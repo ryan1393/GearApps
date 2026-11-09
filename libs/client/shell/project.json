@@ -1,0 +1,10 @@
+{
+  "name": "client-shell",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/client/shell/src",
+  "prefix": "gear",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project client-shell --web",
+  "targets": {}
+}

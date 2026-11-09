@@ -1,0 +1,10 @@
+{
+  "name": "client-feature-dashboard",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/client/feature-dashboard/src",
+  "prefix": "gear",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project client-feature-dashboard --web",
+  "targets": {}
+}

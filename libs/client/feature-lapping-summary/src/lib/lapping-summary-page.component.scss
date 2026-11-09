@@ -1,0 +1,57 @@
+:host {
+  display: block;
+}
+
+.gear-kpi-text {
+  font-size: 22px;
+}
+.gear-context .dana-kpi-note {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.gear-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.gear-groups--tight {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.gear-mesh {
+  display: grid;
+  grid-template-columns: 1fr minmax(220px, 300px);
+  gap: 16px;
+  align-items: start;
+}
+.gear-mesh-figure {
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--dana-border);
+  border-radius: var(--dana-radius-md);
+  background: #fff;
+  text-align: center;
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+  figcaption {
+    margin-top: 8px;
+    font-size: 12px;
+  }
+}
+
+.gear-paths {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .gear-mesh {
+    grid-template-columns: 1fr;
+  }
+}

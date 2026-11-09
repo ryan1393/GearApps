@@ -1,0 +1,56 @@
+import { ChangeDetectionStrategy, Component, forwardRef, input, signal } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+
+export interface SegmentOption<T = string> {
+  label: string;
+  value: T;
+}
+
+/** Dana segmented control (`.dana-segmented`) usable with reactive forms / ngModel. */
+@Component({
+  selector: 'gear-segmented',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [
+    { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SegmentedComponent), multi: true },
+  ],
+  template: `
+    <div class="dana-segmented" role="group" [attr.aria-label]="ariaLabel()">
+      @for (o of options(); track o.value) {
+        <button
+          type="button"
+          [attr.aria-pressed]="o.value === value()"
+          [disabled]="disabled()"
+          (click)="pick(o.value)"
+        >
+          {{ o.label }}
+        </button>
+      }
+    </div>
+  `,
+})
+export class SegmentedComponent<T = string> implements ControlValueAccessor {
+  readonly options = input.required<SegmentOption<T>[]>();
+  readonly ariaLabel = input<string>();
+  protected readonly value = signal<T | null>(null);
+  protected readonly disabled = signal(false);
+  private onChange: (v: T) => void = () => undefined;
+  private onTouched: () => void = () => undefined;
+
+  protected pick(v: T) {
+    this.value.set(v);
+    this.onChange(v);
+    this.onTouched();
+  }
+  writeValue(v: T | null) {
+    this.value.set(v);
+  }
+  registerOnChange(fn: (v: T) => void) {
+    this.onChange = fn;
+  }
+  registerOnTouched(fn: () => void) {
+    this.onTouched = fn;
+  }
+  setDisabledState(d: boolean) {
+    this.disabled.set(d);
+  }
+}

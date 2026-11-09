@@ -1,0 +1,10 @@
+{
+  "name": "client-feature-lapping-summary",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/client/feature-lapping-summary/src",
+  "prefix": "gear",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project client-feature-lapping-summary --web",
+  "targets": {}
+}

@@ -1,0 +1,100 @@
+<div class="dana-app-shell">
+  <aside class="dana-sidebar" [class.is-open]="mobileNavOpen()" aria-label="GearApps navigation">
+    <a routerLink="/dashboard" class="dana-brand-row" (click)="mobileNavOpen.set(false)">
+      <span class="dana-brand-mark" aria-hidden="true"
+        ><img src="assets/branding/dana-diamond.png" alt=""
+      /></span>
+      <span class="dana-brand-copy"><strong>GearApps</strong><span>Gear Lapping</span></span>
+    </a>
+
+    <nav aria-label="GearApps">
+      @for (group of nav; track group.label) {
+        <div class="dana-nav-group">
+          <div class="dana-nav-heading">{{ group.label }}</div>
+          @for (item of group.items; track item.route) {
+            <a
+              class="dana-side-link"
+              [routerLink]="item.route"
+              routerLinkActive="is-active"
+              ariaCurrentWhenActive="page"
+              [routerLinkActiveOptions]="{ exact: !!item.exact }"
+            >
+              <span class="dana-nav-icon" aria-hidden="true">{{ item.glyph }}</span>
+              <span>{{ item.label }}</span>
+            </a>
+          }
+        </div>
+      }
+    </nav>
+
+    <div class="dana-sidebar-footer">
+      <div class="dana-sidebar-identity" [title]="auth.user()?.email">
+        <strong>{{ auth.displayName() }}</strong>
+        <span>Signed in</span>
+      </div>
+      <button type="button" class="gear-signout" (click)="signOut()">Sign out</button>
+      <div class="dana-sidebar-version">Lapper · GearApps</div>
+    </div>
+  </aside>
+  <button
+    type="button"
+    class="dana-sidebar-backdrop gear-backdrop"
+    aria-label="Close navigation"
+    (click)="mobileNavOpen.set(false)"
+  ></button>
+
+  <div class="dana-main">
+    <header class="dana-topbar">
+      <button
+        class="dana-menu-button"
+        type="button"
+        aria-label="Open navigation"
+        [attr.aria-expanded]="mobileNavOpen()"
+        (click)="mobileNavOpen.set(!mobileNavOpen())"
+      >
+        &#9776;
+      </button>
+      <div class="dana-topbar-spacer"></div>
+
+      <div class="gear-text-scale" role="group" aria-label="Text size" title="Text size">
+        <button
+          type="button"
+          class="dana-icon-btn"
+          aria-label="Smaller text"
+          [disabled]="layout.textScale() <= SCALE_MIN"
+          (click)="layout.bumpScale(-1)"
+        >
+          A−
+        </button>
+        <span class="gear-text-scale-value">{{ layout.textScale() }}%</span>
+        <button
+          type="button"
+          class="dana-icon-btn"
+          aria-label="Larger text"
+          [disabled]="layout.textScale() >= SCALE_MAX"
+          (click)="layout.bumpScale(1)"
+        >
+          A+
+        </button>
+      </div>
+
+      <button
+        type="button"
+        class="dana-pill-button"
+        [attr.data-tone]="health.tone"
+        [title]="health.detail()"
+      >
+        {{ health.label }}
+      </button>
+
+      <div class="dana-user" [title]="auth.user()?.email">
+        <span class="dana-avatar" aria-hidden="true">{{ initials() }}</span>
+        <small>{{ auth.displayName() }}</small>
+      </div>
+    </header>
+
+    <main class="dana-page"><router-outlet /></main>
+  </div>
+
+  <dana-toast-host />
+</div>

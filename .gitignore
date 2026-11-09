@@ -1,0 +1,11 @@
+node_modules
+dist
+tmp
+.nx/cache
+.nx/workspace-data
+coverage
+.env
+*.sqlite
+.angular
+.DS_Store
+*.log
