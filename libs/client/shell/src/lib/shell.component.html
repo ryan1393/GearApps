@@ -1,5 +1,5 @@
 <div class="dana-app-shell">
-  <aside danaMobileNav [desktopMinWidth]="761" #mobileNav="danaMobileNav" id="lapper-navigation" (keydown.escape)="closeNavigation(mobileNav)" class="dana-sidebar" [class.is-open]="mobileNav.open" aria-label="GearApps navigation">
+  <aside tabindex="-1" danaMobileNav [desktopMinWidth]="761" #mobileNav="danaMobileNav" id="lapper-navigation" (keydown.escape)="closeNavigation(mobileNav)" class="dana-sidebar" [class.is-open]="mobileNav.open" aria-label="GearApps navigation">
     <a routerLink="/dashboard" class="dana-brand-row" (click)="mobileNav.close()">
       <span class="dana-brand-mark" aria-hidden="true"
         ><img src="assets/branding/dana-diamond.png" alt=""
