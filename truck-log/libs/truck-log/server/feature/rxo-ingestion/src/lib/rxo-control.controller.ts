@@ -2,7 +2,7 @@ import { TruckLogAdminService, TruckLogAdminWrites } from '@truck-log/server/aut
 import { UseInterceptors } from '@nestjs/common';
 import { RxoControlStatusTimeoutInterceptor } from './rxo-control-timeout.interceptor';
 // TRUCK LOG RXO CONTROL STATUS TIMEOUT
-import { Body, Controller, Get, Patch, Post, Put, Req } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Header, HttpCode, Patch, Post, Put, Req } from '@nestjs/common';
 import type { Request } from 'express';
 import { RxoControlService } from './rxo-control.service';
 
@@ -30,6 +30,14 @@ export class RxoControlController {
   @Put('credentials')
   credentials(@Body() body: { username?: string; password?: string }) {
     return this.control.updateCredentials(body ?? {});
+  }
+
+  @Post('recover')
+  @HttpCode(200)
+  @Header('Cache-Control', 'no-store')
+  recover(@Req() request: Request) {
+    if (!request.is('application/json')) throw new BadRequestException('JSON content is required.');
+    return this.control.recoverConnection();
   }
 
   @Post('rescan')

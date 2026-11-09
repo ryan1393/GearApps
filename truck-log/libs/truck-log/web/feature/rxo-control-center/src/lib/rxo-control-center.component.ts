@@ -7,8 +7,8 @@ import type {
   RxoControlStatusData,
   RxoImportStatusData,
 } from '@truck-log/shared/contracts';
-import { forkJoin } from 'rxjs';
-import { Poller, TruckLogApi, createPoller } from '@truck-log/web/data-access';
+import { forkJoin, Subscription } from 'rxjs';
+import { Poller, TruckLogApi, createPoller, rxoRecoveryErrorMessage } from '@truck-log/web/data-access';
 import { StaleDataNoticeComponent, ToastService } from '@truck-log/web/ui';
 import { buildRxoControlView, type RxoControlView } from './rxo-control-center.presenter';
 import { RxoDataStore } from './rxo-data.store';
@@ -41,6 +41,13 @@ const RXO_SYSTEM_STATUS_EVENT = 'truck-log-rxo-system-status';
 })
 export class RxoControlCenterComponent implements OnInit, OnDestroy {
   activeTab: MainTab = 'data';
+  recoveryBusy = false;
+  recoveryMessage = '';
+  recoveryError = '';
+  private recoveryLoginBlocked = false;
+  private recoveryBlockedStatus: RxoControlStatusData | null = null;
+  private recoveryRequest?: Subscription;
+  private destroyed = false;
   lastUpdated: Date | null = null;
   importStatus: RxoImportStatusData | null = null;
   control: RxoControlStatusData | null = null;
@@ -92,6 +99,8 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.destroyed = true;
+    this.recoveryRequest?.unsubscribe();
     if (this.pageClockTimer) {
       window.clearInterval(this.pageClockTimer);
     }
@@ -224,6 +233,65 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
         detail,
       }),
     );
+  }
+
+  get connectionRecoveryNeeded() {
+    const control = this.control;
+    const reason = control?.recovery?.reason;
+    return !!control && ((!!reason && reason !== 'READY') || this.recoveryLoginRequired || this.recoveryCooldownActive || this.view.scanNeedsReview
+      || /AUTH|STOPPED|NEEDS_REVIEW/.test([control.scheduler?.status, control.scheduler?.currentPhase].join(' ').toUpperCase())
+      || /RXO_AUTH_/.test(String(control.exporterHealth?.lastError || control.scheduler?.lastError || '')));
+  }
+  get recoveryLoginRequired() {
+    const info = this.control?.recovery;
+    return !!(info?.requiresCredentials || info?.requiresInteractiveLogin)
+      || (this.recoveryLoginBlocked && this.control === this.recoveryBlockedStatus);
+  }
+  get recoveryCooldownActive() { return Date.parse(this.control?.recovery?.cooldownUntil || '') > this.clockNow; }
+  get recoveryAvailable() {
+    return !!this.control?.controlAvailable && this.control.recovery?.available !== false
+      && !this.recoveryCooldownActive && !this.recoveryLoginRequired;
+  }
+  get connectionRecoveryDetail() {
+    return this.control?.recovery?.message || 'A controlled recovery reopens RXO with the saved login and requests a fresh scan. The previous verified data stays available.';
+  }
+  openRecoverySettings() {
+    this.activeTab = 'settings';
+    document.getElementById('rxo-tab-settings')?.focus();
+  }
+  recoverConnection() {
+    if (!this.adminAuth.canWrite()) { this.toast.error('Sign in as administrator to recover the RXO connection.'); return; }
+    if (this.recoveryLoginRequired) { this.openRecoverySettings(); return; }
+    if (this.recoveryBusy || this.busy || this.view.scanRunning || !this.recoveryAvailable || this.destroyed) return;
+    this.recoveryBusy = true;
+    this.busy = true;
+    this.recoveryError = '';
+    this.recoveryMessage = '';
+    this.recoveryRequest = this.api.recoverRxoConnection().subscribe({
+      next: result => {
+        if (this.destroyed) return;
+        this.recoveryBusy = false;
+        this.busy = false;
+        if (!result || !['QUEUED', 'ALREADY_RUNNING'].includes(result.status)) {
+          this.recoveryError = 'Recovery could not be confirmed. Refresh the status before trying again.';
+        } else {
+          this.recoveryMessage = result.status === 'ALREADY_RUNNING'
+            ? 'A recovery scan is already queued or running. Wait for a verified export; the connection is not yet confirmed.'
+            : 'Recovery requested. Wait for a successful verified export before treating the connection as restored. Previous verified data stays available.';
+        }
+        this.refreshControl(false);
+      },
+      error: error => {
+        if (this.destroyed) return;
+        this.recoveryBusy = false;
+        this.busy = false;
+        this.recoveryLoginBlocked = !!(error?.error?.requiresCredentials || error?.error?.requiresInteractiveLogin);
+        this.recoveryBlockedStatus = this.control;
+        this.recoveryError = rxoRecoveryErrorMessage(error);
+        if (this.recoveryLoginBlocked) this.openRecoverySettings();
+        this.refreshControl(false);
+      },
+    });
   }
 
   runScanNow() {

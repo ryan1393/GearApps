@@ -1,9 +1,11 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import type { RxoConnectionRecoveryInfo } from '@truck-log/shared/contracts';
 import { Observable, Subject, catchError, forkJoin, map, of, timeout } from 'rxjs';
 import { Poller, createPoller } from '@truck-log/web/data-access';
 
 export interface ExpediteStatus {
+  recovery?: RxoConnectionRecoveryInfo;
   source: 'RXO_EXPEDITE'; version: string; schedulingEnabled: boolean; databaseIngestionEnabled: boolean;
   credentialUpdatesEnabled: boolean; controlOrigin: string | null; transportWarning: boolean;
   credentials: { username: string; usernameConfigured: boolean; passwordConfigured: boolean; configured: boolean };

@@ -144,7 +144,7 @@ async function runFilterTest() {
 
     const failures = results.filter(item => item.status !== 'PASS');
     const summary = {
-      version: process.env.TRUCK_LOG_RELEASE || '1.0.1',
+      version: process.env.TRUCK_LOG_RELEASE || '1.0.3',
       testId: id,
       completedAt: new Date().toISOString(),
       implementation: 'SHARED_PRODUCTION_FILTER_UI',

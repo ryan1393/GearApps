@@ -1,3 +1,5 @@
+import { RxoConnectionRecoveryService } from '@truck-log/server/infrastructure/rxo-recovery';
+import type { RxoConnectionRecoveryResult } from '@truck-log/shared/contracts';
 import { BadRequestException, Injectable, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { spawn } from 'node:child_process';
@@ -21,6 +23,7 @@ export class RxoControlService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly config: ConfigService,
     private readonly ingestion: RxoIngestionService,
+    private readonly connectionRecovery: RxoConnectionRecoveryService = new RxoConnectionRecoveryService(config),
   ) {
     this.runtime = new RxoControlRuntime(this.config);
   }
@@ -37,7 +40,7 @@ export class RxoControlService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async autoSyncCheck() {
-    if (this.autoCheckBusy || !['IDLE', 'COMPLETE', 'PARTIAL', 'FAILED'].includes(this.manualRun.status)) return;
+    if (this.connectionRecovery.isRecovering('standard') || this.autoCheckBusy || !['IDLE', 'COMPLETE', 'PARTIAL', 'FAILED'].includes(this.manualRun.status)) return;
     this.autoCheckBusy = true;
     try {
       const containerId = await this.runtime.findExporterContainer();
@@ -95,6 +98,7 @@ export class RxoControlService implements OnModuleInit, OnModuleDestroy {
 
   private async computeStatus() {
     const generatedAt = new Date();
+    const recoveryPromise = this.connectionRecovery.status('standard');
     let dockerVersion: string | null = null;
     let dockerConnected = false;
 
@@ -103,6 +107,7 @@ export class RxoControlService implements OnModuleInit, OnModuleDestroy {
       dockerConnected = true;
     } catch {
       return {
+        recovery: await recoveryPromise,
         serverTime: generatedAt.toISOString(),
         serverEpochMs: generatedAt.getTime(),
         statusGeneratedAt: generatedAt.toISOString(),
@@ -158,6 +163,7 @@ export class RxoControlService implements OnModuleInit, OnModuleDestroy {
     const completedAt = new Date();
 
     return {
+      recovery: await recoveryPromise,
       serverTime: completedAt.toISOString(),
       serverEpochMs: completedAt.getTime(),
       statusGeneratedAt: completedAt.toISOString(),
@@ -226,18 +232,32 @@ export class RxoControlService implements OnModuleInit, OnModuleDestroy {
     return { username, usernameConfigured: true, passwordConfigured: true, passwordUpdated: Boolean(password) };
   }
 
+  recoverConnection(): Promise<RxoConnectionRecoveryResult> {
+    this.invalidateStatus();
+    if (this.autoCheckBusy || !['IDLE', 'COMPLETE', 'PARTIAL', 'FAILED'].includes(this.manualRun.status)) {
+      return Promise.resolve({status: 'ALREADY_RUNNING', message: 'An RXO scan or import is already running. It has been left to finish.'});
+    }
+    return this.connectionRecovery.recover('standard');
+  }
+
   async requestRescan() {
     this.invalidateStatus();
-    if (!['IDLE', 'COMPLETE', 'PARTIAL', 'FAILED'].includes(this.manualRun.status)) {
+    if (this.autoCheckBusy || !['IDLE', 'COMPLETE', 'PARTIAL', 'FAILED'].includes(this.manualRun.status)) {
       throw new BadRequestException('An RXO manual scan/import is already running.');
     }
-    await this.runtime.requireDocker();
-    const containerId = await this.runtime.findExporterContainer();
-    if (!containerId) throw new ServiceUnavailableException('RXO exporter is not running.');
-
+    if (this.connectionRecovery.isRecovering('standard')) throw new BadRequestException('Connection recovery is already being queued.');
+    // Reserve before the first await so concurrent scan/recovery requests cannot both start.
     const requestedAt = new Date().toISOString();
     const id = `manual-${requestedAt.replace(/[-:.TZ]/g, '').slice(0, 14)}-${crypto.randomBytes(3).toString('hex')}`;
     this.manualRun = { id, status: 'QUEUED', phase: 'Queueing RXO scan', requestedAt, startedAt: requestedAt, completedAt: null, error: null };
+    try {
+      await this.runtime.requireDocker();
+      const containerId = await this.runtime.findExporterContainer();
+      if (!containerId) throw new ServiceUnavailableException('RXO exporter is not running.');
+    } catch {
+      this.manualRun = { ...this.manualRun, status: 'FAILED', phase: 'Scan could not be queued', completedAt: new Date().toISOString(), error: 'RXO exporter is unavailable.' };
+      throw new ServiceUnavailableException('RXO exporter is unavailable.');
+    }
 
     void this.executeManualRun(id).catch((error) => {
       if (this.manualRun.id !== id) return;
@@ -253,7 +273,8 @@ export class RxoControlService implements OnModuleInit, OnModuleDestroy {
 
   async syncLatestNow() {
     this.invalidateStatus();
-    if (!['IDLE', 'COMPLETE', 'PARTIAL', 'FAILED'].includes(this.manualRun.status)) {
+    if (this.connectionRecovery.isRecovering('standard')) throw new BadRequestException('Connection recovery is already being queued.');
+    if (this.autoCheckBusy || !['IDLE', 'COMPLETE', 'PARTIAL', 'FAILED'].includes(this.manualRun.status)) {
       throw new BadRequestException('An RXO manual scan/import is already running.');
     }
     const requestedAt = new Date().toISOString();

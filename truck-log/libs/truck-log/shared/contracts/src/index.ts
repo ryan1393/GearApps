@@ -1,5 +1,5 @@
 /** Truck Log release. Must equal the VERSION file (checked by tests/new-host/test-release-version.mjs). */
-export const TRUCK_LOG_VERSION = '1.0.1';
+export const TRUCK_LOG_VERSION = '1.0.3';
 
 export const VisitStatuses = {
     DOCK_ASSIGNED: 'DOCK_ASSIGNED',
@@ -455,7 +455,23 @@ export interface RxoSchedulerStatusData {
     lastRecoveryError?: string | null;
 }
 
+/** A recovery request never certifies a successful login or export. */
+export interface RxoConnectionRecoveryResult {
+    status: 'QUEUED' | 'ALREADY_RUNNING';
+    message: string;
+    requestedAt?: string;
+}
+export interface RxoConnectionRecoveryInfo {
+    available: boolean;
+    reason: string | null;
+    message: string;
+    requiresCredentials: boolean;
+    requiresInteractiveLogin: boolean;
+    cooldownUntil: string | null;
+}
+
 export interface RxoControlStatusData {
+    recovery?: RxoConnectionRecoveryInfo;
     serverTime?: string;
     serverEpochMs?: number;
     statusGeneratedAt?: string;

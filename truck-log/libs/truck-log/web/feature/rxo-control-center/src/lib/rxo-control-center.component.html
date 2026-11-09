@@ -23,6 +23,22 @@
     <span class="dana-muted dana-nowrap">{{view.integrationUpdated}}</span>
   </section>
 
+  <section class="dana-panel" aria-labelledby="rxo-recovery-title" *ngIf="connectionRecoveryNeeded || recoveryBusy || recoveryMessage || recoveryError">
+    <div class="dana-panel-header"><div><h2 id="rxo-recovery-title">Recover RXO connection</h2><small>Keep the previous verified data while reconnecting</small></div></div>
+    <div class="dana-panel-body tl-stack">
+      <p>{{connectionRecoveryDetail}}</p>
+      <p class="dana-alert dana-alert-warning" *ngIf="recoveryLoginRequired">Open Settings &amp; Login to check the saved RXO login. If RXO requests MFA, approval or an interactive sign-in, complete it with your administrator before recovering again.</p>
+      <p class="dana-alert dana-alert-warning" *ngIf="recoveryCooldownActive">A recovery was requested recently. Wait for the current attempt and refresh status before requesting another.</p>
+      <p class="dana-alert dana-alert-danger" role="alert" *ngIf="recoveryError">{{recoveryError}}</p>
+      <p class="dana-alert dana-alert-success" role="status" *ngIf="recoveryMessage">{{recoveryMessage}}</p>
+      <div class="dana-actions" *ngIf="adminAuth.canWrite(); else recoveryAdminSignIn">
+        <button class="dana-btn dana-btn-primary" type="button" [disabled]="recoveryBusy || busy || view.scanRunning || !recoveryAvailable" [attr.aria-busy]="recoveryBusy" (click)="recoverConnection()">{{recoveryBusy ? 'Requesting recovery…' : 'Recover connection'}}</button>
+        <button class="dana-btn" type="button" [disabled]="recoveryBusy" (click)="openRecoverySettings()">Settings &amp; Login</button>
+      </div>
+      <ng-template #recoveryAdminSignIn><a class="dana-btn dana-btn-primary" routerLink="/admin/login" [queryParams]="{ returnTo: '/rxo' }">Sign in as administrator to recover</a></ng-template>
+    </div>
+  </section>
+
   <div class="dana-alert dana-alert-danger" *ngIf="control && !control.controlAvailable">
     <b>RXO controls unavailable.</b> {{control.message || 'Remote Docker is not available from this API host.'}}
   </div>
@@ -44,7 +60,7 @@
       <b>RXO scan stalled.</b> Automatic recovery is in progress. Existing data stays available.
     </div>
     <div class="dana-alert dana-alert-danger" *ngIf="view.scanNeedsReview">
-      <b>RXO needs review.</b> The controlled retry did not complete. Existing data stays available and the next scheduled or manual scan can try again.
+      <b>RXO needs review.</b> The controlled retry did not complete. Existing data stays available. Use Recover connection for a controlled retry, or Settings &amp; Login when credentials or approval need attention.
     </div>
     <div class="dana-actions">
       <button class="dana-btn dana-btn-sm" type="button" (click)="activeTab='health'; timerDiagnosticsOpen = true; healthTabButton.focus()">View timer diagnostics</button>

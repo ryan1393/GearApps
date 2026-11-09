@@ -1,3 +1,4 @@
+import { RxoConnectionRecoveryService } from '@truck-log/server/infrastructure/rxo-recovery';
 import {
   BadRequestException,
   ForbiddenException,
@@ -44,6 +45,7 @@ export class RxoExpediteService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly config: ConfigService,
     private readonly dataSource: DataSource,
+    private readonly connectionRecovery: RxoConnectionRecoveryService = new RxoConnectionRecoveryService(config),
   ) {
     // The runner closure resolves this.native at call time so it stays one seam.
     this.docker = new RxoExpediteDockerHelpers(
@@ -151,7 +153,7 @@ export class RxoExpediteService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async computeStatus() {
-    const raw = await this.helper(false);
+    const [raw, recovery] = await Promise.all([this.helper(false), this.connectionRecovery.status('expedite')]);
     const a = raw.acquisition, s = raw.scheduler;
     if (raw.source !== 'RXO_EXPEDITE' || !a || !SAFE_STATE.has(a.state)) throw new ServiceUnavailableException('Expedite acquisition status requires review.');
     const date = (v: unknown): string | null => typeof v === 'string' && Number.isFinite(Date.parse(v)) ? new Date(v).toISOString() : null;
@@ -167,7 +169,7 @@ export class RxoExpediteService implements OnModuleInit, OnModuleDestroy {
       try { await this.syncLatestVerifiedToDatabase(verifiedBatchId); } catch { /* database status reports the failure */ }
     }
     const database = await this.mirror.databaseStatus(verifiedBatchId);
-    return { source: 'RXO_EXPEDITE', version: process.env.TRUCK_LOG_RELEASE || '1.0.1', schedulingEnabled: raw.schedulingEnabled === true, databaseIngestionEnabled: database.enabled,
+    return { source: 'RXO_EXPEDITE', recovery, version: process.env.TRUCK_LOG_RELEASE || '1.0.3', schedulingEnabled: raw.schedulingEnabled === true, databaseIngestionEnabled: database.enabled,
       database,
       ...this.controlPolicy(), credentials: this.publicCredentials(raw.credentials), settings: { intervalMinutes, syncOnStart },
       scheduler: { state: schedulerState, intervalMinutes: schedulerIntervalMinutes, syncOnStart: s?.syncOnStart !== false, schedulerStartedAt: date(s?.schedulerStartedAt), schedulerHeartbeatAt: date(s?.schedulerHeartbeatAt), currentStartedAt: date(s?.currentStartedAt), nextRunAt: date(s?.nextRunAt), lastCompletedAt: date(s?.lastCompletedAt), lastSuccessAt: date(s?.lastSuccessAt), lastFailureAt: date(s?.lastFailureAt), lastErrorCode: typeof s?.lastErrorCode === 'string' && /^[A-Z0-9_]{1,80}$/.test(s.lastErrorCode) ? s.lastErrorCode : null, lastDurationSeconds: Number.isFinite(s?.lastDurationSeconds) && s.lastDurationSeconds >= 0 ? s.lastDurationSeconds as number : null, lastSourceBatchId: typeof s?.lastSourceBatchId === 'string' && /^[0-9TZ-]+[a-f0-9-]{36}$/.test(s.lastSourceBatchId) ? s.lastSourceBatchId as string : null },
@@ -238,6 +240,11 @@ export class RxoExpediteService implements OnModuleInit, OnModuleDestroy {
       databaseImportedAt: null,
       shipments: await this.mirror.withDriverDocumentState(native.shipments),
     });
+  }
+
+  recoverConnection() {
+    this.invalidateShared();
+    return this.connectionRecovery.recover('expedite');
   }
 
   async updateSettings(input: ExpediteSettingsInput, origin: unknown, intent: unknown) {

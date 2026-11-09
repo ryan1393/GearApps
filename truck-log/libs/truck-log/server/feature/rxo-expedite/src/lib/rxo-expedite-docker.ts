@@ -10,7 +10,7 @@ import type { CredentialInput, ExpediteSettingsInput } from './rxo-expedite.type
  * export. Nothing here touches PostgreSQL or HTTP policy.
  */
 
-export const IMAGE = `truck-log-rxo-expedite:${process.env.TRUCK_LOG_RELEASE || '1.0.1'}`;
+export const IMAGE = `truck-log-rxo-expedite:${process.env.TRUCK_LOG_RELEASE || '1.0.3'}`;
 export const DATA_VOLUME = 'truck-log-rxo-expedite-data';
 
 export type DockerNativeRun = (

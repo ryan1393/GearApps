@@ -80,7 +80,7 @@ const libraryProjects = projects.filter((project) => project.root.startsWith('li
 const webLibraryProjects = libraryProjects.filter((project) => project.root.startsWith('libs/truck-log/web/'));
 const otherLibraryProjects = libraryProjects.filter((project) => !project.root.startsWith('libs/truck-log/web/'));
 if (webLibraryProjects.length !== 15) throw new Error(`Expected 15 Truck Log web Nx libraries; found ${webLibraryProjects.length}.`);
-if (otherLibraryProjects.length !== 23) throw new Error(`Expected 23 Truck Log shared/server Nx libraries; found ${otherLibraryProjects.length}.`);
+if (otherLibraryProjects.length !== 24) throw new Error(`Expected 24 Truck Log shared/server Nx libraries; found ${otherLibraryProjects.length}.`);
 for (const required of ['libs/truck-log/server/auth/station', 'libs/truck-log/web/auth/station']) {
   if (!libraryProjects.some((project) => project.root === required)) throw new Error(`Missing Nx library ${required}.`);
 }

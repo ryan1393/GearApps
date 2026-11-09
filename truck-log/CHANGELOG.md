@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.3 — RXO connection recovery
+
+- Add an administrator **Recover connection** action to both RXO control centers, with pending feedback, cooldowns, and a Settings & Login path when credentials or interactive approval are required.
+- Queue a bounded, durable session refresh and one verified login attempt; resume the matching stopped scheduler without removing credentials, browser profiles, or verified data.
+- Handle slow authentication navigation by waiting for a committed document and then verifying the approved application surface.
+- Serialize recovery requests and worker updates, enforce retry limits across restarts, and prevent duplicate startup/rescan attempts.
+- Add recovery policy, API, UI, concurrency, and browser regression coverage. Database migrations remain unchanged through 0005; DANA UI stays at 0.3.1 and the companion print agents stay at V4R7/W3.
+
 ## 1.0.1 — Reliability and security polish
 
 - Keep browser check-in available without optional printing; add explicit manual/automatic modes and a saved-slip fallback. Lock pending forms and upload queues, preserve accepted print tracking and action keys, and bound status requests.

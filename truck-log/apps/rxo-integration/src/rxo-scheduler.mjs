@@ -1,4 +1,4 @@
-import { readAuthHold, consumeAuthRetry, consumeCredentialChangeRetry, authorizeManualRetry, ensureAuthFailureNotification } from './lib/rxo-auth.mjs';
+import { readAuthHold, consumeAuthRetry, hasPendingAuthRetry, consumeCredentialChangeRetry, authorizeManualRetry, ensureAuthFailureNotification } from './lib/rxo-auth.mjs';
 import { withTimeout } from './lib/process-lock.mjs';
 import fs from 'node:fs';
 import { spawn } from 'node:child_process';
@@ -35,7 +35,7 @@ let activeChild = null;
 let lastHandledRequestId = '';
 let schedulerState = {
   service: 'rxo-scheduler',
-  version: process.env.TRUCK_LOG_RELEASE || '1.0.1',
+  version: process.env.TRUCK_LOG_RELEASE || '1.0.3',
   status: 'STARTING',
   schedulerStartedAt: new Date().toISOString(),
   schedulerHeartbeatAt: new Date().toISOString(),
@@ -589,13 +589,21 @@ async function waitForTrigger(anchorMs) {
   while (!shuttingDown) {
     markLoopProgress(LOOP_IDLE_BOUND_MS);
     const manual = readManualRequest();
+    if (authCall('retry request', () => consumeAuthRetry(DATA_DIR, 'standard'), false)) {
+      // One connection recovery also satisfies a queued legacy Run Scan Now.
+      if (manual) consumeManualRequest(manual);
+      return 'connection-recovery';
+    }
+    if (authCall('pending retry', () => hasPendingAuthRetry(DATA_DIR, 'standard'), true)) {
+      await sleep(1000);
+      continue;
+    }
     if (manual) {
       consumeManualRequest(manual);
       if (authCall('manual retry', () => authorizeManualRetry(DATA_DIR, 'standard'), false)) return 'manual';
       // A rejected/locked credential version cannot be resubmitted by repeatedly pressing Run Scan Now.
       continue;
     }
-    if (authCall('retry request', () => consumeAuthRetry(DATA_DIR, 'standard'), false)) return 'manual';
     if (authCall('credential change', () => consumeCredentialChangeRetry(DATA_DIR, 'standard'), false)) return 'credential-update';
     const auth = readAuthState();
     if (auth.error) {
@@ -696,7 +704,15 @@ async function main() {
   // A queued operator request consumes the first run instead of following a
   // failed startup scan with an unintended second password attempt.
   const startupManual = readManualRequest();
-  if (startupManual) {
+  if (authCall('startup retry', () => consumeAuthRetry(DATA_DIR, 'standard'), false)) {
+    if (startupManual) consumeManualRequest(startupManual);
+    await runExporter('connection-recovery');
+    anchorMs = Date.now();
+  } else if (authCall('pending startup retry', () => hasPendingAuthRetry(DATA_DIR, 'standard'), true)) {
+    // The request is still being handed off (or requires review). The wait loop
+    // will consume it; never follow it with an independent startup attempt.
+    anchorMs = Date.now();
+  } else if (startupManual) {
     consumeManualRequest(startupManual);
     if (authCall('manual retry', () => authorizeManualRetry(DATA_DIR, 'standard'), false)) await runExporter('manual');
     anchorMs = Date.now();

@@ -6,7 +6,7 @@ import { SOURCE, ExpediteError, validateWorkbook, sha256 } from './workbook.mjs'
 import { readCredentials, credentialStatus } from './credentials.mjs';
 import { acquireLock, inspectLock, withTimeout } from './process-lock.mjs';
 import { pruneBatchDirectories } from './batch-retention.mjs';
-export const VERSION=process.env.TRUCK_LOG_RELEASE||'1.0.1';
+export const VERSION=process.env.TRUCK_LOG_RELEASE||'1.0.3';
 export const LOGIN_URL='https://www.expedite.rxo.com/WebClient/Account/Login';
 export const FREIGHT_URL='https://www.expedite.rxo.com/WebClient/#/freight-on-the-move';
 export const XLSX_NAME='Freight On The Move.xlsx';

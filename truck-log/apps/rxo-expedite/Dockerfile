@@ -2,7 +2,7 @@
 # Build context: the repository root (see docker-compose.yml); Dockerfile.dockerignore
 # keeps the context to this app plus libs/truck-log/rxo-shared.
 FROM mcr.microsoft.com/playwright:v1.55.1-noble
-ARG TRUCK_LOG_RELEASE=1.0.1
+ARG TRUCK_LOG_RELEASE=1.0.3
 LABEL com.dana.truck-log.component="rxo-expedite" \
       com.dana.truck-log.release="${TRUCK_LOG_RELEASE}" \
       org.opencontainers.image.version="${TRUCK_LOG_RELEASE}"

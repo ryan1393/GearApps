@@ -9,6 +9,7 @@ import { createHmac, randomBytes, randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import net from 'node:net';
 import tls from 'node:tls';
+import { acquireLock, LockBusyError } from './process-lock.mjs';
 
 export const AUTH_VERSION = '1';
 export const AUTH_POLICY_VERSION = '1';
@@ -16,6 +17,11 @@ const HOLD = 'rxo-auth-review.json';
 const LAST = 'rxo-auth-last.json';
 const RETRY = 'rxo-auth-retry.json';
 const BINDING = 'rxo-auth-session.json';
+const RECOVERY = 'rxo-connection-recovery.json';
+const RECOVERY_COOLDOWN_MS = 60_000;
+const RECOVERY_WINDOW_MS = 60 * 60_000;
+const RECOVERY_MAX_ATTEMPTS = 3;
+const RETRY_TTL_MS = 30 * 60_000;
 const CODES = new Set(['RXO_AUTH_FORM_NOT_READY','RXO_AUTH_FORM_AMBIGUOUS',
   'RXO_AUTH_APP_NOT_READY','RXO_AUTH_ACCOUNT_REVIEW','RXO_AUTH_REJECTED',
   'RXO_AUTH_VERIFICATION_REQUIRED','RXO_AUTH_ACCESS_REVIEW','RXO_AUTH_ORIGIN_REVIEW',
@@ -80,13 +86,14 @@ const HARD_CREDENTIAL_CODES = new Set(['RXO_AUTH_REJECTED','RXO_AUTH_ACCOUNT_REV
 // count as a change. The digest is an HMAC under a random per-install key kept
 // next to the auth state, so the hold records never carry a bare password hash.
 const KEY='rxo-auth-credential-key';
-function credentialKey(root) {
+function credentialKey(root,create=true) {
   dir(root); const p=path.join(root,KEY);
   const load=()=>{const s=fs.lstatSync(p);
     if(!s.isFile()||s.isSymbolicLink()||s.size!==65)fail('RXO_AUTH_STATE_REVIEW');
     const hex=fs.readFileSync(p,'utf8').trim(); if(!/^[a-f0-9]{64}$/.test(hex))fail('RXO_AUTH_STATE_REVIEW');
     return Buffer.from(hex,'hex');};
   try { return load(); } catch(e) { if(e?.code!=='ENOENT')throw e; }
+  if(!create)return null;
   const temp=p+'.'+randomUUID()+'.tmp';
   try {
     fs.writeFileSync(temp,randomBytes(32).toString('hex')+'\n',{flag:'wx',mode:0o600});
@@ -111,10 +118,11 @@ function currentCredentials(role,secretRoot) {
   return [secretText(path.join(generation,'rxo_expedite_username'),1024),
     fs.readFileSync(path.join(generation,'rxo_expedite_password'),'utf8')];
 }
-export function currentCredentialVersion(role,keyRoot,secretRoot=process.env.RXO_SECRET_ROOT||'/run/secrets') {
+export function currentCredentialVersion(role,keyRoot,secretRoot=process.env.RXO_SECRET_ROOT||'/run/secrets',createKey=true) {
   if(!roles.has(role)||typeof keyRoot!=='string')fail('RXO_AUTH_STATE_REVIEW');
   const [username,password]=currentCredentials(role,secretRoot);
-  const digest=createHmac('sha256',credentialKey(keyRoot)).update(JSON.stringify([role,username,password])).digest('hex');
+  const key=credentialKey(keyRoot,createKey); if(!key)return null;
+  const digest=createHmac('sha256',key).update(JSON.stringify([role,username,password])).digest('hex');
   return role+':hmac-sha256:'+digest;
 }
 function bindLegacyHold(root,role,hold) {
@@ -122,49 +130,192 @@ function bindLegacyHold(root,role,hold) {
   const bound={...hold,credentialVersion:currentCredentialVersion(role,root),updatedAt:new Date().toISOString()};
   write(root,HOLD,bound); return bound;
 }
+function holdCredentialsChanged(root,role,hold) {
+  const current=currentCredentialVersion(role,root,process.env.RXO_SECRET_ROOT||'/run/secrets',false);
+  if(!current)fail('RXO_AUTH_STATE_REVIEW');
+  return hold.credentialVersion!==current;
+}
 export function credentialsChangedSinceHold(root,role) {
   let hold=readAuthHold(root,role); if(!hold)return false;
   hold=bindLegacyHold(root,role,hold);
-  return hold.credentialVersion!==currentCredentialVersion(role,root);
+  return holdCredentialsChanged(root,role,hold);
 }
-function clearForOneCredentialVerification(root,role) {
-  if(readAuthHold(root,role))remove(root,HOLD);
-  if(read(root,RETRY)!==null)remove(root,RETRY);
+function recoveryUpdateLock(root,operation) {
+  dir(root);
+  const lock=acquireLock(path.join(root,'.rxo-connection-recovery.lock'),{
+    staleAfterMs:30_000,maxHoldMs:30_000,purpose:'RXO connection recovery',log:()=>{},
+  });
+  try{return operation();}finally{lock.release();}
 }
-export function consumeCredentialChangeRetry(root,role) {
+async function recoveryOperation(root,operation) {
+  for(let attempt=0;attempt<40;attempt++) {
+    try{return recoveryUpdateLock(root,operation);}catch(error){
+      if(!(error instanceof LockBusyError)||attempt===39)throw error;
+      await pause(25);
+    }
+  }
+}
+function recoveryRecord(root,role) {
+  const r=read(root,RECOVERY); if(!r)return null;
+  const date=v=>typeof v==='string'&&Number.isFinite(Date.parse(v))&&Date.parse(v)<=Date.now()+60_000;
+  if(r.version!==AUTH_VERSION||r.role!==role||!/^[-a-f0-9]{36}$/.test(r.id||'')||
+    !['QUEUED','RUNNING','AUTHENTICATED','FAILED'].includes(r.phase)||typeof r.refreshSession!=='boolean'||
+    !date(r.requestedAt)||!date(r.updatedAt)||(r.deliveryRequestedAt!==undefined&&!date(r.deliveryRequestedAt))||
+    !Array.isArray(r.attempts)||!r.attempts.length||r.attempts.length>RECOVERY_MAX_ATTEMPTS||!r.attempts.every(date))fail('RXO_AUTH_STATE_REVIEW');
+  return r;
+}
+function retryRecord(root,role) {
+  const r=read(root,RETRY);if(!r)return null;
+  if(r.version!==AUTH_VERSION||r.role!==role||!/^[-a-f0-9]{36}$/.test(r.id||'')||
+    typeof r.requestedAt!=='string'||!Number.isFinite(Date.parse(r.requestedAt))||
+    (r.kind!==undefined&&r.kind!=='connection'))fail('RXO_AUTH_STATE_REVIEW');
+  return r;
+}
+function retryFresh(r) {const age=Date.now()-Date.parse(r.requestedAt);return age>=-60_000&&age<=RETRY_TTL_MS;}
+function matchingQueue(r,recovery) {
+  if(!r||r.kind!=='connection')return false;
+  if(!recovery||recovery.id!==r.id||recovery.phase!=='QUEUED')fail('RXO_AUTH_STATE_REVIEW');
+  return retryFresh(r);
+}
+function recoveryInfo(available,reason,message,extra={}) {
+  return {available,reason,message,requiresCredentials:false,requiresInteractiveLogin:false,cooldownUntil:null,...extra};
+}
+function blockedHold(hold,changed) {
+  if(!hold||changed)return null;
+  if(HARD_CREDENTIAL_CODES.has(hold.code))return recoveryInfo(false,'CREDENTIALS_UNCHANGED',
+    'RXO rejected or locked this sign-in. Update the credentials in Settings & Login first.',{requiresCredentials:true});
+  if(['RXO_AUTH_VERIFICATION_REQUIRED','RXO_AUTH_ACCESS_REVIEW','RXO_AUTH_ORIGIN_REVIEW'].includes(hold.code))return recoveryInfo(false,'INTERACTIVE_LOGIN_REQUIRED',
+    'RXO requires a verification, sign-in or access review. Open Settings & Login for the next step.',{requiresInteractiveLogin:true});
+  if(hold.code==='RXO_AUTH_STATE_REVIEW')return recoveryInfo(false,'STATE_REVIEW','RXO sign-in state requires operator review before recovery.');
+  return null;
+}
+/** Read-only even on a fresh installation: never create a lock or HMAC key. */
+export function connectionRecoveryStatus(root,role) {
   if(!roles.has(role))fail('RXO_AUTH_STATE_REVIEW');
-  if(!credentialsChangedSinceHold(root,role))return false;
-  clearForOneCredentialVerification(root,role);
-  return true;
+  try {
+    const hold=readAuthHold(root,role), recovery=recoveryRecord(root,role), retry=retryRecord(root,role);
+    const pending=matchingQueue(retry,recovery);
+    try {const [user,password]=currentCredentials(role,process.env.RXO_SECRET_ROOT||'/run/secrets');if(!user||!password)throw Error();}
+    catch{return recoveryInfo(false,'CREDENTIALS_MISSING','Save the RXO sign-in details in Settings & Login first.',{requiresCredentials:true});}
+    const current=hold?.credentialVersion?currentCredentialVersion(role,root,process.env.RXO_SECRET_ROOT||'/run/secrets',false):null;
+    if(hold?.credentialVersion&&!current)return recoveryInfo(false,'STATE_REVIEW','The RXO credential-version key is missing. Sign-in state requires operator review.');
+    const blocked=blockedHold(hold,!!current&&hold.credentialVersion!==current); if(blocked)return blocked;
+    const now=Date.now(), requestedAt=recovery?.requestedAt;
+    const deliveryAt=recovery?.deliveryRequestedAt||requestedAt;
+    const cooldownUntil=deliveryAt?new Date(Date.parse(deliveryAt)+RECOVERY_COOLDOWN_MS).toISOString():null;
+    if(cooldownUntil&&Date.parse(cooldownUntil)>now)return recoveryInfo(false,'COOLDOWN',
+      'A recovery was already requested. Wait one minute before requesting another.',{cooldownUntil,requestedAt});
+    const attempts=(recovery?.attempts||[]).filter(at=>now-Date.parse(at)<RECOVERY_WINDOW_MS);
+    if(attempts.length>=RECOVERY_MAX_ATTEMPTS&&!pending)return recoveryInfo(false,'RETRY_LIMIT',
+      'Three recovery attempts were requested in the last hour. Check Settings & Login or wait for the limit to reset.',
+      {cooldownUntil:new Date(Math.min(...attempts.map(Date.parse))+RECOVERY_WINDOW_MS).toISOString(),requestedAt});
+    return recoveryInfo(true,null,'Refresh the RXO session and request one verified scan. The last verified data stays available.',requestedAt?{requestedAt}:{});
+  } catch(error) {
+    if(error instanceof RxoAuthError||['ENOENT','EACCES','EROFS'].includes(error?.code))return recoveryInfo(false,'STATE_REVIEW','RXO sign-in state requires operator review before recovery.');
+    throw error;
+  }
+}
+export function requestConnectionRecovery(root,role) {
+  if(!roles.has(role))fail('RXO_AUTH_STATE_REVIEW');
+  try {return recoveryUpdateLock(root,()=>{
+    const status=connectionRecoveryStatus(root,role);if(!status.available)return {role,requested:false,...status};
+    const prior=recoveryRecord(root,role), retry=retryRecord(root,role), now=Date.now(), at=new Date(now).toISOString();
+    if(matchingQueue(retry,prior)) {
+      write(root,RECOVERY,{...prior,deliveryRequestedAt:at,updatedAt:at});
+      return {role,requested:true,reason:'ALREADY_QUEUED',requestedAt:prior.requestedAt,
+        cooldownUntil:new Date(now+RECOVERY_COOLDOWN_MS).toISOString(),message:'The existing recovery request is queued for the scheduler.'};
+    }
+    const id=randomUUID(),attempts=[...(prior?.attempts||[]).filter(t=>now-Date.parse(t)<RECOVERY_WINDOW_MS),at];
+    write(root,RECOVERY,{version:AUTH_VERSION,role,id,phase:'QUEUED',attempts,requestedAt:at,deliveryRequestedAt:at,updatedAt:at,refreshSession:false});
+    write(root,RETRY,{version:AUTH_VERSION,role,id,requestedAt:at,kind:'connection'});
+    return {role,requested:true,requestedAt:at,cooldownUntil:new Date(now+RECOVERY_COOLDOWN_MS).toISOString(),
+      message:'Recovery queued. Wait for a verified RXO export before treating the connection as restored.'};
+  });}catch(error){
+    if(error instanceof LockBusyError)return {role,requested:false,reason:'COOLDOWN',message:'Another recovery request is being processed. Refresh status shortly.'};
+    throw error;
+  }
+}
+function startQueuedRecovery(root,role,retry,recovery) {
+  matchingQueue(retry,recovery);
+  let hold=readAuthHold(root,role), changed=false;
+  if(hold){hold=bindLegacyHold(root,role,hold);changed=holdCredentialsChanged(root,role,hold);}
+  const blocked=blockedHold(hold,changed);
+  remove(root,RETRY);
+  write(root,RECOVERY,{...recovery,phase:blocked?'FAILED':'RUNNING',refreshSession:!blocked,updatedAt:new Date(Date.now()).toISOString()});
+  if(blocked)return false;
+  releaseAuthHold(root,role); return true;
+}
+function authorizeManualRetryLocked(root,role) {
+  const recovery=recoveryRecord(root,role), retry=retryRecord(root,role);
+  if(retry?.kind==='connection')return consumeAuthRetryLocked(root,role,retry,recovery);
+  let hold=readAuthHold(root,role);if(!hold)return true;
+  hold=bindLegacyHold(root,role,hold);
+  const changed=holdCredentialsChanged(root,role,hold);
+  if(blockedHold(hold,changed))return false;
+  if(changed){releaseAuthHold(root,role);if(retry)remove(root,RETRY);return true;}
+  const status=connectionRecoveryStatus(root,role);if(!status.available)return false;
+  const now=Date.now(),at=new Date(now).toISOString();
+  write(root,RECOVERY,{version:AUTH_VERSION,role,id:randomUUID(),phase:'RUNNING',refreshSession:true,requestedAt:at,deliveryRequestedAt:at,updatedAt:at,
+    attempts:[...(recovery?.attempts||[]).filter(t=>now-Date.parse(t)<RECOVERY_WINDOW_MS),at]});
+  releaseAuthHold(root,role);if(retry)remove(root,RETRY);return true;
 }
 export function authorizeManualRetry(root,role) {
   if(!roles.has(role))fail('RXO_AUTH_STATE_REVIEW');
-  let hold=readAuthHold(root,role); if(!hold)return true;
-  hold=bindLegacyHold(root,role,hold);
-  if(hold.credentialVersion!==currentCredentialVersion(role,root)) {
-    clearForOneCredentialVerification(root,role); return true;
-  }
-  if(HARD_CREDENTIAL_CODES.has(hold.code))return false;
-  releaseAuthHold(root,role); return true;
+  try{return recoveryUpdateLock(root,()=>authorizeManualRetryLocked(root,role));}
+  catch(error){if(error instanceof LockBusyError)return false;throw error;}
+}
+export function consumeCredentialChangeRetry(root,role) {
+  if(!roles.has(role))fail('RXO_AUTH_STATE_REVIEW');
+  try{return recoveryUpdateLock(root,()=>{
+    if(!credentialsChangedSinceHold(root,role))return false;
+    const retry=retryRecord(root,role);
+    if(retry?.kind==='connection')return consumeAuthRetryLocked(root,role,retry,recoveryRecord(root,role));
+    releaseAuthHold(root,role);if(retry)remove(root,RETRY);return true;
+  });}catch(error){if(error instanceof LockBusyError)return false;throw error;}
 }
 export function requestAuthRetry(root,role) {
-  if(!roles.has(role)) fail('RXO_AUTH_STATE_REVIEW');
-  let h=readAuthHold(root,role);
-  if(!h) return {role,requested:false,reason:'NO_AUTH_HOLD'};
-  h=bindLegacyHold(root,role,h);
-  if(HARD_CREDENTIAL_CODES.has(h.code)&&h.credentialVersion===currentCredentialVersion(role,root))
-    return {role,requested:false,reason:'CREDENTIALS_UNCHANGED'};
-  write(root,RETRY,{version:AUTH_VERSION,role,id:randomUUID(),requestedAt:new Date().toISOString()});
-  return {role,requested:true};
+  if(!readAuthHold(root,role))return {role,requested:false,reason:'NO_AUTH_HOLD'};
+  const result=requestConnectionRecovery(root,role);
+  // Retain the operator CLI's legacy response shape; webpage controls use the
+  // richer requestConnectionRecovery metadata directly.
+  return {role,requested:result.requested,...(result.reason?{reason:result.reason}:{})};
+}
+function consumeAuthRetryLocked(root,role,retry=retryRecord(root,role),recovery=recoveryRecord(root,role)) {
+  if(!retry)return false;
+  if(retry.kind==='connection') {
+    const fresh=matchingQueue(retry,recovery);
+    if(!fresh){remove(root,RETRY);write(root,RECOVERY,{...recovery,phase:'FAILED',refreshSession:false,updatedAt:new Date(Date.now()).toISOString()});return false;}
+    return startQueuedRecovery(root,role,retry,recovery);
+  }
+  remove(root,RETRY);if(!retryFresh(retry))return false;
+  return authorizeManualRetryLocked(root,role);
 }
 export function consumeAuthRetry(root,role) {
-  const r=read(root,RETRY); if(r===null) return false;
-  if(r.version!==AUTH_VERSION||r.role!==role||!/^[-a-f0-9]{36}$/.test(r.id||'')||
-    !Number.isFinite(Date.parse(r.requestedAt))) fail('RXO_AUTH_STATE_REVIEW');
-  const age=Date.now()-Date.parse(r.requestedAt);
-  remove(root,RETRY);
-  if(age< -60000 || age>30*60*1000) return false;
-  return authorizeManualRetry(root,role);
+  if(!roles.has(role))fail('RXO_AUTH_STATE_REVIEW');
+  try{return recoveryUpdateLock(root,()=>consumeAuthRetryLocked(root,role));}
+  catch(error){if(error instanceof LockBusyError)return false;throw error;}
+}
+/** A queued handoff may still be waiting for its short metadata lock. */
+export function hasPendingAuthRetry(root,role) {
+  if(!roles.has(role))fail('RXO_AUTH_STATE_REVIEW');
+  return !!retryRecord(root,role)||recoveryRecord(root,role)?.phase==='QUEUED';
+}
+async function consumeSessionRefresh(root,role,expectedId) {
+  if(!expectedId)return false;
+  return recoveryOperation(root,()=>{
+    const r=recoveryRecord(root,role);
+    if(!r||r.id!==expectedId||r.phase!=='RUNNING'||!r.refreshSession)return false;
+    write(root,RECOVERY,{...r,refreshSession:false,updatedAt:new Date(Date.now()).toISOString()});return true;
+  });
+}
+async function completeRecovery(root,role,expectedId,phase) {
+  if(!expectedId)return false;
+  try{return await recoveryOperation(root,()=>{
+    const r=recoveryRecord(root,role);
+    if(!r||r.id!==expectedId||r.phase!=='RUNNING')return false;
+    if(!['AUTHENTICATED','FAILED'].includes(phase))fail('RXO_AUTH_STATE_REVIEW');
+    write(root,RECOVERY,{...r,phase,refreshSession:false,updatedAt:new Date(Date.now()).toISOString()});return true;
+  });}catch(error){if(error instanceof LockBusyError)return false;throw error;}
 }
 export function releaseAuthHold(root,role) {
   if(readAuthHold(root,role)) remove(root,HOLD);
@@ -381,17 +532,25 @@ async function appReady(page,role) {
   for(const frame of page.frames())if((await visibleAll(frame.locator('input[type="password"]'))).length)return false;
   return (await visibleAll(page.locator('button,a,[role="button"],[ng-click],[data-ng-click],[onclick],.btn,.k-button,label').filter({hasText:/^\s*list\s*$/i}))).length>0;
 }
-async function navigate(page,url,timeoutMs) {
-  try { await page.goto(url,{waitUntil:'domcontentloaded',timeout:timeoutMs}); }
+async function navigate(page,url,timeoutMs,role) {
+  if(!allowedAuthUrl(url,role))fail('RXO_AUTH_ORIGIN_REVIEW');
+  // Commit means the navigation reached a response. RXO/OIDC scripts can keep
+  // DOMContentLoaded pending after a usable app or login surface already exists.
+  // Callers still verify that actual surface; commit alone never proves login.
+  try { await page.goto(url,{waitUntil:'commit',timeout:timeoutMs}); }
   catch(e) {
+    if(!allowedAuthUrl(page.url(),role))fail('RXO_AUTH_ORIGIN_REVIEW');
+    if(await appReady(page,role)||await loginFields(page,role))return;
     const network=/net::ERR_[A-Z_]+/.exec(String(e?.message||''))?.[0];
     throw new RxoAuthError('RXO_AUTH_NAVIGATION_REVIEW',network?'Browser navigation failed: '+network:'Browser navigation did not complete.');
   }
+  if(!allowedAuthUrl(page.url(),role))fail('RXO_AUTH_ORIGIN_REVIEW');
 }
 function budget(value) {return Number.isFinite(value)&&value>=100&&value<=180000?value:120000;}
 async function awaitSurface(page,role,credentials,timeoutMs,{ready=true,entry=true}={}) {
   const end=Date.now()+budget(timeoutMs); let clicked=false;
   while(Date.now()<end) {
+    if(!allowedAuthUrl(page.url(),role))fail('RXO_AUTH_ORIGIN_REVIEW');
     await throwWarning(page,role,credentials);
     if(ready&&await appReady(page,role))return {ready:true};
     const fields=await loginFields(page,role); if(fields)return fields;
@@ -408,24 +567,69 @@ function record(root,role,code,phase,passwordSubmissions,message='') {
     credentialVersion:currentCredentialVersion(role,root),updatedAt:new Date().toISOString()};
   write(root,HOLD,v); write(root,LAST,v); return v;
 }
-async function gated(root,role,credentials,body) {
+const sessionResetContexts=new WeakMap();
+async function refreshBrowserSession(page,role) {
+  const context=page.context();
+  // Clear only cookies applicable to this integration's approved RXO hosts.
+  // Dedicated profiles may still contain unrelated cookies: leave those alone.
+  const domain=role==='standard'?/(^|\.)rxo\.com$/i:/^(?:\.?rxo\.com|\.?expedite\.rxo\.com|\.?www\.expedite\.rxo\.com)$/i;
+  await context.clearCookies({domain});
+  let reset=sessionResetContexts.get(context);
+  if(!reset){reset={marker:'__truckLogRxoReset_'+randomUUID(),sequence:0};sessionResetContexts.set(context,reset);}
+  reset.sequence++;
+  // A network error page has an opaque origin, but its tab can retain RXO
+  // sessionStorage. Reset once before the first new approved document's app JS.
+  // The marker survives callbacks. Monotonic sequences make older retained
+  // init scripts skip a later recovery rather than erase its fresh OIDC state.
+  await context.addInitScript(({role,marker,sequence})=>{
+    const u=new URL(location.href);
+    const approved=u.protocol==='https:'&&(role==='standard'?(u.hostname==='rxo.com'||u.hostname.endsWith('.rxo.com')):u.origin==='https://www.expedite.rxo.com');
+    if(!approved)return;
+    try {
+      if(Number(sessionStorage.getItem(marker)||0)>=sequence)return;
+      localStorage.clear();sessionStorage.clear();sessionStorage.setItem(marker,String(sequence));
+    }catch{/* A storage-blocked surface must still pass the normal app checks. */}
+  },{role,marker:reset.marker,sequence:reset.sequence});
+  const origins=new Set([role==='standard'?'https://customer.rxoconnect.rxo.com':'https://www.expedite.rxo.com']);
+  for(const frame of page.frames()) {
+    if(!allowedAuthUrl(frame.url(),role))continue;
+    origins.add(new URL(frame.url()).origin);
+    // Only pre-existing documents are touched. Do not install an init script
+    // that would erase fresh OIDC state on the next login/callback document.
+    await frame.evaluate(()=>{localStorage.clear();sessionStorage.clear();}).catch(()=>undefined);
+  }
+  if(context.newCDPSession) {
+    const session=await context.newCDPSession(page);
+    try {for(const origin of origins)await session.send('Storage.clearDataForOrigin',{
+      origin,storageTypes:'local_storage,indexeddb,cache_storage,service_workers',
+    });}finally{await session.detach();}
+  }
+}
+async function gated(root,role,credentials,body,page) {
   assertAuthMayRun(root,role);
-  let submissions=0;
+  let submissions=0,recoveryId=null;
   const pending=()=>{
     if(submissions)fail('RXO_AUTH_SUBMISSION_UNCONFIRMED');
     record(root,role,'RXO_AUTH_SUBMISSION_UNCONFIRMED','BEFORE_SUBMIT',1);
     submissions=1;
   };
   try {
-    const result=await body(pending);
+    recoveryId=await recoveryOperation(root,()=>{
+      const recovery=recoveryRecord(root,role);return recovery?.phase==='RUNNING'?recovery.id:null;
+    });
+    const refreshed=await consumeSessionRefresh(root,role,recoveryId);
+    if(refreshed)await refreshBrowserSession(page,role);
+    const result=await body(pending,refreshed);
     write(root,LAST,{version:AUTH_VERSION,role,code:'AUTHENTICATED',phase:'COMPLETE',
       passwordSubmissions:submissions,sessionReused:submissions===0,updatedAt:new Date().toISOString()});
     releaseAuthHold(root,role);
+    await completeRecovery(root,role,recoveryId,'AUTHENTICATED');
     return {...result,passwordSubmissions:submissions};
   } catch(e) {
-    const code=e?.rxoAuthFailure&&CODES.has(e.code)?e.code:'RXO_AUTH_NAVIGATION_REVIEW';
+    const code=e instanceof LockBusyError?'RXO_AUTH_STATE_REVIEW':e?.rxoAuthFailure&&CODES.has(e.code)?e.code:'RXO_AUTH_NAVIGATION_REVIEW';
     const message=e?.rxoAuthFailure?redactLoginMessage(String(e.message).replace(new RegExp('^'+code+':?\\s*'),''),credentials):'Browser interaction could not be verified. No automatic retry.';
     try {record(root,role,code,'FAILED',submissions,message);} catch {throw new RxoAuthError('RXO_AUTH_STATE_REVIEW','Could not safely record sign-in state.');}
+    await completeRecovery(root,role,recoveryId,'FAILED');
     try { await notifyCredentialFailure(root,role,code,credentials.username); } catch {}
     throw new RxoAuthError(code,message.replace(new RegExp('^'+code+':?\\s*'),''));
   }
@@ -469,6 +673,7 @@ async function submitOnce(page,role,fields,credentials,timeoutMs,pending) {
 async function afterSubmit(page,role,credentials,appUrl,timeoutMs) {
   const end=Date.now()+budget(timeoutMs);let navigated=false,stable=0,lastValidation='';
   while(Date.now()<end) {
+    if(!allowedAuthUrl(page.url(),role))fail('RXO_AUTH_ORIGIN_REVIEW');
     await throwWarning(page,role,credentials);
     if(await appReady(page,role))return;
     for(const frame of page.frames())if(allowedAuthUrl(frame.url(),role)) {
@@ -488,7 +693,7 @@ async function afterSubmit(page,role,credentials,appUrl,timeoutMs) {
     const requiredStable=standardCallback?10:3;
     if(!navigated&&stable>=requiredStable) {
       navigated=true;
-      await navigate(page,appUrl,Math.min(30000,Math.max(100, end-Date.now())));
+      await navigate(page,appUrl,Math.min(30000,Math.max(100, end-Date.now())),role);
     }
     await pause(200);
   }
@@ -496,18 +701,18 @@ async function afterSubmit(page,role,credentials,appUrl,timeoutMs) {
 }
 export async function authenticateStandard(page,{username,password,dataRoot,timeoutMs=120000,forceLogin=false}={}) {
   const credentials={username,password};
-  return gated(dataRoot,'standard',credentials,async pending=>{
+  return gated(dataRoot,'standard',credentials,async (pending,refreshed)=>{
     // Known production Orders route: the scorecard need not expose Export.
     const appUrl='https://customer.rxoconnect.rxo.com/orders/list';
-    if(forceLogin)await page.context().clearCookies();
-    await navigate(page,appUrl,budget(timeoutMs));
+    if(forceLogin&&!refreshed)await refreshBrowserSession(page,'standard');
+    await navigate(page,appUrl,budget(timeoutMs),'standard');
     const surface=await awaitSurface(page,'standard',credentials,timeoutMs);
     if(!surface.ready) {
       await submitOnce(page,'standard',surface,credentials,timeoutMs,pending);
       await afterSubmit(page,'standard',credentials,appUrl,timeoutMs);
     }
     return {authenticated:true,verifiedRoute:'ORDERS'};
-  });
+  },page);
 }
 export function readExpediteGeneration(secretRoot='/run/secrets') {
   const p=read(secretRoot,'rxo_expedite_current.json');
@@ -517,7 +722,7 @@ export function readExpediteGeneration(secretRoot='/run/secrets') {
 export async function authenticateExpedite(page,{username,password,dataRoot,sessionRoot,
   generation,checkGeneration=()=>generation,timeoutMs=90000}={}) {
   const credentials={username,password};
-  return gated(dataRoot,'expedite',credentials,async pending=>{
+  return gated(dataRoot,'expedite',credentials,async (pending,refreshed)=>{
     if(!/^[a-f0-9-]{36}$/.test(generation||''))fail('RXO_AUTH_STATE_REVIEW');
     const prior=read(sessionRoot,BINDING);
     if(prior&&(prior.version!==AUTH_VERSION||prior.role!=='expedite'||typeof prior.generation!=='string'))fail('RXO_AUTH_SESSION_REVIEW');
@@ -526,15 +731,12 @@ export async function authenticateExpedite(page,{username,password,dataRoot,sess
     const loginUrl='https://www.expedite.rxo.com/WebClient/Account/Login';
     let surface;
     if(bound) {
-      await navigate(page,appUrl,budget(timeoutMs));
+      await navigate(page,appUrl,budget(timeoutMs),'expedite');
       surface=await awaitSurface(page,'expedite',credentials,Math.min(budget(timeoutMs),30000),{entry:false});
     } else {
       // Unbound/changed credential generation: do not reuse another identity.
-      await page.context().clearCookies();
-      await navigate(page,loginUrl,budget(timeoutMs));
-      if(!allowedAuthUrl(page.url(),'expedite'))fail('RXO_AUTH_ORIGIN_REVIEW');
-      await page.evaluate(()=>{localStorage.clear();sessionStorage.clear();});
-      await navigate(page,loginUrl,budget(timeoutMs));
+      if(!refreshed)await refreshBrowserSession(page,'expedite');
+      await navigate(page,loginUrl,budget(timeoutMs),'expedite');
       surface=await awaitSurface(page,'expedite',credentials,timeoutMs,{ready:false,entry:false});
     }
     if(!surface.ready) {
@@ -544,7 +746,7 @@ export async function authenticateExpedite(page,{username,password,dataRoot,sess
     if(checkGeneration()!==generation)fail('RXO_AUTH_CREDENTIALS_CHANGED');
     write(sessionRoot,BINDING,{version:AUTH_VERSION,role:'expedite',generation,updatedAt:new Date().toISOString()});
     return {authenticated:true,verifiedRoute:'FREIGHT_ON_THE_MOVE'};
-  });
+  },page);
 }
 // Explicit operator-only control. No sign-in, password input or export here.
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)) {

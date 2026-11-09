@@ -5,6 +5,8 @@ import {
   Controller,
   Get,
   Header,
+  HttpCode,
+  Post,
   Put,
   Req,
 } from '@nestjs/common';
@@ -34,6 +36,14 @@ export class RxoExpediteController {
   @Header('Cache-Control', 'no-store')
   shipments() {
     return this.expedite.shipments();
+  }
+
+  @Post('recover')
+  @HttpCode(200)
+  @Header('Cache-Control', 'no-store')
+  recover(@Req() request: Request) {
+    this.requireJson(request);
+    return this.expedite.recoverConnection();
   }
 
   @Put('settings')

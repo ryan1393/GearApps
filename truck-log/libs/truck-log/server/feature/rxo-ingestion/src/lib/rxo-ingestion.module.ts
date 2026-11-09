@@ -1,3 +1,4 @@
+import { RxoConnectionRecoveryModule } from '@truck-log/server/infrastructure/rxo-recovery';
 import { RxoControlService } from './rxo-control.service';
 import { RxoControlController } from './rxo-control.controller';
 import { Module } from '@nestjs/common';
@@ -14,6 +15,7 @@ import { TruckLogAdminModule } from '@truck-log/server/auth/admin';
 @Module({
   imports: [
     TruckLogAdminModule,
+    RxoConnectionRecoveryModule,
     TypeOrmModule.forFeature([
       RxoImportBatch,
       RxoOrder,

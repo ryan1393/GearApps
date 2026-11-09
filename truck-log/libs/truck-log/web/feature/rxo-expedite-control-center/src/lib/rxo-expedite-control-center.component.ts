@@ -3,7 +3,9 @@ import { TruckLogAdminAccessComponent } from '@truck-log/web/auth/admin';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { StaleDataNoticeComponent } from '@truck-log/web/ui';
+import { StaleDataNoticeComponent, ToastService } from '@truck-log/web/ui';
+import { TruckLogApi, rxoRecoveryErrorMessage } from '@truck-log/web/data-access';
+import { Subscription } from 'rxjs';
 import { RxoExpediteComponent } from './rxo-expedite/rxo-expedite.component';
 import { RxoExpediteStore, type ExpediteShipmentsResponse, type ExpediteStatus } from './rxo-expedite/rxo-expedite.store';
 
@@ -35,6 +37,22 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
       <span class="dana-status-badge" [attr.data-tone]="integrationTone">{{integrationStatus}}</span>
       <span class="tl-rxo-activity-detail">{{integrationDetail}}</span>
       <span class="dana-muted dana-nowrap">{{integrationUpdated}}</span>
+    </section>
+
+    <section class="dana-panel" aria-labelledby="expedite-recovery-title" *ngIf="connectionRecoveryNeeded || recoveryBusy || recoveryMessage || recoveryError">
+      <div class="dana-panel-header"><div><h2 id="expedite-recovery-title">Recover Expedite connection</h2><small>Keep the previous verified batch while reconnecting</small></div></div>
+      <div class="dana-panel-body tl-stack">
+        <p>{{connectionRecoveryDetail}}</p>
+        <p class="dana-alert dana-alert-warning" *ngIf="recoveryLoginRequired">Open Settings &amp; Login to check the saved Expedite login. If RXO requests MFA, approval or an interactive sign-in, complete it with your administrator before recovering again.</p>
+        <p class="dana-alert dana-alert-warning" *ngIf="recoveryCooldownActive">A recovery was requested recently. Wait for the current attempt and refresh status before requesting another.</p>
+        <p class="dana-alert dana-alert-danger" role="alert" *ngIf="recoveryError">{{recoveryError}}</p>
+        <p class="dana-alert dana-alert-success" role="status" *ngIf="recoveryMessage">{{recoveryMessage}}</p>
+        <div class="dana-actions" *ngIf="adminAuth.canWrite(); else recoveryAdminSignIn">
+          <button class="dana-btn dana-btn-primary" type="button" [disabled]="recoveryBusy || scanRunning || !recoveryAvailable" [attr.aria-busy]="recoveryBusy" (click)="recoverConnection()">{{recoveryBusy ? 'Requesting recovery…' : 'Recover connection'}}</button>
+          <button class="dana-btn" type="button" [disabled]="recoveryBusy" (click)="openRecoverySettings()">Settings &amp; Login</button>
+        </div>
+        <ng-template #recoveryAdminSignIn><a class="dana-btn dana-btn-primary" routerLink="/admin/login" [queryParams]="{ returnTo: '/rxo-expedite' }">Sign in as administrator to recover</a></ng-template>
+      </div>
     </section>
 
     <div class="dana-alert dana-alert-danger" *ngIf="pageError">
@@ -137,11 +155,23 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
 })
 export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
   activeTab: ExpediteMainTab = 'data';
+  recoveryBusy = false;
+  recoveryMessage = '';
+  recoveryError = '';
+  private recoveryLoginBlocked = false;
+  private recoveryBlockedStatus: ExpediteStatus | null = null;
+  private recoveryRequest?: Subscription;
+  private destroyed = false;
   clockNow = Date.now();
 
   private clockTimer?: number;
 
-  constructor(readonly store: RxoExpediteStore, public readonly adminAuth: TruckLogAdminAuth) {}
+  constructor(
+    readonly store: RxoExpediteStore,
+    public readonly adminAuth: TruckLogAdminAuth,
+    private readonly api: TruckLogApi,
+    private readonly toast: ToastService,
+  ) {}
 
   get status(): ExpediteStatus | null { return this.store.status; }
   get shipments(): ExpediteShipmentsResponse | null { return this.store.shipments; }
@@ -158,11 +188,67 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
+    this.recoveryRequest?.unsubscribe();
     if (this.clockTimer) window.clearInterval(this.clockTimer);
   }
 
   refreshAll(): void {
     this.store.refresh();
+  }
+
+  get connectionRecoveryNeeded() {
+    const reason = this.status?.recovery?.reason;
+    return !!this.status && ((!!reason && reason !== 'READY') || this.recoveryLoginRequired || this.recoveryCooldownActive || this.needsReview
+      || /AUTH|STOPPED|NEEDS_REVIEW/.test(this.schedulerState));
+  }
+  get recoveryLoginRequired() {
+    const info = this.status?.recovery;
+    return !!(info?.requiresCredentials || info?.requiresInteractiveLogin)
+      || (this.recoveryLoginBlocked && this.status === this.recoveryBlockedStatus);
+  }
+  get recoveryCooldownActive() { return Date.parse(this.status?.recovery?.cooldownUntil || '') > this.clockNow; }
+  get recoveryAvailable() {
+    return !!this.status && this.status.recovery?.available !== false
+      && !this.recoveryCooldownActive && !this.recoveryLoginRequired;
+  }
+  get connectionRecoveryDetail() {
+    return this.status?.recovery?.message || 'A controlled recovery reopens Expedite with its saved login and requests a fresh scan. The previous verified batch stays available.';
+  }
+  openRecoverySettings() {
+    this.activeTab = 'settings';
+    document.getElementById('rxo-expedite-tab-settings')?.focus();
+  }
+  recoverConnection() {
+    if (!this.adminAuth.canWrite()) { this.toast.error('Sign in as administrator to recover the Expedite connection.'); return; }
+    if (this.recoveryLoginRequired) { this.openRecoverySettings(); return; }
+    if (this.recoveryBusy || this.scanRunning || !this.recoveryAvailable || this.destroyed) return;
+    this.recoveryBusy = true;
+    this.recoveryError = '';
+    this.recoveryMessage = '';
+    this.recoveryRequest = this.api.recoverRxoExpediteConnection().subscribe({
+      next: result => {
+        if (this.destroyed) return;
+        this.recoveryBusy = false;
+        if (!result || !['QUEUED', 'ALREADY_RUNNING'].includes(result.status)) {
+          this.recoveryError = 'Recovery could not be confirmed. Refresh the status before trying again.';
+        } else {
+          this.recoveryMessage = result.status === 'ALREADY_RUNNING'
+            ? 'A recovery scan is already queued or running. Wait for a verified export; the connection is not yet confirmed.'
+            : 'Recovery requested. Wait for a successful verified export before treating the connection as restored. Previous verified data stays available.';
+        }
+        this.store.refresh();
+      },
+      error: error => {
+        if (this.destroyed) return;
+        this.recoveryBusy = false;
+        this.recoveryLoginBlocked = !!(error?.error?.requiresCredentials || error?.error?.requiresInteractiveLogin);
+        this.recoveryBlockedStatus = this.status;
+        this.recoveryError = rxoRecoveryErrorMessage(error);
+        if (this.recoveryLoginBlocked) this.openRecoverySettings();
+        this.store.refresh();
+      },
+    });
   }
 
   get shipmentCount(): number {
@@ -355,7 +441,7 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
         : 'Truck Log is refreshing RXO Expedite data. The previous verified PostgreSQL batch remains available while the export runs.';
     }
     if (this.needsReview) {
-      return 'The previous verified Expedite batch remains available while the scheduled exporter waits for the next controlled cycle.';
+      return 'The previous verified Expedite batch remains available. Use Recover connection for a controlled retry, or Settings & Login when credentials or approval need attention.';
     }
     if (this.databaseNeedsReview) {
       return 'The previous complete PostgreSQL mirror remains available while the latest import needs attention.';

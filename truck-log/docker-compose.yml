@@ -5,7 +5,7 @@ services:
     image: postgres:16-alpine
     container_name: truck-log-postgres
     labels:
-      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.1}"
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.3}"
     restart: unless-stopped
     environment:
       POSTGRES_USER: "${TRUCK_LOG_DATABASE_USERNAME:?Run SETUP-TRUCK-LOG.cmd first}"
@@ -32,16 +32,16 @@ services:
       context: .
       dockerfile: docker/truck-log/server.Dockerfile
       args:
-        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.1}"
-    image: truck-log-server:${TRUCK_LOG_RELEASE:-1.0.1}
+        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.3}"
+    image: truck-log-server:${TRUCK_LOG_RELEASE:-1.0.3}
     container_name: truck-log-server
     labels:
-      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.1}"
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.3}"
     init: true
     env_file:
       - .env
     environment:
-      TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.1}"
+      TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.3}"
       TRUCK_LOG_ADMIN_ENABLED: "true"
       # Retain HTTP compatibility for existing .env files; HTTPS deployments use
       # docker-compose.https.yml, which requires a trusted proxy and TLS origin.
@@ -94,11 +94,11 @@ services:
       context: .
       dockerfile: docker/truck-log/web.Dockerfile
       args:
-        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.1}"
-    image: truck-log-web:${TRUCK_LOG_RELEASE:-1.0.1}
+        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.3}"
+    image: truck-log-web:${TRUCK_LOG_RELEASE:-1.0.3}
     container_name: truck-log-web
     labels:
-      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.1}"
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.3}"
     init: true
     ports:
       - "${TRUCK_LOG_WEB_PORT:-4300}:80"
@@ -125,12 +125,12 @@ services:
       context: .
       dockerfile: apps/rxo-integration/Dockerfile
       args:
-        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.1}"
+        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.3}"
       target: runtime
-    image: truck-log-rxo-export:${TRUCK_LOG_RELEASE:-1.0.1}
+    image: truck-log-rxo-export:${TRUCK_LOG_RELEASE:-1.0.3}
     container_name: truck-log-rxo-export
     labels:
-      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.1}"
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.3}"
     init: true
     restart: unless-stopped
     # Chromium runs with --no-sandbox, so no capability is needed.
@@ -139,7 +139,7 @@ services:
     mem_limit: "2g"
     pids_limit: 512
     environment:
-      TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.1}"
+      TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.3}"
       TZ: "${TZ:-America/Indiana/Indianapolis}"
       TRUCK_LOG_RXO_AUTH_EMAIL_ENABLED: "${TRUCK_LOG_RXO_AUTH_EMAIL_ENABLED:-false}"
       SMTP_HOST: "${SMTP_HOST:-}"
@@ -192,12 +192,12 @@ services:
       context: .
       dockerfile: apps/rxo-integration/Dockerfile
       args:
-        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.1}"
+        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.3}"
       target: interactive
-    image: truck-log-rxo-browser:${TRUCK_LOG_RELEASE:-1.0.1}
+    image: truck-log-rxo-browser:${TRUCK_LOG_RELEASE:-1.0.3}
     container_name: truck-log-rxo-browser
     labels:
-      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.1}"
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.3}"
     init: true
     shm_size: "1gb"
     # Xvfb, x11vnc, websockify and Chromium (--no-sandbox) need no capability.
@@ -236,16 +236,16 @@ services:
       context: .
       dockerfile: apps/rxo-expedite/Dockerfile
       args:
-        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.1}"
-    image: truck-log-rxo-expedite:${TRUCK_LOG_RELEASE:-1.0.1}
+        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.3}"
+    image: truck-log-rxo-expedite:${TRUCK_LOG_RELEASE:-1.0.3}
     container_name: truck-log-rxo-expedite-scheduler
     labels:
-      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.1}"
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.3}"
     init: true
     restart: unless-stopped
     entrypoint: ["node", "/app/src/scheduler.mjs"]
     environment:
-      TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.1}"
+      TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.3}"
       TZ: "${TZ:-America/Indiana/Indianapolis}"
       TRUCK_LOG_RXO_AUTH_EMAIL_ENABLED: "${TRUCK_LOG_RXO_AUTH_EMAIL_ENABLED:-false}"
       SMTP_HOST: "${SMTP_HOST:-}"
@@ -285,16 +285,16 @@ services:
       context: .
       dockerfile: apps/rxo-expedite/Dockerfile
       args:
-        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.1}"
-    image: truck-log-rxo-expedite:${TRUCK_LOG_RELEASE:-1.0.1}
+        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.3}"
+    image: truck-log-rxo-expedite:${TRUCK_LOG_RELEASE:-1.0.3}
     init: true
     restart: "no"
     labels:
-      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.1}"
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.3}"
     entrypoint: ["node", "/app/src/cli.mjs"]
     command: ["--help"]
     environment:
-      TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.1}"
+      TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.3}"
       TZ: "${TZ:-America/Indiana/Indianapolis}"
     shm_size: "512mb"
     mem_limit: "1g"

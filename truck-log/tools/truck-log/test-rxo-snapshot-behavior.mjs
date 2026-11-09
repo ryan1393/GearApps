@@ -17,10 +17,13 @@ const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'truck-log-rxo-behavior-'));
 const previousTsLoader = require.extensions['.ts'];
 require.extensions['.ts'] = (module, file) => module._compile(compile(file), file);
 function compile(file) {
-  return ts.transpileModule(fs.readFileSync(file, 'utf8'), {
+  const output = ts.transpileModule(fs.readFileSync(file, 'utf8'), {
     compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.CommonJS, experimentalDecorators: true },
     fileName: file,
   }).outputText;
+  // Execute actual public Nx library entry points after infrastructure extraction.
+  return output.replace(/(["'])@truck-log\/([^"']+)\1/g, (_match, _quote, name) =>
+    JSON.stringify(path.join(root, 'libs/truck-log', name, 'src/index.ts')));
 }
 let checks = 0;
 function test(label, run) {

@@ -61,7 +61,7 @@ const requiredLibs = [
   'truck-log-server-core', 'truck-log-server-data-access',
   'truck-log-server-auth-access', 'truck-log-server-auth-admin', 'truck-log-server-auth-print-agent',
   'truck-log-server-domain-rxo', 'truck-log-server-domain-driver-print',
-  'truck-log-server-infrastructure-uploads', 'truck-log-server-infrastructure-sap-documents',
+  'truck-log-server-infrastructure-uploads', 'truck-log-server-infrastructure-sap-documents', 'truck-log-server-infrastructure-rxo-recovery',
 ];
 for (const name of requiredLibs) if (!names.has(name)) fail(`Missing Nx library project ${name}.`);
 

@@ -18,6 +18,7 @@ import type {
   PackingSlipRouteConfig,
   PackingSlipRouteUpdateRequest,
   RxoControlStatusData,
+  RxoConnectionRecoveryResult,
   RxoDataPage,
   RxoExporterSettings,
   RxoFreightRecord,
@@ -195,6 +196,14 @@ export class TruckLogApi {
     return this.http.put<{ username: string; usernameConfigured: boolean; passwordConfigured: boolean; passwordUpdated: boolean }>(
       `${this.base}/rxo/control/credentials`, payload,
     );
+  }
+
+  recoverRxoConnection() {
+    return this.http.post<RxoConnectionRecoveryResult>(`${this.base}/rxo/control/recover`, {}).pipe(timeout(45000));
+  }
+
+  recoverRxoExpediteConnection() {
+    return this.http.post<RxoConnectionRecoveryResult>(`${this.base}/rxo/expedite/recover`, {}).pipe(timeout(45000));
   }
 
   runRxoScanNow() {

@@ -1,4 +1,4 @@
-import { readAuthHold, consumeAuthRetry, consumeCredentialChangeRetry, ensureAuthFailureNotification, RxoAuthError } from './lib/rxo-auth.mjs';
+import { readAuthHold, consumeAuthRetry, hasPendingAuthRetry, consumeCredentialChangeRetry, ensureAuthFailureNotification, RxoAuthError } from './lib/rxo-auth.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -20,7 +20,7 @@ function readSettings(){
  try{const st=fs.lstatSync(SETTINGS_PATH);if(!st.isFile()||st.isSymbolicLink()||st.size>8192)return defaults;const v=JSON.parse(fs.readFileSync(SETTINGS_PATH,'utf8'));return {intervalMinutes:boundedInterval(v.intervalMinutes??defaults.intervalMinutes),syncOnStart:typeof v.syncOnStart==='boolean'?v.syncOnStart:defaults.syncOnStart};}catch{return defaults;}
 }
 const initialSettings=readSettings();
-let stopping=false,running=false,heartbeat=null,state={contractVersion:1,source:'RXO_EXPEDITE',version:process.env.TRUCK_LOG_RELEASE||'1.0.1',schedulerState:'STARTING',intervalMinutes:initialSettings.intervalMinutes,syncOnStart:initialSettings.syncOnStart,schedulerStartedAt:new Date().toISOString(),schedulerHeartbeatAt:new Date().toISOString(),schedulerLoopAt:new Date().toISOString(),schedulerLoopDeadlineAt:new Date(Date.now()+LOOP_IDLE_BOUND_MS).toISOString(),currentStartedAt:null,nextRunAt:null,lastCompletedAt:null,lastSuccessAt:null,lastFailureAt:null,lastErrorCode:null,lastDurationSeconds:null,lastSourceBatchId:null};
+let stopping=false,running=false,heartbeat=null,state={contractVersion:1,source:'RXO_EXPEDITE',version:process.env.TRUCK_LOG_RELEASE||'1.0.3',schedulerState:'STARTING',intervalMinutes:initialSettings.intervalMinutes,syncOnStart:initialSettings.syncOnStart,schedulerStartedAt:new Date().toISOString(),schedulerHeartbeatAt:new Date().toISOString(),schedulerLoopAt:new Date().toISOString(),schedulerLoopDeadlineAt:new Date(Date.now()+LOOP_IDLE_BOUND_MS).toISOString(),currentStartedAt:null,nextRunAt:null,lastCompletedAt:null,lastSuccessAt:null,lastFailureAt:null,lastErrorCode:null,lastDurationSeconds:null,lastSourceBatchId:null};
 function write(){state.schedulerHeartbeatAt=new Date().toISOString();const temp=STATUS+'.'+randomUUID()+'.tmp';fs.writeFileSync(temp,JSON.stringify(state,null,2)+'\n',{mode:0o600});fs.renameSync(temp,STATUS);}
 function markLoop(boundMs=LOOP_IDLE_BOUND_MS){const now=Date.now();state.schedulerLoopAt=new Date(now).toISOString();state.schedulerLoopDeadlineAt=new Date(now+boundMs).toISOString();}
 function errorCode(e){return (e instanceof ExpediteError||e instanceof RxoAuthError)&&typeof e.code==='string'?e.code:'EXPEDITE_SCHEDULED_EXPORT_FAILED';}
@@ -38,6 +38,9 @@ function authCall(operation,fallback){
 async function notifyAuthFailure(){try{await withTimeout(ensureAuthFailureNotification(DATA_ROOT,'expedite'),AUTH_NOTIFICATION_TIMEOUT_MS,'SMTP_TIMEOUT');}catch{}}
 async function runOne(){
  if(stopping)return;markLoop();
+ const retry=authCall(()=>consumeAuthRetry(DATA_ROOT,'expedite'),false);
+ const pending=authCall(()=>hasPendingAuthRetry(DATA_ROOT,'expedite'),true);
+ if(retry.error||pending.error||pending.value)return;
  const changed=authCall(()=>consumeCredentialChangeRetry(DATA_ROOT,'expedite'),false);
  const held=authCall(()=>readAuthHold(DATA_ROOT,'expedite'),null);
  if(changed.error||held.error)return;
@@ -60,6 +63,8 @@ async function waitForNext(baseMs){
  while(!stopping){
   markLoop();
   const retry=authCall(()=>consumeAuthRetry(DATA_ROOT,'expedite'),false);if(retry.value)return;
+  const pending=authCall(()=>hasPendingAuthRetry(DATA_ROOT,'expedite'),true);
+  if(pending.error||pending.value){await sleep(1000);continue;}
   const changed=authCall(()=>consumeCredentialChangeRetry(DATA_ROOT,'expedite'),false);if(changed.value)return;
   const held=authCall(()=>readAuthHold(DATA_ROOT,'expedite'),null);
   if(retry.error||changed.error||held.error){await sleep(5000);continue;}
