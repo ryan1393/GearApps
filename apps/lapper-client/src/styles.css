@@ -1,0 +1,21 @@
+/*
+ * GearApps · Lapper global styles.
+ * The visual foundation comes from Dana UI (node_modules/@dana/ui/styles/dana-ui.css, loaded via project.json).
+ * Only app-level additions live here; components use Dana classes directly.
+ */
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.92em;
+}
+.dana-table td code {
+  color: var(--dana-text);
+}
+
+/* Keep row actions on one line; Dana's default wraps in narrow columns. */
+.dana-table td:has(> .dana-table-actions) {
+  white-space: nowrap;
+  width: 1%;
+}
+.dana-table-actions {
+  flex-wrap: nowrap;
+}

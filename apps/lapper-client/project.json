@@ -1,0 +1,85 @@
+{
+  "name": "lapper-client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "gear",
+  "sourceRoot": "apps/lapper-client/src",
+  "tags": ["scope:client", "type:app"],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "defaultConfiguration": "production",
+      "options": {
+        "outputPath": "dist/apps/lapper-client",
+        "browser": "apps/lapper-client/src/main.ts",
+        "tsConfig": "apps/lapper-client/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/lapper-client/public"
+          }
+        ],
+        "styles": ["node_modules/@dana/ui/styles/dana-ui.css", "apps/lapper-client/src/styles.css"],
+        "polyfills": ["zone.js"],
+        "inlineStyleLanguage": "scss"
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "1mb",
+              "maximumError": "2mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "8kb",
+              "maximumError": "16kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      }
+    },
+    "serve": {
+      "continuous": true,
+      "readyWhen": {
+        "signal": true
+      },
+      "executor": "@angular/build:dev-server",
+      "defaultConfiguration": "development",
+      "configurations": {
+        "production": {
+          "buildTarget": "lapper-client:build:production"
+        },
+        "development": {
+          "buildTarget": "lapper-client:build:development"
+        }
+      },
+      "dependsOn": ["lapper-api:serve"],
+      "options": {
+        "proxyConfig": "apps/lapper-client/proxy.conf.json",
+        "port": 4200
+      }
+    },
+    "serve-static": {
+      "continuous": true,
+      "readyWhen": {
+        "signal": true
+      },
+      "dependsOn": ["build"],
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "lapper-client:build",
+        "staticFilePath": "dist/apps/lapper-client/browser",
+        "spa": true
+      }
+    }
+  }
+}

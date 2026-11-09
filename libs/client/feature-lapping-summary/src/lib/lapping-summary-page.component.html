@@ -1,0 +1,227 @@
+<div class="dana-page-header">
+  <div>
+    <h1>Lapping summaries</h1>
+    <p>
+      Latest machine parameters recorded for a gearset on a lapper. Each picker narrows to
+      combinations that have actually run.
+    </p>
+  </div>
+  <div class="dana-toolbar">
+    <button type="button" class="dana-btn" (click)="refresh()" [disabled]="!ready()">
+      Refresh
+    </button>
+    <button
+      type="button"
+      class="dana-btn dana-btn-ghost"
+      (click)="clear()"
+      [disabled]="!machineId() && !gearsetId()"
+    >
+      Clear
+    </button>
+  </div>
+</div>
+
+<section class="dana-panel">
+  <div class="dana-panel-body dana-form-grid">
+    <div class="dana-field">
+      <span class="dana-field-head"
+        ><span>Gearset</span><span class="dana-field-tag is-required">Required</span></span
+      >
+      <dana-combobox
+        ariaLabel="Gearset"
+        placeholder="Search gearsets by number…"
+        [options]="gearsetOptions.value()"
+        [columns]="gearsetColumns"
+        [keyOf]="idOf"
+        [textOf]="gearsetText"
+        [loading]="gearsetOptions.loading()"
+        emptyText="No gearset matches"
+        [ngModel]="gearsetId() ?? ''"
+        (ngModelChange)="selectGearset($event)"
+      ></dana-combobox>
+    </div>
+    <div class="dana-field">
+      <span class="dana-field-head"
+        ><span>Machine</span><span class="dana-field-tag is-required">Required</span></span
+      >
+      <dana-combobox
+        ariaLabel="Machine"
+        placeholder="Search machines by asset ID, cell or IP…"
+        [options]="machineOptions.value()"
+        [columns]="machineColumns"
+        [keyOf]="idOf"
+        [textOf]="machineText"
+        [loading]="machineOptions.loading()"
+        emptyText="No machine matches"
+        [ngModel]="machineId() ?? ''"
+        (ngModelChange)="selectMachine($event)"
+      ></dana-combobox>
+    </div>
+  </div>
+</section>
+
+@if (!ready()) {
+  <section class="dana-panel">
+    <div class="dana-panel-body">
+      <gear-empty-state
+        title="Choose a gearset and a machine"
+        hint="Pick either one first — the other list narrows to what has run with it."
+      />
+    </div>
+  </section>
+} @else if (rows.loading() && !hasData()) {
+  <div class="dana-loading-state">Loading macro data…</div>
+} @else if (!hasData()) {
+  <section class="dana-panel">
+    <div class="dana-panel-body">
+      <gear-empty-state
+        title="No macro data recorded"
+        hint="This machine has no logged cycles for the selected gearset yet."
+      />
+    </div>
+  </section>
+} @else {
+  <!-- Context strip -->
+  <div class="dana-kpi-grid gear-context">
+    <div class="dana-kpi-card">
+      <div class="dana-kpi-label">Gearset</div>
+      <div class="dana-kpi-value gear-kpi-text">{{ gearset()?.number }}</div>
+      <div class="dana-kpi-note">
+        {{ gearset()?.rev ? 'Rev ' + gearset()?.rev : 'No revision' }} ·
+        <gear-status-badge [status]="gearset()?.status" />
+      </div>
+    </div>
+    <div class="dana-kpi-card">
+      <div class="dana-kpi-label">Pinion / Ring</div>
+      <div class="dana-kpi-value gear-kpi-text">
+        {{ gearset()?.pinion?.number ?? '—' }} <span class="dana-muted">/</span>
+        {{ gearset()?.ring?.number ?? '—' }}
+      </div>
+      <div class="dana-kpi-note">
+        Ratio
+        {{
+          gearset()?.ratio !== null && gearset()?.ratio !== undefined
+            ? (gearset()!.ratio | number: '1.2-4')
+            : '—'
+        }}
+      </div>
+    </div>
+    <div class="dana-kpi-card">
+      <div class="dana-kpi-label">Machine</div>
+      <div class="dana-kpi-value gear-kpi-text">{{ machine()?.number ?? machine()?.ip }}</div>
+      <div class="dana-kpi-note">
+        {{ machine()?.cell ? 'Cell ' + machine()?.cell + ' · ' : '' }}{{ machine()?.ip }}
+      </div>
+    </div>
+    <div class="dana-kpi-card" [attr.data-tone]="cycle() ? 'success' : null">
+      <div class="dana-kpi-label">Last cycle</div>
+      <div class="dana-kpi-value gear-kpi-text">
+        {{ cycle() ? (cycle()!.timestamp | date: 'MMM d, HH:mm') : '—' }}
+      </div>
+      <div class="dana-kpi-note">
+        Serial {{ cycle()?.serial_number || '—' }} · Consec {{ consec() ?? cycle()?.consec ?? '—' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Gearset data -->
+  <section class="dana-panel">
+    <div class="dana-panel-header">
+      <div>
+        <h2>Gearset data</h2>
+        <small>Macros #10020–#10029</small>
+      </div>
+    </div>
+    <div class="dana-panel-body">
+      <div class="dana-detail-grid">
+        <gear-value-field label="Description" [value]="gearset()?.summary?.model" type="text" />
+        <gear-value-field label="Pinion" [value]="gearset()?.pinion?.number" type="text" />
+        <gear-value-field label="Ring" [value]="gearset()?.ring?.number" type="text" />
+        @for (f of gearsetFields; track f.label) {
+          <gear-value-field [label]="f.label" [value]="valueOf(gearData(), f)" />
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- General data -->
+  <section class="dana-panel">
+    <div class="dana-panel-header">
+      <div>
+        <h2>General data</h2>
+        <small>Meshing, time settings, runout, retract, spin-off and acceleration</small>
+      </div>
+    </div>
+    <div class="dana-panel-body gear-groups">
+      @for (g of generalGroups; track g.title) {
+        <gear-summary-group
+          [group]="g"
+          [rows]="generalData()"
+          [columns]="g.fields.length === 1 ? 1 : 2"
+        />
+      }
+    </div>
+  </section>
+
+  <!-- Mesh data -->
+  <section class="dana-panel">
+    <div class="dana-panel-header">
+      <div>
+        <h2>Meshing position</h2>
+        <small>Arbor length, mesh / load / correction-start positions and mounting tolerance</small>
+      </div>
+    </div>
+    <div class="dana-panel-body gear-mesh">
+      <div class="gear-groups">
+        @for (g of meshGroups; track g.title) {
+          <gear-summary-group [group]="g" [rows]="meshData()" [columns]="g.fields.length" />
+        }
+      </div>
+      <figure class="gear-mesh-figure">
+        <img src="assets/mesh-axes.png" alt="V, H and J axis directions on the lapping machine" />
+        <figcaption class="dana-muted">Axis directions: V [X] · H [Y] · J [Z]</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- Lapping paths -->
+  <section class="dana-panel">
+    <div class="dana-panel-header">
+      <div>
+        <h2>Lapping paths</h2>
+        <small>Only paths with an active pass are shown</small>
+      </div>
+      @if (inactivePaths().length) {
+        <ul class="dana-chip-list">
+          @for (p of inactivePaths(); track p.form) {
+            <li class="dana-chip">{{ p.label }} · inactive</li>
+          }
+        </ul>
+      }
+    </div>
+    <div class="dana-panel-body">
+      @if (!activePaths().length) {
+        <gear-empty-state
+          title="No active lapping paths"
+          hint="None of the path forms report pass_active for this combination."
+        />
+      } @else {
+        <div class="gear-paths">
+          @for (p of activePaths(); track p.form) {
+            <div class="dana-card" data-tone="success">
+              <div class="dana-card-header">
+                <span class="dana-card-subtitle">{{ p.label }}</span>
+                <span class="dana-status-badge" data-tone="success">Active</span>
+              </div>
+              <div class="gear-groups gear-groups--tight">
+                @for (g of pathGroups; track g.title) {
+                  <gear-summary-group [group]="g" [rows]="p.rows" [columns]="2" />
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </section>
+}
