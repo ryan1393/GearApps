@@ -224,7 +224,7 @@ export async function auditGearDatabase(source: DataSource): Promise<DatabaseAud
           )
         ).map((m) => m.version)
       : [];
-    const expected = ['20261109-shared-core-integrity-v1'];
+    const expected = ['20261109-shared-core-integrity-v1', '20261109-shared-gearset-schema-v1'];
     if (await relation('public.gearsets'))
       expected.push(
         '20261109-shared-gearset-integrity-v1',

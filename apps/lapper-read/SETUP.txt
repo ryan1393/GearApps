@@ -18,9 +18,9 @@ Configuration
 
   Supply credentials through the Windows service environment or a secure
   configuration provider. Environment variable names are:
-    LapperApi__Email
-    LapperApi__Password
-    LapperApi__BaseAddress                 (optional API-address override)
+    GearAppsApi__Email
+    GearAppsApi__Password
+    GearAppsApi__BaseAddress                 (optional API-address override)
     LapperConfiguration__MachineNumber    (asset number; required if machines share an IP)
     LapperConfiguration__StateDirectory    (optional writable-directory override)
 
@@ -54,9 +54,9 @@ Recovery and API contract
   part number, consecutive count, completion timestamp and macro values are used
   on every retry. Values are not re-read from a later machine cycle.
 
-  With GearApps 70.3.0, point BaseAddress at the Lapper API (default port 3334),
+  With GearApps 70.3.0, point BaseAddress at the shared GearApps API (default port 3333),
   not the manufacturing API on port 3333. Sign in using an existing active
-  GearApps account; LapperApi__Email accepts email, username or employee number.
+  GearApps account; GearAppsApi__Email is the shared GearApps account email.
   The worker uses the API; PostgreSQL credentials stay on the server.
   Machine/scanner profiles must exist in Lapper, with the scanner assigned to the
   selected machine. The optional MachineNumber distinguishes machines sharing an IP.

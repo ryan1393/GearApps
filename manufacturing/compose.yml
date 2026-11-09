@@ -74,6 +74,11 @@ services:
       <<: *gear-db-environment
       DATABASE_SYNCHRONIZE: "false"
       SERVER_PORT: 3333
+      LAPPER_TIME_ZONE: ${LAPPER_TIME_ZONE:-America/Indianapolis}
+      SCANNER_FTP_HOST: ${SCANNER_FTP_HOST:-}
+      SCANNER_FTP_USER: ${SCANNER_FTP_USER:-}
+      SCANNER_FTP_PASSWORD: ${SCANNER_FTP_PASSWORD:-}
+      SCANNER_FTP_ROOT: ${SCANNER_FTP_ROOT:-181-lapper-scanners}
       PUBLIC_API_BASE_URL: ${GEAR_PUBLIC_API_BASE_URL:-http://localhost:3333}
       PUBLIC_WEB_BASE_URL: ${GEAR_PUBLIC_WEB_BASE_URL:-http://localhost:4200}
       EMAIL_TEMPLATE_DIR: /app/dist/manufacturing/apps/server/assets/templates
@@ -90,40 +95,6 @@ services:
       retries: 15
       start_period: 30s
 
-  lapper-api:
-    image: dana-apps-lapper-api:70.3.0
-    build:
-      context: ..
-      dockerfile: apps/lapper-api/Dockerfile
-    restart: unless-stopped
-    environment:
-      <<: *gear-db-environment
-      ENVIRONMENT: production
-      HOST: 0.0.0.0
-      PORT: 3333
-      DATABASE_SYNCHRONIZE: "false"
-      DATABASE_SSL: "false"
-      JWT_SECRET: ${LAPPER_JWT_SECRET:?Set LAPPER_JWT_SECRET in .env (32+ random characters)}
-      JWT_ACCESS_TOKEN_EXPIRES_IN: ${LAPPER_TOKEN_TTL:-10h}
-      LAPPER_TIME_ZONE: ${LAPPER_TIME_ZONE:-America/Indianapolis}
-      CORS_ORIGINS: ${LAPPER_CORS_ORIGINS:-}
-      SWAGGER_ENABLED: ${LAPPER_SWAGGER_ENABLED:-false}
-      SCANNER_FTP_HOST: ${LAPPER_SCANNER_FTP_HOST:-}
-      SCANNER_FTP_USER: ${LAPPER_SCANNER_FTP_USER:-}
-      SCANNER_FTP_PASSWORD: ${LAPPER_SCANNER_FTP_PASSWORD:-}
-      SCANNER_FTP_ROOT: ${LAPPER_SCANNER_FTP_ROOT:-181-lapper-scanners}
-    ports:
-      - "${LAPPER_API_PORT:-3334}:3333"
-    depends_on:
-      gear-base-data-bootstrap:
-        condition: service_completed_successfully
-    healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3333/api/v1/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
-      interval: 10s
-      timeout: 5s
-      retries: 15
-      start_period: 30s
-
   lapper-client:
     image: dana-apps-lapper-client:70.3.0
     build:
@@ -133,7 +104,7 @@ services:
     ports:
       - "${LAPPER_UI_PORT:-4203}:80"
     depends_on:
-      lapper-api:
+      gear-app-server:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1/healthz >/dev/null 2>&1"]

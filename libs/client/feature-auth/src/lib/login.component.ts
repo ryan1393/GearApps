@@ -19,19 +19,19 @@ import { AuthPageComponent } from './auth-page.component';
         </div>
       }
       <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
-        <label class="field-label" for="email">Email or username</label>
+        <label class="field-label" for="email">Email</label>
         <input
           id="email"
           formControlName="email"
-          type="text"
+          type="email"
           autocomplete="username"
           required
           class="field-input"
           [class.field-error]="showError('email')"
-          placeholder="Email, username or employee number"
+          placeholder="Your GearApps email"
         />
         @if (showError('email')) {
-          <small class="field-message">Enter your email or username.</small>
+          <small class="field-message">Enter your email.</small>
         }
 
         <div class="password-label-row">
@@ -78,7 +78,7 @@ export class LoginComponent {
   protected readonly form = new FormGroup({
     email: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required],
+      validators: [Validators.required, Validators.email],
     }),
     password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });

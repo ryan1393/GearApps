@@ -1,0 +1,95 @@
+{
+  "version": "70.3.0",
+  "verifiedDate": "2026-11-09",
+  "deploymentBranch": "codex/lapper-postgres-70-3-0",
+  "targetStage": "non-production",
+  "architecture": {
+    "monorepo": "Root Nx workspace with one JS dependency manifest/lock and an Nx project for the .NET collector",
+    "apiProject": "gear-app-server",
+    "apiPort": 3333,
+    "runningApiServices": 1,
+    "apiDataSources": 1,
+    "authentication": "Shared email login, access/refresh token format, default access guard, account roles, department checks and authVersion revocation",
+    "apiEnvironment": "manufacturing/.env",
+    "clients": ["Lapper", "Blade Tracking", "Cutter Builder", "Greenshed", "Lapper Read"],
+    "removed": [
+      "Standalone Lapper API application/service",
+      "Separate Lapper authentication and signing key",
+      "Separate Lapper database configuration",
+      "Obsolete legacy ORM registration modules"
+    ],
+    "nxApplicationAndLibraryProjects": 57
+  },
+  "database": {
+    "postgresVersion": "16.15",
+    "existingFiveMigrationBodiesAndChecksumsUnchanged": true,
+    "additionalMigration": "20261109-shared-gearset-schema-v1",
+    "additionalMigrationPurpose": "Create the canonical gearset table/type on fresh installations without replacing existing masters",
+    "originalTablesPreserved": 83,
+    "originalRowsPreserved": 212331,
+    "everyOriginalFieldPreservedThroughLiveDataAndArchives": true,
+    "freshBootstrapPublicTables": 42,
+    "freshCompleteAuditTables": 59,
+    "freshCompleteAuditStatus": "passed",
+    "installedIntegrityMigrations": 6,
+    "productionDataResetRequired": false,
+    "ratioConflictsStillPreserved": 8,
+    "componentSummaryConflictsStillPreserved": 9
+  },
+  "validation": {
+    "unitTests": {
+      "passed": 176,
+      "failed": 0,
+      "suites": 48
+    },
+    "collectorTestsThroughNx": {
+      "passed": 46,
+      "failed": 0
+    },
+    "sourceContracts": {
+      "passed": 82,
+      "failed": 0
+    },
+    "linuxDeploymentTests": {
+      "passed": 28,
+      "failed": 0
+    },
+    "workspaceLintAndBuild": {
+      "projects": 56,
+      "tasks": 62,
+      "status": "passed"
+    },
+    "collectorNxBuild": "passed",
+    "updatedMigrationAndBootstrapBuilds": "passed",
+    "sharedUiBoundaryAndAotTasks": {
+      "passed": 2,
+      "failed": 0
+    },
+    "unifiedHttpTests": {
+      "passed": 8,
+      "failed": 0
+    },
+    "databaseIntegrityTests": {
+      "passed": 8,
+      "failed": 0
+    },
+    "chromeProductionBuildSignInAndInitialLoad": {
+      "lapper": "passed",
+      "bladeTracking": "passed",
+      "cutterBuilder": "passed",
+      "greenshed": "passed"
+    },
+    "freshDatabaseSequence": "Empty DB bootstrap, master-data bootstrap, combined API readiness HTTP 200, and read-only audit passed",
+    "compose": "Root include and explicit manufacturing entry points use the same project, named PostgreSQL volume and one API service",
+    "ciConfiguration": "Collector build/test via Nx and a dedicated fresh PostgreSQL API/bootstrap/audit job; equivalent fresh sequence verified locally"
+  },
+  "deployment": {
+    "instructions": "docs/UNIFIED_API.md",
+    "keepExistingDatabaseAndVolume": true,
+    "collectorConfigurationSection": "GearAppsApi",
+    "collectorApiPort": 3333,
+    "signInAgainAfterUpgrade": true,
+    "liveServerUpdatedFromThisWorkstation": false,
+    "hardwareAcceptance": "Licensed FANUC DLL and actual CNC/scanner timing require a Windows collector station"
+  }
+}

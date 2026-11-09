@@ -5,6 +5,7 @@ const {
   GEAR_DATABASE_SCHEMA_LOCK,
   migrationChecksum,
   GEARSET_COMPONENT_INTEGRITY_SQL,
+  GEARSET_SCHEMA_SQL,
 } = require('@gearapps/shared/database');
 const { LAPPER_POSTGRES_DDL } = require('../../libs/api/postgres/src/lib/schema.ts');
 const {
@@ -43,6 +44,7 @@ CREATE TABLE IF NOT EXISTS gearapps_meta.schema_migrations (
   version text PRIMARY KEY,checksum char(64) NOT NULL,
   applied_at timestamptz NOT NULL DEFAULT clock_timestamp(),applied_by text NOT NULL DEFAULT session_user
 );
+${migration('20261109-shared-gearset-schema-v1', GEARSET_SCHEMA_SQL)}
 ${migration('20261109-shared-core-integrity-v1', SHARED_CORE_INTEGRITY_SQL)}
 ${migration('20261109-shared-gearset-integrity-v1', GEARSET_INTEGRITY_SQL, "to_regclass('public.gearsets') IS NOT NULL")}
 ${migration('20261109-shared-gearset-components-v1', GEARSET_COMPONENT_INTEGRITY_SQL, "to_regclass('public.gearsets') IS NOT NULL")}

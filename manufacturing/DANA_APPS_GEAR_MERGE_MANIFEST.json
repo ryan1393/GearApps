@@ -17,38 +17,22 @@
     "typescript": "5.9.3"
   },
   "rootHashes": {
-    "package.json": "E904B42C1D62650CAA3ADB0811C40AB36F3988F7D6FB25432F737A3C8501212B",
+    "package.json": "66B80E7729B6A0D311911FAF1F7A9E50103F23021D854B996306D37275C090C2",
     "package-lock.json": "C4F7A8ADD00CDBCB9F29E0196849E9C27C68C1132D9EF3415B062E482DCC2BF1",
     "nx.json": "A21225DC43443C85FCB8B57D6CA8C56A04DF03B02723D9C1C06064A60FF6DA75",
-    "tsconfig.base.json": "E4067F9552B8EE9622930D1257A1B26F482DBD574BC639CE442C2147C9953935"
+    "tsconfig.base.json": "072FD63370AF0D3FBFD67F843B848EDF81DAD02CAE4C36198AAC7468BD8779DF"
   },
   "composeFiles": [
     {
       "path": "docker-compose.yml",
-      "sha256": "373DC4347BC666375794961333C405C108560FA84015C4303B9B8C54BAC4AAA7"
+      "sha256": "8BC3751BCD337973802A98FDAC40CA394607CFB6C8BFF2EC5184CC100229F991"
     },
     {
       "path": "manufacturing/compose.yml",
-      "sha256": "95A7DECBAE1197508640FF1E05AE3B094C93CF3206088E9EB283BAE4C78AEAE1"
+      "sha256": "F802781E3AC02B3F8CA07389140590C42C6E7E303C5D41123EA111629D23D577"
     }
   ],
   "runtimeProjects": [
-    {
-      "name": "lapper-api",
-      "root": "apps/lapper-api",
-      "projectType": "application",
-      "tags": [],
-      "targets": [
-        "copy-workspace-modules",
-        "prune",
-        "prune-lockfile",
-        "serve",
-        "test"
-      ],
-      "hasBuildTarget": false,
-      "hasServeTarget": true,
-      "hasTestTarget": true
-    },
     {
       "name": "lapper-client",
       "root": "apps/lapper-client",
@@ -65,6 +49,23 @@
       "hasBuildTarget": true,
       "hasServeTarget": true,
       "hasTestTarget": false
+    },
+    {
+      "name": "lapper-read",
+      "root": "apps/lapper-read",
+      "projectType": "application",
+      "tags": [
+        "language:dotnet",
+        "platform:server",
+        "scope:lapper"
+      ],
+      "targets": [
+        "build",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": false,
+      "hasTestTarget": true
     },
     {
       "name": "blade-tracking",
@@ -167,16 +168,6 @@
     {
       "name": "api-data-access",
       "root": "libs/api/data-access",
-      "projectType": "library",
-      "tags": [],
-      "targets": [],
-      "hasBuildTarget": false,
-      "hasServeTarget": false,
-      "hasTestTarget": false
-    },
-    {
-      "name": "api-feature-auth",
-      "root": "libs/api/feature-auth",
       "projectType": "library",
       "tags": [],
       "targets": [],
@@ -630,22 +621,6 @@
       "hasTestTarget": true
     },
     {
-      "name": "lapper-api",
-      "root": "apps/lapper-api",
-      "projectType": "application",
-      "tags": [],
-      "targets": [
-        "copy-workspace-modules",
-        "prune",
-        "prune-lockfile",
-        "serve",
-        "test"
-      ],
-      "hasBuildTarget": false,
-      "hasServeTarget": true,
-      "hasTestTarget": true
-    },
-    {
       "name": "lapper-client",
       "root": "apps/lapper-client",
       "projectType": "application",
@@ -661,6 +636,23 @@
       "hasBuildTarget": true,
       "hasServeTarget": true,
       "hasTestTarget": false
+    },
+    {
+      "name": "lapper-read",
+      "root": "apps/lapper-read",
+      "projectType": "application",
+      "tags": [
+        "language:dotnet",
+        "platform:server",
+        "scope:lapper"
+      ],
+      "targets": [
+        "build",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": false,
+      "hasTestTarget": true
     },
     {
       "name": "server-data-access",

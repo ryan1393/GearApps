@@ -32,8 +32,7 @@ const backend = projects.filter(
   (file) =>
     file.startsWith(path.join(root, 'manufacturing/libs/server') + path.sep) ||
     file.startsWith(path.join(root, 'manufacturing/apps/server') + path.sep) ||
-    file.startsWith(path.join(root, 'libs/api') + path.sep) ||
-    file.startsWith(path.join(root, 'apps/lapper-api') + path.sep),
+    file.startsWith(path.join(root, 'libs/api') + path.sep),
 );
 const other = projects.filter((file) => !backend.includes(file));
 const batches = [];

@@ -16,6 +16,7 @@ import {
   ScannerDetail,
 } from '@gearapps/shared/domain';
 import { PostgresLapperStore } from './postgres-lapper.store';
+import { CrudService } from '@gearapps/api/core';
 import { Resource, Row } from './catalog';
 
 const project = <T>(promise: Promise<unknown>): Promise<T> => promise as Promise<T>;
@@ -26,7 +27,7 @@ const body = (value: unknown): Row => {
 };
 
 /** Public service port used by the unchanged, DTO-validated REST controllers. */
-export class PostgresCrudAdapter<T extends BaseEntity> {
+export class PostgresCrudAdapter<T extends BaseEntity> implements CrudService<T> {
   constructor(
     protected readonly store: PostgresLapperStore,
     private readonly resource: Resource,

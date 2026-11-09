@@ -17,10 +17,13 @@ Object.assign(process.env, {
   DATABASE_TYPE: 'postgres',
   DATABASE_SYNCHRONIZE: 'false',
   DATABASE_LOGGING_ENABLED: 'false',
-  JWT_SECRET: randomBytes(48).toString('base64url'),
+  JWT_ACCESS_SECRET: randomBytes(48).toString('base64url'),
+  JWT_REFRESH_SECRET: randomBytes(48).toString('base64url'),
+  EMAIL_ENABLED: 'false',
+  SOCIAL_GOOGLE_ENABLED: 'false',
   ENVIRONMENT: 'test',
   SWAGGER_ENABLED: 'false',
-  TS_NODE_PROJECT: path.resolve(__dirname, '../apps/lapper-api/tsconfig.app.json'),
+  TS_NODE_PROJECT: path.resolve(__dirname, '../manufacturing/apps/server/tsconfig.app.json'),
   TS_NODE_BASEURL: path.resolve(__dirname, '..'),
   TS_NODE_TRANSPILE_ONLY: '1',
 });
@@ -28,25 +31,17 @@ require('reflect-metadata');
 require('ts-node/register');
 require('tsconfig-paths/register');
 const { NestFactory } = require('@nestjs/core');
-const { ValidationPipe, VersioningType } = require('@nestjs/common');
 const { JwtService } = require('@nestjs/jwt');
 const { DataSource } = require('typeorm');
 const bcrypt = require('bcrypt');
-const { AppModule } = require('../apps/lapper-api/src/app/app.module');
+const { AppModule } = require('../manufacturing/apps/server/src/app/app.module');
+const { configureApi } = require('../manufacturing/apps/server/src/configure-api');
 const { migrateLapperPostgres } = require('../libs/api/postgres/src/lib/schema');
 
 test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 }, async (t) => {
   const app = await NestFactory.create(AppModule, { logger: ['error', 'warn'] });
-  app.setGlobalPrefix('api');
-  app.enableVersioning({ type: VersioningType.URI, prefix: 'v', defaultVersion: '1' });
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transformOptions: { enableImplicitConversion: true },
-    }),
-  );
+  configureApi(app);
+  await app.init();
   const db = app.get(DataSource);
   const query = (sql, parameters = []) => db.query(sql, parameters);
   const fixtures = {
@@ -115,11 +110,17 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
       );
     }
     const admin = (
-      await request('POST', 'auth/login', { email: fixtures.users[0].username, password })
-    ).access_token;
+      await request('POST', 'auth/email/login', {
+        email: fixtures.users[0].username + '@example.invalid',
+        password,
+      })
+    ).accessToken;
     let operator = (
-      await request('POST', 'auth/login', { email: fixtures.users[1].username, password })
-    ).access_token;
+      await request('POST', 'auth/email/login', {
+        email: fixtures.users[1].username + '@example.invalid',
+        password,
+      })
+    ).accessToken;
     await t.test('shared login, closed registration and token purpose', async () => {
       assert.deepEqual(await request('GET', 'auth/capabilities'), { registrationEnabled: false });
       await request(
@@ -127,26 +128,26 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
         'users',
         { email: 'lapper-test@example.invalid', password, fname: 'Test', lname: 'Test' },
         undefined,
-        403,
+        401,
       );
       await request('PATCH', `users/${fixtures.users[1].id}`, { fname: 'Changed' }, operator, 403);
-      const me = await request('GET', 'users/me', undefined, operator);
+      const me = await request('GET', 'auth/me', undefined, operator);
       assert.equal(me.id, fixtures.users[1].id);
       assert.equal(me.password, undefined);
-      assert.equal(me.authVersion, undefined);
-      const otherToken = new JwtService({ secret: process.env.JWT_SECRET }).sign({
+      assert.equal(me.refreshToken, undefined);
+      const otherToken = new JwtService({ secret: process.env.JWT_ACCESS_SECRET }).sign({
         sub: fixtures.users[1].id,
       });
       await request('GET', 'machine', undefined, otherToken, 401);
       await query('UPDATE public.users SET active=false WHERE id=$1', [fixtures.users[1].id]);
       await request('GET', 'machine', undefined, operator, 401);
-      await request('POST', 'auth/check-token', { access_token: operator }, undefined, 401);
+      await request('GET', 'auth/me', undefined, operator, 401);
       await request(
         'POST',
-        'auth/login',
-        { email: fixtures.users[1].username, password },
+        'auth/email/login',
+        { email: fixtures.users[1].username + '@example.invalid', password },
         undefined,
-        401,
+        403,
       );
       await query('UPDATE public.users SET active=true WHERE id=$1', [fixtures.users[1].id]);
       await query('UPDATE public.users SET "authVersion"="authVersion"+1 WHERE id=$1', [
@@ -154,8 +155,63 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
       ]);
       await request('GET', 'machine', undefined, operator, 401);
       operator = (
-        await request('POST', 'auth/login', { email: fixtures.users[1].username, password })
-      ).access_token;
+        await request('POST', 'auth/email/login', {
+          email: fixtures.users[1].username + '@example.invalid',
+          password,
+        })
+      ).accessToken;
+    });
+    await t.test('one API owns authentication, users and all application routes', async () => {
+      await request('GET', 'machine', undefined, undefined, 401);
+      await request('GET', 'admin/master-data/departments', undefined, admin);
+      await request('GET', 'admin/master-data/departments', undefined, operator, 403);
+      await request('GET', 'auth/me', undefined, operator);
+      await request('GET', 'health/ready');
+      const [greenshedDepartment] = await query(
+        "SELECT id FROM public.departments WHERE code='48' AND active AND enabled LIMIT 1",
+      );
+      assert.ok(greenshedDepartment, 'Restored GearApps has the Greenshed department');
+      await query('UPDATE public.users SET "departmentId"=$1 WHERE id=$2', [
+        greenshedDepartment.id,
+        fixtures.users[1].id,
+      ]);
+      // An editor must reach the manufacturing DTO validator. A Lapper-wide
+      // setup interceptor would incorrectly deny this POST before validation.
+      await request('POST', 'greenshed/setup', {}, operator, 422);
+      assert.equal(db.options.type, 'postgres');
+      assert.ok(
+        !db.entityMetadatas.some((m) => m.tableName === 'Machine_Cycles'),
+        'Legacy repositories must not enter the shared connection',
+      );
+      await request(
+        'POST',
+        'auth/login',
+        { email: fixtures.users[1].username + '@example.invalid', password },
+        undefined,
+        404,
+      );
+      const router = app.getHttpAdapter().getInstance().router;
+      const endpoints = router.stack
+        .filter((s) => s.route)
+        .flatMap((s) => Object.keys(s.route.methods).map((m) => m + ' ' + s.route.path));
+      assert.equal(
+        new Set(endpoints).size,
+        endpoints.length,
+        'Duplicate controller routes must not depend on registration order',
+      );
+      const refreshed = await request(
+        'GET',
+        'auth/refresh',
+        undefined,
+        (
+          await request('POST', 'auth/email/login', {
+            email: fixtures.users[1].username + '@example.invalid',
+            password,
+          })
+        ).refreshToken,
+      );
+      await request('GET', 'machine', undefined, refreshed.accessToken);
+      await request('GET', 'admin/master-data/departments', undefined, refreshed.accessToken, 403);
     });
     const machines = await request('GET', 'machine', undefined, operator);
     const gears = await request('GET', 'gearset', undefined, operator);
@@ -430,7 +486,7 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
           [log.id],
         );
         assert.equal(persisted.value, '-12.34567');
-        await request('POST', 'macro-log', { ...logBody, extra: true }, operator, 400);
+        await request('POST', 'macro-log', { ...logBody, extra: true }, operator, 422);
         await request(
           'POST',
           'department',

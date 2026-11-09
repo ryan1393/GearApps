@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { EntityManager } from 'typeorm';
+import { GEARSET_SCHEMA_SQL } from './gearset-schema';
 import { GEARSET_COMPONENT_INTEGRITY_SQL } from './gearset-components';
 
 /** Same lock as manufacturing's startup routines; always acquire it first. */
@@ -155,6 +156,7 @@ WHERE abs(g.ratio_value-r.teeth::numeric/nullif(p.teeth,0))>0.005 OR
 
 export async function applySharedDatabaseIntegrity(manager: EntityManager): Promise<void> {
   await manager.query(GEAR_DATABASE_SCHEMA_LOCK);
+  await runDatabaseMigration(manager, '20261109-shared-gearset-schema-v1', GEARSET_SCHEMA_SQL);
   await runDatabaseMigration(
     manager,
     '20261109-shared-core-integrity-v1',

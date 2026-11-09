@@ -106,7 +106,6 @@ if [ ! -f ${rq(root)}/manufacturing/compose.yml ]; then ENV=${rq(root)}/.env; fi
 val(){ grep -E "^$1=" "$ENV" | tail -1 | cut -d= -f2- | tr -d '\\r"' ; }
 weak(){ v="$(val "$1")"; if [ "\${#v}" -lt 32 ] || printf '%s' "$v" | grep -qiE 'change|example|placeholder|replace|secret$|^x+$'; then echo "WEAK $1"; fi; }
 weak JWT_ACCESS_SECRET; weak JWT_REFRESH_SECRET
-if grep -q 'LAPPER_JWT_SECRET' ${rq(root)}/manufacturing/compose.yml 2>/dev/null; then weak LAPPER_JWT_SECRET; fi
 p="$(val GEAR_DB_PASSWORD)"; [ "\${#p}" -ge 12 ] || echo "SHORTDB GEAR_DB_PASSWORD"
 grep -qE '^GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES' "$ENV" && echo "TEST_ACCOUNTS_ENABLED" || true
 echo ENV_OK`;
@@ -204,8 +203,6 @@ function localEnvCheck(text) {
     const v = vals[k] ?? '';
     if (v.length < 32 || /change|example|placeholder|replace|secret$|^x+$/i.test(v)) out.push('WEAK ' + k);
   }
-  const lapperSecret = vals.LAPPER_JWT_SECRET ?? '';
-  if (lapperSecret.length < 32 || /change|example|placeholder|replace|secret$|^x+$/i.test(lapperSecret)) out.push('WEAK LAPPER_JWT_SECRET');
   if ((vals.GEAR_DB_PASSWORD ?? '').length < 12) out.push('SHORTDB GEAR_DB_PASSWORD');
   if (vals.GEAR_APPS_ALLOW_TEST_ACCOUNTS === 'YES') out.push('TEST_ACCOUNTS_ENABLED');
   return out.concat('ENV_OK').join('\n');
@@ -262,7 +259,6 @@ async function waitAll(ctx) {
   await waitFor(ctx, 'gear-base-data-bootstrap', { oneShot: true, minutes: 10 });
   await waitFor(ctx, 'gear-app-server');
   // Older rollback releases predate the Lapper services.
-  if (containerState(ctx, 'lapper-api')) await waitFor(ctx, 'lapper-api');
   if (containerState(ctx, 'lapper-client')) await waitFor(ctx, 'lapper-client', { minutes: 6 });
   for (const ui of ['blade-tracking', 'cutter-builder', 'greenshed']) await waitFor(ctx, ui, { minutes: 6 });
 }

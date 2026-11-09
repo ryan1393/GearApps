@@ -39,7 +39,14 @@ export class ServerFeatAuthController {
   private logger = new Logger('AuthController');
   constructor(private authService: ServerFeatAuthService) {}
 
+  @Get('capabilities')
+  @SkipAuth()
+  capabilities() {
+    return { registrationEnabled: false };
+  }
+
   @Post('email/login')
+  @SkipAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({
     type: TokenResponseDto,
@@ -53,6 +60,7 @@ export class ServerFeatAuthController {
   }
 
   @Get('email/verify')
+  @SkipAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   async verifyEmail(
     @Query('code') code: string,
@@ -71,6 +79,7 @@ export class ServerFeatAuthController {
   }
 
   @Get('refresh')
+  @SkipAuth()
   @ApiBearerAuth()
   @UseGuards(JwtRefreshTokenGuard)
   @ApiOkResponse({ type: TokenResponseDto })

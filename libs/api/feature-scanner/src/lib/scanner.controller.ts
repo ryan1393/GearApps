@@ -1,8 +1,9 @@
 import { ErrorResponseDto, ScannerCommandDto } from '@gearapps/api/data-access';
 import { ScannerDetailsService } from '@gearapps/api/feature-gear';
-import { scannerConfig } from '@gearapps/api/core';
+import { LapperWritePolicy, scannerConfig } from '@gearapps/api/core';
 import { ScannerCommand, ScannerLogEntry, ScannerSummary } from '@gearapps/shared/domain';
 import {
+  UseInterceptors,
   BadRequestException,
   Body,
   Controller,
@@ -30,6 +31,7 @@ import { ScannerClientService } from './scanner-client.service';
  * proxies to an arbitrary caller-supplied host (SSRF). The legacy un-keyed
  * routes fall back to `SCANNER_DEFAULT_HOST` for backwards compatibility.
  */
+@UseInterceptors(LapperWritePolicy)
 @Controller({ path: 'scanner', version: '1' })
 @ApiTags('Scanner')
 @ApiBearerAuth()

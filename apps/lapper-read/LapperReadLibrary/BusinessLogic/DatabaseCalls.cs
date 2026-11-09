@@ -38,8 +38,8 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
     {
         _auth = null;
         if (string.IsNullOrWhiteSpace(_settings.Email) || string.IsNullOrWhiteSpace(_settings.Password))
-            throw new InvalidOperationException("Configure LapperApi:Email and LapperApi:Password before starting the service.");
-        using var response = await _client.PostAsJsonAsync("api/v1/auth/login",
+            throw new InvalidOperationException("Configure GearAppsApi:Email and GearAppsApi:Password before starting the service.");
+        using var response = await _client.PostAsJsonAsync("api/v1/auth/email/login",
             new { email = _settings.Email, password = _settings.Password }, token);
         if (!response.IsSuccessStatusCode)
         {
@@ -47,7 +47,7 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
             return null;
         }
         var auth = await response.Content.ReadFromJsonAsync<Auth>(cancellationToken: token);
-        if (!string.IsNullOrWhiteSpace(auth?.access_token)) _auth = auth;
+        if (!string.IsNullOrWhiteSpace(auth?.AccessToken)) _auth = auth;
         return _auth;
     }
 
@@ -59,17 +59,14 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
         await _authentication.WaitAsync(cancellationToken);
         try
         {
-            if (string.IsNullOrWhiteSpace(_auth?.access_token))
-                return (await LoginCoreAsync(cancellationToken))?.access_token;
-            using var response = await _client.PostAsJsonAsync("api/v1/auth/check-token",
-                new { access_token = _auth.access_token }, cancellationToken);
-            if (response.IsSuccessStatusCode)
-            {
-                var validation = await response.Content.ReadFromJsonAsync<AuthValidate>(cancellationToken: cancellationToken);
-                if (validation != null && validation.exp > DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 60)
-                    return _auth.access_token;
-            }
-            return (await LoginCoreAsync(cancellationToken))?.access_token;
+            if (string.IsNullOrWhiteSpace(_auth?.AccessToken))
+                return (await LoginCoreAsync(cancellationToken))?.AccessToken;
+            using var request = new HttpRequestMessage(HttpMethod.Get, "api/v1/auth/me");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _auth.AccessToken);
+            using var response = await _client.SendAsync(request, cancellationToken);
+            if (response.IsSuccessStatusCode) return _auth.AccessToken;
+            if (response.StatusCode != HttpStatusCode.Unauthorized) response.EnsureSuccessStatusCode();
+            return (await LoginCoreAsync(cancellationToken))?.AccessToken;
         }
         finally { _authentication.Release(); }
     }
@@ -87,9 +84,9 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
         await _authentication.WaitAsync(token);
         try
         {
-            if ((_auth == null || _auth.access_token == usedToken) && await LoginCoreAsync(token) == null)
+            if ((_auth == null || _auth.AccessToken == usedToken) && await LoginCoreAsync(token) == null)
                 throw new HttpRequestException("API authentication refresh failed.");
-            usedToken = _auth!.access_token;
+            usedToken = _auth!.AccessToken;
         }
         finally { _authentication.Release(); }
         return await SendOnceAsync(method, path, body, usedToken, requestId, token);

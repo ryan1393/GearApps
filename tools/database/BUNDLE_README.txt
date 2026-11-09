@@ -4,12 +4,12 @@ Run this on the computer that can access the GearApps PostgreSQL container.
 Use PostgreSQL 16. The script finds POSTGRES_USER in the container unless you
 supply the database username explicitly. No database password is printed.
 
-1. Schedule the update and stop the GearApps API, Lapper API and Lapper Read
+1. Schedule the update and stop the shared GearApps API and Lapper Read
    collection during it. Leave the PostgreSQL container running.
-   Keep the updated Lapper API stopped until step 3 succeeds.
-   Keep every collector checkpoint/state file. Deploy the updated Lapper API
+   Keep the updated shared API stopped until step 3 succeeds.
+   Keep every collector checkpoint/state file. Deploy the updated shared API
    before restarting the collectors, so old record IDs resolve through aliases.
-   Keep DATABASE_SYNCHRONIZE=false on both APIs. Keep the existing PostgreSQL volume.
+   Keep DATABASE_SYNCHRONIZE=false on the shared API. Keep the existing PostgreSQL volume.
 
 2. Extract the entire ZIP. List containers and identify the GearApps PostgreSQL one:
      docker ps --format "table {{.Names}}\t{{.Image}}"
@@ -41,7 +41,7 @@ The preserved values and review items
   - The eight disputed ratios remain unchanged, as requested.
   - Cross-summary component assignments, duplicate machine addresses and two
     pending legacy gearset references are reported for review, not guessed.
-  - The shared account authVersion supports revocation in both APIs.
+  - The shared account authVersion supports revocation throughout the API.
 
 Verification
   validate.sql checks all foreign keys, primary keys and archive hashes/guards,
@@ -54,10 +54,9 @@ Application source
   Source: https://github.com/ryan1393/GearApps/tree/codex/lapper-postgres-70-3-0
   Clone: git clone --branch codex/lapper-postgres-70-3-0 --single-branch https://github.com/ryan1393/GearApps.git
   The accompanying source ZIP or this GitHub branch contains the
-  updated APIs, collector, migration runner, audit command, and regression tests.
-  Keep existing manufacturing/.env credentials and signing keys. Configure the
-  separate LAPPER_JWT_SECRET and the same PostgreSQL database for Lapper.
-  Lapper defaults to browser port 4203 and collector API port 3334.
+  updated shared API, collector, migration runner, audit command, and regression tests.
+  Keep existing manufacturing/.env credentials and signing keys. Use the same JWT_ACCESS_SECRET / JWT_REFRESH_SECRET and PostgreSQL database
+  for all applications. Lapper uses browser port 4203 and the shared API port 3333.
 
 Backups and recovery
   The automatic before-update dump is the recovery point for YOUR running database.

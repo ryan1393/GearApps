@@ -21,4 +21,5 @@ export const dbConfig = registerAs('db', () => ({
   username: process.env[ENV_DATABASE_USERNAME],
   synchronize: process.env[ENV_DATABASE_SYNCHRONIZE] === 'true',
   logging: process.env[ENV_DATABASE_LOGGING_ENABLED],
+  lapperTimeZone: process.env['LAPPER_TIME_ZONE'] ?? 'America/Indianapolis',
 }));

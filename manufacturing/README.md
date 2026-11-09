@@ -1,8 +1,8 @@
 # Gear Apps 70.3.0
 
-Gear Apps is the Dana manufacturing workspace for three workflows sharing one API and database:
-**Blade Tracking**, **Cutter Builder** and **Green Shed**. It belongs to the root GearApps Nx workspace alongside Lapper. All frontends use
-Angular 20.3.35 and Dana UI 0.3.3; the APIs use NestJS 11.2.9 and TypeORM 1.1.2.
+Gear Apps is the Dana manufacturing workspace for four workflows sharing one API and database:
+**Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root GearApps Nx workspace. All frontends use
+Angular 20.3.35 and Dana UI 0.3.3; the shared API uses NestJS 11.2.9 and TypeORM 1.1.2.
 Manufacturing retains PostgreSQL 16 and Docker Compose.
 
 | Service | Port | |
@@ -10,7 +10,8 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
 | Blade Tracking | 4200 | `apps/blade-tracking` |
 | Cutter Builder | 4201 | `apps/cutter-builder` |
 | Green Shed | 4202 | `apps/greenshed` |
-| API | 3333 | `apps/server` (`/api/v1`, health at `/api/v1/health/ready`) |
+| Lapper | 4203 | `../apps/lapper-client` |
+| Shared API | 3333 | `apps/server` (`/api/v1`, health at `/api/v1/health/ready`) |
 
 ## What changed in 70.3.0
 
@@ -31,10 +32,8 @@ npx nx serve blade-tracking
 ```
 
 The authentication, recovery, inventory, scanning, and deployment fixes from 70.2.1
-are retained. API routes and PostgreSQL workflow rules remain compatible. The default
-development ports overlap with Lapper; configure SERVER_PORT and the matching client
-proxy when running both APIs on one host. Manufacturing environment settings stay
-in manufacturing/.env; Lapper uses the root .env.
+are retained. API routes and PostgreSQL workflow rules remain compatible. All four clients and Lapper Read use gear-app-server on port 3333. The only API
+environment is manufacturing/.env. See [unified API setup](../docs/UNIFIED_API.md).
 
 Users must sign in again after upgrading. Emailed recovery requires SMTP and the public
 frontend origin (`PUBLIC_WEB_BASE_URL`, or Docker `GEAR_PUBLIC_WEB_BASE_URL`).

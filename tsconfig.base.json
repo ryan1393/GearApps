@@ -22,7 +22,6 @@
       "@gearapps/shared/database": ["./libs/shared/database/src/index.ts"],
       "@gearapps/api/core": ["./libs/api/core/src/index.ts"],
       "@gearapps/api/data-access": ["./libs/api/data-access/src/index.ts"],
-      "@gearapps/api/feature-auth": ["./libs/api/feature-auth/src/index.ts"],
       "@gearapps/api/feature-gear": ["./libs/api/feature-gear/src/index.ts"],
       "@gearapps/api/feature-cutter-tracking": ["./libs/api/feature-cutter-tracking/src/index.ts"],
       "@gearapps/api/feature-scanner": ["./libs/api/feature-scanner/src/index.ts"],

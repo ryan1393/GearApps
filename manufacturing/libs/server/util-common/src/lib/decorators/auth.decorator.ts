@@ -9,7 +9,6 @@ import {
 import { RoleType } from '@gearapps/manufacturing/shared/util-types';
 import { ROLES_REQUEST_KEY, SKIP_AUTH_KEY } from '../constants';
 import { RolesGuard } from '../guards/role.guard';
-import { JwtAccessTokenGuard } from '../guards/jwt-access.guard';
 
 /**
  * Automatically apply certain Swagger decorators, auth decorators, and
@@ -22,7 +21,7 @@ export function Auth(
   return applyDecorators(
     SetMetadata(ROLES_REQUEST_KEY, roles),
     SetMetadata(SKIP_AUTH_KEY, opts?.public),
-    UseGuards(JwtAccessTokenGuard, RolesGuard),
+    UseGuards(RolesGuard),
     ApiBearerAuth(),
     ApiUnauthorizedResponse({ description: 'Unauthorized' }),
     ApiForbiddenResponse({ description: `Forbidden` }),

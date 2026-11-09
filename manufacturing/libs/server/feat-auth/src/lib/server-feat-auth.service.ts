@@ -48,6 +48,8 @@ export class ServerFeatAuthService {
       departmentId: data.departmentId,
       departmentCode: data.department?.code ?? null,
       departmentDescription: data.department?.description ?? null,
+      firstName: data.firstName,
+      lastName: data.lastName,
       authVersion: data.authVersion,
       tokenUse: 'access',
     };
@@ -102,6 +104,9 @@ export class ServerFeatAuthService {
   }
 
   async validateUser(userLoginDto: UserLoginDto): Promise<UserOrmEntity> {
+    if (Buffer.byteLength(userLoginDto.password, 'utf8') > 72) {
+      throw new UnauthorizedException('Invalid email or password');
+    }
     const user = await this.userService.findByEmail(userLoginDto.email);
 
     if (!user) {

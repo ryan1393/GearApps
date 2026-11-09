@@ -33,7 +33,7 @@ public class ApiTests
     [Fact]
     public async Task ExpiredTokenIsRefreshed()
     {
-        using var http = new HttpDouble { Respond = call => call.Path.EndsWith("check-token") ? Fixtures.Json(new { exp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 1 }) : null };
+        using var http = new HttpDouble { Respond = call => call.Path.EndsWith("auth/me") ? Fixtures.Json(new { }, HttpStatusCode.Unauthorized) : null };
         var db = Database(http); await db.Login(); Assert.True(await db.CheckToken()); Assert.Equal(2, http.LoginCount);
     }
 

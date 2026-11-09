@@ -1,5 +1,8 @@
 const path = require('node:path');
-process.env.TS_NODE_PROJECT = path.resolve(__dirname, '../../apps/lapper-api/tsconfig.app.json');
+process.env.TS_NODE_PROJECT = path.resolve(
+  __dirname,
+  '../../manufacturing/apps/server/tsconfig.app.json',
+);
 process.env.TS_NODE_BASEURL = path.resolve(__dirname, '../..');
 process.env.TS_NODE_TRANSPILE_ONLY = '1';
 require('reflect-metadata');

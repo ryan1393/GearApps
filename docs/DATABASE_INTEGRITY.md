@@ -4,7 +4,7 @@ Lapper, Lapper Read and the manufacturing applications use one PostgreSQL 16
 database. Public users, departments, machines, parts, summaries and gearset
 assemblies are the canonical masters. The `lapper` schema contains machine
 configuration, collector state and production history linked to those masters.
-Lapper Read continues to collect through the authenticated Lapper API.
+Lapper Read collects through the authenticated shared GearApps API.
 
 The private update package imports the supplied legacy Lapper history and then
 applies the integrity migrations in **one transaction**. It takes a fresh backup
@@ -13,9 +13,9 @@ are supplied privately and excluded from Git, source ZIPs and Docker contexts.
 
 ## Run on the database host
 
-Extract the complete private database-update ZIP. Stop GearApps API, Lapper API
+Extract the complete private database-update ZIP. Stop the shared GearApps API
 and collection for the maintenance window; leave PostgreSQL running. Keep the
-updated Lapper API stopped until this script succeeds. Preserve collector checkpoint files and the existing
+updated API stopped until this script succeeds. Preserve collector checkpoint files and the existing
 PostgreSQL volume. Identify the container with `docker ps`, then run:
 
 ```powershell
@@ -34,9 +34,8 @@ The runner checks the SQL checksum, verifies a fresh custom-format backup under
 `backups/`, applies the transaction and runs `validate.sql`. A migration error
 rolls back the transaction. Review the output before restarting collection.
 
-Deploy the accompanying source before restarting Lapper. Keep both APIs on
-`DATABASE_SYNCHRONIZE=false`, the same database, existing manufacturing signing
-keys, and a separate Lapper signing key. Follow [Lapper setup](LAPPER_POSTGRES.md).
+Deploy the accompanying source before restarting Lapper. Keep the shared API on
+`DATABASE_SYNCHRONIZE=false`, the same database and existing JWT access/refresh signing keys. Follow [Lapper setup](LAPPER_POSTGRES.md).
 Normal manufacturing startup now rejects PostgreSQL schema synchronization too.
 The existing one-shot fresh-database bootstrap permits it only inside its scoped
 initialization after confirming that the public schema is empty.
@@ -56,8 +55,10 @@ added since that snapshot. A reference dump is not an incremental update.
 
 ## What changes
 
-- Shared schema changes use the existing manufacturing advisory lock and five
-  checksummed migration versions in `gearapps_meta.schema_migrations`. Concurrent
+- Shared schema changes use the existing manufacturing advisory lock and six
+  checksummed migration versions in `gearapps_meta.schema_migrations`. The unified
+  API adds a fresh-install gearset schema migration while preserving the original
+  five migration bodies and checksums. Concurrent
   startup and reruns apply each version once; changed installed SQL is rejected.
 - Missing references to machines, locations, users and shared master data become
   validated foreign keys. Normalized unique keys prevent ambiguous accounts,

@@ -1,4 +1,3 @@
-export * from './lib/gear.module';
 export * from './lib/simple.controllers';
 export * from './lib/gearsets';
 export * from './lib/machines';

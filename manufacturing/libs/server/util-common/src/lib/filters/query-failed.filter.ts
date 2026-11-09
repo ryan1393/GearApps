@@ -44,6 +44,9 @@ export class QueryFailedFilter extends BaseExceptionFilter {
       status = HttpStatus.CONFLICT;
       message =
         'The record is still in use or references an unavailable record';
+    } else if (code === '23514') {
+      status = HttpStatus.UNPROCESSABLE_ENTITY;
+      message = 'The submitted values violate a database rule';
     } else if (concurrent) {
       status = HttpStatus.CONFLICT;
       message = 'The record is being changed by another request. Please retry';

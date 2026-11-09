@@ -7,20 +7,18 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PATH_METADATA } from '@nestjs/common/constants';
-import { RequestUser } from '@gearapps/api/core';
+import { RequestUser } from './req-user.decorator';
 
 @Injectable()
-export class PostgresWritePolicy implements NestInterceptor {
+export class LapperWritePolicy implements NestInterceptor {
   constructor(private readonly reflector: Reflector) {}
   intercept(context: ExecutionContext, next: CallHandler) {
-    const request = context
-      .switchToHttp()
-      .getRequest<{
-        method: string;
-        originalUrl: string;
-        body?: Record<string, unknown>;
-        user?: RequestUser;
-      }>();
+    const request = context.switchToHttp().getRequest<{
+      method: string;
+      originalUrl: string;
+      body?: Record<string, unknown>;
+      user?: RequestUser;
+    }>();
     if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) return next.handle();
     const resource = this.reflector.get<string>(PATH_METADATA, context.getClass());
     if (resource === 'auth' || resource === 'users') return next.handle();
@@ -47,7 +45,7 @@ export class PostgresWritePolicy implements NestInterceptor {
       throw new ForbiddenException('Only GearApps administrators can change setup data');
     }
     if (request.user && ['gearset', 'part', 'part-summary'].includes(resource))
-      body.user_id = request.user.userId;
+      body.user_id = request.user.id;
     return next.handle();
   }
 }

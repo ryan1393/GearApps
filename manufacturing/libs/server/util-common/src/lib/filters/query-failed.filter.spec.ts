@@ -56,6 +56,9 @@ describe('QueryFailedFilter', () => {
       });
     },
   );
+  it('reports database validation failures without exposing the rejected data', () => {
+    expect(capture('23514').statusCode).toBe(HttpStatus.UNPROCESSABLE_ENTITY);
+  });
   it.each([
     'SQLITE_CONSTRAINT_UNIQUE',
     'SQLITE_CONSTRAINT_PRIMARYKEY',

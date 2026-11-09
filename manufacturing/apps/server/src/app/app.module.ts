@@ -27,7 +27,9 @@ import {
 import { ServerUtilMailerModule } from '@gearapps/manufacturing/server/util-mailer';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_FILTER } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { JwtAccessTokenGuard } from '@gearapps/manufacturing/server/util-common';
+import { PostgresLapperModule } from '@gearapps/api/postgres';
 import { TerminusModule } from '@nestjs/terminus';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -61,9 +63,11 @@ const featureModules = [
     TerminusModule.forRoot(),
     ServerUtilMailerModule,
     ...featureModules,
+    PostgresLapperModule,
   ],
   providers: [
     AdminMasterDataService,
+    { provide: APP_GUARD, useClass: JwtAccessTokenGuard },
     { provide: APP_FILTER, useClass: EntityNotFoundFilter },
     { provide: APP_FILTER, useClass: QueryFailedFilter },
   ],

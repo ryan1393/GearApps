@@ -17,7 +17,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
       if (
         err instanceof HttpErrorResponse &&
         err.status === 401 &&
-        !req.url.includes('/auth/login')
+        !req.url.includes('/auth/email/login')
       ) {
         auth.logout();
         router.navigate(['/login'], { queryParams: { returnUrl: router.url } });

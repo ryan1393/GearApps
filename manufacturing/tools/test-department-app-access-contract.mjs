@@ -1,4 +1,6 @@
 import fs from 'node:fs';
+import path from 'node:path';
+import { workspaceRoot } from './lib/contract-paths.mjs';
 
 const policy=fs.readFileSync('libs/shared/util-constants/src/lib/app-access.constants.ts','utf8');
 const roleGuard=fs.readFileSync('libs/server/util-common/src/lib/guards/role.guard.ts','utf8');
@@ -6,6 +8,8 @@ const decorator=fs.readFileSync('libs/server/util-common/src/lib/decorators/depa
 const jwtStrategy=fs.readFileSync('libs/server/feat-auth/src/lib/strategies/jwt-access.strategy.ts','utf8');
 const authService=fs.readFileSync('libs/server/feat-auth/src/lib/server-feat-auth.service.ts','utf8');
 const requestUser=fs.readFileSync('libs/shared/util-types/src/lib/interfaces/request-user.interface.ts','utf8');
+const sharedPrincipal=fs.readFileSync(path.join(workspaceRoot,'libs/shared/domain/src/lib/auth/auth.ts'),'utf8');
+if(!requestUser.includes('extends AuthenticatedUser')) throw new Error('Request principal must extend the shared domain contract');
 const jwtPayload=fs.readFileSync('libs/shared/util-types/src/lib/interfaces/jwt-payload.interface.ts','utf8');
 const frontendGuard=fs.readFileSync('libs/frontend/data-access-common/src/lib/guards/department-editor.guard.ts','utf8');
 const adminUserDto=fs.readFileSync('libs/server/feat-user/src/lib/admin-create-user.dto.ts','utf8');
@@ -37,7 +41,7 @@ if(!decorator.includes('SetMetadata(GEAR_APP_EDIT_METADATA_KEY, app)')){
 }
 
 for(const marker of ['departmentId','departmentCode','departmentDescription']){
-  if(!requestUser.includes(marker) || !jwtPayload.includes(marker) ||
+  if(!sharedPrincipal.includes(marker) || !jwtPayload.includes(marker) ||
      !jwtStrategy.includes(marker) || !authService.includes(marker)){
     throw new Error(`Department claim ${marker} is not carried through auth/JWT/request context.`);
   }

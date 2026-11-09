@@ -3,7 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
-  OnModuleInit,
+  OnApplicationBootstrap,
 } from '@nestjs/common';
 import { createHash, randomUUID } from 'node:crypto';
 import { EntityManager } from 'typeorm';
@@ -62,9 +62,9 @@ export const ingestFingerprint = (body: Row): string =>
     .digest('hex');
 
 @Injectable()
-export class PostgresLapperStore implements OnModuleInit {
+export class PostgresLapperStore implements OnApplicationBootstrap {
   constructor(readonly catalog: PostgresLapperCatalog) {}
-  async onModuleInit(): Promise<void> {
+  async onApplicationBootstrap(): Promise<void> {
     await migrateLapperPostgres(this.catalog.db);
   }
   list(kind: Resource): Promise<Row[]> {

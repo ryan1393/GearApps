@@ -46,20 +46,20 @@ public static class Program
                         "Polling intervals, ports and state directory must be valid.")
                     .ValidateOnStart();
                 services.AddOptions<ApiConfiguration>()
-                    .Bind(context.Configuration.GetSection("LapperApi"))
+                    .Bind(context.Configuration.GetSection("GearAppsApi"))
                     .Validate(settings => Uri.TryCreate(settings.BaseAddress, UriKind.Absolute, out var uri) &&
                         (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps) && settings.TimeoutSeconds > 0,
                         "Configure a valid Lapper API address and timeout.")
                     .Validate(settings => !string.IsNullOrWhiteSpace(settings.Email) && !string.IsNullOrWhiteSpace(settings.Password),
-                        "Set LapperApi__Email and LapperApi__Password in the service environment or configuration.")
+                        "Set GearAppsApi__Email and GearAppsApi__Password in the service environment or configuration.")
                     .ValidateOnStart();
                 services.Configure<ArgonautConfiguration>(context.Configuration.GetSection("Argonaut"));
-                services.AddHttpClient("LapperApi");
+                services.AddHttpClient("GearAppsApi");
                 services.AddHttpClient("Argonaut", client => client.Timeout = TimeSpan.FromSeconds(10));
                 services.AddSingleton<IDatabaseCalls>(provider => new DatabaseCalls(
                     provider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<DatabaseCalls>>(),
                     provider.GetRequiredService<IOptions<ApiConfiguration>>(),
-                    provider.GetRequiredService<IHttpClientFactory>().CreateClient("LapperApi")));
+                    provider.GetRequiredService<IHttpClientFactory>().CreateClient("GearAppsApi")));
                 services.AddSingleton<IArgonaut>(provider => new Argonaut(
                     provider.GetRequiredService<Microsoft.Extensions.Logging.ILogger<Argonaut>>(),
                     provider.GetRequiredService<IFanuc>(),

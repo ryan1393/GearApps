@@ -6,7 +6,7 @@ DECLARE k record; matches text; nonnulls text; violations bigint; table_count in
 BEGIN
   IF EXISTS(SELECT version FROM (VALUES
     ('20261109-shared-core-integrity-v1'),('20261109-shared-gearset-integrity-v1'),
-    ('20261109-shared-gearset-components-v1')) required(version)
+    ('20261109-shared-gearset-components-v1'),('20261109-shared-gearset-schema-v1')) required(version)
     WHERE NOT EXISTS(SELECT 1 FROM gearapps_meta.schema_migrations m WHERE m.version=required.version)) THEN
     RAISE EXCEPTION 'A required shared integrity migration is missing';
   END IF;

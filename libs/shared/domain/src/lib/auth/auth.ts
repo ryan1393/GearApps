@@ -4,20 +4,31 @@ export interface LoginPayload {
 }
 
 export interface TokenResponse {
-  access_token: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 /** Decoded JWT payload. `sub` is the user id. */
 export interface AccessTokenPayload {
   sub: string;
   email: string;
-  fname?: string;
-  lname?: string;
-  token_use?: 'lapper-access';
-  auth_version?: number;
+  firstName?: string;
+  lastName?: string;
+  role?: 'admin' | 'user';
+  tokenUse?: 'access' | 'refresh';
+  authVersion?: number;
   iat?: number;
   exp?: number;
 }
 
 export const PASSWORD_MIN_LENGTH = 8;
 export const PASSWORD_MAX_LENGTH = 64;
+
+export interface AuthenticatedUser {
+  id: string;
+  email: string;
+  role: 'admin' | 'user';
+  departmentId: string | null;
+  departmentCode: string | null;
+  departmentDescription: string | null;
+}
