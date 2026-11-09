@@ -11,7 +11,13 @@
     "apiDataSources": 1,
     "authentication": "Shared email login, access/refresh token format, default access guard, account roles, department checks and authVersion revocation",
     "apiEnvironment": "manufacturing/.env",
-    "clients": ["Lapper", "Blade Tracking", "Cutter Builder", "Greenshed", "Lapper Read"],
+    "clients": [
+      "Lapper",
+      "Blade Tracking",
+      "Cutter Builder",
+      "Greenshed",
+      "Lapper Read"
+    ],
     "removed": [
       "Standalone Lapper API application/service",
       "Separate Lapper authentication and signing key",
@@ -51,7 +57,7 @@
       "failed": 0
     },
     "linuxDeploymentTests": {
-      "passed": 28,
+      "passed": 29,
       "failed": 0
     },
     "workspaceLintAndBuild": {
@@ -81,7 +87,8 @@
     },
     "freshDatabaseSequence": "Empty DB bootstrap, master-data bootstrap, combined API readiness HTTP 200, and read-only audit passed",
     "compose": "Root include and explicit manufacturing entry points use the same project, named PostgreSQL volume and one API service",
-    "ciConfiguration": "Collector build/test via Nx and a dedicated fresh PostgreSQL API/bootstrap/audit job; equivalent fresh sequence verified locally"
+    "ciConfiguration": "Collector build/test via Nx and a dedicated fresh PostgreSQL API/bootstrap/audit job; equivalent fresh sequence verified locally",
+    "releaseManifestPortability": "CRLF and LF checkouts produce identical fingerprints; real configuration changes remain detectable"
   },
   "deployment": {
     "instructions": "docs/UNIFIED_API.md",

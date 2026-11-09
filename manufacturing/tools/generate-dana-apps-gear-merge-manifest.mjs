@@ -11,7 +11,10 @@ const EXCLUDED_DIRS = new Set([
 
 function sha256File(file) {
   if (!fs.existsSync(file)) return null;
-  return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex').toUpperCase();
+  // These inputs are text configuration files. Git may check them out with
+  // CRLF on Windows and LF on Linux; the fingerprint must describe the source.
+  const text = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+  return crypto.createHash('sha256').update(text).digest('hex').toUpperCase();
 }
 
 function readJson(file) {
@@ -88,6 +91,7 @@ export function buildGearMergeManifest(root = workspaceRoot) {
 
   return {
     schemaVersion: 1,
+    hashEncoding: 'utf8-lf',
     baseline: 'Dana Apps V70.0.0',
     releaseVersion: pkg.version,
     workspace: 'single-root',
