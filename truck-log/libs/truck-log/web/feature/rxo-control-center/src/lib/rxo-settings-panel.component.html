@@ -1,0 +1,29 @@
+<section class="dana-panel">
+  <div class="dana-panel-header"><div><h2>Scan schedule</h2><small>Recurring Fort Wayne RXO export window</small></div></div>
+  <div class="dana-panel-body tl-stack">
+    <div class="dana-form-grid">
+      <label class="dana-field">Scan every (minutes)<input class="dana-input" type="number" min="1" max="1440" step="1" [(ngModel)]="form.settingsInterval"></label>
+      <label class="dana-field">Max scan duration (minutes)<input class="dana-input" type="number" min="5" max="240" step="1" [(ngModel)]="form.settingsMaxScanDuration"></label>
+      <label class="dana-field">No exporter output timeout (minutes)<input class="dana-input" type="number" min="2" max="120" step="1" [(ngModel)]="form.settingsNoProgressTimeout"></label>
+    </div>
+    <p class="dana-note"><b>Active load window:</b> yesterday, today and tomorrow in Fort Wayne time. Exports below RXO's row limit are kept in full. Larger Orders and Shipments exports use verified date ranges to cover this window: Orders use Pickup or Delivery Date by direction; Shipments use the corresponding Appointment and Estimated Arrival dates. Freight On The Move stays live. Scans never overlap. If a scan runs past the maximum duration or stops producing output, the scheduler stops the exporter, waits for the recovery cooldown and retries once. Existing data stays available until a replacement batch validates.</p>
+    <div class="dana-actions"><button class="dana-btn dana-btn-primary" type="button" [disabled]="busy || !settingsValid" (click)="saveSettings()">Save scan settings</button></div>
+  </div>
+</section>
+<section class="dana-panel">
+  <div class="dana-panel-header">
+    <div><h2>RXO login</h2><small>Stored in the Docker credential volume</small></div>
+    <div class="dana-actions">
+      <span class="dana-status-badge" [attr.data-tone]="control?.credentials?.usernameConfigured ? 'success' : 'warning'">Username {{control?.credentials?.usernameConfigured ? 'saved' : 'missing'}}</span>
+      <span class="dana-status-badge" [attr.data-tone]="control?.credentials?.passwordConfigured ? 'success' : 'warning'">Password {{control?.credentials?.passwordConfigured ? 'saved' : 'missing'}}</span>
+    </div>
+  </div>
+  <div class="dana-panel-body tl-stack">
+    <div class="dana-form-grid">
+      <label class="dana-field">RXO username<input class="dana-input" autocomplete="username" [(ngModel)]="form.credentialUsername" placeholder="RXO username"></label>
+      <label class="dana-field">RXO password<input class="dana-input" type="password" autocomplete="new-password" [(ngModel)]="form.credentialPassword" [placeholder]="control?.credentials?.passwordConfigured ? 'Saved — leave blank to keep' : 'Enter RXO password'"></label>
+    </div>
+    <p class="dana-note">The password is never shown here or stored in the Truck Log database. Leave it blank to keep the saved password.</p>
+    <div class="dana-actions"><button class="dana-btn dana-btn-primary" type="button" [disabled]="busy || !form.credentialUsername.trim()" (click)="saveCredentials()">Save RXO login</button></div>
+  </div>
+</section>

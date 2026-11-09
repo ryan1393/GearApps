@@ -1,0 +1,19 @@
+{
+  "name": "truck-log-server-core",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/truck-log/server/core/src",
+  "projectType": "library",
+  "tags": [
+    "scope:truck-log",
+    "platform:server",
+    "type:core"
+  ],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/truck-log/server/core/tsconfig.json --noEmit"
+      }
+    }
+  }
+}

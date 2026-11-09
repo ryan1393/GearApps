@@ -1,0 +1,17 @@
+/* Dock Board — layout only. */
+.tl-dock-search { flex: 1 1 320px; }
+.tl-dock-counts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-left: auto; align-self: center; }
+
+.tl-dock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); align-items: start; gap: 16px; }
+.tl-dock-grid-empty { grid-column: 1 / -1; }
+.tl-dock-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+
+@media (max-width: 760px) {
+  .tl-dock-grid { grid-template-columns: 1fr; }
+  .tl-dock-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tl-dock-counts { margin-left: 0; }
+}
+
+/* Delivery Number scan dialog. */
+.tl-scan-dialog { --dana-dialog-width: 640px; }
+.tl-scan-receiver { display: grid; gap: 4px; text-align: center; cursor: text; }

@@ -1,0 +1,146 @@
+{
+  "release": "1.0.1",
+  "product": "Truck Log",
+  "deployment": {
+    "model": "docker-compose",
+    "requiredEngineOs": "linux",
+    "windowsSetup": "SETUP-TRUCK-LOG.cmd",
+    "linuxSetup": "SETUP-TRUCK-LOG.sh",
+    "webPortDefault": 4300,
+    "apiPortDefault": 3334,
+    "browserPortDefault": 6080,
+    "variant": "isolated second install; Docker Compose auto-provisions network and volumes"
+  },
+  "docker": {
+    "project": "truck-log",
+    "network": "truck-log",
+    "imageTag": "1.0.1",
+    "containerReleaseLabel": "1.0.1",
+    "imagePrefix": "truck-log",
+    "networkKey": "truck-log",
+    "resources": "compose-managed (creates missing, reuses existing named volumes)"
+  },
+  "services": [
+    "truck-log-postgres",
+    "truck-log-server",
+    "truck-log-web",
+    "rxo-export",
+    "rxo-browser (optional profile)",
+    "rxo-expedite-scheduler",
+    "rxo-expedite (manual profile)"
+  ],
+  "databaseMigrations": [
+    "0001_baseline.sql",
+    "0002_stations.sql",
+    "0003_late_print_agent_results.sql",
+    "0004_packing_slip_watcher_routes.sql",
+    "0005_print_workflow_recovery.sql"
+  ],
+  "persistentVolumes": [
+    "truck-log-postgres-data",
+    "truck-log-documents",
+    "truck-log-rxo-import",
+    "truck-log-rxo-data",
+    "truck-log-rxo-state",
+    "truck-log-rxo-credentials",
+    "truck-log-rxo-expedite-data",
+    "truck-log-rxo-expedite-state"
+  ],
+  "secretsIncluded": false,
+  "runtimeDataIncluded": false,
+  "historicalPatchBackupsIncluded": false,
+  "historicalPromotionRecordsIncluded": false,
+  "releaseId": "truck-log-1.0.1",
+  "workspace": {
+    "tool": "Nx",
+    "nxVersion": "23.3.1",
+    "applications": 4,
+    "libraries": 38,
+    "publicApiRule": "cross-project TypeScript imports use @truck-log/* public entry points"
+  },
+  "freshDatabaseSeed": {
+    "siteName": "Dana Fort Wayne Plant",
+    "plantLocationName": "Fort Wayne",
+    "dockCodes": [
+      "7",
+      "25",
+      "28",
+      "41",
+      "49",
+      "52",
+      "61",
+      "62",
+      "68"
+    ]
+  },
+  "hostRequirements": {
+    "dockerRuntime": [
+      "Docker CLI connected to a Linux engine",
+      "Docker Compose v2+"
+    ],
+    "windows": [
+      "PowerShell 5.1+"
+    ],
+    "linux": [
+      "POSIX shell",
+      "openssl or /dev/urandom for fresh secret generation"
+    ],
+    "hostNodeRequiredForCoreDockerRuntime": false,
+    "optionalWorkstationNode": "Node.js22.12+ for Nx development; Node.js20+ for browser bootstrap and diagnostics"
+  },
+  "operationalUtilities": {
+    "referenceDataImport": {
+      "windows": "IMPORT-TRUCK-LOG-REFERENCE-CSV.cmd",
+      "linux": "IMPORT-TRUCK-LOG-REFERENCE-CSV.sh"
+    },
+    "authoritativeDockRestore": {
+      "windows": "SYNC-TRUCK-LOG-AUTHORITATIVE-DOCKS.cmd",
+      "linux": "SYNC-TRUCK-LOG-AUTHORITATIVE-DOCKS.sh"
+    },
+    "controlledDataClear": {
+      "windows": "CLEAR-TRUCK-LOG-DATA.cmd",
+      "linux": "CLEAR-TRUCK-LOG-DATA.sh"
+    },
+    "referenceDataRunsInsideServerContainer": true,
+    "mockData": {
+      "windows": [
+        "LOAD-MOCK-DATA.cmd",
+        "RESET-MOCK-DATA.cmd",
+        "CLEAR-MOCK-DATA.cmd",
+        "MOCK-DATA-STATUS.cmd"
+      ],
+      "linux": [
+        "./LOAD-MOCK-DATA.sh",
+        "./RESET-MOCK-DATA.sh",
+        "./CLEAR-MOCK-DATA.sh",
+        "./MOCK-DATA-STATUS.sh"
+      ],
+      "runsInsideServerContainer": true
+    },
+    "rxoCredentials": {
+      "standard": {
+        "windows": "SETUP-RXO-INTEGRATION-CREDENTIALS.cmd",
+        "linux": "SETUP-RXO-INTEGRATION-CREDENTIALS.sh"
+      },
+      "expedite": {
+        "windows": "SETUP-RXO-EXPEDITE-CREDENTIALS.cmd",
+        "linux": "SETUP-RXO-EXPEDITE-CREDENTIALS.sh"
+      }
+    },
+    "optionalDiagnostics": {
+      "requiresNode20": true,
+      "browserBootstrap": {
+        "windows": "BOOTSTRAP-RXO-BROWSER.cmd",
+        "linux": "BOOTSTRAP-RXO-BROWSER.sh"
+      },
+      "rxoDiagnostics": {
+        "windows": "COLLECT-RXO-DIAGNOSTICS.cmd",
+        "linux": "COLLECT-RXO-DIAGNOSTICS.sh"
+      },
+      "fullLiveScan": {
+        "windows": "RUN-TRUCK-LOG-FULL-LIVE-SCAN.cmd",
+        "linux": "RUN-TRUCK-LOG-FULL-LIVE-SCAN.sh"
+      }
+    }
+  }
+}

@@ -1,0 +1,25 @@
+/* Dock TV boards — layout only; the wall-display look comes from Dana UI (.dana-wall). */
+@media screen {
+  .tl-tv-dock-layout { display: grid; flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr) max-content; gap: 12px; }
+  .tl-tv-management-layout { display: grid; flex: 1; min-height: 0; grid-template-columns: minmax(0, 1fr) 255px; gap: 18px; }
+  .tl-tv-timing-grid { display: grid; grid-template-columns: minmax(0, .85fr) repeat(2, minmax(0, 1fr)); align-items: start; }
+  .tl-tv-wait-status { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 5px 12px; }
+  .tl-tv-dock-summary { display: grid; gap: 9px; }
+  .tl-tv-table th:nth-child(1) { width: 19%; }
+  .tl-tv-table th:nth-child(2) { width: 22%; }
+  .tl-tv-table th:nth-child(3) { width: 11%; }
+  .tl-tv-table th:nth-child(4) { width: 22%; }
+  .tl-tv-table th:nth-child(5),
+  .tl-tv-table th:nth-child(6) { width: 13%; }
+}
+@media screen and (max-width: 1399px) { .tl-tv-management-layout { grid-template-columns: minmax(0, 1fr) 205px; gap: 12px; } }
+@media screen and (max-width: 1149px) {
+  .tl-tv-management-layout { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) 112px; }
+  .tl-tv-dock-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media screen and (max-height: 819px) { .tl-tv-dock-layout { gap: 8px; } }
+@media screen and (max-width: 699px) {
+  .tl-tv-management-layout { grid-template-rows: minmax(0, 1fr) 108px; }
+  .tl-tv-dock-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tl-tv-timing-grid { gap: 6px; }
+}

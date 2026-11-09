@@ -1,0 +1,95 @@
+<main class="login-page">
+  <section class="login-brand-panel" aria-label="Truck Log">
+    <div class="login-brand-content">
+      <div class="login-logo-row">
+        <div class="login-logo-mark"><img src="assets/branding/dana-diamond.png" alt="Dana Incorporated" /></div>
+        <div>
+          <div class="login-product">TRUCK LOG</div>
+          <div class="login-suite">Truck & Dock Operations</div>
+        </div>
+      </div>
+
+      <div class="login-brand-copy">
+        <div class="login-eyebrow">CONNECTED LOGISTICS</div>
+        <h1>Guard Check-In.<br />Dock Board.<br />Truck Log.</h1>
+        <p>
+          One consistent workspace for truck arrivals, dock assignments,
+          delivery documents, and shipment history.
+        </p>
+      </div>
+
+      <div class="login-status">
+        <span class="login-status-dot"></span>
+        <span>Truck Log system</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="login-form-panel">
+    <div class="login-card">
+      <div class="login-card-heading">
+        <div class="login-mobile-brand">
+          <span class="login-mobile-mark"><img src="assets/branding/dana-diamond.png" alt="Dana Incorporated" /></span>
+          <span>TRUCK LOG</span>
+        </div>
+        <div class="login-kicker">WELCOME BACK</div>
+        <h2>Sign in to Truck Log</h2>
+        <p>Use your Truck Log account to continue.</p>
+      </div>
+
+      <div *ngIf="loginError" class="login-error" role="alert">
+        <span class="login-error-icon">!</span>
+        <span>{{ loginError }}</span>
+      </div>
+
+      <p *ngIf="loading" class="login-notice" role="status">Checking sign-in availability…</p>
+      <form *ngIf="ready" [formGroup]="loginForm" (ngSubmit)="login(identifierInput.value, passwordInput.value)" data-login-flow="single-submit" data-login-validation="strict" class="login-form">
+        <label class="field-label" for="email">Username or email</label>
+        <input
+          formControlName="email"
+          #identifierInput
+          id="email"
+          name="email"
+          type="text"
+          autocomplete="username"
+          required
+          maxlength="254"
+          class="field-input"
+          [class.field-error]="showIdentifierRequired"
+          placeholder="Username or email"
+        />
+        <small *ngIf="showIdentifierRequired" class="field-message">
+          Enter your username or email.
+        </small>
+
+        <div class="password-label-row">
+          <label class="field-label" for="password">Password</label>
+          <span class="password-help">Account login</span>
+        </div>
+        <input
+          formControlName="password"
+          #passwordInput
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+          maxlength="256"
+          class="field-input"
+          [class.field-error]="showPasswordRequired"
+          placeholder="Enter your password"
+        />
+        <small *ngIf="showPasswordRequired" class="field-message">
+          Password is required.
+        </small>
+
+        <button type="submit" class="login-submit" [disabled]="submitting" [attr.aria-busy]="submitting">{{ submitting ? 'Signing in…' : 'Sign in' }}</button>
+      </form>
+
+      <div class="login-footer">
+        <span class="login-footer-dot"></span>
+        <a routerLink="/" title="Return to Guard Dashboard">Guard Check-In · Dock Board · Truck Log</a>
+      </div>
+    </div>
+  </section>
+</main>

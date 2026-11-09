@@ -1,0 +1,6 @@
+# Optional OCR: Python 3.11+ and separately installed Tesseract for Windows.
+# Exact patched versions audited 2026-10-29; packaging is pytesseract's dependency.
+PyMuPDF==1.26.7
+pytesseract==0.3.13
+Pillow==13.0.0
+packaging==26.3

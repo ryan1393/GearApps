@@ -1,0 +1,13 @@
+/* Guard Dashboard and Active Trucks — layout only. */
+
+/* Search box in a panel header. */
+.tl-search { display: flex; flex: 1 1 360px; justify-content: flex-end; gap: 8px; max-width: 560px; }
+.tl-search .dana-input { flex: 1 1 auto; min-width: 0; }
+
+/* Table row actions: Final Checkout takes its own line. */
+.tl-row-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 156px; }
+.tl-row-actions .dana-btn-success { grid-column: 1 / -1; }
+.tl-active-table td:last-child { width: 1%; }
+
+
+@media (max-width: 760px) { .tl-search { flex-basis: 100%; max-width: none; } }

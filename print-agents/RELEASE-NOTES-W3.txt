@@ -1,0 +1,42 @@
+TRUCK LOG PRINT AGENTS - V4R7 / WATCHER W3
+Updated 2026-10-29. Guard service and embedded V4R7 installer unchanged.
+
+W3 addresses three review findings:
+1. Slow printer submissions/PDF extraction no longer block the eight-route
+   capture scanner. Accepted PDFs enter a durable bounded FIFO, then an
+   independent worker verifies/prints them in order. Queue-full warnings,
+   before-print hash checks and renderer cancellation support safe recovery.
+2. Restart safety records provenance and quarantines pre-existing staging
+   files. READY entries may resume; ACTIVE/interrupted work never reprints
+   automatically. Pending LIVE captures lose print authorization when their
+   route is OFF/TEST or the configured printer changes.
+3. The Windows service installer protects an existing credential with an
+   exact SYSTEM/Administrators-only ACL before adjusting nonsecret state
+   permissions. Recursive ACL resets were removed, including during upgrades.
+
+UPDATE
+Run 02-SAP-Queue-Watcher\INSTALL-WATCHER-SERVICE.cmd as Administrator to
+upgrade the SAP watcher only. It keeps the installed watcher.ini unless
+-ReplaceConfig is requested. Existing INIs use max_pending_captures = 500
+by default. Preserve all state/PDF directories and inspect NeedsReview
+following startup. Do not reinstall the unchanged guard service.
+
+VALIDATION
+Guard isolated selftest: 131/131 passed.
+Watcher suite on Python 3.12/Linux: 90 run, 88 passed, 2 Windows NTFS ACL
+integration tests skipped. The API DTO comparison also skips when the
+companion Truck Log source is not available next to this package.
+No Windows service, real SAP PDF, live API or physical printer acceptance
+was performed. Run the Windows ACL tests and multi-route paper/stop/restart
+checks on the actual Windows staging print host before rollout.
+
+Fixed-name capture.pdf ports can still overwrite jobs arriving faster than
+polling or while the durable queue is full. QUEUE-FULL requires operators
+to stop submissions and investigate; accepted PDFs are never dropped.
+
+DEPENDENCIES: Exact-pinned Python requirements audited with pip-audit 2.10.1;
+no known vulnerabilities in all five pinned packages. Optional OCR now needs
+Python 3.11+ for patched Pillow 13; text-only remains Python 3.10+. See
+02-SAP-Queue-Watcher/DEPENDENCIES.md and DEPENDENCY-AUDIT.json for scope.
+Actual PDF/raster/OCR smoke tests passed on Linux; Windows x64/Python 3.11
+wheels resolved/downloaded, but native Windows execution is not validated.

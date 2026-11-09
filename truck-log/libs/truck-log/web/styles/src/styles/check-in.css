@@ -1,0 +1,21 @@
+/* Check In Truck — layout only; every look comes from Dana UI. */
+.tl-checkin-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.tl-notice-action { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.tl-checkin-layout { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr); align-items: start; gap: 18px; }
+.tl-checkin-rail { position: sticky; top: calc(var(--dana-topbar-height) + 16px); }
+
+.tl-load-entry { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 10px; }
+.tl-load-picker { --dana-combobox-panel-width: 780px; }
+.tl-missing { margin-top: 8px; }
+.tl-last-checkin { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+.tl-dock-status { display: grid; gap: 6px; }
+.tl-dock-status p { margin: 0; }
+.tl-dock-status-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+@media (max-width: 1100px) {
+  .tl-checkin-layout { grid-template-columns: 1fr; }
+  .tl-checkin-rail { position: static; }
+}
+@media (max-width: 760px) { .tl-load-entry { grid-template-columns: 1fr; } }

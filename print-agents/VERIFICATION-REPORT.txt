@@ -1,0 +1,57 @@
+VERIFICATION REPORT — 2026-10-29 (W3 update)
+
+GUARD (V4R7 = recovered V4R6 + printer-outage and result-delivery fixes):
+  269,353-byte command, CRLF line endings.
+  Rebuilt with the original embedding mechanism (boot PowerShell pinned by
+  TL_BOOT_SHA, bundle pinned inside the boot script, setup.cjs PACKAGE with
+  per-file SHA-256). The same build tool reproduces the original 200,495-byte
+  V4R6 command byte-for-byte from the V4R6 sources.
+  Boot script SHA-256 (TL_BOOT_SHA):    97b8d2edff3c3f2596142f25ea3da31467836163283eafcd738afe5935bd219b
+  Internal V4R7 embedded package SHA-256: a6fba7259b08100971a2e3d8783f73431ce3514181576410b63b1b3ab7ba238d
+  Extracted setup.cjs SHA-256:         ac71f3c6189b86c7cd736461e455703d20d22446115aaed83107ab0b0fac7baa
+  All six nested embedded runtime/test files match original-source/ exactly.
+  Simulated installer extraction (setup.cjs safePackage, node --check) and the
+  source selftest rechecked: 131/131 PASS (Node 24.19.0, Linux; no Windows/printer/API).
+  ServiceHost.cs unchanged from V4R6 (SHA-256 1f85189d...903249).
+  Previous V4R6 values: package 848bffd2...5959926, setup.cjs 6aca4ebb...7309.
+
+SAP WATCHER W3 (independent reconstruction, not historic V3):
+  Version: sap-queue-watcher-reconstructed-2026.10.29-w3.
+  Durable bounded capture FIFO independent of extraction/printing; persisted
+  provenance; startup quarantine; interrupted ACTIVE work never auto-reprints;
+  exact credential-first ACL upgrades with no recursive child reset.
+  Python 3.12.14/Linux: 90 tests run, 88 passed and 2 skipped. Skips are actual
+  Windows-administrator NTFS ACL integration tests (normal and interrupted
+  upgrade). Test the NTFS operations on Windows before rollout.
+  Added 18 capture-queue regressions, including real service-loop capture
+  during a blocked renderer, slow extraction, FIFO/order, READY restart,
+  ACTIVE interruption, post-submission interruption, unknown startup capture,
+  orphan Incoming preservation, queue backpressure/snapshot preservation,
+  queued file mutation, failed queue commit, revoked print authorization,
+  frozen TEST mode and renderer cancellation.
+  Existing route config, offline cache, metadata, upload outbox, DPAPI mock,
+  service-run tests pass. API DTO source comparison passed against the supplied
+  companion Truck Log source (skips when that source is absent).
+  NOT compiled or run here: WatcherServiceHost.cs (Windows .NET compiler),
+  INSTALL/REMOVE/STATUS PowerShell scripts, live DPAPI/printer/share operations.
+  No Windows service, real SAP PDF, live API or physical paper acceptance.
+  .cmd and .ps1 scripts retain ASCII CRLF. Guard binaries/payloads unchanged.
+  Original V3 source remains unavailable; historical scan/recovery tools are
+  included, not a claim of exact parity or site acceptance.
+
+GUARD RE-CHECK FOR THIS ZIP: guard files unchanged from the V4R7 package;
+  selftest re-run from the extracted ZIP: 131/131 PASS.
+
+ZIP:
+  SHA-256 source manifest regenerated; VERIFY-PACKAGE.py checks every listed
+  file, guard boot/bundle/nested payload consistency and Windows line endings.
+  Final ZIP creation/CRC verification is performed separately by the packager.
+  No host-specific encrypted credentials, actual captured PDFs, or real tokens
+  are included. Test PDFs shipped inside the guard installer are benign fixtures.
+
+DEPENDENCIES: Exact-pinned Python requirements audited with pip-audit 2.10.1;
+no known vulnerabilities in all five pinned packages. Optional OCR now needs
+Python 3.11+ for patched Pillow 13; text-only remains Python 3.10+. See
+02-SAP-Queue-Watcher/DEPENDENCIES.md and DEPENDENCY-AUDIT.json for scope.
+Actual PDF/raster/OCR smoke tests passed on Linux; Windows x64/Python 3.11
+wheels resolved/downloaded, but native Windows execution is not validated.

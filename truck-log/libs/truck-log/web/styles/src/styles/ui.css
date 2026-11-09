@@ -1,0 +1,7 @@
+/* Shared Truck Log screens (dialogs, notices) — layout only. */
+.tl-notice { margin: 0 0 14px; }
+.tl-stack { display: grid; gap: 12px; }
+.tl-checkout-dialog { --dana-dialog-width: 620px; }
+.tl-panel-note { margin: 12px 18px 0; }
+/* Visit tables scroll sideways on tablets instead of squeezing every column. */
+.tl-wide-table { min-width: 940px; }

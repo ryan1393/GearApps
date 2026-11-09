@@ -1,0 +1,21 @@
+/* RXO and RXO Expedite Control Centers — layout only. */
+.tl-rxo { display: grid; gap: 16px; min-width: 0; }
+.tl-rxo > *, .tl-rxo-columns > * { min-width: 0; }
+.tl-rxo > .dana-page-header,
+.tl-rxo > .dana-kpi-grid { margin-bottom: 0; }
+.tl-rxo-activity { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.tl-rxo-activity-detail { flex: 1 1 320px; min-width: 0; }
+.tl-rxo-run { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.tl-rxo-import-review details { margin-top: 8px; }
+.tl-rxo-import-review summary { cursor: pointer; padding: 6px 0; }
+.tl-rxo-kpi-time { font-size: 20px; }
+.tl-rxo-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.tl-rxo-datasets { min-width: min(100%, 440px); }
+.tl-rxo-search { flex: 1 1 360px; }
+.tl-rxo-range { justify-content: flex-end; }
+.tl-rxo-caption { caption-side: top; padding: 0 0 8px; text-align: left; }
+.tl-rxo-details { margin-top: 4px; }
+.tl-rxo-document { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tl-rxo-error { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+@media (max-width: 1100px) { .tl-rxo-columns { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .tl-rxo-datasets { width: 100%; grid-auto-flow: row; } }

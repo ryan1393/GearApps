@@ -1,0 +1,5 @@
+node_modules/
+exported-latest/
+exported-failure/
+*.log
+.env

@@ -1,0 +1,10 @@
+# BuildKit per-Dockerfile ignore file: the build context is the repository root,
+# but this image only needs its own app and the shared RXO modules.
+*
+!apps/rxo-integration/package.json
+!apps/rxo-integration/package-lock.json
+!apps/rxo-integration/src/
+!apps/rxo-integration/browser-bootstrap.sh
+!libs/truck-log/rxo-shared/
+**/node_modules
+**/*.tmp

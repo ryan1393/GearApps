@@ -1,0 +1,11 @@
+{
+  "name": "truck-log-web-styles",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/truck-log/web/styles/src",
+  "projectType": "library",
+  "tags": [
+    "scope:truck-log",
+    "platform:web",
+    "type:styles"
+  ]
+}

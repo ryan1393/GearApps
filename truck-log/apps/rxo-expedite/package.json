@@ -1,0 +1,16 @@
+{
+  "name": "truck-log-rxo-expedite",
+  "version": "1.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/cli.mjs --help",
+    "schedule": "node src/scheduler.mjs",
+    "once": "node src/cli.mjs --once --confirm-live-export",
+    "verify": "node src/cli.mjs --verify-latest",
+    "check": "node --check src/cli.mjs && node --check src/scheduler.mjs && node --check src/lib/workbook.mjs && node --check src/lib/acquisition.mjs && node --check src/lib/credentials.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.55.1"
+  }
+}

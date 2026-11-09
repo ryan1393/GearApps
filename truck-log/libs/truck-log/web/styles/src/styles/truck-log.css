@@ -1,0 +1,15 @@
+/*
+ * Truck Log styles on top of Dana UI (loaded first, from @dana/ui/styles/dana-ui.css).
+ * Dana UI owns tokens, the shell, buttons, panels, forms, tables, badges, dialogs and toasts.
+ * These files hold only what is specific to Truck Log, one file per area.
+ */
+@import "./shell.css";
+@import "./ui.css";
+@import "./auth.css";
+@import "./operations.css";
+@import "./check-in.css";
+@import "./dock-board.css";
+@import "./records.css";
+@import "./rxo.css";
+@import "./tv.css";
+@import "./admin.css";

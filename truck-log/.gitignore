@@ -1,0 +1,31 @@
+# Dependencies / Nx / build output
+node_modules/
+dist/
+.nx/
+.angular/
+coverage/
+npm-debug.log*
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+.secrets/
+
+# Runtime documents / RXO snapshots / diagnostics
+data/documents/*
+!data/documents/.gitkeep
+data/rxo/latest/
+data/rxo/previous/
+data/rxo/.incoming-*/
+.runtime-logs/
+.new-host-state/
+
+# Local setup / historical backup artifacts
+.setup-backups/
+_patch_backups/
+patch_backups/
+backups/
+*.bak
+*.bak-*
+*.zip

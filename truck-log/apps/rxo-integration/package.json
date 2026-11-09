@@ -1,0 +1,19 @@
+{
+  "name": "truck-log-rxo-export",
+  "version": "1.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node src/rxo-scheduler.mjs",
+    "scheduler-check": "node --check src/rxo-scheduler.mjs",
+    "once": "node src/rxo-fort-wayne-export.mjs --once",
+    "check": "node --check src/rxo-fort-wayne-export.mjs",
+    "filter-test": "node src/rxo-filter-test.mjs",
+    "browser-preflight": "node src/playwright-preflight.mjs",
+    "verify-latest": "node src/rxo-fort-wayne-export.mjs --verify-latest"
+  },
+  "dependencies": {
+    "playwright": "1.55.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  }
+}

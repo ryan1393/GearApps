@@ -1,0 +1,9 @@
+/* Sign-in, password and station pages — layout only. */
+.tl-auth-narrow { max-width: 560px; margin: 24px auto; }
+.tl-fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+.tl-admin-access { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 16px; margin-bottom: 16px; }
+.tl-station-current { margin: 0 0 18px; }
+.tl-station-hint { margin-top: 6px; }
+/* Keep the access links in one wrapping row on phones. */
+.tl-admin-access > nav.dana-actions { flex-direction: row; }
+.tl-admin-access > nav.dana-actions > .dana-btn { width: auto; }
