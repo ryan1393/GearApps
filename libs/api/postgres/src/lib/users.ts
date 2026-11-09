@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 import { DataSource } from 'typeorm';
 import { Row, text } from './catalog';
 
-type SharedUser = User & { role: string };
+type SharedUser = User & { role: string; authVersion: number };
 
 @Injectable()
 export class PostgresUsersService {
@@ -28,6 +28,7 @@ export class PostgresUsersService {
       .addSelect('u."firstName"', 'fname')
       .addSelect('u."lastName"', 'lname')
       .addSelect('u.role', 'role')
+      .addSelect('u."authVersion"', 'auth_version')
       .from('public.users', 'u')
       .where('u.active=true AND u."deletedAt" IS NULL');
   }
@@ -39,6 +40,7 @@ export class PostgresUsersService {
       fname: text(row.fname),
       lname: text(row.lname),
       role: text(row.role),
+      authVersion: Number(row.auth_version),
     };
   }
   async findByEmail(identifier: string): Promise<User | null> {
@@ -69,6 +71,8 @@ export class PostgresUsersService {
       throw new UnauthorizedException('Use a Lapper access token');
     try {
       const user = (await this.findOne(payload.sub)) as SharedUser;
+      if (payload.auth_version !== user.authVersion)
+        throw new UnauthorizedException('Account access was revoked');
       return {
         userId: user.id,
         email: user.email,

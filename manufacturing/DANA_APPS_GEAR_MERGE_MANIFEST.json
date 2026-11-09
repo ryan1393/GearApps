@@ -17,10 +17,10 @@
     "typescript": "5.9.3"
   },
   "rootHashes": {
-    "package.json": "367FB546402D8D98B9353DCD45C084B97F8C2CAA2BC82AE4CD7B6F4361B1CF4A",
+    "package.json": "E904B42C1D62650CAA3ADB0811C40AB36F3988F7D6FB25432F737A3C8501212B",
     "package-lock.json": "C4F7A8ADD00CDBCB9F29E0196849E9C27C68C1132D9EF3415B062E482DCC2BF1",
     "nx.json": "A21225DC43443C85FCB8B57D6CA8C56A04DF03B02723D9C1C06064A60FF6DA75",
-    "tsconfig.base.json": "BEA7591E40B5A436D04C93B6CCC6084B2206BB883220179208A1A9DFB6BEFA80"
+    "tsconfig.base.json": "E4067F9552B8EE9622930D1257A1B26F482DBD574BC639CE442C2147C9953935"
   },
   "composeFiles": [
     {
@@ -979,6 +979,18 @@
       "targets": [
         "lint"
       ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "shared-database",
+      "root": "libs/shared/database",
+      "projectType": "library",
+      "tags": [
+        "platform:server"
+      ],
+      "targets": [],
       "hasBuildTarget": false,
       "hasServeTarget": false,
       "hasTestTarget": false

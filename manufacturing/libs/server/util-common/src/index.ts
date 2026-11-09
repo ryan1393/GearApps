@@ -9,3 +9,4 @@ export * from './lib/config';
 export * from './lib/exceptions';
 export * from './lib/guards';
 export * from './lib/interceptors';
+export * from './lib/config/schema-creation-policy';

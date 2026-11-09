@@ -99,10 +99,12 @@ export class PostgresLapperStore implements OnModuleInit {
         'department',
         'gearset-marriage',
       ].includes(kind);
+      const effectiveId =
+        existing && ['machine-cycle', 'macro-log'].includes(kind) ? text(existing.id) : id;
       const saved = await this.write(
         manager,
         kind,
-        id,
+        effectiveId,
         needsContext ? { ...existing, ...data } : data,
         true,
       );
@@ -253,25 +255,76 @@ export class PostgresLapperStore implements OnModuleInit {
           .into(table)
           .values({ id: rowId, ...values })
           .setParameters({ recorded: timestamp.toISOString(), zone: this.catalog.timeZone })
+          .orIgnore()
           .execute();
-      return rowId;
+      if (exists) return rowId;
+      const saved = await manager
+        .createQueryBuilder()
+        .select('c.id', 'id')
+        .from(table, 'c')
+        .where(
+          'c.machine_id=:machine AND c.gearset_id=:gear AND c.consec=:consec AND c.serial_number IS NOT DISTINCT FROM :serial',
+          {
+            machine: machine.id,
+            gear: gear.id,
+            consec: data.consec,
+            serial: data.serial_number ?? null,
+          },
+        )
+        .andWhere(
+          'c.recorded_at=CAST(:recorded AS timestamptz) AND c.timestamp=(CAST(:recorded AS timestamptz) AT TIME ZONE :zone)',
+          { recorded: timestamp.toISOString(), zone: this.catalog.timeZone },
+        )
+        .getRawOne<Row>();
+      if (!saved) throw new ConflictException('Cycle could not be recorded');
+      return text(saved.id);
     }
     if (kind === 'macro-log') {
+      if (exists) {
+        await manager
+          .createQueryBuilder()
+          .update(table)
+          .set(pick(data, ['value']))
+          .where('id=:id', { id: rowId })
+          .execute();
+        return rowId;
+      }
       const cycle = await manager
         .createQueryBuilder()
-        .select('c.id')
+        .select('c.id', 'id')
         .from('lapper.machine_cycles', 'c')
-        .where('c.id=:id', { id: data.machine_cycle_id })
-        .getRawOne();
+        .where(
+          'c.id=COALESCE((SELECT a.canonical_id FROM lapper.machine_cycle_aliases a WHERE a.original_id=:id),CAST(:id AS uuid))',
+          { id: data.machine_cycle_id },
+        )
+        .getRawOne<Row>();
       const macro = await manager
         .createQueryBuilder()
         .select('m.id')
         .from('lapper.macros', 'm')
         .where('m.id=:id', { id: data.macro_id })
         .getRawOne();
-      if (!exists && (!cycle || !macro))
-        throw new BadRequestException('Cycle and macro must exist');
-      values = pick(data, ['machine_cycle_id', 'macro_id', 'value']);
+      if (!cycle || !macro) throw new BadRequestException('Cycle and macro must exist');
+      values = { machine_cycle_id: cycle.id, macro_id: data.macro_id, value: data.value };
+      await manager
+        .createQueryBuilder()
+        .insert()
+        .into(table)
+        .values({ id: rowId, ...values })
+        .orIgnore()
+        .execute();
+      const saved = await manager
+        .createQueryBuilder()
+        .select('l.id', 'id')
+        .from(table, 'l')
+        .where(
+          'l.machine_cycle_id=:cycle AND l.macro_id=:macro AND l.value=CAST(:value AS numeric(13,5))',
+          { cycle: cycle.id, macro: data.macro_id, value: data.value },
+        )
+        .getRawOne<Row>();
+      if (!saved)
+        throw new ConflictException('This cycle already has a different value for that macro');
+      return text(saved.id);
     }
     if (kind === 'scanner-detail' && data.machine_id !== undefined) {
       values.machine_id =
@@ -420,11 +473,26 @@ export class PostgresLapperStore implements OnModuleInit {
       pinion.deletedAt
     )
       throw new BadRequestException('Select an active ring and pinion');
+    const summaryId = data.summary_id ?? ring.summary_id;
+    const summaries = await manager
+      .createQueryBuilder()
+      .select('s.id', 'id')
+      .addSelect('s.number', 'number')
+      .from('public.part_summaries', 's')
+      .where('s.id IN (:...ids)', { ids: [ring.summary_id, pinion.summary_id, summaryId] })
+      .getRawMany<Row>();
+    const family = (id: unknown) =>
+      text(summaries.find((s) => s.id === id)?.number)
+        .trim()
+        .toLowerCase();
     if (
-      ring.summary_id !== pinion.summary_id ||
-      (data.summary_id && data.summary_id !== ring.summary_id)
+      !family(summaryId) ||
+      family(ring.summary_id) !== family(summaryId) ||
+      family(pinion.summary_id) !== family(summaryId)
     )
-      throw new BadRequestException('Ring, pinion and gearset must use the same summary');
+      throw new BadRequestException(
+        'Ring, pinion and gearset must use the same summary number; revisions may differ',
+      );
     if (Number(ring.teeth) <= 0 || Number(pinion.teeth) <= 0)
       throw new BadRequestException('Ring and pinion require positive tooth counts');
     const ratio = Number((Number(ring.teeth) / Number(pinion.teeth)).toFixed(4));
@@ -461,7 +529,7 @@ export class PostgresLapperStore implements OnModuleInit {
         id: partId,
         part_number: name,
         part_type_id: type.id,
-        summary_id: ring.summary_id,
+        summary_id: summaryId,
         teeth: null,
         active,
         enabled: true,
@@ -478,7 +546,7 @@ export class PostgresLapperStore implements OnModuleInit {
         gearset_part_id: partId,
         ring_part_id: ring.id,
         pinion_part_id: pinion.id,
-        summary_id: ring.summary_id,
+        summary_id: summaryId,
         ratio_value: ratio,
         ratio_text: ratio.toFixed(2) + ' (' + ring.teeth + '-' + pinion.teeth + ')',
         active,

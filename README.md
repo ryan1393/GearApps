@@ -51,6 +51,8 @@ repository root. The two APIs retain their existing routes and database configur
 Lapper uses API port 3334 and UI port 4203; manufacturing retains API port 3333
 and client ports 4200–4202. See [Lapper PostgreSQL setup](docs/LAPPER_POSTGRES.md)
 for the shared database, collector setup, and existing-history import.
+See [database integrity and the host update procedure](docs/DATABASE_INTEGRITY.md)
+for the backup-first cleanup, preserved review items, and audit commands.
 
 All four clients consume the same [Dana UI source](libs/shared/dana-ui). Its build
 updates the root vendor package used for published styles. No separate Dana UI install

@@ -55,7 +55,7 @@ API container, such as `host.docker.internal` for a database on the Docker host.
   cycles, macro values, scanner serial slots and FANUC signal snapshots.
 - Complete new gearsets created through Lapper's Gearsets form also create their
   shared GearApps assembly and gearset part. The ring and pinion must be active,
-  share a summary and have valid tooth counts. An unknown number first encountered
+  share a summary number (revisions may differ) and have valid tooth counts. An unknown number first encountered
   by a collector remains a pending Lapper reference until its assembly is defined.
   Earlier history follows the canonical assembly when the number is matched.
 - Shared master deletion, machine department/asset changes and changes to parts
@@ -64,8 +64,9 @@ API container, such as `host.docker.internal` for a database on the Docker host.
 
 The application's schema migration creates empty Lapper tables if needed. It does
 **not** import the old SQL Server backup. Apply the separately prepared, validated
-`database-merge/Apply-Merge.ps1` package to the current database to bring across
-old machines, macros and history. That private package and all database dumps are
+combined `Apply-DatabaseCleanup.ps1` or `Apply-DatabaseCleanup.sh` package to the current database to bring across
+old machines, macros and history before integrity cleanup. See [the host update procedure](DATABASE_INTEGRITY.md).
+That private package and all database dumps are
 kept outside this repository. Startup also works when the import is already applied.
 
 Imported SQL Server timestamps have no offset. `LAPPER_TIME_ZONE` controls their

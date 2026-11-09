@@ -15,6 +15,11 @@
 **/*.key
 **/*.sqlite
 **/*.sqlite3
+**/*.dump
+**/*.bak
+**/backups
+tools/database/cleanup.sql
+tools/database/legacy-import.sql
 **/*.log
 **/*.zip
 **/_patch_backups

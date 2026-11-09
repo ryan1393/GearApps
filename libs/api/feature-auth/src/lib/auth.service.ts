@@ -3,6 +3,7 @@ import {
   LoginPayload,
   PublicUser,
   TokenResponse,
+  User,
 } from '@gearapps/shared/domain';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -17,24 +18,29 @@ export class AuthService {
     private readonly jwt: JwtService,
   ) {}
 
-  async validateUser({ email, password }: LoginPayload): Promise<PublicUser> {
+  private async authenticate({ email, password }: LoginPayload): Promise<User> {
     const user = await this.users.findByEmail(email);
     const ok = user ? await this.users.verifyPassword(user, password) : false;
     if (!user || !ok) {
       this.logger.warn(`Failed login for ${email}`);
       throw new UnauthorizedException('Email or password is invalid');
     }
-    return toPublicUser(user);
+    return user;
+  }
+
+  async validateUser(payload: LoginPayload): Promise<PublicUser> {
+    return toPublicUser(await this.authenticate(payload));
   }
 
   async login(payload: LoginPayload): Promise<TokenResponse> {
-    const user = await this.validateUser(payload);
+    const user = (await this.authenticate(payload)) as User & { authVersion?: number };
     const claims: AccessTokenPayload = {
       sub: user.id,
       email: user.email,
       fname: user.fname,
       lname: user.lname,
       token_use: 'lapper-access',
+      auth_version: user.authVersion,
     };
     return { access_token: await this.jwt.signAsync(claims) };
   }

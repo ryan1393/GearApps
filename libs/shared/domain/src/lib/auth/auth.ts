@@ -14,6 +14,7 @@ export interface AccessTokenPayload {
   fname?: string;
   lname?: string;
   token_use?: 'lapper-access';
+  auth_version?: number;
   iat?: number;
   exp?: number;
 }

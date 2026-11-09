@@ -14,7 +14,12 @@ import { Repository } from 'typeorm';
 
 const BCRYPT_ROUNDS = 10;
 
-export const toPublicUser = ({ password: _password, ...rest }: User): PublicUser => rest;
+export const toPublicUser = (user: User): PublicUser => ({
+  id: user.id,
+  email: user.email,
+  fname: user.fname,
+  lname: user.lname,
+});
 
 @Injectable()
 export class UsersService {

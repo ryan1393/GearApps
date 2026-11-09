@@ -46,6 +46,8 @@ test('nested build pages survive generated-output exclusions', () => {
     '.git/config',
     'coverage/report.html',
     'releases/GearApps-70.3.0.zip',
+    'tools/database/cleanup.sql',
+    'tools/database/legacy-import.sql',
   ]);
 });
 
@@ -98,6 +100,11 @@ test('browser sessions and runtime data are excluded at any depth', () => {
     'manufacturing/runtime-data/session.txt',
     'manufacturing/database.db',
     'manufacturing/database.sqlite3',
+    'tools/database/backups/GearApps-before-cleanup.dump',
+    'backups/gearapps.sql',
+    'manufacturing/database.dump',
+    'manufacturing/database.bak',
+    'database-reports/private-audit.json',
     'server.log',
     'test-results/report.json',
   ]);

@@ -58,6 +58,7 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
     departments: [],
   };
   let base, scannerBefore;
+  const fingerprintColumns = new Map();
   const fingerprints = async () => {
     const tables = await query(
       "SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY tablename",
@@ -65,8 +66,18 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
     const result = {};
     for (const { tablename } of tables) {
       assert.match(tablename, /^[a-zA-Z_][a-zA-Z0-9_]*$/);
+      if (!fingerprintColumns.has(tablename)) {
+        const columns = await query(
+          "SELECT column_name FROM information_schema.columns WHERE table_schema='public' AND table_name=$1 ORDER BY ordinal_position",
+          [tablename],
+        );
+        fingerprintColumns.set(
+          tablename,
+          columns.map((c) => '"' + c.column_name.replaceAll('"', '""') + '"').join(','),
+        );
+      }
       const [row] = await query(
-        `SELECT count(*)::int AS count, md5(COALESCE(string_agg(row_to_json(t)::text,E'\\n' ORDER BY row_to_json(t)::text),'')) AS hash FROM public."${tablename}" t`,
+        `SELECT count(*)::int AS count, md5(COALESCE(string_agg(to_jsonb(t)::text,E'\\n' ORDER BY to_jsonb(t)::text),'')) AS hash FROM (SELECT ${fingerprintColumns.get(tablename)} FROM public."${tablename}") t`,
       );
       result[tablename] = row;
     }
@@ -106,7 +117,7 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
     const admin = (
       await request('POST', 'auth/login', { email: fixtures.users[0].username, password })
     ).access_token;
-    const operator = (
+    let operator = (
       await request('POST', 'auth/login', { email: fixtures.users[1].username, password })
     ).access_token;
     await t.test('shared login, closed registration and token purpose', async () => {
@@ -122,6 +133,7 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
       const me = await request('GET', 'users/me', undefined, operator);
       assert.equal(me.id, fixtures.users[1].id);
       assert.equal(me.password, undefined);
+      assert.equal(me.authVersion, undefined);
       const otherToken = new JwtService({ secret: process.env.JWT_SECRET }).sign({
         sub: fixtures.users[1].id,
       });
@@ -137,6 +149,13 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
         401,
       );
       await query('UPDATE public.users SET active=true WHERE id=$1', [fixtures.users[1].id]);
+      await query('UPDATE public.users SET "authVersion"="authVersion"+1 WHERE id=$1', [
+        fixtures.users[1].id,
+      ]);
+      await request('GET', 'machine', undefined, operator, 401);
+      operator = (
+        await request('POST', 'auth/login', { email: fixtures.users[1].username, password })
+      ).access_token;
     });
     const machines = await request('GET', 'machine', undefined, operator);
     const gears = await request('GET', 'gearset', undefined, operator);
@@ -147,6 +166,22 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
       );
       assert.equal(machines.length, counts.machines);
       assert.equal(macros.length, counts.macros);
+      const [cycleAlias] = await query(
+        'SELECT original_id,canonical_id FROM lapper.machine_cycle_aliases LIMIT 1',
+      );
+      if (cycleAlias)
+        assert.equal(
+          (await request('GET', `machine-cycle/${cycleAlias.original_id}`, undefined, operator)).id,
+          cycleAlias.canonical_id,
+        );
+      const [macroAlias] = await query(
+        'SELECT original_id,canonical_id FROM lapper.macro_log_aliases LIMIT 1',
+      );
+      if (macroAlias)
+        assert.equal(
+          (await request('GET', `macro-log/${macroAlias.original_id}`, undefined, operator)).id,
+          macroAlias.canonical_id,
+        );
       const canonical = await query('SELECT id FROM public.gearsets');
       assert.ok(canonical.every((g) => gears.some((api) => api.id === g.id)));
       const [sample] = await query(`SELECT c.*,m.public_machine_id,g.public_gearset_id,
@@ -291,6 +326,65 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
       );
       assert.equal(changed.teeth, 43);
       assert.equal(changed.status.toLowerCase(), 'inactive');
+      const revisionId = randomUUID();
+      await query(
+        `INSERT INTO public.part_summaries(id,number,revision,model_id,hos,active,enabled)
+        SELECT $1,number,'B',model_id,hos,true,true FROM public.part_summaries WHERE id=$2`,
+        [revisionId, summary.id],
+      );
+      fixtures.summaries.push(revisionId);
+      const ring = await request(
+        'POST',
+        'part',
+        {
+          number: number + '-R2',
+          type: 'Ring',
+          summary_id: summary.id,
+          teeth: 40,
+          status: 'Active',
+          user_id: fixtures.users[0].id,
+        },
+        admin,
+        201,
+      );
+      const pinion = await request(
+        'POST',
+        'part',
+        {
+          number: number + '-P',
+          type: 'Pinion',
+          summary_id: revisionId,
+          teeth: 10,
+          status: 'Active',
+          user_id: fixtures.users[0].id,
+        },
+        admin,
+        201,
+      );
+      fixtures.parts.push(ring.id, pinion.id);
+      const assembly = await request(
+        'POST',
+        'gearset',
+        {
+          number: number + '-GS',
+          ring_id: ring.id,
+          pinion_id: pinion.id,
+          summary_id: summary.id,
+          status: 'Active',
+          user_id: fixtures.users[0].id,
+        },
+        admin,
+        201,
+      );
+      fixtures.gears.push(assembly.id);
+      const [{ gearset_part_id: assemblyPart }] = await query(
+        'SELECT gearset_part_id FROM public.gearsets WHERE id=$1',
+        [assembly.id],
+      );
+      fixtures.parts.push(assemblyPart);
+      assert.equal(assembly.summary_id, summary.id);
+      assert.equal(assembly.pinion.summary_id, revisionId);
+      assert.equal(assembly.ratio, 4);
     });
     await t.test(
       'collector writes decimal values and deduplicates concurrent retries',
@@ -312,12 +406,21 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
           request('POST', 'machine-cycle', body, operator, 201, key),
         ]);
         assert.equal(first.id, second.id);
+        assert.equal(
+          (await request('POST', 'machine-cycle', body, operator, 201, randomUUID())).id,
+          first.id,
+        );
         assert.equal(first.timestamp, body.timestamp);
         await request('POST', 'machine-cycle', { ...body, consec: 78 }, operator, 409, key);
         const logBody = { machine_cycle_id: first.id, macro_id: macros[0].id, value: -12.34567 };
         const logKey = randomUUID();
         const log = await request('POST', 'macro-log', logBody, operator, 201, logKey);
         assert.equal(log.value, logBody.value);
+        assert.equal(
+          (await request('POST', 'macro-log', logBody, operator, 201, randomUUID())).id,
+          log.id,
+        );
+        await request('POST', 'macro-log', { ...logBody, value: 77 }, operator, 409, randomUUID());
         assert.equal(
           (await request('POST', 'macro-log', logBody, operator, 201, logKey)).id,
           log.id,
@@ -535,7 +638,10 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
     }
     for (const id of fixtures.departments)
       await query('DELETE FROM public.departments WHERE id=$1', [id]);
-    for (const { id } of fixtures.users) await query('DELETE FROM public.users WHERE id=$1', [id]);
+    for (const { id } of fixtures.users) {
+      await query('UPDATE lapper.gearsets SET user_id=NULL WHERE user_id=$1', [id]);
+      await query('DELETE FROM public.users WHERE id=$1', [id]);
+    }
     const after = await fingerprints();
     await app.close();
     assert.deepEqual(

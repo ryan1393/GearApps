@@ -1,7 +1,7 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from './auth.service';
-import { UsersService } from './users.service';
+import { toPublicUser, UsersService } from './users.service';
 
 describe('AuthService', () => {
   const user = { id: 'u1', email: 'a@b.c', password: 'hash', fname: 'A', lname: 'B' };
@@ -33,5 +33,19 @@ describe('AuthService', () => {
 
   it('rejects tampered tokens', async () => {
     await expect(svc.verify('not.a.token')).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
+  it('signs the account version from the same password-validated user snapshot', async () => {
+    const versioned = { ...user, authVersion: 3 };
+    users.findByEmail.mockResolvedValue(versioned);
+    users.verifyPassword.mockResolvedValue(true);
+    const { access_token } = await svc.login({ email: user.email, password: 'pw' });
+    expect(jwt.verify(access_token)).toMatchObject({ auth_version: 3 });
+    expect(toPublicUser(versioned)).toEqual({
+      id: user.id,
+      email: user.email,
+      fname: user.fname,
+      lname: user.lname,
+    });
   });
 });

@@ -1,4 +1,11 @@
 import { DataSource } from 'typeorm';
+import {
+  applySharedDatabaseIntegrity,
+  GEAR_DATABASE_SCHEMA_LOCK,
+  runDatabaseMigration,
+} from '@gearapps/shared/database';
+import { LAPPER_HISTORY_INTEGRITY_SQL } from './history-integrity';
+import { LAPPER_ARCHIVE_GUARD_SQL } from './archive-guard';
 
 // Compatible with the tested legacy import. Public manufacturing tables are
 // referenced, never synchronized or rebuilt by the Lapper API.
@@ -61,6 +68,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_lapper_profile_master ON lapper.machines(pu
 
 export async function migrateLapperPostgres(dataSource: DataSource): Promise<void> {
   await dataSource.transaction(async (manager) => {
+    await manager.query(GEAR_DATABASE_SCHEMA_LOCK);
+    await manager.query("SET LOCAL lock_timeout='5s'");
+    await manager.query("SET LOCAL statement_timeout='120s'");
     await manager.query(
       "SELECT pg_advisory_xact_lock(hashtextextended('gearapps-lapper-api-schema',0))",
     );
@@ -78,11 +88,23 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
     );
     const version = '20261109-postgres-lapper-v1';
     if (
-      (await manager.query('SELECT version FROM lapper.api_migrations WHERE version=$1', [version]))
-        .length
-    )
-      return;
-    await manager.query(LAPPER_POSTGRES_DDL);
-    await manager.query('INSERT INTO lapper.api_migrations(version) VALUES ($1)', [version]);
+      !(
+        await manager.query('SELECT version FROM lapper.api_migrations WHERE version=$1', [version])
+      ).length
+    ) {
+      await manager.query(LAPPER_POSTGRES_DDL);
+      await manager.query('INSERT INTO lapper.api_migrations(version) VALUES ($1)', [version]);
+    }
+    await applySharedDatabaseIntegrity(manager);
+    await runDatabaseMigration(
+      manager,
+      '20261109-lapper-history-integrity-v2',
+      LAPPER_HISTORY_INTEGRITY_SQL,
+    );
+    await runDatabaseMigration(
+      manager,
+      '20261109-lapper-archive-guard-v1',
+      LAPPER_ARCHIVE_GUARD_SQL,
+    );
   });
 }

@@ -278,7 +278,11 @@ export class PostgresLapperCatalog {
       .innerJoin('(SELECT * FROM lapper.machines)', 'lm', 'lm.id=c.machine_id')
       .innerJoin('(SELECT * FROM lapper.gearsets)', 'g', 'g.id=c.gearset_id')
       .setParameter('zone', this.timeZone);
-    if (filter.id) query.andWhere('c.id=:id', { id: filter.id });
+    if (filter.id)
+      query.andWhere(
+        'c.id=COALESCE((SELECT a.canonical_id FROM lapper.machine_cycle_aliases a WHERE a.original_id=:id),CAST(:id AS uuid))',
+        { id: filter.id },
+      );
     if (filter.ids) query.andWhere('c.id IN (:...ids)', { ids: filter.ids });
     if (filter.machineId)
       query.andWhere('(lm.public_machine_id=:machineId OR lm.id=:machineId)', {
@@ -327,7 +331,11 @@ export class PostgresLapperCatalog {
 
   async logs(id?: string, manager = this.db.manager): Promise<Row[]> {
     const query = manager.createQueryBuilder().select('l.*').from('lapper.macro_logs', 'l');
-    if (id) query.where('l.id=:id', { id });
+    if (id)
+      query.where(
+        'l.id=COALESCE((SELECT a.canonical_id FROM lapper.macro_log_aliases a WHERE a.original_id=:id),CAST(:id AS uuid))',
+        { id },
+      );
     const [rows, macros] = await readBatch(
       () => query.getRawMany<Row>(),
       () => this.macros(manager),

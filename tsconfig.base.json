@@ -19,6 +19,7 @@
     "forceConsistentCasingInFileNames": true,
     "paths": {
       "@gearapps/shared/domain": ["./libs/shared/domain/src/index.ts"],
+      "@gearapps/shared/database": ["./libs/shared/database/src/index.ts"],
       "@gearapps/api/core": ["./libs/api/core/src/index.ts"],
       "@gearapps/api/data-access": ["./libs/api/data-access/src/index.ts"],
       "@gearapps/api/feature-auth": ["./libs/api/feature-auth/src/index.ts"],

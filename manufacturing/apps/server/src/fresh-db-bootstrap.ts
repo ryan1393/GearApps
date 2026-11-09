@@ -4,6 +4,7 @@ import {
   UserDatabaseSeedService,
 } from '@gearapps/manufacturing/server/data-access';
 import { DataSource } from 'typeorm';
+import { withValidatedEmptyBootstrap } from '@gearapps/manufacturing/server/util-common';
 
 const required = (name: string): string => {
   const value = process.env[name]?.trim();
@@ -65,9 +66,10 @@ async function bootstrap(): Promise<void> {
     console.log('[INFO] Empty Gear database detected; enabling TypeORM synchronize for this one-shot bootstrap only.');
   }
 
-  const app = await NestFactory.createApplicationContext(SeedModule, {
+  const createContext=()=>NestFactory.createApplicationContext(SeedModule, {
     logger: ['log', 'warn', 'error'],
   });
+  const app=tables.length===0 ? await withValidatedEmptyBootstrap(createContext):await createContext();
 
   try {
     await app.get(UserDatabaseSeedService).seed();
