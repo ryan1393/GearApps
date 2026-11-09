@@ -1,0 +1,125 @@
+{
+  "name": "cutter-builder",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "gear",
+  "sourceRoot": "apps/cutter-builder/src",
+  "tags": [
+    "type:app",
+    "scope:frontend",
+    "framework:angular",
+    "domain:gear-apps"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:webpack-browser",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/apps/cutter-builder",
+        "index": "apps/cutter-builder/src/index.html",
+        "main": "apps/cutter-builder/src/main.ts",
+        "polyfills": [
+          "zone.js"
+        ],
+        "tsConfig": "apps/cutter-builder/tsconfig.app.json",
+        "assets": [
+          "apps/cutter-builder/src/favicon.ico",
+          "apps/cutter-builder/src/assets",
+          {
+            "glob": "**/*",
+            "input": "assets",
+            "output": "assets"
+          }
+        ],
+        "styles": [
+          "apps/cutter-builder/src/styles.css",
+          "node_modules/@dana/ui/styles/gear-compat.css",
+          "node_modules/@dana/ui/styles/gear-compat-features.css",
+          "node_modules/@dana/ui/styles/dana-ui.css",
+          "node_modules/@dana/ui/styles/gear-compat-overrides.css"
+        ],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "750kb",
+              "maximumError": "2mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "options": {
+        "proxyConfig": "apps/cutter-builder/proxy.conf.json",
+        "port": 4201
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "cutter-builder:build:production"
+        },
+        "development": {
+          "buildTarget": "cutter-builder:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "cutter-builder:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "apps/cutter-builder/**/*.ts",
+          "apps/cutter-builder/**/*.html"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "options": {
+        "jestConfig": "apps/cutter-builder/jest.config.ts",
+        "passWithNoTests": true,
+        "tsConfig": "apps/cutter-builder/tsconfig.spec.json"
+      }
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "cutter-builder:build",
+        "port": 4201
+      }
+    }
+  }
+}

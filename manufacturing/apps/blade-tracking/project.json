@@ -1,0 +1,130 @@
+{
+  "name": "blade-tracking",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "gear",
+  "sourceRoot": "apps/blade-tracking/src",
+  "tags": [
+    "type:app",
+    "scope:frontend",
+    "framework:angular",
+    "domain:gear-apps"
+  ],
+  "targets": {
+    "build": {
+      "executor": "@nx/angular:webpack-browser",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/apps/blade-tracking",
+        "index": "apps/blade-tracking/src/index.html",
+        "main": "apps/blade-tracking/src/main.ts",
+        "polyfills": [
+          "zone.js"
+        ],
+        "tsConfig": "apps/blade-tracking/tsconfig.app.json",
+        "assets": [
+          "apps/blade-tracking/src/favicon.ico",
+          "apps/blade-tracking/src/assets",
+          {
+            "glob": "**/*",
+            "input": "assets",
+            "output": "assets"
+          }
+        ],
+        "styles": [
+          "apps/blade-tracking/src/styles.css",
+          "node_modules/@dana/ui/styles/gear-compat.css",
+          "node_modules/@dana/ui/styles/gear-compat-features.css",
+          "node_modules/@dana/ui/styles/dana-ui.css",
+          "node_modules/@dana/ui/styles/gear-compat-overrides.css"
+        ],
+        "scripts": []
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "750kb",
+              "maximumError": "2mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "buildOptimizer": false,
+          "optimization": false,
+          "vendorChunk": true,
+          "extractLicenses": false,
+          "sourceMap": true,
+          "namedChunks": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "options": {
+        "proxyConfig": "apps/blade-tracking/proxy.conf.json"
+      },
+      "configurations": {
+        "production": {
+          "buildTarget": "blade-tracking:build:production"
+        },
+        "development": {
+          "buildTarget": "blade-tracking:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "options": {
+        "buildTarget": "blade-tracking:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "apps/blade-tracking/**/*.ts",
+          "apps/blade-tracking/**/*.html"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": [
+        "{workspaceRoot}/coverage/{projectRoot}"
+      ],
+      "options": {
+        "jestConfig": "apps/blade-tracking/jest.config.ts",
+        "passWithNoTests": true,
+        "tsConfig": "apps/blade-tracking/tsconfig.spec.json"
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "codeCoverage": true
+        }
+      }
+    },
+    "serve-static": {
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "blade-tracking:build",
+        "port": 4200
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "danaAppsVersion": "70.2.1",
+  "packageName": "@dana/ui",
+  "packageVersion": "0.3.2",
+  "visualSource": "Truck Log",
+  "dependency": "file:vendor/dana-ui/package",
+  "packageArtifact": "dana-ui-0.3.2.tgz",
+  "vendoredTreeSha256": "6A7AEBE1A8893E912D6DC8EA214434D2CCF1E1965EB3926ED0AA9680ECE9CA4A",
+  "vendoredTreeHashAlgorithm": "SHA-256 of sorted UTF-8 lines: uppercase file SHA-256, two spaces, relative POSIX path, newline",
+  "packageArtifactSha256": "2331B4E5BF369B3CEB704F86242ACCB55C455A7C20BDED28CFEECDD925C005C8",
+  "upstreamRepository": "https://github.com/ryan1393/Dana-UI",
+  "upstreamCommit": "b9ead55f435bb5ca225852c02c3918ce0a825f0c",
+  "compatibilityStylesSource": "original GearApps 70.2.0 upload",
+  "buildAngularVersion": "19.2.25",
+  "sourceArchive": "releases/DanaUI-0.3.2-source.zip"
+}

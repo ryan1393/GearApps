@@ -1,0 +1,235 @@
+<section class="gear-page gear-workflow-page">
+  <header
+    class="gear-page-header"
+    danaPageHeader
+    eyebrow="CUTTER BUILDER / BUILD"
+    heading="Build Cutter"
+    description="Scan the Cutter Body and a ready blade tray. Gear Apps validates Summary, part type, blade identity, quantity, tray stage, and active assignments before a build can be created."
+  ></header>
+
+  <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert">{{ error }}</div>
+
+  <div *ngIf="!result" class="gear-workflow-grid">
+    <section class="gear-workflow-section">
+      <div class="gear-workflow-section-header">
+        <span class="gear-workflow-step">1</span>
+        <div>
+          <h2>Cutter Body</h2>
+          <p>Scan the Dana S/N. MF S/N remains available as the transition fallback.</p>
+        </div>
+      </div>
+      <div class="gear-workflow-section-body">
+        <form class="gear-workflow-scan-row" (ngSubmit)="scanCutterBody()">
+          <label class="gear-field">
+            Cutter Body
+            <input
+              autofocus
+              [ngModel]="cutterBodySerial" (ngModelChange)="cutterBodyChanged($event)" [disabled]="busy"
+              name="cutterBodySerial"
+              class="gear-input font-mono"
+              placeholder="Scan Dana S/N or enter MF S/N..."
+              autocomplete="off"
+            />
+          </label>
+          <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy">Scan</button>
+        </form>
+        <div class="gear-workflow-divider">OR</div>
+        <label class="gear-field">
+          Select Available Cutter Body
+          <select [(ngModel)]="selectedCutterBodyId" name="selectedCutterBodyId" class="gear-input" (change)="selectAvailableCutterBody()" [disabled]="busy">
+            <option value="">Choose available cutter body...</option>
+            <option *ngFor="let body of availableCutterBodies" [value]="body.id">
+              {{ body.dana_serial_number || body.mf_serial_number }} · {{ cutterBodyRequiredBladeCount(body) || '?' }} blades
+            </option>
+          </select>
+        </label>
+
+
+        <div *ngIf="cutterBody as body" class="gear-workflow-selection">
+          <span class="gear-workflow-kicker">Selected Cutter Body</span>
+          <div class="gear-workflow-selection-title font-mono">{{ bodyDisplaySerial }}</div>
+          <div class="gear-workflow-detail-grid">
+            <div class="gear-workflow-detail">
+              <span class="gear-workflow-detail-label">Dana S/N</span>
+              <strong>{{ body.dana_serial_number || 'Not etched' }}</strong>
+            </div>
+            <div class="gear-workflow-detail">
+              <span class="gear-workflow-detail-label">MF S/N</span>
+              <strong>{{ body.mf_serial_number || '—' }}</strong>
+            </div>
+            <div class="gear-workflow-detail">
+              <span class="gear-workflow-detail-label">Definition</span>
+              <strong>{{ body.definition?.definition_code || body.description || '—' }}</strong>
+            </div>
+            <div class="gear-workflow-detail">
+              <span class="gear-workflow-detail-label">Status</span>
+              <strong>{{ body.enabled ? 'Enabled' : 'Disabled' }}</strong>
+            </div>
+          </div>
+          <p *ngIf="!body.dana_serial_number" class="gear-workflow-help">
+            Dana serial assignment belongs in <strong>Admin &gt; Cutter Bodies</strong>. Normal Cutter Builder does not administer etched serials.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="gear-workflow-section">
+      <div class="gear-workflow-section-header">
+        <span class="gear-workflow-step">2</span>
+        <div>
+          <h2>Ready Blade Tray</h2>
+          <p>Tray validation is authoritative. The exact required blades must be ready for cutter use.</p>
+        </div>
+      </div>
+      <div class="gear-workflow-section-body">
+        <form class="gear-workflow-scan-row" (ngSubmit)="scanTray()">
+          <label class="gear-field">
+            Tray serial
+            <input
+              [ngModel]="traySerial" (ngModelChange)="trayChanged($event)"
+              name="traySerial"
+              class="gear-input font-mono"
+              placeholder="Scan ready tray..."
+              autocomplete="off"
+              [disabled]="busy || !cutterBody"
+            />
+          </label>
+          <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy || !cutterBody">Scan</button>
+        </form>
+        <div class="gear-workflow-divider">OR</div>
+        <label class="gear-field">
+          Select Compatible Ready Tray
+          <select [(ngModel)]="selectedTraySerial" name="selectedTraySerial" class="gear-input"
+                  (change)="selectAvailableTray()" [disabled]="busy || !cutterBody">
+            <option value="">Choose compatible ready tray...</option>
+            <option *ngFor="let ready of compatibleReadyTrays" [value]="ready.tray_serial_number">
+              {{ ready.tray_serial_number }} · {{ ready.summary_number || 'No Summary' }} · {{ ready.part_type_code || 'No Part Type' }} · {{ ready.blade_count }} blades
+            </option>
+          </select>
+        </label>
+
+
+        <div *ngIf="tray as selectedTray" class="gear-workflow-selection">
+          <span class="gear-workflow-kicker">Selected Tray</span>
+          <div class="gear-workflow-selection-title font-mono">{{ selectedTray.serial_number }}</div>
+          <div class="gear-workflow-detail-grid">
+            <div class="gear-workflow-detail">
+              <span class="gear-workflow-detail-label">Summary</span>
+              <strong>{{ selectedTray.summary?.number || '—' }}</strong>
+            </div>
+            <div class="gear-workflow-detail">
+              <span class="gear-workflow-detail-label">Part Type</span>
+              <strong>{{ selectedTray.part_type?.code || '—' }}</strong>
+            </div>
+            <div class="gear-workflow-detail">
+              <span class="gear-workflow-detail-label">Blade Count</span>
+              <strong>{{ selectedTray.blade_count }}</strong>
+            </div>
+            <div class="gear-workflow-detail">
+              <span class="gear-workflow-detail-label">Stage</span>
+              <strong>{{ selectedTray.current_stage?.name || selectedTray.current_stage?.code || '—' }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="trayValidation as validation" class="gear-workflow-state" [class.gear-workflow-state-success]="validation.valid">
+          <span class="gear-workflow-kicker">Tray Validation</span>
+          <div class="gear-workflow-selection-title">{{ validation.valid ? 'Ready for Cutter Builder' : 'Not Ready' }}</div>
+          <p class="gear-workflow-help">
+            Required {{ validation.required_blade_count }} · Active {{ validation.active_blade_count }} ·
+            Summary {{ validation.summary_matches ? 'match' : 'mismatch' }} ·
+            Part Type {{ validation.part_type_matches ? 'match' : 'mismatch' }}
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="gear-workflow-section">
+      <div class="gear-workflow-section-header">
+        <span class="gear-workflow-step">3</span>
+        <div>
+          <h2>Build Details</h2>
+          <p>Record finishing state and optional roll-off values, then create the build.</p>
+        </div>
+      </div>
+      <div class="gear-workflow-section-body">
+        <label class="gear-field">
+          Cutter Builder Machine
+          <select [(ngModel)]="selectedCutterBuilderMachineId" name="cutterBuilderMachineId" class="gear-input" [disabled]="busy">
+            <option value="">Choose Department 45 Cutter Builder machine...</option>
+            <option *ngFor="let machine of availableCutterBuilderMachines" [value]="machine.id">
+              {{ machine.machine_number }}<ng-container *ngIf="machine.description"> · {{ machine.description }}</ng-container>
+            </option>
+          </select>
+          <small class="gear-field-help">Only enabled, active Department 45 machines whose Machine Type is Cutter Builder are available.</small>
+        </label>
+        <div *ngIf="availableCutterBuilderMachines.length === 0" class="gear-alert gear-alert-warning" role="status">
+          No eligible Cutter Builder machines are configured. In Admin → Machines, enable a Department 45 machine and set Machine Type to Cutter Builder.
+        </div>
+
+        <div class="gear-workflow-form-grid">
+          <label class="gear-field">
+            <span>IB RO</span>
+            <input [(ngModel)]="ibRo" name="ibRo" type="number" step="any" class="gear-input" />
+          </label>
+          <label class="gear-field">
+            <span>OB RO</span>
+            <input [(ngModel)]="obRo" name="obRo" type="number" step="any" class="gear-input" />
+          </label>
+          <label class="gear-field">
+            <span>Honed</span>
+            <input [(ngModel)]="honed" name="honed" type="checkbox" />
+          </label>
+          <label class="gear-field">
+            <span>Coated</span>
+            <input [(ngModel)]="coated" name="coated" type="checkbox" />
+          </label>
+        </div>
+
+        <label class="gear-field">
+          Comments
+          <textarea [(ngModel)]="comments" name="comments" class="gear-textarea" rows="3"></textarea>
+        </label>
+
+        <div class="gear-workflow-actions">
+          <button type="button" class="gear-btn gear-btn-secondary" (click)="reset()" [disabled]="busy">Reset</button>
+          <button type="button" class="gear-btn gear-btn-primary gear-workflow-submit" (click)="build()" [disabled]="!canBuild">
+            Create Cutter Build
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div *ngIf="result as r" class="cutter-card gear-workflow-card">
+    <div class="gear-workflow-card-header">
+      <div>
+        <span class="gear-workflow-kicker">Cutter Builder</span>
+        <div class="gear-workflow-card-title">CUTTER CARD</div>
+      </div>
+      <div>
+        <span class="gear-workflow-kicker">Build Number</span>
+        <div class="gear-workflow-card-number font-mono">{{ r.build.build_number }}</div>
+      </div>
+    </div>
+
+    <div class="gear-workflow-card-body gear-workflow-detail-grid gear-workflow-detail-grid-four">
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Cutter Body</span><strong>{{ r.build.cutter_body_serial_number }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Summary</span><strong>{{ r.build.summary_number }}</strong><small>{{ r.build.summary_model }}</small></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Part Type</span><strong>{{ r.build.part_type_code }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Blades</span><strong>{{ r.build.blade_count }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Source Tray</span><strong>{{ r.build.source_tray_serial_number }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Cutter Builder Machine</span><strong>{{ r.build.cutter_builder_machine_number || '—' }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Increment</span><strong>{{ r.build.build_increment }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Honed</span><strong>{{ r.build.honed ? 'YES' : 'NO' }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Coated</span><strong>{{ r.build.coated ? 'YES' : 'NO' }}</strong></div>
+    </div>
+
+    <div *ngIf="r.build.comments" class="gear-workflow-comments"><strong>Comments:</strong> {{ r.build.comments }}</div>
+
+    <div class="gear-workflow-actions gear-print-hide">
+      <button type="button" class="gear-btn gear-btn-secondary" (click)="print()">Print Cutter Card</button>
+      <button type="button" class="gear-btn gear-btn-primary" (click)="reset()">Build Another</button>
+    </div>
+  </div>
+</section>

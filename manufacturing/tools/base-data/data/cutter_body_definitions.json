@@ -1,0 +1,80 @@
+[
+  {
+    "Definition_Code": "CGRT076",
+    "Cutter_Head_Code": "C",
+    "Supplier_Code": "G",
+    "Supplier_Name": "Gleason",
+    "Hand_Code": "R",
+    "Hand_Name": "RIGHT",
+    "Blade_Family_Code": "T",
+    "Blade_Family_Name": "TRI-AC",
+    "Size_Code": "076",
+    "Size_Description": "76 mm - 13",
+    "Enabled": true
+  },
+  {
+    "Definition_Code": "CGLT076",
+    "Cutter_Head_Code": "C",
+    "Supplier_Code": "G",
+    "Supplier_Name": "Gleason",
+    "Hand_Code": "L",
+    "Hand_Name": "LEFT",
+    "Blade_Family_Code": "T",
+    "Blade_Family_Name": "TRI-AC",
+    "Size_Code": "076",
+    "Size_Description": "76 mm - 13",
+    "Enabled": true
+  },
+  {
+    "Definition_Code": "CGRT088",
+    "Cutter_Head_Code": "C",
+    "Supplier_Code": "G",
+    "Supplier_Name": "Gleason",
+    "Hand_Code": "R",
+    "Hand_Name": "RIGHT",
+    "Blade_Family_Code": "T",
+    "Blade_Family_Name": "TRI-AC",
+    "Size_Code": "088",
+    "Size_Description": "88 mm - 17",
+    "Enabled": true
+  },
+  {
+    "Definition_Code": "CGLT088",
+    "Cutter_Head_Code": "C",
+    "Supplier_Code": "G",
+    "Supplier_Name": "Gleason",
+    "Hand_Code": "L",
+    "Hand_Name": "LEFT",
+    "Blade_Family_Code": "T",
+    "Blade_Family_Name": "TRI-AC",
+    "Size_Code": "088",
+    "Size_Description": "88 mm - 17",
+    "Enabled": true
+  },
+  {
+    "Definition_Code": "CGRT105",
+    "Cutter_Head_Code": "C",
+    "Supplier_Code": "G",
+    "Supplier_Name": "Gleason",
+    "Hand_Code": "R",
+    "Hand_Name": "RIGHT",
+    "Blade_Family_Code": "T",
+    "Blade_Family_Name": "TRI-AC",
+    "Size_Code": "105",
+    "Size_Description": "105 mm family (8th-character convention applies)",
+    "Enabled": true
+  },
+  {
+    "Definition_Code": "CGLT105",
+    "Cutter_Head_Code": "C",
+    "Supplier_Code": "G",
+    "Supplier_Name": "Gleason",
+    "Hand_Code": "L",
+    "Hand_Name": "LEFT",
+    "Blade_Family_Code": "T",
+    "Blade_Family_Name": "TRI-AC",
+    "Size_Code": "105",
+    "Size_Description": "105 mm family (8th-character convention applies)",
+    "Enabled": true
+  }
+]

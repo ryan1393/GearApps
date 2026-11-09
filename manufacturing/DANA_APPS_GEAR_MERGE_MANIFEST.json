@@ -1,0 +1,778 @@
+{
+  "schemaVersion": 1,
+  "baseline": "Dana Apps V70.0.0",
+  "authoritativeTest": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/run-all-tests.ps1",
+  "sourcePackager": "tools/package-dana-apps-source.ps1",
+  "masterUiBaseline": "DANA_MASTER_UI_BASELINE.md",
+  "gearPreMergeReadiness": "DANA_APPS_GEAR_PREMERGE_READINESS.md",
+  "sourcePackageHygiene": "DANA_APPS_SOURCE_PACKAGE_HYGIENE.md",
+  "frameworkVersions": {
+    "nx": "23.0.2",
+    "@angular/core": "19.2.25",
+    "@nestjs/core": "10.4.22",
+    "typeorm": "0.3.31",
+    "pg": "8.21.0",
+    "typescript": "~5.7.3"
+  },
+  "rootHashes": {
+    "package.json": "CA024285B632BD85F9AC4FE32BAB46D72BD946C5590019B42B22D123BE1E353C",
+    "package-lock.json": "31157D12E9336DB9D47F1EA3852A2659E9AF35980583192A33B68E9170F688D6",
+    "nx.json": "C7606F50A0B7212DEE1C2384489D7247A7BE22A0C0DCA8AB3968396027B7FB04",
+    "tsconfig.base.json": "23798FDAAD23F1F619E8D282F89726A030CBBDB3F7C4CBBC481494CBD4B08E19"
+  },
+  "composeFiles": [
+    {
+      "path": "compose.yml",
+      "sha256": "92DFFF957B16309DBAE6F204E8F7C0E01AA87291448F497EE623894362A0FFF6"
+    }
+  ],
+  "runtimeProjects": [
+    {
+      "name": "blade-tracking",
+      "root": "apps/blade-tracking",
+      "projectType": "application",
+      "tags": [
+        "domain:gear-apps",
+        "framework:angular",
+        "scope:frontend",
+        "type:app"
+      ],
+      "targets": [
+        "build",
+        "extract-i18n",
+        "lint",
+        "serve",
+        "serve-static",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": true,
+      "hasTestTarget": true
+    },
+    {
+      "name": "cutter-builder",
+      "root": "apps/cutter-builder",
+      "projectType": "application",
+      "tags": [
+        "domain:gear-apps",
+        "framework:angular",
+        "scope:frontend",
+        "type:app"
+      ],
+      "targets": [
+        "build",
+        "extract-i18n",
+        "lint",
+        "serve",
+        "serve-static",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": true,
+      "hasTestTarget": true
+    },
+    {
+      "name": "greenshed",
+      "root": "apps/greenshed",
+      "projectType": "application",
+      "tags": [
+        "domain:gear-apps",
+        "framework:angular",
+        "scope:frontend",
+        "type:app"
+      ],
+      "targets": [
+        "build",
+        "extract-i18n",
+        "lint",
+        "serve",
+        "serve-static",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": true,
+      "hasTestTarget": true
+    },
+    {
+      "name": "gear-app-server",
+      "root": "apps/server",
+      "projectType": "application",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:app"
+      ],
+      "targets": [
+        "build",
+        "build-fresh-db-bootstrap",
+        "lint",
+        "serve",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": true,
+      "hasTestTarget": true
+    }
+  ],
+  "projects": [
+    {
+      "name": "blade-tracking",
+      "root": "apps/blade-tracking",
+      "projectType": "application",
+      "tags": [
+        "domain:gear-apps",
+        "framework:angular",
+        "scope:frontend",
+        "type:app"
+      ],
+      "targets": [
+        "build",
+        "extract-i18n",
+        "lint",
+        "serve",
+        "serve-static",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": true,
+      "hasTestTarget": true
+    },
+    {
+      "name": "blade-tracking-e2e",
+      "root": "apps/blade-tracking-e2e",
+      "projectType": "application",
+      "tags": [
+        "domain:gear-apps"
+      ],
+      "targets": [
+        "e2e",
+        "lint"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "cutter-builder",
+      "root": "apps/cutter-builder",
+      "projectType": "application",
+      "tags": [
+        "domain:gear-apps",
+        "framework:angular",
+        "scope:frontend",
+        "type:app"
+      ],
+      "targets": [
+        "build",
+        "extract-i18n",
+        "lint",
+        "serve",
+        "serve-static",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": true,
+      "hasTestTarget": true
+    },
+    {
+      "name": "frontend-data-access-blade-tracking",
+      "root": "libs/frontend/data-access-blade-tracking",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:frontend",
+        "type:data-access"
+      ],
+      "targets": [
+        "lint"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "frontend-data-access-common",
+      "root": "libs/frontend/data-access-common",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "framework:angular",
+        "scope:frontend",
+        "type:data-access"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "frontend-data-access-cutter-builder",
+      "root": "libs/frontend/data-access-cutter-builder",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:frontend",
+        "type:data-access"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "frontend-data-access-greenshed",
+      "root": "libs/frontend/data-access-greenshed",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:frontend",
+        "type:data-access"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "frontend-data-access-user",
+      "root": "libs/frontend/data-access-user",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:frontend",
+        "type:data-access"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "frontend-feature-admin-users",
+      "root": "libs/frontend/feature-admin-users",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "framework:angular",
+        "scope:frontend",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "frontend-feature-blade-tracking",
+      "root": "libs/frontend/feature-blade-tracking",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "framework:angular",
+        "scope:frontend",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "frontend-feature-cutter-builder",
+      "root": "libs/frontend/feature-cutter-builder",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:frontend",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "frontend-feature-greenshed",
+      "root": "libs/frontend/feature-greenshed",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:frontend",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "frontend-feature-login",
+      "root": "libs/frontend/feature-login",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "framework:angular",
+        "scope:frontend",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "frontend-util-common",
+      "root": "libs/frontend/util-common",
+      "projectType": "library",
+      "tags": [
+        "domain:shared",
+        "framework:angular",
+        "scope:frontend",
+        "type:util"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "gear-app-server",
+      "root": "apps/server",
+      "projectType": "application",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:app"
+      ],
+      "targets": [
+        "build",
+        "build-fresh-db-bootstrap",
+        "lint",
+        "serve",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": true,
+      "hasTestTarget": true
+    },
+    {
+      "name": "gear-app-server-e2e",
+      "root": "apps/server-e2e",
+      "projectType": null,
+      "tags": [
+        "domain:gear-apps"
+      ],
+      "targets": [
+        "e2e",
+        "lint"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "greenshed",
+      "root": "apps/greenshed",
+      "projectType": "application",
+      "tags": [
+        "domain:gear-apps",
+        "framework:angular",
+        "scope:frontend",
+        "type:app"
+      ],
+      "targets": [
+        "build",
+        "extract-i18n",
+        "lint",
+        "serve",
+        "serve-static",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": true,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-data-access",
+      "root": "libs/server/data-access",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:data-access"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-auth",
+      "root": "libs/server/feat-auth",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-blade",
+      "root": "libs/server/feat-blade",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-blade-tray",
+      "root": "libs/server/feat-blade-tray",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-container",
+      "root": "libs/server/feat-container",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-container-tray",
+      "root": "libs/server/feat-container-tray",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-cutter-build",
+      "root": "libs/server/feat-cutter-build",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-cutter-config",
+      "root": "libs/server/feat-cutter-config",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-greenshed",
+      "root": "libs/server/feat-greenshed",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-health",
+      "root": "libs/server/feat-health",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-location",
+      "root": "libs/server/feat-location",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-location-tray",
+      "root": "libs/server/feat-location-tray",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-part-summary",
+      "root": "libs/server/feat-part-summary",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-tray",
+      "root": "libs/server/feat-tray",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-feat-user",
+      "root": "libs/server/feat-user",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:feature"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-util-common",
+      "root": "libs/server/util-common",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:shared",
+        "type:util"
+      ],
+      "targets": [
+        "lint"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "server-util-mailer",
+      "root": "libs/server/util-mailer",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:util"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "server-util-testing",
+      "root": "libs/server/util-testing",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:server",
+        "type:util"
+      ],
+      "targets": [
+        "lint"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "shared-dana-app-config",
+      "root": "libs/shared/dana-app-config",
+      "projectType": "library",
+      "tags": [
+        "domain:shared",
+        "scope:shared",
+        "type:util"
+      ],
+      "targets": [
+        "lint"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "shared-util-constants",
+      "root": "libs/shared/util-constants",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:shared",
+        "type:util"
+      ],
+      "targets": [
+        "lint"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "shared-util-types",
+      "root": "libs/shared/util-types",
+      "projectType": "library",
+      "tags": [
+        "domain:gear-apps",
+        "scope:shared",
+        "type:util"
+      ],
+      "targets": [
+        "lint"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    }
+  ]
+}

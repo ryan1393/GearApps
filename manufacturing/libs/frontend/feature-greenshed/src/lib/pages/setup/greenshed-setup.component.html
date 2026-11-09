@@ -1,0 +1,93 @@
+<section class="gear-page gear-workflow-page">
+  <header
+    class="gear-page-header"
+    danaPageHeader
+    eyebrow="GREENSHED / SETUP"
+    heading="Machine Setup"
+    description="Assign an available cutter to a validated machine and matching production part."
+  ></header>
+
+  <div *ngIf="error" class="gear-feedback" role="alert">{{ error }}</div>
+  <div *ngIf="message" class="gear-feedback" role="status" aria-live="polite">{{ message }}</div>
+
+  <div *ngIf="!result" class="gear-workflow-grid">
+    <section class="gear-workflow-section">
+      <div class="gear-workflow-section-header"><span class="gear-workflow-step">1</span><div><h2>Select Cutter Build</h2><p>Choose a ready cutter build to put on a machine.</p></div></div>
+      <div class="gear-workflow-section-body">
+        <label class="gear-field">Available Cutter Build
+          <select [(ngModel)]="buildNumber" name="build" (change)="selectBuild()" class="gear-select" [disabled]="busy">
+            <option value="">Choose available cutter build...</option>
+            <option *ngFor="let row of availableBuilds" [value]="row.build_number">{{row.build_number}} · Summary {{row.summary_number}} · {{row.part_type_code}}</option>
+          </select>
+        </label>
+        <div *ngIf="build" class="gear-workflow-selection">
+          <div class="gear-workflow-selection-title font-mono">{{ build.build_number }}</div>
+          <div class="gear-workflow-detail-grid">
+            <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Body</span><strong>{{ build.cutter_body_serial_number }}</strong></div>
+            <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Status</span><strong>{{ build.status_code }}</strong></div>
+            <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Summary</span><strong>{{ build.summary_number }}</strong></div>
+            <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Part Type</span><strong>{{ build.part_type_code }}</strong></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="gear-workflow-section">
+      <div class="gear-workflow-section-header"><span class="gear-workflow-step">2</span><div><h2>Machine &amp; Production Part</h2><p>Pick the machine and the part it will run.</p></div></div>
+      <div class="gear-workflow-section-body">
+        <label class="gear-field">Machine Number
+          <select [(ngModel)]="machineNumber" name="machine" (change)="selectMachine()" class="gear-select" [disabled]="busy||!build||machineLocked">
+            <option value="">Choose available machine...</option>
+            <option *ngIf="machineLocked && !availableMachineNumbers.includes(machineNumber)" [value]="machineNumber">{{machineNumber}}</option>
+            <option *ngFor="let machineNo of availableMachineNumbers" [value]="machineNo">{{machineNo}}</option>
+          </select>
+        </label>
+        <p *ngIf="machineLocked" class="gear-workflow-help">Selected from Running Machines. To use a different machine, return to Running Machines.</p>
+        <div *ngIf="machine" class="gear-workflow-state gear-workflow-state-success"><strong>Validated {{machine.machine_number}}</strong> · {{machine.department_code}}<ng-container *ngIf="machine.cell!==null"> · Cell {{machine.cell}}</ng-container></div>
+
+        <label class="gear-field">Part Number
+          <select [(ngModel)]="partNumber" name="part" (change)="selectPart()" class="gear-select" [disabled]="busy||!build">
+            <option value="">Choose part for Summary {{build?.summary_number || '—'}}...</option>
+            <option *ngFor="let row of matchingParts" [value]="row.part_number">{{row.part_number}}</option>
+          </select>
+        </label>
+        <div *ngIf="build && matchingParts.length===0" class="gear-workflow-state gear-workflow-state-warning">No active {{build.part_type_code}} parts are assigned to Summary {{build.summary_number}}.</div>
+        <div *ngIf="part" class="gear-workflow-state gear-workflow-state-success">
+          <div class="gear-workflow-detail-grid gear-workflow-detail-grid-four">
+            <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Part</span><strong>{{part.part_number}}</strong></div>
+            <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Summary</span><strong>{{part.summary?.number}}</strong></div>
+            <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Type</span><strong>{{part.part_type?.name}}</strong></div>
+            <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Teeth</span><strong>{{part.teeth ?? '—'}}</strong></div>
+          </div>
+        </div>
+        <div *ngIf="part && selectedRollMaster as rollMaster" class="gear-workflow-state" [class.gear-workflow-state-warning]="rollMasterLow" [class.gear-workflow-state-info]="!rollMasterLow">
+          <div class="gear-workflow-status-row">
+            <div><span class="gear-workflow-detail-label">Roll Master</span><strong>Current {{ rollMasterCurrentQuantity }} · Minimum {{ rollMasterMinimumQuantity }}</strong></div>
+            <span *ngIf="rollMasterLow" class="gear-workflow-kicker">Low Quantity</span>
+          </div>
+          <p *ngIf="rollMasterLow"><strong>Warning: Roll Master quantity for {{ part.part_number }} is at or below its configured minimum.</strong></p>
+        </div>
+        <div *ngIf="part && !selectedRollMaster" class="gear-workflow-state gear-workflow-state-info">No Roll Master quantity is configured for {{ part.part_number }}.</div>
+
+        <div class="gear-workflow-form-grid">
+          <label class="gear-field">Starting Piece Count<input type="number" min="0" step="1" [disabled]="busy" [(ngModel)]="startingPieceCount" name="count" class="gear-input" /></label>
+          <label class="gear-field gear-workflow-span-full">Comments<textarea [(ngModel)]="comments" [disabled]="busy" name="comments" rows="3" class="gear-textarea"></textarea></label>
+        </div>
+        <div class="gear-workflow-actions">
+          <button type="button" (click)="setup()" [disabled]="busy||!build||!machine||!part||!['READY','SHELF'].includes(build.status_code)" danaButton="primary" class="gear-workflow-submit">{{busy?'Setting up…':'Setup Cutter'}}</button>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div *ngIf="result" class="gear-workflow-result" role="status" aria-live="polite">
+    <div class="gear-workflow-result-header">
+      <div><span class="gear-workflow-kicker">Machine Setup</span><div class="gear-workflow-result-title">Setup Complete</div></div>
+    </div>
+    <div class="gear-workflow-result-body">
+      <p>Next 25-piece quality check is due at piece <strong>{{ result.next_check_piece_count }}</strong>.</p>
+    </div>
+    <div class="gear-workflow-result-footer gear-workflow-actions">
+      <button type="button" (click)="startAnother()" class="gear-btn gear-btn-dark">Setup Another Cutter</button>
+    </div>
+  </div>
+</section>

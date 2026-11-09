@@ -1,0 +1,12 @@
+/* @dana/ui Gear compatibility: Gear Apps feature presentation (dashboards, Running Machines
+   board, inventory, scrap). Load AFTER gear-compat.css and BEFORE dana-ui.css.
+   Temporary migration debt like the rest of the Gear layer; Truck Log must not import it. */
+@import './gear-apps/features/blade-dashboard.css';
+@import './gear-apps/features/cutter-builder.css';
+@import './gear-apps/features/greenshed-running-machines.css';
+@import './gear-apps/features/greenshed-running-machines-typography.css';
+@import './gear-apps/features/greenshed-running-machines-colors.css';
+@import './gear-apps/features/greenshed-running-machines-counts.css';
+@import './gear-apps/features/inventory-core.css';
+@import './gear-apps/features/inventory-relations.css';
+@import './gear-apps/features/scrap-blades.css';

@@ -1,0 +1,126 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "module": "esnext",
+    "lib": [
+      "es2020",
+      "dom"
+    ],
+    "skipLibCheck": true,
+    "skipDefaultLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@libs/frontend/data-access-common": [
+        "libs/frontend/data-access-common/src/index.ts"
+      ],
+      "@libs/frontend/data-access-blade-tracking": [
+        "libs/frontend/data-access-blade-tracking/src/index.ts"
+      ],
+      "@libs/frontend/data-access-cutter-builder": [
+        "libs/frontend/data-access-cutter-builder/src/index.ts"
+      ],
+      "@libs/frontend/data-access-greenshed": [
+        "libs/frontend/data-access-greenshed/src/index.ts"
+      ],
+      "@libs/frontend/data-access-user": [
+        "libs/frontend/data-access-user/src/index.ts"
+      ],
+      "@libs/frontend/feature-admin-users": [
+        "libs/frontend/feature-admin-users/src/index.ts"
+      ],
+      "@libs/frontend/feature-blade-tracking": [
+        "libs/frontend/feature-blade-tracking/src/index.ts"
+      ],
+      "@libs/frontend/feature-cutter-builder": [
+        "libs/frontend/feature-cutter-builder/src/index.ts"
+      ],
+      "@libs/frontend/feature-greenshed": [
+        "libs/frontend/feature-greenshed/src/index.ts"
+      ],
+      "@libs/frontend/feature-login": [
+        "libs/frontend/feature-login/src/index.ts"
+      ],
+      "@libs/frontend/util-common": [
+        "libs/frontend/util-common/src/index.ts"
+      ],
+      "@libs/server/data-access": [
+        "libs/server/data-access/src/index.ts"
+      ],
+      "@libs/server/feat-auth": [
+        "libs/server/feat-auth/src/index.ts"
+      ],
+      "@libs/server/feat-health": [
+        "libs/server/feat-health/src/index.ts"
+      ],
+      "@libs/server/feat-user": [
+        "libs/server/feat-user/src/index.ts"
+      ],
+      "@libs/server/util-common": [
+        "libs/server/util-common/src/index.ts"
+      ],
+      "@libs/server/util-mailer": [
+        "libs/server/util-mailer/src/index.ts"
+      ],
+      "@libs/server/util-mailer/testing": [
+        "libs/server/util-mailer/src/testing/index.ts"
+      ],
+      "@libs/server/util-testing": [
+        "libs/server/util-testing/src/index.ts"
+      ],
+      "@libs/shared/util-constants": [
+        "libs/shared/util-constants/src/index.ts"
+      ],
+      "@libs/shared/util-types": [
+        "libs/shared/util-types/src/index.ts"
+      ],
+      "@libs/server/feat-location": [
+        "libs/server/feat-location/src/index.ts"
+      ],
+      "@libs/server/feat-tray": [
+        "libs/server/feat-tray/src/index.ts"
+      ],
+      "@libs/server/feat-container": [
+        "libs/server/feat-container/src/index.ts"
+      ],
+      "@libs/server/feat-part-summary": [
+        "libs/server/feat-part-summary/src/index.ts"
+      ],
+      "@libs/server/feat-blade": [
+        "libs/server/feat-blade/src/index.ts"
+      ],
+      "@libs/server/feat-location-tray": [
+        "libs/server/feat-location-tray/src/index.ts"
+      ],
+      "@libs/server/feat-container-tray": [
+        "libs/server/feat-container-tray/src/index.ts"
+      ],
+      "@libs/server/feat-blade-tray": [
+        "libs/server/feat-blade-tray/src/index.ts"
+      ],
+      "@libs/server/feat-cutter-config": [
+        "libs/server/feat-cutter-config/src/index.ts"
+      ],
+      "@libs/server/feat-cutter-build": [
+        "libs/server/feat-cutter-build/src/index.ts"
+      ],
+      "@libs/server/feat-greenshed": [
+        "libs/server/feat-greenshed/src/index.ts"
+      ],
+      "@libs/shared/dana-app-config": [
+        "libs/shared/dana-app-config/src/index.ts"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "tmp"
+  ]
+}

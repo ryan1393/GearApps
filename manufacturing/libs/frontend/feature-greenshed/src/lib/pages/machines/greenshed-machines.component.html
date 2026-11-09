@@ -1,0 +1,155 @@
+<section class="gear-page running-machines-page">
+  <div class="running-machines-header">
+    <!-- DANA-R61R6-LOGO-REMOVED -->
+    <div class="running-title-wrap">
+      <p class="text-xs font-bold uppercase tracking-[.16em] text-slate-500">Gear Quality / Greenshed</p>
+      <h1>Running Machines</h1>
+      <p *ngIf="board?.current_shift" class="current-shift-label">{{ board?.current_shift?.label }}</p>
+      <p>Live cutter status and last quality check by department.</p>
+    </div>
+    <div class="running-header-actions">
+      <div class="machine-active-filter" aria-label="Machine active filter">
+        <button type="button" [class.active]="activeFilter === 'ACTIVE'" (click)="setActiveFilter('ACTIVE')">Active</button>
+        <button type="button" [class.active]="activeFilter === 'INACTIVE'" (click)="setActiveFilter('INACTIVE')">Inactive</button>
+        <button type="button" [class.active]="activeFilter === 'ALL'" (click)="setActiveFilter('ALL')">All</button>
+      </div>
+      <button type="button" (click)="refresh()" [disabled]="busy" class="running-refresh">
+        {{ busy ? 'Refreshing…' : 'Refresh' }}
+      </button>
+      <div *ngIf="board" class="last-refresh">
+        Last refreshed<br />
+        <strong>{{ board.refreshed_at | date:'M/d/y h:mm a' }}</strong>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="rounded-xl border border-red-200 bg-red-50 p-4 font-semibold text-red-800">
+    {{ error }}
+  </div>
+
+  <div *ngIf="board as b" class="department-board">
+    <section *ngFor="let dept of b.departments" class="department-panel gear-panel">
+      <div class="department-title">Department {{ dept.department_code }}</div>
+
+      <div danaTableShell class="running-table-wrap">
+        <table danaTable class="gear-table running-machine-table">
+          <thead>
+            <tr>
+              <th class="machine-col">
+                <span class="column-heading-stack">
+                  <span>CELL</span>
+                  <span>MACHINE</span>
+                </span>
+              </th>
+              <th>
+                <span class="column-heading-stack">
+                  <span>BUILD</span>
+                  <span>ID</span>
+                </span>
+              </th>
+              <th>
+                <span class="column-heading-stack single-line">
+                  <span>PART</span>
+                </span>
+              </th>
+              <th class="part-count-col" title="Recorded total on the active cutter run"><span class="column-heading-stack"><span>PART</span><span>COUNT</span></span></th>
+              <th class="shift-count-col" [attr.title]="board?.current_shift?.label || 'Recorded count increases during the current shift'"><span class="column-heading-stack"><span>SHIFT</span><span>COUNT</span></span></th>
+              <th class="machine-check-col">
+                <span class="column-heading-stack">
+                  
+                  <span>LAST CHECK</span>
+                  <span>DATE</span>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let machine of sortedMachines(dept.machines)" [class.machine-open]="!machine.has_cutter">
+              <td class="machine-cell">
+                <button
+                  type="button"
+                  class="machine-number-button"
+                  [attr.data-cell-color]="(machine.cell === null || machine.cell === undefined) || machine.cell < 0 ? 'unassigned' : machine.cell % 12"
+                  [attr.data-machine-active]="machine.machine_active ? 'true' : 'false'"
+                  [style.background-color]="machine.machine_background_color"
+                  [attr.title]="'Cell ' + (machine.cell ?? '—') + ' · ' + (machine.machine_active ? 'ACTIVE' : 'INACTIVE')"
+                  (click)="toggleActions(machine)"
+                >
+                  <span *ngIf="(machine.cell !== null && machine.cell !== undefined)" class="cell-tag">CELL {{ machine.cell }}</span>
+                  <span class="machine-number-value">{{ machine.machine_number }}</span>
+                </button>
+
+              </td>
+
+              <td>
+                <button
+                  *ngIf="machine.has_cutter"
+                  type="button"
+                  class="build-link"
+                  (click)="openBuild(machine)"
+                >
+                  {{ machine.build_number }}
+                </button>
+              </td>
+              <td>{{ machine.part_number || '' }}</td>
+              
+              <td class="part-count-cell"><span *ngIf="machine.has_cutter" class="part-count-value">{{ machine.current_piece_count | number:'1.0-0' }}</span></td>
+              <td class="shift-count-cell" [attr.title]="board?.current_shift?.is_complete ? 'Recorded count increases during the current shift' : 'Partial shift: tracking began after this shift started'"><span class="shift-count-value">{{ (machine.shift_piece_count === null || machine.shift_piece_count === undefined) ? '—' : (machine.shift_piece_count | number:'1.0-0') }}<sup *ngIf="board?.current_shift && !board?.current_shift?.is_complete">*</sup></span></td>
+              <td class="machine-check-cell">
+                
+                <span
+                  *ngIf="machine.has_cutter"
+                  class="last-check-value"
+                  [class.last-check-setup]="machine.last_check_code === 'CS'"
+                  [class.last-check-good]="machine.last_check_code !== 'CS' && !machine.check_due"
+                  [class.last-check-frequency]="machine.last_check_code === 'FC' && !machine.check_due"
+                  [class.last-check-due]="machine.check_due"
+                >
+                  {{
+                    machine.last_check_code === 'CS'
+                      ? 'Setup'
+                      : machine.last_check_code === 'FC'
+                        ? 'Frequency'
+                        : machine.last_check_code === 'CMM'
+                          ? 'CMM'
+                          : machine.last_check_name
+                  }}
+                  <span *ngIf="machine.last_check_result && machine.last_check_code !== 'CS'">
+                    · {{ machine.last_check_result }}
+                  </span>
+                </span>
+              
+                <span *ngIf="machine.last_check_at" class="check-date-value">
+                  {{ machine.last_check_at | date:'M/d/y h:mm a' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <div class="running-machines-footer">
+    <span class="shift-count-note">Shift Count = recorded increases this shift (ET).</span>
+    <span *ngIf="board?.current_shift && !board?.current_shift?.is_complete" class="shift-count-note">* Partial shift: tracking began during this shift.</span>
+    <span>Green = quality check complete</span>
+    <span>Yellow = setup / no quality check yet</span>
+    <span>Red = 25-piece check due</span>
+    <span>Machine number color comes from Cell</span>
+    <span>Active/Inactive comes from the Machine master record</span>
+    <span>Cutter occupancy comes from the active machine run</span>
+    <span>Click a machine number for actions</span>
+  </div>
+</section>
+<dialog #machineActions class="machine-actions-dialog" aria-labelledby="machine-actions-title" (cancel)="closeActions()" (click)="closeFromBackdrop($event)">
+  <h2 id="machine-actions-title">Machine {{ selectedMachine?.machine_number }}</h2>
+  <p>Build ID <strong class="font-mono">{{ selectedMachine?.build_number }}</strong></p>
+  <div *ngIf="selectedMachine as machine" class="dialog-actions">
+    <button type="button" class="gear-btn gear-btn-primary" (click)="frequencyCheck(machine)">Frequency Check</button>
+    <button type="button" class="gear-btn gear-btn-secondary" (click)="cmmCheck(machine)">ZEISS / CMM Check</button>
+    <button type="button" class="gear-btn gear-btn-secondary" (click)="changeover(machine)">Cutter Change Over</button>
+    <button type="button" class="gear-btn gear-btn-secondary" (click)="deathCertificate(machine)">Cutter Death Certificate</button>
+    <button type="button" autofocus class="gear-btn gear-btn-secondary" (click)="closeActions()">Close</button>
+  </div>
+</dialog>

@@ -1,0 +1,35 @@
+/* R24R4: local dashboard tray drilldown only; no shared/Admin sizing changes. */
+:host .availability-stage-card { appearance: none; width: 100%; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: .2rem; border: 1px solid #cbd5e1; border-radius: .75rem; padding: 1rem; background: #fff; color: #1e293b; font: inherit; text-align: left; cursor: pointer; }
+:host .availability-stage-card:hover { border-color: #2563eb; background: #f8fafc; }
+:host .availability-stage-card.is-selected { border-color: #1d4ed8; background: #eff6ff; box-shadow: inset 0 0 0 1px #1d4ed8; }
+:host .availability-stage-card:focus-visible, :host .availability-tray-list a:focus-visible, :host .availability-tray-list button:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+:host .availability-stage-card:disabled { cursor: wait; opacity: .7; }
+:host .availability-stage-count { font-size: 1.5rem; line-height: 1.25; }
+:host .availability-stage-name { font-size: .875rem; font-weight: 800; }
+:host .availability-stage-code { font-size: .7rem; color: #64748b; overflow-wrap: anywhere; }
+:host .availability-stage-hint { font-size: .75rem; color: #1d4ed8; font-weight: 700; margin-top: .25rem; }
+:host .availability-tray-list { margin-top: 1rem; border: 1px solid #bfdbfe; border-radius: .75rem; padding: 1rem; background: #fff; }
+:host .availability-tray-toolbar, :host .availability-tray-footer { display: flex; justify-content: space-between; align-items: center; gap: .75rem; flex-wrap: wrap; }
+:host .availability-tray-toolbar h3 { margin: 0; font-size: 1.05rem; font-weight: 800; }
+:host .availability-tray-toolbar p { margin: .3rem 0; font-size: .875rem; color: #475569; }
+:host .availability-tray-search { margin: .8rem 0; }
+:host .availability-tray-search label { display: grid; gap: .3rem; font-weight: 700; font-size: .875rem; width: min(100%, 28rem); }
+:host .availability-tray-search input { width: 100%; min-width: 0; }
+:host .availability-tray-table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: .9375rem; }
+:host .availability-tray-table th, :host .availability-tray-table td { padding: .7rem .5rem; border-bottom: 1px solid #e2e8f0; text-align: center; vertical-align: middle; overflow-wrap: anywhere; }
+:host .availability-tray-table th { background: #f8fafc; color: #334155; font-weight: 700; }
+:host .availability-tray-table td span { display: block; }
+:host .availability-tray-table a { color: #1d4ed8; font-weight: 700; text-decoration: underline; }
+:host .availability-tray-table .availability-empty-trays { padding: 1.5rem .75rem; color: #475569; }
+:host .availability-tray-footer { margin-top: .75rem; }
+:host .availability-tray-footer small { color: #475569; max-width: 42rem; }
+:host .availability-tray-pagination { display: flex; align-items: center; gap: .75rem; font-size: .875rem; }
+:host .availability-visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@media (max-width: 700px) {
+  :host .availability-tray-table, :host .availability-tray-table tbody, :host .availability-tray-table tr, :host .availability-tray-table td { display: block; width: 100%; }
+  :host .availability-tray-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+  :host .availability-tray-table tr { border: 1px solid #e2e8f0; border-radius: .5rem; margin-top: .75rem; padding: .4rem; }
+  :host .availability-tray-table td { box-sizing: border-box; border: 0; text-align: left; padding: .35rem; }
+  :host .availability-tray-table td[data-label]::before { content: attr(data-label) ': '; font-weight: 700; margin-right: .4rem; }
+  :host .availability-tray-table td span { display: inline-block; margin-right: .4rem; }
+}

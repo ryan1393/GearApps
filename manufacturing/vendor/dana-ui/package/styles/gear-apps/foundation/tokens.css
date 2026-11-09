@@ -1,0 +1,132 @@
+/* ============================================================
+   GEAR APPS DESIGN SYSTEM TOKENS
+   Canonical visual constants shared by every Gear Apps frontend.
+   This is the only module allowed to define global design tokens.
+   ============================================================ */
+
+:root {
+  --gear-font-sans: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --gear-sidebar-width: 272px;
+  --gear-topbar-height: 68px;
+
+  --gear-navy-950: #061a2f;
+  --gear-navy-900: #071a30;
+  --gear-navy-800: #08233d;
+  --gear-blue-700: #0b5fc9;
+  --gear-blue-600: #1676e8;
+  --gear-blue-500: #2563eb;
+
+  --gear-heading: #132238;
+  --gear-text: #26384d;
+  --gear-muted: #68798d;
+  --gear-muted-soft: #8491a4;
+  --gear-text-muted: var(--gear-muted);
+  --gear-border: #d7e2ec;
+  --gear-border-soft: #e5edf3;
+  --gear-border-strong: #c5d3df;
+  --gear-page: #edf3f8;
+  --gear-page-top: #f7fafc;
+  --gear-page-accent: #e8f2f9;
+  --gear-bg-app: var(--gear-page);
+  --gear-surface: #ffffff;
+  --gear-surface-muted: #f5f9fc;
+  --gear-surface-subtle: var(--gear-surface-muted);
+  --gear-surface-accent: #eef6fb;
+  --gear-accent: #1769aa;
+  --gear-accent-soft: #e6f1f9;
+  --gear-focus: #2b6cb0;
+  --gear-sidebar: #0a1d31;
+  --gear-sidebar-raised: #102a45;
+  --gear-sidebar-text: #e7eef7;
+
+  --gear-success: #047857;
+  --gear-success-bg: #ecfdf5;
+  --gear-warning: #b45309;
+  --gear-warning-bg: #fffbeb;
+  --gear-danger: #b42318;
+  --gear-danger-bg: #fff5f5;
+
+  /* Canonical shop-floor type scale. Responsive overrides may raise these values. */
+  --gear-font-xs: 11px;
+  --gear-font-sm: 12px;
+  --gear-font-md: 14px;
+  --gear-font-lg: 16px;
+  --gear-font-xl: 20px;
+  --gear-font-2xl: 24px;
+
+  --gear-weight-normal: 400;
+  --gear-weight-medium: 500;
+  --gear-weight-semibold: 600;
+  --gear-weight-bold: 700;
+  --gear-weight-heavy: 800;
+
+  --gear-line-tight: 1.2;
+  --gear-line-normal: 1.45;
+  --gear-line-relaxed: 1.55;
+
+  --gear-space-1: .25rem;
+  --gear-space-2: .375rem;
+  --gear-space-3: .5rem;
+  --gear-space-4: .75rem;
+  --gear-space-5: 1rem;
+  --gear-space-6: 1.25rem;
+  --gear-space-7: 1.5rem;
+  --gear-space-8: 2rem;
+
+  --gear-radius-sm: 8px;
+  --gear-radius-md: 10px;
+  --gear-radius-lg: 12px;
+  --gear-radius-xl: 16px;
+  --gear-radius-pill: 999px;
+
+  --gear-shadow-sm: 0 1px 2px rgba(15, 23, 42, .025);
+  --gear-shadow-panel: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 24px rgba(20, 52, 80, .065);
+  --gear-shadow-raised: 0 14px 34px rgba(15, 23, 42, .12);
+  --gear-shadow-popover: 0 14px 34px rgba(15, 23, 42, .20);
+
+  --gear-panel-bg: var(--gear-surface);
+  --gear-panel-border: var(--gear-border);
+  --gear-panel-radius: var(--gear-radius-lg);
+  --gear-panel-header-pad-y: 14px;
+  --gear-panel-header-pad-x: 16px;
+
+  --gear-control-height: 44px;
+  --gear-control-border: var(--gear-border-strong);
+  --gear-control-radius: var(--gear-radius-md);
+  --gear-control-bg: var(--gear-surface);
+
+  --gear-table-min-header-height: 42px;
+  --gear-table-header-pad-y: .72rem;
+  --gear-table-header-pad-x: .95rem;
+  --gear-table-cell-pad-y: .68rem;
+  --gear-table-cell-pad-x: .95rem;
+  --gear-table-header-gap: .42rem;
+  --gear-table-header-bg: linear-gradient(180deg, #eef5fa, #e8f1f7);
+  --gear-table-header-text: #4f687d;
+  --gear-table-border: #dfe6ee;
+  --gear-table-row-hover: #eef6fb;
+
+  /* === DANA APPS SHARED SEMANTIC TOKENS START === */
+  --dana-radius-control: var(--gear-radius-sm);
+  --dana-radius-card: var(--gear-radius-md);
+  --dana-radius-panel: var(--gear-radius-lg);
+  --dana-radius-hero: var(--gear-radius-xl);
+  --dana-radius-pill: var(--gear-radius-pill);
+  --dana-section-gap: 1rem;
+  --dana-panel-header-pad-y: var(--gear-panel-header-pad-y);
+  --dana-panel-header-pad-x: var(--gear-panel-header-pad-x);
+  --dana-panel-header-border: #dfe9f1;
+  --dana-panel-header-bg: linear-gradient(180deg, #f7fafc, #eff6fa);
+  --dana-count-border: #d5e4f2;
+  --dana-count-bg: #f2f7fb;
+  --dana-count-text: #2c669a;
+  --dana-empty-border: #d4dee8;
+  --dana-empty-bg: #f9fbfd;
+  /* === DANA APPS SHARED SEMANTIC TOKENS END === */
+
+  --dana-dashboard-gap: 14px;
+  --dana-dashboard-section-gap: 14px;
+  --dana-dashboard-panel-header-y: 15px;
+  --dana-dashboard-panel-header-x: 17px;
+}

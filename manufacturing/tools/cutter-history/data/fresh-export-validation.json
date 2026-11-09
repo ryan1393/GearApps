@@ -1,0 +1,23 @@
+{
+    "generated_at":  "2026-08-23T17:49:09.0239057-04:00",
+    "source_row_counts":  {
+                              "cutter_builds":  1770,
+                              "logs":  14981,
+                              "setups":  1693,
+                              "frequency":  9844,
+                              "retired":  1595,
+                              "pull_reasons":  27,
+                              "machines":  55
+                          },
+    "log_toc_counts":  {
+                           "CB":  1770,
+                           "CS":  1693,
+                           "FC":  9844,
+                           "CP":  1595
+                       },
+    "notes":  [
+                  "This is a source snapshot only.",
+                  "Known legacy orphan/reused Check_ID cleanup is intentionally handled after export.",
+                  "No SQL Server data was changed."
+              ]
+}

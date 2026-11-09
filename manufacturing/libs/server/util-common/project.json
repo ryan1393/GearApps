@@ -1,0 +1,24 @@
+{
+  "name": "server-util-common",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/server/util-common/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "libs/server/util-common/**/*.ts"
+        ]
+      }
+    }
+  },
+  "tags": [
+    "type:util",
+    "scope:shared",
+    "domain:gear-apps"
+  ]
+}

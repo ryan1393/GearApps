@@ -1,0 +1,85 @@
+<section class="gear-page gear-workflow-page">
+  <header class="gear-page-header" danaPageHeader eyebrow="GREENSHED / QUALITY" heading="Quality Check"
+    description="Record a Frequency or ZEISS / CMM check for the active cutter."></header>
+  <div *ngIf="error" class="gear-feedback" role="alert">{{ error }}</div>
+  <div *ngIf="message" class="gear-feedback" role="status" aria-live="polite">{{ message }}</div>
+
+  <section *ngIf="!lockedToRunningMachine" class="gear-workflow-section">
+    <div class="gear-workflow-section-header"><div><h2>Scan Active Cutter</h2><p>Open the current machine run before recording quality.</p></div></div>
+    <div class="gear-workflow-section-body">
+      <form class="gear-workflow-scan-row" (ngSubmit)="scan()">
+        <label class="gear-field">Build ID<input autofocus [(ngModel)]="buildNumber" (ngModelChange)="onBuildInput()" name="build" class="gear-input font-mono" placeholder="Scan active cutter build..." [disabled]="busy" /></label>
+        <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy">{{ busy ? 'Checking…' : 'Scan' }}</button>
+      </form>
+      <div class="gear-workflow-divider">OR</div>
+      <label class="gear-field">Select Active Cutter
+        <select [(ngModel)]="buildNumber" name="buildPicker" class="gear-select" (change)="selectBuild()" [disabled]="busy">
+          <option value="">Choose active cutter...</option>
+          <option *ngFor="let row of availableRunningBuilds" [value]="row.build_number">{{row.build_number}} · Machine {{row.machine_number}} · {{row.summary_number}} · {{row.part_type_code}}{{row.check_due ? ' · CHECK DUE' : ''}}</option>
+        </select>
+      </label>
+    </div>
+  </section>
+  <div *ngIf="lockedToRunningMachine" class="gear-workflow-actions">
+    <a routerLink="/greenshed/machines" class="gear-btn gear-btn-secondary">Back to Running Machines</a>
+    <p>Machine and Build ID are locked to your Running Machines selection.</p>
+  </div>
+
+  <div *ngIf="build" class="quality-check-layout">
+    <section class="gear-workflow-section">
+      <div class="gear-workflow-section-header"><div><h2>Active Cutter</h2><p>Current machine and piece-count status.</p></div></div>
+      <div class="gear-workflow-section-body gear-workflow-detail-grid quality-check-summary">
+        <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Build ID</span><strong class="font-mono">{{ build.build_number }}</strong></div>
+        <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Machine</span><strong>{{ build.machine_run?.machine_number || '—' }}</strong></div>
+        <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Current Count</span><strong>{{ build.machine_run?.current_piece_count }}</strong></div>
+        <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Next Check</span><strong>{{ build.machine_run?.next_check_piece_count }}</strong></div>
+      </div>
+    </section>
+
+    <form #checkFormElement #checkForm="ngForm" (ngSubmit)="save()" class="gear-workflow-section">
+      <div class="gear-workflow-section-header"><div><h2>Check Result</h2><p>Your logged-in user is recorded with this check.</p></div></div>
+      <div class="gear-workflow-section-body">
+        <fieldset [disabled]="busy || !contextValid">
+          <div *ngIf="resultCode === 'FAIL' || resultCode === 'HOLD'" class="gear-workflow-state gear-workflow-state-danger" role="alert">
+            <strong>{{ resultCode }} selected</strong><p class="gear-workflow-help">Save the check, then review whether this cutter needs to be pulled.</p>
+          </div>
+          <div class="gear-workflow-form-grid">
+            <label class="gear-field">Check Type
+              <select [(ngModel)]="checkType" name="type" class="gear-select" required>
+                <option *ngFor="let x of refs?.check_types" [value]="x.code">{{ x.code === 'CMM' ? 'ZEISS / CMM Check' : x.name }}</option>
+              </select>
+            </label>
+            <label class="gear-field">Result
+              <select [(ngModel)]="resultCode" name="result" class="gear-select" required>
+                <option *ngFor="let x of refs?.check_results" [value]="x.code">{{ x.name }}</option>
+              </select>
+            </label>
+            <label class="gear-field">Cutter Piece Count<input type="number" [min]="build.machine_run?.current_piece_count || 0" step="1" required [(ngModel)]="pieceCount" name="pieces" class="gear-input" /></label>
+          </div>
+          <h3>{{ checkType === 'FC' ? 'Frequency Measurements' : 'ZEISS / CMM Measurements' }}</h3>
+          <div *ngIf="checkType === 'FC'" class="check-measurements">
+            <label *ngFor="let field of frequencyFields" class="gear-field">{{ field.label }}
+              <input type="number" step="any" [(ngModel)]="frequency[field.key]" [name]="'fc_' + field.key" class="gear-input" />
+            </label>
+          </div>
+          <div *ngIf="checkType === 'CMM'" class="check-measurements">
+            <label *ngFor="let field of cmmFields" class="gear-field">{{ field.label }}
+              <input type="number" step="any" [(ngModel)]="cmm[field.key]" [name]="'cmm_' + field.key" class="gear-input" />
+            </label>
+          </div>
+          <label class="gear-field">Comments<textarea [(ngModel)]="comments" name="comments" maxlength="2000" rows="3" class="gear-textarea"></textarea></label>
+          <div class="check-result-actions">
+            <button type="submit" [disabled]="busy || !contextValid || !refs || checkForm.invalid" class="gear-btn gear-btn-primary">{{ busy ? 'Saving…' : 'Save Quality Check' }}</button>
+            <button type="button" (click)="resetCheckEntry(true)" class="gear-btn gear-btn-secondary">Reset</button>
+          </div>
+        </fieldset>
+      </div>
+    </form>
+  </div>
+  <div *ngIf="build && !lockedToRunningMachine" class="gear-workflow-actions">
+    <button type="button" (click)="startAnother()" [disabled]="busy" class="gear-btn gear-btn-secondary">Record Check For Another Cutter</button>
+  </div>
+  <div *ngIf="build" class="gear-workflow-actions">
+    <a routerLink="/greenshed/cancel-last" [queryParams]="{identifier: build.build_number}" class="gear-btn gear-btn-secondary">Review / Cancel Last Check</a>
+  </div>
+</section>

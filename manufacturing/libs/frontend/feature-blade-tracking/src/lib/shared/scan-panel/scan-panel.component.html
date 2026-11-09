@@ -1,0 +1,14 @@
+<div class="flex gap-4 p-5 sm:p-6">
+  <div class="gear-workflow-step-number flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-bold text-white">{{ step }}</div>
+  <div class="flex-1">
+    <label [for]="inputId" class="block text-lg font-bold">{{ label }}</label>
+    <p *ngIf="help" class="mt-1 text-sm text-slate-600">{{ help }}</p>
+    <div class="mt-4 flex gap-2">
+      <input #input [id]="inputId" [(ngModel)]="value" (keyup.enter)="submit()" autocomplete="off"
+        class="min-w-0 flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-lg font-semibold outline-none placeholder:font-normal placeholder:text-slate-400 focus:border-slate-900"
+        [placeholder]="placeholder" [disabled]="disabled" />
+      <button type="button" (click)="submit()" [disabled]="disabled || !value.trim()"
+        class="rounded-xl bg-slate-900 px-5 py-3 font-bold text-white disabled:cursor-not-allowed disabled:opacity-40">{{ buttonText }}</button>
+    </div>
+  </div>
+</div>

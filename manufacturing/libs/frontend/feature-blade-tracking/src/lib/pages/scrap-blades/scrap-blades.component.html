@@ -1,0 +1,161 @@
+<section class="gear-page scrap-blades-page">
+  <header class="gear-page-header gear-section-heading scrap-blades-heading" danaPageHeader eyebrow="BLADE TRACKING / HISTORY" heading="Scrap / Discarded Blades" description="Browse every blade currently recorded as scrapped and open the complete lifecycle history for any blade.">
+  <button danaPageHeaderAction type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading">
+      ↻ Refresh
+    </button>
+</header>
+
+  <div *ngIf="error" class="gear-alert gear-alert-danger">{{ error }}</div>
+
+  <section class="scrap-summary-row">
+    <div class="scrap-summary-card">
+      <span>SCRAPPED / DISCARDED</span>
+      <strong>{{ totalScrapped }}</strong>
+      <small>{{ appliedSearch ? 'matching records' : 'blade records' }}</small>
+    </div>
+
+    <form class="scrap-search-panel" (ngSubmit)="search()">
+      <label for="scrapBladeSearch">Search scrap history</label>
+      <div class="scrap-search-row">
+        <input
+          id="scrapBladeSearch"
+          class="gear-input"
+          type="search"
+          name="scrapBladeSearch"
+          [(ngModel)]="searchValue"
+          placeholder="Blade serial, Summary, or Part Type"
+          autocomplete="off"
+        />
+        <button type="submit" class="gear-btn gear-btn-primary" [disabled]="loading">Search</button>
+        <button
+          *ngIf="appliedSearch || searchValue"
+          type="button"
+          class="gear-btn gear-btn-secondary"
+          (click)="clearSearch()"
+          [disabled]="loading"
+        >
+          Clear
+        </button>
+      </div>
+      <small *ngIf="appliedSearch">Showing results for “{{ appliedSearch }}”</small>
+    </form>
+  </section>
+
+  <section class="gear-panel scrap-blades-panel">
+    <div class="gear-panel-header inventory-table-heading">
+      <div>
+        <h2>Scrapped Blade Records</h2>
+        <p>Most recently updated scrap records are shown first. Open History to see the blade’s full recorded lifecycle.</p>
+      </div>
+      <span class="gear-count-badge count-chip">{{ totalScrapped }}</span>
+    </div>
+
+    <div *ngIf="loading" class="gear-loading-state inventory-loading">Loading scrap / discarded blades…</div>
+
+    <div *ngIf="!loading" danaTableShell class="table-wrap">
+      <table danaTable class="gear-table dashboard-table scrap-blades-table">
+        <thead>
+          <tr>
+            <th>Blade</th>
+            <th>Summary / Type</th>
+            <th>Scrapped</th>
+            <th>Scrap Detail</th>
+            <th>Last Tray</th>
+            <th>Cycle</th>
+            <th data-dana-table-static>History</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let blade of rows">
+            <tr [attr.data-dana-table-group]="'blade-' + blade.id">
+              <td>
+                <strong class="mono">{{ blade.serial_number }}</strong>
+                <small><span class="scrap-status-pill">SCRAPPED</span></small>
+              </td>
+              <td>
+                <strong>{{ blade.summary?.number || '—' }}</strong>
+                <small>{{ blade.part_type?.code || '—' }}<span *ngIf="blade.summary?.revision"> · Rev {{ blade.summary?.revision }}</span></small>
+              </td>
+              <td>
+                <strong>{{ blade.scrap_details?.occurred_at ? (blade.scrap_details?.occurred_at | date:'MMM d, y') : '—' }}</strong>
+                <small>{{ blade.scrap_details?.occurred_at ? (blade.scrap_details?.occurred_at | date:'h:mm a') : 'No scrap event timestamp' }}</small>
+              </td>
+              <td class="scrap-detail-cell">
+                <strong>{{ blade.scrap_details?.notes || 'Scrapped blade' }}</strong>
+                <small *ngIf="blade.scrap_details?.actor">By {{ blade.scrap_details?.actor }}</small>
+              </td>
+              <td class="mono strong">{{ blade.scrap_details?.tray_serial_number || '—' }}</td>
+              <td><strong>{{ blade.service_cycle }}</strong></td>
+              <td>
+                <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button" (click)="toggleHistory(blade)">
+                  {{ expandedBladeId === blade.id ? 'Hide history' : 'View history' }}
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="expandedBladeId === blade.id" data-dana-table-detail="true" [attr.data-dana-table-group]="'blade-' + blade.id" class="inventory-expanded-row scrap-history-row">
+              <td colspan="7">
+                <div class="scrap-history-panel">
+                  <div class="scrap-history-heading">
+                    <div>
+                      <strong>{{ blade.serial_number }} · Complete Blade History</strong>
+                      <span>{{ blade.summary?.number || 'No Summary' }} · {{ blade.part_type?.code || 'No Part Type' }} · Service Cycle {{ blade.service_cycle }}</span>
+                    </div>
+                    <span class="gear-count-badge gear-count-badge-neutral scrap-history-count" *ngIf="historyByBladeId[blade.id] as history">{{ history.length }} events</span>
+                  </div>
+
+                  <div *ngIf="historyLoadingBladeId === blade.id" class="gear-loading-state inventory-loading">Loading blade history…</div>
+                  <div *ngIf="historyErrorByBladeId[blade.id]" class="gear-alert gear-alert-danger">
+                    {{ historyErrorByBladeId[blade.id] }}
+                  </div>
+
+                  <div *ngIf="historyLoadingBladeId !== blade.id && !historyErrorByBladeId[blade.id]" class="scrap-history-timeline">
+                    <article *ngFor="let event of (historyByBladeId[blade.id] || [])" class="scrap-history-event" [class.scrap-history-event-danger]="event.event_type === 'scrapped'">
+                      <div class="scrap-history-marker" aria-hidden="true"></div>
+                      <div class="scrap-history-content">
+                        <div class="scrap-history-event-heading">
+                          <strong>{{ eventLabel(event.event_type) }}</strong>
+                          <time>{{ event.occurred_at | date:'MMM d, y · h:mm a' }}</time>
+                        </div>
+
+                        <div class="scrap-history-meta">
+                          <span *ngIf="event.from_status || event.to_status">
+                            {{ statusLabel(event.from_status) }} → {{ statusLabel(event.to_status) }}
+                          </span>
+                          <span>Cycle {{ event.service_cycle }}</span>
+                          <span *ngIf="event.tray_serial_number">Tray {{ event.tray_serial_number }}</span>
+                          <span *ngIf="event.container_serial_number">Container {{ event.container_serial_number }}</span>
+                          <span *ngIf="event.actor">By {{ event.actor }}</span>
+                        </div>
+
+                        <p *ngIf="event.notes">{{ event.notes }}</p>
+                      </div>
+                    </article>
+
+                    <div *ngIf="!(historyByBladeId[blade.id] || []).length" class="empty-row gear-empty-state scrap-history-empty">
+                      No lifecycle history is recorded for this blade.
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+
+          <tr *ngIf="!rows.length">
+            <td danaTableEmpty colspan="7" class="empty-row">
+              {{ appliedSearch ? 'No scrapped blades match this search.' : 'No scrapped / discarded blades are currently recorded.' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="meta as page" class="inventory-pagination">
+      <span>Page {{ page.page }} of {{ page.totalPages }} · {{ page.totalItems }} scrapped blades</span>
+      <div>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!page.hasPreviousPage || loading" (click)="loadPage(page.page - 1)">← Previous</button>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!page.hasNextPage || loading" (click)="loadPage(page.page + 1)">Next →</button>
+      </div>
+    </div>
+  </section>
+</section>

@@ -1,0 +1,16 @@
+/* Canonical Gear Apps typography composition beyond the native baseline. */
+.gear-page-title,
+.gear-section-title,
+.gear-panel-title {
+  font-family: var(--gear-font-sans);
+  font-weight: var(--gear-weight-semibold);
+  line-height: var(--gear-line-tight);
+}
+
+.gear-page-subtitle,
+.gear-section-subtitle,
+.gear-panel-subtitle,
+.gear-muted {
+  color: var(--gear-text-muted);
+  line-height: var(--gear-line-normal);
+}

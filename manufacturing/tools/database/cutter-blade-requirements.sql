@@ -1,0 +1,8 @@
+-- Cutter blade requirements are intentionally data-driven.
+-- Populate these rows after the real Summary + Part Type + Blade Count list is available.
+--
+-- Example only (do not run without replacing IDs):
+-- INSERT INTO cutter_blade_requirements
+--   (id, summary_id, part_type_id, required_blade_count, enabled, "createdAt", "updatedAt")
+-- VALUES
+--   (gen_random_uuid(), '<summary-uuid>', '<part-type-uuid>', 24, true, now(), now());

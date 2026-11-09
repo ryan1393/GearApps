@@ -1,0 +1,70 @@
+<ng-container *ngIf="session.authState$ | async as user">
+  <aside danaMobileNav [desktopMinWidth]="1024" #mobileNav="danaMobileNav" class="gear-sidebar" [class.mobile-open]="mobileNav.open" aria-label="Application navigation">
+    <a routerLink="/blades" class="brand-row">
+      <span class="brand-mark dana-diamond-mark"><img src="assets/brand/dana-logo.svg" alt="" class="dana-diamond-image" aria-hidden="true" /></span>
+      <span class="brand-copy">
+        <small>GEAR APPS</small>
+        <strong>BLADE TRACKING</strong>
+      </span>
+    </a>
+
+    <nav (click)="mobileNav.close()" class="side-nav" aria-label="Blade Tracking">
+      <a routerLink="/blades" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active" class="side-link primary">
+        <span class="nav-icon"><span class="gear-glyph gear-glyph-dashboard" aria-hidden="true"></span></span><span>Blade Dashboard</span><span class="nav-current">ACTIVE</span>
+      </a>
+
+      <ng-container *ngIf="canEdit(user)">
+        <div class="nav-heading">OPERATIONS</div>
+        <a routerLink="/blades/internal-movement" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-move" aria-hidden="true"></span></span><span>Internal Movement</span></a>
+        <a routerLink="/blades/load-container" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-container" aria-hidden="true"></span></span><span>Load Coater Container</span></a>
+        <a routerLink="/blades/coater-shipments" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-container" aria-hidden="true"></span></span><span>Coater Shipments</span></a>
+        <a routerLink="/blades/receive-container" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-receive" aria-hidden="true"></span></span><span>Receive From Coater</span></a>
+        <a routerLink="/blades/intake" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-intake" aria-hidden="true"></span></span><span>Blade Intake</span></a>
+        <a routerLink="/blades/grinding" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Grinding</span></a>
+
+        <div class="nav-heading">INVENTORY</div>
+        <a routerLink="/blades/body-shelves" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-location" aria-hidden="true"></span></span><span>Empty Body Shelves</span></a>
+        <a routerLink="/blades/tray-contents" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-tray" aria-hidden="true"></span></span><span>Tray Contents</span></a>
+        <a routerLink="/blades/inventory" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span><span>Find Inventory</span></a>
+        <a routerLink="/blades/all-inventory" routerLinkActive="active-sub" class="side-link inventory-master-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-inventory" aria-hidden="true"></span></span><span>Inventory Control Center</span></a>
+        <a routerLink="/blades/locations" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-location" aria-hidden="true"></span></span><span>Locations</span></a>
+        <a routerLink="/blades/scrap-blades" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-scrap" aria-hidden="true"></span></span><span>Scrap / Discarded</span></a>
+      </ng-container>
+
+      <div *ngIf="!canEdit(user)" class="sidebar-view-only">
+        <strong>VIEW ONLY</strong>
+        <span>{{ user.departmentDescription || 'Your department' }} can view this dashboard, but cannot perform transactions in this app.</span>
+      </div>
+
+      <div class="nav-heading">SHARED APPS</div>
+      <a [href]="cutterBuilderUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Cutter Builder</span></a>
+      <a [href]="greenshedUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Greenshed</span></a>
+
+      <div class="nav-heading">ADMINISTRATION</div>
+      <a *ngIf="user.role === 'admin'" routerLink="/admin" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span><span>Admin</span></a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="version">Gear Apps <span>v{{ appVersion }}</span></div>
+      <div class="online-row"><span>Shared manufacturing workspace</span></div>
+    </div>
+  </aside>
+
+  <button *ngIf="mobileNav.open" type="button" class="gear-nav-overlay" aria-label="Close navigation" (click)="mobileNav.close()"></button>
+
+  <header class="gear-topbar">
+    <button class="menu-button" type="button" aria-label="Open navigation" [attr.aria-expanded]="mobileNav.open" (click)="mobileNav.toggle()">☰</button>
+
+    <form *ngIf="canEdit(user)" class="global-search" (ngSubmit)="search()">
+      <span class="search-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span>
+      <input type="text" name="globalSearch" [(ngModel)]="searchValue" placeholder="Scan tray, container, location, or blade…" aria-label="Scan tray, container, location, or blade" autocomplete="off" />
+      <button type="submit" aria-label="Search"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></button>
+    </form>
+
+    <div class="topbar-user">
+      <div class="avatar">{{ initials(user.email) }}</div>
+      <div class="user-copy"><strong>{{ user.email }}</strong><span>{{ user.departmentDescription || user.role }}</span></div>
+      <button type="button" class="signout-button" (click)="logout()">Sign out</button>
+    </div>
+  </header>
+</ng-container>

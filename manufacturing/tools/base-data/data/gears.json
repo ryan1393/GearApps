@@ -1,0 +1,2012 @@
+[
+    {
+        "Gear_ID":  "1",
+        "Gear":  "044GR103",
+        "Summary_ID":  "158",
+        "Teeth":  "45",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "2"
+    },
+    {
+        "Gear_ID":  "2",
+        "Gear":  "060GR104",
+        "Summary_ID":  "158",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "3",
+        "Gear":  "060GR105",
+        "Summary_ID":  "158",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "4",
+        "Gear":  "070GR106",
+        "Summary_ID":  "149",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "5",
+        "Gear":  "070GR120",
+        "Summary_ID":  "11",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "6",
+        "Gear":  "10006254",
+        "Summary_ID":  "92",
+        "Teeth":  "38",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "7",
+        "Gear":  "10006616",
+        "Summary_ID":  "110",
+        "Teeth":  "38",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "8",
+        "Gear":  "10010739",
+        "Summary_ID":  "95",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "9",
+        "Gear":  "10012657",
+        "Summary_ID":  "109",
+        "Teeth":  "47",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "10",
+        "Gear":  "10014796",
+        "Summary_ID":  "63",
+        "Teeth":  "37",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "11",
+        "Gear":  "10014800",
+        "Summary_ID":  "64",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "12",
+        "Gear":  "10018689",
+        "Summary_ID":  "76",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "13",
+        "Gear":  "10026637",
+        "Summary_ID":  "96",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "14",
+        "Gear":  "10026640",
+        "Summary_ID":  "97",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "15",
+        "Gear":  "10026643",
+        "Summary_ID":  "98",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "16",
+        "Gear":  "10027180",
+        "Summary_ID":  "99",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "4"
+    },
+    {
+        "Gear_ID":  "17",
+        "Gear":  "10031772",
+        "Summary_ID":  "100",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "18",
+        "Gear":  "10034910",
+        "Summary_ID":  "101",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "19",
+        "Gear":  "10039665",
+        "Summary_ID":  "107",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "INACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "20",
+        "Gear":  "10044313",
+        "Summary_ID":  "107",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "INACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "21",
+        "Gear":  "10050777",
+        "Summary_ID":  "104",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "22",
+        "Gear":  "10050940",
+        "Summary_ID":  "111",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "23",
+        "Gear":  "10050980",
+        "Summary_ID":  "113",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "6"
+    },
+    {
+        "Gear_ID":  "24",
+        "Gear":  "10051005",
+        "Summary_ID":  "112",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "25",
+        "Gear":  "10051748",
+        "Summary_ID":  "118",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "26",
+        "Gear":  "10067144",
+        "Summary_ID":  "114",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "27",
+        "Gear":  "10067159",
+        "Summary_ID":  "115",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "28",
+        "Gear":  "10067206",
+        "Summary_ID":  "116",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "29",
+        "Gear":  "10067223",
+        "Summary_ID":  "94",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "30",
+        "Gear":  "10067233",
+        "Summary_ID":  "117",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "31",
+        "Gear":  "10067246",
+        "Summary_ID":  "103",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "4"
+    },
+    {
+        "Gear_ID":  "32",
+        "Gear":  "10073112",
+        "Summary_ID":  "119",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "33",
+        "Gear":  "10095821",
+        "Summary_ID":  "66",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "34",
+        "Gear":  "10115608",
+        "Summary_ID":  "122",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "35",
+        "Gear":  "10134297",
+        "Summary_ID":  "77",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "36",
+        "Gear":  "10134386",
+        "Summary_ID":  "76",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "37",
+        "Gear":  "10134415",
+        "Summary_ID":  "78",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "38",
+        "Gear":  "10134527",
+        "Summary_ID":  "100",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "39",
+        "Gear":  "10134545",
+        "Summary_ID":  "101",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "40",
+        "Gear":  "10145079",
+        "Summary_ID":  "126",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "41",
+        "Gear":  "10145086",
+        "Summary_ID":  "121",
+        "Teeth":  "47",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "42",
+        "Gear":  "10145093",
+        "Summary_ID":  "102",
+        "Teeth":  "49",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "43",
+        "Gear":  "10145100",
+        "Summary_ID":  "102",
+        "Teeth":  "49",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "44",
+        "Gear":  "10145107",
+        "Summary_ID":  "120",
+        "Teeth":  "47",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "45",
+        "Gear":  "10149092",
+        "Summary_ID":  "111",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "46",
+        "Gear":  "10149095",
+        "Summary_ID":  "114",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "47",
+        "Gear":  "10149461",
+        "Summary_ID":  "123",
+        "Teeth":  "47",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "48",
+        "Gear":  "10158282",
+        "Summary_ID":  "124",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "49",
+        "Gear":  "10158283",
+        "Summary_ID":  "125",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "50",
+        "Gear":  "10159660",
+        "Summary_ID":  "107",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "51",
+        "Gear":  "10159665",
+        "Summary_ID":  "108",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "52",
+        "Gear":  "10161959",
+        "Summary_ID":  "81",
+        "Teeth":  "38",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "53",
+        "Gear":  "10161962",
+        "Summary_ID":  "110",
+        "Teeth":  "38",
+        "Date_Added":  null,
+        "Status":  "INACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "54",
+        "Gear":  "10163460",
+        "Summary_ID":  "106",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "55",
+        "Gear":  "10163921",
+        "Summary_ID":  "105",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "56",
+        "Gear":  "10213042",
+        "Summary_ID":  "119",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "57",
+        "Gear":  "10213045",
+        "Summary_ID":  "118",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "58",
+        "Gear":  "18445",
+        "Summary_ID":  "34",
+        "Teeth":  "47",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "59",
+        "Gear":  "18450",
+        "Summary_ID":  "25",
+        "Teeth":  "47",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "60",
+        "Gear":  "18515",
+        "Summary_ID":  "28",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "61",
+        "Gear":  "18530",
+        "Summary_ID":  "26",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "62",
+        "Gear":  "2001813",
+        "Summary_ID":  "71",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "63",
+        "Gear":  "2001835",
+        "Summary_ID":  "152",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "64",
+        "Gear":  "2002215",
+        "Summary_ID":  "72",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "65",
+        "Gear":  "2002674",
+        "Summary_ID":  "73",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "66",
+        "Gear":  "2003489",
+        "Summary_ID":  "18",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "67",
+        "Gear":  "2004651",
+        "Summary_ID":  "16",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "68",
+        "Gear":  "2005635",
+        "Summary_ID":  "75",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "69",
+        "Gear":  "2007773",
+        "Summary_ID":  "16",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "70",
+        "Gear":  "2007775",
+        "Summary_ID":  "70",
+        "Teeth":  "45",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "71",
+        "Gear":  "2008689",
+        "Summary_ID":  "18",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "72",
+        "Gear":  "2010408",
+        "Summary_ID":  "77",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "73",
+        "Gear":  "2010762",
+        "Summary_ID":  "79",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "74",
+        "Gear":  "2010903",
+        "Summary_ID":  "78",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "75",
+        "Gear":  "2012183",
+        "Summary_ID":  "80",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "4"
+    },
+    {
+        "Gear_ID":  "76",
+        "Gear":  "2013027",
+        "Summary_ID":  "57",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "77",
+        "Gear":  "2013527",
+        "Summary_ID":  "50",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "78",
+        "Gear":  "2013539",
+        "Summary_ID":  "47",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "79",
+        "Gear":  "2013743",
+        "Summary_ID":  "82",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "80",
+        "Gear":  "2015274",
+        "Summary_ID":  "46",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "81",
+        "Gear":  "2015358",
+        "Summary_ID":  "56",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "82",
+        "Gear":  "2015725",
+        "Summary_ID":  "41",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "83",
+        "Gear":  "2018522",
+        "Summary_ID":  "84",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "84",
+        "Gear":  "2018598",
+        "Summary_ID":  "51",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "85",
+        "Gear":  "2018738",
+        "Summary_ID":  "39",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "86",
+        "Gear":  "2018748",
+        "Summary_ID":  "74",
+        "Teeth":  "49",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "87",
+        "Gear":  "2018757",
+        "Summary_ID":  "85",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "88",
+        "Gear":  "2018923",
+        "Summary_ID":  "52",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "89",
+        "Gear":  "2019215",
+        "Summary_ID":  "36",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "90",
+        "Gear":  "2019218",
+        "Summary_ID":  "83",
+        "Teeth":  "46",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "91",
+        "Gear":  "2019270",
+        "Summary_ID":  "87",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "92",
+        "Gear":  "2019616",
+        "Summary_ID":  "86",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "93",
+        "Gear":  "2019747",
+        "Summary_ID":  "88",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "94",
+        "Gear":  "2019750",
+        "Summary_ID":  "89",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "95",
+        "Gear":  "2019753",
+        "Summary_ID":  "90",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "96",
+        "Gear":  "2020708",
+        "Summary_ID":  "93",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "97",
+        "Gear":  "2020769",
+        "Summary_ID":  "56",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "98",
+        "Gear":  "2022834",
+        "Summary_ID":  "55",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "99",
+        "Gear":  "30268",
+        "Summary_ID":  "36",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "100",
+        "Gear":  "30316",
+        "Summary_ID":  "30",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "101",
+        "Gear":  "30706",
+        "Summary_ID":  "19",
+        "Teeth":  "53",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "102",
+        "Gear":  "31711",
+        "Summary_ID":  "32",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "103",
+        "Gear":  "32626",
+        "Summary_ID":  "35",
+        "Teeth":  "37",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "104",
+        "Gear":  "32906",
+        "Summary_ID":  "21",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "105",
+        "Gear":  "32934",
+        "Summary_ID":  "127",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "106",
+        "Gear":  "33428",
+        "Summary_ID":  "22",
+        "Teeth":  "47",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "107",
+        "Gear":  "33850",
+        "Summary_ID":  "23",
+        "Teeth":  "45",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "108",
+        "Gear":  "33953",
+        "Summary_ID":  "31",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "109",
+        "Gear":  "34508",
+        "Summary_ID":  "20",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "110",
+        "Gear":  "34717",
+        "Summary_ID":  "29",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "111",
+        "Gear":  "34810",
+        "Summary_ID":  "135",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "112",
+        "Gear":  "34812",
+        "Summary_ID":  "33",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "4"
+    },
+    {
+        "Gear_ID":  "113",
+        "Gear":  "34815",
+        "Summary_ID":  "139",
+        "Teeth":  "37",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "114",
+        "Gear":  "34837",
+        "Summary_ID":  "27",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "115",
+        "Gear":  "35307",
+        "Summary_ID":  "146",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "116",
+        "Gear":  "36211",
+        "Summary_ID":  "38",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "117",
+        "Gear":  "37768",
+        "Summary_ID":  "128",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "118",
+        "Gear":  "38755",
+        "Summary_ID":  "131",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "119",
+        "Gear":  "39070",
+        "Summary_ID":  "37",
+        "Teeth":  "37",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "120",
+        "Gear":  "39159",
+        "Summary_ID":  "129",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "121",
+        "Gear":  "39275",
+        "Summary_ID":  "134",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "122",
+        "Gear":  "39287",
+        "Summary_ID":  "133",
+        "Teeth":  "46",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "123",
+        "Gear":  "39299",
+        "Summary_ID":  "30",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "124",
+        "Gear":  "40629",
+        "Summary_ID":  "138",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "125",
+        "Gear":  "40633",
+        "Summary_ID":  "137",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "126",
+        "Gear":  "40790",
+        "Summary_ID":  "136",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "127",
+        "Gear":  "42339",
+        "Summary_ID":  "140",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "128",
+        "Gear":  "42420",
+        "Summary_ID":  "141",
+        "Teeth":  "37",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "129",
+        "Gear":  "42701",
+        "Summary_ID":  "143",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "130",
+        "Gear":  "42721",
+        "Summary_ID":  "153",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "131",
+        "Gear":  "42722",
+        "Summary_ID":  "154",
+        "Teeth":  "37",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "132",
+        "Gear":  "42725",
+        "Summary_ID":  "142",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "133",
+        "Gear":  "42760",
+        "Summary_ID":  "144",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "6"
+    },
+    {
+        "Gear_ID":  "134",
+        "Gear":  "42828",
+        "Summary_ID":  "145",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "135",
+        "Gear":  "43982",
+        "Summary_ID":  "147",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "136",
+        "Gear":  "44065",
+        "Summary_ID":  "146",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "137",
+        "Gear":  "44222",
+        "Summary_ID":  "148",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "138",
+        "Gear":  "44765",
+        "Summary_ID":  "150",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "139",
+        "Gear":  "44813",
+        "Summary_ID":  "2",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "140",
+        "Gear":  "45565",
+        "Summary_ID":  "1",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "141",
+        "Gear":  "46132",
+        "Summary_ID":  "4",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "142",
+        "Gear":  "46136",
+        "Summary_ID":  "3",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "143",
+        "Gear":  "46216",
+        "Summary_ID":  "151",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "144",
+        "Gear":  "46257",
+        "Summary_ID":  "5",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "145",
+        "Gear":  "46638",
+        "Summary_ID":  "7",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "146",
+        "Gear":  "46684",
+        "Summary_ID":  "10",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "147",
+        "Gear":  "47086",
+        "Summary_ID":  "14",
+        "Teeth":  "40",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "148",
+        "Gear":  "47325",
+        "Summary_ID":  "15",
+        "Teeth":  "45",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "149",
+        "Gear":  "47609",
+        "Summary_ID":  "5",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "150",
+        "Gear":  "47686",
+        "Summary_ID":  "151",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "151",
+        "Gear":  "47688",
+        "Summary_ID":  "8",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "152",
+        "Gear":  "47906",
+        "Summary_ID":  "12",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "153",
+        "Gear":  "47921",
+        "Summary_ID":  "17",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "154",
+        "Gear":  "47925",
+        "Summary_ID":  "13",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "155",
+        "Gear":  "48144",
+        "Summary_ID":  "18",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "156",
+        "Gear":  "48181",
+        "Summary_ID":  "4",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "157",
+        "Gear":  "48182",
+        "Summary_ID":  "3",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "158",
+        "Gear":  "48382",
+        "Summary_ID":  "43",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "159",
+        "Gear":  "48386",
+        "Summary_ID":  "44",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "160",
+        "Gear":  "48390",
+        "Summary_ID":  "45",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "161",
+        "Gear":  "48742",
+        "Summary_ID":  "16",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "162",
+        "Gear":  "48743",
+        "Summary_ID":  "40",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "163",
+        "Gear":  "49156",
+        "Summary_ID":  "10",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "164",
+        "Gear":  "49613",
+        "Summary_ID":  "48",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "4"
+    },
+    {
+        "Gear_ID":  "165",
+        "Gear":  "50481",
+        "Summary_ID":  "154",
+        "Teeth":  "37",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "166",
+        "Gear":  "50555",
+        "Summary_ID":  "52",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "167",
+        "Gear":  "50733",
+        "Summary_ID":  "6",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "168",
+        "Gear":  "51009",
+        "Summary_ID":  "53",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "169",
+        "Gear":  "51013",
+        "Summary_ID":  "54",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "170",
+        "Gear":  "51172",
+        "Summary_ID":  "9",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "171",
+        "Gear":  "51177",
+        "Summary_ID":  "47",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "172",
+        "Gear":  "51208",
+        "Summary_ID":  "42",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "173",
+        "Gear":  "51300",
+        "Summary_ID":  "145",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "174",
+        "Gear":  "51403",
+        "Summary_ID":  "18",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "175",
+        "Gear":  "51405",
+        "Summary_ID":  "49",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "176",
+        "Gear":  "51407",
+        "Summary_ID":  "4",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "177",
+        "Gear":  "51409",
+        "Summary_ID":  "3",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "178",
+        "Gear":  "51951",
+        "Summary_ID":  "59",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "179",
+        "Gear":  "52069930AC",
+        "Summary_ID":  "155",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "180",
+        "Gear":  "52069931AC",
+        "Summary_ID":  "156",
+        "Teeth":  "47",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "181",
+        "Gear":  "52069957AC",
+        "Summary_ID":  "91",
+        "Teeth":  "45",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "182",
+        "Gear":  "52531",
+        "Summary_ID":  "55",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "183",
+        "Gear":  "52535",
+        "Summary_ID":  "56",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "1"
+    },
+    {
+        "Gear_ID":  "184",
+        "Gear":  "52539",
+        "Summary_ID":  "61",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "185",
+        "Gear":  "52544",
+        "Summary_ID":  "62",
+        "Teeth":  "43",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "186",
+        "Gear":  "52975",
+        "Summary_ID":  "58",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "187",
+        "Gear":  "53464",
+        "Summary_ID":  "60",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "188",
+        "Gear":  "53495",
+        "Summary_ID":  "65",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "189",
+        "Gear":  "53531",
+        "Summary_ID":  "1",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "190",
+        "Gear":  "54321",
+        "Summary_ID":  "67",
+        "Teeth":  "39",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "191",
+        "Gear":  "54703",
+        "Summary_ID":  "28",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "192",
+        "Gear":  "55641",
+        "Summary_ID":  "68",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "193",
+        "Gear":  "55643",
+        "Summary_ID":  "69",
+        "Teeth":  "45",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "194",
+        "Gear":  "620095",
+        "Summary_ID":  "130",
+        "Teeth":  "46",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "195",
+        "Gear":  "620108",
+        "Summary_ID":  "24",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "196",
+        "Gear":  "620481",
+        "Summary_ID":  "132",
+        "Teeth":  "41",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "4"
+    },
+    {
+        "Gear_ID":  "207",
+        "Gear":  "10162901",
+        "Summary_ID":  "159",
+        "Teeth":  "41",
+        "Date_Added":  "2023-06-07 12:25:23.393",
+        "Status":  "ACTIVE",
+        "Emp_ID":  "999",
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "208",
+        "Gear":  "10263074",
+        "Summary_ID":  "160",
+        "Teeth":  "47",
+        "Date_Added":  "2024-07-24 12:59:34.620",
+        "Status":  "ACTIVE",
+        "Emp_ID":  "999",
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "209",
+        "Gear":  "10213514",
+        "Summary_ID":  "161",
+        "Teeth":  "41",
+        "Date_Added":  "2026-07-08 13:14:19.160",
+        "Status":  "ACTIVE",
+        "Emp_ID":  "999",
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Gear_ID":  "210",
+        "Gear":  "10213519",
+        "Summary_ID":  "162",
+        "Teeth":  "41",
+        "Date_Added":  "2026-07-08 13:15:25.850",
+        "Status":  "ACTIVE",
+        "Emp_ID":  "999",
+        "Roll_Master_Needed":  "3"
+    },
+    {
+        "Gear_ID":  "211",
+        "Gear":  "10213524",
+        "Summary_ID":  "163",
+        "Teeth":  "41",
+        "Date_Added":  "2026-08-11 11:46:38.593",
+        "Status":  "ACTIVE",
+        "Emp_ID":  "999",
+        "Roll_Master_Needed":  "2"
+    }
+]

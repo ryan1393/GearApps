@@ -1,0 +1,33 @@
+{
+    "generated_at":  "2026-08-23T17:48:43.9131966-04:00",
+    "sql_server":  "usftwplvsql01",
+    "sql_database":  "GearAppsNew",
+    "export_mode":  "fresh-safe-swap",
+    "source_tables":  {
+                          "cutter_build":  "tbl_CT_Cutter_Build",
+                          "central_log":  "tbl_CT_Log",
+                          "setup":  "tbl_CT_Setup",
+                          "frequency":  "tbl_CT_Frequency_Check",
+                          "retired":  "tbl_CT_Retired_Cutters",
+                          "pull_reason":  "tbl_CT_Pull_Cutter_Reason",
+                          "machines":  "tbl_Machines"
+                      },
+    "migration_policy":  {
+                             "preserve_retired_history":  true,
+                             "retired_in_current_inventory":  false,
+                             "preserve_setup_history":  true,
+                             "preserve_frequency_history":  true,
+                             "preserve_piece_counts":  true,
+                             "preserve_legacy_build_id_as_reference":  true,
+                             "postgres_uuid_is_primary_key":  true
+                         },
+    "row_counts":  {
+                       "cutter_builds":  1770,
+                       "logs":  14981,
+                       "setups":  1693,
+                       "frequency":  9844,
+                       "retired":  1595,
+                       "pull_reasons":  27,
+                       "machines":  55
+                   }
+}

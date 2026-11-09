@@ -1,0 +1,110 @@
+[
+    {
+        "PCR_ID":  "1",
+        "PCR_Desc":  "BROKEN BLADES"
+    },
+    {
+        "PCR_ID":  "2",
+        "PCR_Desc":  "CHANGEOVER"
+    },
+    {
+        "PCR_ID":  "3",
+        "PCR_Desc":  "CHIPPED BLADES"
+    },
+    {
+        "PCR_ID":  "4",
+        "PCR_Desc":  "CUTTER BUILT WRONG"
+    },
+    {
+        "PCR_ID":  "5",
+        "PCR_Desc":  "CUTTER TIPS BURNT"
+    },
+    {
+        "PCR_ID":  "6",
+        "PCR_Desc":  "DULL"
+    },
+    {
+        "PCR_ID":  "7",
+        "PCR_Desc":  "FLATS"
+    },
+    {
+        "PCR_ID":  "8",
+        "PCR_Desc":  "HIGH ZEISS ERRORS"
+    },
+    {
+        "PCR_ID":  "9",
+        "PCR_Desc":  "IB ROUGH SURFACE FINISH"
+    },
+    {
+        "PCR_ID":  "10",
+        "PCR_Desc":  "LINE ON COAST"
+    },
+    {
+        "PCR_ID":  "11",
+        "PCR_Desc":  "LINE ON DRIVE"
+    },
+    {
+        "PCR_ID":  "12",
+        "PCR_Desc":  "OB ROUGH SURFACE FINISH"
+    },
+    {
+        "PCR_ID":  "13",
+        "PCR_Desc":  "OPERATOR PULLED CUTTER?"
+    },
+    {
+        "PCR_ID":  "14",
+        "PCR_Desc":  "PEEL COAST SIDE"
+    },
+    {
+        "PCR_ID":  "15",
+        "PCR_Desc":  "PEEL DRIVE SIDE"
+    },
+    {
+        "PCR_ID":  "16",
+        "PCR_Desc":  "PULL CUTTER (CLOSE TO CUTTER END LIFE)"
+    },
+    {
+        "PCR_ID":  "17",
+        "PCR_Desc":  "RAISED LINE, LINES, ON COAST"
+    },
+    {
+        "PCR_ID":  "18",
+        "PCR_Desc":  "RAISED LINE, LINES, ON DRIVE"
+    },
+    {
+        "PCR_ID":  "19",
+        "PCR_Desc":  "RAISED LINES DRIVE AND COAST"
+    },
+    {
+        "PCR_ID":  "20",
+        "PCR_Desc":  "ROUGH COAST"
+    },
+    {
+        "PCR_ID":  "21",
+        "PCR_Desc":  "ROUGH DRIVE"
+    },
+    {
+        "PCR_ID":  "22",
+        "PCR_Desc":  "ROUGH SURFACE FINISH - BOTH"
+    },
+    {
+        "PCR_ID":  "23",
+        "PCR_Desc":  "SPACING"
+    },
+    {
+        "PCR_ID":  "24",
+        "PCR_Desc":  "STEP ON ROOT"
+    },
+    {
+        "PCR_ID":  "25",
+        "PCR_Desc":  "WRECK"
+    },
+    {
+        "PCR_ID":  "26",
+        "PCR_Desc":  "HIGH PRESSURE ANGLE"
+    },
+    {
+        "PCR_ID":  "27",
+        "PCR_Desc":  "PATTERN FLANK"
+    }
+]

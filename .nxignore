@@ -1,0 +1,3 @@
+# The recovered manufacturing release is an independently versioned Nx workspace.
+# Run its targets from manufacturing/ using that workspace's pinned dependencies.
+manufacturing/**

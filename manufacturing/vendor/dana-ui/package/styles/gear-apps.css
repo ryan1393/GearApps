@@ -1,0 +1,24 @@
+/* ============================================================
+   GEAR APPS DESIGN SYSTEM ENTRY POINT
+   Shared by Blade Tracking, Cutter Builder, Greenshed, and Admin.
+
+   Keep this file declarative: it only owns module load order.
+   Add or edit rules in the appropriate gear-apps/ module.
+   ============================================================ */
+
+@import './gear-apps/foundation/tokens.css';
+@import './gear-apps/foundation/base.css';
+@import './gear-apps/layout/app-shell.css';
+@import './gear-apps/components/primitives.css';
+@import './gear-apps/components/workflow-layout.css';
+@import './gear-apps/components/data-display.css';
+@import './gear-apps/components/icons.css';
+@import './gear-apps/layout/navigation-shell.css';
+@import './gear-apps/layout/brand.css';
+@import './gear-apps/components/login.css';
+@import './gear-apps/features/admin-core.css';
+@import './gear-apps/components/access-states.css';
+@import './gear-apps/features/dashboard.css';
+@import './gear-apps/components/toast.css';
+@import './gear-apps/foundation/responsive.css';
+@import './gear-apps/features/typography.css';

@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Gear Apps visual styling is centralized in:
+ * @dana/ui (gear-compat.css, gear-compat-features.css, dana-ui.css, gear-compat-overrides.css)
+ */

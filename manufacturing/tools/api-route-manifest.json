@@ -1,0 +1,793 @@
+[
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/master-data/departments",
+    "controller": "AdminMasterDataController",
+    "source": "apps/server/src/app/admin-master-data.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/master-data/machines",
+    "controller": "AdminMasterDataController",
+    "source": "apps/server/src/app/admin-master-data.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/master-data/machines",
+    "controller": "AdminMasterDataController",
+    "source": "apps/server/src/app/admin-master-data.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/admin/master-data/machines/:id",
+    "controller": "AdminMasterDataController",
+    "source": "apps/server/src/app/admin-master-data.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/admin/master-data/models",
+    "controller": "AdminMasterDataController",
+    "source": "apps/server/src/app/admin-master-data.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/admin/master-data/models",
+    "controller": "AdminMasterDataController",
+    "source": "apps/server/src/app/admin-master-data.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/admin/master-data/models/:id",
+    "controller": "AdminMasterDataController",
+    "source": "apps/server/src/app/admin-master-data.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/asset-tags/print",
+    "controller": "ServerFeatAssetTagController",
+    "source": "libs/server/feat-tray/src/lib/server-feat-asset-tag.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/email/forgot-password",
+    "controller": "ServerFeatAuthController",
+    "source": "libs/server/feat-auth/src/lib/server-feat-auth.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/email/login",
+    "controller": "ServerFeatAuthController",
+    "source": "libs/server/feat-auth/src/lib/server-feat-auth.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/email/reset-password",
+    "controller": "ServerFeatAuthController",
+    "source": "libs/server/feat-auth/src/lib/server-feat-auth.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/auth/email/verify",
+    "controller": "ServerFeatAuthController",
+    "source": "libs/server/feat-auth/src/lib/server-feat-auth.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/auth/google/login",
+    "controller": "GoogleAuthController",
+    "source": "libs/server/feat-auth/src/lib/google-auth/google-auth.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/auth/me",
+    "controller": "ServerFeatAuthController",
+    "source": "libs/server/feat-auth/src/lib/server-feat-auth.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/auth/refresh",
+    "controller": "ServerFeatAuthController",
+    "source": "libs/server/feat-auth/src/lib/server-feat-auth.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/bladeTrays",
+    "controller": "ServerFeatBladeTrayController",
+    "source": "libs/server/feat-blade-tray/src/lib/server-feat-blade-tray.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bladeTrays",
+    "controller": "ServerFeatBladeTrayController",
+    "source": "libs/server/feat-blade-tray/src/lib/server-feat-blade-tray.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/bladeTrays/:id",
+    "controller": "ServerFeatBladeTrayController",
+    "source": "libs/server/feat-blade-tray/src/lib/server-feat-blade-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/bladeTrays/:id",
+    "controller": "ServerFeatBladeTrayController",
+    "source": "libs/server/feat-blade-tray/src/lib/server-feat-blade-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/bladeTrays/:id",
+    "controller": "ServerFeatBladeTrayController",
+    "source": "libs/server/feat-blade-tray/src/lib/server-feat-blade-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/bladeTrays/batch",
+    "controller": "ServerFeatBladeTrayController",
+    "source": "libs/server/feat-blade-tray/src/lib/server-feat-blade-tray.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/bladeTrays/tray/:trayId/active",
+    "controller": "ServerFeatBladeTrayController",
+    "source": "libs/server/feat-blade-tray/src/lib/server-feat-blade-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/blades",
+    "controller": "ServerFeatBladeController",
+    "source": "libs/server/feat-blade/src/lib/server-feat-blade.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/blades",
+    "controller": "ServerFeatBladeController",
+    "source": "libs/server/feat-blade/src/lib/server-feat-blade.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/blades/:id",
+    "controller": "ServerFeatBladeController",
+    "source": "libs/server/feat-blade/src/lib/server-feat-blade.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/blades/:id",
+    "controller": "ServerFeatBladeController",
+    "source": "libs/server/feat-blade/src/lib/server-feat-blade.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/blades/:id",
+    "controller": "ServerFeatBladeController",
+    "source": "libs/server/feat-blade/src/lib/server-feat-blade.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/blades/:id/history",
+    "controller": "ServerFeatBladeController",
+    "source": "libs/server/feat-blade/src/lib/server-feat-blade.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/containerTrays",
+    "controller": "ServerFeatContainerTrayController",
+    "source": "libs/server/feat-container-tray/src/lib/server-feat-container-tray.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/containerTrays",
+    "controller": "ServerFeatContainerTrayController",
+    "source": "libs/server/feat-container-tray/src/lib/server-feat-container-tray.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/containerTrays/:id",
+    "controller": "ServerFeatContainerTrayController",
+    "source": "libs/server/feat-container-tray/src/lib/server-feat-container-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/containerTrays/:id",
+    "controller": "ServerFeatContainerTrayController",
+    "source": "libs/server/feat-container-tray/src/lib/server-feat-container-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/containerTrays/:id",
+    "controller": "ServerFeatContainerTrayController",
+    "source": "libs/server/feat-container-tray/src/lib/server-feat-container-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/containerTrays/container/:containerId/active",
+    "controller": "ServerFeatContainerTrayController",
+    "source": "libs/server/feat-container-tray/src/lib/server-feat-container-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/containerTrays/container/:containerId/tray/:trayId/unload",
+    "controller": "ServerFeatContainerTrayController",
+    "source": "libs/server/feat-container-tray/src/lib/server-feat-container-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/containerTrays/tray/:trayId/current",
+    "controller": "ServerFeatContainerTrayController",
+    "source": "libs/server/feat-container-tray/src/lib/server-feat-container-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/containers",
+    "controller": "ServerFeatContainerController",
+    "source": "libs/server/feat-container/src/lib/server-feat-container.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/containers",
+    "controller": "ServerFeatContainerController",
+    "source": "libs/server/feat-container/src/lib/server-feat-container.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/containers/:id",
+    "controller": "ServerFeatContainerController",
+    "source": "libs/server/feat-container/src/lib/server-feat-container.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/containers/:id",
+    "controller": "ServerFeatContainerController",
+    "source": "libs/server/feat-container/src/lib/server-feat-container.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/containers/:id",
+    "controller": "ServerFeatContainerController",
+    "source": "libs/server/feat-container/src/lib/server-feat-container.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/containers/scan/:serialNumber",
+    "controller": "ServerFeatContainerController",
+    "source": "libs/server/feat-container/src/lib/server-feat-container.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/cutter-builder/builds",
+    "controller": "ServerFeatCutterBuildController",
+    "source": "libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/cutter-builder/builds",
+    "controller": "ServerFeatCutterBuildController",
+    "source": "libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/cutter-builder/builds/:buildNumber",
+    "controller": "ServerFeatCutterBuildController",
+    "source": "libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/cutter-builder/builds/:buildNumber/card",
+    "controller": "ServerFeatCutterBuildController",
+    "source": "libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/cutter-builder/cutter-bodies",
+    "controller": "ServerFeatCutterBuildController",
+    "source": "libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/cutter-builder/cutter-bodies",
+    "controller": "ServerFeatCutterBuildController",
+    "source": "libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/cutter-builder/cutter-bodies/:id/dana-serial",
+    "controller": "ServerFeatAuthController",
+    "source": "libs/server/feat-auth/src/lib/server-feat-auth.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/cutter-builder/cutter-bodies/scan/:serialNumber",
+    "controller": "ServerFeatCutterBuildController",
+    "source": "libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/cutter-builder/dashboard",
+    "controller": "ServerFeatCutterBuildController",
+    "source": "libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/cutter-builder/teardowns",
+    "controller": "ServerFeatCutterBuildController",
+    "source": "libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/cutter-builder/teardowns/:buildNumber",
+    "controller": "ServerFeatCutterBuildController",
+    "source": "libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/cutter-config/blade-requirements",
+    "controller": "ServerFeatCutterConfigController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/cutter-config/blade-requirements",
+    "controller": "ServerFeatCutterConfigController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/cutter-config/blade-requirements/:id",
+    "controller": "ServerFeatCutterConfigController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/cutter-config/blade-requirements/:id",
+    "controller": "ServerFeatCutterConfigController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/cutter-config/blade-requirements/resolve",
+    "controller": "ServerFeatCutterConfigController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/cutter-config/part-types",
+    "controller": "ServerFeatCutterConfigController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/cutter-config/validate-tray",
+    "controller": "ServerFeatCutterConfigController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/greenshed/builds",
+    "controller": "ServerFeatGreenshedController",
+    "source": "libs/server/feat-greenshed/src/lib/server-feat-greenshed.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/greenshed/builds/:buildNumber",
+    "controller": "ServerFeatGreenshedController",
+    "source": "libs/server/feat-greenshed/src/lib/server-feat-greenshed.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/greenshed/dashboard",
+    "controller": "ServerFeatGreenshedController",
+    "source": "libs/server/feat-greenshed/src/lib/server-feat-greenshed.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/greenshed/history/:buildNumber",
+    "controller": "ServerFeatGreenshedController",
+    "source": "libs/server/feat-greenshed/src/lib/server-feat-greenshed.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/greenshed/machines/:machineNumber",
+    "controller": "ServerFeatGreenshedController",
+    "source": "libs/server/feat-greenshed/src/lib/server-feat-greenshed.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/greenshed/machines/:machineNumber/piece-count",
+    "controller": "ServerFeatGreenshedController",
+    "source": "libs/server/feat-greenshed/src/lib/server-feat-greenshed.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/greenshed/pull",
+    "controller": "ServerFeatGreenshedController",
+    "source": "libs/server/feat-greenshed/src/lib/server-feat-greenshed.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/greenshed/quality-check",
+    "controller": "ServerFeatGreenshedController",
+    "source": "libs/server/feat-greenshed/src/lib/server-feat-greenshed.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/greenshed/reference-data",
+    "controller": "ServerFeatGreenshedController",
+    "source": "libs/server/feat-greenshed/src/lib/server-feat-greenshed.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/greenshed/running-machines",
+    "controller": "ServerFeatGreenshedController",
+    "source": "libs/server/feat-greenshed/src/lib/server-feat-greenshed.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/greenshed/setup",
+    "controller": "ServerFeatGreenshedController",
+    "source": "libs/server/feat-greenshed/src/lib/server-feat-greenshed.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/health",
+    "controller": "ServerFeatureHealthController",
+    "source": "libs/server/feat-health/src/lib/server-feature-health.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/locationTrays",
+    "controller": "ServerFeatLocationTrayController",
+    "source": "libs/server/feat-location-tray/src/lib/server-feat-location-tray.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/locationTrays",
+    "controller": "ServerFeatLocationTrayController",
+    "source": "libs/server/feat-location-tray/src/lib/server-feat-location-tray.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/locationTrays/:id",
+    "controller": "ServerFeatLocationTrayController",
+    "source": "libs/server/feat-location-tray/src/lib/server-feat-location-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/locationTrays/:id",
+    "controller": "ServerFeatLocationTrayController",
+    "source": "libs/server/feat-location-tray/src/lib/server-feat-location-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/locationTrays/:id",
+    "controller": "ServerFeatLocationTrayController",
+    "source": "libs/server/feat-location-tray/src/lib/server-feat-location-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/locationTrays/tray/:trayId/current",
+    "controller": "ServerFeatLocationTrayController",
+    "source": "libs/server/feat-location-tray/src/lib/server-feat-location-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/locations",
+    "controller": "ServerFeatLocationController",
+    "source": "libs/server/feat-location/src/lib/server-feat-location.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/locations",
+    "controller": "ServerFeatLocationController",
+    "source": "libs/server/feat-location/src/lib/server-feat-location.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/locations/:id",
+    "controller": "ServerFeatLocationController",
+    "source": "libs/server/feat-location/src/lib/server-feat-location.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/locations/:id",
+    "controller": "ServerFeatLocationController",
+    "source": "libs/server/feat-location/src/lib/server-feat-location.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/locations/:id",
+    "controller": "ServerFeatLocationController",
+    "source": "libs/server/feat-location/src/lib/server-feat-location.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/locations/scan/:serialNumber",
+    "controller": "ServerFeatLocationController",
+    "source": "libs/server/feat-location/src/lib/server-feat-location.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/part-summaries",
+    "controller": "ServerFeatPartSummaryController",
+    "source": "libs/server/feat-part-summary/src/lib/server-feat-part-summary.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/part-summaries",
+    "controller": "ServerFeatPartSummaryController",
+    "source": "libs/server/feat-part-summary/src/lib/server-feat-part-summary.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/part-summaries/:id",
+    "controller": "ServerFeatPartSummaryController",
+    "source": "libs/server/feat-part-summary/src/lib/server-feat-part-summary.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/part-summaries/:id",
+    "controller": "ServerFeatPartSummaryController",
+    "source": "libs/server/feat-part-summary/src/lib/server-feat-part-summary.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/part-summaries/:id",
+    "controller": "ServerFeatPartSummaryController",
+    "source": "libs/server/feat-part-summary/src/lib/server-feat-part-summary.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/part-types",
+    "controller": "ServerPartTypesController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-part-types.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/parts",
+    "controller": "ServerPartsController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-parts.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/parts",
+    "controller": "ServerPartsController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-parts.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/parts/:id",
+    "controller": "ServerPartsController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-parts.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/parts/number/:partNumber",
+    "controller": "ServerPartsController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-parts.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/roll-masters",
+    "controller": "ServerRollMastersController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-roll-masters.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/roll-masters",
+    "controller": "ServerRollMastersController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-roll-masters.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/roll-masters/:id",
+    "controller": "ServerRollMastersController",
+    "source": "libs/server/feat-cutter-config/src/lib/server-roll-masters.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/trays",
+    "controller": "ServerFeatTrayController",
+    "source": "libs/server/feat-tray/src/lib/server-feat-tray.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/trays",
+    "controller": "ServerFeatTrayController",
+    "source": "libs/server/feat-tray/src/lib/server-feat-tray.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/trays/:id",
+    "controller": "ServerFeatTrayController",
+    "source": "libs/server/feat-tray/src/lib/server-feat-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/trays/:id",
+    "controller": "ServerFeatTrayController",
+    "source": "libs/server/feat-tray/src/lib/server-feat-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/trays/:id",
+    "controller": "ServerFeatTrayController",
+    "source": "libs/server/feat-tray/src/lib/server-feat-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/trays/:id/complete-grinding",
+    "controller": "ServerFeatTrayController",
+    "source": "libs/server/feat-tray/src/lib/server-feat-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/trays/:id/grinding-runs",
+    "controller": "ServerFeatTrayController",
+    "source": "libs/server/feat-tray/src/lib/server-feat-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/trays/:id/readiness",
+    "controller": "ServerFeatTrayController",
+    "source": "libs/server/feat-tray/src/lib/server-feat-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/trays/:id/start-grinding",
+    "controller": "ServerFeatTrayController",
+    "source": "libs/server/feat-tray/src/lib/server-feat-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/trays/dashboard",
+    "controller": "ServerFeatTrayController",
+    "source": "libs/server/feat-tray/src/lib/server-feat-tray.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/trays/scan/:serialNumber",
+    "controller": "ServerFeatTrayController",
+    "source": "libs/server/feat-tray/src/lib/server-feat-tray.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/users",
+    "controller": "ServerFeatUserController",
+    "source": "libs/server/feat-user/src/lib/server-feat-user.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "POST",
+    "path": "/api/v1/users",
+    "controller": "ServerFeatUserController",
+    "source": "libs/server/feat-user/src/lib/server-feat-user.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/users/:id",
+    "controller": "ServerFeatUserController",
+    "source": "libs/server/feat-user/src/lib/server-feat-user.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/users/:id",
+    "controller": "ServerFeatUserController",
+    "source": "libs/server/feat-user/src/lib/server-feat-user.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "PATCH",
+    "path": "/api/v1/users/:id",
+    "controller": "ServerFeatUserController",
+    "source": "libs/server/feat-user/src/lib/server-feat-user.controller.ts",
+    "has_parameters": true
+  }
+]

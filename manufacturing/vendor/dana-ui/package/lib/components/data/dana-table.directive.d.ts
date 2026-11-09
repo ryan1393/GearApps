@@ -1,0 +1,33 @@
+import { AfterViewInit, ElementRef, OnDestroy, Renderer2 } from '@angular/core';
+import * as i0 from "@angular/core";
+export declare class DanaTableDirective implements AfterViewInit, OnDestroy {
+    private readonly host;
+    private readonly renderer;
+    private readonly filters;
+    private sortColumn;
+    private sortDirection;
+    private observer?;
+    private destroyed;
+    private updateScheduled;
+    private readonly popovers;
+    private readonly cleanups;
+    private applying;
+    private openPopover?;
+    private openTrigger?;
+    constructor(host: ElementRef<HTMLTableElement>, renderer: Renderer2);
+    ngAfterViewInit(): void;
+    ngOnDestroy(): void;
+    private listen;
+    private danaTableConnectObserver;
+    private danaTableInitialize;
+    private danaTableCreatePopover;
+    private danaTablePositionOpenPopover;
+    private danaTableClosePopover;
+    private danaTableUpdateSortIndicators;
+    private danaTableApplyFilters;
+    private danaTableBuildRowGroups;
+    private danaTableSyncNoMatchState;
+    private danaTableCompare;
+    static ɵfac: i0.ɵɵFactoryDeclaration<DanaTableDirective, never>;
+    static ɵdir: i0.ɵɵDirectiveDeclaration<DanaTableDirective, "table[danaTable]", never, {}, {}, never, never, true, never>;
+}

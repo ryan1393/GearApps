@@ -1,0 +1,195 @@
+<section class="gear-page blade-locations-page">
+  <header class="gear-page-header gear-section-heading blade-locations-heading" danaPageHeader eyebrow="BLADE TRACKING / LOCATIONS" heading="Blade Locations" description="See every tagged location, the trays physically assigned there, and the individual blades currently assigned to each tray.">
+  <button danaPageHeaderAction danaButton="secondary" type="button" (click)="refresh()" [disabled]="loading">
+      ↻ Refresh
+    </button>
+</header>
+
+  <div *ngIf="error" danaAlert="danger">{{ error }}</div>
+  <div *ngIf="printMessage" danaAlert="success">{{ printMessage }}</div>
+
+  <section danaSummaryGrid class="blade-location-summary-grid" aria-label="Location inventory summary">
+    <article danaSummaryCard class="gear-metric-card blade-location-summary-card">
+      <span>LOCATIONS</span>
+      <strong>{{ totalLocations }}</strong>
+      <small>tagged records</small>
+    </article>
+    <article danaSummaryCard class="gear-metric-card blade-location-summary-card">
+      <span>TRAYS AT LOCATIONS</span>
+      <strong>{{ totalTrays }}</strong>
+      <small>active placements</small>
+    </article>
+    <article danaSummaryCard class="gear-metric-card blade-location-summary-card">
+      <span>BLADES REPRESENTED</span>
+      <strong>{{ totalBlades }}</strong>
+      <small>tracked blade count</small>
+    </article>
+    <article danaSummaryCard class="gear-metric-card blade-location-summary-card">
+      <span>EMPTY LOCATIONS</span>
+      <strong>{{ emptyLocations }}</strong>
+      <small>no tray assigned</small>
+    </article>
+  </section>
+
+  <section class="gear-panel blade-location-browser">
+    <div class="gear-panel-header blade-location-toolbar">
+      <div>
+        <h2>Location Inventory</h2>
+        <p>Expand a location to see trays. Expand a tray to see each active blade assignment.</p>
+      </div>
+
+      <div class="blade-location-search">
+        <label for="bladeLocationSearch">Search</label>
+        <div>
+          <input
+            id="bladeLocationSearch"
+            class="gear-input"
+            type="search"
+            name="bladeLocationSearch"
+            [(ngModel)]="searchValue"
+            placeholder="Location, tray, blade, Summary, type..."
+            autocomplete="off"
+          />
+          <button
+            *ngIf="searchValue"
+            type="button"
+            class="gear-btn gear-btn-secondary"
+            (click)="clearSearch()"
+          >
+            Clear
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="gear-loading-state inventory-loading">Loading all locations, trays, and blades…</div>
+
+    <div *ngIf="!loading" danaTableShell class="table-wrap">
+      <table danaTable class="gear-table dashboard-table inventory-master-table blade-location-table">
+        <thead>
+          <tr>
+            <th>Location</th>
+            <th>Department / Type</th>
+            <th>Status</th>
+            <th>Trays</th>
+            <th>Blades</th>
+            <th data-dana-table-static>Tag</th>
+            <th data-dana-table-static>Contents</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let location of filteredLocations">
+            <tr [attr.data-dana-table-group]="'location-' + location.id">
+              <td>
+                <strong class="mono">{{ location.serial_number }}</strong>
+                <small>{{ location.description || 'No description' }} · #{{ location.number }}</small>
+              </td>
+              <td>
+                <strong>{{ location.department || 'Shared / Internal' }}</strong>
+                <small>{{ readable(location.location_type) }}</small>
+              </td>
+              <td>
+                <span class="status-pill" [class.status-pill-muted]="!location.enabled">
+                  {{ location.enabled ? 'ACTIVE' : 'INACTIVE' }}
+                </span>
+                <small *ngIf="isGreenshedCutterShelf(location)" class="blade-location-cutter-note">
+                  Cutter shelf · trays not permitted
+                </small>
+              </td>
+              <td><strong>{{ location.tray_count }}</strong></td>
+              <td><strong>{{ location.blade_count }}</strong></td>
+              <td>
+                <button
+                  type="button"
+                  class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
+                  [disabled]="printingTagSerial !== null"
+                  (click)="printTag('LOCATION', location.id, location.serial_number)"
+                >
+                  {{ printingTagSerial === location.serial_number ? 'Printing…' : 'Print Tag' }}
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
+                  (click)="toggleLocation(location.id)"
+                >
+                  {{ expandedLocationId === location.id ? 'Hide contents' : (location.tray_count ? 'View contents' : 'View empty location') }}
+                </button>
+              </td>
+            </tr>
+
+            <tr *ngIf="expandedLocationId === location.id" data-dana-table-detail="true" [attr.data-dana-table-group]="'location-' + location.id" class="inventory-expanded-row blade-location-expanded-row">
+              <td colspan="7">
+                <div class="inventory-expanded-panel blade-location-expanded-panel">
+                  <div class="inventory-expanded-heading">
+                    <div>
+                      <strong>{{ location.serial_number }} · Current Contents</strong>
+                      <span>{{ location.tray_count }} tray{{ location.tray_count === 1 ? '' : 's' }} · {{ location.blade_count }} tracked blades</span>
+                    </div>
+                  </div>
+
+                  <div *ngIf="!location.trays.length" class="gear-empty-surface blade-location-empty">
+                    <strong>This location is empty.</strong>
+                    <span *ngIf="isGreenshedCutterShelf(location)">This is a Green Shed cutter shelf, so generic tray placement is intentionally rejected.</span>
+                    <span *ngIf="!isGreenshedCutterShelf(location)">No active tray assignment is recorded here.</span>
+                  </div>
+
+                  <div *ngIf="location.trays.length" class="blade-location-tray-grid">
+                    <article *ngFor="let tray of location.trays" class="blade-location-tray-card">
+                      <div class="blade-location-tray-header">
+                        <div>
+                          <strong class="mono">{{ tray.serial_number }}</strong>
+                          <small>{{ tray.summary_number || 'No Summary' }} · {{ tray.part_type_code || 'No Part Type' }}</small>
+                        </div>
+                        <span class="status-pill">{{ readable(tray.stage_name || tray.stage_code) }}</span>
+                      </div>
+
+                      <div class="blade-location-tray-stats">
+                        <span><strong>{{ tray.blade_count }}</strong> tracked count</span>
+                        <span><strong>{{ tray.blades.length }}</strong> active blade records</span>
+                      </div>
+
+                      <div class="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button blade-location-tray-button"
+                          [disabled]="printingTagSerial !== null"
+                          (click)="printTag('TRAY', tray.id, tray.serial_number)"
+                        >
+                          {{ printingTagSerial === tray.serial_number ? 'Printing…' : 'Print Tray Tag' }}
+                        </button>
+                        <button
+                          type="button"
+                          class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button blade-location-tray-button"
+                          [disabled]="!tray.blades.length"
+                          (click)="toggleTray(tray.id)"
+                        >
+                          {{ tray.blades.length ? (expandedTrayId === tray.id ? 'Hide blades' : 'View ' + tray.blades.length + ' blades') : 'No blades' }}
+                        </button>
+                      </div>
+
+                      <div *ngIf="expandedTrayId === tray.id" class="blade-location-blade-list">
+                        <div *ngFor="let blade of tray.blades" class="blade-location-blade-row">
+                          <strong class="mono">{{ blade.serial_number }}</strong>
+                          <span>{{ blade.summary_number || '—' }} · {{ blade.part_type_code || '—' }}</span>
+                          <span>{{ readable(blade.status) }} · Cycle {{ blade.service_cycle }}</span>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+
+          <tr *ngIf="!filteredLocations.length">
+            <td danaTableEmpty colspan="7" class="empty-row">
+              {{ searchValue ? 'No locations, trays, or blades match this search.' : 'No locations found.' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>

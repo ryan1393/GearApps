@@ -1,0 +1,148 @@
+import { Subject, takeUntil } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
+import { GearToastService } from '@libs/frontend/util-common';
+import { IContainer } from '@libs/shared/util-types';
+import {
+  BladeTrackingApiService,
+  InventoryContainerRow,
+  InventoryContainedTrayRow,
+  InventoryTrayRow,
+  apiErrorText,
+} from '@libs/frontend/data-access-blade-tracking';
+import { ScanMessage } from '../../models/scan-message';
+import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
+import {
+  DanaPageHeaderComponent,
+} from '@dana/ui';
+
+@Component({
+  selector: 'gear-load-container',
+  standalone: true,
+  imports: [RouterLink, CommonModule, FormsModule, ScanPanelComponent, DanaPageHeaderComponent],
+  templateUrl: './load-container.component.html',
+})
+export class LoadContainerComponent implements OnDestroy {
+  private readonly destroyed$ = new Subject<void>();
+  ngOnDestroy(): void { this.destroyed$.next(); this.destroyed$.complete(); }
+  private readonly api = inject(BladeTrackingApiService);
+  private readonly toast = inject(GearToastService);
+  @ViewChild('containerScanner') containerScanner?: ScanPanelComponent;
+  @ViewChild('trayScanner') trayScanner?: ScanPanelComponent;
+  container: IContainer | null = null;
+  trays: Array<Pick<InventoryContainedTrayRow, 'id' | 'serial_number' | 'blade_count'>> = [];
+  availableContainers:InventoryContainerRow[]=[]; availableTrays:InventoryTrayRow[]=[]; selectedContainerSerial=''; selectedTraySerial=''; containerSearch=''; traySearch='';
+  get filteredContainers(){const q=this.containerSearch.trim().toLowerCase();return q?this.availableContainers.filter(x=>x.serial_number.toLowerCase().includes(q)):this.availableContainers;} get filteredTrays(){const q=this.traySearch.trim().toLowerCase();return q?this.availableTrays.filter(x=>x.serial_number.toLowerCase().includes(q)):this.availableTrays;}
+  pickerError = '';
+  private pickerVersion = 0;
+  constructor(){this.refreshPickers();}
+  refreshPickers(): void {
+    const version = ++this.pickerVersion; this.pickerError = '';
+    this.api.getWorkflowContainers('load').pipe(takeUntil(this.destroyed$)).subscribe({ next: rows => { if(version === this.pickerVersion) this.availableContainers = rows; }, error: e => { if(version === this.pickerVersion) { this.availableContainers = []; this.pickerError = apiErrorText(e, 'Could not load available containers.'); } } });
+    this.api.getWorkflowTrays('coater_load').pipe(takeUntil(this.destroyed$)).subscribe({ next: rows => { if(version === this.pickerVersion) this.availableTrays = rows; }, error: e => { if(version === this.pickerVersion) { this.availableTrays = []; this.pickerError = apiErrorText(e, 'Could not load ready-for-coating trays.'); } } });
+  }
+  chooseContainer(s:string){if(s)this.scanContainer(s);else if(!this.busy){this.container=null;this.trays=[];}} chooseTray(s:string){if(s)this.scanTray(s);}
+  busy = false;
+  message: ScanMessage | null = null;
+  lastCompleted: { serial: string; trayCount: number; bladeCount: number } | null = null;
+
+  scanContainer(serial: string) {
+    if (this.busy || !serial.trim()) return;
+    serial = serial.trim().toUpperCase();
+    this.container = null;
+    this.trays = [];
+    this.lastCompleted = null;
+    this.message = null;
+    this.busy = true;
+    this.api.scanContainer(serial).pipe(takeUntil(this.destroyed$)).subscribe({
+      next: (container) => {
+        if (!container.workflow_eligibility?.load) {
+          this.busy = false; this.message = { tone: 'error', text: 'Select an empty container or one packed for dispatch. Containers already sent belong in Receive From Coater.' }; return;
+        }
+        this.container = container;
+        this.trays = [...container.trays];
+        this.lastCompleted = null;
+        this.busy = false;
+        this.containerScanner?.clearAndFocus();
+        this.trayScanner?.focus();
+        this.message = {
+          tone: 'success',
+          text: `Container ${container.serial_number} selected.`,
+        };
+      },
+      error: (err: HttpErrorResponse) =>
+        this.fail(err, 'Container not found.', this.containerScanner),
+    });
+  }
+  scanTray(serial: string) {
+    if (this.busy || !this.container || !serial.trim()) return;
+    serial = serial.trim().toUpperCase();
+    this.busy = true;
+    this.api.scanTray(serial).pipe(takeUntil(this.destroyed$)).subscribe({
+      next: (tray) => {
+        if (!tray.workflow_eligibility?.coater_load) {
+          this.busy = false; this.message = { tone: 'error', text: 'Only a complete, ground tray available for coating can be loaded.' }; return;
+        }
+        if (this.trays.some((x) => x.id === tray.id)) {
+          this.busy = false;
+          this.message = {
+            tone: 'info',
+            text: `Tray ${tray.serial_number} is already in this session.`,
+          };
+          this.trayScanner?.clearAndFocus();
+          return;
+        }
+        const container = this.container;
+        if (!container) return;
+        this.api.loadTrayIntoContainer(container.id, tray.id).pipe(takeUntil(this.destroyed$)).subscribe({
+          next: () => {
+            this.trays = [tray, ...this.trays];
+            this.refreshPickers();
+            this.busy = false;
+            this.message = null;
+            this.toast.success(`Tray ${tray.serial_number} added.`, 'Tray loaded');
+            this.trayScanner?.clearAndFocus();
+          },
+          error: (err: HttpErrorResponse) =>
+            this.fail(
+              err,
+              'Could not add tray to container.',
+              this.trayScanner,
+            ),
+        });
+      },
+      error: (err: HttpErrorResponse) =>
+        this.fail(err, 'Tray not found.', this.trayScanner),
+    });
+  }
+  finish() {
+    if (!this.container || !this.trays.length || this.busy) return;
+    const completed = {
+      serial: this.container.serial_number,
+      trayCount: this.trays.length,
+      bladeCount: this.trays.reduce((sum, tray) => sum + Number(tray.blade_count ?? 0), 0),
+    };
+    this.lastCompleted = completed;
+    this.refreshPickers();
+    this.container = null;
+    this.trays = [];
+    this.message = null;
+    this.toast.success(
+      `${completed.serial} loading session finished with ${completed.trayCount} tray${completed.trayCount === 1 ? '' : 's'}. Scan another container to start the next load.`,
+      'Container loading complete',
+    );
+    queueMicrotask(() => this.containerScanner?.clearAndFocus());
+  }
+  private fail(
+    err: HttpErrorResponse,
+    fallback: string,
+    scanner?: ScanPanelComponent,
+  ) {
+    this.busy = false;
+    this.message = { tone: 'error', text: apiErrorText(err, fallback) };
+    scanner?.select();
+  }
+}

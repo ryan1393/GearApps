@@ -1,0 +1,1952 @@
+[
+    {
+        "Pinion_ID":  "1",
+        "Pinion":  "044GP103",
+        "Summary_ID":  "157",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "2",
+        "Pinion":  "060GP104",
+        "Summary_ID":  "158",
+        "Teeth":  "7",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "3",
+        "Pinion":  "060GP105",
+        "Summary_ID":  "158",
+        "Teeth":  "7",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "4",
+        "Pinion":  "070GP110",
+        "Summary_ID":  "149",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "5",
+        "Pinion":  "070GP120",
+        "Summary_ID":  "11",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "6",
+        "Pinion":  "10006255",
+        "Summary_ID":  "92",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "7",
+        "Pinion":  "10006617",
+        "Summary_ID":  "110",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "8",
+        "Pinion":  "10010740",
+        "Summary_ID":  "95",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "9",
+        "Pinion":  "10012658",
+        "Summary_ID":  "109",
+        "Teeth":  "12",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "10",
+        "Pinion":  "10014773",
+        "Summary_ID":  "64",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "11",
+        "Pinion":  "10014799",
+        "Summary_ID":  "63",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "12",
+        "Pinion":  "10018690",
+        "Summary_ID":  "76",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "13",
+        "Pinion":  "10026638",
+        "Summary_ID":  "96",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "14",
+        "Pinion":  "10026641",
+        "Summary_ID":  "97",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "15",
+        "Pinion":  "10026644",
+        "Summary_ID":  "98",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "16",
+        "Pinion":  "10027181",
+        "Summary_ID":  "99",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "17",
+        "Pinion":  "10031773",
+        "Summary_ID":  "100",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "18",
+        "Pinion":  "10034911",
+        "Summary_ID":  "101",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "19",
+        "Pinion":  "10039666",
+        "Summary_ID":  "107",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "INACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "20",
+        "Pinion":  "10046057",
+        "Summary_ID":  "105",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "21",
+        "Pinion":  "10048089",
+        "Summary_ID":  "106",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "22",
+        "Pinion":  "10050778",
+        "Summary_ID":  "104",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "23",
+        "Pinion":  "10050941",
+        "Summary_ID":  "111",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "24",
+        "Pinion":  "10050981",
+        "Summary_ID":  "113",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "25",
+        "Pinion":  "10051006",
+        "Summary_ID":  "112",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "26",
+        "Pinion":  "10051752",
+        "Summary_ID":  "118",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "27",
+        "Pinion":  "10060466",
+        "Summary_ID":  "81",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "28",
+        "Pinion":  "10062025",
+        "Summary_ID":  "107",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "29",
+        "Pinion":  "10062039",
+        "Summary_ID":  "108",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "30",
+        "Pinion":  "10062932",
+        "Summary_ID":  "110",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "INACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "31",
+        "Pinion":  "10067149",
+        "Summary_ID":  "114",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "32",
+        "Pinion":  "10067163",
+        "Summary_ID":  "115",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "33",
+        "Pinion":  "10067212",
+        "Summary_ID":  "116",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "34",
+        "Pinion":  "10067227",
+        "Summary_ID":  "94",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "35",
+        "Pinion":  "10067237",
+        "Summary_ID":  "117",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "36",
+        "Pinion":  "10067250",
+        "Summary_ID":  "103",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "37",
+        "Pinion":  "10073116",
+        "Summary_ID":  "119",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "38",
+        "Pinion":  "10095823",
+        "Summary_ID":  "66",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "39",
+        "Pinion":  "10115610",
+        "Summary_ID":  "122",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "40",
+        "Pinion":  "10134298",
+        "Summary_ID":  "77",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "41",
+        "Pinion":  "10134387",
+        "Summary_ID":  "76",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "42",
+        "Pinion":  "10134416",
+        "Summary_ID":  "78",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "43",
+        "Pinion":  "10134528",
+        "Summary_ID":  "100",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "44",
+        "Pinion":  "10134546",
+        "Summary_ID":  "101",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "45",
+        "Pinion":  "10145082",
+        "Summary_ID":  "107",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "46",
+        "Pinion":  "10145089",
+        "Summary_ID":  "121",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "47",
+        "Pinion":  "10145096",
+        "Summary_ID":  "102",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "48",
+        "Pinion":  "10145110",
+        "Summary_ID":  "120",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "49",
+        "Pinion":  "10149093",
+        "Summary_ID":  "111",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "50",
+        "Pinion":  "10149096",
+        "Summary_ID":  "114",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "51",
+        "Pinion":  "10149464",
+        "Summary_ID":  "123",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "52",
+        "Pinion":  "10158287",
+        "Summary_ID":  "124",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "53",
+        "Pinion":  "10158288",
+        "Summary_ID":  "125",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "54",
+        "Pinion":  "10213043",
+        "Summary_ID":  "119",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "55",
+        "Pinion":  "10213046",
+        "Summary_ID":  "118",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "56",
+        "Pinion":  "2001812",
+        "Summary_ID":  "71",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "57",
+        "Pinion":  "2001836",
+        "Summary_ID":  "152",
+        "Teeth":  "16",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "58",
+        "Pinion":  "2003503",
+        "Summary_ID":  "18",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "59",
+        "Pinion":  "2004200",
+        "Summary_ID":  "130",
+        "Teeth":  "13",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "60",
+        "Pinion":  "2005016",
+        "Summary_ID":  "69",
+        "Teeth":  "14",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "61",
+        "Pinion":  "2005022",
+        "Summary_ID":  "72",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "62",
+        "Pinion":  "2005025",
+        "Summary_ID":  "73",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "63",
+        "Pinion":  "2005028",
+        "Summary_ID":  "68",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "64",
+        "Pinion":  "2005112",
+        "Summary_ID":  "10",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "65",
+        "Pinion":  "2005115",
+        "Summary_ID":  "70",
+        "Teeth":  "14",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "66",
+        "Pinion":  "2005117",
+        "Summary_ID":  "16",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "67",
+        "Pinion":  "2005872",
+        "Summary_ID":  "75",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "68",
+        "Pinion":  "2010409",
+        "Summary_ID":  "77",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "69",
+        "Pinion":  "2010763",
+        "Summary_ID":  "79",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "70",
+        "Pinion":  "2010904",
+        "Summary_ID":  "78",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "71",
+        "Pinion":  "2012184",
+        "Summary_ID":  "80",
+        "Teeth":  "13",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "4"
+    },
+    {
+        "Pinion_ID":  "72",
+        "Pinion":  "2013028",
+        "Summary_ID":  "57",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "73",
+        "Pinion":  "2013744",
+        "Summary_ID":  "82",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "74",
+        "Pinion":  "2015275",
+        "Summary_ID":  "46",
+        "Teeth":  "14",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "75",
+        "Pinion":  "2015763",
+        "Summary_ID":  "68",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "76",
+        "Pinion":  "2018523",
+        "Summary_ID":  "84",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "77",
+        "Pinion":  "2018739",
+        "Summary_ID":  "39",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "78",
+        "Pinion":  "2018749",
+        "Summary_ID":  "74",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "79",
+        "Pinion":  "2018758",
+        "Summary_ID":  "85",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "80",
+        "Pinion":  "2018924",
+        "Summary_ID":  "52",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "81",
+        "Pinion":  "2019216",
+        "Summary_ID":  "36",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "82",
+        "Pinion":  "2019219",
+        "Summary_ID":  "83",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "83",
+        "Pinion":  "2019271",
+        "Summary_ID":  "87",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "84",
+        "Pinion":  "2019617",
+        "Summary_ID":  "86",
+        "Teeth":  "13",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "85",
+        "Pinion":  "2019748",
+        "Summary_ID":  "88",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "86",
+        "Pinion":  "2019751",
+        "Summary_ID":  "89",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "87",
+        "Pinion":  "2019754",
+        "Summary_ID":  "90",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "88",
+        "Pinion":  "2020690",
+        "Summary_ID":  "56",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "89",
+        "Pinion":  "2020709",
+        "Summary_ID":  "93",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "90",
+        "Pinion":  "2020785",
+        "Summary_ID":  "55",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "91",
+        "Pinion":  "31488",
+        "Summary_ID":  "34",
+        "Teeth":  "12",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "92",
+        "Pinion":  "31766",
+        "Summary_ID":  "26",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "93",
+        "Pinion":  "32072",
+        "Summary_ID":  "28",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "94",
+        "Pinion":  "32359",
+        "Summary_ID":  "25",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "95",
+        "Pinion":  "32973",
+        "Summary_ID":  "19",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "96",
+        "Pinion":  "32980",
+        "Summary_ID":  "21",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "97",
+        "Pinion":  "33673",
+        "Summary_ID":  "22",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "98",
+        "Pinion":  "33849",
+        "Summary_ID":  "23",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "99",
+        "Pinion":  "34172",
+        "Summary_ID":  "30",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "100",
+        "Pinion":  "34383",
+        "Summary_ID":  "36",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "101",
+        "Pinion":  "34507",
+        "Summary_ID":  "20",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "102",
+        "Pinion":  "34718",
+        "Summary_ID":  "29",
+        "Teeth":  "7",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "103",
+        "Pinion":  "35425",
+        "Summary_ID":  "31",
+        "Teeth":  "6",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "104",
+        "Pinion":  "35658",
+        "Summary_ID":  "35",
+        "Teeth":  "6",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "105",
+        "Pinion":  "36210",
+        "Summary_ID":  "38",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "106",
+        "Pinion":  "37767",
+        "Summary_ID":  "128",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "107",
+        "Pinion":  "38754",
+        "Summary_ID":  "131",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "108",
+        "Pinion":  "40628",
+        "Summary_ID":  "138",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "109",
+        "Pinion":  "40632",
+        "Summary_ID":  "137",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "1"
+    },
+    {
+        "Pinion_ID":  "110",
+        "Pinion":  "40789",
+        "Summary_ID":  "136",
+        "Teeth":  "14",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "1"
+    },
+    {
+        "Pinion_ID":  "111",
+        "Pinion":  "40957",
+        "Summary_ID":  "135",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "112",
+        "Pinion":  "40959",
+        "Summary_ID":  "32",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "113",
+        "Pinion":  "40960",
+        "Summary_ID":  "33",
+        "Teeth":  "7",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "114",
+        "Pinion":  "40961",
+        "Summary_ID":  "139",
+        "Teeth":  "6",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "115",
+        "Pinion":  "40962",
+        "Summary_ID":  "27",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "116",
+        "Pinion":  "40963",
+        "Summary_ID":  "146",
+        "Teeth":  "6",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "117",
+        "Pinion":  "40965",
+        "Summary_ID":  "37",
+        "Teeth":  "6",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "118",
+        "Pinion":  "40966",
+        "Summary_ID":  "129",
+        "Teeth":  "6",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "119",
+        "Pinion":  "40967",
+        "Summary_ID":  "134",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "120",
+        "Pinion":  "40969",
+        "Summary_ID":  "133",
+        "Teeth":  "13",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "121",
+        "Pinion":  "42115",
+        "Summary_ID":  "153",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "122",
+        "Pinion":  "42119",
+        "Summary_ID":  "154",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "123",
+        "Pinion":  "42337",
+        "Summary_ID":  "140",
+        "Teeth":  "15",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "124",
+        "Pinion":  "42419",
+        "Summary_ID":  "141",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "125",
+        "Pinion":  "42469",
+        "Summary_ID":  "142",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "126",
+        "Pinion":  "42699",
+        "Summary_ID":  "143",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "127",
+        "Pinion":  "42759",
+        "Summary_ID":  "144",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "6"
+    },
+    {
+        "Pinion_ID":  "128",
+        "Pinion":  "42827",
+        "Summary_ID":  "145",
+        "Teeth":  "14",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "129",
+        "Pinion":  "44199",
+        "Summary_ID":  "146",
+        "Teeth":  "6",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "130",
+        "Pinion":  "44221",
+        "Summary_ID":  "148",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "131",
+        "Pinion":  "44225",
+        "Summary_ID":  "128",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "132",
+        "Pinion":  "44226",
+        "Summary_ID":  "147",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "133",
+        "Pinion":  "44812",
+        "Summary_ID":  "2",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "134",
+        "Pinion":  "45564",
+        "Summary_ID":  "1",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "135",
+        "Pinion":  "46131",
+        "Summary_ID":  "4",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "136",
+        "Pinion":  "46135",
+        "Summary_ID":  "3",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "137",
+        "Pinion":  "46211",
+        "Summary_ID":  "127",
+        "Teeth":  "14",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "138",
+        "Pinion":  "46214",
+        "Summary_ID":  "21",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "139",
+        "Pinion":  "46215",
+        "Summary_ID":  "151",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "140",
+        "Pinion":  "46256",
+        "Summary_ID":  "5",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "141",
+        "Pinion":  "46541",
+        "Summary_ID":  "6",
+        "Teeth":  "14",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "142",
+        "Pinion":  "46636",
+        "Summary_ID":  "150",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "143",
+        "Pinion":  "46637",
+        "Summary_ID":  "7",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "144",
+        "Pinion":  "46683",
+        "Summary_ID":  "10",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "145",
+        "Pinion":  "47084",
+        "Summary_ID":  "14",
+        "Teeth":  "13",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "6"
+    },
+    {
+        "Pinion_ID":  "146",
+        "Pinion":  "47323",
+        "Summary_ID":  "15",
+        "Teeth":  "14",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "147",
+        "Pinion":  "47608",
+        "Summary_ID":  "5",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "148",
+        "Pinion":  "47687",
+        "Summary_ID":  "151",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "149",
+        "Pinion":  "47689",
+        "Summary_ID":  "8",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "150",
+        "Pinion":  "47907",
+        "Summary_ID":  "12",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "151",
+        "Pinion":  "47912",
+        "Summary_ID":  "24",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "152",
+        "Pinion":  "47922",
+        "Summary_ID":  "17",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "153",
+        "Pinion":  "47926",
+        "Summary_ID":  "13",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "154",
+        "Pinion":  "48084",
+        "Summary_ID":  "16",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "155",
+        "Pinion":  "48088",
+        "Summary_ID":  "40",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "156",
+        "Pinion":  "48096",
+        "Summary_ID":  "41",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "157",
+        "Pinion":  "48393",
+        "Summary_ID":  "43",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "158",
+        "Pinion":  "48395",
+        "Summary_ID":  "44",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "159",
+        "Pinion":  "48665",
+        "Summary_ID":  "18",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "160",
+        "Pinion":  "49612",
+        "Summary_ID":  "48",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "161",
+        "Pinion":  "50546",
+        "Summary_ID":  "51",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "162",
+        "Pinion":  "50550",
+        "Summary_ID":  "50",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "163",
+        "Pinion":  "50554",
+        "Summary_ID":  "52",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "164",
+        "Pinion":  "50732",
+        "Summary_ID":  "37",
+        "Teeth":  "6",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "165",
+        "Pinion":  "51007",
+        "Summary_ID":  "53",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "166",
+        "Pinion":  "51011",
+        "Summary_ID":  "54",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "167",
+        "Pinion":  "51015",
+        "Summary_ID":  "44",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "168",
+        "Pinion":  "51019",
+        "Summary_ID":  "45",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "169",
+        "Pinion":  "51171",
+        "Summary_ID":  "9",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "170",
+        "Pinion":  "51176",
+        "Summary_ID":  "47",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "171",
+        "Pinion":  "51402",
+        "Summary_ID":  "18",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "172",
+        "Pinion":  "51404",
+        "Summary_ID":  "49",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "173",
+        "Pinion":  "51406",
+        "Summary_ID":  "4",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "174",
+        "Pinion":  "51408",
+        "Summary_ID":  "3",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "175",
+        "Pinion":  "51950",
+        "Summary_ID":  "59",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "176",
+        "Pinion":  "52069929AC",
+        "Summary_ID":  "155",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "177",
+        "Pinion":  "52069940AC",
+        "Summary_ID":  "156",
+        "Teeth":  "12",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "178",
+        "Pinion":  "52069955AC",
+        "Summary_ID":  "91",
+        "Teeth":  "14",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "179",
+        "Pinion":  "52530",
+        "Summary_ID":  "55",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "180",
+        "Pinion":  "52534",
+        "Summary_ID":  "56",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "1"
+    },
+    {
+        "Pinion_ID":  "181",
+        "Pinion":  "52538",
+        "Summary_ID":  "61",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "182",
+        "Pinion":  "52543",
+        "Summary_ID":  "62",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "183",
+        "Pinion":  "52899",
+        "Summary_ID":  "42",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "184",
+        "Pinion":  "52974",
+        "Summary_ID":  "58",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "185",
+        "Pinion":  "53463",
+        "Summary_ID":  "60",
+        "Teeth":  "9",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "186",
+        "Pinion":  "53494",
+        "Summary_ID":  "65",
+        "Teeth":  "8",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "187",
+        "Pinion":  "54320",
+        "Summary_ID":  "67",
+        "Teeth":  "11",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "188",
+        "Pinion":  "620094",
+        "Summary_ID":  "130",
+        "Teeth":  "13",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "189",
+        "Pinion":  "620107",
+        "Summary_ID":  "24",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "190",
+        "Pinion":  "620480",
+        "Summary_ID":  "132",
+        "Teeth":  "10",
+        "Date_Added":  null,
+        "Status":  "ACTIVE",
+        "Emp_ID":  null,
+        "Roll_Master_Needed":  "6"
+    },
+    {
+        "Pinion_ID":  "192",
+        "Pinion":  "10162905",
+        "Summary_ID":  "107",
+        "Teeth":  "11",
+        "Date_Added":  "2023-06-07 12:26:03.407",
+        "Status":  "ACTIVE",
+        "Emp_ID":  "999",
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "193",
+        "Pinion":  "10263075",
+        "Summary_ID":  "160",
+        "Teeth":  "12",
+        "Date_Added":  "2024-07-24 13:00:11.057",
+        "Status":  "ACTIVE",
+        "Emp_ID":  "999",
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "194",
+        "Pinion":  "10213516",
+        "Summary_ID":  "161",
+        "Teeth":  "11",
+        "Date_Added":  "2026-07-08 13:14:43.500",
+        "Status":  "ACTIVE",
+        "Emp_ID":  "999",
+        "Roll_Master_Needed":  "0"
+    },
+    {
+        "Pinion_ID":  "195",
+        "Pinion":  "10213521",
+        "Summary_ID":  "162",
+        "Teeth":  "10",
+        "Date_Added":  "2026-07-08 13:16:12.423",
+        "Status":  "ACTIVE",
+        "Emp_ID":  "999",
+        "Roll_Master_Needed":  "2"
+    },
+    {
+        "Pinion_ID":  "196",
+        "Pinion":  "10213526",
+        "Summary_ID":  "163",
+        "Teeth":  "9",
+        "Date_Added":  "2026-08-11 11:47:43.120",
+        "Status":  "ACTIVE",
+        "Emp_ID":  "999",
+        "Roll_Master_Needed":  "0"
+    }
+]

@@ -1,0 +1,114 @@
+.blade-dashboard-data-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.blade-dashboard-bottom {
+  align-items: stretch;
+  margin-bottom: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.blade-dashboard-bottom .activity-panel,
+.blade-dashboard-bottom .data-panel {
+  min-height: 310px;
+}
+
+.dashboard-activity-list {
+  padding: 4px 16px 12px;
+}
+
+.dashboard-activity-row {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 55px;
+  border-bottom: 1px solid #edf1f5;
+}
+
+.dashboard-activity-row:last-child {
+  border-bottom: 0;
+}
+
+.dashboard-activity-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid #d2e2ef;
+  border-radius: 8px;
+  background: #eef6fc;
+  color: #2b72ad;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.dashboard-activity-icon.container {
+  border-color: #d8e8df;
+  background: #eef8f2;
+  color: #2c7e5d;
+}
+
+.dashboard-activity-row > div {
+  min-width: 0;
+}
+
+.dashboard-activity-row strong,
+.dashboard-activity-row span {
+  display: block;
+}
+
+.dashboard-activity-row strong {
+  overflow: hidden;
+  color: #283d52;
+  font-size: var(--gear-font-sm);
+  font-weight: 780;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-activity-row span {
+  overflow: hidden;
+  margin-top: 3px;
+  color: #758598;
+  font-size: var(--gear-font-xs);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashboard-activity-row time {
+  color: #8291a2;
+  font-size: var(--gear-font-xs);
+  white-space: nowrap;
+}
+
+.blade-dashboard-quick {
+  min-height: auto;
+  margin-bottom: 0;
+}
+
+@media (max-width: 1050px) {
+  .blade-dashboard-data-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* === GEAR APPS MANAGED BLADE DASHBOARD ALIGNMENT START === */
+/* Feature owns columns/min-heights. DanaDashboardGrid/Panel own gap, margins, and panel shell. */
+.blade-dashboard-aligned-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.blade-dashboard-aligned-grid>.activity-panel{display:flex;flex-direction:column;min-height:310px;padding:0}
+.blade-dashboard-aligned-grid>.data-panel{min-height:310px}
+.blade-dashboard-aligned-grid>.activity-panel .dashboard-activity-list{flex:1 1 auto}
+.blade-dashboard-metric-table{width:100%;table-layout:fixed}
+.blade-dashboard-metric-table col.blade-dashboard-col-primary{width:auto}
+.blade-dashboard-metric-table col.blade-dashboard-col-count{width:96px}
+.blade-dashboard-metric-table :is(th,td):first-child{text-align:left}
+.blade-dashboard-metric-table :is(th,td):nth-child(2),.blade-dashboard-metric-table :is(th,td):nth-child(3){text-align:right;font-variant-numeric:tabular-nums}
+.blade-dashboard-metric-table td:first-child{min-width:0}
+@media (min-width:1500px){.blade-dashboard-metric-table col.blade-dashboard-col-count{width:108px}}
+@media (max-width:1050px){.blade-dashboard-aligned-grid{grid-template-columns:1fr}}
+@media (max-width:640px){.blade-dashboard-metric-table col.blade-dashboard-col-count{width:72px}}
+/* === GEAR APPS MANAGED BLADE DASHBOARD ALIGNMENT END === */

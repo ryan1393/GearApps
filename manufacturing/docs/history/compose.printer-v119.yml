@@ -1,0 +1,6 @@
+services:
+  gear-app-server:
+    image: dana-apps-gear-app-server:v113-20261008t005504z-1513124
+    environment:
+      GEAR_LABEL_PRINTER_HOST: ${GEAR_LABEL_PRINTER_HOST:?Required_in_project_.env}
+      GEAR_LABEL_PRINTER_PORT: ${GEAR_LABEL_PRINTER_PORT:-9100}

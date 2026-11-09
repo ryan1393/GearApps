@@ -1,0 +1,61 @@
+<ng-container *ngIf="session.authState$ | async as user">
+  <aside danaMobileNav [desktopMinWidth]="1024" #mobileNav="danaMobileNav" class="gear-sidebar" [class.mobile-open]="mobileNav.open" aria-label="Application navigation">
+    <a routerLink="/cutter-builder" class="brand-row">
+      <span class="brand-mark dana-diamond-mark"><img src="assets/brand/dana-logo.svg" alt="" class="dana-diamond-image" aria-hidden="true" /></span>
+      <span class="brand-copy">
+        <small>GEAR APPS</small>
+        <strong>CUTTER BUILDER</strong>
+      </span>
+    </a>
+
+    <nav (click)="mobileNav.close()" class="side-nav" aria-label="Cutter Builder">
+      <a routerLink="/cutter-builder" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active" class="side-link primary">
+        <span class="nav-icon"><span class="gear-glyph gear-glyph-dashboard" aria-hidden="true"></span></span><span>Cutter Dashboard</span><span class="nav-current">ACTIVE</span>
+      </a>
+
+      <ng-container *ngIf="canEdit(user)">
+        <div class="nav-heading">OPERATIONS</div>
+        <a routerLink="/cutter-builder/build" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-build-cutter" aria-hidden="true"></span></span><span>Build Cutter</span></a>
+        <a routerLink="/cutter-builder/teardown" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-teardown" aria-hidden="true"></span></span><span>Tear Down Cutter</span></a>
+
+        <div class="nav-heading">REFERENCE</div>
+        <a routerLink="/cutter-builder/lookup" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span><span>Build Lookup</span></a>
+      </ng-container>
+
+      <div *ngIf="!canEdit(user)" class="sidebar-view-only">
+        <strong>VIEW ONLY</strong>
+        <span>{{ user.departmentDescription || 'Your department' }} can view this dashboard, but cannot perform transactions in this app.</span>
+      </div>
+
+      <div class="nav-heading">SHARED APPS</div>
+      <a [href]="bladeTrackingUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-blade" aria-hidden="true"></span></span><span>Blade Tracking</span></a>
+      <a [href]="greenshedUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Greenshed</span></a>
+
+      <div class="nav-heading">ADMINISTRATION</div>
+      <a *ngIf="user.role === 'admin'" routerLink="/admin" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span><span>Admin</span></a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="version">Gear Apps <span>v{{ appVersion }}</span></div>
+      <div class="online-row"><span>Shared manufacturing workspace</span></div>
+    </div>
+  </aside>
+
+  <button *ngIf="mobileNav.open" type="button" class="gear-nav-overlay" aria-label="Close navigation" (click)="mobileNav.close()"></button>
+
+  <header class="gear-topbar">
+    <button class="menu-button" type="button" aria-label="Open navigation" [attr.aria-expanded]="mobileNav.open" (click)="mobileNav.toggle()">☰</button>
+
+    <form *ngIf="canEdit(user)" class="global-search" (ngSubmit)="search()">
+      <span class="search-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span>
+      <input type="text" name="globalSearch" [(ngModel)]="searchValue" placeholder="Search build, cutter body, or Summary…" aria-label="Search build, cutter body, or Summary" autocomplete="off" />
+      <button type="submit" aria-label="Search"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></button>
+    </form>
+
+    <div class="topbar-user">
+      <div class="avatar">{{ initials(user.email) }}</div>
+      <div class="user-copy"><strong>{{ user.email }}</strong><span>{{ user.departmentDescription || user.role }}</span></div>
+      <button type="button" class="signout-button" (click)="logout()">Sign out</button>
+    </div>
+  </header>
+</ng-container>

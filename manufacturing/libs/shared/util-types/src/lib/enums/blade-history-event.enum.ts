@@ -1,0 +1,15 @@
+export enum BladeHistoryEvent {
+  CREATED = 'created',
+  STATUS_CHANGED = 'status_changed',
+  ASSIGNED_TO_TRAY = 'assigned_to_tray',
+  REMOVED_FROM_TRAY = 'removed_from_tray',
+  LOADED_TO_CONTAINER = 'loaded_to_container',
+  REMOVED_FROM_CONTAINER = 'removed_from_container',
+  SENT_TO_COATER = 'sent_to_coater',
+  RETURNED_FROM_COATER = 'returned_from_coater',
+  INSTALLED_IN_CUTTER = 'installed_in_cutter',
+  REMOVED_FROM_CUTTER = 'removed_from_cutter',
+  RESHARPEN_STARTED = 'resharpen_started',
+  CYCLE_COMPLETED = 'cycle_completed',
+  SCRAPPED = 'scrapped',
+}

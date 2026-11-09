@@ -1,0 +1,24 @@
+{
+  "name": "shared-dana-app-config",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/dana-app-config/src",
+  "projectType": "library",
+  "tags": [
+    "type:util",
+    "scope:shared",
+    "domain:shared"
+  ],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "libs/shared/dana-app-config/**/*.ts"
+        ]
+      }
+    }
+  }
+}

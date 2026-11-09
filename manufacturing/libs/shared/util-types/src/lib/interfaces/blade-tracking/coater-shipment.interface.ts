@@ -1,0 +1,65 @@
+export interface CoaterShipmentBlade {
+  id: string;
+  serial: string;
+  status: string;
+  cycle: number;
+}
+export interface CoaterShipmentTray {
+  id: string;
+  assignment_id: string;
+  serial: string;
+  summary: string;
+  part_type: string;
+  count: number;
+  required: number | null;
+  rough_shelf: string;
+  blades: CoaterShipmentBlade[];
+}
+export interface CoaterShipmentContainer {
+  id: string;
+  serial: string;
+  trays: CoaterShipmentTray[];
+  issues: string[];
+}
+export interface CoaterManifest {
+  containers: CoaterShipmentContainer[];
+  totals: { containers: number; trays: number; blades: number };
+  summary: Array<{ summary: string; part_type: string; trays: number; blades: number }>;
+  issues: string[];
+}
+export interface CoaterShipment {
+  id: string;
+  number: string;
+  status: 'DRAFT' | 'DISPATCHED' | 'CANCELED';
+  revision: number;
+  destination: string;
+  notes: string;
+  created_at: string;
+  created_by: string;
+  dispatched_at: string | null;
+  dispatched_by: string | null;
+  manifest: CoaterManifest;
+  reviewed: boolean;
+  print_requested: boolean;
+  changed: boolean;
+  events: Array<{ kind: string; revision: number; at: string; actor: string; detail: string }>;
+}
+export interface CoaterAvailableContainer {
+  id: string;
+  serial: string;
+  trays: number;
+  blades: number;
+  summary: CoaterManifest['summary'];
+}
+export interface CoaterShipmentList {
+  rows: Array<{ id: string; number: string; status: string; revision: number; destination: string; created_at: string; totals: CoaterManifest['totals'] }>;
+  total: number;
+  page: number;
+  page_size: number;
+}
+export interface CoaterPackingSlip {
+  shipment: CoaterShipment;
+  reprint: boolean;
+  requested_at: string;
+  requested_by: string;
+}

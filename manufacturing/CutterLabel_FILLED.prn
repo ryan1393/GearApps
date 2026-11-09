@@ -1,0 +1,77 @@
+<STX>R<ETX>
+<STX><ESC>C<SI>W816<ETX>
+R
+k
+C0
+P;
+E*;F*;
+L39;D0;
+L0;o156,303;f0;l860;w3;D39;
+L1;o156,606;f0;l860;w3;
+L2;o916,53;f0;l3;w812;
+L3;o814,53;f0;l3;w812;
+L4;o865,53;f0;l3;w812;
+L5;o611,53;f0;l3;w812;
+L6;o662,53;f0;l3;w812;
+L7;o713,53;f0;l3;w812;
+L8;o763,53;f0;l3;w812;
+L9;o206,53;f0;l3;w812;
+L10;o254,53;f0;l3;w812;
+L11;o305,53;f0;l3;w812;
+L12;o357,53;f0;l3;w812;
+L13;o407,53;f0;l3;w812;
+L14;o458,53;f0;l3;w812;
+L15;o509,53;f0;l3;w812;
+L16;o560,53;f0;l3;w812;
+W17;o1090,559;f0;l38;h39;w4;
+W18;o1042,558;f0;l39;h39;w4;
+W19;o1179,52;f0;l81;h812;w4;
+W20;o155,52;f0;l862;h812;w4;
+W21;o1131,52;f0;l51;h406;w4;
+W22;o1084,52;f0;l51;h406;w4;
+W23;o1036,52;f0;l51;h406;w4;
+W24;o1131,455;f0;l51;h409;w4;
+W25;o1036,455;f0;l51;h409;w4;
+W26;o1084,455;f0;l51;h409;w4;
+W27;o93,52;f0;l51;h812;w4;
+B28,bc_Build;o82,59;f3;h51;w3;c6;i0;d3,$BuildID;
+H29,Labe0070;o141,60;f3;h1;w1;c31;r0;b0;d3,Reason:;
+H30,Labe0062;o1255,59;f3;h1;w1;c21;r0;b0;d3,Build ID:;
+H31,Text0061;o1250,229;f3;h31;w30;c26;r0;b0;d3,$BuildID;
+H32,glbl_Pie;o998,637;f3;h1;w1;c37;r0;b0;d3,PIECES;
+H33,glbl_Mac;o1001,341;f3;h1;w1;c37;r0;b0;d3,MACHINE;
+H34,glbl_Dat;o1001,112;f3;h1;w1;c37;r0;b0;d3,DATE;
+H35,Coated  ;o1080,570;f3;h1;w1;c31;r0;b0;d3,$XCoated;
+H36,lbl_Coat;o1084,462;f3;h1;w1;c31;r0;b0;d3,Coated:;
+H37,lbl_Hone;o1131,462;f3;h1;w1;c31;r0;b0;d3,Honed:;
+H38,Honed   ;o1127,571;f3;h1;w1;c31;r0;b0;d3,$XHoned;
+H39,lbl_Mach;o1178,462;f3;h1;w1;c31;r0;b0;d3,Machine:;
+H40,Machine ;o1164,570;f3;h1;w1;c31;r0;b0;d3,$Machine;
+H41,BuildDat;o1069,206;f3;h1;w1;c31;r0;b0;d3,$Date;
+H42,Name    ;o1117,127;f3;h1;w1;c31;r0;b0;d3,$Name;
+H43,BodyNumb;o1164,219;f3;h1;w1;c31;r0;b0;d3,$BodyNumber;
+H44,lbl_Buil;o1084,60;f3;h1;w1;c31;r0;b0;d3,Build Date:;
+H45,lbl_Name;o1131,60;f3;h1;w1;c31;r0;b0;d3,Name:;
+H46,lbl_Body;o1178,60;f3;h1;w1;c31;r0;b0;d3,Body Number:;
+R
+R
+k
+C0
+L1320
+g0,424
+T1
+R0r0
+D0
+c0t0
+l0
+F2
+f0
+L1000
+I5
+i0
+W914;S60
+d0
+
+E*
+11
+

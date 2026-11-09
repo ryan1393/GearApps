@@ -1,11 +1,41 @@
 # GearApps
 
-Dana gear-manufacturing plant-floor apps. This Nx monorepo currently holds the **Lapper** app (gear lapping cells, lapping summaries, cutter tracking); Blade Tracking and Cutter Builder slot in alongside it as further `apps/` + `libs/` pairs.
+Dana gear-manufacturing plant-floor apps. The root Nx workspace holds **Lapper**.
+The recovered **Blade Tracking, Cutter Builder, and Greenshed** release lives in
+[`manufacturing/`](manufacturing/README.md) with its own pinned build system.
 
 | App             | Stack                                         | Path                 |
 | --------------- | --------------------------------------------- | -------------------- |
 | `lapper-client` | Angular 20 · [Dana UI](vendor/dana-ui)        | `apps/lapper-client` |
 | `lapper-api`    | NestJS 11 · TypeORM 1.x · SQL Server / SQLite | `apps/lapper-api`    |
+
+## Manufacturing workspace
+
+The uploaded GearApps 70.2.0 release has been restored and hardened as 70.2.1 under
+`manufacturing/`. It contains three Angular 19 applications, their NestJS 10 API,
+PostgreSQL schema/bootstrap, deployment tools, and regression tests. Its dependencies
+and Nx targets are separate from Lapper's newer framework versions; root targets
+continue to build Lapper. Run manufacturing commands from that directory:
+
+```sh
+cd manufacturing
+npm install --global npm@11.6.2
+npm ci
+npm test
+npm run test:contracts
+```
+
+See the manufacturing README and changelog for PostgreSQL/Docker setup, environment
+settings, and upgrade notes. Default API/UI ports overlap with Lapper's development
+defaults; use separate hosts or configure ports before running both stacks together.
+Existing manufacturing users must sign in again after the authentication upgrade.
+Email recovery requires SMTP and the public frontend origin to be configured.
+
+Download the rebuilt standalone release: [GearApps 70.2.1 ZIP](releases/GearApps-70.2.1.zip).
+
+The original upload is retained at
+[`source-archives/GearApps-70.2.0.zip`](source-archives/GearApps-70.2.0.zip) for recovery.
+The root Lapper API paths, source, and database configuration are preserved.
 
 ## Quick start
 

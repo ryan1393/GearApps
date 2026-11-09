@@ -1,0 +1,722 @@
+[
+  {
+    "Dana_Serial": "CGRT076AAA",
+    "MF_Serial": "A18395",
+    "Source_Entry": 1,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAA",
+    "MF_Serial": "8612",
+    "Source_Entry": 2,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAB",
+    "MF_Serial": "A36135",
+    "Source_Entry": 3,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAC",
+    "MF_Serial": "582",
+    "Source_Entry": 4,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAB",
+    "MF_Serial": "A28957",
+    "Source_Entry": 5,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAC",
+    "MF_Serial": "998",
+    "Source_Entry": 6,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAD",
+    "MF_Serial": "A28723",
+    "Source_Entry": 7,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAE",
+    "MF_Serial": "A32746",
+    "Source_Entry": 8,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAF",
+    "MF_Serial": "753507201",
+    "Source_Entry": 9,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAG",
+    "MF_Serial": "6798",
+    "Source_Entry": 10,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAH",
+    "MF_Serial": "762",
+    "Source_Entry": 11,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAJ",
+    "MF_Serial": "19",
+    "Source_Entry": 13,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAK",
+    "MF_Serial": "A27574",
+    "Source_Entry": 14,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAL",
+    "MF_Serial": "A26178",
+    "Source_Entry": 15,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAM",
+    "MF_Serial": "8581",
+    "Source_Entry": 16,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAN",
+    "MF_Serial": "205",
+    "Source_Entry": 17,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAO",
+    "MF_Serial": "A32963",
+    "Source_Entry": 18,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAD",
+    "MF_Serial": "13",
+    "Source_Entry": 19,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAF",
+    "MF_Serial": "A35347",
+    "Source_Entry": 21,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAH",
+    "MF_Serial": "A29056",
+    "Source_Entry": 23,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAP",
+    "MF_Serial": "R112",
+    "Source_Entry": 24,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAQ",
+    "MF_Serial": "1865",
+    "Source_Entry": 25,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAR",
+    "MF_Serial": "7858-8",
+    "Source_Entry": 26,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAT",
+    "MF_Serial": "6685",
+    "Source_Entry": 28,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAU",
+    "MF_Serial": "A36138",
+    "Source_Entry": 29,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAV",
+    "MF_Serial": "A18393",
+    "Source_Entry": 30,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAW",
+    "MF_Serial": "A20761",
+    "Source_Entry": 31,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAX",
+    "MF_Serial": "O384",
+    "Source_Entry": 32,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAI",
+    "MF_Serial": "8614",
+    "Source_Entry": 33,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAJ",
+    "MF_Serial": "113",
+    "Source_Entry": 34,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAK",
+    "MF_Serial": "A36140",
+    "Source_Entry": 35,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAL",
+    "MF_Serial": "A26285",
+    "Source_Entry": 36,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAM",
+    "MF_Serial": "2792",
+    "Source_Entry": 37,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAN",
+    "MF_Serial": "386",
+    "Source_Entry": 38,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAO",
+    "MF_Serial": "A32753",
+    "Source_Entry": 39,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAP",
+    "MF_Serial": "116",
+    "Source_Entry": 40,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAQ",
+    "MF_Serial": "8613",
+    "Source_Entry": 41,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAS",
+    "MF_Serial": "564",
+    "Source_Entry": 43,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AAZ",
+    "MF_Serial": "834",
+    "Source_Entry": 45,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAT",
+    "MF_Serial": "120",
+    "Source_Entry": 46,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AA0",
+    "MF_Serial": "A27682",
+    "Source_Entry": 47,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAU",
+    "MF_Serial": "7904",
+    "Source_Entry": 48,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AA1",
+    "MF_Serial": "7205",
+    "Source_Entry": 49,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AA2",
+    "MF_Serial": "117R",
+    "Source_Entry": 50,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AA3",
+    "MF_Serial": "A26282",
+    "Source_Entry": 51,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAV",
+    "MF_Serial": "611",
+    "Source_Entry": 52,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAW",
+    "MF_Serial": "A27630",
+    "Source_Entry": 53,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAX",
+    "MF_Serial": "7301",
+    "Source_Entry": 54,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAY",
+    "MF_Serial": "127",
+    "Source_Entry": 55,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AAZ",
+    "MF_Serial": "2785",
+    "Source_Entry": 56,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AA4",
+    "MF_Serial": "A30239",
+    "Source_Entry": 57,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AA5",
+    "MF_Serial": "8587",
+    "Source_Entry": 58,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AA6",
+    "MF_Serial": "125",
+    "Source_Entry": 59,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AA7",
+    "MF_Serial": "A28724",
+    "Source_Entry": 60,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AA8",
+    "MF_Serial": "A36133",
+    "Source_Entry": 61,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076AA9",
+    "MF_Serial": "7203",
+    "Source_Entry": 62,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT1058AA",
+    "MF_Serial": "78",
+    "Source_Entry": 63,
+    "Definition_Code": "CGRT105"
+  },
+  {
+    "Dana_Serial": "CGRT105AAB",
+    "MF_Serial": "4661",
+    "Source_Entry": 64,
+    "Definition_Code": "CGRT105"
+  },
+  {
+    "Dana_Serial": "CGRT105AAA",
+    "MF_Serial": "39",
+    "Source_Entry": 65,
+    "Definition_Code": "CGRT105"
+  },
+  {
+    "Dana_Serial": "CGRT1058AD",
+    "MF_Serial": "A33361",
+    "Source_Entry": 66,
+    "Definition_Code": "CGRT105"
+  },
+  {
+    "Dana_Serial": "CGRT1058AE",
+    "MF_Serial": "A36457",
+    "Source_Entry": 67,
+    "Definition_Code": "CGRT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAA",
+    "MF_Serial": "51",
+    "Source_Entry": 68,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAB",
+    "MF_Serial": "99",
+    "Source_Entry": 69,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAC",
+    "MF_Serial": "71",
+    "Source_Entry": 70,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAD",
+    "MF_Serial": "32",
+    "Source_Entry": 71,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAE",
+    "MF_Serial": "66",
+    "Source_Entry": 72,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAF",
+    "MF_Serial": "A35176",
+    "Source_Entry": 73,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT076AA0",
+    "MF_Serial": "1742",
+    "Source_Entry": 76,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AA1",
+    "MF_Serial": "8618",
+    "Source_Entry": 77,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AA2",
+    "MF_Serial": "A32751",
+    "Source_Entry": 78,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AA3",
+    "MF_Serial": "6751",
+    "Source_Entry": 79,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT105AAG",
+    "MF_Serial": "321",
+    "Source_Entry": 80,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAH",
+    "MF_Serial": "65",
+    "Source_Entry": 81,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAI",
+    "MF_Serial": "378",
+    "Source_Entry": 82,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAJ",
+    "MF_Serial": "22566",
+    "Source_Entry": 83,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAK",
+    "MF_Serial": "64",
+    "Source_Entry": 84,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAL",
+    "MF_Serial": "104",
+    "Source_Entry": 85,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAM",
+    "MF_Serial": "A35178",
+    "Source_Entry": 86,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAO",
+    "MF_Serial": "A33360",
+    "Source_Entry": 88,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAP",
+    "MF_Serial": "33",
+    "Source_Entry": 89,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAQ",
+    "MF_Serial": "30",
+    "Source_Entry": 90,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAR",
+    "MF_Serial": "16",
+    "Source_Entry": 91,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAS",
+    "MF_Serial": "3352",
+    "Source_Entry": 92,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAT",
+    "MF_Serial": "108",
+    "Source_Entry": 93,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAU",
+    "MF_Serial": "10",
+    "Source_Entry": 94,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAW",
+    "MF_Serial": "76",
+    "Source_Entry": 96,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAX",
+    "MF_Serial": "322",
+    "Source_Entry": 97,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAY",
+    "MF_Serial": "28",
+    "Source_Entry": 98,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGLT105AAZ",
+    "MF_Serial": "42145",
+    "Source_Entry": 99,
+    "Definition_Code": "CGLT105"
+  },
+  {
+    "Dana_Serial": "CGRT076ABC",
+    "MF_Serial": "132",
+    "Source_Entry": 100,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076ABD",
+    "MF_Serial": "130",
+    "Source_Entry": 101,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AA4",
+    "MF_Serial": "126",
+    "Source_Entry": 102,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AA5",
+    "MF_Serial": "A28904",
+    "Source_Entry": 104,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGRT076ABF",
+    "MF_Serial": "2634",
+    "Source_Entry": 105,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AA6",
+    "MF_Serial": "A26091",
+    "Source_Entry": 107,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGRT105AAC",
+    "MF_Serial": "766",
+    "Source_Entry": 108,
+    "Definition_Code": "CGRT105"
+  },
+  {
+    "Dana_Serial": "CGRT105AAD",
+    "MF_Serial": "A27323",
+    "Source_Entry": 109,
+    "Definition_Code": "CGRT105"
+  },
+  {
+    "Dana_Serial": "CGRT105AAE",
+    "MF_Serial": "A27325",
+    "Source_Entry": 110,
+    "Definition_Code": "CGRT105"
+  },
+  {
+    "Dana_Serial": "CGRT105AAF",
+    "MF_Serial": "A36459",
+    "Source_Entry": 111,
+    "Definition_Code": "CGRT105"
+  },
+  {
+    "Dana_Serial": "CGRT105AAG",
+    "MF_Serial": "585",
+    "Source_Entry": 112,
+    "Definition_Code": "CGRT105"
+  },
+  {
+    "Dana_Serial": "CGLT076AA7",
+    "MF_Serial": "128",
+    "Source_Entry": 113,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AA8",
+    "MF_Serial": "A33209",
+    "Source_Entry": 114,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGLT076AA9",
+    "MF_Serial": "8863",
+    "Source_Entry": 115,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGRT105AAH",
+    "MF_Serial": "168",
+    "Source_Entry": 116,
+    "Definition_Code": "CGRT105"
+  },
+  {
+    "Dana_Serial": "CGLT088AAA",
+    "MF_Serial": "33184",
+    "Source_Entry": 117,
+    "Definition_Code": "CGLT088"
+  },
+  {
+    "Dana_Serial": "CGLT088AAC",
+    "MF_Serial": "A30848",
+    "Source_Entry": 119,
+    "Definition_Code": "CGLT088"
+  },
+  {
+    "Dana_Serial": "CGLT088AAD",
+    "MF_Serial": "340",
+    "Source_Entry": 120,
+    "Definition_Code": "CGLT088"
+  },
+  {
+    "Dana_Serial": "CGLT076ABA",
+    "MF_Serial": "119",
+    "Source_Entry": 121,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGRT076ABH",
+    "MF_Serial": "27375",
+    "Source_Entry": 122,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076ABI",
+    "MF_Serial": "122",
+    "Source_Entry": 124,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076ABJ",
+    "MF_Serial": "A26105",
+    "Source_Entry": 125,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076ABK",
+    "MF_Serial": "27627",
+    "Source_Entry": 126,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT105AAI",
+    "MF_Serial": "118",
+    "Source_Entry": 127,
+    "Definition_Code": "CGRT105"
+  },
+  {
+    "Dana_Serial": "CGRT088AAA",
+    "MF_Serial": "A30731",
+    "Source_Entry": 128,
+    "Definition_Code": "CGRT088"
+  },
+  {
+    "Dana_Serial": "CGRT088AAB",
+    "MF_Serial": "A36146",
+    "Source_Entry": 129,
+    "Definition_Code": "CGRT088"
+  },
+  {
+    "Dana_Serial": "CGRT088AAC",
+    "MF_Serial": "A27075",
+    "Source_Entry": 130,
+    "Definition_Code": "CGRT088"
+  },
+  {
+    "Dana_Serial": "CGLT076ABD",
+    "MF_Serial": "6755",
+    "Source_Entry": 132,
+    "Definition_Code": "CGLT076"
+  },
+  {
+    "Dana_Serial": "CGRT076ABM",
+    "MF_Serial": "A28726",
+    "Source_Entry": 134,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076ABN",
+    "MF_Serial": "78586",
+    "Source_Entry": 135,
+    "Definition_Code": "CGRT076"
+  },
+  {
+    "Dana_Serial": "CGRT076ABO",
+    "MF_Serial": "8584",
+    "Source_Entry": 136,
+    "Definition_Code": "CGRT076"
+  }
+]

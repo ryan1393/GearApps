@@ -1,0 +1,351 @@
+<div class="gear-page dashboard-page" [class.view-only-dashboard]="!canEdit">
+  <section class="gear-page-header dashboard-heading" danaPageHeader eyebrow="BLADE TRACKING" heading="Dashboard" description="Live inventory, movement, and workflow status from the Gear Apps database." [dashboard]="true">
+  <button danaPageHeaderAction
+      type="button"
+      class="refresh-chip"
+      (click)="refreshDashboard()"
+      [disabled]="loading"
+    >
+      ↻
+      <span>{{ loading ? 'Refreshing…' : 'Refresh Data' }}</span>
+    </button>
+</section>
+
+  <div *ngIf="error" class="dashboard-alert">{{ error }}</div>
+
+  <section danaKpiGrid class="kpi-grid">
+    <article danaKpiCard class="kpi-card">
+      <div class="kpi-icon blue"><span class="gear-glyph gear-glyph-blade" aria-hidden="true"></span></div>
+      <div>
+        <strong>{{ dashboard?.counts?.blades_in_process ?? '—' }}</strong>
+        <h3>Blades In Process</h3>
+        <p>Enabled blades excluding scrapped blades</p>
+      </div>
+    </article>
+
+    <article danaKpiCard class="kpi-card">
+      <div class="kpi-icon green"><span class="gear-glyph gear-glyph-container" aria-hidden="true"></span></div>
+      <div>
+        <strong>{{ dashboard?.counts?.trays_at_coater ?? '—' }}</strong>
+        <h3>Trays At Coater</h3>
+        <p>Currently loaded in active coater containers</p>
+      </div>
+    </article>
+
+    <article danaKpiCard class="kpi-card">
+      <div class="kpi-icon purple"><span class="gear-glyph gear-glyph-tray" aria-hidden="true"></span></div>
+      <div>
+        <strong>{{ dashboard?.counts?.trays_in_house ?? '—' }}</strong>
+        <h3>Trays In House</h3>
+        <p>Enabled trays not currently at the coater</p>
+      </div>
+    </article>
+
+    <article danaKpiCard class="kpi-card">
+      <div class="kpi-icon orange"><span class="gear-glyph gear-glyph-move" aria-hidden="true"></span></div>
+      <div>
+        <strong>{{ dashboard?.counts?.movements_today ?? '—' }}</strong>
+        <h3>Movements Today</h3>
+        <p>Location moves, coater loads, and returns today</p>
+      </div>
+    </article>
+  </section>
+
+  <section *ngIf="canEdit" class="gear-panel operations-panel">
+    <div class="gear-panel-heading panel-heading">
+      <h2>Blade Operations</h2>
+      <p>Choose the workflow you need to perform.</p>
+    </div>
+
+    <div danaOperationGrid class="operation-grid">
+      <a routerLink="/blades/cancel-last" class="operation-card" danaOperationCard icon="search" tone="orange" heading="Cancel Last Tray Transaction" description="Review the last transaction and its cancellation history."></a>
+      <a routerLink="internal-movement" class="operation-card" danaOperationCard icon="move" tone="blue" heading="Internal Movement" description="Scan a tray and destination location to move blades."></a>
+
+      <a routerLink="load-container" class="operation-card" danaOperationCard icon="container" tone="green" heading="Load Coater Container" description="Scan one container, then load multiple trays."></a>
+      <a routerLink="coater-shipments" class="operation-card" danaOperationCard icon="container" tone="green" heading="Coater Shipments" description="Scan containers, print one slip and dispatch."></a>
+
+      <a routerLink="receive-container" class="operation-card" danaOperationCard icon="receive" tone="purple" heading="Receive From Coater" description="Verify and unload returned trays."></a>
+
+      <a routerLink="tray-contents" class="operation-card" danaOperationCard icon="tray" tone="teal" heading="Tray Contents" description="View blade records and current placement."></a>
+
+      <a routerLink="intake" class="operation-card" danaOperationCard icon="intake" tone="blue" heading="Blade Intake" description="Create or top up blade inventory in a tray."></a>
+
+      <a routerLink="grinding" class="operation-card" danaOperationCard icon="cutter" tone="teal" heading="Grinding" description="Start grinding, record scrap, and select the actual CGRR-###/CGRP-### rough shelf."></a>
+
+      <a routerLink="inventory" class="operation-card" danaOperationCard icon="search" tone="orange" heading="Find Inventory" description="Search by tray, container, location, or serial."></a>
+
+      <a routerLink="all-inventory" class="operation-card" danaOperationCard icon="inventory" tone="purple" heading="Inventory Control Center" description="Browse trays, containers, locations, blades, and their relationships."></a>
+
+      <a routerLink="locations" class="operation-card" danaOperationCard icon="location" tone="teal" heading="Blade Locations" description="See every location, the trays there, and the blades inside each tray."></a>
+    </div>
+  </section>
+
+
+  <section class="gear-panel p-5">
+    <div class="gear-panel-heading panel-heading panel-row">
+      <div><h2>Availability By Part Summary</h2><p>Distinct trays in their current workflow stage plus cutter bodies physically recorded on shelves.</p></div>
+      <span *ngIf="availability" class="gear-count-badge count-chip">{{ availability.total_trays }} trays</span>
+    </div>
+    <div class="grid gap-3 md:grid-cols-2">
+      <label class="text-sm font-bold">Part Summary
+        <select class="gear-input mt-1 w-full" [(ngModel)]="selectedSummaryId" (ngModelChange)="refreshAvailability()"><option value="">Select Summary…</option><option *ngFor="let summary of summaries" [value]="summary.id">{{summary.number}}</option></select>
+      </label>
+      <label class="text-sm font-bold">Part Type
+        <select class="gear-input mt-1 w-full" [(ngModel)]="selectedPartTypeId" (ngModelChange)="refreshAvailability()"><option value="">All RING + PINION</option><option *ngFor="let partType of partTypes" [value]="partType.id">{{partType.code}}</option></select>
+      </label>
+    </div>
+    <div class="mt-3 flex flex-wrap gap-3 items-center">
+      <button type="button" class="gear-button" [disabled]="!selectedSummaryId || availabilityLoading" (click)="refreshAvailability()">Refresh Availability</button>
+      <a *ngIf="canEdit" routerLink="body-shelves" class="text-sm font-bold text-blue-700">Record Empty Body Shelf</a>
+      <span class="text-sm text-slate-500">Refreshes every 30 seconds while this page is visible.</span>
+    </div>
+    <p *ngIf="lookupsError" role="alert" class="mt-3 text-sm text-red-700">{{lookupsError}}</p>
+    <p *ngIf="availabilityLoading" class="mt-4 text-sm">Loading current availability…</p>
+    <p *ngIf="availabilityError" class="mt-4 text-sm font-bold text-red-700">{{availabilityError}}</p>
+    <div *ngIf="availability" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
+      <button *ngFor="let stage of availability.stages; trackBy: trackStage" type="button"
+        class="availability-stage-card" [class.is-selected]="selectedTrayStageCode === stage.code"
+        [disabled]="availabilityLoading" (click)="showStageTrays(stage.code)"
+        [attr.aria-label]="stage.name + ': ' + stage.tray_count + ' trays. Show matching trays.'"
+        [attr.aria-expanded]="selectedTrayStageCode === stage.code" aria-controls="availability-tray-list">
+        <strong class="availability-stage-count">{{stage.tray_count}}</strong>
+        <span class="availability-stage-name">{{stage.name}}</span>
+        <small class="availability-stage-code">{{stage.code}}</small>
+        <span class="availability-stage-hint">View trays</span>
+      </button>
+      <article class="rounded-xl border border-blue-200 bg-blue-50 p-4"><strong class="text-2xl text-blue-800">{{availability.shelved_cutter_bodies.total}}</strong><h3 class="mt-1 text-sm font-black">Shelved Cutter Bodies</h3><small>{{availability.shelved_cutter_bodies.with_blades}} with blades · {{availability.shelved_cutter_bodies.empty}} empty</small></article>
+    </div>
+    <section *ngIf="selectedTrayStageCode" id="availability-tray-list" class="availability-tray-list"
+      aria-labelledby="availability-tray-list-title" [attr.aria-busy]="availabilityLoading">
+      <div class="availability-tray-toolbar">
+        <div>
+          <h3 id="availability-tray-list-title">{{selectedTrayStageName}} — Trays</h3>
+          <p *ngIf="availability">Summary {{availability.summary_number}} · {{availability.part_type_code || 'All RING + PINION'}} · {{selectedTrayStage?.tray_count ?? 0}} trays</p>
+        </div>
+        <button type="button" class="gear-button" (click)="closeStageTrays()">Close tray list</button>
+      </div>
+      <p *ngIf="availabilityLoading" role="status">Refreshing matching trays…</p>
+      <p *ngIf="!availabilityLoading && availabilityError" role="alert">{{availabilityError}} Use Refresh Availability to retry.</p>
+      <p *ngIf="!availabilityLoading && availability && !trayListSupported" role="alert">Matching tray details are unavailable. Refresh after the matching API update; no unfiltered tray list is substituted.</p>
+      <ng-container *ngIf="!availabilityLoading && trayListSupported">
+        <div class="availability-tray-toolbar availability-tray-search">
+          <label>Find a tray, shelf, or container
+            <input type="search" class="gear-input" [(ngModel)]="traySearch" (ngModelChange)="resetTrayPage()"
+              placeholder="Tray number, shelf, container, or part type" />
+          </label>
+          <p role="status">Showing {{trayRangeStart}}–{{trayRangeEnd}} of {{filteredStageTrays.length}}<span *ngIf="traySearch.trim()"> matching search ({{selectedTrayStage?.tray_count}} in this stage)</span></p>
+        </div>
+        <table class="availability-tray-table">
+          <caption class="availability-visually-hidden">Matching trays for {{selectedTrayStageName}} and the selected Summary and Part Type</caption>
+          <thead><tr><th scope="col">Tray</th><th scope="col">Part Type</th><th scope="col">Blades</th><th scope="col">Required*</th><th scope="col">Current placement</th><th scope="col">Details</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let tray of displayedTrays; trackBy: trackTray">
+              <td data-label="Tray"><strong>{{tray.serial_number}}</strong></td>
+              <td data-label="Part Type">{{tray.part_type_code || 'Unassigned'}}</td>
+              <td data-label="Blades">{{tray.blade_count}}</td>
+              <td data-label="Required">{{tray.required_blade_count ?? '—'}}</td>
+              <td data-label="Current placement">
+                <span *ngIf="tray.location_serial">Shelf/location: {{tray.location_serial}}</span>
+                <span *ngIf="tray.container_serial">Container: {{tray.container_serial}}</span>
+                <span *ngIf="!tray.location_serial && !tray.container_serial">No recorded placement</span>
+              </td>
+              <td data-label="Details"><a *ngIf="canEdit" [routerLink]="['/blades/tray-contents']" [queryParams]="{serial: tray.serial_number}" [attr.aria-label]="'Open Tray Contents for ' + tray.serial_number">Tray Contents</a><span *ngIf="!canEdit">Read-only list</span></td>
+            </tr>
+            <tr *ngIf="!filteredStageTrays.length"><td colspan="6" class="availability-empty-trays" role="status">{{traySearch.trim() ? 'No trays match that search in this stage.' : 'No matching trays are currently in this stage.'}}</td></tr>
+          </tbody>
+        </table>
+        <div class="availability-tray-footer">
+          <small>*Required is the tray’s saved blade-count requirement. A dash means it has not been recorded on that tray yet.</small>
+          <nav *ngIf="trayPageCount > 1" class="availability-tray-pagination" aria-label="Matching tray pages">
+            <button type="button" class="gear-button" [disabled]="trayPage <= 1" (click)="changeTrayPage(-1)">Previous</button>
+            <span>Page {{trayPage}} of {{trayPageCount}}</span>
+            <button type="button" class="gear-button" [disabled]="trayPage >= trayPageCount" (click)="changeTrayPage(1)">Next</button>
+          </nav>
+        </div>
+      </ng-container>
+    </section>
+    <div *ngIf="availability" class="mt-3 text-sm text-slate-600">
+      <p *ngIf="availability.blade_requirements.length"><strong>Blade requirement:</strong> <span *ngFor="let req of availability.blade_requirements">{{req.part_type_code}}: {{req.required_blade_count}} blades. </span></p>
+      <p *ngFor="let note of availability.notes" class="mt-1">{{note}}</p>
+    </div>
+    <p *ngIf="!selectedSummaryId" class="mt-4 text-sm text-slate-500">Select a Summary to see every current tray stage, including zero counts.</p>
+  </section>
+
+  <section danaDashboardGrid class="blade-dashboard-aligned-grid">
+    <article danaDashboardPanel class="gear-panel data-panel">
+      <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+        <div>
+          <h2>Inventory By Stage</h2>
+          <p>Live tray and blade totals by current tray stage.</p>
+        </div>
+        <span danaCountBadge class="gear-count-badge count-chip">{{ dashboard?.counts?.total_trays ?? 0 }}</span>
+      </div>
+
+      <div danaTableShell class="table-wrap">
+        <table danaTable class="gear-table dashboard-table blade-dashboard-metric-table">
+        <colgroup class="blade-dashboard-colgroup">
+          <col class="blade-dashboard-col-primary" />
+          <col class="blade-dashboard-col-count" />
+          <col class="blade-dashboard-col-count" />
+        </colgroup>
+          <thead>
+            <tr>
+              <th>Stage</th>
+              <th>Trays</th>
+              <th>Blades</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let stage of dashboard?.stage_breakdown">
+              <td>
+                <strong>{{ stage.name }}</strong>
+                <small>{{ stage.code }}</small>
+              </td>
+              <td>{{ stage.tray_count }}</td>
+              <td>{{ stage.blade_count }}</td>
+            </tr>
+            <tr *ngIf="!loading && !dashboard?.stage_breakdown?.length">
+              <td danaTableEmpty colspan="3" class="empty-row">No tray-stage data found.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+
+    <article danaDashboardPanel class="gear-panel data-panel">
+      <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+        <div>
+          <h2>Inventory By Location</h2>
+          <p>Locations with the most active trays right now.</p>
+        </div>
+        <a danaPanelAction routerLink="all-inventory" class="panel-link">All locations →</a>
+      </div>
+
+      <div danaTableShell class="table-wrap">
+        <table danaTable class="gear-table dashboard-table blade-dashboard-metric-table">
+        <colgroup class="blade-dashboard-colgroup">
+          <col class="blade-dashboard-col-primary" />
+          <col class="blade-dashboard-col-count" />
+          <col class="blade-dashboard-col-count" />
+        </colgroup>
+          <thead>
+            <tr>
+              <th>Location</th>
+              <th>Trays</th>
+              <th>Blades</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let location of dashboard?.top_locations">
+              <td>
+                <strong class="mono">{{ location.serial_number }}</strong>
+                <small>{{ location.description || location.department || location.location_type }}</small>
+              </td>
+              <td>{{ location.tray_count }}</td>
+              <td>{{ location.blade_count }}</td>
+            </tr>
+            <tr *ngIf="!loading && !dashboard?.top_locations?.length">
+              <td danaTableEmpty colspan="3" class="empty-row">No trays are currently assigned to locations.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  
+    <article danaDashboardPanel class="gear-panel activity-panel gear-recent-activity-panel">
+      <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row compact">
+        <div>
+          <h2>Recent Activity</h2>
+          <p>Latest tray movements and coater activity.</p>
+        </div>
+        <small *ngIf="dashboard?.generated_at">Updated {{ dashboard?.generated_at | date:'shortTime' }}</small>
+      </div>
+
+      <div danaLoadingState *ngIf="loading" class="activity-empty">
+        <span class="activity-empty-icon">◴</span>
+        <strong>Loading live activity…</strong>
+      </div>
+
+      <div *ngIf="!loading && dashboard?.recent_activity?.length" class="dashboard-activity-list">
+        <div *ngFor="let activity of dashboard?.recent_activity" class="dashboard-activity-row">
+          <span
+            class="dashboard-activity-icon"
+            [class.container]="activity.type !== 'LOCATION_MOVE'"
+          >
+            {{ activity.type === 'LOCATION_MOVE' ? '↔' : '▥' }}
+          </span>
+          <div>
+            <strong>{{ activity.title }}</strong>
+            <span>{{ activity.detail }}</span>
+          </div>
+          <time>{{ activity.occurred_at | date:'short' }}</time>
+        </div>
+      </div>
+
+      <div danaEmptyState *ngIf="!loading && !dashboard?.recent_activity?.length" class="activity-empty">
+        <span class="activity-empty-icon">◴</span>
+        <strong>No movement history yet</strong>
+        <p>New tray movements and coater activity will appear here automatically.</p>
+      </div>
+    </article>
+
+    <article danaDashboardPanel class="gear-panel data-panel">
+      <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+        <div>
+          <h2>At The Coater</h2>
+          <p>Containers that currently have trays loaded.</p>
+        </div>
+        <a danaPanelAction routerLink="all-inventory" class="panel-link">Container inventory →</a>
+      </div>
+
+      <div danaTableShell class="table-wrap">
+        <table danaTable class="gear-table dashboard-table blade-dashboard-metric-table">
+        <colgroup class="blade-dashboard-colgroup">
+          <col class="blade-dashboard-col-primary" />
+          <col class="blade-dashboard-col-count" />
+          <col class="blade-dashboard-col-count" />
+        </colgroup>
+          <thead>
+            <tr>
+              <th>Container</th>
+              <th>Trays</th>
+              <th>Blades</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let container of dashboard?.coater_containers">
+              <td class="mono strong">{{ container.serial_number }}</td>
+              <td>{{ container.tray_count }}</td>
+              <td>{{ container.blade_count }}</td>
+            </tr>
+            <tr *ngIf="!loading && !dashboard?.coater_containers?.length">
+              <td danaTableEmpty colspan="3" class="empty-row">No trays are currently loaded at the coater.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </article>
+  </section>
+
+  <section *ngIf="canEdit" class="gear-panel quick-panel blade-dashboard-quick">
+    <div class="gear-panel-heading panel-heading compact">
+      <h2>Quick Scanner</h2>
+      <p>Scan a tray, container, or location.</p>
+    </div>
+
+    <form class="quick-search" (ngSubmit)="quickScan()">
+      <input
+        name="quickScan"
+        [(ngModel)]="scanValue"
+        placeholder="Scan barcode or type ID..."
+        autocomplete="off"
+      />
+      <button type="submit">▥</button>
+    </form>
+
+    <div class="subheading-row">
+      <strong>Inventory tools</strong>
+      <a routerLink="all-inventory">Open Inventory Control Center</a>
+    </div>
+  </section>
+</div>

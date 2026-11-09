@@ -1,0 +1,24 @@
+{
+  "name": "frontend-data-access-blade-tracking",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/frontend/data-access-blade-tracking/src",
+  "projectType": "library",
+  "tags": [
+    "type:data-access",
+    "scope:frontend",
+    "domain:gear-apps"
+  ],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "libs/frontend/data-access-blade-tracking/**/*.ts"
+        ]
+      }
+    }
+  }
+}

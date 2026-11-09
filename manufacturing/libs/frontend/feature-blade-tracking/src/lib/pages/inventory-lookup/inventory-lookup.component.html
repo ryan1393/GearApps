@@ -1,0 +1,179 @@
+<section class="gear-page space-y-5">
+  <header class="gear-page-header" danaPageHeader eyebrow="INVENTORY SEARCH" heading="Find Inventory" description="Scan a tray, container, or location serial."></header>
+
+  <div *ngIf="message" class="gear-alert" role="alert">
+    {{ message.text }}
+  </div>
+
+  <gear-scan-panel
+    #scanner
+    [step]="1"
+    label="Scan Serial Number"
+    buttonText="Find"
+    [disabled]="busy"
+    (scanned)="lookup($event)"
+  />
+
+  <section *ngIf="tray as t" class="gear-panel inventory-result-card">
+    <div class="inventory-result-header">
+      <div>
+        <span class="gear-badge">TRAY</span>
+        <h3>{{ t.serial_number }}</h3>
+        <p>{{ t.current_stage?.name || t.current_stage?.code || 'No stage assigned' }}</p>
+      </div>
+      <div class="inventory-count">
+        <strong>{{ t.blade_count }}</strong>
+        <span>Blades</span>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="printingTagSerial === t.serial_number" (click)="printTag('TRAY', t.id, t.serial_number)">
+          {{ printingTagSerial === t.serial_number ? 'Printing…' : 'Print Tag' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="inventory-detail-grid">
+      <div class="gear-detail">
+        <span>Summary</span>
+        <strong>{{ t.summary?.number || 'Unassigned' }}</strong>
+        <small *ngIf="t.summary?.revision">Rev {{ t.summary?.revision }}</small>
+      </div>
+
+      <div class="gear-detail">
+        <span>Part Type</span>
+        <strong>{{ t.part_type?.code || 'Unassigned' }}</strong>
+        <small *ngIf="t.part_type?.name">{{ t.part_type?.name }}</small>
+      </div>
+
+      <div class="gear-detail">
+        <span>Stage</span>
+        <strong>{{ t.current_stage?.name || t.current_stage?.code || 'Not assigned' }}</strong>
+      </div>
+
+      <div class="gear-detail">
+        <span>Required Blades</span>
+        <strong>{{ t.required_blade_count ?? 'Not set' }}</strong>
+      </div>
+
+      <div class="gear-detail">
+        <span>Grinding</span>
+        <strong>{{ t.grinding_completed_at ? 'Complete' : 'Not complete' }}</strong>
+      </div>
+
+      <div class="gear-detail">
+        <span>Status</span>
+        <strong>{{ t.enabled ? 'Enabled' : 'Disabled' }}</strong>
+      </div>
+    </div>
+    <div class="mt-4 grid gap-3 sm:grid-cols-2"><div class="gear-detail"><span>Current Placement</span><strong *ngIf="t.current_location" class="font-mono">{{ t.current_location.serial_number }}</strong><small *ngIf="t.current_location?.description">{{ t.current_location?.description }}</small><strong *ngIf="t.current_container">Container {{ t.current_container.serial_number }}</strong><strong *ngIf="!t.current_location && !t.current_container">{{ t.blade_count===0 ? 'Available / Ready to Use' : 'Unassigned' }}</strong></div><div class="gear-detail"><span>Active Blade Records</span><strong>{{ t.blades.length }}</strong></div></div>
+    <div *ngIf="t.blades.length" danaTableShell class="table-wrap inventory-child-table"><table danaTable class="gear-table"><thead><tr><th>Blade</th><th>Status</th><th>Cycle</th></tr></thead><tbody><tr *ngFor="let b of t.blades"><td class="font-mono font-bold">{{b.serial_number}}</td><td>{{b.status}}</td><td>{{b.service_cycle}}</td></tr></tbody></table></div>
+  </section>
+
+  <section *ngIf="container as c" class="gear-panel inventory-result-card">
+    <div class="inventory-result-header">
+      <div>
+        <span class="gear-badge">CONTAINER</span>
+        <h3>{{ c.serial_number }}</h3>
+        <p>Reusable coating container</p>
+      </div>
+      <div class="inventory-count">
+        <span class="gear-badge">{{ c.enabled ? 'Enabled' : 'Disabled' }}</span>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="printingTagSerial === c.serial_number" (click)="printTag('CONTAINER', c.id, c.serial_number)">
+          {{ printingTagSerial === c.serial_number ? 'Printing…' : 'Print Tag' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="inventory-detail-grid">
+      <div class="gear-detail">
+        <span>Container Serial</span>
+        <strong>{{ c.serial_number }}</strong>
+      </div>
+
+      <div class="gear-detail"><span>Status</span><strong>{{ c.enabled ? 'Available / Active' : 'Disabled' }}</strong></div>
+      <div class="gear-detail"><span>Loaded Trays</span><strong>{{ c.tray_count }}</strong></div>
+      <div class="gear-detail"><span>Represented Blades</span><strong>{{ c.blade_count }}</strong></div>
+    </div>
+    <div *ngIf="c.trays.length" class="inventory-child-stack">
+      <article *ngFor="let t of c.trays" class="inventory-child-card">
+        <div class="inventory-child-card-header">
+          <div>
+            <strong class="font-mono">{{ t.serial_number }}</strong>
+            <small>{{ t.summary_number || '—' }} · {{ t.part_type_code || '—' }} · {{ t.stage_name || t.stage_code || '—' }}</small>
+          </div>
+          <span class="inventory-child-count">{{ t.blade_count }} blades</span>
+        </div>
+        <div *ngIf="t.blades.length" danaTableShell class="inventory-child-table">
+          <table danaTable class="gear-table">
+            <thead><tr><th>Blade</th><th>Summary / Type</th><th>Status</th><th>Cycle</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let b of t.blades">
+                <td class="font-mono font-bold">{{ b.serial_number }}</td>
+                <td>{{ b.summary_number || '—' }} · {{ b.part_type_code || '—' }}</td>
+                <td><span class="status-pill">{{ b.status }}</span></td>
+                <td>{{ b.service_cycle }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div *ngIf="!t.blades.length" class="gear-empty-surface inventory-child-empty">No active blade records are assigned to this tray.</div>
+      </article>
+    </div>
+    <div *ngIf="!c.trays.length" class="gear-empty-surface inventory-child-empty">No trays are currently loaded in this container.</div>
+  </section>
+
+  <section *ngIf="location as l" class="gear-panel inventory-result-card">
+    <div class="inventory-result-header">
+      <div>
+        <span class="gear-badge">LOCATION</span>
+        <h3>{{ l.serial_number }}</h3>
+        <p>{{ l.description || 'Inventory location' }}</p>
+      </div>
+      <div class="inventory-count">
+        <span class="gear-badge">{{ l.location_type }}</span>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="printingTagSerial === l.serial_number" (click)="printTag('LOCATION', l.id, l.serial_number)">
+          {{ printingTagSerial === l.serial_number ? 'Printing…' : 'Print Tag' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="inventory-detail-grid">
+      <div class="gear-detail">
+        <span>Location Number</span>
+        <strong>{{ l.number }}</strong>
+      </div>
+
+      <div class="gear-detail">
+        <span>Department</span>
+        <strong>{{ l.department || 'Shared / Internal' }}</strong>
+      </div>
+
+      <div class="gear-detail">
+        <span>Location Type</span>
+        <strong>{{ l.location_type }}</strong>
+      </div>
+
+      <div class="gear-detail"><span>Status</span><strong>{{ l.enabled ? 'Enabled' : 'Disabled' }}</strong></div>
+      <div class="gear-detail"><span>Trays Here</span><strong>{{ l.tray_count }}</strong></div>
+      <div class="gear-detail"><span>Blades Here</span><strong>{{ l.blade_count }}</strong></div>
+    </div>
+    <div *ngIf="l.trays.length" class="inventory-child-stack">
+      <article *ngFor="let t of l.trays" class="inventory-child-card">
+        <div class="inventory-child-card-header">
+          <div>
+            <strong class="font-mono">{{ t.serial_number }}</strong>
+            <small>{{ t.summary_number || '—' }} · {{ t.part_type_code || '—' }} · {{ t.stage_name || t.stage_code || '—' }}</small>
+          </div>
+          <span class="inventory-child-count">{{ t.blade_count }} blades</span>
+        </div>
+        <div *ngIf="t.blades.length" class="inventory-child-list">
+          <div *ngFor="let b of t.blades" class="inventory-child-row">
+            <strong class="font-mono">{{ b.serial_number }}</strong>
+            <span>{{ b.summary_number || '—' }} · {{ b.part_type_code || '—' }}</span>
+            <span>{{ b.status }} · Cycle {{ b.service_cycle }}</span>
+          </div>
+        </div>
+        <div *ngIf="!t.blades.length" class="gear-empty-surface inventory-child-empty">No active blade records are assigned to this tray.</div>
+      </article>
+    </div>
+    <div *ngIf="!l.trays.length" class="gear-empty-surface inventory-child-empty">No trays are currently assigned to this location.</div>
+  </section>
+</section>

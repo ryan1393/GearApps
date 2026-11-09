@@ -1,0 +1,952 @@
+DANA APPS R15 BLADE SCAN/DROPDOWN SOURCE REPORT
+Generated: 2026-09-18T19:29:28
+Workspace: C:\Users\ryan.thompson\Downloads\dana-apps.v0.1
+READ ONLY: YES
+
+========================================================================
+PAGE: internal-movement
+
+FILE: libs\frontend\feature-blade-tracking\src\lib\pages\internal-movement\internal-movement.component.ts
+SHA256: EFB211108E44B16723A6D3630AFF89C0164D1DC07CCAC83ADAC93575631ADF7E
+    3: import { HttpErrorResponse } from '@angular/common/http';
+    5: import { GearToastService } from '@libs/frontend/util-common';
+    6: import { ILocation, ILocationTray, ITray } from '@libs/shared/util-types';
+    7: import { BladeTrackingApiService, apiErrorText } from '@libs/frontend/data-access-blade-tracking';
+    8: import { ScanMessage } from '../../models/scan-message';
+    9: import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
+   14: @Component({ selector: 'gear-internal-movement', standalone: true, imports: [CommonModule, FormsModule, ScanPanelComponent, DanaPageHeaderComponent], templateUrl: './internal-movement.component.html' })
+   16:   private readonly api = inject(BladeTrackingApiService);
+   17:   private readonly toast = inject(GearToastService);
+   18:   @ViewChild('trayScanner') trayScanner?: ScanPanelComponent;
+   19:   @ViewChild('locationScanner') locationScanner?: ScanPanelComponent;
+   20:   tray: ITray | null = null;
+   21:   current: ILocationTray | null = null;
+   22:   destination: ILocation | null = null;
+   23:   availableTrays:ITray[]=[]; selectedTraySerial=''; traySearch=''; trayLocationLabels:Record<string,string>={}; pickerOpen=false;
+   24:   get filteredTrays(){const q=this.traySearch.trim().toLowerCase();return q?this.availableTrays.filter(x=>(x.serial_number+' '+(this.trayLocationLabels[x.id]||'Unassigned')).toLowerCase().includes(q)):this.availableTrays;}
+   25:   trayOptionLabel(tray:ITray){return tray.serial_number+' - Current: '+(this.trayLocationLabels[tray.id]||'Unassigned');}
+   26:   private loadTrayLocationLabels(){for(const tray of this.availableTrays){this.api.getCurrentTrayLocation(tray.id).subscribe({next:current=>this.trayLocationLabels[tray.id]=current?.location?.serial_number||'Unassigned',error:()=>this.trayLocationLabels[tray.id]='Unassigned'});}}
+   27:   constructor(){this.api.getTrays(1,50).subscribe({next:r=>{this.availableTrays=r.data;this.loadTrayLocationLabels();},error:()=>this.availableTrays=[]});}
+   28:   chooseTray(s:string){if(s){this.selectedTraySerial=s;this.pickerOpen=false;this.scanTray(s);}} toggleTrayPicker(){this.pickerOpen=!this.pickerOpen;}
+   30:   message: ScanMessage | null = null;
+   32:   scanTray(serial: string) {
+   34:     this.api.scanTray(serial).subscribe({
+   35:       next: (tray) => {
+   36:         this.tray = tray;
+   37:         this.api.getCurrentTrayLocation(tray.id).subscribe({
+   38:           next: (current) => this.finishTray(current),
+   39:           error: (err: HttpErrorResponse) => err.status === 404 ? this.finishTray(null) : this.fail(err, 'Could not read tray location.'),
+   42:       error: (err: HttpErrorResponse) => this.fail(err, 'Tray not found.', this.trayScanner),
+   46:   scanLocation(serial: string) {
+   47:     if (!this.tray) return;
+   49:     this.api.scanLocation(serial).subscribe({
+   50:       next: (location) => { this.destination = location; this.busy = false; this.locationScanner?.clearAndFocus(); this.message = { tone: 'info', text: `Destination ${location.serial_number} selected.` }; },
+   51:       error: (err: HttpErrorResponse) => this.fail(err, 'Location not found.', this.locationScanner),
+   56:     if (!this.tray || !this.destination || this.busy) return;
+   57:     if (this.current?.location?.id === this.destination.id) { this.message = { tone: 'info', text: `Tray ${this.tray.serial_number} is already at ${this.destination.serial_number}.` }; return; }
+   58:     const tray = this.tray; const destination = this.destination; const from = this.current?.location?.serial_number ?? 'Unassigned';
+   60:     this.api.moveTray(tray.id, destination.id).subscribe({
+   61:       next: () => { this.busy = false; const text = `Tray ${tray.serial_number} moved from ${from} to ${destination.serial_number}.`; this.message = null; this.toast.success(text, 'Tray moved'); this.tray = null; this.current = null; this.destination = null; this.trayScanner?.clearAndFocus(); },
+   62:       error: (err: HttpErrorResponse) => { const text = apiErrorText(err, 'Could not move tray.'); this.toast.error(text, 'Move failed'); this.fail(err, 'Could not move tray.'); },
+   66:   private finishTray(current: ILocationTray | null) { this.current = current; this.busy = false; this.trayScanner?.clearAndFocus(); this.locationScanner?.focus(); this.message = { tone: 'success', text: current?.location ? `Tray ${this.tray?.serial_number} found at ${current.location.serial_number}.` : `Tray ${this.tray?.serial_number} has no current internal location.` }; }
+   67:   private fail(err: HttpErrorResponse, fallback: string, scanner?: ScanPanelComponent) { this.busy = false; this.message = { tone: 'error', text: apiErrorText(err, fallback) }; scanner?.select(); }
+
+FILE: libs\frontend\feature-blade-tracking\src\lib\pages\internal-movement\internal-movement.component.html
+SHA256: AA6B2820D70720BC506D26DCA44DA3B1616A06AC01A8AB010CADFF70F9F8740D
+    2:   <header class="gear-page-header" danaPageHeader eyebrow="INTERNAL MOVEMENT" heading="Move Tray" description="Scan the tray, then the destination location serial."></header>
+    8:     <gear-scan-panel class="block w-full" #trayScanner class="block w-full" [label]="''" [placeholder]="'Scan barcode...'" (scan)="scanTray(trayScanner.value)"></gear-scan-panel>
+   11:       <label class="mb-2 block font-bold">Or choose an available tray</label>
+   13:         <button type="button" class="gear-input flex w-full appearance-none items-center justify-between text-left" (click)="toggleTrayPicker()">
+   14:           <span>{{ selectedTraySerial || 'Choose tray...' }}</span>
+   20:             <input class="gear-input w-full" type="search" placeholder="Search tray serial or current location..." [(ngModel)]="traySearch" />
+   23:             <span>Tray Serial</span>
+   24:             <span>Current Location</span>
+   27:             <button type="button" *ngFor="let tray of filteredTrays" (click)="chooseTray(tray.serial_number)" class="grid w-full grid-cols-2 border-b border-slate-100 px-3 py-2 text-left text-sm hover:bg-blue-50">
+   28:               <span class="font-semibold">{{ tray.serial_number }}</span>
+   29:               <span>{{ trayLocationLabels[tray.id] || 'Unassigned' }}</span>
+   37:   <div *ngIf="tray" class="gear-panel mt-4 w-full p-5">
+   41:         <div class="font-black">Scan Destination Location</div>
+   42:         <div class="text-sm text-slate-500">Location serial numbers are scannable.</div>
+   45:     <gear-scan-panel class="block w-full" #locationScanner class="block w-full" [label]="''" [placeholder]="'Scan barcode...'" (scan)="scanLocation(locationScanner.value)"></gear-scan-panel>
+   48:   <div *ngIf="tray && destination" class="gear-panel p-5">
+   49:     <div class="mb-4 grid gap-3 rounded-xl bg-slate-50 p-4 sm:grid-cols-4"><div><span class="text-xs font-bold text-slate-500">TRAY</span><div class="font-mono text-lg font-black">{{ tray.serial_number }}</div></div><div><span class="text-xs font-bold text-slate-500">SUMMARY / TYPE</span><div class="font-black">{{ tray.summary?.number || 'Unassigned' }} ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· {{ tray.part_type?.code || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â' }}</div></div><div><span class="text-xs font-bold text-slate-500">BLADES</span><div class="text-lg font-black">{{ tray.blade_count }}</div></div><div><span class="text-xs font-bold text-slate-500">STAGE</span><div class="font-black">{{ tray.current_stage?.name || tray.current_stage?.code || 'ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¦ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â' }}</div></div></div>
+   50:     <div class="grid gap-4 sm:grid-cols-2"><div><span class="text-xs font-bold text-slate-500">FROM</span><div class="font-mono text-xl font-black">{{ current?.location?.serial_number || 'Unassigned' }}</div><div *ngIf="current?.location?.description" class="text-sm text-slate-500">{{ current?.location?.description }}</div></div><div><span class="text-xs font-bold text-slate-500">TO</span><div class="font-mono text-xl font-black">{{ destination.serial_number }}</div><div *ngIf="destination.description" class="text-sm text-slate-500">{{ destination.description }}</div></div></div>
+========================================================================
+PAGE: load-container
+
+FILE: libs\frontend\feature-blade-tracking\src\lib\pages\load-container\load-container.component.ts
+SHA256: 40D93EC3C67A4A3ADC57BBB5F214180ABC98C4282E7E33817B920763E710D43A
+    3: import { HttpErrorResponse } from '@angular/common/http';
+    5: import { GearToastService } from '@libs/frontend/util-common';
+    6: import { IContainer, ITray } from '@libs/shared/util-types';
+    8:   BladeTrackingApiService,
+    9:   apiErrorText,
+   11: import { ScanMessage } from '../../models/scan-message';
+   12: import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
+   18:   selector: 'gear-load-container',
+   20:   imports: [CommonModule, FormsModule, ScanPanelComponent, DanaPageHeaderComponent],
+   21:   templateUrl: './load-container.component.html',
+   23: export class LoadContainerComponent {
+   24:   private readonly api = inject(BladeTrackingApiService);
+   25:   private readonly toast = inject(GearToastService);
+   26:   @ViewChild('containerScanner') containerScanner?: ScanPanelComponent;
+   27:   @ViewChild('trayScanner') trayScanner?: ScanPanelComponent;
+   28:   container: IContainer | null = null;
+   29:   trays: ITray[] = [];
+   30:   availableContainers:IContainer[]=[]; availableTrays:ITray[]=[]; selectedContainerSerial=''; selectedTraySerial=''; containerSearch=''; traySearch='';
+   31:   get filteredContainers(){const q=this.containerSearch.trim().toLowerCase();return q?this.availableContainers.filter(x=>x.serial_number.toLowerCase().includes(q)):this.availableContainers;} get filteredTrays(){const q=this.traySearch.trim().toLowerCase();return q?this.availableTrays.filter(x=>x.serial_number.toLowerCase().includes(q)):this.availableTrays;}
+   32:   constructor(){this.api.getContainers(1,50).subscribe({next:r=>this.availableContainers=r.data});this.api.getTrays(1,50).subscribe({next:r=>this.availableTrays=r.data});}
+   33:   chooseContainer(s:string){if(s)this.scanContainer(s);} chooseTray(s:string){if(s)this.scanTray(s);}
+   35:   message: ScanMessage | null = null;
+   36:   lastCompleted: { serial: string; trayCount: number; bladeCount: number } | null = null;
+   38:   scanContainer(serial: string) {
+   40:     this.api.scanContainer(serial).subscribe({
+   41:       next: (container) => {
+   42:         this.container = container;
+   43:         this.trays = [];
+   46:         this.containerScanner?.clearAndFocus();
+   47:         this.trayScanner?.focus();
+   50:           text: `Container ${container.serial_number} selected.`,
+   53:       error: (err: HttpErrorResponse) =>
+   54:         this.fail(err, 'Container not found.', this.containerScanner),
+   57:   scanTray(serial: string) {
+   58:     if (!this.container) return;
+   60:     this.api.scanTray(serial).subscribe({
+   61:       next: (tray) => {
+   62:         if (this.trays.some((x) => x.id === tray.id)) {
+   66:             text: `Tray ${tray.serial_number} is already in this session.`,
+   68:           this.trayScanner?.clearAndFocus();
+   71:         const container = this.container;
+   72:         if (!container) return;
+   73:         this.api.loadTrayIntoContainer(container.id, tray.id).subscribe({
+   75:             this.trays = [tray, ...this.trays];
+   78:             this.toast.success(`Tray ${tray.serial_number} added.`, 'Tray loaded');
+   79:             this.trayScanner?.clearAndFocus();
+   81:           error: (err: HttpErrorResponse) =>
+   84:               'Could not add tray to container.',
+   85:               this.trayScanner,
+   89:       error: (err: HttpErrorResponse) =>
+   90:         this.fail(err, 'Tray not found.', this.trayScanner),
+   94:     if (!this.container || !this.trays.length || this.busy) return;
+   96:       serial: this.container.serial_number,
+   97:       trayCount: this.trays.length,
+   98:       bladeCount: this.trays.reduce((sum, tray) => sum + Number(tray.blade_count ?? 0), 0),
+  101:     this.container = null;
+  102:     this.trays = [];
+  105:       `${completed.serial} loading session finished with ${completed.trayCount} tray${completed.trayCount === 1 ? '' : 's'}. Scan another container to start the next load.`,
+  106:       'Container loading complete',
+  108:     queueMicrotask(() => this.containerScanner?.clearAndFocus());
+  111:     err: HttpErrorResponse,
+  113:     scanner?: ScanPanelComponent,
+  116:     this.message = { tone: 'error', text: apiErrorText(err, fallback) };
+  117:     scanner?.select();
+
+FILE: libs\frontend\feature-blade-tracking\src\lib\pages\load-container\load-container.component.html
+SHA256: B8191A23FCA15D28A5B9AF5BD3FEA3D5AA6EF5817F69C33B5A8F7A019248A331
+    1: <section class="gear-page space-y-5"><header class="gear-page-header" danaPageHeader eyebrow="COATER SHIPPING" heading="Load Coater Container" description="Select a container, then scan as many trays as needed."></header>
+    3: <div *ngIf="lastCompleted as done" class="gear-panel p-5" role="status" aria-live="polite"><div class="text-xs font-black uppercase tracking-wide text-emerald-700">Loading Session Complete</div><div class="mt-1 text-xl font-black">{{ done.serial }}</div><p class="mt-1 text-sm text-slate-600">{{ done.trayCount }} tray(s) ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· {{ done.bladeCount }} represented blade(s). The loading session is closed; scan another container to begin again.</p></div>
+    4: <gear-scan-panel class="block w-full" #containerScanner [step]="1" label="Scan Container" buttonText="Select" [disabled]="busy" (scanned)="scanContainer($event)" />
+    5: <div class="gear-panel p-4 w-full "><label class="mb-2 block font-bold">Or choose an available container</label><input class="gear-input mb-3 w-full" type="search" placeholder="Search containers..." [(ngModel)]="containerSearch" /><select class="gear-input w-full" [(ngModel)]="selectedContainerSerial" (ngModelChange)="chooseContainer($event)"><option value="">Choose container...</option><option *ngFor="let item of filteredContainers" [value]="item.serial_number">{{ item.serial_number }}</option></select></div>
+    6: <gear-scan-panel class="block w-full" #trayScanner *ngIf="container" [step]="2" label="Scan Tray Into Container" [disabled]="busy" (scanned)="scanTray($event)" />
+    7: <div *ngIf="container" class="gear-panel p-4 w-full "><label class="mb-2 block font-bold">Or choose an available tray</label><input class="gear-input mb-3 w-full" type="search" placeholder="Search trays..." [(ngModel)]="traySearch" /><select class="gear-input w-full" [(ngModel)]="selectedTraySerial" (ngModelChange)="chooseTray($event)"><option value="">Choose tray...</option><option *ngFor="let tray of filteredTrays" [value]="tray.serial_number">{{ tray.serial_number }}</option></select></div>
+    8: <div *ngIf="container" class="gear-panel overflow-hidden"><div class="flex justify-between border-b p-4"><strong>{{ container.serial_number }}</strong><span>{{ trays.length }} trays</span></div><div *ngFor="let tray of trays" class="flex justify-between border-b border-slate-100 px-5 py-4"><span class="font-bold">{{ tray.serial_number }}</span><span>{{ tray.blade_count }} blades</span></div><div *ngIf="!trays.length" class="p-6 text-center text-slate-500">No trays loaded yet.</div></div>
+    9: <button *ngIf="container" (click)="finish()" [disabled]="!trays.length" class="w-full rounded-xl bg-emerald-600 px-5 py-4 font-bold text-white disabled:opacity-40">{{ busy ? 'FinishingÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¦' : 'Finish Loading Container' }}</button></section>
+========================================================================
+PAGE: receive-container
+
+FILE: libs\frontend\feature-blade-tracking\src\lib\pages\receive-container\receive-container.component.ts
+SHA256: 69D5CFA6FE2B0334F9F716775FDF5612C19946A3F3C78C98126218BB1174AA2C
+    3: import { HttpErrorResponse } from '@angular/common/http';
+    5: import { GearToastService } from '@libs/frontend/util-common';
+   11: import { IContainer, IContainerTray, ILocation, ITray } from '@libs/shared/util-types';
+   13:   BladeTrackingApiService,
+   14:   apiErrorText,
+   16: import { ScanMessage } from '../../models/scan-message';
+   17: import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
+   23:   selector: 'gear-receive-container',
+   25:   imports: [CommonModule, FormsModule, ScanPanelComponent, DanaPageHeaderComponent],
+   26:   templateUrl: './receive-container.component.html',
+   28: export class ReceiveContainerComponent {
+   29:   private readonly api = inject(BladeTrackingApiService);
+   30:   private readonly toast = inject(GearToastService);
+   32:   @ViewChild('containerScanner') containerScanner?: ScanPanelComponent;
+   33:   @ViewChild('trayScanner') trayScanner?: ScanPanelComponent;
+   34:   @ViewChild('shelfScanner') shelfScanner?: ScanPanelComponent;
+   36:   container: IContainer | null = null;
+   37:   expected: IContainerTray[] = [];
+   38:   received: ITray[] = [];
+   39:   pendingTray: ITray | null = null;
+   40:   pendingShelf: ILocation | null = null;
+   41:   availableContainers:IContainer[]=[]; selectedContainerSerial=''; selectedTraySerial=''; containerSearch=''; traySearch='';
+   42:   get filteredContainers(){const q=this.containerSearch.trim().toLowerCase();return q?this.availableContainers.filter(x=>x.serial_number.toLowerCase().includes(q)):this.availableContainers;} get filteredExpected(){const q=this.traySearch.trim().toLowerCase();return q?this.expected.filter(x=>x.tray.serial_number.toLowerCase().includes(q)):this.expected;}
+   43:   constructor(){this.api.getContainers(1,50).subscribe({next:r=>this.availableContainers=r.data});}
+   44:   chooseContainer(s:string){if(s)this.scanContainer(s);} chooseTray(s:string){if(s)this.scanTray(s);}
+   46:   message: ScanMessage | null = null;
+   48:   scanContainer(serial: string): void {
+   51:     this.received = [];
+   52:     this.pendingTray = null;
+   55:     this.api.scanContainer(serial).subscribe({
+   56:       next: (container) => {
+   57:         this.container = container;
+   58:         this.api.getActiveContainerTrays(container.id).subscribe({
+   62:             this.containerScanner?.clearAndFocus();
+   63:             this.trayScanner?.focus();
+   66:               text: `${container.serial_number} has ${items.length} expected tray${items.length === 1 ? '' : 's'}.`,
+   69:           error: (err: HttpErrorResponse) =>
+   70:             this.fail(err, 'Could not load expected trays.'),
+   73:       error: (err: HttpErrorResponse) =>
+   74:         this.fail(err, 'Container not found.', this.containerScanner),
+   78:   scanTray(serial: string): void {
+   79:     if (!this.container || this.pendingTray) return;
+   82:     this.api.scanTray(serial).subscribe({
+   83:       next: (tray) => {
+   85:           (x) => x.tray_id === tray.id && x.enabled,
+   91:             text: `Tray ${tray.serial_number} is not expected in ${this.container?.serial_number}.`,
+   93:           this.trayScanner?.clearAndFocus();
+   97:         this.pendingTray = tray;
+  101:           text: tray.summary?.number
+  102:             ? tray.part_type?.code
+  103:               ? `Tray ${tray.serial_number} selected. Scan finished shelf ${buildSummaryShelfTag('CUTTERGRIND_FINISHED', tray.summary.number, tray.part_type.code)}.`
+  104:               : `Tray ${tray.serial_number} selected, but it has no Part Type assigned.`
+  105:             : `Tray ${tray.serial_number} selected, but it has no summary assigned.`,
+  107:         queueMicrotask(() => this.shelfScanner?.focus());
+  109:       error: (err: HttpErrorResponse) =>
+  110:         this.fail(err, 'Tray not found.', this.trayScanner),
+  114:   scanShelf(serial: string): void {
+  115:     const pendingTray = this.pendingTray;
+  116:     if (!this.container || !pendingTray) return;
+  119:     this.api.scanLocation(serial).subscribe({
+  120:       next: (location) => {
+  121:         const summaryNumber = pendingTray.summary?.number;
+  126:             text: `Tray ${pendingTray.serial_number} does not have a summary assigned.`,
+  128:           this.shelfScanner?.clearAndFocus();
+  132:         const partTypeCode = pendingTray.part_type?.code;
+  137:             text: `Tray ${pendingTray.serial_number} does not have a Part Type assigned.`,
+  139:           this.shelfScanner?.clearAndFocus();
+  151:           location.location_type !== 'SHELF' ||
+  152:           location.department !== DEPARTMENT_CUTTERGRIND ||
+  153:           location.number !== normalizedSummaryNumber ||
+  154:           location.serial_number !== expectedShelf
+  161:           this.shelfScanner?.clearAndFocus();
+  165:         this.pendingShelf = location;
+  166:         const tray = pendingTray;
+  167:         const container = this.container;
+  168:         if (!tray || !container) return;
+  170:         this.api
+  171:           .unloadTray(container.id, tray.id, location.serial_number)
+  174:               this.expected = this.expected.filter((x) => x.tray_id !== tray.id);
+  175:               this.received = [tray, ...this.received];
+  176:               this.pendingTray = null;
+  181:                 `Tray ${tray.serial_number} received and stored at ${location.serial_number}.`,
+  182:                 'Tray received',
+  184:               queueMicrotask(() => this.trayScanner?.clearAndFocus());
+  186:             error: (err: HttpErrorResponse) =>
+  187:               this.fail(err, 'Could not receive tray.', this.shelfScanner),
+  190:       error: (err: HttpErrorResponse) =>
+  191:         this.fail(err, 'Shelf location not found.', this.shelfScanner),
+  195:   cancelPendingTray(): void {
+  196:     this.pendingTray = null;
+  198:     this.message = { tone: 'info', text: 'Tray selection cleared.' };
+  199:     queueMicrotask(() => this.trayScanner?.focus());
+  203:     if (!this.container || this.expected.length || this.pendingTray) return;
+  204:     const serial = this.container.serial_number;
+  205:     const count = this.received.length;
+  206:     this.container = null;
+  207:     this.received = [];
+  211:       `${serial} receiving complete. ${count} trays unloaded to tagged shelf locations.`,
+  212:       'Container received',
+  214:     this.containerScanner?.focus();
+  218:     err: HttpErrorResponse,
+  220:     scanner?: ScanPanelComponent,
+  223:     this.message = { tone: 'error', text: apiErrorText(err, fallback) };
+  224:     scanner?.select();
+
+FILE: libs\frontend\feature-blade-tracking\src\lib\pages\receive-container\receive-container.component.html
+SHA256: 7ABD5C1B0ACEFC47FC2FE7A048D7F5671DF60DDB1B441AE0B3F69A49C16BFA6C
+    2:   <header class="gear-page-header" danaPageHeader eyebrow="COATER RECEIVING" heading="Receive Container" description="Scan the returned container, scan each tray out, then scan its part-specific Cuttergrind Finished shelf: CGFR- + Summary for RING or CGFP- + Summary for PINION."></header>
+    6:   <gear-scan-panel class="block w-full"
+    7:     #containerScanner
+    9:     label="Scan Returned Container"
+   10:     buttonText="Select"
+   12:     (scanned)="scanContainer($event)"
+   14: <div class="gear-panel p-4 w-full "><label class="mb-2 block font-bold">Or choose an available returned container</label><input class="gear-input mb-3 w-full" type="search" placeholder="Search containers..." [(ngModel)]="containerSearch" /><select class="gear-input w-full" [(ngModel)]="selectedContainerSerial" (ngModelChange)="chooseContainer($event)"><option value="">Choose container...</option><option *ngFor="let item of filteredContainers" [value]="item.serial_number">{{ item.serial_number }}</option></select></div>
+   16:   <gear-scan-panel class="block w-full"
+   17:     #trayScanner
+   18:     *ngIf="container && expected.length && !pendingTray"
+   20:     label="Scan Tray Out"
+   22:     (scanned)="scanTray($event)"
+   24: <div *ngIf="container && expected.length && !pendingTray" class="gear-panel p-4 w-full "><label class="mb-2 block font-bold">Or choose an expected tray</label><input class="gear-input mb-3 w-full" type="search" placeholder="Search expected trays..." [(ngModel)]="traySearch" /><select class="gear-input w-full" [(ngModel)]="selectedTraySerial" (ngModelChange)="chooseTray($event)"><option value="">Choose expected tray...</option><option *ngFor="let x of filteredExpected" [value]="x.tray.serial_number">{{ x.tray.serial_number }}</option></select></div>
+   26:   <div *ngIf="pendingTray" class="rounded-2xl border border-blue-200 bg-blue-50 p-4">
+   27:     <div class="text-xs font-bold uppercase text-blue-700">Selected Tray</div>
+   28:     <div class="mt-1 text-xl font-bold">{{ pendingTray.serial_number }}</div>
+   30:       After coating this tray is READY FOR CUTTER. Scan its shelf-location tag to complete receiving.
+   34:   <gear-scan-panel class="block w-full"
+   35:     #shelfScanner
+   36:     *ngIf="pendingTray"
+   38:     label="Scan Cuttergrind Finished Shelf"
+   40:     (scanned)="scanShelf($event)"
+   44:     *ngIf="pendingTray"
+   46:     (click)="cancelPendingTray()"
+   49:     Cancel Tray Selection
+   52:   <div *ngIf="container" class="grid gap-4 lg:grid-cols-2">
+   55:       <div *ngFor="let x of filteredExpected" class="border-b p-4">{{ x.tray.serial_number }}</div>
+   56:       <div *ngIf="!expected.length" class="p-5 text-emerald-700">All expected trays received.</div>
+   60:       <div class="border-b p-4 font-bold">Received To Shelf ({{ received.length }})</div>
+   61:       <div *ngFor="let tray of received" class="border-b p-4">{{ tray.serial_number }}</div>
+   66:     *ngIf="container"
+   68:     [disabled]="expected.length > 0 || !!pendingTray"
+   71:     Finish Receiving Container
+========================================================================
+PAGE: intake
+
+FILE: libs\frontend\feature-blade-tracking\src\lib\pages\intake\intake.component.ts
+SHA256: FCD0CB64AC7C112C9CB537A3468804275C67CF3A0B80A21E9CCC6F1ED85959A9
+    2: import { HttpErrorResponse } from '@angular/common/http';
+    5: import { GearToastService } from '@libs/frontend/util-common';
+   10:   ITray,
+   13:   BladeTrackingApiService,
+   14:   TrayGrindingRunView,
+   15:   apiErrorText,
+   17: import { ScanMessage } from '../../models/scan-message';
+   18: import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
+   26:   selector: 'gear-blade-intake',
+   28:   imports: [CommonModule, FormsModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
+   29:   templateUrl: './intake.component.html',
+   31: export class IntakeComponent implements OnInit {
+   32:   private readonly api = inject(BladeTrackingApiService);
+   33:   private readonly toast = inject(GearToastService);
+   35:   @ViewChild('scanner') scanner?: ScanPanelComponent;
+   36:   @ViewChild('summarySelect') summarySelect?: ElementRef<HTMLSelectElement>;
+   37:   @ViewChild('partTypeSelect') partTypeSelect?: ElementRef<HTMLSelectElement>;
+   40:   tray: ITray | null = null;
+   41:   availableTrays:ITray[]=[]; selectedTraySerial=''; traySearch='';
+   42:   get filteredTrays(){const q=this.traySearch.trim().toLowerCase();return q?this.availableTrays.filter(x=>x.serial_number.toLowerCase().includes(q)):this.availableTrays;}
+   49:   grindingRuns: TrayGrindingRunView[] = [];
+   52:   message: ScanMessage | null = null;
+   57:     if (!this.tray) return 0;
+   58:     return Math.max(this.tray.blade_count - this.scrappedBladeCount, 0);
+   63:       this.tray &&
+   65:         this.scrappedBladeCount <= this.tray.blade_count,
+   70:     this.api.getTrays(1,50).subscribe({next:r=>this.availableTrays=r.data,error:()=>this.availableTrays=[]});
+   71:     this.api.getPartSummaries().subscribe({
+   76:           text: 'Could not load blade part summaries.',
+   80:     this.api.getPartTypes().subscribe({
+   85:           text: 'Could not load RING/PINION part types.',
+   90:   chooseTray(s:string):void{if(s)this.scanTray(s);}
+   91:   scanTray(serial: string): void {
+   93:     this.api.scanTray(serial).subscribe({
+   94:       next: (tray) => {
+   95:         this.tray = tray;
+   96:         this.summaryId = tray.summary_id ?? '';
+   97:         this.partTypeId = tray.part_type_id ?? '';
+   99:         this.api.getTrayGrindingRuns(tray.id).subscribe({
+  106:             tray.blade_count > 0
+  107:               ? `Tray ${tray.serial_number} selected. Existing Summary/Part Type are locked while it contains blades.`
+  108:               : `Empty tray ${tray.serial_number} selected. Choose Summary and RING/PINION for this blade set.`,
+  111:           if (tray.blade_count > 0) {
+  114:             this.summarySelect?.nativeElement.focus();
+  116:             this.partTypeSelect?.nativeElement.focus();
+  122:       error: (err: HttpErrorResponse) => {
+  126:           text: apiErrorText(err, 'Tray not found.'),
+  128:         this.scanner?.select();
+  135:       !this.tray ||
+  144:     this.api
+  146:         trayId: this.tray.id,
+  155:           if (this.tray) {
+  156:             this.tray = {
+  157:               ...this.tray,
+  160:               blade_count: result.tray_blade_count ?? this.tray.blade_count,
+  165:             `${result.quantity} new blades added to ${this.tray?.serial_number}.`,
+  170:         error: (err: HttpErrorResponse) => {
+  172:           const message = apiErrorText(err, 'Could not add blades.');
+  180:     if (!this.tray || !this.summaryId || !this.partTypeId || !this.grindingScrapValid) return;
+  183:     this.api
+  184:       .completeTrayGrinding(
+  185:         this.tray.id,
+  194:             ? `Grinding complete. ${result.scrapped_blade_count} scrapped; ${result.returned_blade_count} returned to tray. Complete ${result.required_blade_count}-blade set.`
+  195:             : `Grinding complete. ${result.scrapped_blade_count} scrapped; ${result.returned_blade_count} returned to tray. ${result.blades_needed} more blade(s) are needed for the ${result.required_blade_count}-blade requirement.`;
+  203:           this.api.getTrayGrindingRuns(this.tray!.id).subscribe({
+  206:           this.api.scanTray(this.tray!.serial_number).subscribe({
+  207:             next: (tray) => (this.tray = tray),
+  210:         error: (err: HttpErrorResponse) => {
+  212:           const message = apiErrorText(err, 'Could not complete grinding.');
+
+FILE: libs\frontend\feature-blade-tracking\src\lib\pages\intake\intake.component.html
+SHA256: 8E12037ABDE26705357FA46DA2778C7C645CA1D1EEB18E24564F0B56116BA9C4
+    2:   <header class="gear-page-header" danaPageHeader eyebrow="BLADE INTAKE / GRINDING" heading="Assign Blades To Tray" description="An empty tray is assigned a Summary and RING/PINION when its first blades are added. Required quantity is enforced only after grinding is completed."></header>
+    8:   <gear-scan-panel class="block w-full"
+    9:     #scanner
+   11:     label="Scan Tray"
+   13:     (scanned)="scanTray($event)"
+   15: <div class="gear-panel p-4 w-full "><label class="mb-2 block font-bold">Or choose an available tray</label><input class="gear-input mb-3 w-full" type="search" placeholder="Search trays..." [(ngModel)]="traySearch" /><select class="gear-input w-full" [(ngModel)]="selectedTraySerial" (ngModelChange)="chooseTray($event)"><option value="">Choose tray...</option><option *ngFor="let tray of filteredTrays" [value]="tray.serial_number">{{ tray.serial_number }}</option></select></div>
+   18:     *ngIf="tray"
+   24:         <div class="font-bold">Tray {{ tray.serial_number }}</div>
+   26:           {{ tray.blade_count }} blade(s)
+   27:           <span *ngIf="tray.grinding_completed_at && tray.required_blade_count != null">
+   28:             ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· Post-grind requirement {{ tray.required_blade_count }}
+   34:         [class.bg-amber-100]="!tray.grinding_completed_at"
+   35:         [class.text-amber-800]="!tray.grinding_completed_at"
+   36:         [class.bg-emerald-100]="tray.grinding_completed_at"
+   37:         [class.text-emerald-800]="tray.grinding_completed_at"
+   39:         {{ tray.grinding_completed_at ? 'GRINDING COMPLETE' : 'GRINDING' }}
+   46:         <select
+   47:           #summarySelect
+   51:           [disabled]="tray.blade_count > 0"
+   53:           <option value="">Select...</option>
+   57:         </select>
+   62:         <select
+   63:           #partTypeSelect
+   67:           [disabled]="tray.blade_count > 0"
+   69:           <option value="">Select...</option>
+   73:         </select>
+   90:         <select
+   96:         </select>
+  100:     <div *ngIf="!tray.grinding_completed_at" class="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
+  104:           Enter how many blades were scrapped during grinding when the usable blades are put back into this tray.
+  111:           <strong class="text-2xl">{{ tray.blade_count }}</strong>
+  119:             [max]="tray.blade_count"
+  127:           <span class="block text-xs font-bold uppercase text-emerald-600">Returned To Tray</span>
+  136:         Scrap quantity must be between 0 and {{ tray.blade_count }}.
+  152:         [disabled]="busy || !summaryId || !partTypeId || !!tray.grinding_completed_at || !grindingScrapValid"
+  160:   <div *ngIf="tray && grindingRuns.length" class="gear-panel mt-5 overflow-hidden">
+  163:       <p class="mt-1 text-sm text-slate-500">Recorded grinding disposition for this tray.</p>
+
+========================================================================
+RELATED TYPESCRIPT/API FILES
+
+FILE: C:\Users\ryan.thompson\Downloads\dana-apps.v0.1\libs\frontend\feature-blade-tracking\src\lib\pages\intake\intake.component.ts
+SHA256: FCD0CB64AC7C112C9CB537A3468804275C67CF3A0B80A21E9CCC6F1ED85959A9
+    2: import { HttpErrorResponse } from '@angular/common/http';
+    7:   BladeStatus,
+   10:   ITray,
+   13:   BladeTrackingApiService,
+   14:   TrayGrindingRunView,
+   15:   apiErrorText,
+   32:   private readonly api = inject(BladeTrackingApiService);
+   40:   tray: ITray | null = null;
+   41:   availableTrays:ITray[]=[]; selectedTraySerial=''; traySearch='';
+   42:   get filteredTrays(){const q=this.traySearch.trim().toLowerCase();return q?this.availableTrays.filter(x=>x.serial_number.toLowerCase().includes(q)):this.availableTrays;}
+   49:   grindingRuns: TrayGrindingRunView[] = [];
+   50:   status = BladeStatus.NEW;
+   54:   readonly statuses = [BladeStatus.NEW, BladeStatus.GRINDING];
+   56:   get returnedAfterGrinding(): number {
+   57:     if (!this.tray) return 0;
+   58:     return Math.max(this.tray.blade_count - this.scrappedBladeCount, 0);
+   61:   get grindingScrapValid(): boolean {
+   63:       this.tray &&
+   65:         this.scrappedBladeCount <= this.tray.blade_count,
+   70:     this.api.getTrays(1,50).subscribe({next:r=>this.availableTrays=r.data,error:()=>this.availableTrays=[]});
+   71:     this.api.getPartSummaries().subscribe({
+   80:     this.api.getPartTypes().subscribe({
+   90:   chooseTray(s:string):void{if(s)this.scanTray(s);}
+   91:   scanTray(serial: string): void {
+   93:     this.api.scanTray(serial).subscribe({
+   94:       next: (tray) => {
+   95:         this.tray = tray;
+   96:         this.summaryId = tray.summary_id ?? '';
+   97:         this.partTypeId = tray.part_type_id ?? '';
+   99:         this.api.getTrayGrindingRuns(tray.id).subscribe({
+  106:             tray.blade_count > 0
+  107:               ? `Tray ${tray.serial_number} selected. Existing Summary/Part Type are locked while it contains blades.`
+  108:               : `Empty tray ${tray.serial_number} selected. Choose Summary and RING/PINION for this blade set.`,
+  111:           if (tray.blade_count > 0) {
+  122:       error: (err: HttpErrorResponse) => {
+  126:           text: apiErrorText(err, 'Tray not found.'),
+  135:       !this.tray ||
+  144:     this.api
+  146:         trayId: this.tray.id,
+  150:         status: this.status,
+  155:           if (this.tray) {
+  156:             this.tray = {
+  157:               ...this.tray,
+  160:               blade_count: result.tray_blade_count ?? this.tray.blade_count,
+  165:             `${result.quantity} new blades added to ${this.tray?.serial_number}.`,
+  170:         error: (err: HttpErrorResponse) => {
+  172:           const message = apiErrorText(err, 'Could not add blades.');
+  180:     if (!this.tray || !this.summaryId || !this.partTypeId || !this.grindingScrapValid) return;
+  183:     this.api
+  184:       .completeTrayGrinding(
+  185:         this.tray.id,
+  194:             ? `Grinding complete. ${result.scrapped_blade_count} scrapped; ${result.returned_blade_count} returned to tray. Complete ${result.required_blade_count}-blade set.`
+  195:             : `Grinding complete. ${result.scrapped_blade_count} scrapped; ${result.returned_blade_count} returned to tray. ${result.blades_needed} more blade(s) are needed for the ${result.required_blade_count}-blade requirement.`;
+  203:           this.api.getTrayGrindingRuns(this.tray!.id).subscribe({
+  206:           this.api.scanTray(this.tray!.serial_number).subscribe({
+  207:             next: (tray) => (this.tray = tray),
+  210:         error: (err: HttpErrorResponse) => {
+  212:           const message = apiErrorText(err, 'Could not complete grinding.');
+
+FILE: C:\Users\ryan.thompson\Downloads\dana-apps.v0.1\libs\frontend\feature-blade-tracking\src\lib\pages\internal-movement\internal-movement.component.ts
+SHA256: EFB211108E44B16723A6D3630AFF89C0164D1DC07CCAC83ADAC93575631ADF7E
+    3: import { HttpErrorResponse } from '@angular/common/http';
+    6: import { ILocation, ILocationTray, ITray } from '@libs/shared/util-types';
+    7: import { BladeTrackingApiService, apiErrorText } from '@libs/frontend/data-access-blade-tracking';
+   16:   private readonly api = inject(BladeTrackingApiService);
+   18:   @ViewChild('trayScanner') trayScanner?: ScanPanelComponent;
+   19:   @ViewChild('locationScanner') locationScanner?: ScanPanelComponent;
+   20:   tray: ITray | null = null;
+   21:   current: ILocationTray | null = null;
+   22:   destination: ILocation | null = null;
+   23:   availableTrays:ITray[]=[]; selectedTraySerial=''; traySearch=''; trayLocationLabels:Record<string,string>={}; pickerOpen=false;
+   24:   get filteredTrays(){const q=this.traySearch.trim().toLowerCase();return q?this.availableTrays.filter(x=>(x.serial_number+' '+(this.trayLocationLabels[x.id]||'Unassigned')).toLowerCase().includes(q)):this.availableTrays;}
+   25:   trayOptionLabel(tray:ITray){return tray.serial_number+' - Current: '+(this.trayLocationLabels[tray.id]||'Unassigned');}
+   26:   private loadTrayLocationLabels(){for(const tray of this.availableTrays){this.api.getCurrentTrayLocation(tray.id).subscribe({next:current=>this.trayLocationLabels[tray.id]=current?.location?.serial_number||'Unassigned',error:()=>this.trayLocationLabels[tray.id]='Unassigned'});}}
+   27:   constructor(){this.api.getTrays(1,50).subscribe({next:r=>{this.availableTrays=r.data;this.loadTrayLocationLabels();},error:()=>this.availableTrays=[]});}
+   28:   chooseTray(s:string){if(s){this.selectedTraySerial=s;this.pickerOpen=false;this.scanTray(s);}} toggleTrayPicker(){this.pickerOpen=!this.pickerOpen;}
+   32:   scanTray(serial: string) {
+   34:     this.api.scanTray(serial).subscribe({
+   35:       next: (tray) => {
+   36:         this.tray = tray;
+   37:         this.api.getCurrentTrayLocation(tray.id).subscribe({
+   38:           next: (current) => this.finishTray(current),
+   39:           error: (err: HttpErrorResponse) => err.status === 404 ? this.finishTray(null) : this.fail(err, 'Could not read tray location.'),
+   42:       error: (err: HttpErrorResponse) => this.fail(err, 'Tray not found.', this.trayScanner),
+   46:   scanLocation(serial: string) {
+   47:     if (!this.tray) return;
+   49:     this.api.scanLocation(serial).subscribe({
+   50:       next: (location) => { this.destination = location; this.busy = false; this.locationScanner?.clearAndFocus(); this.message = { tone: 'info', text: `Destination ${location.serial_number} selected.` }; },
+   51:       error: (err: HttpErrorResponse) => this.fail(err, 'Location not found.', this.locationScanner),
+   56:     if (!this.tray || !this.destination || this.busy) return;
+   57:     if (this.current?.location?.id === this.destination.id) { this.message = { tone: 'info', text: `Tray ${this.tray.serial_number} is already at ${this.destination.serial_number}.` }; return; }
+   58:     const tray = this.tray; const destination = this.destination; const from = this.current?.location?.serial_number ?? 'Unassigned';
+   60:     this.api.moveTray(tray.id, destination.id).subscribe({
+   61:       next: () => { this.busy = false; const text = `Tray ${tray.serial_number} moved from ${from} to ${destination.serial_number}.`; this.message = null; this.toast.success(text, 'Tray moved'); this.tray = null; this.current = null; this.destination = null; this.trayScanner?.clearAndFocus(); },
+   62:       error: (err: HttpErrorResponse) => { const text = apiErrorText(err, 'Could not move tray.'); this.toast.error(text, 'Move failed'); this.fail(err, 'Could not move tray.'); },
+   66:   private finishTray(current: ILocationTray | null) { this.current = current; this.busy = false; this.trayScanner?.clearAndFocus(); this.locationScanner?.focus(); this.message = { tone: 'success', text: current?.location ? `Tray ${this.tray?.serial_number} found at ${current.location.serial_number}.` : `Tray ${this.tray?.serial_number} has no current internal location.` }; }
+   67:   private fail(err: HttpErrorResponse, fallback: string, scanner?: ScanPanelComponent) { this.busy = false; this.message = { tone: 'error', text: apiErrorText(err, fallback) }; scanner?.select(); }
+
+FILE: C:\Users\ryan.thompson\Downloads\dana-apps.v0.1\libs\frontend\feature-blade-tracking\src\lib\pages\inventory-lookup\inventory-lookup.component.ts
+SHA256: DC75EF61DA6599F513816D5FB2F61EA2E39142387C08C1A0A5AC555A21EB26FA
+    2: import { HttpErrorResponse } from '@angular/common/http';
+    7:   BladeTrackingApiService,
+    8:   InventoryContainerRow,
+    9:   InventoryLocationRow,
+   11:   InventoryTrayRow,
+   12:   apiErrorText,
+   29:   private readonly api = inject(BladeTrackingApiService);
+   40:     const serial = this.route.snapshot.queryParamMap.get('serial')?.trim();
+   44:   get tray(): InventoryTrayRow | null {
+   45:     return this.result?.kind === 'tray'
+   46:       ? (this.result.value as InventoryTrayRow)
+   50:   get container(): InventoryContainerRow | null {
+   51:     return this.result?.kind === 'container'
+   52:       ? (this.result.value as InventoryContainerRow)
+   56:   get location(): InventoryLocationRow | null {
+   57:     return this.result?.kind === 'location'
+   58:       ? (this.result.value as InventoryLocationRow)
+   67:     this.api.printAssetTag(kind, recordId).subscribe({
+   71:           this.api.downloadAssetTagPrn(result);
+   80:       error: (error: HttpErrorResponse) => {
+   84:           text: apiErrorText(error, `Could not print ${serialNumber} tag.`),
+   95:     this.api.lookup(serial).subscribe({
+  101:       error: (err: HttpErrorResponse) => {
+  105:           text: apiErrorText(
+
+FILE: C:\Users\ryan.thompson\Downloads\dana-apps.v0.1\libs\frontend\feature-blade-tracking\src\lib\pages\inventory-overview\inventory-overview.component.ts
+SHA256: 315C2B6DB4FD1B3C579DABE64CB9DBFD32EA906CB2C7C77AC8F6E34DB46BC626
+    2: import { HttpErrorResponse } from '@angular/common/http';
+    9:   BladeTrackingApiService,
+   11:   InventoryContainerRow,
+   12:   InventoryLocationRow,
+   13:   InventoryTrayRow,
+   14:   apiErrorText,
+   26: type InventoryTab = 'trays' | 'containers' | 'locations' | 'blades';
+   50:   private readonly api = inject(BladeTrackingApiService);
+   52:   activeTab: InventoryTab = 'trays';
+   58:     trays: '',
+   59:     containers: '',
+   60:     locations: '',
+   65:     trays: '',
+   66:     containers: '',
+   67:     locations: '',
+   72:     trays: 0,
+   73:     containers: 0,
+   74:     locations: 0,
+   78:   expandedTrayId: string | null = null;
+   79:   expandedContainerId: string | null = null;
+   80:   expandedLocationId: string | null = null;
+   81:   expandedContainerTrayId: string | null = null;
+   82:   expandedLocationTrayId: string | null = null;
+   84:   trays: InventoryPageState<InventoryTrayRow> = {
+   90:   containers: InventoryPageState<InventoryContainerRow> = {
+   96:   locations: InventoryPageState<InventoryLocationRow> = {
+  112:   get totalTrays(): number {
+  113:     return this.inventoryTotals.trays;
+  116:   get totalContainers(): number {
+  117:     return this.inventoryTotals.containers;
+  120:   get totalLocations(): number {
+  121:     return this.inventoryTotals.locations;
+  124:   get totalBlades(): number {
+  128:   get anyLoading(): boolean {
+  130:       this.trays.loading ||
+  131:       this.containers.loading ||
+  132:       this.locations.loading ||
+  137:   get activeSearch(): string {
+  145:   get activeAppliedSearch(): string {
+  149:   get activeTabLabel(): string {
+  151:       trays: 'trays',
+  152:       containers: 'containers',
+  153:       locations: 'locations',
+  159:   get activeSearchPlaceholder(): string {
+  161:       trays: 'Tray serial, Summary, Part Type, or stage',
+  162:       containers: 'Container serial number',
+  163:       locations: 'Location tag, number, description, department, or type',
+  169:   get activeResultCount(): number {
+  190:   toggleTray(trayId: string): void {
+  191:     this.expandedTrayId = this.expandedTrayId === trayId ? null : trayId;
+  194:   toggleContainer(containerId: string): void {
+  195:     this.expandedContainerId =
+  196:       this.expandedContainerId === containerId ? null : containerId;
+  197:     this.expandedContainerTrayId = null;
+  200:   toggleContainerTray(trayId: string): void {
+  201:     this.expandedContainerTrayId =
+  202:       this.expandedContainerTrayId === trayId ? null : trayId;
+  205:   toggleLocation(locationId: string): void {
+  206:     this.expandedLocationId =
+  207:       this.expandedLocationId === locationId ? null : locationId;
+  208:     this.expandedLocationTrayId = null;
+  211:   toggleLocationTray(trayId: string): void {
+  212:     this.expandedLocationTrayId =
+  213:       this.expandedLocationTrayId === trayId ? null : trayId;
+  222:     this.api.printAssetTag(kind, recordId).subscribe({
+  226:           this.api.downloadAssetTagPrn(result);
+  232:       error: (error: HttpErrorResponse) => {
+  234:         this.error = apiErrorText(error, `Could not print ${serialNumber} tag.`);
+  243:   loadTrays(page: number): void {
+  246:     this.expandedTrayId = null;
+  247:     this.trays.loading = true;
+  249:     const search = this.appliedSearchTerms.trays;
+  250:     this.api.getTrays(page, 50, search).subscribe({
+  252:         this.trays = {
+  257:         if (!search) this.inventoryTotals.trays = response.meta.totalItems;
+  259:       error: (error: HttpErrorResponse) => {
+  260:         this.trays.loading = false;
+  261:         this.error = apiErrorText(error, 'Could not load trays.');
+  266:   loadContainers(page: number): void {
+  269:     this.expandedContainerId = null;
+  270:     this.expandedContainerTrayId = null;
+  271:     this.containers.loading = true;
+  273:     const search = this.appliedSearchTerms.containers;
+  274:     this.api.getContainers(page, 50, search).subscribe({
+  276:         this.containers = {
+  281:         if (!search) this.inventoryTotals.containers = response.meta.totalItems;
+  283:       error: (error: HttpErrorResponse) => {
+  284:         this.containers.loading = false;
+  285:         this.error = apiErrorText(error, 'Could not load containers.');
+  290:   loadLocations(page: number): void {
+  293:     this.expandedLocationId = null;
+  294:     this.expandedLocationTrayId = null;
+  295:     this.locations.loading = true;
+  297:     const search = this.appliedSearchTerms.locations;
+  298:     this.api.getLocations(page, 50, search).subscribe({
+  300:         this.locations = {
+  305:         if (!search) this.inventoryTotals.locations = response.meta.totalItems;
+  307:       error: (error: HttpErrorResponse) => {
+  308:         this.locations.loading = false;
+  309:         this.error = apiErrorText(error, 'Could not load locations.');
+  320:     this.api.getBlades(page, 50, search).subscribe({
+  329:       error: (error: HttpErrorResponse) => {
+  331:         this.error = apiErrorText(error, 'Could not load blades.');
+  337:     if (this.activeTab === 'trays') {
+  338:       this.loadTrays(page);
+  339:     } else if (this.activeTab === 'containers') {
+  340:       this.loadContainers(page);
+  341:     } else if (this.activeTab === 'locations') {
+  342:       this.loadLocations(page);
+  349:     if (tab === 'trays') return this.trays;
+  350:     if (tab === 'containers') return this.containers;
+  351:     if (tab === 'locations') return this.locations;
+  359:       trays: this.api.getTrays(1, 50),
+  360:       containers: this.api.getContainers(1, 50),
+  361:       locations: this.api.getLocations(1, 50),
+  362:       blades: this.api.getBlades(1, 50),
+  364:       next: ({ trays, containers, locations, blades }) => {
+  365:         this.trays = { rows: trays.data, meta: trays.meta, loading: false };
+  366:         this.containers = {
+  367:           rows: containers.data,
+  368:           meta: containers.meta,
+  371:         this.locations = {
+  372:           rows: locations.data,
+  373:           meta: locations.meta,
+  378:         this.inventoryTotals.trays = trays.meta.totalItems;
+  379:         this.inventoryTotals.containers = containers.meta.totalItems;
+  380:         this.inventoryTotals.locations = locations.meta.totalItems;
+  383:       error: (error: HttpErrorResponse) => {
+  384:         this.trays.loading = false;
+  385:         this.containers.loading = false;
+  386:         this.locations.loading = false;
+  388:         this.error = apiErrorText(
+
+FILE: C:\Users\ryan.thompson\Downloads\dana-apps.v0.1\libs\frontend\feature-blade-tracking\src\lib\pages\load-container\load-container.component.ts
+SHA256: 40D93EC3C67A4A3ADC57BBB5F214180ABC98C4282E7E33817B920763E710D43A
+    3: import { HttpErrorResponse } from '@angular/common/http';
+    6: import { IContainer, ITray } from '@libs/shared/util-types';
+    8:   BladeTrackingApiService,
+    9:   apiErrorText,
+   18:   selector: 'gear-load-container',
+   21:   templateUrl: './load-container.component.html',
+   23: export class LoadContainerComponent {
+   24:   private readonly api = inject(BladeTrackingApiService);
+   26:   @ViewChild('containerScanner') containerScanner?: ScanPanelComponent;
+   27:   @ViewChild('trayScanner') trayScanner?: ScanPanelComponent;
+   28:   container: IContainer | null = null;
+   29:   trays: ITray[] = [];
+   30:   availableContainers:IContainer[]=[]; availableTrays:ITray[]=[]; selectedContainerSerial=''; selectedTraySerial=''; containerSearch=''; traySearch='';
+   31:   get filteredContainers(){const q=this.containerSearch.trim().toLowerCase();return q?this.availableContainers.filter(x=>x.serial_number.toLowerCase().includes(q)):this.availableContainers;} get filteredTrays(){const q=this.traySearch.trim().toLowerCase();return q?this.availableTrays.filter(x=>x.serial_number.toLowerCase().includes(q)):this.availableTrays;}
+   32:   constructor(){this.api.getContainers(1,50).subscribe({next:r=>this.availableContainers=r.data});this.api.getTrays(1,50).subscribe({next:r=>this.availableTrays=r.data});}
+   33:   chooseContainer(s:string){if(s)this.scanContainer(s);} chooseTray(s:string){if(s)this.scanTray(s);}
+   36:   lastCompleted: { serial: string; trayCount: number; bladeCount: number } | null = null;
+   38:   scanContainer(serial: string) {
+   40:     this.api.scanContainer(serial).subscribe({
+   41:       next: (container) => {
+   42:         this.container = container;
+   43:         this.trays = [];
+   46:         this.containerScanner?.clearAndFocus();
+   47:         this.trayScanner?.focus();
+   50:           text: `Container ${container.serial_number} selected.`,
+   53:       error: (err: HttpErrorResponse) =>
+   54:         this.fail(err, 'Container not found.', this.containerScanner),
+   57:   scanTray(serial: string) {
+   58:     if (!this.container) return;
+   60:     this.api.scanTray(serial).subscribe({
+   61:       next: (tray) => {
+   62:         if (this.trays.some((x) => x.id === tray.id)) {
+   66:             text: `Tray ${tray.serial_number} is already in this session.`,
+   68:           this.trayScanner?.clearAndFocus();
+   71:         const container = this.container;
+   72:         if (!container) return;
+   73:         this.api.loadTrayIntoContainer(container.id, tray.id).subscribe({
+   75:             this.trays = [tray, ...this.trays];
+   78:             this.toast.success(`Tray ${tray.serial_number} added.`, 'Tray loaded');
+   79:             this.trayScanner?.clearAndFocus();
+   81:           error: (err: HttpErrorResponse) =>
+   84:               'Could not add tray to container.',
+   85:               this.trayScanner,
+   89:       error: (err: HttpErrorResponse) =>
+   90:         this.fail(err, 'Tray not found.', this.trayScanner),
+   94:     if (!this.container || !this.trays.length || this.busy) return;
+   96:       serial: this.container.serial_number,
+   97:       trayCount: this.trays.length,
+   98:       bladeCount: this.trays.reduce((sum, tray) => sum + Number(tray.blade_count ?? 0), 0),
+  101:     this.container = null;
+  102:     this.trays = [];
+  105:       `${completed.serial} loading session finished with ${completed.trayCount} tray${completed.trayCount === 1 ? '' : 's'}. Scan another container to start the next load.`,
+  106:       'Container loading complete',
+  108:     queueMicrotask(() => this.containerScanner?.clearAndFocus());
+  111:     err: HttpErrorResponse,
+  116:     this.message = { tone: 'error', text: apiErrorText(err, fallback) };
+
+FILE: C:\Users\ryan.thompson\Downloads\dana-apps.v0.1\libs\frontend\feature-blade-tracking\src\lib\pages\locations\blade-locations.component.ts
+SHA256: 9C7B4CA8045EBCDDCA813F3727B55447D1163CF9D6DF72574F6ACCD1184846FB
+    2: import { HttpErrorResponse } from '@angular/common/http';
+    8:   BladeTrackingApiService,
+    9:   InventoryLocationRow,
+   10:   apiErrorText,
+   24:   selector: 'gear-blade-locations',
+   27:   templateUrl: './blade-locations.component.html',
+   29: export class BladeLocationsComponent implements OnInit {
+   30:   private readonly api = inject(BladeTrackingApiService);
+   32:   rows: InventoryLocationRow[] = [];
+   38:   expandedLocationId: string | null = null;
+   39:   expandedTrayId: string | null = null;
+   45:   get filteredLocations(): InventoryLocationRow[] {
+   49:     return this.rows.filter((location) => {
+   50:       const locationText = [
+   51:         location.serial_number,
+   52:         location.number,
+   53:         location.description,
+   54:         location.department,
+   55:         location.location_type,
+   61:       if (locationText.includes(search)) return true;
+   63:       return location.trays.some((tray) => {
+   64:         const trayText = [
+   65:           tray.serial_number,
+   66:           tray.summary_number,
+   67:           tray.part_type_code,
+   68:           tray.stage_code,
+   69:           tray.stage_name,
+   75:         if (trayText.includes(search)) return true;
+   77:         return tray.blades.some((blade) =>
+   80:             blade.status,
+   93:   get totalLocations(): number {
+   97:   get totalTrays(): number {
+   98:     return this.rows.reduce((total, location) => total + location.tray_count, 0);
+  101:   get totalBlades(): number {
+  102:     return this.rows.reduce((total, location) => total + location.blade_count, 0);
+  105:   get emptyLocations(): number {
+  106:     return this.rows.filter((location) => location.tray_count === 0).length;
+  116:     this.api.printAssetTag(kind, recordId).subscribe({
+  120:           this.api.downloadAssetTagPrn(result);
+  126:       error: (error: HttpErrorResponse) => {
+  128:         this.error = apiErrorText(error, `Could not print ${serialNumber} tag.`);
+  136:     this.expandedLocationId = null;
+  137:     this.expandedTrayId = null;
+  138:     this.loadLocationsPage(1, []);
+  145:   toggleLocation(locationId: string): void {
+  146:     if (this.expandedLocationId === locationId) {
+  147:       this.expandedLocationId = null;
+  148:       this.expandedTrayId = null;
+  152:     this.expandedLocationId = locationId;
+  153:     this.expandedTrayId = null;
+  156:   toggleTray(trayId: string): void {
+  157:     this.expandedTrayId = this.expandedTrayId === trayId ? null : trayId;
+  160:   isGreenshedCutterShelf(location: InventoryLocationRow): boolean {
+  162:       location.department === 'GREENSHED' &&
+  163:       location.location_type === 'SHELF'
+  172:   private loadLocationsPage(
+  174:     accumulated: InventoryLocationRow[],
+  176:     this.api.getLocations(page, 50).subscribe({
+  180:           this.loadLocationsPage(page + 1, combined);
+  187:       error: (error: HttpErrorResponse) => {
+  189:         this.error = apiErrorText(
+  191:           'Could not load Blade Tracking locations and tray contents.',
+
+FILE: C:\Users\ryan.thompson\Downloads\dana-apps.v0.1\libs\frontend\feature-blade-tracking\src\lib\pages\receive-container\receive-container.component.ts
+SHA256: 69D5CFA6FE2B0334F9F716775FDF5612C19946A3F3C78C98126218BB1174AA2C
+    3: import { HttpErrorResponse } from '@angular/common/http';
+   11: import { IContainer, IContainerTray, ILocation, ITray } from '@libs/shared/util-types';
+   13:   BladeTrackingApiService,
+   14:   apiErrorText,
+   23:   selector: 'gear-receive-container',
+   26:   templateUrl: './receive-container.component.html',
+   28: export class ReceiveContainerComponent {
+   29:   private readonly api = inject(BladeTrackingApiService);
+   32:   @ViewChild('containerScanner') containerScanner?: ScanPanelComponent;
+   33:   @ViewChild('trayScanner') trayScanner?: ScanPanelComponent;
+   36:   container: IContainer | null = null;
+   37:   expected: IContainerTray[] = [];
+   38:   received: ITray[] = [];
+   39:   pendingTray: ITray | null = null;
+   40:   pendingShelf: ILocation | null = null;
+   41:   availableContainers:IContainer[]=[]; selectedContainerSerial=''; selectedTraySerial=''; containerSearch=''; traySearch='';
+   42:   get filteredContainers(){const q=this.containerSearch.trim().toLowerCase();return q?this.availableContainers.filter(x=>x.serial_number.toLowerCase().includes(q)):this.availableContainers;} get filteredExpected(){const q=this.traySearch.trim().toLowerCase();return q?this.expected.filter(x=>x.tray.serial_number.toLowerCase().includes(q)):this.expected;}
+   43:   constructor(){this.api.getContainers(1,50).subscribe({next:r=>this.availableContainers=r.data});}
+   44:   chooseContainer(s:string){if(s)this.scanContainer(s);} chooseTray(s:string){if(s)this.scanTray(s);}
+   48:   scanContainer(serial: string): void {
+   52:     this.pendingTray = null;
+   55:     this.api.scanContainer(serial).subscribe({
+   56:       next: (container) => {
+   57:         this.container = container;
+   58:         this.api.getActiveContainerTrays(container.id).subscribe({
+   62:             this.containerScanner?.clearAndFocus();
+   63:             this.trayScanner?.focus();
+   66:               text: `${container.serial_number} has ${items.length} expected tray${items.length === 1 ? '' : 's'}.`,
+   69:           error: (err: HttpErrorResponse) =>
+   70:             this.fail(err, 'Could not load expected trays.'),
+   73:       error: (err: HttpErrorResponse) =>
+   74:         this.fail(err, 'Container not found.', this.containerScanner),
+   78:   scanTray(serial: string): void {
+   79:     if (!this.container || this.pendingTray) return;
+   82:     this.api.scanTray(serial).subscribe({
+   83:       next: (tray) => {
+   85:           (x) => x.tray_id === tray.id && x.enabled,
+   91:             text: `Tray ${tray.serial_number} is not expected in ${this.container?.serial_number}.`,
+   93:           this.trayScanner?.clearAndFocus();
+   97:         this.pendingTray = tray;
+  101:           text: tray.summary?.number
+  102:             ? tray.part_type?.code
+  103:               ? `Tray ${tray.serial_number} selected. Scan finished shelf ${buildSummaryShelfTag('CUTTERGRIND_FINISHED', tray.summary.number, tray.part_type.code)}.`
+  104:               : `Tray ${tray.serial_number} selected, but it has no Part Type assigned.`
+  105:             : `Tray ${tray.serial_number} selected, but it has no summary assigned.`,
+  109:       error: (err: HttpErrorResponse) =>
+  110:         this.fail(err, 'Tray not found.', this.trayScanner),
+  115:     const pendingTray = this.pendingTray;
+  116:     if (!this.container || !pendingTray) return;
+  119:     this.api.scanLocation(serial).subscribe({
+  120:       next: (location) => {
+  121:         const summaryNumber = pendingTray.summary?.number;
+  126:             text: `Tray ${pendingTray.serial_number} does not have a summary assigned.`,
+  132:         const partTypeCode = pendingTray.part_type?.code;
+  137:             text: `Tray ${pendingTray.serial_number} does not have a Part Type assigned.`,
+  151:           location.location_type !== 'SHELF' ||
+  152:           location.department !== DEPARTMENT_CUTTERGRIND ||
+  153:           location.number !== normalizedSummaryNumber ||
+  154:           location.serial_number !== expectedShelf
+  165:         this.pendingShelf = location;
+  166:         const tray = pendingTray;
+  167:         const container = this.container;
+  168:         if (!tray || !container) return;
+  170:         this.api
+  171:           .unloadTray(container.id, tray.id, location.serial_number)
+  174:               this.expected = this.expected.filter((x) => x.tray_id !== tray.id);
+  175:               this.received = [tray, ...this.received];
+  176:               this.pendingTray = null;
+  181:                 `Tray ${tray.serial_number} received and stored at ${location.serial_number}.`,
+  182:                 'Tray received',
+  184:               queueMicrotask(() => this.trayScanner?.clearAndFocus());
+  186:             error: (err: HttpErrorResponse) =>
+  187:               this.fail(err, 'Could not receive tray.', this.shelfScanner),
+  190:       error: (err: HttpErrorResponse) =>
+  191:         this.fail(err, 'Shelf location not found.', this.shelfScanner),
+  195:   cancelPendingTray(): void {
+  196:     this.pendingTray = null;
+  198:     this.message = { tone: 'info', text: 'Tray selection cleared.' };
+  199:     queueMicrotask(() => this.trayScanner?.focus());
+  203:     if (!this.container || this.expected.length || this.pendingTray) return;
+  204:     const serial = this.container.serial_number;
+  206:     this.container = null;
+  211:       `${serial} receiving complete. ${count} trays unloaded to tagged shelf locations.`,
+  212:       'Container received',
+  214:     this.containerScanner?.focus();
+  218:     err: HttpErrorResponse,
+  223:     this.message = { tone: 'error', text: apiErrorText(err, fallback) };
+
+FILE: C:\Users\ryan.thompson\Downloads\dana-apps.v0.1\libs\frontend\feature-blade-tracking\src\lib\pages\scrap-blades\scrap-blades.component.ts
+SHA256: 5707EDC272F81B1FB3FCF000538F3BFB86F175C11BDEE8078941A13C25FA73FD
+    2: import { HttpErrorResponse } from '@angular/common/http';
+    8:   BladeTrackingApiService,
+   10:   apiErrorText,
+   27:   private readonly api = inject(BladeTrackingApiService);
+   45:   get totalScrapped(): number {
+   71:     this.api.getScrappedBlades(page, 50, this.appliedSearch).subscribe({
+   77:       error: (error: HttpErrorResponse) => {
+   79:         this.error = apiErrorText(
+  101:     this.api.getBladeHistory(blade.id).subscribe({
+  106:       error: (error: HttpErrorResponse) => {
+  108:         this.historyErrorByBladeId[blade.id] = apiErrorText(
+  119:       status_changed: 'Status changed',
+  120:       assigned_to_tray: 'Assigned to tray',
+  121:       removed_from_tray: 'Removed from tray',
+  122:       loaded_to_container: 'Loaded to container',
+  123:       removed_from_container: 'Removed from container',
+  136:   statusLabel(value: string | null): string {
+
+FILE: C:\Users\ryan.thompson\Downloads\dana-apps.v0.1\libs\frontend\feature-blade-tracking\src\lib\pages\tray-contents\tray-contents.component.ts
+SHA256: 17DA0FAC33F06980E9BA9146811C2FED765C302392D7EA8E6355FA9418E7E337
+    2: import { HttpErrorResponse } from '@angular/common/http';
+    7:   BladeTrackingApiService,
+    8:   TrayDetails,
+    9:   apiErrorText,
+   20:   selector: 'gear-tray-contents',
+   23:   templateUrl: './tray-contents.component.html',
+   25: export class TrayContentsComponent {
+   26:   private readonly api = inject(BladeTrackingApiService);
+   28:   details: TrayDetails | null = null;
+   41:     this.api.scanTray(serial).subscribe({
+   42:       next: (tray) =>
+   43:         this.api.getTrayDetails(tray).subscribe({
+   53:           error: (err: HttpErrorResponse) =>
+   54:             this.fail(err, 'Could not load tray details.'),
+   56:       error: (err: HttpErrorResponse) => this.fail(err, 'Tray not found.'),
+   64:     this.api.printAssetTag(kind, recordId).subscribe({
+   68:           this.api.downloadAssetTagPrn(result);
+   77:       error: (error: HttpErrorResponse) => {
+   81:           text: apiErrorText(error, `Could not print ${serialNumber} tag.`),
+   87:   get traySummary(): string {
+   89:       this.details?.tray.summary?.number ||
+   95:   get trayPartType(): string {
+   97:       this.details?.tray.part_type?.code ||
+  103:   get bladeTypes() {
+  114:         this.details?.tray.summary?.number ||
+  118:         this.details?.tray.part_type?.code ||
+  121:       const current = counts.get(key);
+  144:     this.api.getBladeHistory(bladeId).subscribe({
+  149:       error: (error: HttpErrorResponse) => {
+  151:         this.historyErrorByBladeId[bladeId] = apiErrorText(
+  162:       status_changed: 'Status changed',
+  163:       assigned_to_tray: 'Assigned to tray',
+  164:       removed_from_tray: 'Removed from tray',
+  165:       loaded_to_container: 'Loaded to container',
+  166:       removed_from_container: 'Removed from container',
+  178:   statusLabel(value: string | null): string {
+  188:   private fail(err: HttpErrorResponse, fallback: string) {
+  190:     this.message = { tone: 'error', text: apiErrorText(err, fallback) };

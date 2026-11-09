@@ -1,0 +1,70 @@
+<section class="gear-page space-y-5">
+  <header class="gear-page-header" danaPageHeader eyebrow="CUTTER GRIND / GRINDING" heading="Grinding" description="Start a tray, record scrap, and scan or select its actual numbered CGRR-### (RING) or CGRP-### (PINION) shelf before coating."></header>
+
+  <div class="gear-panel p-5">
+    <gear-scan-panel [step]="1" label="Scan Tray For Grinding" [disabled]="busy" (scanned)="scanTray($event)" />
+    <div class="mt-4 border-t border-slate-200 pt-4">
+      <details #trayPicker class="relative w-full">
+        <summary class="gear-input flex w-full cursor-pointer list-none items-center justify-between">Choose grinding tray...<span aria-hidden="true">⌄</span></summary>
+        <div class="absolute z-50 mt-1 max-h-80 w-full overflow-auto rounded-xl border border-slate-200 bg-white shadow-xl">
+          <button *ngFor="let row of filteredTrays" type="button" class="grid w-full grid-cols-[1fr_1fr_100px] gap-3 border-b px-4 py-2 text-left hover:bg-slate-50" (click)="chooseTray(row.serial_number); trayPicker.removeAttribute('open')">
+            <strong>{{ row.serial_number }}</strong><span>{{ row.current_location?.serial_number || row.current_stage?.name || 'Unassigned' }}</span><span class="text-right">{{ row.blade_count }} blades</span>
+          </button>
+          <p *ngIf="pickerLoading" class="px-4 py-2 text-sm">Loading grinding trays…</p>
+          <p *ngIf="pickerError" class="px-4 py-2 text-sm text-red-700">{{ pickerError }}</p>
+          <p *ngIf="!pickerLoading && !pickerError && !filteredTrays.length" class="px-4 py-2 text-sm">No trays are currently waiting for or active in grinding.</p>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <button *ngIf="selectedTraySerial && !busy" type="button" class="gear-btn" (click)="retryTray()">Refresh tray {{ selectedTraySerial }}</button>
+
+  <section *ngIf="tray" class="gear-panel p-5">
+    <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+      <div><h2 class="text-xl font-black">Tray {{ tray.serial_number }}</h2><p class="text-sm text-slate-500">Summary {{ tray.summary?.number || '—' }} · {{ tray.part_type?.code || '—' }} · {{ tray.blade_count }} blade(s)</p></div>
+      <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-800">{{ stageLabel }}</span>
+    </div>
+
+    <div *ngIf="waitingToStart" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+      <strong>Ready to start grinding</strong>
+      <p class="mt-1 text-sm text-slate-600">Starting removes the tray from its dull shelf and moves its blades into the active grinding stage.</p>
+    </div>
+
+    <div *ngIf="tray.current_stage?.code === 'GRINDING'" class="grid gap-4 sm:grid-cols-3">
+      <div class="rounded-xl border p-4"><small class="font-bold uppercase text-slate-500">Pending This Pass</small><strong class="mt-1 block text-2xl">{{ pendingGrindingCount }}</strong></div>
+      <label class="rounded-xl border p-4 text-sm font-bold">Scrapped During Grinding<input type="number" min="0" [max]="pendingGrindingCount" [(ngModel)]="scrappedBladeCount" class="gear-input mt-2 w-full text-xl font-black" /></label>
+      <div class="rounded-xl border p-4"><small class="font-bold uppercase text-emerald-700">Returned This Pass</small><strong class="mt-1 block text-2xl text-emerald-700">{{ returnedAfterGrinding }}</strong><small>{{ previouslyReadyCount }} already ready</small></div>
+    </div>
+    <p *ngIf="!waitingToStart && !grindingScrapValid" class="mt-3 text-sm font-bold text-red-700">Scrap must be a whole number from 0 to {{ pendingGrindingCount }}.</p>
+    <p *ngIf="requiredBlades !== null && previouslyReadyCount + returnedAfterGrinding > requiredBlades" class="mt-2 text-sm text-red-700">Returned quantity would exceed the requirement. Refresh and review the tray.</p>
+    <section *ngIf="tray.current_stage?.code === 'GRINDING' && tray.workflow_eligibility?.grinding" class="mt-4 rounded-xl border border-slate-200 p-4">
+      <p class="text-sm font-bold">After this pass: {{ previouslyReadyCount + returnedAfterGrinding }} / {{ requiredBlades ?? '—' }} blades</p>
+      <p *ngIf="requiredBlades === null" class="mt-2 text-sm text-red-700">{{ requirementLoading ? 'Loading blade requirement…' : requirementError || 'Blade requirement unavailable. Refresh this tray before completing grinding.' }}</p>
+      <ng-container *ngIf="fullAfterGrinding">
+        <gear-scan-panel [step]="2" label="Scan Numbered Rough Shelf" [disabled]="busy || shelvesLoading" (scanned)="selectRoughShelf($event)" />
+        <label class="mt-3 block text-sm font-bold">Or select {{ expectedShelfPrefix }} shelf
+          <select class="gear-input mt-2 w-full" [ngModel]="roughShelfSerial" (ngModelChange)="selectRoughShelf($event)" [disabled]="busy || shelvesLoading">
+            <option value="">Choose the actual numbered shelf…</option>
+            <option *ngFor="let shelf of matchingRoughShelves" [value]="shelf.serial_number">{{ shelf.serial_number }} · {{ shelf.tray_count }} trays · {{ shelf.blade_count }} blades</option>
+          </select>
+        </label>
+        <p *ngIf="shelvesLoading" class="mt-2 text-sm" role="status">Loading numbered rough shelves…</p>
+        <p *ngIf="shelvesError" class="mt-2 text-sm text-red-700" role="alert">{{ shelvesError }}</p>
+        <p *ngIf="!shelvesLoading && !shelvesError && !matchingRoughShelves.length" class="mt-2 text-sm">No matching numbered shelves. Add your actual {{ expectedShelfPrefix }}-001, {{ expectedShelfPrefix }}-002, and other shelf tags in Admin → Locations, then refresh shelves here.</p>
+        <button type="button" class="gear-btn mt-2" [disabled]="busy || shelvesLoading" (click)="refreshShelves()">Refresh shelves</button>
+        <p *ngIf="hasSelectedRoughShelf" class="mt-3 text-sm font-bold">Complete Grinding records this tray on {{ roughShelfSerial }}. Place it on that physical shelf.</p>
+      </ng-container>
+      <p *ngIf="requiredBlades !== null && previouslyReadyCount + returnedAfterGrinding < requiredBlades" class="mt-2 text-sm">Short trays need replacement blades and another grinding pass; no ready-for-coating shelf is assigned.</p>
+    </section>
+    <div *ngIf="!tray.workflow_eligibility?.grinding" class="mt-4 rounded-xl border p-4"><strong>Grinding recorded.</strong><p>Current stage: {{tray.current_stage?.name}} · Shelf: {{tray.current_location?.serial_number || 'Not yet shelved / replacements needed'}}</p><p class="mt-2 text-sm"><a routerLink="/blades/intake" class="font-bold text-blue-700">Blade Intake for replacements</a> · <a routerLink="/blades/load-container" class="font-bold text-blue-700">Pack shelved trays into containers</a></p></div>
+    <button *ngIf="tray.workflow_eligibility?.grinding" type="button" class="mt-5 w-full rounded-xl bg-slate-900 px-5 py-3 font-black text-white disabled:opacity-50" [disabled]="!canRecordGrinding" (click)="recordGrinding()">{{ waitingToStart ? 'Start Grinding' : 'Complete Grinding / Record Scrap' }}</button>
+  </section>
+
+  <section *ngIf="tray" class="gear-panel overflow-hidden">
+    <div class="border-b px-5 py-4"><h3 class="font-black">Grinding History</h3><p class="text-sm text-slate-500">Completed passes for this tray.</p></div>
+    <p *ngIf="historyLoading" class="px-5 py-3 text-sm">Loading history…</p>
+    <p *ngIf="historyError" class="px-5 py-3 text-sm text-red-700">{{ historyError }} <button type="button" (click)="retryTray()">Retry</button></p>
+    <div danaTableShell class="table-wrap"><table danaTable class="gear-table"><thead><tr><th>Completed</th><th>Started</th><th>Scrapped</th><th>Returned</th><th>Required</th></tr></thead><tbody><tr *ngFor="let run of grindingRuns"><td>{{ run.completed_at | date:'short' }}</td><td>{{ run.starting_blade_count }}</td><td>{{ run.scrapped_blade_count }}</td><td>{{ run.returned_blade_count }}</td><td>{{ run.required_blade_count }}</td></tr><tr *ngIf="!historyLoading && !historyError && !grindingRuns.length"><td colspan="5">No completed grinding passes yet.</td></tr></tbody></table></div>
+  </section>
+</section>

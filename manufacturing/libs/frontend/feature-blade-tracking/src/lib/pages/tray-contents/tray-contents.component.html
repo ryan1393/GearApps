@@ -1,0 +1,146 @@
+<section class="gear-page space-y-5">
+  <header class="gear-page-header" danaPageHeader eyebrow="TRAY INVENTORY" heading="Tray Contents" description="Scan a tray to review its current placement and tracked blade contents."></header>
+
+  <div *ngIf="message" class="rounded-xl border px-4 py-3 text-sm font-semibold">{{ message.text }}</div>
+
+  <gear-scan-panel
+    #scanner
+    [step]="1"
+    label="Scan Tray"
+    help="No individual blade scan is required."
+    buttonText="Open Tray"
+    [disabled]="busy"
+    (scanned)="scan($event)"
+  />
+
+  <div *ngIf="details as d" class="space-y-4">
+    <div class="rounded-2xl bg-slate-900 p-5 text-white">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div class="text-3xl font-black">{{ d.tray.serial_number }}</div>
+        <button
+          type="button"
+          class="rounded-xl bg-white px-4 py-2 text-sm font-black text-slate-900 disabled:opacity-50"
+          [disabled]="printingTagSerial !== null"
+          (click)="printTag('TRAY', d.tray.id, d.tray.serial_number)"
+        >
+          {{ printingTagSerial === d.tray.serial_number ? 'Printing…' : 'Print Tag' }}
+        </button>
+      </div>
+      <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <div>
+          <small>Summary</small>
+          <div class="font-bold">{{ traySummary }}</div>
+        </div>
+        <div>
+          <small>Part Type</small>
+          <div class="font-bold">{{ trayPartType }}</div>
+        </div>
+        <div>
+          <small>Location</small>
+          <div class="font-bold">{{ d.location?.location?.serial_number || (d.tray.blade_count === 0 && d.tray.current_stage?.code === 'EMPTY' && !d.container ? 'Available / Ready to Use' : 'Unassigned') }}</div>
+        </div>
+        <div>
+          <small>Container</small>
+          <div class="font-bold">{{ d.container?.container?.serial_number || 'Not in container' }}</div>
+        </div>
+        <div>
+          <small>Tracked Blades</small>
+          <div class="font-bold">{{ d.blades.length }}</div>
+        </div>
+      </div>
+    </div>
+
+    <section class="gear-panel inventory-child-section">
+      <div class="inventory-child-section-header">
+        <strong>Blade Contents</strong>
+        <small>View every active blade in this tray and open its recorded lifecycle history.</small>
+      </div>
+
+      <div *ngIf="d.blades.length" danaTableShell class="table-wrap">
+        <table danaTable class="gear-table">
+          <thead>
+            <tr>
+              <th>Blade</th>
+              <th>Summary</th>
+              <th>Part Type</th>
+              <th>Status</th>
+              <th>Cycle</th>
+              <th data-dana-table-static>History</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let assignment of d.blades">
+              <tr [attr.data-dana-table-group]="'blade-' + assignment.blade.id">
+                <td class="font-mono font-bold">{{ assignment.blade.serial_number }}</td>
+                <td>{{ assignment.blade.summary?.number || traySummary }}</td>
+                <td>{{ assignment.blade.part_type?.code || trayPartType }}</td>
+                <td><span class="status-pill">{{ readable(assignment.blade.status) }}</span></td>
+                <td>{{ assignment.blade.service_cycle }}</td>
+                <td>
+                  <button
+                    type="button"
+                    class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
+                    (click)="toggleBladeHistory(assignment.blade.id)"
+                  >
+                    {{ expandedBladeId === assignment.blade.id ? 'Hide history' : 'View history' }}
+                  </button>
+                </td>
+              </tr>
+
+              <tr *ngIf="expandedBladeId === assignment.blade.id" data-dana-table-detail="true" [attr.data-dana-table-group]="'blade-' + assignment.blade.id" class="inventory-expanded-row">
+                <td colspan="6">
+                  <div class="scrap-history-panel">
+                    <div class="scrap-history-heading">
+                      <div>
+                        <strong>{{ assignment.blade.serial_number }} · Blade History</strong>
+                        <span>{{ assignment.blade.summary?.number || traySummary }} · {{ assignment.blade.part_type?.code || trayPartType }} · Cycle {{ assignment.blade.service_cycle }}</span>
+                      </div>
+                      <span *ngIf="historyByBladeId[assignment.blade.id] as history" class="gear-count-badge gear-count-badge-neutral scrap-history-count">{{ history.length }} events</span>
+                    </div>
+
+                    <div *ngIf="historyLoadingBladeId === assignment.blade.id" class="gear-loading-state inventory-loading">Loading blade history…</div>
+                    <div *ngIf="historyErrorByBladeId[assignment.blade.id]" class="gear-alert gear-alert-danger" role="alert">
+                      {{ historyErrorByBladeId[assignment.blade.id] }}
+                    </div>
+
+                    <div *ngIf="historyLoadingBladeId !== assignment.blade.id && !historyErrorByBladeId[assignment.blade.id]" class="scrap-history-timeline">
+                      <article *ngFor="let event of (historyByBladeId[assignment.blade.id] || [])" class="scrap-history-event" [class.scrap-history-event-danger]="event.event_type === 'scrapped'">
+                        <div class="scrap-history-marker" aria-hidden="true"></div>
+                        <div class="scrap-history-content">
+                          <div class="scrap-history-event-heading">
+                            <strong>{{ eventLabel(event.event_type) }}</strong>
+                            <time>{{ event.occurred_at | date:'MMM d, y · h:mm a' }}</time>
+                          </div>
+                          <div class="scrap-history-meta">
+                            <span *ngIf="event.from_status || event.to_status">{{ statusLabel(event.from_status) }} → {{ statusLabel(event.to_status) }}</span>
+                            <span>Cycle {{ event.service_cycle }}</span>
+                            <span *ngIf="event.tray_serial_number">Tray {{ event.tray_serial_number }}</span>
+                            <span *ngIf="event.container_serial_number">Container {{ event.container_serial_number }}</span>
+                            <span *ngIf="event.actor">By {{ event.actor }}</span>
+                          </div>
+                          <p *ngIf="event.notes">{{ event.notes }}</p>
+                        </div>
+                      </article>
+                      <div *ngIf="!(historyByBladeId[assignment.blade.id] || []).length" class="empty-row">
+                        No lifecycle history is recorded for this blade.
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+
+      <div *ngIf="!d.blades.length" class="gear-empty-surface inventory-child-empty">No active blades are assigned to this tray.</div>
+
+      <div *ngIf="bladeTypes.length" class="inventory-child-summary">
+        <strong>Summary / Part Type totals:</strong>
+        <span *ngFor="let item of bladeTypes; let last = last">
+          {{ item.summary }} · {{ item.partType }} ({{ item.count }}){{ last ? '' : ' · ' }}
+        </span>
+      </div>
+    </section>
+  </div>
+</section>

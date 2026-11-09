@@ -1,0 +1,38 @@
+/* Neutral glyphs use package-relative URLs so applications need no asset-copy rule. */
+.dana-glyph {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  background-color: currentColor;
+  -webkit-mask: var(--dana-glyph-url) center / contain no-repeat;
+  mask: var(--dana-glyph-url) center / contain no-repeat;
+}
+.dana-operation-icon > .dana-glyph { width: 22px; height: 22px; }
+.dana-glyph-admin { --dana-glyph-url: url("../../assets/icons/admin.svg"); }
+.dana-glyph-alert { --dana-glyph-url: url("../../assets/icons/alert.svg"); }
+.dana-glyph-available { --dana-glyph-url: url("../../assets/icons/available.svg"); }
+.dana-glyph-blade { --dana-glyph-url: url("../../assets/icons/blade.svg"); }
+.dana-glyph-build-cutter { --dana-glyph-url: url("../../assets/icons/build-cutter.svg"); }
+.dana-glyph-close { --dana-glyph-url: url("../../assets/icons/close.svg"); }
+.dana-glyph-container { --dana-glyph-url: url("../../assets/icons/container.svg"); }
+.dana-glyph-cutter { --dana-glyph-url: url("../../assets/icons/cutter.svg"); }
+.dana-glyph-dashboard { --dana-glyph-url: url("../../assets/icons/dashboard.svg"); }
+.dana-glyph-grinding { --dana-glyph-url: url("../../assets/icons/grinding.svg"); }
+.dana-glyph-intake { --dana-glyph-url: url("../../assets/icons/intake.svg"); }
+.dana-glyph-inventory { --dana-glyph-url: url("../../assets/icons/inventory.svg"); }
+.dana-glyph-location { --dana-glyph-url: url("../../assets/icons/location.svg"); }
+.dana-glyph-machine { --dana-glyph-url: url("../../assets/icons/machine.svg"); }
+.dana-glyph-move { --dana-glyph-url: url("../../assets/icons/move.svg"); }
+.dana-glyph-pull { --dana-glyph-url: url("../../assets/icons/pull.svg"); }
+.dana-glyph-quality-check { --dana-glyph-url: url("../../assets/icons/quality-check.svg"); }
+.dana-glyph-receive { --dana-glyph-url: url("../../assets/icons/receive.svg"); }
+.dana-glyph-scrap { --dana-glyph-url: url("../../assets/icons/scrap.svg"); }
+.dana-glyph-search { --dana-glyph-url: url("../../assets/icons/search.svg"); }
+.dana-glyph-setup { --dana-glyph-url: url("../../assets/icons/setup.svg"); }
+.dana-glyph-shelf { --dana-glyph-url: url("../../assets/icons/shelf.svg"); }
+.dana-glyph-sort-asc { --dana-glyph-url: url("../../assets/icons/sort-asc.svg"); }
+.dana-glyph-sort-desc { --dana-glyph-url: url("../../assets/icons/sort-desc.svg"); }
+.dana-glyph-sort { --dana-glyph-url: url("../../assets/icons/sort.svg"); }
+.dana-glyph-teardown { --dana-glyph-url: url("../../assets/icons/teardown.svg"); }
+.dana-glyph-tray { --dana-glyph-url: url("../../assets/icons/tray.svg"); }

@@ -1,0 +1,515 @@
+<section class="gear-page">
+  <header class="gear-page-header gear-section-heading inventory-overview-heading" danaPageHeader eyebrow="BLADE TRACKING / INVENTORY" heading="Inventory Control Center" description="See every tray, container, location, and blade — including the live relationships between them.">
+  <button danaPageHeaderAction
+      type="button"
+      class="gear-btn gear-btn-secondary"
+      (click)="refresh()"
+      [disabled]="anyLoading"
+    >
+      ↻ Refresh Current View
+    </button>
+</header>
+
+  <div *ngIf="error" class="gear-alert">{{ error }}</div>
+  <div *ngIf="printMessage" class="gear-alert gear-alert-success">{{ printMessage }}</div>
+
+  <section danaSummaryGrid class="inventory-overview-kpis inventory-overview-kpis-four">
+    <button danaSummaryCard
+      type="button"
+      class="gear-metric-card inventory-overview-kpi"
+      [class.active]="activeTab === 'trays'"
+      (click)="setTab('trays')"
+    >
+      <span>TRAYS</span>
+      <strong>{{ totalTrays }}</strong>
+      <small>Blade carriers and contents</small>
+    </button>
+
+    <button danaSummaryCard
+      type="button"
+      class="gear-metric-card inventory-overview-kpi"
+      [class.active]="activeTab === 'containers'"
+      (click)="setTab('containers')"
+    >
+      <span>CONTAINERS</span>
+      <strong>{{ totalContainers }}</strong>
+      <small>Coater containers and loaded trays</small>
+    </button>
+
+    <button danaSummaryCard
+      type="button"
+      class="gear-metric-card inventory-overview-kpi"
+      [class.active]="activeTab === 'locations'"
+      (click)="setTab('locations')"
+    >
+      <span>LOCATIONS</span>
+      <strong>{{ totalLocations }}</strong>
+      <small>All tagged inventory locations</small>
+    </button>
+
+    <button danaSummaryCard
+      type="button"
+      class="gear-metric-card inventory-overview-kpi"
+      [class.active]="activeTab === 'blades'"
+      (click)="setTab('blades')"
+    >
+      <span>BLADES</span>
+      <strong>{{ totalBlades }}</strong>
+      <small>Individual blade records and trays</small>
+    </button>
+  </section>
+
+  <form class="gear-panel inventory-browser-toolbar" (ngSubmit)="searchCurrentTab()">
+    <div class="inventory-browser-copy">
+      <label for="inventoryBrowserSearch">Search {{ activeTabLabel }}</label>
+      <p>Searches the full database for this inventory type, not only the current page.</p>
+    </div>
+
+    <div class="inventory-browser-search">
+      <span class="gear-glyph gear-glyph-search" aria-hidden="true"></span>
+      <input
+        id="inventoryBrowserSearch"
+        class="gear-input"
+        type="search"
+        name="inventoryBrowserSearch"
+        [(ngModel)]="activeSearch"
+        [placeholder]="activeSearchPlaceholder"
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="gear-actions inventory-browser-actions">
+      <button type="submit" class="gear-btn gear-btn-primary" [disabled]="anyLoading">Search</button>
+      <button
+        type="button"
+        class="gear-btn gear-btn-secondary"
+        [disabled]="anyLoading || (!activeSearch && !activeAppliedSearch)"
+        (click)="clearCurrentSearch()"
+      >
+        Clear
+      </button>
+    </div>
+
+    <div class="inventory-browser-status" role="status" aria-live="polite">
+      <ng-container *ngIf="activeAppliedSearch; else inventoryBrowseDefault">
+        {{ activeResultCount }} match{{ activeResultCount === 1 ? '' : 'es' }} for “{{ activeAppliedSearch }}”
+      </ng-container>
+      <ng-template #inventoryBrowseDefault>Use the column controls below for current-page sorting and filtering.</ng-template>
+    </div>
+  </form>
+
+  <section *ngIf="activeTab === 'trays'" class="gear-panel inventory-overview-panel">
+    <div class="gear-panel-header inventory-table-heading">
+      <div>
+        <h2>Tray Inventory</h2>
+        <p>Shows each tray, its physical placement, and every active blade assigned to it.</p>
+      </div>
+      <span class="gear-count-badge count-chip">{{ totalTrays }}</span>
+    </div>
+
+    <div *ngIf="trays.loading" class="gear-loading-state inventory-loading">Loading trays and blade assignments…</div>
+
+    <div *ngIf="!trays.loading" danaTableShell class="table-wrap">
+      <table danaTable class="gear-table dashboard-table inventory-master-table inventory-relation-table">
+        <thead>
+          <tr>
+            <th>Tray</th>
+            <th>Summary / Type</th>
+            <th>Stage</th>
+            <th>Blades</th>
+            <th>Current Location</th>
+            <th>Container</th>
+            <th data-dana-table-static>Tag</th>
+            <th data-dana-table-static>Contents</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let tray of trays.rows">
+            <tr [attr.data-dana-table-group]="tray.id">
+              <td class="mono strong">{{ tray.serial_number }}</td>
+              <td>
+                <strong>{{ tray.summary?.number || 'Unassigned' }}</strong>
+                <small>{{ tray.part_type?.code || 'No Part Type' }}</small>
+              </td>
+              <td>
+                <span class="status-pill">{{ tray.current_stage?.name || tray.current_stage?.code || 'No Stage' }}</span>
+              </td>
+              <td>
+                <strong>{{ tray.blade_count }}</strong>
+                <small *ngIf="tray.required_blade_count !== null && tray.required_blade_count !== undefined">Required {{ tray.required_blade_count }}</small>
+              </td>
+              <td>
+                <ng-container *ngIf="tray.current_location; else noTrayLocation">
+                  <strong>{{ tray.current_location.serial_number }}</strong>
+                  <small *ngIf="tray.current_location.description">{{ tray.current_location.description }}</small>
+                </ng-container>
+                <ng-template #noTrayLocation>
+                  <ng-container *ngIf="tray.blade_count === 0 && tray.current_stage?.code === 'EMPTY' && !tray.current_container; else unplacedTray">
+                    <strong>Available / Ready to Use</strong>
+                    <small>No location required</small>
+                  </ng-container>
+                  <ng-template #unplacedTray><strong>—</strong></ng-template>
+                </ng-template>
+              </td>
+              <td class="mono strong">{{ tray.current_container?.serial_number || '—' }}</td>
+              <td>
+                <button
+                  type="button"
+                  class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
+                  [disabled]="printingTagSerial !== null"
+                  (click)="printTag('TRAY', tray.id, tray.serial_number)"
+                >
+                  {{ printingTagSerial === tray.serial_number ? 'Printing…' : 'Print Tag' }}
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
+                  [disabled]="!tray.blades.length"
+                  (click)="toggleTray(tray.id)"
+                >
+                  {{ tray.blades.length ? (expandedTrayId === tray.id ? 'Hide blades' : 'View ' + tray.blades.length + ' blades') : 'Empty' }}
+                </button>
+              </td>
+            </tr>
+
+            <tr
+              *ngIf="expandedTrayId === tray.id"
+              class="inventory-expanded-row"
+              data-dana-table-detail="true"
+              [attr.data-dana-table-group]="tray.id"
+            >
+              <td colspan="8">
+                <div class="inventory-expanded-panel">
+                  <div class="inventory-expanded-heading">
+                    <div>
+                      <strong>{{ tray.serial_number }} · Blade Contents</strong>
+                      <span>{{ tray.blades.length }} active blade record{{ tray.blades.length === 1 ? '' : 's' }}</span>
+                    </div>
+                  </div>
+
+                  <div class="inventory-chip-grid">
+                    <div *ngFor="let blade of tray.blades" class="inventory-relation-chip">
+                      <strong class="mono">{{ blade.serial_number }}</strong>
+                      <span>{{ blade.status }}</span>
+                      <small>{{ blade.summary_number || '—' }} · {{ blade.part_type_code || '—' }} · Cycle {{ blade.service_cycle }}</small>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+
+          <tr *ngIf="!trays.rows.length">
+            <td danaTableEmpty colspan="8" class="empty-row">No trays found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="trays.meta as meta" class="inventory-pagination">
+      <span>Page {{ meta.page }} of {{ meta.totalPages }} · {{ meta.totalItems }} trays</span>
+      <div>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!meta.hasPreviousPage || trays.loading" (click)="loadTrays(meta.page - 1)">← Previous</button>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!meta.hasNextPage || trays.loading" (click)="loadTrays(meta.page + 1)">Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <section *ngIf="activeTab === 'containers'" class="gear-panel inventory-overview-panel">
+    <div class="gear-panel-header inventory-table-heading">
+      <div>
+        <h2>Container Inventory</h2>
+        <p>Shows exactly which trays are currently loaded in each coater container.</p>
+      </div>
+      <span class="gear-count-badge count-chip">{{ totalContainers }}</span>
+    </div>
+
+    <div *ngIf="containers.loading" class="gear-loading-state inventory-loading">Loading containers and tray assignments…</div>
+
+    <div *ngIf="!containers.loading" danaTableShell class="table-wrap">
+      <table danaTable class="gear-table dashboard-table inventory-master-table inventory-relation-table">
+        <thead>
+          <tr>
+            <th>Container</th>
+            <th>Trays Loaded</th>
+            <th>Blades Inside</th>
+            <th>Status</th>
+            <th data-dana-table-static>Tag</th>
+            <th data-dana-table-static>Contents</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let container of containers.rows">
+            <tr [attr.data-dana-table-group]="container.id">
+              <td class="mono strong">{{ container.serial_number }}</td>
+              <td><strong>{{ container.tray_count }}</strong></td>
+              <td><strong>{{ container.blade_count }}</strong></td>
+              <td><span class="gear-badge">{{ container.enabled ? 'Enabled' : 'Disabled' }}</span></td>
+              <td>
+                <button
+                  type="button"
+                  class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
+                  [disabled]="printingTagSerial !== null"
+                  (click)="printTag('CONTAINER', container.id, container.serial_number)"
+                >
+                  {{ printingTagSerial === container.serial_number ? 'Printing…' : 'Print Tag' }}
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
+                  [disabled]="!container.trays.length"
+                  (click)="toggleContainer(container.id)"
+                >
+                  {{ container.trays.length ? (expandedContainerId === container.id ? 'Hide trays' : 'View ' + container.trays.length + ' trays') : 'Empty' }}
+                </button>
+              </td>
+            </tr>
+
+            <tr
+              *ngIf="expandedContainerId === container.id"
+              class="inventory-expanded-row"
+              data-dana-table-detail="true"
+              [attr.data-dana-table-group]="container.id"
+            >
+              <td colspan="6">
+                <div class="inventory-expanded-panel">
+                  <div class="inventory-expanded-heading">
+                    <div>
+                      <strong>{{ container.serial_number }} · Loaded Trays</strong>
+                      <span>{{ container.tray_count }} tray{{ container.tray_count === 1 ? '' : 's' }} · {{ container.blade_count }} blades</span>
+                    </div>
+                  </div>
+
+                  <div class="inventory-child-grid">
+                    <article *ngFor="let tray of container.trays" class="inventory-child-card">
+                      <div class="inventory-child-card-header">
+                        <div>
+                          <strong class="mono">{{ tray.serial_number }}</strong>
+                          <small>{{ tray.summary_number || 'No Summary' }} · {{ tray.part_type_code || 'No Part Type' }}</small>
+                        </div>
+                        <span class="status-pill">{{ tray.stage_name || tray.stage_code || 'No Stage' }}</span>
+                      </div>
+                      <div class="inventory-child-stats">
+                        <span><strong>{{ tray.blade_count }}</strong> tracked count</span>
+                        <span><strong>{{ tray.blades.length }}</strong> active blade records</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button inventory-child-action"
+                        [disabled]="!tray.blades.length"
+                        (click)="toggleContainerTray(tray.id)"
+                      >
+                        {{ tray.blades.length ? (expandedContainerTrayId === tray.id ? 'Hide blades' : 'View ' + tray.blades.length + ' blades') : 'No blades' }}
+                      </button>
+                      <div *ngIf="expandedContainerTrayId === tray.id" class="inventory-child-list">
+                        <div *ngFor="let blade of tray.blades" class="inventory-child-row">
+                          <strong class="mono">{{ blade.serial_number }}</strong>
+                          <span>{{ blade.summary_number || '—' }} · {{ blade.part_type_code || '—' }}</span>
+                          <span>{{ blade.status }} · Cycle {{ blade.service_cycle }}</span>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+
+          <tr *ngIf="!containers.rows.length">
+            <td danaTableEmpty colspan="6" class="empty-row">No containers found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="containers.meta as meta" class="inventory-pagination">
+      <span>Page {{ meta.page }} of {{ meta.totalPages }} · {{ meta.totalItems }} containers</span>
+      <div>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!meta.hasPreviousPage || containers.loading" (click)="loadContainers(meta.page - 1)">← Previous</button>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!meta.hasNextPage || containers.loading" (click)="loadContainers(meta.page + 1)">Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <section *ngIf="activeTab === 'locations'" class="gear-panel inventory-overview-panel">
+    <div class="gear-panel-header inventory-table-heading">
+      <div>
+        <h2>Location Inventory</h2>
+        <p>Every tagged location in the database, including all trays currently assigned there.</p>
+      </div>
+      <span class="gear-count-badge count-chip">{{ totalLocations }}</span>
+    </div>
+
+    <div *ngIf="locations.loading" class="gear-loading-state inventory-loading">Loading locations and tray assignments…</div>
+
+    <div *ngIf="!locations.loading" danaTableShell class="table-wrap">
+      <table danaTable class="gear-table dashboard-table inventory-master-table inventory-relation-table">
+        <thead>
+          <tr>
+            <th>Location</th>
+            <th>Number</th>
+            <th>Department</th>
+            <th>Type</th>
+            <th>Trays</th>
+            <th>Blades</th>
+            <th data-dana-table-static>Tag</th>
+            <th data-dana-table-static>Contents</th>
+          </tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let location of locations.rows">
+            <tr [attr.data-dana-table-group]="location.id">
+              <td>
+                <strong class="mono">{{ location.serial_number }}</strong>
+                <small>{{ location.description || 'No description' }}</small>
+              </td>
+              <td>{{ location.number }}</td>
+              <td>{{ location.department || 'Shared / Internal' }}</td>
+              <td><span class="status-pill">{{ location.location_type }}</span></td>
+              <td><strong>{{ location.tray_count }}</strong></td>
+              <td><strong>{{ location.blade_count }}</strong></td>
+              <td>
+                <button
+                  type="button"
+                  class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
+                  [disabled]="printingTagSerial !== null"
+                  (click)="printTag('LOCATION', location.id, location.serial_number)"
+                >
+                  {{ printingTagSerial === location.serial_number ? 'Printing…' : 'Print Tag' }}
+                </button>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
+                  [disabled]="!location.trays.length"
+                  (click)="toggleLocation(location.id)"
+                >
+                  {{ location.trays.length ? (expandedLocationId === location.id ? 'Hide trays' : 'View ' + location.trays.length + ' trays') : 'Empty' }}
+                </button>
+              </td>
+            </tr>
+
+            <tr
+              *ngIf="expandedLocationId === location.id"
+              class="inventory-expanded-row"
+              data-dana-table-detail="true"
+              [attr.data-dana-table-group]="location.id"
+            >
+              <td colspan="8">
+                <div class="inventory-expanded-panel">
+                  <div class="inventory-expanded-heading">
+                    <div>
+                      <strong>{{ location.serial_number }} · Tray Inventory</strong>
+                      <span>{{ location.tray_count }} tray{{ location.tray_count === 1 ? '' : 's' }} · {{ location.blade_count }} blades</span>
+                    </div>
+                  </div>
+
+                  <div class="inventory-child-grid">
+                    <article *ngFor="let tray of location.trays" class="inventory-child-card">
+                      <div class="inventory-child-card-header">
+                        <div>
+                          <strong class="mono">{{ tray.serial_number }}</strong>
+                          <small>{{ tray.summary_number || 'No Summary' }} · {{ tray.part_type_code || 'No Part Type' }}</small>
+                        </div>
+                        <span class="status-pill">{{ tray.stage_name || tray.stage_code || 'No Stage' }}</span>
+                      </div>
+                      <div class="inventory-child-stats">
+                        <span><strong>{{ tray.blade_count }}</strong> tracked count</span>
+                        <span><strong>{{ tray.blades.length }}</strong> active blade records</span>
+                      </div>
+                      <button
+                        type="button"
+                        class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button inventory-child-action"
+                        [disabled]="!tray.blades.length"
+                        (click)="toggleLocationTray(tray.id)"
+                      >
+                        {{ tray.blades.length ? (expandedLocationTrayId === tray.id ? 'Hide blades' : 'View ' + tray.blades.length + ' blades') : 'No blades' }}
+                      </button>
+                      <div *ngIf="expandedLocationTrayId === tray.id" class="inventory-child-list">
+                        <div *ngFor="let blade of tray.blades" class="inventory-child-row">
+                          <strong class="mono">{{ blade.serial_number }}</strong>
+                          <span>{{ blade.summary_number || '—' }} · {{ blade.part_type_code || '—' }}</span>
+                          <span>{{ blade.status }} · Cycle {{ blade.service_cycle }}</span>
+                        </div>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </ng-container>
+
+          <tr *ngIf="!locations.rows.length">
+            <td danaTableEmpty colspan="8" class="empty-row">No locations found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="locations.meta as meta" class="inventory-pagination">
+      <span>Page {{ meta.page }} of {{ meta.totalPages }} · {{ meta.totalItems }} locations</span>
+      <div>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!meta.hasPreviousPage || locations.loading" (click)="loadLocations(meta.page - 1)">← Previous</button>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!meta.hasNextPage || locations.loading" (click)="loadLocations(meta.page + 1)">Next →</button>
+      </div>
+    </div>
+  </section>
+
+  <section *ngIf="activeTab === 'blades'" class="gear-panel inventory-overview-panel">
+    <div class="gear-panel-header inventory-table-heading">
+      <div>
+        <h2>Blade Inventory</h2>
+        <p>Every blade record with its Summary, Part Type, status, and current tray.</p>
+      </div>
+      <span class="gear-count-badge count-chip">{{ totalBlades }}</span>
+    </div>
+
+    <div *ngIf="blades.loading" class="gear-loading-state inventory-loading">Loading blades and tray assignments…</div>
+
+    <div *ngIf="!blades.loading" danaTableShell class="table-wrap">
+      <table danaTable class="gear-table dashboard-table inventory-master-table">
+        <thead>
+          <tr>
+            <th>Blade</th>
+            <th>Summary</th>
+            <th>Part Type</th>
+            <th>Status</th>
+            <th>Current Tray</th>
+            <th>Tray Stage</th>
+            <th>Service Cycle</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let blade of blades.rows">
+            <td class="mono strong">{{ blade.serial_number }}</td>
+            <td>
+              <strong>{{ blade.summary?.number || '—' }}</strong>
+              <small *ngIf="blade.summary?.revision">Rev {{ blade.summary?.revision }}</small>
+            </td>
+            <td>{{ blade.part_type?.code || '—' }}</td>
+            <td><span class="status-pill">{{ blade.status }}</span></td>
+            <td class="mono strong">{{ blade.current_tray?.serial_number || 'Not in tray' }}</td>
+            <td>{{ blade.current_tray?.stage_name || blade.current_tray?.stage_code || '—' }}</td>
+            <td>{{ blade.service_cycle }}</td>
+          </tr>
+          <tr *ngIf="!blades.rows.length">
+            <td danaTableEmpty colspan="7" class="empty-row">No blades found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="blades.meta as meta" class="inventory-pagination">
+      <span>Page {{ meta.page }} of {{ meta.totalPages }} · {{ meta.totalItems }} blades</span>
+      <div>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!meta.hasPreviousPage || blades.loading" (click)="loadBlades(meta.page - 1)">← Previous</button>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!meta.hasNextPage || blades.loading" (click)="loadBlades(meta.page + 1)">Next →</button>
+      </div>
+    </div>
+  </section>
+</section>

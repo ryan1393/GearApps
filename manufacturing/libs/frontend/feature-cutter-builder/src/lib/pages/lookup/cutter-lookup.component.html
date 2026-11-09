@@ -1,0 +1,119 @@
+<section class="gear-page gear-workflow-page">
+  <header
+    class="gear-page-header gear-print-hide"
+    danaPageHeader
+    eyebrow="CUTTER BUILDER / LOOKUP"
+    heading="Build Lookup"
+    description="Search cutter builds by Build Number, Cutter Body, Summary, Part Type, or status."
+  ></header>
+
+  <form *ngIf="!card" class="gear-workflow-section gear-print-hide" (ngSubmit)="search()">
+    <div class="gear-workflow-section-header">
+      <div><h2>Search Builds</h2><p>Use one or more filters to narrow the cutter build history.</p></div>
+    </div>
+    <div class="gear-workflow-section-body">
+      <div class="gear-workflow-filter-grid">
+        <label class="gear-field">
+          Search
+          <input autofocus [(ngModel)]="searchText" name="searchText" class="gear-input" placeholder="Build, body, or summary..." />
+        </label>
+        <label class="gear-field">
+          Part Type
+          <select [(ngModel)]="partType" name="partType" class="gear-select">
+            <option *ngFor="let value of partTypes" [value]="value">{{ value || 'All' }}</option>
+          </select>
+        </label>
+        <label class="gear-field">
+          Status
+          <select [(ngModel)]="status" name="status" class="gear-select">
+            <option *ngFor="let value of statuses" [value]="value">{{ value || 'All' }}</option>
+          </select>
+        </label>
+        <label class="gear-field">
+          Cutter Body
+          <input [(ngModel)]="cutterBody" name="cutterBody" class="gear-input" placeholder="All" />
+        </label>
+        <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy">{{ busy ? 'Searching…' : 'Search' }}</button>
+        <button type="button" (click)="clear()" class="gear-btn gear-btn-secondary">Clear</button>
+      </div>
+    </div>
+  </form>
+
+  <div *ngIf="error" class="gear-alert gear-alert-danger gear-print-hide" role="alert">{{ error }}</div>
+  <div *ngIf="message" class="gear-alert gear-alert-success gear-print-hide" role="status" aria-live="polite">{{ message }}</div>
+
+  <section *ngIf="!card" class="gear-workflow-table-panel gear-print-hide">
+    <div class="gear-workflow-table-heading">
+      <h2>Cutter Builds</h2>
+      <p>Click a column header to sort or use its filter control to narrow visible rows.</p>
+    </div>
+    <div danaTableShell class="table-wrap">
+      <table danaTable class="gear-table">
+        <thead>
+          <tr>
+            <th>Build Number</th>
+            <th>Cutter Body</th>
+            <th>Part Type</th>
+            <th>Summary</th>
+            <th>Status</th>
+            <th>Built On</th>
+            <th data-dana-table-static>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of results">
+            <td class="font-mono"><strong>{{ row.build_number }}</strong></td>
+            <td>{{ row.cutter_body_serial_number }}</td>
+            <td>{{ row.part_type_code }}</td>
+            <td>{{ row.summary_number }}</td>
+            <td><span class="status-pill">{{ row.status_code }}</span></td>
+            <td>{{ row.built_at | date:'MMM d, y' }}</td>
+            <td><button type="button" (click)="openCard(row.build_number)" class="gear-btn gear-btn-secondary gear-btn-sm">View</button></td>
+          </tr>
+          <tr *ngIf="!busy && results.length === 0">
+            <td danaTableEmpty colspan="7" class="empty-row">No cutter builds match this search.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div *ngIf="card as c" class="cutter-card gear-workflow-card">
+    <div class="gear-workflow-card-header">
+      <div>
+        <span class="gear-workflow-kicker">Cutter Builder</span>
+        <div class="gear-workflow-card-title">CUTTER CARD</div>
+      </div>
+      <div>
+        <span class="gear-workflow-kicker">Build Number</span>
+        <div class="gear-workflow-card-number font-mono">{{ c.build_number }}</div>
+        <span class="status-pill">{{ c.status_code }}</span>
+      </div>
+    </div>
+
+    <div class="gear-workflow-card-body gear-workflow-detail-grid gear-workflow-detail-grid-four">
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Cutter Body</span><strong>{{ c.cutter_body_serial_number }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Summary</span><strong>{{ c.summary_number }}</strong><small>{{ c.summary_model }}</small></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Part Type</span><strong>{{ c.part_type_code }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Increment</span><strong>{{ c.build_increment }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Blade Qty</span><strong>{{ c.blade_count }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Status</span><strong>{{ c.status_code }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Source Tray</span><strong>{{ c.source_tray_serial_number }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Honed</span><strong>{{ c.honed ? 'YES' : 'NO' }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Coated</span><strong>{{ c.coated ? 'YES' : 'NO' }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">IB RO</span><strong>{{ c.ib_ro ?? '—' }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">OB RO</span><strong>{{ c.ob_ro ?? '—' }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Built On</span><strong>{{ c.built_at | date:'MMM d, y, h:mm a' }}</strong></div>
+    </div>
+
+    <div *ngIf="c.comments" class="gear-workflow-comments"><strong>Comments:</strong> {{ c.comments }}</div>
+
+    <div class="gear-workflow-actions gear-print-hide">
+      <button type="button" (click)="print()" [disabled]="busy" class="gear-btn gear-btn-dark">
+        {{ busy ? 'Preparing PRN + PNG…' : 'Print Cutter Card (PRN + PNG)' }}
+      </button>
+      <button type="button" (click)="browserPrint()" [disabled]="busy" class="gear-btn gear-btn-secondary">Browser Print</button>
+      <button type="button" (click)="card = null; search()" class="gear-btn gear-btn-secondary">Back to Results</button>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,387 @@
+[
+    {
+        "Machine_ID":  "1",
+        "Asset_ID":  "01-024-010",
+        "Dept_ID":  "1",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "2",
+        "Asset_ID":  "01-024-073",
+        "Dept_ID":  "1",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "3",
+        "Asset_ID":  "01-024-075",
+        "Dept_ID":  "1",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "4",
+        "Asset_ID":  "01-024-077",
+        "Dept_ID":  "1",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "5",
+        "Asset_ID":  "237",
+        "Dept_ID":  "4",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "6",
+        "Asset_ID":  "238",
+        "Dept_ID":  "4",
+        "Cell":  "11",
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "7",
+        "Asset_ID":  "485",
+        "Dept_ID":  "4",
+        "Cell":  "1",
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "8",
+        "Asset_ID":  "486",
+        "Dept_ID":  "4",
+        "Cell":  "1",
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "9",
+        "Asset_ID":  "487",
+        "Dept_ID":  "4",
+        "Cell":  "1",
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "10",
+        "Asset_ID":  "501",
+        "Dept_ID":  "3",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "11",
+        "Asset_ID":  "502",
+        "Dept_ID":  "3",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "12",
+        "Asset_ID":  "510",
+        "Dept_ID":  "4",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "13",
+        "Asset_ID":  "511",
+        "Dept_ID":  "4",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "14",
+        "Asset_ID":  "514",
+        "Dept_ID":  "4",
+        "Cell":  "2",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "15",
+        "Asset_ID":  "515",
+        "Dept_ID":  "4",
+        "Cell":  "2",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "16",
+        "Asset_ID":  "516",
+        "Dept_ID":  "3",
+        "Cell":  "1",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "17",
+        "Asset_ID":  "517",
+        "Dept_ID":  "3",
+        "Cell":  "1",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "18",
+        "Asset_ID":  "518",
+        "Dept_ID":  "4",
+        "Cell":  "3",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "19",
+        "Asset_ID":  "519",
+        "Dept_ID":  "4",
+        "Cell":  "3",
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "20",
+        "Asset_ID":  "521",
+        "Dept_ID":  "4",
+        "Cell":  "4",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "21",
+        "Asset_ID":  "522",
+        "Dept_ID":  "4",
+        "Cell":  "4",
+        "Status":  "1"
+    },
+    {
+        "Machine_ID":  "22",
+        "Asset_ID":  "523",
+        "Dept_ID":  "4",
+        "Cell":  "5",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "23",
+        "Asset_ID":  "524",
+        "Dept_ID":  "4",
+        "Cell":  "5",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "24",
+        "Asset_ID":  "525",
+        "Dept_ID":  "4",
+        "Cell":  "1",
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "25",
+        "Asset_ID":  "537",
+        "Dept_ID":  "3",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "26",
+        "Asset_ID":  "538",
+        "Dept_ID":  "3",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "27",
+        "Asset_ID":  "539",
+        "Dept_ID":  "3",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "28",
+        "Asset_ID":  "540",
+        "Dept_ID":  "4",
+        "Cell":  "6",
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "29",
+        "Asset_ID":  "541",
+        "Dept_ID":  "4",
+        "Cell":  "7",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "30",
+        "Asset_ID":  "542",
+        "Dept_ID":  "3",
+        "Cell":  "2",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "31",
+        "Asset_ID":  "543",
+        "Dept_ID":  "4",
+        "Cell":  "9",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "32",
+        "Asset_ID":  "544",
+        "Dept_ID":  "3",
+        "Cell":  "2",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "33",
+        "Asset_ID":  "545",
+        "Dept_ID":  "4",
+        "Cell":  null,
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "34",
+        "Asset_ID":  "546",
+        "Dept_ID":  "4",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "35",
+        "Asset_ID":  "547",
+        "Dept_ID":  "3",
+        "Cell":  "8",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "36",
+        "Asset_ID":  "548",
+        "Dept_ID":  "3",
+        "Cell":  "7",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "37",
+        "Asset_ID":  "549",
+        "Dept_ID":  "3",
+        "Cell":  "7",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "38",
+        "Asset_ID":  "550",
+        "Dept_ID":  "3",
+        "Cell":  "9",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "39",
+        "Asset_ID":  "551",
+        "Dept_ID":  "3",
+        "Cell":  "8",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "40",
+        "Asset_ID":  "552",
+        "Dept_ID":  "3",
+        "Cell":  "3",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "41",
+        "Asset_ID":  "553",
+        "Dept_ID":  "3",
+        "Cell":  "3",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "42",
+        "Asset_ID":  "554",
+        "Dept_ID":  "4",
+        "Cell":  "7",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "43",
+        "Asset_ID":  "558",
+        "Dept_ID":  "4",
+        "Cell":  "8",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "44",
+        "Asset_ID":  "559",
+        "Dept_ID":  "3",
+        "Cell":  "10",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "45",
+        "Asset_ID":  "560",
+        "Dept_ID":  "4",
+        "Cell":  "8",
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "46",
+        "Asset_ID":  "561",
+        "Dept_ID":  "3",
+        "Cell":  "10",
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "47",
+        "Asset_ID":  "Alicona",
+        "Dept_ID":  "2",
+        "Cell":  null,
+        "Status":  "1"
+    },
+    {
+        "Machine_ID":  "48",
+        "Asset_ID":  "Zeiss",
+        "Dept_ID":  "2",
+        "Cell":  null,
+        "Status":  "1"
+    },
+    {
+        "Machine_ID":  "49",
+        "Asset_ID":  "01-114-024",
+        "Dept_ID":  "1",
+        "Cell":  null,
+        "Status":  "1"
+    },
+    {
+        "Machine_ID":  "50",
+        "Asset_ID":  "01-114-021",
+        "Dept_ID":  "1",
+        "Cell":  null,
+        "Status":  "1"
+    },
+    {
+        "Machine_ID":  "51",
+        "Asset_ID":  "01-114-023",
+        "Dept_ID":  "1",
+        "Cell":  null,
+        "Status":  "1"
+    },
+    {
+        "Machine_ID":  "52",
+        "Asset_ID":  "01-114-008",
+        "Dept_ID":  "1",
+        "Cell":  null,
+        "Status":  "1"
+    },
+    {
+        "Machine_ID":  "53",
+        "Asset_ID":  "999",
+        "Dept_ID":  "3",
+        "Cell":  null,
+        "Status":  "0"
+    },
+    {
+        "Machine_ID":  "55",
+        "Asset_ID":  "520G",
+        "Dept_ID":  "4",
+        "Cell":  null,
+        "Status":  "2"
+    },
+    {
+        "Machine_ID":  "56",
+        "Asset_ID":  "520P",
+        "Dept_ID":  "3",
+        "Cell":  null,
+        "Status":  "2"
+    }
+]

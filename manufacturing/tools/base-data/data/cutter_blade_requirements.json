@@ -1,0 +1,1514 @@
+[
+  {
+    "Summary": "1.955FC",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 106
+  },
+  {
+    "Summary": "1.955FC",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 2
+  },
+  {
+    "Summary": "1010",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 110
+  },
+  {
+    "Summary": "1010",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 6
+  },
+  {
+    "Summary": "1052",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 111
+  },
+  {
+    "Summary": "1052",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 7
+  },
+  {
+    "Summary": "1053",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 112
+  },
+  {
+    "Summary": "1053",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 8
+  },
+  {
+    "Summary": "1069",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 113
+  },
+  {
+    "Summary": "1069",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 9
+  },
+  {
+    "Summary": "1091",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 114
+  },
+  {
+    "Summary": "1091",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 10
+  },
+  {
+    "Summary": "1092",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 115
+  },
+  {
+    "Summary": "1092",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 11
+  },
+  {
+    "Summary": "1095",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 116
+  },
+  {
+    "Summary": "1095",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 12
+  },
+  {
+    "Summary": "1107",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 117
+  },
+  {
+    "Summary": "1107",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 13
+  },
+  {
+    "Summary": "1172",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 118
+  },
+  {
+    "Summary": "1172",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 14
+  },
+  {
+    "Summary": "30007",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 119
+  },
+  {
+    "Summary": "30007",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 15
+  },
+  {
+    "Summary": "30009",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 120
+  },
+  {
+    "Summary": "30009",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 16
+  },
+  {
+    "Summary": "30010",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 121
+  },
+  {
+    "Summary": "30010",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 17
+  },
+  {
+    "Summary": "30043",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 122
+  },
+  {
+    "Summary": "30043",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 18
+  },
+  {
+    "Summary": "30064",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 123
+  },
+  {
+    "Summary": "30064",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 19
+  },
+  {
+    "Summary": "30131",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 216
+  },
+  {
+    "Summary": "30131",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 211
+  },
+  {
+    "Summary": "30132",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 217
+  },
+  {
+    "Summary": "30132",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 213
+  },
+  {
+    "Summary": "30133",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 218
+  },
+  {
+    "Summary": "30133",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 214
+  },
+  {
+    "Summary": "30135",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 124
+  },
+  {
+    "Summary": "30135",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 20
+  },
+  {
+    "Summary": "30136",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 219
+  },
+  {
+    "Summary": "30136",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 215
+  },
+  {
+    "Summary": "30163",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 125
+  },
+  {
+    "Summary": "30163",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 21
+  },
+  {
+    "Summary": "30164",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 126
+  },
+  {
+    "Summary": "30164",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 22
+  },
+  {
+    "Summary": "30196",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 127
+  },
+  {
+    "Summary": "30196",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 23
+  },
+  {
+    "Summary": "30201",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 128
+  },
+  {
+    "Summary": "30201",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 24
+  },
+  {
+    "Summary": "30204",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 129
+  },
+  {
+    "Summary": "30204",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 25
+  },
+  {
+    "Summary": "30208",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 130
+  },
+  {
+    "Summary": "30208",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 26
+  },
+  {
+    "Summary": "30213",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 131
+  },
+  {
+    "Summary": "30213",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 27
+  },
+  {
+    "Summary": "30214",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 132
+  },
+  {
+    "Summary": "30214",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 28
+  },
+  {
+    "Summary": "30241",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 133
+  },
+  {
+    "Summary": "30241",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 29
+  },
+  {
+    "Summary": "30269",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 134
+  },
+  {
+    "Summary": "30269",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 30
+  },
+  {
+    "Summary": "30310",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 135
+  },
+  {
+    "Summary": "30310",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 31
+  },
+  {
+    "Summary": "30311",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 136
+  },
+  {
+    "Summary": "30311",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 32
+  },
+  {
+    "Summary": "30312",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 137
+  },
+  {
+    "Summary": "30312",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 33
+  },
+  {
+    "Summary": "30339",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 138
+  },
+  {
+    "Summary": "30339",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 34
+  },
+  {
+    "Summary": "30354",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 139
+  },
+  {
+    "Summary": "30354",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 35
+  },
+  {
+    "Summary": "30403",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 140
+  },
+  {
+    "Summary": "30403",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 36
+  },
+  {
+    "Summary": "30456",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 141
+  },
+  {
+    "Summary": "30456",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 37
+  },
+  {
+    "Summary": "30475",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 142
+  },
+  {
+    "Summary": "30475",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 38
+  },
+  {
+    "Summary": "30516",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 143
+  },
+  {
+    "Summary": "30516",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 39
+  },
+  {
+    "Summary": "30526",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 144
+  },
+  {
+    "Summary": "30526",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 40
+  },
+  {
+    "Summary": "30538",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 145
+  },
+  {
+    "Summary": "30538",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 41
+  },
+  {
+    "Summary": "30588",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 146
+  },
+  {
+    "Summary": "30588",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 42
+  },
+  {
+    "Summary": "30613",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 147
+  },
+  {
+    "Summary": "30613",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 43
+  },
+  {
+    "Summary": "30634",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 148
+  },
+  {
+    "Summary": "30634",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 44
+  },
+  {
+    "Summary": "30654",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 149
+  },
+  {
+    "Summary": "30654",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 46
+  },
+  {
+    "Summary": "30695",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 150
+  },
+  {
+    "Summary": "30695",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 45
+  },
+  {
+    "Summary": "30711",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 11,
+    "Source_Row": 151
+  },
+  {
+    "Summary": "30711",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 11,
+    "Source_Row": 47
+  },
+  {
+    "Summary": "30746",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 152
+  },
+  {
+    "Summary": "30746",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 48
+  },
+  {
+    "Summary": "30841",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 153
+  },
+  {
+    "Summary": "30841",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 49
+  },
+  {
+    "Summary": "30901",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 154
+  },
+  {
+    "Summary": "30901",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 50
+  },
+  {
+    "Summary": "30989",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 155
+  },
+  {
+    "Summary": "30989",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 51
+  },
+  {
+    "Summary": "30990",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 156
+  },
+  {
+    "Summary": "30990",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 52
+  },
+  {
+    "Summary": "30994",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 157
+  },
+  {
+    "Summary": "30994",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 53
+  },
+  {
+    "Summary": "31045",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 158
+  },
+  {
+    "Summary": "31045",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 54
+  },
+  {
+    "Summary": "31046",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 159
+  },
+  {
+    "Summary": "31046",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 55
+  },
+  {
+    "Summary": "31047",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 160
+  },
+  {
+    "Summary": "31047",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 56
+  },
+  {
+    "Summary": "31077",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 161
+  },
+  {
+    "Summary": "31077",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 57
+  },
+  {
+    "Summary": "31241",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 162
+  },
+  {
+    "Summary": "31241",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 58
+  },
+  {
+    "Summary": "31254",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 163
+  },
+  {
+    "Summary": "31254",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 59
+  },
+  {
+    "Summary": "31283",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 164
+  },
+  {
+    "Summary": "31283",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 60
+  },
+  {
+    "Summary": "31489",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 11,
+    "Source_Row": 165
+  },
+  {
+    "Summary": "31489",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 11,
+    "Source_Row": 61
+  },
+  {
+    "Summary": "31490",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 11,
+    "Source_Row": 166
+  },
+  {
+    "Summary": "31490",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 11,
+    "Source_Row": 62
+  },
+  {
+    "Summary": "31494",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 11,
+    "Source_Row": 167
+  },
+  {
+    "Summary": "31494",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 11,
+    "Source_Row": 63
+  },
+  {
+    "Summary": "31497",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 11,
+    "Source_Row": 168
+  },
+  {
+    "Summary": "31497",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 11,
+    "Source_Row": 64
+  },
+  {
+    "Summary": "31552",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 169
+  },
+  {
+    "Summary": "31552",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 65
+  },
+  {
+    "Summary": "31574",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 170
+  },
+  {
+    "Summary": "31574",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 66
+  },
+  {
+    "Summary": "31585",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 171
+  },
+  {
+    "Summary": "31585",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 67
+  },
+  {
+    "Summary": "31615",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 172
+  },
+  {
+    "Summary": "31615",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 68
+  },
+  {
+    "Summary": "31634",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 173
+  },
+  {
+    "Summary": "31634",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 69
+  },
+  {
+    "Summary": "31641",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 174
+  },
+  {
+    "Summary": "31641",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 70
+  },
+  {
+    "Summary": "31642",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 175
+  },
+  {
+    "Summary": "31642",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 71
+  },
+  {
+    "Summary": "31645",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 176
+  },
+  {
+    "Summary": "31645",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 72
+  },
+  {
+    "Summary": "31650",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 177
+  },
+  {
+    "Summary": "31650",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 73
+  },
+  {
+    "Summary": "31653",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 178
+  },
+  {
+    "Summary": "31653",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 74
+  },
+  {
+    "Summary": "31654",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 179
+  },
+  {
+    "Summary": "31654",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 75
+  },
+  {
+    "Summary": "31655",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 180
+  },
+  {
+    "Summary": "31655",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 76
+  },
+  {
+    "Summary": "31669",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 181
+  },
+  {
+    "Summary": "31669",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 77
+  },
+  {
+    "Summary": "31693",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 182
+  },
+  {
+    "Summary": "31693",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 78
+  },
+  {
+    "Summary": "31695",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 183
+  },
+  {
+    "Summary": "31695",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 79
+  },
+  {
+    "Summary": "31703",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 184
+  },
+  {
+    "Summary": "31703",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 80
+  },
+  {
+    "Summary": "31704",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 185
+  },
+  {
+    "Summary": "31704",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 81
+  },
+  {
+    "Summary": "31705",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 186
+  },
+  {
+    "Summary": "31705",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 82
+  },
+  {
+    "Summary": "31706",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 187
+  },
+  {
+    "Summary": "31706",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 83
+  },
+  {
+    "Summary": "31707",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 188
+  },
+  {
+    "Summary": "31707",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 84
+  },
+  {
+    "Summary": "31708",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 189
+  },
+  {
+    "Summary": "31708",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 85
+  },
+  {
+    "Summary": "31738",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 11,
+    "Source_Row": 190
+  },
+  {
+    "Summary": "31738",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 11,
+    "Source_Row": 88
+  },
+  {
+    "Summary": "31743",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 191
+  },
+  {
+    "Summary": "31743",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 87
+  },
+  {
+    "Summary": "31760",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 192
+  },
+  {
+    "Summary": "31760",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 86
+  },
+  {
+    "Summary": "31841",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 193
+  },
+  {
+    "Summary": "31841",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 89
+  },
+  {
+    "Summary": "31868",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 194
+  },
+  {
+    "Summary": "31868",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 90
+  },
+  {
+    "Summary": "31901",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 195
+  },
+  {
+    "Summary": "31901",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 91
+  },
+  {
+    "Summary": "31912",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 196
+  },
+  {
+    "Summary": "31912",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 92
+  },
+  {
+    "Summary": "31988",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 197
+  },
+  {
+    "Summary": "31988",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 93
+  },
+  {
+    "Summary": "32108",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 198
+  },
+  {
+    "Summary": "32108",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 94
+  },
+  {
+    "Summary": "32158",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 199
+  },
+  {
+    "Summary": "32158",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 95
+  },
+  {
+    "Summary": "32189",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 200
+  },
+  {
+    "Summary": "32189",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 96
+  },
+  {
+    "Summary": "32208",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 201
+  },
+  {
+    "Summary": "32208",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 97
+  },
+  {
+    "Summary": "32209",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 202
+  },
+  {
+    "Summary": "32209",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 98
+  },
+  {
+    "Summary": "32280",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 203
+  },
+  {
+    "Summary": "32280",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 99
+  },
+  {
+    "Summary": "32298",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 204
+  },
+  {
+    "Summary": "32298",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 100
+  },
+  {
+    "Summary": "32380",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 205
+  },
+  {
+    "Summary": "32380",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 101
+  },
+  {
+    "Summary": "32414",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 206
+  },
+  {
+    "Summary": "32414",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 102
+  },
+  {
+    "Summary": "60156",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 208
+  },
+  {
+    "Summary": "60156",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 103
+  },
+  {
+    "Summary": "752",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 13,
+    "Source_Row": 107
+  },
+  {
+    "Summary": "752",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 13,
+    "Source_Row": 3
+  },
+  {
+    "Summary": "969",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 108
+  },
+  {
+    "Summary": "969",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 4
+  },
+  {
+    "Summary": "991",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 19,
+    "Source_Row": 109
+  },
+  {
+    "Summary": "991",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 19,
+    "Source_Row": 5
+  },
+  {
+    "Summary": "H018472",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 209
+  },
+  {
+    "Summary": "H018472",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 104
+  },
+  {
+    "Summary": "H018473",
+    "Summary_Rev": "",
+    "Part_Type_Code": "PINION",
+    "Blades_Required": 17,
+    "Source_Row": 210
+  },
+  {
+    "Summary": "H018473",
+    "Summary_Rev": "",
+    "Part_Type_Code": "RING",
+    "Blades_Required": 17,
+    "Source_Row": 105
+  }
+]

@@ -1,0 +1,95 @@
+<div class="gear-page dashboard-page" [class.view-only-dashboard]="!canEdit">
+  <section class="gear-page-header dashboard-heading" danaPageHeader eyebrow="CUTTER BUILDER" heading="Dashboard" description="Welcome back. Here’s what’s happening in Cutter Builder." [dashboard]="true">
+  <button danaPageHeaderAction type="button" class="date-chip refresh-chip" (click)="refresh()" [disabled]="loading">↻ <span>{{ loading ? 'Refreshing…' : 'Refresh' }}</span></button>
+</section>
+
+  <div *ngIf="error" class="dashboard-alert">{{ error }}</div>
+
+  <section danaKpiGrid *ngIf="data as d" class="kpi-grid cutter-kpis">
+    <article danaKpiCard class="kpi-card"><div class="kpi-icon blue"><span class="gear-glyph gear-glyph-build-cutter" aria-hidden="true"></span></div><div><strong>{{ d.counts.builds_in_progress }}</strong><h3>Builds In Progress</h3><p>Open cutter builds</p></div></article>
+    <article danaKpiCard class="kpi-card"><div class="kpi-icon green"><span class="gear-glyph gear-glyph-available" aria-hidden="true"></span></div><div><strong>{{ d.counts.ready_to_run }}</strong><h3>Ready To Run</h3><p>Available for setup</p></div></article>
+    <article danaKpiCard class="kpi-card"><div class="kpi-icon purple"><span class="gear-glyph gear-glyph-shelf" aria-hidden="true"></span></div><div><strong>{{ d.counts.on_shelf }}</strong><h3>On Shelf</h3><p>Stored intact cutters</p></div></article>
+    <article danaKpiCard class="kpi-card"><div class="kpi-icon orange"><span class="gear-glyph gear-glyph-teardown" aria-hidden="true"></span></div><div><strong>{{ d.counts.under_teardown }}</strong><h3>Under Teardown</h3><p>Returned for rebuild</p></div></article>
+    <article danaKpiCard class="kpi-card"><div class="kpi-icon teal"><span class="gear-glyph gear-glyph-grinding" aria-hidden="true"></span></div><div><strong>{{ d.counts.waiting_for_grinding }}</strong><h3>Waiting For Grinding</h3><p>Returned blade trays</p></div></article>
+    <article danaKpiCard class="kpi-card"><div class="kpi-icon blue"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></div><div><strong>{{ d.counts.ready_for_cutter_shelf }}</strong><h3>Ready For Cutter</h3><p>Finished coated trays</p></div></article>
+  </section>
+
+  <section *ngIf="canEdit" class="gear-panel operations-panel">
+    <div class="gear-panel-heading panel-heading"><h2>Cutter Operations</h2><p>Choose the workflow you need to perform.</p></div>
+    <div danaOperationGrid class="operation-grid three-up">
+      <a routerLink="/cutter-builder/cancel-last" class="operation-card" danaOperationCard icon="search" tone="orange" heading="Cancel Last Build" description="Review the last transaction and its cancellation history."></a>
+      <a routerLink="/cutter-builder/build" class="operation-card" danaOperationCard icon="build-cutter" tone="blue" heading="Build Cutter" description="Build a cutter from a complete returned tray."></a>
+      <a routerLink="/cutter-builder/teardown" class="operation-card" danaOperationCard icon="teardown" tone="green" heading="Tear Down Cutter" description="Return blades to a tray and close the current build."></a>
+      <a routerLink="/cutter-builder/lookup" class="operation-card" danaOperationCard icon="search" tone="purple" heading="Build Lookup" description="Find cutter status, body, build, and history."></a>
+    </div>
+  </section>
+
+  <section *ngIf="data as d" danaDashboardGrid class="bottom-grid cutter-dashboard-grid">
+    <article danaDashboardPanel class="gear-panel data-panel">
+      <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row"><div><h2>Waiting For Grinding</h2><p>Returned dull trays ready to start grinding.</p></div><span danaCountBadge class="gear-count-badge count-chip">{{ d.waiting_for_grinding.length }}</span></div>
+      <div danaTableShell class="table-wrap"><table danaTable class="gear-table dashboard-table cutter-queue-table">
+        <colgroup class="cutter-queue-colgroup">
+          <col class="cutter-col-tray" />
+          <col class="cutter-col-summary" />
+          <col class="cutter-col-type" />
+          <col class="cutter-col-blades" />
+          <col class="cutter-col-tail" />
+        </colgroup>
+        <thead><tr><th>Tray</th><th>Summary</th><th>Type</th><th>Blades</th><th></th></tr></thead><tbody>
+        <tr *ngFor="let row of d.waiting_for_grinding"><td class="mono strong">{{ row.tray_serial_number }}</td><td>{{ row.summary_number || '—' }}</td><td>{{ row.part_type_code || '—' }}</td><td>{{ row.blade_count }}</td><td class="right"><button *ngIf="canEdit" type="button" class="table-action" (click)="startGrinding(row.tray_id, row.tray_serial_number)" [disabled]="loading">Start Grinding</button></td></tr>
+        <tr *ngIf="d.waiting_for_grinding.length === 0"><td danaTableEmpty colspan="5" class="empty-row">No trays waiting for grinding.</td></tr>
+      </tbody></table></div>
+    </article>
+
+    <article danaDashboardPanel class="gear-panel data-panel">
+      <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row"><div><h2>Ready For Cutter Shelf</h2><p>Finished coated trays ready for a cutter build.</p></div><span danaCountBadge class="gear-count-badge count-chip green-chip">{{ d.ready_for_cutter.length }}</span></div>
+      <div danaTableShell class="table-wrap"><table danaTable class="gear-table dashboard-table cutter-queue-table">
+        <colgroup class="cutter-queue-colgroup">
+          <col class="cutter-col-tray" />
+          <col class="cutter-col-summary" />
+          <col class="cutter-col-type" />
+          <col class="cutter-col-blades" />
+          <col class="cutter-col-tail" />
+        </colgroup>
+        <thead><tr><th>Tray</th><th>Summary</th><th>Type</th><th>Blades</th><th>Shelf</th></tr></thead><tbody>
+        <tr *ngFor="let row of d.ready_for_cutter"><td class="mono strong">{{ row.tray_serial_number }}</td><td>{{ row.summary_number || '—' }}</td><td>{{ row.part_type_code || '—' }}</td><td>{{ row.blade_count }} / {{ row.required_blade_count ?? '—' }}</td><td><strong>{{ row.shelf_location }}</strong></td></tr>
+        <tr *ngIf="d.ready_for_cutter.length === 0"><td danaTableEmpty colspan="5" class="empty-row">No coated trays ready for cutter builds.</td></tr>
+      </tbody></table></div>
+    </article>
+  </section>
+
+  <section *ngIf="data as d" danaDashboardGrid class="bottom-grid cutter-dashboard-grid history-grid">
+    <article danaDashboardPanel class="gear-panel data-panel">
+      <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row"><div><h2>Recent Builds</h2><p>Latest Cutter Builder activity.</p></div><a danaPanelAction routerLink="/cutter-builder/lookup" class="panel-link">View all →</a></div>
+      <div danaTableShell class="table-wrap"><table danaTable class="gear-table dashboard-table cutter-history-table">
+        <colgroup class="cutter-history-colgroup">
+          <col class="cutter-col-build" />
+          <col class="cutter-col-body" />
+          <col class="cutter-col-detail" />
+          <col class="cutter-col-state" />
+          <col class="cutter-col-date" />
+        </colgroup>
+        <thead><tr><th>Build</th><th>Body</th><th>Summary</th><th>Status</th><th>Built</th></tr></thead><tbody>
+        <tr *ngFor="let row of d.recent_builds"><td><a routerLink="/cutter-builder/lookup" [queryParams]="{ build: row.build_number }" class="build-link mono">{{ row.build_number }}</a></td><td>{{ row.cutter_body_serial_number }}</td><td>{{ row.summary_number }}</td><td><span danaStatusBadge class="status-pill">{{ row.status_code }}</span></td><td>{{ row.built_at | date:'MMM d, y' }}</td></tr>
+        <tr *ngIf="d.recent_builds.length === 0"><td danaTableEmpty colspan="5" class="empty-row">No cutter builds yet.</td></tr>
+      </tbody></table></div>
+    </article>
+
+    <article danaDashboardPanel class="gear-panel data-panel">
+      <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading"><h2>Recent Teardowns</h2><p>Latest returned cutter builds.</p></div>
+      <div danaTableShell class="table-wrap"><table danaTable class="gear-table dashboard-table cutter-history-table">
+        <colgroup class="cutter-history-colgroup">
+          <col class="cutter-col-build" />
+          <col class="cutter-col-body" />
+          <col class="cutter-col-detail" />
+          <col class="cutter-col-state" />
+          <col class="cutter-col-date" />
+        </colgroup>
+        <thead><tr><th>Build</th><th>Body</th><th>Returned</th><th>Scrapped</th><th>Date</th></tr></thead><tbody>
+        <tr *ngFor="let row of d.recent_teardowns"><td class="mono strong">{{ row.build_number }}</td><td>{{ row.cutter_body_serial_number }}</td><td>{{ row.returned_blade_count }}</td><td>{{ row.scrapped_blade_count }}</td><td>{{ row.torn_down_at | date:'MMM d, y' }}</td></tr>
+        <tr *ngIf="d.recent_teardowns.length === 0"><td danaTableEmpty colspan="5" class="empty-row">No cutter teardowns yet.</td></tr>
+      </tbody></table></div>
+    </article>
+  </section>
+</div>
+

@@ -1,0 +1,102 @@
+<main class="login-page">
+  <section class="login-brand-panel" aria-label="Gear Apps">
+    <div class="login-brand-content">
+      <div class="login-logo-row">
+        <div class="login-logo-mark"><img src="assets/brand/dana-logo.svg" alt="Dana Incorporated" /></div>
+        <div>
+          <div class="login-product">GEAR APPS</div>
+          <div class="login-suite">Manufacturing Operations Suite</div>
+        </div>
+      </div>
+
+      <div class="login-brand-copy">
+        <div class="login-eyebrow">CONNECTED MANUFACTURING</div>
+        <h1>Blade Tracking.<br />Cutter Builder.<br />Greenshed.</h1>
+        <p>
+          One consistent workspace for blade inventory, cutter builds,
+          machine setup, quality checks, and production history.
+        </p>
+      </div>
+
+      <div class="login-status">
+        <span class="login-status-dot"></span>
+        <span>Gear Apps system</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="login-form-panel">
+    <div class="login-card">
+      <div class="login-card-heading">
+        <div class="login-mobile-brand">
+          <span class="login-mobile-mark"><img src="assets/brand/dana-logo.svg" alt="Dana Incorporated" /></span>
+          <span>GEAR APPS</span>
+        </div>
+        <div class="login-kicker">WELCOME BACK</div>
+        <h2>Sign in to Gear Apps</h2>
+        <p>Use your Gear Apps account to continue.</p>
+      </div>
+
+      <div *ngIf="showLocalTestLogin" class="local-test-card">
+        <div>
+          <strong>Local accounts</strong>
+          <span>{{ localTestEmail }}</span>
+          <span>{{ localAdminEmail }}</span>
+        </div>
+        <div class="local-test-actions">
+          <button type="button" (click)="useLocalTestLogin()">Operator</button>
+          <button type="button" (click)="useLocalAdminLogin()">Admin</button>
+        </div>
+      </div>
+
+      <div *ngIf="loginError" class="login-error" role="alert">
+        <span class="login-error-icon">!</span>
+        <span>{{ loginError }}</span>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form">
+        <label class="field-label" for="email">Email address</label>
+        <input
+          formControlName="email"
+          id="email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+          class="field-input"
+          [class.field-error]="fEmail.invalid && (fEmail.touched || fEmail.dirty)"
+          placeholder="name@company.com"
+        />
+        <small *ngIf="fEmail.invalid && (fEmail.touched || fEmail.dirty)" class="field-message">
+          Enter a valid email address.
+        </small>
+
+        <div class="password-label-row">
+          <label class="field-label" for="password">Password</label>
+          <a class="password-help" href="/forgot-password">Forgot password?</a>
+        </div>
+        <input
+          formControlName="password"
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+          class="field-input"
+          [class.field-error]="fPassword.invalid && (fPassword.touched || fPassword.dirty)"
+          placeholder="Enter your password"
+        />
+        <small *ngIf="fPassword.invalid && (fPassword.touched || fPassword.dirty)" class="field-message">
+          Password is required.
+        </small>
+
+        <button type="submit" class="login-submit" [disabled]="submitting" [attr.aria-busy]="submitting">{{ submitting ? 'Signing in…' : 'Sign in' }}</button>
+      </form>
+
+      <div class="login-footer">
+        <span class="login-footer-dot"></span>
+        <span>Blade Tracking · Cutter Builder · Greenshed</span>
+      </div>
+    </div>
+  </section>
+</main>

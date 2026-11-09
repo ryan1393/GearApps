@@ -1,0 +1,7 @@
+@if (!isLoginRoute) {
+  <gear-cutter-builder-nav />
+}
+<div class="app-content-shell" [class.login-shell]="isLoginRoute">
+  <router-outlet />
+</div>
+<gear-toast-host />

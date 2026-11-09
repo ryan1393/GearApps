@@ -1,0 +1,53 @@
+<div class="gear-page dashboard-page" [class.view-only-dashboard]="!canEdit">
+  <section class="gear-page-header dashboard-heading" danaPageHeader eyebrow="GREENSHED / GEAR QUALITY" heading="Dashboard" description="Welcome back. Here’s what’s happening in Greenshed." [dashboard]="true">
+  <button danaPageHeaderAction type="button" class="date-chip refresh-chip" (click)="refresh()" [disabled]="loading">↻ <span>{{ loading ? 'Refreshing…' : 'Refresh' }}</span></button>
+</section>
+
+  <div *ngIf="error" class="dashboard-alert">{{ error }}</div>
+
+  <section danaKpiGrid *ngIf="data as d" class="kpi-grid greenshed-kpis">
+    <article danaKpiCard class="kpi-card"><div class="kpi-icon blue"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></div><div><strong>{{ d.counts.running }}</strong><h3>Running Machines</h3><p>Active cutter setups</p></div></article>
+    <article danaKpiCard class="kpi-card"><div class="kpi-icon orange"><span class="gear-glyph gear-glyph-alert" aria-hidden="true"></span></div><div><strong>{{ d.counts.checks_due }}</strong><h3>Checks Due</h3><p>Frequency or CMM</p></div></article>
+    <article danaKpiCard class="kpi-card"><div class="kpi-icon purple"><span class="gear-glyph gear-glyph-shelf" aria-hidden="true"></span></div><div><strong>{{ d.counts.on_shelf }}</strong><h3>Shelf Cutters</h3><p>Intact changeover stock</p></div></article>
+    <article danaKpiCard class="kpi-card"><div class="kpi-icon teal"><span class="gear-glyph gear-glyph-pull" aria-hidden="true"></span></div><div><strong>{{ d.counts.pulled_for_cutter_builder }}</strong><h3>To Cutter Builder</h3><p>Pulled for teardown</p></div></article>
+    <article danaKpiCard class="kpi-card"><div class="kpi-icon green"><span class="gear-glyph gear-glyph-available" aria-hidden="true"></span></div><div><strong>{{ d.counts.available }}</strong><h3>Available Cutters</h3><p>READY + SHELF builds in database</p></div></article>
+  </section>
+
+  <section *ngIf="canEdit" class="gear-panel operations-panel" danaDashboardPanel>
+    <div class="gear-panel-heading panel-heading"><h2>Greenshed Operations</h2><p>Choose the workflow you need to perform.</p></div>
+    <div danaOperationGrid class="operation-grid">
+      <a routerLink="/greenshed/cancel-last" class="operation-card" danaOperationCard icon="search" tone="orange" heading="Cancel Last Check" description="Review the last transaction and its cancellation history."></a>
+      <a routerLink="/greenshed/machines" class="operation-card" danaOperationCard icon="machine" tone="blue" heading="Running Machines" description="View current cutters, piece counts, and checks due."></a>
+      <a routerLink="/greenshed/setup" class="operation-card" danaOperationCard icon="setup" tone="green" heading="Machine Setup" description="Install a ready cutter build on the correct machine."></a>
+      <a routerLink="/greenshed/check" class="operation-card" danaOperationCard icon="quality-check" tone="purple" heading="Quality Check" description="Record frequency or CMM quality verification."></a>
+      <a routerLink="/greenshed/pull" class="operation-card" danaOperationCard icon="pull" tone="orange" heading="Cutter Pull" description="Pull for dull, damaged, or changeover conditions."></a>
+      <a routerLink="/greenshed/lookup" class="operation-card" danaOperationCard icon="search" tone="teal" heading="Cutter Lookup" description="Find build status, history, and current placement."></a>
+    </div>
+  </section>
+
+  <section *ngIf="data as d" class="bottom-grid">
+    <article class="gear-panel data-panel" danaDashboardPanel>
+      <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row"><div><h2>Active Machines</h2><p>Current Greenshed production setups.</p></div><a danaPanelAction routerLink="/greenshed/machines" class="panel-link">View board →</a></div>
+      <div danaTableShell class="table-wrap"><table danaTable class="gear-table dashboard-table"><thead><tr><th>Machine</th><th>Build</th><th>Summary</th><th>Pieces</th><th>Next Check</th></tr></thead><tbody>
+        <tr *ngFor="let r of d.active_machines" [class.check-due-row]="r.check_due"><td><a routerLink="/greenshed/machines" [queryParams]="{ machine: r.machine_number }" class="build-link">{{ r.machine_number }}</a></td><td><a routerLink="/greenshed/check" [queryParams]="{ build: r.build_number }" class="build-link mono">{{ r.build_number }}</a></td><td>{{ r.summary_number }}</td><td>{{ r.current_piece_count }}</td><td><strong [class.due-text]="r.check_due">{{ r.next_check_piece_count }}</strong><small>{{ r.check_due ? 'CHECK DUE' : r.pieces_until_check + ' pieces' }}</small></td></tr>
+        <tr *ngIf="!d.active_machines.length"><td danaTableEmpty colspan="5" class="empty-row">No active machine setups.</td></tr>
+      </tbody></table></div>
+    </article>
+
+    <article class="gear-panel data-panel" danaDashboardPanel>
+      <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row"><div><h2>Available Cutters</h2><p>Every open READY or SHELF cutter build currently available in the database.</p></div><span danaCountBadge class="gear-count-badge count-chip">{{ d.available_cutters.length }}</span></div>
+      <div danaTableShell class="table-wrap"><table danaTable class="gear-table dashboard-table"><thead><tr><th>Build</th><th>Body</th><th>Summary</th><th>Type</th><th>Status</th><th>Location</th></tr></thead><tbody>
+        <tr *ngFor="let r of d.available_cutters">
+          <td class="mono strong">{{ r.build_number }}</td>
+          <td>{{ r.cutter_body_serial_number }}</td>
+          <td>{{ r.summary_number }}</td>
+          <td>{{ r.part_type_code }}</td>
+          <td><span danaStatusBadge class="status-pill">{{ r.status_code }}</span></td>
+          <td><strong>{{ r.shelf_location || 'Available — no shelf recorded' }}</strong><small>{{ r.shelf_description || '' }}</small></td>
+        </tr>
+        <tr *ngIf="!d.available_cutters.length"><td danaTableEmpty colspan="6" class="empty-row">No available cutter builds in the database.</td></tr>
+      </tbody></table></div>
+    </article>
+  </section>
+</div>
+

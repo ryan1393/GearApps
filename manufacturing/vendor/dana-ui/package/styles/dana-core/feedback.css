@@ -1,0 +1,111 @@
+/* Truck Log-inspired feedback surfaces. */
+.dana-loading-state,
+[danaLoadingState],
+.dana-empty-state,
+[danaEmptyState] {
+  padding: 16px;
+  border: 1px dashed #c6d3e2;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: var(--dana-muted);
+  font-size: 13px;
+}
+
+.dana-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(15,31,54,.46);
+}
+
+.dana-confirm-dialog {
+  width: min(520px,100%);
+  border: 1px solid var(--dana-border);
+  border-radius: 12px;
+  padding: 20px;
+  background: #fff;
+  box-shadow: var(--dana-shadow-raised);
+}
+
+.dana-confirm-dialog h2 {
+  margin: 0;
+  color: var(--dana-text);
+  font-size: 18px;
+}
+
+.dana-confirm-dialog p {
+  margin: 8px 0 0;
+  color: var(--dana-muted);
+  line-height: 1.5;
+}
+
+.dana-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.dana-toast-stack {
+  position: fixed;
+  top: 86px;
+  right: 20px;
+  z-index: 2200;
+  display: grid;
+  width: min(390px,calc(100vw - 32px));
+  gap: 10px;
+  pointer-events: none;
+}
+
+.dana-toast {
+  display: grid;
+  grid-template-columns: 34px minmax(0,1fr) 28px;
+  align-items: start;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid var(--dana-border);
+  border-left: 5px solid var(--dana-primary);
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: var(--dana-shadow-raised);
+  color: var(--dana-text);
+  pointer-events: auto;
+}
+
+.dana-toast.toast-success { border-left-color: var(--dana-success); }
+.dana-toast.toast-warning { border-left-color: var(--dana-warning); }
+.dana-toast.toast-error { border-left-color: var(--dana-danger); }
+
+.dana-toast-copy strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.dana-toast-copy span {
+  display: block;
+  margin-top: 2px;
+  color: var(--dana-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.dana-toast-close {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--dana-muted);
+  cursor: pointer;
+}
+
+.dana-toast-close:hover { background: #f3f6f9; }
+
+:where(dialog.dana-confirm-dialog) { max-width: calc(100vw - 40px); max-height: calc(100vh - 40px); overflow: auto; }
+:where(dialog.dana-confirm-dialog)::backdrop { background: rgba(15,31,54,.46); }

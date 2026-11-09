@@ -1,0 +1,33 @@
+# Gear Apps Docker build context.
+# Patterns are rooted at the repository root (Docker matches them like filepath.Match).
+
+# Source control and secrets: the runtime .env is passed by compose, never baked in
+.git
+.env
+.env.*
+!.env.example
+
+# Dependencies, build output and caches (images run npm ci / nx build themselves)
+node_modules
+dist
+tmp
+.nx
+.angular
+.runtime-logs
+coverage
+*.log
+*.zip
+*.gz
+
+# Generated and host-side artifacts
+_patch_backups
+deploy-reports
+swagger.json
+cutter-history-dynamic-migration-report.json
+gearapps-*-results.json
+tools/data-import/work
+data
+
+# Documentation, history and retired tooling are not image inputs
+docs/history
+tools/retired

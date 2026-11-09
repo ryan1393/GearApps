@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 1,
+  "release": "V70.0.2R9",
+  "files": [
+    {
+      "path": "tools/data-import/test-data-import-contract.mjs",
+      "sha256": "003C5E92CF0BF80908CE8D29E2CA4E75F2B8ADEBEC5FD9A532EBE3222D6042E3"
+    },
+    {
+      "path": "tools/data-import/test-full-data-reset-contract.mjs",
+      "sha256": "6047EFE99E11D32B5FC0346CD8C23DEC7BEBB2BFBBE7BA5ADC0F0FEE7FA84FA0"
+    },
+    {
+      "path": "tools/data-import/test-legacy-log-dedupe.mjs",
+      "sha256": "D89766FB1BB43D733245466C87B87F1495C8E329AB001C9B5B95CD1F4D0FEC97"
+    },
+    {
+      "path": "tools/data-import/test-legacy-null-mf-contract.mjs",
+      "sha256": "708F9A37A5575234F19D3BD150D771A19E7F2791011AF4815FFC368EBD5545B6"
+    },
+    {
+      "path": "tools/test-admin-backend-consistency-contract.mjs",
+      "sha256": "2B5566CCB8665894F82F9B3F5AD4C15353F4E74F640F1B7BA8B174C0D2AD35B7"
+    },
+    {
+      "path": "tools/test-admin-management-ui-contract.mjs",
+      "sha256": "5D7B40527BD678618A278BAA0829828EC3BE247702F7BFF60AA8E76D4AF2D6D1"
+    },
+    {
+      "path": "tools/test-angular-template-structure-contract.mjs",
+      "sha256": "3FC8A6F73E9A43D27B370DC6EE2103F213BA325E44725537BA42C6F0578AF6E3"
+    },
+    {
+      "path": "tools/test-authenticated-mutation-coverage-contract.mjs",
+      "sha256": "E65CEB3293B3966CEF6747242C99FD4425794B1C1A6008062D343A8CAB872591"
+    },
+    {
+      "path": "tools/test-backend-mutation-fixture-schema-contract.mjs",
+      "sha256": "166DCC4E976B28A13AB370D5B389F0AE0CD8B5D66CE779FEEDC47E325D5AF53A"
+    },
+    {
+      "path": "tools/test-backend-mutation-null-response-contract.mjs",
+      "sha256": "A471A808DF6ECEC59E64F3F6C00B16767F429AB0ABF1EB7B0701CE0B56EDED89"
+    },
+    {
+      "path": "tools/test-blade-dashboard-live-data-contract.mjs",
+      "sha256": "8FB8A3CA4CD956DFC861BC0EB6C9919CA0145332C9385611F6B4C6F97CFBBB8A"
+    },
+    {
+      "path": "tools/test-blade-inventory-control-center-contract.mjs",
+      "sha256": "27A42C51DED6B3DAF46FD9860B1F4DA5C167622915DE9153AF782370384FCD50"
+    },
+    {
+      "path": "tools/test-blade-locations-management-contract.mjs",
+      "sha256": "08967FAE92ABB926C49531299CCAEFBA54D100CE3D9558D270FDFA3E55089C01"
+    },
+    {
+      "path": "tools/test-concurrent-backend-mutation.mjs",
+      "sha256": "4B0FF47548249A132CAB9D84DB4E236EA7695802C32A8FC8D7E15B0BC3D88928"
+    },
+    {
+      "path": "tools/test-cutter-builder-request-contract.mjs",
+      "sha256": "108C76E2FEDFEB9FDDB1096F2BBA3942B62B7AE15F3E9088487D8039CD1BCE51"
+    },
+    {
+      "path": "tools/test-cuttergrind-part-shelf-contract.mjs",
+      "sha256": "8814DAEBEF352E959C2915968016194F0983C190BE4F0E36480272FE0CB22EFC"
+    },
+    {
+      "path": "tools/test-dana-apps-fresh-db-runtime-deps-contract.mjs",
+      "sha256": "13FA26D0CA757B0B7D6A83B2F241C94BDDB41B921783E983008FB3F345F9EBFB"
+    },
+    {
+      "path": "tools/test-dana-apps-fresh-docker-contract.mjs",
+      "sha256": "42F353ABAF8FA843608B4AB0CD1D1DC0E11D5B49BB3056D477D1E284C74CAA77"
+    },
+    {
+      "path": "tools/test-dana-apps-gear-handoff-package-contract.mjs",
+      "sha256": "0AE466416C2B1D5B5DA698E2FE61C3EA1F432EFBA39E7E34B308C31D1DF22DC3"
+    },
+    {
+      "path": "tools/test-dana-apps-gear-merge-manifest-contract.mjs",
+      "sha256": "6816A593D9B8F036650696F2713E0B3477332A8F9A4C5DA50BCF12F6B8774787"
+    },
+    {
+      "path": "tools/test-dana-apps-gear-premerge-readiness-contract.mjs",
+      "sha256": "6C6735E79F159D4655880A1BCDB5F0FCDBDF5FBD1E7FD659F9A718252C491BA0"
+    },
+    {
+      "path": "tools/test-dana-apps-source-package-completeness-contract.mjs",
+      "sha256": "772478805A6A070B7DE36BB665E34ACBBC4B02E61FE05298D6173AEEE19E8D5C"
+    },
+    {
+      "path": "tools/test-dana-apps-source-package-hygiene-contract.mjs",
+      "sha256": "34EF0D29EF7121004CF756B61A247BD2C6BC484F0F14B4AB7F4F6839997D9DE9"
+    },
+    {
+      "path": "tools/test-dana-component-consolidation-contract.mjs",
+      "sha256": "6AB2D7F728BABCB10CDD90D42976A926A4CB49B70A702F2020B3138E6E45CB44"
+    },
+    {
+      "path": "tools/test-dana-diamond-brand-contract.mjs",
+      "sha256": "7B4C1D76F339FB40CA5AC4512D57A46212763478433926178B8640B7E7928A16"
+    },
+    {
+      "path": "tools/test-dana-kpi-balance-icon-contract.mjs",
+      "sha256": "96D634EF4DF440DC32B85430E1928C69E0028239249ADD6EFE99BE11F32D4CAE"
+    },
+    {
+      "path": "tools/test-dana-master-ui-contract.mjs",
+      "sha256": "259E1383BBD51596728AB62D25DCE4769582F14DB35D4C680D548AD3FF8B1CBA"
+    },
+    {
+      "path": "tools/test-dana-master-ui-freeze-contract.mjs",
+      "sha256": "1F926A33AB3332D9575F178CF3617D5BFA0B21244015AFBF974FC97589CCA360"
+    },
+    {
+      "path": "tools/test-dana-responsive-data-surface-contract.mjs",
+      "sha256": "FE1A108827B796E9075C746694E3161A365E89D7FC5FF5E807B3C703CE215F7B"
+    },
+    {
+      "path": "tools/test-dana-responsive-page-layout-contract.mjs",
+      "sha256": "39F6AEC7825D91E4C3D153259DACD190CE1AA98DB0D96861C5F4B8F5E51B98AC"
+    },
+    {
+      "path": "tools/test-dana-shared-export-integrity-contract.mjs",
+      "sha256": "1BDD855D81CD784B90FBFD6D6A567729B23E50052C2B0FF22C12A351DF85FF5D"
+    },
+    {
+      "path": "tools/test-dana-summary-card-contract.mjs",
+      "sha256": "DB44B0F099837BD9470087A0664D39FF9BF1904A8C3EB523AEBE9BFA68FA1F21"
+    },
+    {
+      "path": "tools/test-dana-ui-ownership-adoption-contract.mjs",
+      "sha256": "A197ED27DFA0A69D81DFCA0B8043E2CF98753944C240A37BEC5C17239B41BF62"
+    },
+    {
+      "path": "tools/test-dana-ui-release-hardening-contract.mjs",
+      "sha256": "43ED195E71C1FAF93F345CEE6C61A04D91397C1E9CE7E98B7D297F2FF1745C2B"
+    },
+    {
+      "path": "tools/test-data/test-blade-status-fixture-contract.mjs",
+      "sha256": "0160DAB62E1399DC9F4C732DE56B77574E6B833A521880450328B55CEEF546D1"
+    },
+    {
+      "path": "tools/test-data/test-fixture-enum-contract.mjs",
+      "sha256": "A5B8ED1326F86731E44F348B405651557868E0ADAE77E8CF804A8F90D0BA668C"
+    },
+    {
+      "path": "tools/test-data/test-part-machine-compatibility-contract.mjs",
+      "sha256": "2B2FCBD45B7488744133C0C218A41898E2C127DF7CA9CEA8A35597BB7EB4556F"
+    },
+    {
+      "path": "tools/test-data/test-start-grinding-db-contract.mjs",
+      "sha256": "A763AB01785855EB32669E18E594E36142478926E94270BEC8302373444F7880"
+    },
+    {
+      "path": "tools/test-data/test-workflow-harness-contract.mjs",
+      "sha256": "0EEE018B7D8C6FB0D4D733D8B40460186F6195E865A1DDA38D6EA8F26071779A"
+    },
+    {
+      "path": "tools/test-db-lock-query-contract.mjs",
+      "sha256": "BF7CE16CF6EB740196A438DB93EE04A8E8C346F14D40CD8F40EC17530BB11FA6"
+    },
+    {
+      "path": "tools/test-department-app-access-contract.mjs",
+      "sha256": "0BC6DC332DEE248CD3A66465CF0B02E5E6455DA288EC8A2E83EBFF0DD3D35B9D"
+    },
+    {
+      "path": "tools/test-dependency-trim-contract.mjs",
+      "sha256": "EB73DD8F007A281D7F68A4F817215692831EF18D15515CB96179EDDE7AC2D6BA"
+    },
+    {
+      "path": "tools/test-empty-tray-availability-contract.mjs",
+      "sha256": "73C914A11DAB689EAE4032AE71899C669D0FB2428433D0DFCF2DB7605227B179"
+    },
+    {
+      "path": "tools/test-error-message-contract.mjs",
+      "sha256": "191E1267A46658271052036DC7C6EE194E094D499701F94AC67184ED0C5030F5"
+    },
+    {
+      "path": "tools/test-fk-relation-sync-contract.mjs",
+      "sha256": "B5607B7E1FAE4CFEA5FAD4BB53BDA92B3F98F6FA1B923EACA9F9A5DE25A4EB0C"
+    },
+    {
+      "path": "tools/test-global-professional-ui-contract.mjs",
+      "sha256": "8E505158C9D94B92053E39C3B436B8B1F78B1BCE56B07DE83DE2117DC5CDF6B3"
+    },
+    {
+      "path": "tools/test-greenshed-available-cutters-contract.mjs",
+      "sha256": "5D816CA62AC40E9FFD67399AA7E9B106C45A145CF5024AF3C3B3C6652C217C8F"
+    },
+    {
+      "path": "tools/test-greenshed-part-shelf-contract.mjs",
+      "sha256": "C2CE277EDDD616475E79FEEA7FF2F8BAD9DA468F3E9F1F5B7BEA684C9FDAB958"
+    },
+    {
+      "path": "tools/test-inventory-control-center-search-contract.mjs",
+      "sha256": "10966DECC5FE4D952F7BEE946C643AD8A65854AC53ADD25243BA0ABDC12F93C7"
+    },
+    {
+      "path": "tools/test-inventory-lookup-ui-contract.mjs",
+      "sha256": "8F318EFE165A088CDDB499BAA8CD37DC33BD992F2C6DEB787F29A97B43E2D968"
+    },
+    {
+      "path": "tools/test-large-screen-readability-contract.mjs",
+      "sha256": "EE977A0B198A8F0768CBCC5723C5134E5A907A91BEABA874C221C5E6C1299444"
+    },
+    {
+      "path": "tools/test-local-debug-login-startup-contract.mjs",
+      "sha256": "AA1797F46C5D301F95CC9D8F722636FB42A53F3B40FC971BB78CE4DD83248FA6"
+    },
+    {
+      "path": "tools/test-location-identity-display-contract.mjs",
+      "sha256": "332889F46533B2B226F0F100E10643D61CF41B344A2757F553F09C110F2ECC0D"
+    },
+    {
+      "path": "tools/test-login-swagger-ui-contract.mjs",
+      "sha256": "E7531FCCA4D7C3C580F7B3CA8261B8F10939D28CAFBF0ACAD11C4CE21BF2D80D"
+    },
+    {
+      "path": "tools/test-login-ui-consistency-contract.mjs",
+      "sha256": "731C89EFA0B354C755BB336513F070BB2D4B7DA36D86ABF8DDF15BBD517CD8AA"
+    },
+    {
+      "path": "tools/test-native-asset-tag-printing-contract.mjs",
+      "sha256": "2732CDB46C1C19C8D8975E923F543FB1AF6BCE92883095D4AE7283157A9DC3A1"
+    },
+    {
+      "path": "tools/test-no-raw-debug-ui-contract.mjs",
+      "sha256": "6DAC62F9F29B5B0B50D9B08657126E994FCFB5A87050E0B7B001BDCA153623E5"
+    },
+    {
+      "path": "tools/test-nx-install-contract.mjs",
+      "sha256": "23F61B4C8A139977E715C4DEE58C0F8BD865B7C93117D19881EF41B1C9BB3103"
+    },
+    {
+      "path": "tools/test-parent-child-drilldown-contract.mjs",
+      "sha256": "6E8943B01CA0331BB6F444E29D474333B2611026FF2EE5C1C7A61562E5DD2A8B"
+    },
+    {
+      "path": "tools/test-post-workflow-db-integrity-contract.mjs",
+      "sha256": "BCCF2D87A14B7899D0502A47110FFD4146A293628DB4BFCE1B346094FD5BFB06"
+    },
+    {
+      "path": "tools/test-post-workflow-db-integrity.mjs",
+      "sha256": "6194F68DD70FA41BDBDCBE4D3689F4752B18C5939D792D932D9EB3D6AA63155C"
+    },
+    {
+      "path": "tools/test-public-registration-closed-contract.mjs",
+      "sha256": "2279D63DAD532204562C068174C862022D2A970B0812CEFA02D47631EC9ACEF9"
+    },
+    {
+      "path": "tools/test-scrap-blade-history-contract.mjs",
+      "sha256": "7822EBD0C591BD710A534DC0F4069B5883EDF6D04AF195F11B6CB4972E8069A5"
+    },
+    {
+      "path": "tools/test-shared-icon-assets-contract.mjs",
+      "sha256": "2719651225D77A48E576B189CB170D799F953D75A608918B897B82BA1E2F4EFC"
+    },
+    {
+      "path": "tools/test-shared-table-migration-contract.mjs",
+      "sha256": "6A5B84E51040CEA7CB128CEBFBC54C2621EB2AF01CBF97E22728C47BD7BDFC15"
+    },
+    {
+      "path": "tools/test-shared-ui-style-source-contract.mjs",
+      "sha256": "374DC34E15B7085E65E3A3F6AD2FBB7E3E5C10B3016F8569DCA416694FAAD499"
+    },
+    {
+      "path": "tools/test-shop-floor-readability-contract.mjs",
+      "sha256": "2F4B89C19E5862455FF79A06B94B85D75719DD58626E6B2F8F081AB06942C4FB"
+    },
+    {
+      "path": "tools/test-sidebar-navigation-hierarchy-contract.mjs",
+      "sha256": "26030665F13A88E1C0292E37810140A43CD77D8792BD8FB5B1C83A8643CD6F26"
+    },
+    {
+      "path": "tools/test-summary-shelf-dash-contract.mjs",
+      "sha256": "FD6FCB6D43E2BDA0F8A3B8AE2D19EC92C284EF22DADDBB18D97D2A3D8F422115"
+    },
+    {
+      "path": "tools/test-tray-contents-part-type-contract.mjs",
+      "sha256": "7AA15882E7F74130C67D7B9B6D29710FA1E90957EA44204F46DFCB3176C8C8E4"
+    },
+    {
+      "path": "tools/test-ui-consistency-contract.mjs",
+      "sha256": "5699ADE0779E86AA1912F8710639C15F2FA1127664D2D966703EBEE6F91955B0"
+    },
+    {
+      "path": "tools/test-ui-deep-scan-contract.mjs",
+      "sha256": "0E5FD74790E1A28CBDC3B7B21242C69A896E39F1823E5AF2346D98B3258B7362"
+    },
+    {
+      "path": "tools/test-ui-foundation-cleanup-contract.mjs",
+      "sha256": "ECB61E3C97CD91AC1D79FBB68BA169E1A6B04D57C8472B1F089A353A95E89826"
+    },
+    {
+      "path": "tools/test-ui-style-integrity-contract.mjs",
+      "sha256": "9D0C4028DFD1DA49B72687FF1FA9CFDD2698214D305834556F4F2CF0F453C508"
+    },
+    {
+      "path": "tools/test-ux-accessibility-feedback-contract.mjs",
+      "sha256": "7A70F76C42D1329FD81BD43BFE73631C5D4486FAB51DF2AAADF381D707EFB7B4"
+    },
+    {
+      "path": "tools/test-ux-responsive-navigation-contract.mjs",
+      "sha256": "BDE2EEB42D618D4F3CF8447E624512CA6098CAE68EEBBBB720FFD797393C58B3"
+    },
+    {
+      "path": "tools/test-ux-workflow-state-contract.mjs",
+      "sha256": "BF395E8A3C3D1247D2CDCD06318764F35D29807807952F4A30539681E25068E1"
+    },
+    {
+      "path": "tools/test-workflow-surface-consolidation-contract.mjs",
+      "sha256": "2EEDADD1C1D1C5A8354C3E17CCF63D79C612FDE1F55818981EF7E09B675C0F35"
+    }
+  ]
+}
