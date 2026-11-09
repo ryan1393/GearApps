@@ -14,13 +14,17 @@ export const validationSchema = Joi.object({
   CORS_ORIGINS: Joi.string().allow('').optional(),
   SWAGGER_ENABLED: Joi.boolean().default(true),
 
-  DATABASE_TYPE: Joi.string().valid('mssql', 'better-sqlite3').default('better-sqlite3'),
+  DATABASE_TYPE: Joi.string()
+    .valid('mssql', 'postgres', 'better-sqlite3')
+    .default('better-sqlite3'),
   DATABASE_HOST: requiredUnlessSqlite(Joi.string()),
   DATABASE_PORT: requiredUnlessSqlite(Joi.number()),
   DATABASE_USERNAME: requiredUnlessSqlite(Joi.string()),
   DATABASE_PASSWORD: requiredUnlessSqlite(Joi.string()),
   DATABASE_NAME: requiredUnlessSqlite(Joi.string()),
   DATABASE_INSTANCE: Joi.string().optional(),
+  DATABASE_SSL: Joi.boolean().default(false),
+  DATABASE_SCHEMA: Joi.string().optional(),
   DATABASE_PATH: Joi.string().default('tmp/gearapps.sqlite'),
   DATABASE_SYNCHRONIZE: Joi.boolean().default(false),
   DATABASE_LOGGING_ENABLED: Joi.boolean().default(false),

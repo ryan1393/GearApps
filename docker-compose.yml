@@ -22,5 +22,26 @@ services:
       - lapper-api
     restart: unless-stopped
 
+  # Optional local Postgres:  docker compose --profile postgres up
+  # then set DATABASE_TYPE=postgres DATABASE_HOST=postgres DATABASE_USERNAME=gearapps ... in .env
+  postgres:
+    image: postgres:16-alpine
+    profiles: [postgres]
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gearapps}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gearapps}
+      POSTGRES_DB: ${POSTGRES_DB:-gearapps}
+    ports:
+      - '${POSTGRES_PORT:-5432}:5432'
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-gearapps}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
 volumes:
   lapper-data:
+  pg-data:

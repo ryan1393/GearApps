@@ -1,6 +1,6 @@
 import { registerAs } from '@nestjs/config';
 
-export type DatabaseType = 'mssql' | 'better-sqlite3';
+export type DatabaseType = 'mssql' | 'postgres' | 'better-sqlite3';
 
 export const appConfig = registerAs('app', () => ({
   host: process.env['HOST'] ?? '0.0.0.0',
@@ -27,6 +27,10 @@ export const dbConfig = registerAs('db', () => ({
   logging: (process.env['DATABASE_LOGGING_ENABLED'] ?? 'false') === 'true',
   /** MSSQL named instance, e.g. SQLEXPRESS. */
   instanceName: process.env['DATABASE_INSTANCE'],
+  /** Postgres: require TLS to the server (managed DBs usually do). */
+  ssl: (process.env['DATABASE_SSL'] ?? 'false') === 'true',
+  /** Postgres schema (defaults to public). */
+  schema: process.env['DATABASE_SCHEMA'],
 }));
 
 export const jwtConfig = registerAs('jwt', () => ({

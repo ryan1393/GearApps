@@ -19,7 +19,7 @@ npx nx serve lapper-client   # http://localhost:4200  (proxies /api to the API)
 
 Register the first account at `/register`, then sign in.
 
-To run against the plant SQL Server set `DATABASE_TYPE=mssql` and the `DATABASE_*` values in `.env` (see `.env.example`). Keep `DATABASE_SYNCHRONIZE=false` against a shared database and manage schema changes deliberately.
+Set `DATABASE_TYPE` to `postgres`, `mssql` or `better-sqlite3` and the matching `DATABASE_*` values in `.env` (see `.env.example`). `docker compose --profile postgres up` starts a local Postgres 16. Keep `DATABASE_SYNCHRONIZE=false` against a shared database and manage schema changes deliberately.
 
 ## Features (Lapper)
 

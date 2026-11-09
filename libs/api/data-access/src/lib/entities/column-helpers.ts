@@ -11,8 +11,15 @@ export const str = (nullable = false): EntitySchemaColumnOptions => ({ type: Str
 export const int = (nullable = false): EntitySchemaColumnOptions => ({ type: 'int', nullable });
 export const num = (nullable = false): EntitySchemaColumnOptions => ({ type: 'float', nullable });
 export const bool = (nullable = false): EntitySchemaColumnOptions => ({ type: Boolean, nullable });
+/**
+ * Driver selected at load time: entity schemas are static, so the few column types
+ * that differ between databases are resolved here rather than per request.
+ */
+const DB_TYPE = process.env['DATABASE_TYPE'] ?? 'better-sqlite3';
+
+/** Timestamp column: Postgres has no `datetime`; MSSQL/SQLite have no `timestamp` in this sense. */
 export const date = (nullable = false): EntitySchemaColumnOptions => ({
-  type: 'datetime',
+  type: DB_TYPE === 'postgres' ? 'timestamp' : 'datetime',
   nullable,
 });
 export const decimal = (
@@ -53,12 +60,10 @@ export const manyToOne = (
 
 /**
  * Whether the configured driver supports an identity/sequence on a non-key column.
- * SQL Server does; SQLite does not (AUTOINCREMENT is only valid on INTEGER PRIMARY KEY),
- * so on SQLite the application assigns the value instead. Read once at load time
- * because entity schemas are static.
+ * SQL Server (IDENTITY) and Postgres (serial) do; SQLite does not (AUTOINCREMENT is only
+ * valid on INTEGER PRIMARY KEY), so on SQLite the application assigns the value instead.
  */
-export const DB_SUPPORTS_NON_PK_IDENTITY =
-  (process.env['DATABASE_TYPE'] ?? 'better-sqlite3') === 'mssql';
+export const DB_SUPPORTS_NON_PK_IDENTITY = DB_TYPE === 'mssql' || DB_TYPE === 'postgres';
 
 /** Auto-incrementing business number (e.g. build number). See {@link DB_SUPPORTS_NON_PK_IDENTITY}. */
 export const sequenceInt = (): EntitySchemaColumnOptions =>

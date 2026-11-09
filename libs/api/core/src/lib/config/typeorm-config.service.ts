@@ -12,7 +12,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
   createTypeOrmOptions(): TypeOrmModuleOptions {
     const db = this.config.getOrThrow<ConfigType<typeof dbConfig>>('db');
     this.logger.log(
-      `Database: ${db.type}${db.type === 'mssql' ? ` @ ${db.host}/${db.name}` : ` (${db.path})`}`,
+      `Database: ${db.type}${db.type === 'better-sqlite3' ? ` (${db.path})` : ` @ ${db.host}:${db.port ?? ''}/${db.name}`}`,
     );
 
     const common = {
@@ -23,6 +23,22 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
 
     if (db.type === 'better-sqlite3') {
       return { type: 'better-sqlite3', database: db.path, ...common };
+    }
+
+    if (db.type === 'postgres') {
+      return {
+        type: 'postgres',
+        host: db.host,
+        port: db.port ?? 5432,
+        username: db.username,
+        password: db.password,
+        database: db.name,
+        schema: db.schema,
+        ssl: db.ssl ? { rejectUnauthorized: false } : false,
+        // gen_random_uuid() is built into Postgres 13+; avoids needing uuid-ossp.
+        uuidExtension: 'pgcrypto',
+        ...common,
+      };
     }
 
     return {
