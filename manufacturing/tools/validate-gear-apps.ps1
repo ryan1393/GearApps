@@ -1,4 +1,6 @@
 $ErrorActionPreference = 'Stop'
+$WorkspaceRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
+Set-Location $WorkspaceRoot
 
 function Invoke-NativeChecked {
     param([string]$Label,[scriptblock]$Command)

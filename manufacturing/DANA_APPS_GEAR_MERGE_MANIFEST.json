@@ -1,35 +1,74 @@
 {
   "schemaVersion": 1,
   "baseline": "Dana Apps V70.0.0",
-  "authoritativeTest": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/run-all-tests.ps1",
-  "sourcePackager": "tools/package-dana-apps-source.ps1",
-  "masterUiBaseline": "DANA_MASTER_UI_BASELINE.md",
-  "gearPreMergeReadiness": "DANA_APPS_GEAR_PREMERGE_READINESS.md",
-  "sourcePackageHygiene": "DANA_APPS_SOURCE_PACKAGE_HYGIENE.md",
+  "releaseVersion": "70.3.0",
+  "workspace": "single-root",
+  "authoritativeTest": "node manufacturing/tools/run-unit-tests.mjs",
+  "sourcePackager": "tools/package-release.mjs",
+  "masterUiBaseline": "manufacturing/DANA_MASTER_UI_BASELINE.md",
+  "gearPreMergeReadiness": "manufacturing/DANA_APPS_GEAR_PREMERGE_READINESS.md",
+  "sourcePackageHygiene": "manufacturing/DANA_APPS_SOURCE_PACKAGE_HYGIENE.md",
   "frameworkVersions": {
-    "nx": "23.0.2",
-    "@angular/core": "19.2.25",
-    "@nestjs/core": "10.4.22",
-    "typeorm": "0.3.31",
+    "nx": "24.0.5",
+    "@angular/core": "20.3.35",
+    "@nestjs/core": "11.2.9",
+    "typeorm": "1.1.2",
     "pg": "8.21.0",
-    "typescript": "~5.7.3"
+    "typescript": "5.9.3"
   },
   "rootHashes": {
-    "package.json": "CA024285B632BD85F9AC4FE32BAB46D72BD946C5590019B42B22D123BE1E353C",
-    "package-lock.json": "31157D12E9336DB9D47F1EA3852A2659E9AF35980583192A33B68E9170F688D6",
-    "nx.json": "C7606F50A0B7212DEE1C2384489D7247A7BE22A0C0DCA8AB3968396027B7FB04",
-    "tsconfig.base.json": "23798FDAAD23F1F619E8D282F89726A030CBBDB3F7C4CBBC481494CBD4B08E19"
+    "package.json": "2B2F29F74CB204EEFA2A9B55941D55715518C173C0130710373B3B5E0EF5D570",
+    "package-lock.json": "B9AAA5CA9D755E0481ECB897481FF811EB59D5E186075BAD0A88E5EE40A6168D",
+    "nx.json": "70665B73BCA488DA1CBA39928CA99A5C5911A292E4E2DC2594B6D8A0002945DE",
+    "tsconfig.base.json": "39F3E1CCAB5AFA57C8CB50ACBE1D65811C50FD8574C33DC10F0DD31EF46CF833"
   },
   "composeFiles": [
     {
-      "path": "compose.yml",
-      "sha256": "92DFFF957B16309DBAE6F204E8F7C0E01AA87291448F497EE623894362A0FFF6"
+      "path": "docker-compose.yml",
+      "sha256": "C2342D13EB171044A3719EFFCA3B8A65F31551221B98FAD82DDCAC215C43A421"
+    },
+    {
+      "path": "manufacturing/compose.yml",
+      "sha256": "1981FCAF7DB3447ADF1F096374AFB302A3C223C5197295A0D7BCEC3570CAAC7B"
     }
   ],
   "runtimeProjects": [
     {
+      "name": "lapper-api",
+      "root": "apps/lapper-api",
+      "projectType": "application",
+      "tags": [],
+      "targets": [
+        "copy-workspace-modules",
+        "prune",
+        "prune-lockfile",
+        "serve",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": true,
+      "hasTestTarget": true
+    },
+    {
+      "name": "lapper-client",
+      "root": "apps/lapper-client",
+      "projectType": "application",
+      "tags": [
+        "scope:client",
+        "type:app"
+      ],
+      "targets": [
+        "build",
+        "serve",
+        "serve-static"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": true,
+      "hasTestTarget": false
+    },
+    {
       "name": "blade-tracking",
-      "root": "apps/blade-tracking",
+      "root": "manufacturing/apps/blade-tracking",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -51,7 +90,7 @@
     },
     {
       "name": "cutter-builder",
-      "root": "apps/cutter-builder",
+      "root": "manufacturing/apps/cutter-builder",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -73,7 +112,7 @@
     },
     {
       "name": "greenshed",
-      "root": "apps/greenshed",
+      "root": "manufacturing/apps/greenshed",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -95,7 +134,7 @@
     },
     {
       "name": "gear-app-server",
-      "root": "apps/server",
+      "root": "manufacturing/apps/server",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -116,8 +155,68 @@
   ],
   "projects": [
     {
+      "name": "api-core",
+      "root": "libs/api/core",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "api-data-access",
+      "root": "libs/api/data-access",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "api-feature-auth",
+      "root": "libs/api/feature-auth",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "api-feature-cutter-tracking",
+      "root": "libs/api/feature-cutter-tracking",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "api-feature-gear",
+      "root": "libs/api/feature-gear",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "api-feature-scanner",
+      "root": "libs/api/feature-scanner",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
       "name": "blade-tracking",
-      "root": "apps/blade-tracking",
+      "root": "manufacturing/apps/blade-tracking",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -139,7 +238,7 @@
     },
     {
       "name": "blade-tracking-e2e",
-      "root": "apps/blade-tracking-e2e",
+      "root": "manufacturing/apps/blade-tracking-e2e",
       "projectType": "application",
       "tags": [
         "domain:gear-apps"
@@ -153,8 +252,88 @@
       "hasTestTarget": false
     },
     {
+      "name": "client-core",
+      "root": "libs/client/core",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "client-feature-auth",
+      "root": "libs/client/feature-auth",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "client-feature-dashboard",
+      "root": "libs/client/feature-dashboard",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "client-feature-lapping-summary",
+      "root": "libs/client/feature-lapping-summary",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "client-feature-machines",
+      "root": "libs/client/feature-machines",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "client-feature-parts",
+      "root": "libs/client/feature-parts",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "client-shell",
+      "root": "libs/client/shell",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "client-ui",
+      "root": "libs/client/ui",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
       "name": "cutter-builder",
-      "root": "apps/cutter-builder",
+      "root": "manufacturing/apps/cutter-builder",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -175,8 +354,26 @@
       "hasTestTarget": true
     },
     {
+      "name": "dana-ui",
+      "root": "libs/shared/dana-ui",
+      "projectType": "library",
+      "tags": [
+        "scope:shared",
+        "type:ui"
+      ],
+      "targets": [
+        "build",
+        "pack",
+        "test",
+        "test-browser"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
       "name": "frontend-data-access-blade-tracking",
-      "root": "libs/frontend/data-access-blade-tracking",
+      "root": "manufacturing/libs/frontend/data-access-blade-tracking",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -192,7 +389,7 @@
     },
     {
       "name": "frontend-data-access-common",
-      "root": "libs/frontend/data-access-common",
+      "root": "manufacturing/libs/frontend/data-access-common",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -210,7 +407,7 @@
     },
     {
       "name": "frontend-data-access-cutter-builder",
-      "root": "libs/frontend/data-access-cutter-builder",
+      "root": "manufacturing/libs/frontend/data-access-cutter-builder",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -227,7 +424,7 @@
     },
     {
       "name": "frontend-data-access-greenshed",
-      "root": "libs/frontend/data-access-greenshed",
+      "root": "manufacturing/libs/frontend/data-access-greenshed",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -244,7 +441,7 @@
     },
     {
       "name": "frontend-data-access-user",
-      "root": "libs/frontend/data-access-user",
+      "root": "manufacturing/libs/frontend/data-access-user",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -261,7 +458,7 @@
     },
     {
       "name": "frontend-feature-admin-users",
-      "root": "libs/frontend/feature-admin-users",
+      "root": "manufacturing/libs/frontend/feature-admin-users",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -279,7 +476,7 @@
     },
     {
       "name": "frontend-feature-blade-tracking",
-      "root": "libs/frontend/feature-blade-tracking",
+      "root": "manufacturing/libs/frontend/feature-blade-tracking",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -297,7 +494,7 @@
     },
     {
       "name": "frontend-feature-cutter-builder",
-      "root": "libs/frontend/feature-cutter-builder",
+      "root": "manufacturing/libs/frontend/feature-cutter-builder",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -314,7 +511,7 @@
     },
     {
       "name": "frontend-feature-greenshed",
-      "root": "libs/frontend/feature-greenshed",
+      "root": "manufacturing/libs/frontend/feature-greenshed",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -331,7 +528,7 @@
     },
     {
       "name": "frontend-feature-login",
-      "root": "libs/frontend/feature-login",
+      "root": "manufacturing/libs/frontend/feature-login",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -349,7 +546,7 @@
     },
     {
       "name": "frontend-util-common",
-      "root": "libs/frontend/util-common",
+      "root": "manufacturing/libs/frontend/util-common",
       "projectType": "library",
       "tags": [
         "domain:shared",
@@ -367,7 +564,7 @@
     },
     {
       "name": "gear-app-server",
-      "root": "apps/server",
+      "root": "manufacturing/apps/server",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -387,7 +584,7 @@
     },
     {
       "name": "gear-app-server-e2e",
-      "root": "apps/server-e2e",
+      "root": "manufacturing/apps/server-e2e",
       "projectType": null,
       "tags": [
         "domain:gear-apps"
@@ -402,7 +599,7 @@
     },
     {
       "name": "greenshed",
-      "root": "apps/greenshed",
+      "root": "manufacturing/apps/greenshed",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -423,8 +620,41 @@
       "hasTestTarget": true
     },
     {
+      "name": "lapper-api",
+      "root": "apps/lapper-api",
+      "projectType": "application",
+      "tags": [],
+      "targets": [
+        "copy-workspace-modules",
+        "prune",
+        "prune-lockfile",
+        "serve",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": true,
+      "hasTestTarget": true
+    },
+    {
+      "name": "lapper-client",
+      "root": "apps/lapper-client",
+      "projectType": "application",
+      "tags": [
+        "scope:client",
+        "type:app"
+      ],
+      "targets": [
+        "build",
+        "serve",
+        "serve-static"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": true,
+      "hasTestTarget": false
+    },
+    {
       "name": "server-data-access",
-      "root": "libs/server/data-access",
+      "root": "manufacturing/libs/server/data-access",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -441,7 +671,7 @@
     },
     {
       "name": "server-feat-auth",
-      "root": "libs/server/feat-auth",
+      "root": "manufacturing/libs/server/feat-auth",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -458,7 +688,7 @@
     },
     {
       "name": "server-feat-blade",
-      "root": "libs/server/feat-blade",
+      "root": "manufacturing/libs/server/feat-blade",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -475,7 +705,7 @@
     },
     {
       "name": "server-feat-blade-tray",
-      "root": "libs/server/feat-blade-tray",
+      "root": "manufacturing/libs/server/feat-blade-tray",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -492,7 +722,7 @@
     },
     {
       "name": "server-feat-container",
-      "root": "libs/server/feat-container",
+      "root": "manufacturing/libs/server/feat-container",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -509,7 +739,7 @@
     },
     {
       "name": "server-feat-container-tray",
-      "root": "libs/server/feat-container-tray",
+      "root": "manufacturing/libs/server/feat-container-tray",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -526,7 +756,7 @@
     },
     {
       "name": "server-feat-cutter-build",
-      "root": "libs/server/feat-cutter-build",
+      "root": "manufacturing/libs/server/feat-cutter-build",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -543,7 +773,7 @@
     },
     {
       "name": "server-feat-cutter-config",
-      "root": "libs/server/feat-cutter-config",
+      "root": "manufacturing/libs/server/feat-cutter-config",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -560,7 +790,7 @@
     },
     {
       "name": "server-feat-greenshed",
-      "root": "libs/server/feat-greenshed",
+      "root": "manufacturing/libs/server/feat-greenshed",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -577,7 +807,7 @@
     },
     {
       "name": "server-feat-health",
-      "root": "libs/server/feat-health",
+      "root": "manufacturing/libs/server/feat-health",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -594,7 +824,7 @@
     },
     {
       "name": "server-feat-location",
-      "root": "libs/server/feat-location",
+      "root": "manufacturing/libs/server/feat-location",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -611,7 +841,7 @@
     },
     {
       "name": "server-feat-location-tray",
-      "root": "libs/server/feat-location-tray",
+      "root": "manufacturing/libs/server/feat-location-tray",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -628,7 +858,7 @@
     },
     {
       "name": "server-feat-part-summary",
-      "root": "libs/server/feat-part-summary",
+      "root": "manufacturing/libs/server/feat-part-summary",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -645,7 +875,7 @@
     },
     {
       "name": "server-feat-tray",
-      "root": "libs/server/feat-tray",
+      "root": "manufacturing/libs/server/feat-tray",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -662,7 +892,7 @@
     },
     {
       "name": "server-feat-user",
-      "root": "libs/server/feat-user",
+      "root": "manufacturing/libs/server/feat-user",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -679,7 +909,7 @@
     },
     {
       "name": "server-util-common",
-      "root": "libs/server/util-common",
+      "root": "manufacturing/libs/server/util-common",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -687,15 +917,16 @@
         "type:util"
       ],
       "targets": [
-        "lint"
+        "lint",
+        "test"
       ],
       "hasBuildTarget": false,
       "hasServeTarget": false,
-      "hasTestTarget": false
+      "hasTestTarget": true
     },
     {
       "name": "server-util-mailer",
-      "root": "libs/server/util-mailer",
+      "root": "manufacturing/libs/server/util-mailer",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -712,7 +943,7 @@
     },
     {
       "name": "server-util-testing",
-      "root": "libs/server/util-testing",
+      "root": "manufacturing/libs/server/util-testing",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -728,7 +959,7 @@
     },
     {
       "name": "shared-dana-app-config",
-      "root": "libs/shared/dana-app-config",
+      "root": "manufacturing/libs/shared/dana-app-config",
       "projectType": "library",
       "tags": [
         "domain:shared",
@@ -743,8 +974,18 @@
       "hasTestTarget": false
     },
     {
+      "name": "shared-domain",
+      "root": "libs/shared/domain",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
       "name": "shared-util-constants",
-      "root": "libs/shared/util-constants",
+      "root": "manufacturing/libs/shared/util-constants",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",
@@ -760,7 +1001,7 @@
     },
     {
       "name": "shared-util-types",
-      "root": "libs/shared/util-types",
+      "root": "manufacturing/libs/shared/util-types",
       "projectType": "library",
       "tags": [
         "domain:gear-apps",

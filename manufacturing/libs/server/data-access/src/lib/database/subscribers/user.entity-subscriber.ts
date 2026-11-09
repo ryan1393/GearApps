@@ -6,10 +6,9 @@ import type {
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { MD5 } from 'crypto-js';
 import { EventSubscriber } from 'typeorm';
 
-import { AuthProviderType } from '@libs/shared/util-types';
+import { AuthProviderType } from '@gearapps/manufacturing/shared/util-types';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 
@@ -39,7 +38,7 @@ export class UserOrmEntitySubscriber
 
     // default to gravatars
     if (!event.entity.avatar && event.entity.email) {
-      const emailHash = MD5(event.entity.email).toString();
+      const emailHash = crypto.createHash('md5').update(event.entity.email).digest('hex');
       event.entity.avatar = `https://www.gravatar.com/avatar/${emailHash}`;
     }
 

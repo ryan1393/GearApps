@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { AbstractDto, AbstractDtoOptions } from '@libs/server/util-common';
+import { AbstractDto, AbstractDtoOptions } from '@gearapps/manufacturing/server/util-common';
 import { LocationOrmEntity } from '../../../database/entities/blade-tracking/location.orm-entity';
 
 

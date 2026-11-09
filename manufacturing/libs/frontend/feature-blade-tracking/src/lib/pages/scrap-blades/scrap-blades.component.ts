@@ -8,8 +8,8 @@ import {
   BladeTrackingApiService,
   InventoryBladeRow,
   apiErrorText,
-} from '@libs/frontend/data-access-blade-tracking';
-import { IPaginationMeta } from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
+import { IPaginationMeta } from '@gearapps/manufacturing/shared/util-types';
 import {
   DanaPageHeaderComponent,
   DanaTableDirective,

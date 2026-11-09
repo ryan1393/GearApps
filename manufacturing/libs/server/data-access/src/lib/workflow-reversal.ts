@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { ConflictException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
-import { STARTUP_SCHEMA_LOCK_SQL } from '@libs/shared/util-constants';
+import { STARTUP_SCHEMA_LOCK_SQL } from '@gearapps/manufacturing/shared/util-constants';
 
 export type ReversalApp = 'GREENSHED' | 'CUTTER_BUILDER' | 'BLADE_TRACKING';
 // Columns this module reads by name. Declared so strict index-signature checks

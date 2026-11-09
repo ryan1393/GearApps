@@ -1,5 +1,29 @@
 # Changelog
 
+## 70.3.0 (2026-11-09)
+
+All four applications now belong to one root Nx workspace and use one dependency
+manifest and lockfile. Application releases share the root version constant.
+
+- Aligned Angular 20.3.35, NestJS 11.2.9, TypeORM 1.1.2, Nx 24.0.5,
+  TypeScript 5.9.3, Jest 30, Node 24.22.1, and npm 11.9.0.
+- Dana UI 0.3.3 source is included under libs/shared/dana-ui and built with the
+  root Angular compiler. Every client uses this source and one generated package.
+- Removed the manufacturing dependency install, lockfile, Nx configuration,
+  duplicate UI package, obsolete UI adapters, and unused crypto/UUID packages.
+- Migrated Angular application builds, backend webpack builds, Jest configuration,
+  flat ESLint configuration, Docker contexts, CI, Windows tools, and deployments.
+- Updated JWT decoding, Nest configuration typing, public health tests, template
+  resolution, and keyboard/focus handling for the shared framework versions.
+- Retained the 70.2.1 authentication and inventory safeguards, API routes,
+  PostgreSQL data preservation, and existing Lapper database support.
+- Lapper production packages explicitly retain the database drivers TypeORM loads
+  dynamically, using the root pinned versions and a generated runtime lockfile.
+
+Upgrade: install once at the repository root with npm ci. Manufacturing settings
+remain in manufacturing/.env; Lapper settings remain in the root .env. Use
+npm run test:versions to detect dependency or release-version drift.
+
 ## 70.2.1 (2026-11-09)
 
 Recovered from the original 70.2.0 upload and rebuilt with security, inventory,

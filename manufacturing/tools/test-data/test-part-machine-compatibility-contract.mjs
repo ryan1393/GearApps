@@ -1,10 +1,11 @@
+import { contractPath } from '../lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
-const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
+const read = (p) => fs.readFileSync(contractPath(root, p), 'utf8');
 const service = read('libs/server/feat-greenshed/src/lib/server-feat-greenshed.service.ts');
 const workflow = read('tools/test-full-workflow.ps1');
 const fixture = read('tools/test-data/ensure-workflow-test-fixtures.mjs');

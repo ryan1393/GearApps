@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
@@ -21,8 +22,8 @@ const criticalOrder=[
   'components/primitives.css','components/data-display.css','components/icons.css',
   'layout/navigation-shell.css','layout/brand.css','foundation/responsive.css',
 ];
-const sharedStyleFile=path.join(root,sharedStyle);
-const domainStyleFile=path.join(root,domainStyle);
+const sharedStyleFile=contractPath(root,sharedStyle);
+const domainStyleFile=contractPath(root,domainStyle);
 must(fs.existsSync(sharedStyleFile),'Dana shared stylesheet entry point is missing.');
 must(fs.existsSync(domainStyleFile),'Gear domain stylesheet entry point is missing.');
 
@@ -47,7 +48,7 @@ for(const name of moved){
 const duplicate=new Set(sharedModules.filter(p=>domainModules.includes(p)));
 must(duplicate.size===0,`Dana/Gear style ownership overlaps: ${[...duplicate].join(', ')}`);
 for(const rel of [...sharedModules,...domainModules]){
-  const absolute=path.join(root,rel); must(fs.existsSync(absolute),`Style module is missing: ${rel}`);
+  const absolute=contractPath(root,rel); must(fs.existsSync(absolute),`Style module is missing: ${rel}`);
   const css=fs.readFileSync(absolute,'utf8');
   must(!/@import\s+['"]/.test(css),`${rel}: nested imports are not allowed; entry points own module order.`);
   const lines=css.split(/\r?\n/).length; must(lines<=520,`${rel}: ${lines} lines exceeds the 520-line modular ceiling.`);
@@ -64,7 +65,7 @@ for(const marker of ['GEAR APPS DESIGN SYSTEM','--gear-sidebar-width','.gear-sid
   must(combined.includes(marker),`Combined Dana/Gear style graph missing ${marker}`);
 }
 
-const appsDir=path.join(root,'apps');
+const appsDir=contractPath(root,'apps');
 const frontendApps=fs.readdirSync(appsDir,{withFileTypes:true}).filter(e=>e.isDirectory()).map(e=>e.name).filter(name=>{
   const file=path.join(appsDir,name,'project.json'); if(!fs.existsSync(file)) return false;
   const project=JSON.parse(fs.readFileSync(file,'utf8')); const tags=new Set(project.tags??[]);
@@ -72,18 +73,18 @@ const frontendApps=fs.readdirSync(appsDir,{withFileTypes:true}).filter(e=>e.isDi
 });
 must(frontendApps.length>=3,'Expected the Gear Apps Angular frontends to be discoverable.');
 for(const app of frontendApps){
-  const projectFile=path.join(root,'apps',app,'project.json'); const project=JSON.parse(fs.readFileSync(projectFile,'utf8'));
+  const projectFile=contractPath(root,'apps',app,'project.json'); const project=JSON.parse(fs.readFileSync(projectFile,'utf8'));
   const sourceRoot=project.sourceRoot||`apps/${app}/src`; const appStyle=`${sourceRoot}/styles.css`; const styles=project.targets?.build?.options?.styles??[];
   const sharedIndex=styles.indexOf(GEAR_APPS_STYLE_ENTRY_INSTALLED),domainIndex=styles.indexOf(GEAR_APPS_DOMAIN_STYLE_ENTRY_INSTALLED),appIndex=styles.indexOf(appStyle);
   // Gear owns no CSS: every stylesheet an app loads must come from @dana/ui.
-  for(const entry of styles) must(entry===appStyle||entry.startsWith('node_modules/@dana/ui/styles/'),`${app}: loads a stylesheet that is not from @dana/ui: ${entry}`);
+  for(const entry of styles) must(entry===appStyle||entry.startsWith('libs/shared/dana-ui/src/styles/'),`${app}: loads a stylesheet that is not from @dana/ui: ${entry}`);
   must(sharedIndex===appIndex+1,`${app}: Dana shared style entry must load immediately after Tailwind.`);
   must(domainIndex===sharedIndex+1,`${app}: Gear domain styles must load immediately after Dana shared UI.`);
   for(const modulePath of [...sharedModules,...domainModules]) must(!styles.includes(modulePath),`${app}: must not import style module directly (${modulePath}).`);
-  const local=fs.readFileSync(path.join(root,appStyle),'utf8');
+  const local=fs.readFileSync(contractPath(root,appStyle),'utf8');
   for(const directive of ['@tailwind base;','@tailwind components;','@tailwind utilities;']) must(local.includes(directive),`${app}: local style entry missing ${directive}`);
-  const tw=fs.readFileSync(path.join(root,'apps',app,'tailwind.config.js'),'utf8'); must(tw.includes(factory),`${app}: Tailwind does not use the central config factory.`);
+  const tw=fs.readFileSync(contractPath(root,'apps',app,'tailwind.config.js'),'utf8'); must(tw.includes(factory),`${app}: Tailwind does not use the central config factory.`);
 }
-const loginPath=path.join(root,'libs/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.scss');
+const loginPath=contractPath(root,'libs/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.scss');
 if(fs.existsSync(loginPath)) must(!fs.readFileSync(loginPath,'utf8').replace(/\/\*[\s\S]*?\*\//g,'').trim(),'Login component still owns styling.');
 console.log(`[PASS] Dana/Gear modular styling contract passed: ${sharedModules.length} Dana modules + ${domainModules.length} Gear-domain modules across ${frontendApps.length} Angular frontends.`);

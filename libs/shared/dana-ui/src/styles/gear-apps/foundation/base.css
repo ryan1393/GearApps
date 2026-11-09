@@ -1,0 +1,24 @@
+/* Global Gear Apps reset and typography baseline */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-width: 100%;
+  min-height: 100%;
+  background: var(--gear-page);
+  color: var(--gear-text);
+  font-family: var(--gear-font-sans);
+  line-height: var(--gear-line-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}

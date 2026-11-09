@@ -40,9 +40,9 @@ function load(rel,overrides={}){
  const mod={exports:{}};
  const resolver=id=>{
   if(id in overrides)return overrides[id];
-  if(id==='@libs/shared/util-types')return utilTypes;
-  if(id==='@libs/shared/util-constants')return constants;
-  if(id==='@libs/server/data-access')return entityTokens;
+  if(id==='@gearapps/manufacturing/shared/util-types')return utilTypes;
+  if(id==='@gearapps/manufacturing/shared/util-constants')return constants;
+  if(id==='@gearapps/manufacturing/server/data-access')return entityTokens;
   if(id==='@nestjs/common')return common;
   if(id==='@nestjs/typeorm')return {InjectRepository:deco,InjectDataSource:deco};
   if(id==='typeorm')return typeorm;
@@ -51,8 +51,8 @@ function load(rel,overrides={}){
   if(id==='@angular/common')return {CommonModule:token('CommonModule')};
   if(id==='@angular/forms')return {FormsModule:token('FormsModule')};
   if(id==='@angular/common/http')return {HttpClient:token('HttpClient'),HttpErrorResponse:class extends Error{constructor(x){super(x.message);Object.assign(this,x)}}};
-  if(id==='@libs/frontend/util-common')return {GearToastService:token('GearToastService')};
-  if(id==='@libs/frontend/data-access-blade-tracking')return {BladeTrackingApiService:token('BladeTrackingApiService'),apiErrorText:(e,f)=>e?.error?.message||e?.message||f};
+  if(id==='@gearapps/manufacturing/frontend/util-common')return {GearToastService:token('GearToastService')};
+  if(id==='@gearapps/manufacturing/frontend/data-access-blade-tracking')return {BladeTrackingApiService:token('BladeTrackingApiService'),apiErrorText:(e,f)=>e?.error?.message||e?.message||f};
   if(id==='@dana/ui')return new Proxy({},{get:(o,k)=>token(String(k))});
   if(id.includes('scan-panel.component'))return {ScanPanelComponent:token('ScanPanelComponent')};
   if(id.includes('scan-message'))return {};

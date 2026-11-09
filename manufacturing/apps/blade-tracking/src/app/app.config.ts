@@ -1,7 +1,7 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter, withEnabledBlockingInitialNavigation } from '@angular/router';
-import { jwtInterceptor } from '@libs/frontend/data-access-common';
+import { jwtInterceptor } from '@gearapps/manufacturing/frontend/data-access-common';
 
 import { appRoutes } from './app.routes';
 

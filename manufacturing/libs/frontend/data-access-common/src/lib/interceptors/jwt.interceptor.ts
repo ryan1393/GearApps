@@ -1,7 +1,7 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthSessionService } from '@libs/frontend/data-access-user';
+import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
 import { catchError, throwError } from 'rxjs';
 import { REDIRECT_URL_QUERY_PARAM } from '../constants';
 

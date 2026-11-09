@@ -8,7 +8,7 @@
     <div class="gear-workflow-section-header"><div><h2>Scan Active Cutter</h2><p>Open the current machine run before recording quality.</p></div></div>
     <div class="gear-workflow-section-body">
       <form class="gear-workflow-scan-row" (ngSubmit)="scan()">
-        <label class="gear-field">Build ID<input autofocus [(ngModel)]="buildNumber" (ngModelChange)="onBuildInput()" name="build" class="gear-input font-mono" placeholder="Scan active cutter build..." [disabled]="busy" /></label>
+        <label class="gear-field">Build ID<input gearScannerFocus [(ngModel)]="buildNumber" (ngModelChange)="onBuildInput()" name="build" class="gear-input font-mono" placeholder="Scan active cutter build..." [disabled]="busy" /></label>
         <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy">{{ busy ? 'Checking…' : 'Scan' }}</button>
       </form>
       <div class="gear-workflow-divider">OR</div>

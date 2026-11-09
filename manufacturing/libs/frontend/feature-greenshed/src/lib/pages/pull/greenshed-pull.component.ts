@@ -4,19 +4,19 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { GearToastService } from '@libs/frontend/util-common';
+import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
 import {
   buildSummaryShelfTag,
   normalizeSummaryNumber,
-} from '@libs/shared/util-constants';
-import { ILocation } from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-constants';
+import { ILocation } from '@gearapps/manufacturing/shared/util-types';
 import {
   GreenshedApiService,
   GreenshedBuild,
   GreenshedPullResult,
   GreenshedReferenceData,
   greenshedApiErrorText,
-} from '@libs/frontend/data-access-greenshed';
+} from '@gearapps/manufacturing/frontend/data-access-greenshed';
 import { DanaPageHeaderComponent } from '@dana/ui';
 
 @Component({

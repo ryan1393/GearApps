@@ -1,8 +1,9 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
+const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8');
 const json = (rel) => JSON.parse(read(rel));
 const must = (ok, msg) => { if (!ok) throw new Error(msg); };
 
@@ -16,7 +17,7 @@ const pkg = json('package.json');
 const doc = read('DANA_APPS_FRESH_DOCKER.md');
 const transfer = read('TRANSFER-DANA-APPS-TO-DOCKER.cmd');
 
-must(!fs.existsSync(path.join(root, 'docker-compose.yml')), 'compose.yml must be the only authoritative root Compose file.');
+must(!fs.existsSync(contractPath(root, 'docker-compose.yml')), 'compose.yml must be the only authoritative root Compose file.');
 must(compose.includes('name: dana-apps'), 'Compose project name must be dana-apps.');
 for (const service of ['dana-postgres:', 'gear-db-bootstrap:', 'gear-base-data-bootstrap:', 'gear-app-server:', 'blade-tracking:', 'cutter-builder:', 'greenshed:']) {
   must(compose.includes(service), `Fresh-host Compose missing ${service}`);
@@ -26,14 +27,16 @@ must(compose.includes('name: ${DANA_POSTGRES_VOLUME_NAME:-dana-apps-gear-postgre
 must(compose.includes('condition: service_completed_successfully'), 'Runtime API must wait for one-shot DB/bootstrap jobs.');
 must(compose.includes('DANA_FRESH_DB_BOOTSTRAP: "YES"'), 'Fresh DB bootstrap guard is missing.');
 must(compose.includes('SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?'), 'Fresh host must require an admin seed password.');
-must(compose.includes('command: ["node", "dist/apps/server-bootstrap/main.js"]'), 'Fresh schema bootstrap command is missing.');
-must(compose.includes('command: ["node", "tools/base-data/import-base-data.mjs", "--bootstrap-only"]'), 'Fresh base-data bootstrap command is missing.');
+must(compose.includes('command: ["node", "dist/manufacturing/apps/server-bootstrap/main.js"]'), 'Fresh schema bootstrap command is missing.');
+must(compose.includes('command: ["node", "manufacturing/tools/base-data/import-base-data.mjs", "--bootstrap-only"]'), 'Fresh base-data bootstrap command is missing.');
 must(compose.indexOf('gear-db-bootstrap:') < compose.indexOf('gear-base-data-bootstrap:'), 'Schema bootstrap must be defined before base-data bootstrap.');
 
-must(serverProject.targets?.['build-fresh-db-bootstrap']?.options?.main === 'apps/server/src/fresh-db-bootstrap.ts', 'Gear server project missing fresh DB bootstrap build target.');
+must(serverProject.targets?.['build-fresh-db-bootstrap']?.options?.command.includes('webpack.bootstrap.config.js'), 'Gear server project must build the bootstrap using the native root webpack plugin.');
+const webpackBootstrap=read('apps/server/webpack.bootstrap.config.js');
+must(webpackBootstrap.includes("main: './src/fresh-db-bootstrap.ts'") && webpackBootstrap.includes('NxAppWebpackPlugin'), 'Native bootstrap config must preserve its actual main source');
 for (const marker of [
   'build-fresh-db-bootstrap',
-  'dist/apps/server-bootstrap',
+  'dist/manufacturing/apps/server-bootstrap',
   'tools/base-data',
 ]) {
   must(dockerfile.includes(marker), `Server Dockerfile missing ${marker}`);
@@ -67,7 +70,7 @@ for (const command of [
   'docker compose -f compose.yml up -d',
   'docker compose -f compose.yml ps',
 ]) {
-  must(helper.includes(command), `Fresh Docker helper missing ${command}`);
+  must(helper.includes(command.replace('docker compose -f compose.yml', 'docker compose --env-file "$ENV_FILE" -f manufacturing/compose.yml')), `Fresh Docker helper missing ${command}`);
 }
 
 for (const marker of [
@@ -84,8 +87,9 @@ for (const marker of [
   must(helper.includes(marker), `Fresh Docker helper missing safety marker ${marker}`);
 }
 
-must(pkg.scripts?.['docker:up'] === 'docker compose -f compose.yml up -d --build', 'docker:up must use modern Compose.');
-must(pkg.scripts?.['docker:config'] === 'docker compose -f compose.yml config', 'docker:config must validate compose.yml.');
+const commands=JSON.parse(fs.readFileSync(contractPath(root,'../tools/manufacturing-scripts.json'),'utf8'));
+must(commands['docker:up']?.includes('docker compose') && commands['docker:up']?.includes('up -d --build'), 'docker:up must use modern Compose with a build');
+must(commands['docker:config']?.includes('docker compose') && commands['docker:config']?.includes('config'), 'docker:config must validate Compose');
 
 for (const marker of [
   'Dana Apps — Fresh Docker Host',

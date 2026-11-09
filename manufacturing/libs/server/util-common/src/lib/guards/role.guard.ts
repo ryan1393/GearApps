@@ -2,8 +2,8 @@ import {
   canEditGearApp,
   GearAppKey,
   GEAR_APP_EDITOR_DEPARTMENT_NAMES,
-} from '@libs/shared/util-constants';
-import { IRequestUserData } from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-constants';
+import { IRequestUserData } from '@gearapps/manufacturing/shared/util-types';
 import {
   CanActivate,
   ExecutionContext,

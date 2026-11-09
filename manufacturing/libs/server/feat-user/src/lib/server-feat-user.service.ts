@@ -7,12 +7,12 @@ import {
   PaginationOptionsDto,
   PaginationService,
   UserOrmEntity,
-} from '@libs/server/data-access';
+} from '@gearapps/manufacturing/server/data-access';
 import {
   IResetPasswordEmailContext,
   IVerifyEmailContext,
   ServerUtilMailerService,
-} from '@libs/server/util-mailer';
+} from '@gearapps/manufacturing/server/util-mailer';
 import {
   AuthProviderType,
   IForgotPasswordPayload,
@@ -22,7 +22,7 @@ import {
   IUserEntity,
   RoleType,
   Uuid,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 import {
   BadRequestException,
   ConflictException,

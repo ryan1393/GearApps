@@ -1,8 +1,9 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { readDanaUiSource } from './lib/dana-ui-source.mjs';
 const root = path.resolve(process.argv[2] || '.');
-const read = (r) => fs.readFileSync(path.join(root, r), 'utf8').replace(/\r\n/g, '\n');
+const read = (r) => fs.readFileSync(contractPath(root, r), 'utf8').replace(/\r\n/g, '\n');
 const must = (c,m) => { if(!c) throw new Error(m); };
 const count = (s,n) => s.split(n).length - 1;
 const attrCount = (s,n) => (s.match(new RegExp('\\b' + n + '(?:\\s|=|>)','g')) || []).length;

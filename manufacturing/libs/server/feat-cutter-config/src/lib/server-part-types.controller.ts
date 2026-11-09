@@ -1,5 +1,5 @@
-import { Auth } from '@libs/server/util-common';
-import { RoleType } from '@libs/shared/util-types';
+import { Auth } from '@gearapps/manufacturing/server/util-common';
+import { RoleType } from '@gearapps/manufacturing/shared/util-types';
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 

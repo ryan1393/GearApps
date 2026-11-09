@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { BadRequestException, ConflictException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
-import { cutterBodyBladeCapacity, cutterBodyMatchesRequirement, classifyTrayAvailabilityStage } from '@libs/shared/util-constants';
+import { cutterBodyBladeCapacity, cutterBodyMatchesRequirement, classifyTrayAvailabilityStage } from '@gearapps/manufacturing/shared/util-constants';
 
 interface AvailabilityTrayRow {
   id: string; serial_number: string; part_type_code: string | null;

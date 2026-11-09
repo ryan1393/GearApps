@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-import { IBaseEntity, Uuid } from '@libs/shared/util-types';
+import { IBaseEntity, Uuid } from '@gearapps/manufacturing/shared/util-types';
 
 import { AbstractDto } from '../dto/base.dto';
 import { Constructor } from '../types';

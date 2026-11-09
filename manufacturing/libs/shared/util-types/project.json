@@ -1,19 +1,16 @@
 {
   "name": "shared-util-types",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/shared/util-types/src",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "manufacturing/libs/shared/util-types/src",
   "projectType": "library",
   "targets": {
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": [
-          "libs/shared/util-types/**/*.ts"
-        ]
-      }
+        "command": "eslint .",
+        "cwd": "manufacturing/libs/shared/util-types"
+      },
+      "cache": true
     }
   },
   "tags": [

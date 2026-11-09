@@ -13,15 +13,15 @@ import {
   DepartmentOrmEntity,
   UserOrmEntity,
   UserOrmEntitySubscriber,
-} from '@libs/server/data-access';
-import { ServerFeatUserService } from '@libs/server/feat-user';
-import { ServerUtilMailerService } from '@libs/server/util-mailer';
+} from '@gearapps/manufacturing/server/data-access';
+import { ServerFeatUserService } from '@gearapps/manufacturing/server/feat-user';
+import { ServerUtilMailerService } from '@gearapps/manufacturing/server/util-mailer';
 import {
   AuthProviderType,
   IJwtPayload,
   RoleType,
-} from '@libs/shared/util-types';
-import { canEditGearApp } from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-types';
+import { canEditGearApp } from '@gearapps/manufacturing/shared/util-constants';
 import { ServerFeatAuthService } from './server-feat-auth.service';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';

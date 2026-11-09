@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthSessionService } from '@libs/frontend/data-access-user';
-import { canEditGearApp, GEAR_APPS_VERSION } from '@libs/shared/util-constants';
-import { getDanaAppUrl } from '@libs/shared/dana-app-config';
-import { IJwtPayload } from '@libs/shared/util-types';
+import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
+import { canEditGearApp, GEAR_APPS_VERSION } from '@gearapps/manufacturing/shared/util-constants';
+import { getDanaAppUrl } from '@gearapps/manufacturing/shared/dana-app-config';
+import { IJwtPayload } from '@gearapps/manufacturing/shared/util-types';
 import { DanaMobileNavDirective } from '@dana/ui';
 
 @Component({

@@ -1,7 +1,7 @@
 {
   "name": "frontend-data-access-blade-tracking",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/frontend/data-access-blade-tracking/src",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "manufacturing/libs/frontend/data-access-blade-tracking/src",
   "projectType": "library",
   "tags": [
     "type:data-access",
@@ -10,15 +10,12 @@
   ],
   "targets": {
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": [
-          "libs/frontend/data-access-blade-tracking/**/*.ts"
-        ]
-      }
+        "command": "eslint .",
+        "cwd": "manufacturing/libs/frontend/data-access-blade-tracking"
+      },
+      "cache": true
     }
   }
 }

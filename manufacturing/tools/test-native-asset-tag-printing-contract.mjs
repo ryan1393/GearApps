@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const read=(p)=>fs.readFileSync(p,'utf8').replace(/^\uFEFF/,'');
+const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8').replace(/^\uFEFF/,'');
 const manifest=JSON.parse(read('tools/api-route-manifest.json'));
 
 const controller=read('libs/server/feat-tray/src/lib/server-feat-asset-tag.controller.ts');

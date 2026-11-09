@@ -1,4 +1,4 @@
-import { GearAppKey } from '@libs/shared/util-constants';
+import { GearAppKey } from '@gearapps/manufacturing/shared/util-constants';
 import { SetMetadata } from '@nestjs/common';
 import { GEAR_APP_EDIT_METADATA_KEY } from '../constants';
 

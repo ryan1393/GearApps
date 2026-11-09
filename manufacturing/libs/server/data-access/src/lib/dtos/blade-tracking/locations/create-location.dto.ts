@@ -4,7 +4,7 @@ import {
   IsString,
 } from 'class-validator';
 
-import { ICreateLocation } from '@libs/shared/util-types';
+import { ICreateLocation } from '@gearapps/manufacturing/shared/util-types';
 import {
   ApiProperty,
   ApiPropertyOptional,

@@ -1,10 +1,11 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { readDanaUiSource } from './lib/dana-ui-source.mjs';
 
 const root = process.cwd();
-const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8').replace(/^\uFEFF/, '');
-const frontendRoot = path.join(root, 'libs/frontend');
+const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8').replace(/^\uFEFF/, '');
+const frontendRoot = contractPath(root, 'libs/frontend');
 const htmlFiles = [];
 
 function walk(dir) {

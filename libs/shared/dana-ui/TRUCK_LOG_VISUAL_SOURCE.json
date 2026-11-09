@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "danaUiVersion": "0.3.1",
+  "visualSource": "Truck Log",
+  "sourceRepo": "C:\\Users\\ryan.thompson\\Downloads\\truck-log-v0.2",
+  "sourcePublicEntry": "libs/truck-log/ui/src/styles/truck-log.css",
+  "files": [
+    {
+      "path": "libs/truck-log/ui/src/styles/truck-log.css",
+      "sha256": "5BB5974CE335067C59BE21927CB7EFCF38648B259603E9F1C597B625C10E8702"
+    },
+    {
+      "path": "libs/truck-log/ui/src/styles/truck-log-core.css",
+      "sha256": "BB2E3F24D231774AD543F2EA729A198EE2F6BFFC19C9DCB1A7B4EF51EB25D9B6"
+    },
+    {
+      "path": "libs/truck-log/ui/src/styles/gear-source/tokens.css",
+      "sha256": "07AC037F7E0759980CE4067DAB9CDC2FA9E7D6A822FB051481586069AAEAB9E1"
+    },
+    {
+      "path": "libs/truck-log/ui/src/styles/gear-source/base.css",
+      "sha256": "88A6B5C607D274204CC281EBA8738C5999712FED026E9816C55FA58A09D4F671"
+    },
+    {
+      "path": "libs/truck-log/ui/src/styles/gear-source/app-shell.css",
+      "sha256": "4983B2EB3AF49C19DD5CC94F85607D978DFF2256A73ED052F55A2B2A851C3DD1"
+    },
+    {
+      "path": "libs/truck-log/ui/src/styles/gear-source/navigation-shell.css",
+      "sha256": "71B8FB9588BDAD7B3018CB8B8A52A9BD8B1BF1B1B37591A06083C7478D070591"
+    },
+    {
+      "path": "libs/truck-log/ui/src/styles/gear-source/primitives.css",
+      "sha256": "9A8CEBEC4E5EBE9BA5EDB8B5D2000E7CE6A1063E002B3042F68E4DE4A1DF005A"
+    },
+    {
+      "path": "libs/truck-log/ui/src/styles/truck-log-gear-adapter.css",
+      "sha256": "076A4FC8F5B9A87766D44FACE3FB3AFD3A79DC92145313AAD5FC4FBE033C6A1B"
+    },
+    {
+      "path": "libs/truck-log/ui/src/styles/truck-log-spacing-v0.2.8.css",
+      "sha256": "0D5EA02369F25EDA3E1EDBA0F66DBD17AD129E72BF0CEC4D344E19381B7BDF39"
+    },
+    {
+      "path": "libs/truck-log/ui/src/styles/truck-log-toast.css",
+      "sha256": "26B6303A8CC62BF870B53C31C1122825B2463701962DE1F466E65A424CEAE47C"
+    },
+    {
+      "path": "libs/truck-log/ui/src/styles/truck-log-global-polish.css",
+      "sha256": "0386A60A54DE9BDB56E974CBD1D77187EC4FAA11F8444BB482B8002E8F138CB1"
+    },
+    {
+      "path": "apps/truck-log/src/assets/branding/dana-diamond.png",
+      "sha256": "6B3D9387F6E90C90B7E599E20853F09C3471C65B7756D648595AD1F58D1E03E9"
+    }
+  ],
+  "resolvedTokens": {
+    "text": "#26384d",
+    "muted": "#68798d",
+    "border": "#dfe6ee",
+    "page": "#f5f7fa",
+    "surface": "#ffffff",
+    "success": "#047857",
+    "warning": "#b45309",
+    "danger": "#b42318",
+    "primary": "#2457a6",
+    "primaryDark": "#173b73",
+    "sidebar": "#0b1d35",
+    "sidebarRaised": "#102a45",
+    "radiusSm": "8px",
+    "radiusMd": "10px",
+    "radiusLg": "12px",
+    "radiusXl": "16px",
+    "shadowPanel": "0 1px 2px rgba(15, 23, 42, .035), 0 5px 18px rgba(15, 23, 42, .045)",
+    "shadowRaised": "0 12px 30px rgba(15, 23, 42, .10)",
+    "sidebarWidth": "258px",
+    "topbarHeight": "70px",
+    "contentPad": "26px",
+    "contentMax": "1580px"
+  },
+  "originalDanaUiVersion": "0.2.0"
+}

@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
-import { Auth, DepartmentAppEdit, ReqUserId } from '@libs/server/util-common';
-import { RoleType, Uuid } from '@libs/shared/util-types';
+import { Auth, DepartmentAppEdit, ReqUserId } from '@gearapps/manufacturing/server/util-common';
+import { RoleType, Uuid } from '@gearapps/manufacturing/shared/util-types';
 import { CoaterShipmentsService } from './coater-shipments.service';
 import { CancelCoaterShipmentDto, CoaterContainerDto, CoaterRevisionDto, CreateCoaterShipmentDto, DispatchCoaterShipmentDto, UpdateCoaterShipmentDto } from './coater-shipments.dto';
 

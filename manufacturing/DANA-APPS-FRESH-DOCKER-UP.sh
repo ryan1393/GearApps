@@ -1,17 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+MANUFACTURING_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$MANUFACTURING_ROOT/.." && pwd)"
 cd "$ROOT"
+ENV_FILE="$MANUFACTURING_ROOT/.env"
 
-if [[ ! -f .env ]]; then
-  echo "[FAIL] .env is missing. Copy .env.example to .env and set the required secrets first." >&2
+if [[ ! -f "$ENV_FILE" ]]; then
+  echo "[FAIL] manufacturing/.env is missing. Copy manufacturing/.env.example to manufacturing/.env and set the required secrets first." >&2
   exit 1
 fi
 
 get_env() {
   local key="$1" raw
-  raw="$(grep -E "^${key}=" .env | tail -n 1 | cut -d= -f2- || true)"
+  raw="$(grep -E "^${key}=" "$ENV_FILE" | tail -n 1 | cut -d= -f2- || true)"
   raw="${raw%$'\r'}"
   if [[ "$raw" == \"*\" && "$raw" == *\" ]]; then raw="${raw:1:${#raw}-2}"; fi
   if [[ "$raw" == \'*\' && "$raw" == *\' ]]; then raw="${raw:1:${#raw}-2}"; fi
@@ -59,13 +61,13 @@ else
 fi
 
 echo "[1/5] Validating Compose..."
-docker compose -f compose.yml config >/dev/null
+docker compose --env-file "$ENV_FILE" -f manufacturing/compose.yml config >/dev/null
 
 echo "[2/5] Building Dana Apps..."
-docker compose -f compose.yml build --progress=plain
+docker compose --env-file "$ENV_FILE" -f manufacturing/compose.yml build --progress=plain
 
 echo "[3/5] Starting fresh-host stack..."
-docker compose -f compose.yml up -d
+docker compose --env-file "$ENV_FILE" -f manufacturing/compose.yml up -d
 
 echo "[4/5] Waiting for Gear API readiness..."
 for attempt in $(seq 1 60); do
@@ -75,15 +77,15 @@ for attempt in $(seq 1 60); do
   fi
   if [[ "$attempt" == "60" ]]; then
     echo "[FAIL] Gear API did not become ready." >&2
-    docker compose -f compose.yml ps
-    docker compose -f compose.yml logs --tail=160 dana-postgres gear-db-bootstrap gear-base-data-bootstrap gear-app-server
+    docker compose --env-file "$ENV_FILE" -f manufacturing/compose.yml ps
+    docker compose --env-file "$ENV_FILE" -f manufacturing/compose.yml logs --tail=160 dana-postgres gear-db-bootstrap gear-base-data-bootstrap gear-app-server
     exit 1
   fi
   sleep 5
 done
 
 echo "[5/5] Final service state"
-docker compose -f compose.yml ps
+docker compose --env-file "$ENV_FILE" -f manufacturing/compose.yml ps
 
 echo
 echo "[PASS] Dana Apps fresh Docker host is up."

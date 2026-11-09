@@ -1,3 +1,4 @@
+import { contractPath, workspaceRoot, manufacturingRoot } from './lib/contract-paths.mjs';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -18,7 +19,7 @@ function readJson(file) {
 }
 
 function walkProjectFiles(root, startRel) {
-  const start = path.join(root, startRel);
+  const start = contractPath(root, startRel);
   if (!fs.existsSync(start)) return [];
   const out = [];
   const visit = (dir) => {
@@ -37,11 +38,14 @@ function rel(root, file) {
   return path.relative(root, file).replace(/\\/g, '/');
 }
 
-export function buildGearMergeManifest(root = process.cwd()) {
-  const pkg = readJson(path.join(root, 'package.json'));
+export function buildGearMergeManifest(root = workspaceRoot) {
+  if (path.resolve(root) === manufacturingRoot) root = workspaceRoot;
+  const pkg = readJson(contractPath(root, 'package.json'));
   const projectFiles = [
     ...walkProjectFiles(root, 'apps'),
     ...walkProjectFiles(root, 'libs'),
+    ...walkProjectFiles(root, 'manufacturing/apps'),
+    ...walkProjectFiles(root, 'manufacturing/libs'),
   ];
 
   const projects = projectFiles.map((file) => {
@@ -61,9 +65,9 @@ export function buildGearMergeManifest(root = process.cwd()) {
     String(a.name).localeCompare(String(b.name)) || a.root.localeCompare(b.root)
   );
 
-  const composeFiles = ['compose.yml']
-    .filter((name) => fs.existsSync(path.join(root, name)))
-    .map((name) => ({ path: name, sha256: sha256File(path.join(root, name)) }));
+  const composeFiles = ['docker-compose.yml', 'manufacturing/compose.yml']
+    .filter((name) => fs.existsSync(contractPath(root, name)))
+    .map((name) => ({ path: name, sha256: sha256File(contractPath(root, name)) }));
 
   const deps = { ...(pkg.dependencies ?? {}), ...(pkg.devDependencies ?? {}) };
   const frameworkVersions = {};
@@ -73,10 +77,10 @@ export function buildGearMergeManifest(root = process.cwd()) {
 
   const rootHashes = {};
   for (const name of ['package.json', 'package-lock.json', 'nx.json', 'tsconfig.base.json']) {
-    if (fs.existsSync(path.join(root, name))) rootHashes[name] = sha256File(path.join(root, name));
+    if (fs.existsSync(contractPath(root, name))) rootHashes[name] = sha256File(contractPath(root, name));
   }
 
-  const runtimeNames = ['blade-tracking', 'cutter-builder', 'greenshed', 'gear-app-server'];
+  const runtimeNames = ['lapper-api', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed', 'gear-app-server'];
   const runtimeProjects = runtimeNames.map((name) => {
     const project = projects.find((p) => p.name === name);
     return project ?? { name, missing: true };
@@ -85,18 +89,20 @@ export function buildGearMergeManifest(root = process.cwd()) {
   return {
     schemaVersion: 1,
     baseline: 'Dana Apps V70.0.0',
-    authoritativeTest: pkg.scripts?.['test:gear-apps'] ?? null,
-    sourcePackager: fs.existsSync(path.join(root, 'tools/package-dana-apps-source.ps1'))
-      ? 'tools/package-dana-apps-source.ps1'
+    releaseVersion: pkg.version,
+    workspace: 'single-root',
+    authoritativeTest: pkg.scripts?.['test:unit'] ?? null,
+    sourcePackager: fs.existsSync(contractPath(root, 'tools/package-release.mjs'))
+      ? 'tools/package-release.mjs'
       : null,
-    masterUiBaseline: fs.existsSync(path.join(root, 'DANA_MASTER_UI_BASELINE.md'))
-      ? 'DANA_MASTER_UI_BASELINE.md'
+    masterUiBaseline: fs.existsSync(contractPath(root, 'manufacturing/DANA_MASTER_UI_BASELINE.md'))
+      ? 'manufacturing/DANA_MASTER_UI_BASELINE.md'
       : null,
-    gearPreMergeReadiness: fs.existsSync(path.join(root, 'DANA_APPS_GEAR_PREMERGE_READINESS.md'))
-      ? 'DANA_APPS_GEAR_PREMERGE_READINESS.md'
+    gearPreMergeReadiness: fs.existsSync(contractPath(root, 'manufacturing/DANA_APPS_GEAR_PREMERGE_READINESS.md'))
+      ? 'manufacturing/DANA_APPS_GEAR_PREMERGE_READINESS.md'
       : null,
-    sourcePackageHygiene: fs.existsSync(path.join(root, 'DANA_APPS_SOURCE_PACKAGE_HYGIENE.md'))
-      ? 'DANA_APPS_SOURCE_PACKAGE_HYGIENE.md'
+    sourcePackageHygiene: fs.existsSync(contractPath(root, 'manufacturing/DANA_APPS_SOURCE_PACKAGE_HYGIENE.md'))
+      ? 'manufacturing/DANA_APPS_SOURCE_PACKAGE_HYGIENE.md'
       : null,
     frameworkVersions,
     rootHashes,
@@ -115,8 +121,8 @@ const invoked = process.argv[1]
   : false;
 
 if (invoked) {
-  const root = process.cwd();
-  const output = path.join(root, 'DANA_APPS_GEAR_MERGE_MANIFEST.json');
+  const root = workspaceRoot;
+  const output = path.join(manufacturingRoot, 'DANA_APPS_GEAR_MERGE_MANIFEST.json');
   fs.writeFileSync(output, stableStringify(buildGearMergeManifest(root)));
   console.log(`[PASS] Gear merge manifest generated: ${output}`);
 }

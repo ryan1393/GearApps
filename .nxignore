@@ -1,3 +1,4 @@
-# The recovered manufacturing release is an independently versioned Nx workspace.
-# Run its targets from manufacturing/ using that workspace's pinned dependencies.
-manufacturing/**
+# Historical release archives are not active Nx projects.
+source-archives/**
+releases/**
+vendor/**

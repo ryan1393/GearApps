@@ -1,11 +1,11 @@
 # Dana Apps — Fresh Docker Host
 
-Dana Apps V70.0.0 supports a brand-new Docker host without requiring a pre-existing Gear PostgreSQL volume.
+The consolidated Gear Apps workspace supports a brand-new Docker host without requiring a pre-existing Gear PostgreSQL volume.
 
 ## Safety model
 
 - Gear data remains in its own PostgreSQL database and named volume.
-- Truck Log will use a separate database/volume when it is merged later.
+- Lapper uses its own database and volume.
 - Runtime Gear API always starts with `DATABASE_SYNCHRONIZE=false`.
 - The one-shot `gear-db-bootstrap` service may enable TypeORM synchronize **only when the Gear database has zero public tables**.
 - A non-empty partial schema is refused rather than auto-repaired.
@@ -16,13 +16,13 @@ Dana Apps V70.0.0 supports a brand-new Docker host without requiring a pre-exist
 
 ## Required .env values
 
-Copy `.env.example` to `.env` and set real values for at least:
+Copy `manufacturing/.env.example` to `manufacturing/.env` and set real values for at least:
 
 - `GEAR_DB_PASSWORD` (12+ characters)
 - `SEED_ADMIN_PASSWORD` (12+ characters)
 - `SEED_USER_PASSWORD` (12+ characters)
-- `JWT_ACCESS_SECRET` (16+ characters)
-- `JWT_REFRESH_SECRET` (16+ characters)
+- `JWT_ACCESS_SECRET` (32+ random characters recommended)
+- `JWT_REFRESH_SECRET` (32+ random characters recommended)
 
 Do not leave the `replace-*` placeholders in place.
 
@@ -36,8 +36,8 @@ Fresh seed logins are:
 From the Linux Docker host, in the Dana Apps root:
 
 ```bash
-chmod +x DANA-APPS-FRESH-DOCKER-UP.sh
-./DANA-APPS-FRESH-DOCKER-UP.sh
+chmod +x manufacturing/DANA-APPS-FRESH-DOCKER-UP.sh
+./manufacturing/DANA-APPS-FRESH-DOCKER-UP.sh
 ```
 
 The helper validates secrets, validates Compose, builds all images, starts PostgreSQL, runs one-shot schema/user/reference bootstrap, imports base master data, starts the runtime API, waits for `/api/v1/health/ready`, then starts the three Gear frontends.
@@ -60,13 +60,13 @@ Override with `DANA_POSTGRES_VOLUME_NAME` in `.env` when needed.
 
 ## Windows-to-Docker transfer
 
-From the Windows Dana Apps root, `TRANSFER-DANA-APPS-TO-DOCKER.cmd` packages source without `node_modules`/archives/caches and copies it to the configured remote Docker host at `/tmp/dana-apps.v0.1` by default.
+From the repository root, `manufacturing\TRANSFER-DANA-APPS-TO-DOCKER.cmd` packages source without `node_modules`/archives/caches and copies it to the configured remote Docker host at `/tmp/dana-apps.v0.1` by default.
 
 ## Fresh DB runtime dependency boundary
 
 The `gear-db-bootstrap` service runs from the same production-dependency image as the Gear API. Production seed/bootstrap code therefore must not import test-only/dev-only libraries.
 
-`@ngneat/falso` remains a devDependency for unit tests, but `UserDatabaseSeedService` uses Node `crypto` for runtime-safe fallback/random seed values. The server Docker build scans `dist/apps/server-bootstrap/main.js` and fails immediately if `@ngneat/falso` is ever reintroduced into the bootstrap bundle.
+`@ngneat/falso` remains a devDependency for unit tests, but `UserDatabaseSeedService` uses Node `crypto` for runtime-safe fallback/random seed values. The server Docker build scans `dist/manufacturing/apps/server-bootstrap/main.js` and fails immediately if `@ngneat/falso` is ever reintroduced into the bootstrap bundle.
 
 ## Password recovery and upgrades
 
@@ -82,3 +82,12 @@ preserved with synchronization disabled. Users sign in again and request fresh r
 links after upgrading. Normal automatic redeployment skips the bundled reference-data
 snapshot once master data exists; it does not undo disabled employees/machines or edited
 roll-master minimum quantities.
+
+## Consolidated workspace
+
+All Docker contexts point to the repository root. Root `package.json` and
+`package-lock.json` supply every app's dependencies; manufacturing has no separate
+installation. Node is pinned to 24.22.1 and npm to 11.9.0. CI installs once at the root
+and verifies all applications. The manufacturing stack can be managed from the root
+with `docker compose --env-file manufacturing/.env -f manufacturing/compose.yml ...`.
+This keeps manufacturing's database/environment separate from the Lapper stack.

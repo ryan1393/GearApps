@@ -1,7 +1,7 @@
 {
   "name": "shared-dana-app-config",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/shared/dana-app-config/src",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "manufacturing/libs/shared/dana-app-config/src",
   "projectType": "library",
   "tags": [
     "type:util",
@@ -10,15 +10,12 @@
   ],
   "targets": {
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": [
-          "libs/shared/dana-app-config/**/*.ts"
-        ]
-      }
+        "command": "eslint .",
+        "cwd": "manufacturing/libs/shared/dana-app-config"
+      },
+      "cache": true
     }
   }
 }

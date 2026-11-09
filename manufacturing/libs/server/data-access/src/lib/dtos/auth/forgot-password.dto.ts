@@ -1,6 +1,6 @@
 import { IsEmail } from 'class-validator';
 
-import { IForgotPasswordPayload } from '@libs/shared/util-types';
+import { IForgotPasswordPayload } from '@gearapps/manufacturing/shared/util-types';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ForgotPasswordDto implements IForgotPasswordPayload {

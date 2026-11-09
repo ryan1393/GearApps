@@ -8,7 +8,7 @@ import {
   ENV_DATABASE_SYNCHRONIZE,
   ENV_DATABASE_TYPE,
   ENV_DATABASE_USERNAME,
-} from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-constants';
 import { registerAs } from '@nestjs/config';
 
 export const dbConfig = registerAs('db', () => ({

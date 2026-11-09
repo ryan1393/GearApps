@@ -12,7 +12,7 @@ import {
   ENV_EMAIL_SECURE,
   ENV_EMAIL_TEMPLATE_DIR,
   ENV_EMAIL_USER,
-} from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-constants';
 import { registerAs } from '@nestjs/config';
 
 import { CONFIG_NAMESPACE_MAILER } from '../constants';
@@ -33,6 +33,13 @@ export interface IMailerConfig {
   partialsDir: string;
 }
 
+// Local commands run from the unified repository root. Preserve explicitly
+// configured absolute/custom paths and adapt the former workspace-relative path.
+const templateDirectory = (configured: string | undefined, suffix = '') =>
+  configured
+    ? configured.replace(/^apps[\\/]server[\\/]/, 'manufacturing/apps/server/')
+    : `manufacturing/apps/server/src/assets/templates${suffix}`;
+
 export const mailerConfig = registerAs(CONFIG_NAMESPACE_MAILER, () => ({
   enabled: process.env[ENV_EMAIL_ENABLED] === 'true',
   host: process.env[ENV_EMAIL_HOST] ?? '',
@@ -41,14 +48,14 @@ export const mailerConfig = registerAs(CONFIG_NAMESPACE_MAILER, () => ({
     : 587,
   user: process.env[ENV_EMAIL_USER] ?? '',
   password: process.env[ENV_EMAIL_PASSWORD] ?? '',
-  templateDir: process.env[ENV_EMAIL_TEMPLATE_DIR] ?? '',
+  templateDir: templateDirectory(process.env[ENV_EMAIL_TEMPLATE_DIR]),
   // ignoreTls: !!process.env[ENV_EMAIL_IGNORE_TLS] ?? false,
   // secure: !!process.env[ENV_EMAIL_SECURE] ?? true,
   // requireTls: !!process.env[ENV_EMAIL_REQUIRE_TLS] ?? true,
   // debug: !!process.env[ENV_EMAIL_DEBUG] ?? false,
   defaultName: process.env[ENV_EMAIL_DEFAULT_NAME] ?? '',
   defaultEmail: process.env[ENV_EMAIL_DEFAULT_EMAIL] ?? '',
-  partialsDir: process.env[ENV_EMAIL_PARTIALS_DIR] ?? '',
+  partialsDir: templateDirectory(process.env[ENV_EMAIL_PARTIALS_DIR], '/partials'),
   
   ignoreTls: process.env[ENV_EMAIL_IGNORE_TLS] === 'true',
   secure: process.env[ENV_EMAIL_SECURE] !== 'false',

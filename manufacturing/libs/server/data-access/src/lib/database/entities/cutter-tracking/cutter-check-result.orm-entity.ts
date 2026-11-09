@@ -1,8 +1,8 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index } from 'typeorm';
 
-import { AbstractOrmEntity } from '@libs/server/util-common';
-import { ICutterCheckResult } from '@libs/shared/util-types';
+import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { ICutterCheckResult } from '@gearapps/manufacturing/shared/util-types';
 
 @Entity({ name: 'cutter_check_results' })
 export class CutterCheckResultOrmEntity extends AbstractOrmEntity {

@@ -1,7 +1,17 @@
 {
   "extends": "../../../tsconfig.base.json",
-  "compilerOptions": { "target": "es2022", "useDefineForClassFields": false },
+  "compilerOptions": {
+    "target": "es2022",
+    "useDefineForClassFields": false,
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "emitDecoratorMetadata": false
+  },
   "files": [],
   "include": [],
-  "references": [{ "path": "./tsconfig.lib.json" }]
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    }
+  ]
 }

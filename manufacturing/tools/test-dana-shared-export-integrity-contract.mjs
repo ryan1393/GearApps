@@ -1,27 +1,26 @@
 import fs from 'node:fs';
 import path from 'node:path';
-
-const root = process.cwd();
-const barrelRel = 'vendor/dana-ui/package/index.d.ts';
-const barrel = fs.readFileSync(path.join(root, barrelRel), 'utf8').replace(/^\uFEFF/, '');
-const exportRe = /export(?:\s+type)?\s+(?:\{[^}]+\}|\*)\s+from\s+['"](\.\/[^'"]+)['"]/g;
-const checked = [];
-for (const match of barrel.matchAll(exportRe)) {
-  const spec = match[1];
-  const base = path.resolve(root, path.dirname(barrelRel), spec);
-  const candidates = [base + '.ts', base + '.d.ts', path.join(base, 'index.ts'), path.join(base, 'index.d.ts')];
-  const resolved = candidates.find((candidate) => fs.existsSync(candidate));
-  if (!resolved) throw new Error(`Shared UI barrel export does not resolve: ${spec}`);
-  checked.push(path.relative(root, resolved).replaceAll('\\', '/'));
+import { readContract, workspaceRoot } from './lib/contract-paths.mjs';
+const sourceRoot=path.join(workspaceRoot,'libs/shared/dana-ui/src');
+const source=fs.readFileSync(path.join(sourceRoot,'index.ts'),'utf8');
+const declarations=readContract('vendor/dana-ui/package/index.d.ts');
+const exports=[...source.matchAll(/export(?:\s+type)?\s+(?:\{[^}]+\}|\*)\s+from\s+['"](\.\/[^'"]+)['"]/g)].map(match=>match[1]);
+if(exports.length<20) throw new Error(`Shared UI source barrel export scan was unexpectedly small: ${exports.length}`);
+for(const spec of exports) {
+ const base=path.resolve(sourceRoot,spec);
+ if(![base+'.ts',path.join(base,'index.ts')].some(file=>fs.existsSync(file))) throw new Error(`Shared UI source export does not resolve: ${spec}`);
 }
-if (checked.length < 20) throw new Error(`Shared UI export integrity scan was unexpectedly small: ${checked.length}`);
-for (const required of [
-  'vendor/dana-ui/package/lib/components/navigation/dana-tabs.directive.d.ts',
-  'vendor/dana-ui/package/lib/components/navigation/dana-tab.directive.d.ts',
-  'vendor/dana-ui/package/lib/components/feedback/dana-toast-host.component.d.ts',
-  'vendor/dana-ui/package/lib/components/feedback/dana-toast.service.d.ts',
-  'vendor/dana-ui/package/lib/components/feedback/dana-confirm-dialog.component.d.ts',
+// Angular 20 ng-packagr emits flattened declarations. Check public symbols,
+// rather than requiring the old compiler's private per-component .d.ts layout.
+const publicExports=[...declarations.matchAll(/export\s*\{([^}]+)\}/g)].map(match=>match[1]).join(' ');
+for(const [name,file] of [
+ ['DanaTabsDirective','dana-tabs.directive'],['DanaTabDirective','dana-tab.directive'],
+ ['DanaToastHostComponent','dana-toast-host.component'],['DanaToastService','dana-toast.service'],
+ ['DanaConfirmDialogComponent','dana-confirm-dialog.component'],['DanaTableDirective','dana-table.directive'],
+ ['DanaComboboxComponent','dana-combobox.component'],
 ]) {
-  if (!checked.includes(required)) throw new Error(`Required Step 2 shared export was not verified through the barrel: ${required}`);
+ if(!new RegExp(`\\b${name}\\b`).test(publicExports)) throw new Error(`Shared UI public declaration missing: ${name}`);
+ if(!exports.some(spec=>spec.endsWith('/'+file))) throw new Error(`Shared UI source barrel missing: ${file}`);
 }
-console.log(`[PASS] Dana shared UI barrel/export integrity passed for ${checked.length} resolved exports.`);
+
+console.log(`[PASS] Dana shared UI source exports resolve (${exports.length}) and flattened public declarations preserve the component API.`);

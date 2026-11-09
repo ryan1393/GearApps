@@ -8,10 +8,10 @@ import {
   OnInit,
   } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GearToastService } from '@libs/frontend/util-common';
+import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
 import { Observable } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AuthSessionService } from '@libs/frontend/data-access-user';
+import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
 import {
   CuttergrindNumberedShelfTag,
   CuttergrindRoughShelfTag,
@@ -19,7 +19,7 @@ import {
   parseCuttergrindNumberedShelfTag,
   parseSummaryShelfTag,
   SummaryShelfTag,
-} from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-constants';
 import {
   AdminApiService,
   AdminLocationRow,

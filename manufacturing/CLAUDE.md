@@ -1,13 +1,12 @@
-# Recovered manufacturing workspace
+# Manufacturing applications
 
-This directory is the independently versioned GearApps manufacturing release.
-Keep its existing @libs aliases, apps/server entry point, Angular 19/NestJS 10
-configuration, and pinned dependency lock. Run its commands from this directory.
-The parent Lapper workspace uses @gearapps aliases and newer frameworks; do not
-replace its sources or share dependency installs implicitly. A framework/API merge
-requires a separate deliberate migration.
+This directory belongs to the root GearApps Nx workspace. Run npm and Nx from the
+repository root, using its single lockfile and shared Angular/Nest/TypeORM/Dana UI
+versions. Import manufacturing libraries as @gearapps/manufacturing/....
 
-Preserve existing manufacturing API paths and data, use Dana UI, validate DTOs,
-and keep SQL parameterized. Run npm test, npm run test:contracts, and the four
-production builds before changing this release. Live database tests require a
-dedicated test database and GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES.
+Preserve existing manufacturing API paths, database schema, transaction locks,
+authentication safeguards, and inventory rules. Use Dana UI, validate DTOs,
+and keep SQL parameterized. Follow the root CLAUDE.md for dependency changes.
+Run npm test, npm run test:contracts, npm run lint, and npm run build at the root.
+Live database tests require a dedicated test database and
+GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES.

@@ -1,4 +1,4 @@
-import * as jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { BehaviorSubject, map } from 'rxjs';
 
 import {
@@ -6,7 +6,7 @@ import {
   IJwtPayload,
   ITokenResponse,
   RefreshToken,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 
 import {
   LOCAL_STORAGE_KEY_ACCESS_TOKEN,
@@ -44,7 +44,7 @@ export class UserState {
     // decoding errors
     if (val) {
       try {
-        const data = jwtDecode.default(val) as IJwtPayload;
+        const data = jwtDecode<IJwtPayload>(val);
         this.userData$$.next(data);
       } catch (err) {
         throw new Error(`Error decoding access token: ${err}`);

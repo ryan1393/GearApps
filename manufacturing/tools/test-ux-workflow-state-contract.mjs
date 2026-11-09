@@ -1,5 +1,6 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
-const read=(p)=>fs.readFileSync(p,'utf8');
+const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8');
 const setup=read('libs/frontend/feature-greenshed/src/lib/pages/setup/greenshed-setup.component.ts');
 for(const m of ['resetSetupDownstream()','scanMachine()','this.part=null','!this.machine||!this.part']) if(!setup.includes(m)) throw new Error(`Greenshed Setup stale-state guard missing ${m}`);
 const check=read('libs/frontend/feature-greenshed/src/lib/pages/check/greenshed-check.component.ts');

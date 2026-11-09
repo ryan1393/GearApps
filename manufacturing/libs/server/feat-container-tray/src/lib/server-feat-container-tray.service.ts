@@ -1,6 +1,6 @@
 import { FindOptionsWhere, Repository } from 'typeorm';
 
-import { beginWorkflowJournal, lockCoaterInventory } from '@libs/server/data-access';
+import { beginWorkflowJournal, lockCoaterInventory } from '@gearapps/manufacturing/server/data-access';
 import {
   BladeHistoryOrmEntity,
   BladeOrmEntity,
@@ -15,13 +15,13 @@ import {
   PaginationService,
   TrayOrmEntity,
   TrayStageOrmEntity,
-} from '@libs/server/data-access';
+} from '@gearapps/manufacturing/server/data-access';
 import {
   cuttergrindRoughShelfForPartType,
   parseCuttergrindRoughShelfTag,
   DEPARTMENT_CUTTERGRIND,
   parseCuttergrindNumberedShelfTag,
-} from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-constants';
 import {
   BladeHistoryEvent,
   BladeStatus,
@@ -29,7 +29,7 @@ import {
   IContainerTrayEntity,
   IPaginatedResponse,
   Uuid,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,

@@ -3,11 +3,11 @@ import { Component, ElementRef, ViewChild, inject, OnDestroy } from '@angular/co
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { v4 as uuid } from 'uuid';
-import { CoaterAvailableContainer, CoaterShipment, CoaterShipmentContainer, CoaterShipmentList } from '@libs/shared/util-types';
-import { CoaterShipmentsApiService, apiErrorText } from '@libs/frontend/data-access-blade-tracking';
+import { CoaterAvailableContainer, CoaterShipment, CoaterShipmentContainer, CoaterShipmentList } from '@gearapps/manufacturing/shared/util-types';
+import { CoaterShipmentsApiService, apiErrorText } from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
 import { DanaPageHeaderComponent } from '@dana/ui';
 import { coaterPackingSlipHtml, coaterContainerLabelsHtml } from './coater-packing-slip';
+import { createCoaterRequestId } from './coater-request-id';
 
 @Component({
   selector: 'gear-coater-shipments', standalone: true,
@@ -27,7 +27,7 @@ export class CoaterShipmentsComponent implements OnDestroy {
   error = ''; notice = ''; listError = '';
   confirmSend = false; checked = false; cancelOpen = false; cancelReason = '';
   undoSerial = '';
-  private requestId = uuid();
+  private requestId = createCoaterRequestId();
   private listVersion = 0;
   constructor() { this.refreshList(); }
   ngOnDestroy() { this.destroy$.next(); this.destroy$.complete(); }
@@ -54,7 +54,7 @@ export class CoaterShipmentsComponent implements OnDestroy {
     if(this.busy)return;this.busy=true;this.error='';this.notice='';
     request.pipe(takeUntil(this.destroy$)).subscribe({next:s=>{this.accept(s);this.busy=false;this.notice=success;done?.();this.refreshList();this.focus();},error:e=>{this.busy=false;this.confirmSend=false;this.checked=false;this.error=apiErrorText(e,'The request could not be confirmed. Refresh the shipment before continuing.');if(this.active)this.stale=true;}});
   }
-  start() { if(this.busy || this.active || !this.destination.trim())return;this.act(this.api.create(this.requestId,this.destination,this.notes),'Shipment started. Scan packed containers.',()=>{this.requestId=uuid();this.undoSerial='';}); }
+  start() { if(this.busy || this.active || !this.destination.trim())return;this.act(this.api.create(this.requestId,this.destination,this.notes),'Shipment started. Scan packed containers.',()=>{this.requestId=createCoaterRequestId();this.undoSerial='';}); }
   open(id: string) { if(this.busy)return;this.undoSerial='';this.act(this.api.get(id),'Shipment loaded.'); }
   refresh() { if(this.active)this.open(this.active.id);else this.refreshList(); }
   close() { if(this.busy)return;this.active=null;this.error='';this.notice='';this.undoSerial='';this.destination='Coater';this.notes='';this.stale=false;this.confirmSend=false;this.cancelOpen=false;this.refreshList(); }

@@ -4,7 +4,7 @@ import {
   ContainerOrmEntity,
   LocationOrmEntity,
   TrayOrmEntity,
-} from '@libs/server/data-access';
+} from '@gearapps/manufacturing/server/data-access';
 import {
   BadRequestException,
   Injectable,

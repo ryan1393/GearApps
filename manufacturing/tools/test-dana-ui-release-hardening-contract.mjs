@@ -1,8 +1,9 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { readDanaUiSource } from './lib/dana-ui-source.mjs';
 const root=path.resolve(process.argv[2]||'.');
-const read=r=>fs.readFileSync(path.join(root,r),'utf8').replace(/\r\n/g,'\n');
+const read=r=>fs.readFileSync(contractPath(root,r),'utf8').replace(/\r\n/g,'\n');
 const must=(c,m)=>{if(!c)throw new Error(m)};
 const entry=read('vendor/dana-ui/package/styles/gear-apps.css');
 const dash=read('vendor/dana-ui/package/styles/gear-apps/features/dashboard.css');
@@ -16,8 +17,8 @@ const summary=read('tools/test-dana-summary-card-contract.mjs');
 const consolidation=read('tools/test-dana-component-consolidation-contract.mjs');
 const htmlFiles=[];
 function walk(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())walk(p);else if(e.name.endsWith('.html'))htmlFiles.push(p)}}
-walk(path.join(root,'libs/frontend'));
-const allHtml=htmlFiles.map(p=>fs.readFileSync(p,'utf8')).join('\n');
+walk(contractPath(root,'libs/frontend'));
+const allHtml=htmlFiles.map(p=>fs.readFileSync(contractPath(process.cwd(), p),'utf8')).join('\n');
 const count=(s,n)=>(s.match(new RegExp(n,'g'))||[]).length;
 must(!entry.includes('admin-standard.css'),'Retired admin-standard.css returned to the public style entry point.');
 must(!dash.includes('.gear-page .rounded-lg')&&!dash.includes('.gear-page .rounded-xl')&&!dash.includes('.gear-page .rounded-2xl'),'Risky global Tailwind radius remapping returned.');

@@ -1,9 +1,10 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
 const root = process.cwd();
-const read = rel => fs.readFileSync(path.join(root, rel), 'utf8');
+const read = rel => fs.readFileSync(contractPath(root, rel), 'utf8');
 const must = (ok, message) => { if (!ok) throw new Error(message); };
 const norm = text => text.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
 const digest = text => crypto.createHash('sha256').update(text).digest('hex').toUpperCase();
@@ -28,8 +29,8 @@ must(pkg.name === '@dana/ui' && /^0\.(2|3)\.\d+$/.test(pkg.version), 'Dashboard 
 for (const app of ['blade-tracking', 'cutter-builder', 'greenshed']) {
   const project = JSON.parse(read(`apps/${app}/project.json`));
   const styles = project.targets?.build?.options?.styles ?? [];
-  const external = styles.indexOf('node_modules/@dana/ui/styles/dana-ui.css');
-  const bridge = styles.indexOf('node_modules/@dana/ui/styles/gear-compat-overrides.css');
+  const external = styles.indexOf('libs/shared/dana-ui/src/styles/dana-ui.css');
+  const bridge = styles.indexOf('libs/shared/dana-ui/src/styles/gear-compat-overrides.css');
   must(external >= 0 && bridge === external + 1 && bridge === styles.length - 1,
     `${app}: retain the external Dana UI then the final Gear migration stylesheet.`);
 }

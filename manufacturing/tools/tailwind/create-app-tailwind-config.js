@@ -1,19 +1,9 @@
-const { createGlobPatternsForDependencies } = require('@nx/angular/tailwind');
-const { join } = require('path');
-// Theme tokens (colors, fonts) come from Dana UI; Gear only decides which files Tailwind scans.
-const sharedTailwindConfig = require('@dana/ui/tailwind/tailwind-preset.cjs');
-
-/**
- * One Tailwind configuration factory for every Gear Apps Angular application.
- * Each app's tailwind.config.js should be a one-line call to this function.
- */
+const { join } = require('node:path');
+const sharedTailwindConfig = require('../../../libs/shared/dana-ui/src/tailwind/tailwind-preset.cjs');
 module.exports = function createGearAppTailwindConfig(appRoot) {
-  return {
-    presets: [sharedTailwindConfig],
-    content: [
-      join(appRoot, 'src/**/!(*.stories|*.spec).{ts,html}'),
-      ...createGlobPatternsForDependencies(appRoot),
-      join(appRoot, '../../libs/frontend/**/!(*.stories|*.spec).{ts,html}'),
-    ],
-  };
+  return { presets: [sharedTailwindConfig], content: [
+    join(appRoot, 'src/**/!(*.stories|*.spec).{ts,html}'),
+    join(appRoot, '../../libs/frontend/**/!(*.stories|*.spec).{ts,html}'),
+    join(appRoot, '../../../libs/shared/dana-ui/src/**/*.{ts,html}'),
+  ] };
 };

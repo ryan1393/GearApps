@@ -1,8 +1,9 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8').replace(/^\uFEFF/, '');
+const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8').replace(/^\uFEFF/, '');
 const entry = read('vendor/dana-ui/package/styles/gear-apps.css');
 const cssRel = 'vendor/dana-ui/package/styles/gear-apps/components/workflow-layout.css';
 const css = read(cssRel);

@@ -23,24 +23,24 @@ must(
   'Gear merge manifest is missing the authoritative test:gear-apps command.'
 );
 must(
-  actual.sourcePackager === 'tools/package-dana-apps-source.ps1',
+  actual.sourcePackager === 'tools/package-release.mjs',
   'Gear merge manifest is missing the maintained safe source packager.'
 );
 must(
-  actual.masterUiBaseline === 'DANA_MASTER_UI_BASELINE.md',
+  actual.masterUiBaseline === 'manufacturing/DANA_MASTER_UI_BASELINE.md',
   'Gear merge manifest is missing the Dana master UI baseline.'
 );
 must(
-  actual.gearPreMergeReadiness === 'DANA_APPS_GEAR_PREMERGE_READINESS.md',
+  actual.gearPreMergeReadiness === 'manufacturing/DANA_APPS_GEAR_PREMERGE_READINESS.md',
   'Gear merge manifest is missing Gear pre-merge readiness documentation.'
 );
 must(
-  actual.sourcePackageHygiene === 'DANA_APPS_SOURCE_PACKAGE_HYGIENE.md',
+  actual.sourcePackageHygiene === 'manufacturing/DANA_APPS_SOURCE_PACKAGE_HYGIENE.md',
   'Gear merge manifest is missing source-package hygiene documentation.'
 );
 
 const names = new Set(actual.projects.map((p) => p.name).filter(Boolean));
-for (const name of ['blade-tracking', 'cutter-builder', 'greenshed', 'gear-app-server']) {
+for (const name of ['lapper-api', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed', 'gear-app-server']) {
   must(names.has(name), `Gear merge manifest is missing runtime project ${name}`);
 }
 must(
@@ -73,3 +73,5 @@ must(
 console.log(
   `[PASS] Dana Apps Gear merge manifest contract: ${actual.projects.length} Nx projects inventoried, protected Gear runtime identities present, root/config hashes captured, and manifest matches the live workspace.`
 );
+
+must(actual.workspace === 'single-root', 'Manifest must describe the single repository workspace');

@@ -8,8 +8,8 @@ import {
   PartOrmEntity,
   RollMasterOrmEntity,
   TrayOrmEntity,
-} from '@libs/server/data-access';
-import { BladeStatus, IValidateCutterTrayResult, Uuid } from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/server/data-access';
+import { BladeStatus, IValidateCutterTrayResult, Uuid } from '@gearapps/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,

@@ -1,35 +1,70 @@
+import assert from 'node:assert/strict';
 import fs from 'node:fs';
-const read=(p)=>fs.readFileSync(p,'utf8');
-const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
-const wrapper=read('PACKAGE-DANA-APPS-SOURCE.cmd');
-const script=read('tools/package-gear-for-dana-apps.ps1');
-const generator=read('tools/generate-dana-apps-gear-merge-manifest.mjs');
-const manifestContract=read('tools/test-dana-apps-gear-merge-manifest-contract.mjs');
-const doc=read('DANA_APPS_GEAR_HANDOFF_PACKAGE.md');
-const runner=read('tools/run-all-tests.ps1');
-for(const m of ['package-gear-for-dana-apps.ps1','DANA APPS SOURCE PACKAGE COMPLETE'])must(wrapper.includes(m),'Gear handoff wrapper missing '+m);
-for(const m of ['generate-dana-apps-gear-merge-manifest.mjs','test-dana-apps-gear-merge-manifest-contract.mjs','test-dana-apps-source-package-hygiene-contract.mjs','test-dana-apps-source-package-completeness-contract.mjs','package-dana-apps-source.ps1','Dana-Apps-V70.0.0-Fresh-Docker-Ready','Get-FileHash -Algorithm SHA256','DANA_APPS_GEAR_MERGE_MANIFEST.json','npm install required: NO'])must(script.includes(m),'Gear handoff PowerShell missing '+m);
-const manifestGenerateAt=script.indexOf('& $Node.Source $ManifestGenerator');
-const manifestValidateAt=script.indexOf('& $Node.Source $ManifestContract');
-const hygieneValidateAt=script.indexOf('& $Node.Source $HygieneContract');
-const completenessValidateAt=script.indexOf('& $Node.Source $CompletenessContract');
-const packageAt=script.indexOf('& $SafePackager -OutputDirectory $OutputDirectory -ArchivePrefix $ArchivePrefix');
-must(manifestGenerateAt>=0,'Handoff script does not invoke the live merge-manifest generator.');
-must(manifestValidateAt>=0,'Handoff script does not invoke the merge-manifest contract.');
-must(hygieneValidateAt>=0,'Handoff script does not invoke the source-package hygiene contract.');
-must(completenessValidateAt>=0,'Handoff script does not invoke the source-package completeness contract.');
-must(packageAt>=0,'Handoff script does not invoke the maintained safe source packager.');
-must(manifestGenerateAt<manifestValidateAt,'Manifest must generate before manifest validation.');
-must(manifestValidateAt<hygieneValidateAt,'Manifest validation must complete before package-hygiene validation.');
-must(hygieneValidateAt<completenessValidateAt,'Package hygiene must validate before source completeness.');
-must(completenessValidateAt<packageAt,'Source completeness must validate before source packaging.');
-must(!script.includes('Safe source packager failed with exit code $LASTEXITCODE'),'Handoff script must not interpret stale native LASTEXITCODE after invoking the PowerShell safe packager.');
-must(script.includes('$PackageStartedUtc = [DateTime]::UtcNow'),'Handoff script must timestamp the packaging run.');
-must(script.includes('Safe source packager failed: $($_.Exception.Message)'),'Handoff script must rely on PowerShell exception propagation from the safe packager.');
-must(script.includes('$Zip.LastWriteTimeUtc -lt $PackageStartedUtc.AddSeconds(-2)'),'Handoff script must verify the selected ZIP belongs to the current packaging run.');
-must(generator.includes("baseline: 'Dana Apps V70.0.0'"),'Merge manifest generator baseline must be Dana Apps V70.0.0.');
-must(manifestContract.includes("actual.baseline === 'Dana Apps V70.0.0'"),'Merge manifest contract must require Dana Apps V70.0.0.');
-for(const m of ['Dana Apps — Source Handoff Package','PACKAGE-DANA-APPS-SOURCE.cmd','preferred Dana Apps source input'])must(doc.includes(m),'Handoff documentation missing '+m);
-must(runner.includes('test-dana-apps-gear-handoff-package-contract.mjs'),'Authoritative runner missing Gear handoff package contract.');
-must(runner.includes("Add-MasterResult 'Dana Apps Gear handoff package contract' 'PASS'"),'Authoritative runner missing Gear handoff PASS result.');
-console.log('[PASS] Dana Apps Gear handoff package contract.');
+import path from 'node:path';
+import { readContract, workspaceRoot } from './lib/contract-paths.mjs';
+
+const command = readContract('PACKAGE-DANA-APPS-SOURCE.cmd');
+const runner = readContract('tools/run-all-tests.ps1');
+assert.ok(
+  command.includes('package-gear-for-dana-apps.ps1'),
+  'Existing Windows handoff launcher must stay connected.',
+);
+for (const file of [
+  'tools/package-gear-for-dana-apps.ps1',
+  'tools/package-dana-apps-source.ps1',
+]) {
+  const script = readContract(file);
+  for (const marker of [
+    "Join-Path $PSScriptRoot '../..'",
+    'tools/package-release.mjs',
+    '--output-dir',
+    '$LASTEXITCODE -ne 0',
+    'Push-Location $WorkspaceRoot',
+    'Pop-Location',
+  ]) {
+    assert.ok(
+      script.includes(marker),
+      `${file} must delegate complete workspace packaging and propagate failure: ${marker}`,
+    );
+  }
+  assert.ok(
+    !script.includes("Join-Path $Root 'package.json'"),
+    `${file} must not require the removed nested manifest.`,
+  );
+}
+const canonical = fs.readFileSync(
+  path.join(workspaceRoot, 'tools/package-release.mjs'),
+  'utf8',
+);
+assert.ok(
+  canonical.includes('GearApps-${pkg.version}.zip'),
+  'Release archive identity must follow the single root release version.',
+);
+assert.ok(
+  canonical.includes("'--output-dir'"),
+  'Root packager must support the compatibility wrappers output directory.',
+);
+assert.ok(
+  canonical.includes('process.argv[1]') &&
+    canonical.includes('fileURLToPath(import.meta.url)'),
+  'Importing packaging policy must not create an archive.',
+);
+const pkg = JSON.parse(readContract('package.json'));
+assert.ok(
+  pkg.scripts['package:release']?.includes('tools/package-release.mjs'),
+  'The release command must use the canonical root packager.',
+);
+assert.ok(
+  readContract('DANA_APPS_GEAR_HANDOFF_PACKAGE.md').includes(
+    'npm run package:release',
+  ),
+);
+assert.ok(runner.includes('test-dana-apps-gear-handoff-package-contract.mjs'));
+assert.ok(
+  runner.includes(
+    "Add-MasterResult 'Dana Apps Gear handoff package contract' 'PASS'",
+  ),
+);
+console.log(
+  '[PASS] Historical handoff entry points package the complete workspace through one versioned root release tool.',
+);

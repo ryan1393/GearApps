@@ -1,0 +1,4 @@
+/* @dana/ui Gear compatibility entry.
+   This stylesheet intentionally preserves legacy Gear selectors while Gear Apps
+   migrates to Dana-neutral class names. Truck Log should not import this file. */
+@import './gear-apps.css';

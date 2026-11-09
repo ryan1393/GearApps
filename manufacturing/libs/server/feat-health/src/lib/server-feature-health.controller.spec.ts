@@ -1,47 +1,36 @@
-import { LoggerService } from '@nestjs/common';
+import { ServiceUnavailableException } from '@nestjs/common';
 import { TerminusModule, TypeOrmHealthIndicator } from '@nestjs/terminus';
-import { HealthCheckExecutor } from '@nestjs/terminus/dist/health-check/health-check-executor.service';
-import { TERMINUS_LOGGER } from '@nestjs/terminus/dist/health-check/logger/logger.provider';
-import { Test } from '@nestjs/testing';
-
+import { Test, TestingModule } from '@nestjs/testing';
+import { GEAR_APPS_VERSION } from '@gearapps/manufacturing/shared/util-constants';
 import { ServerFeatureHealthController } from './server-feature-health.controller';
 
-const loggerMock: Partial<LoggerService> = {
-  log: jest.fn(),
-  error: jest.fn(),
-  warn: jest.fn(),
-  debug: jest.fn(),
-};
-
-const healthCheckExecutorMock: Partial<HealthCheckExecutor> = {
-  execute: jest.fn(),
-};
-
 describe('ServerFeatureHealthController', () => {
+  let module: TestingModule;
   let controller: ServerFeatureHealthController;
+  const pingCheck = jest.fn();
 
   beforeEach(async () => {
-    const module = await Test.createTestingModule({
-      imports: [TerminusModule],
-      providers: [
-        HealthCheckExecutor,
-        TypeOrmHealthIndicator,
-        {
-          provide: HealthCheckExecutor,
-          useValue: healthCheckExecutorMock,
-        },
-        {
-          provide: TERMINUS_LOGGER,
-          useValue: loggerMock,
-        },
-      ],
+    pingCheck.mockReset().mockResolvedValue({ database: { status: 'up' } });
+    module = await Test.createTestingModule({
+      imports: [TerminusModule.forRoot({ logger: false })],
+      providers: [{ provide: TypeOrmHealthIndicator, useValue: { pingCheck } }],
       controllers: [ServerFeatureHealthController],
     }).compile();
-
     controller = module.get(ServerFeatureHealthController);
   });
+  afterEach(async () => module.close());
 
-  it('should be defined', () => {
-    expect(controller).toBeTruthy();
+  it('reports liveness without requiring a database connection', () => {
+    expect(controller.live()).toEqual({ status: 'ok', service: 'gear-app-server', version: GEAR_APPS_VERSION });
+    expect(pingCheck).not.toHaveBeenCalled();
+  });
+  it('checks database readiness through the public Terminus service', async () => {
+    expect(await controller.ready()).toMatchObject({ status: 'ok', details: { database: { status: 'up' } } });
+    expect(pingCheck).toHaveBeenCalledWith('database');
+  });
+  it('retains unavailable status and the legacy health endpoint when the database is down', async () => {
+    pingCheck.mockResolvedValue({ database: { status: 'down' } });
+    await expect(controller.ready()).rejects.toBeInstanceOf(ServiceUnavailableException);
+    await expect(controller.check()).rejects.toBeInstanceOf(ServiceUnavailableException);
   });
 });

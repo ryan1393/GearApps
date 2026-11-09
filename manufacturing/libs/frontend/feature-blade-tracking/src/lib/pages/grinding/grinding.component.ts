@@ -1,18 +1,18 @@
 import { RouterLink } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { isPendingGrindingStatus, parseCuttergrindRoughShelfTag, cuttergrindRoughShelfForPartType } from '@libs/shared/util-constants';
+import { isPendingGrindingStatus, parseCuttergrindRoughShelfTag, cuttergrindRoughShelfForPartType } from '@gearapps/manufacturing/shared/util-constants';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GearToastService } from '@libs/frontend/util-common';
-import { BladeStatus } from '@libs/shared/util-types';
+import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { BladeStatus } from '@gearapps/manufacturing/shared/util-types';
 import {
   BladeTrackingApiService,
   TrayGrindingRunView,
   InventoryTrayRow,
   InventoryLocationRow,
   apiErrorText,
-} from '@libs/frontend/data-access-blade-tracking';
+} from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import { DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
 

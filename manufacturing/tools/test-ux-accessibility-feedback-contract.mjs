@@ -1,5 +1,6 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
-const read=(p)=>fs.readFileSync(p,'utf8');
+const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8');
 const scanTs=read('libs/frontend/feature-blade-tracking/src/lib/shared/scan-panel/scan-panel.component.ts');
 const scanHtml=read('libs/frontend/feature-blade-tracking/src/lib/shared/scan-panel/scan-panel.component.html');
 for(const m of ['implements AfterViewInit','@Input() autoFocus = true','readonly inputId','ngAfterViewInit()']) if(!scanTs.includes(m)) throw new Error(`Shared scan autofocus missing ${m}`);

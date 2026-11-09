@@ -1,0 +1,244 @@
+/* DANA-R61R14-RUNNING-MACHINES-PART-SHIFT-COUNTS-BEGIN */
+.running-machines-page .running-machines-header { min-height: 82px !important; flex: 0 0 auto !important; }
+.running-machines-page .running-machine-table th:nth-child(1),
+.running-machines-page .running-machine-table td:nth-child(1) { width: 96px !important; }
+.running-machines-page .running-machine-table th:nth-child(2),
+.running-machines-page .running-machine-table td:nth-child(2) { width: calc(74% - 400px) !important; }
+.running-machines-page .running-machine-table th:nth-child(3),
+.running-machines-page .running-machine-table td:nth-child(3) { width: 112px !important; }
+.running-machines-page .running-machine-table th:nth-child(4),
+.running-machines-page .running-machine-table td:nth-child(4),
+.running-machines-page .running-machine-table th:nth-child(5),
+.running-machines-page .running-machine-table td:nth-child(5) { width: 96px !important; }
+.running-machines-page .running-machine-table th:nth-child(6),
+.running-machines-page .running-machine-table td:nth-child(6) { width: 26% !important; }
+.running-machines-page .running-machine-table .part-count-cell,
+.running-machines-page .running-machine-table .shift-count-cell,
+.running-machines-page .running-machine-table .machine-check-cell {
+  text-align: center !important;
+  vertical-align: middle !important;
+  white-space: normal !important;
+}
+.running-machines-page .running-machine-table .part-count-value,
+.running-machines-page .running-machine-table .shift-count-value {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 auto !important;
+  font-size: .9375rem !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  font-variant-numeric: tabular-nums !important;
+  color: #334155 !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  overflow-x: auto !important;
+}
+.running-machines-page .current-shift-label {
+  text-align: center !important;
+  font-size: .8125rem !important;
+  line-height: 1.25 !important;
+  color: #334155 !important;
+  font-weight: 600 !important;
+}
+.running-machines-page .shift-count-note { text-align: center !important; }
+@media (max-width: 1799px) {
+  .running-machines-page { height: auto !important; max-height: none !important; overflow-y: visible !important; }
+  .running-machines-page .department-board { display: block !important; overflow: visible !important; }
+  .running-machines-page .department-panel { width: 100% !important; max-width: 100% !important; margin-bottom: 14px !important; }
+  .running-machines-page .running-table-wrap { overflow-y: visible !important; }
+}
+/* DANA-R61R14-RUNNING-MACHINES-PART-SHIFT-COUNTS-END */
+
+
+/* DANA-R61R15-RUNNING-MACHINES-FOOTER-SYMBOL-FIX-BEGIN */
+/* Draw separators with CSS instead of encoding-sensitive text glyphs. */
+.running-machines-page .running-machines-footer::before,
+.running-machines-page .running-machines-footer::after,
+.running-machines-page .running-machines-footer > span::before,
+.running-machines-page .running-machines-footer > span::after {
+  content: none !important;
+  display: none !important;
+}
+.running-machines-page .running-machines-footer > span + span::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 3px !important;
+  height: 3px !important;
+  margin: 0 8px 2px 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: currentColor !important;
+  box-shadow: none !important;
+  vertical-align: middle !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+/* DANA-R61R15-RUNNING-MACHINES-FOOTER-SYMBOL-FIX-END */
+
+
+/* DANA-R61R16-RUNNING-MACHINES-RESPONSIVE-SCALE-BEGIN */
+/* Scale the board in CSS pixels, respecting browser/Windows display scaling.
+   A rem contribution keeps browser zoom and text-size preferences effective.
+   Use the smaller of available width and height; never shrink the base type. */
+.running-machines-page {
+  --rm-unit: clamp(.0625rem, min(calc(.01rem + .045vw), calc(.015625rem + .075dvh)), .125rem);
+}
+.running-machines-page .running-machines-header {
+  min-height: calc(82 * var(--rm-unit)) !important;
+  padding: calc(6 * var(--rm-unit)) calc(10 * var(--rm-unit)) !important;
+  margin-bottom: calc(5 * var(--rm-unit)) !important;
+  gap: calc(8 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-title-wrap h1 {
+  font-size: calc(24 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-title-wrap > p:first-child {
+  font-size: calc(11 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-title-wrap > p:last-child,
+.running-machines-page .last-refresh {
+  font-size: calc(12 * var(--rm-unit)) !important;
+}
+.running-machines-page .current-shift-label {
+  font-size: calc(13 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-header-actions {
+  flex-wrap: wrap !important;
+  justify-content: flex-end !important;
+  gap: calc(6 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-header-actions button {
+  font-size: calc(14 * var(--rm-unit)) !important;
+  min-height: calc(32 * var(--rm-unit)) !important;
+  padding: calc(4 * var(--rm-unit)) calc(8 * var(--rm-unit)) !important;
+}
+.running-machines-page .department-board {
+  gap: calc(10 * var(--rm-unit)) !important;
+}
+.running-machines-page .department-panel {
+  max-width: calc(50% - 5 * var(--rm-unit)) !important;
+  border-radius: calc(8 * var(--rm-unit)) !important;
+}
+.running-machines-page .department-title {
+  font-size: calc(17 * var(--rm-unit)) !important;
+  padding: calc(8 * var(--rm-unit)) calc(10 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table th {
+  font-size: calc(14 * var(--rm-unit)) !important;
+  padding: calc(6 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table th .column-heading-stack,
+.running-machines-page .running-machine-table th:nth-child(n) .column-heading-stack {
+  font-size: calc(14 * var(--rm-unit)) !important;
+  gap: var(--rm-unit) !important;
+}
+.running-machines-page .running-machine-table th:first-child .column-heading-stack {
+  font-size: calc(13 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table th button {
+  font-size: inherit !important;
+}
+.running-machines-page .running-machine-table th:nth-child(1),
+.running-machines-page .running-machine-table td:nth-child(1) {
+  width: calc(96 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table th:nth-child(2),
+.running-machines-page .running-machine-table td:nth-child(2) {
+  width: calc(74% - 416 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table th:nth-child(3),
+.running-machines-page .running-machine-table td:nth-child(3) {
+  width: calc(112 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table th:nth-child(4),
+.running-machines-page .running-machine-table td:nth-child(4),
+.running-machines-page .running-machine-table th:nth-child(5),
+.running-machines-page .running-machine-table td:nth-child(5) {
+  width: calc(104 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table th:nth-child(6),
+.running-machines-page .running-machine-table td:nth-child(6) {
+  width: 26% !important;
+}
+.running-machines-page .running-machine-table thead tr {
+  height: calc(60 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table tbody tr {
+  height: calc(48 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table tbody td,
+.running-machines-page .running-machine-table tbody td:nth-child(n) {
+  font-size: calc(17 * var(--rm-unit)) !important;
+  padding: calc(3 * var(--rm-unit)) calc(6 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table .machine-number-button {
+  max-width: calc(88 * var(--rm-unit)) !important;
+  min-height: calc(42 * var(--rm-unit)) !important;
+  padding: calc(2 * var(--rm-unit)) calc(4 * var(--rm-unit)) !important;
+  gap: var(--rm-unit) !important;
+  border-radius: calc(7 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table .cell-tag {
+  font-size: calc(12 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table .machine-number-value {
+  font-size: calc(22 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table .build-link {
+  font-size: calc(18 * var(--rm-unit)) !important;
+  padding: calc(2 * var(--rm-unit)) 0 !important;
+}
+.running-machines-page .running-machine-table .part-count-value,
+.running-machines-page .running-machine-table .shift-count-value {
+  font-size: calc(15 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table .last-check-value {
+  font-size: calc(15 * var(--rm-unit)) !important;
+  padding: calc(3 * var(--rm-unit)) calc(7 * var(--rm-unit)) !important;
+  border-radius: calc(6 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machine-table .check-date-value {
+  font-size: calc(13 * var(--rm-unit)) !important;
+  margin-top: calc(2 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machines-footer {
+  font-size: calc(12 * var(--rm-unit)) !important;
+  padding: calc(6 * var(--rm-unit)) calc(4 * var(--rm-unit)) !important;
+  gap: calc(6 * var(--rm-unit)) calc(14 * var(--rm-unit)) !important;
+}
+.running-machines-page .running-machines-footer > span + span::before {
+  width: calc(3 * var(--rm-unit)) !important;
+  height: calc(3 * var(--rm-unit)) !important;
+  margin: 0 calc(8 * var(--rm-unit)) calc(2 * var(--rm-unit)) 0 !important;
+}
+@media (min-width: 1800px) {
+  /* Fill the panel with readable rows, with scrolling when content needs it. */
+  .running-machines-page .running-machine-table {
+    height: 100% !important;
+  }
+}
+@media (max-width: 1799px) {
+  .running-machines-page { --rm-unit: .0625rem; }
+  .running-machines-page .department-panel {
+    max-width: 100% !important;
+  }
+  .running-machines-page .running-machine-table {
+    height: auto !important;
+  }
+}
+@media (max-width: 1199px) {
+  .running-machines-page .running-header-actions {
+    justify-content: center !important;
+  }
+}
+@media (max-width: 999px) {
+  .running-machines-page .running-table-wrap {
+    overflow-x: auto !important;
+  }
+  .running-machines-page .running-machine-table {
+    min-width: 48rem !important;
+  }
+}
+/* DANA-R61R16-RUNNING-MACHINES-RESPONSIVE-SCALE-END */

@@ -1,8 +1,8 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
-import { AbstractOrmEntity } from '@libs/server/util-common';
-import { BladeStatus, IBlade, IBladeEntity } from '@libs/shared/util-types';
+import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { BladeStatus, IBlade, IBladeEntity } from '@gearapps/manufacturing/shared/util-types';
 import { BladeDto, BladeDtoOptions } from '../../../dtos/blade-tracking/blades/blade.dto';
 import { PartSummaryOrmEntity } from '../base/part-summary.orm-entity';
 import { CutterPartTypeOrmEntity } from '../cutter-tracking/cutter-part-type.orm-entity';

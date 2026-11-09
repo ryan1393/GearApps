@@ -12,7 +12,7 @@ import {
   InventoryLocationRow,
   InventoryTrayRow,
   apiErrorText,
-} from '@libs/frontend/data-access-blade-tracking';
+} from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
 import {
   DanaPageHeaderComponent,
   DanaSummaryCardDirective,
@@ -21,7 +21,7 @@ import {
   DanaTableEmptyDirective,
   DanaTableShellDirective,
 } from '@dana/ui';
-import { IPaginationMeta } from '@libs/shared/util-types';
+import { IPaginationMeta } from '@gearapps/manufacturing/shared/util-types';
 
 type InventoryTab = 'trays' | 'containers' | 'locations' | 'blades';
 

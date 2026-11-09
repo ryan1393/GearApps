@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { EntityManager } from 'typeorm';
-import { CoaterManifest, CoaterShipmentTray } from '@libs/shared/util-types';
-import { parseCuttergrindRoughShelfTag, DEPARTMENT_CUTTERGRIND } from '@libs/shared/util-constants';
+import { CoaterManifest, CoaterShipmentTray } from '@gearapps/manufacturing/shared/util-types';
+import { parseCuttergrindRoughShelfTag, DEPARTMENT_CUTTERGRIND } from '@gearapps/manufacturing/shared/util-constants';
 
 export function coaterContentHash(destination: string, notes: string, manifest: CoaterManifest): string {
   // PostgreSQL jsonb may reorder object keys. Sort keys recursively so storing a

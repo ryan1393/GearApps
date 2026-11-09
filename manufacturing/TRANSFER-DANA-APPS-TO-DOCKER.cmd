@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
-cd /d "%~dp0"
+cd /d "%~dp0.."
 
 title Dana Apps - Transfer Source To Remote Docker Host
 
@@ -13,7 +13,8 @@ if not "%~2"=="" set "SSH_HOST=%~2"
 if not "%~3"=="" set "REMOTE_DIR=%~3"
 
 set "REMOTE=%SSH_USER%@%SSH_HOST%"
-set "REMOTE_ARCHIVE=/tmp/dana-apps-transfer.tar.gz"
+set "REMOTE_UPLOAD_DIR="
+set "REMOTE_ARCHIVE="
 set "LOCAL_ARCHIVE=%TEMP%\dana-apps-transfer-%RANDOM%%RANDOM%.tar.gz"
 
 echo ============================================================
@@ -78,6 +79,17 @@ tar.exe -czf "%LOCAL_ARCHIVE%" ^
   --exclude="./.angular" ^
   --exclude="./.cache" ^
   --exclude="./runtime-data" ^
+  --exclude=".env" ^
+  --exclude=".env.*" ^
+  --exclude=".npmrc" ^
+  --exclude=".ssh" ^
+  --exclude="*.pem" ^
+  --exclude="*.key" ^
+  --exclude="./manufacturing/.env" ^
+  --exclude="./manufacturing/.env.local" ^
+  --exclude="./manufacturing/node_modules" ^
+  --exclude="./manufacturing/dist" ^
+  --exclude="./manufacturing/.nx" ^
   --exclude="./*.zip" ^
   --exclude="./*.tar.gz" ^
   --exclude="./*.log" ^
@@ -93,13 +105,16 @@ echo [PASS] Archive created: %LOCAL_ARCHIVE%
 echo        Size: !ARCHIVE_SIZE! bytes
 echo.
 
-echo [3/6] Removing stale remote transfer archive...
-ssh.exe "%REMOTE%" "rm -f '%REMOTE_ARCHIVE%'"
+echo [3/6] Creating a private remote transfer directory...
+for /f "usebackq delims=" %%D in (`ssh.exe "%REMOTE%" "umask 077; mktemp -d /tmp/dana-apps-transfer.XXXXXXXXXX"`) do set "REMOTE_UPLOAD_CANDIDATE=%%D"
+echo !REMOTE_UPLOAD_CANDIDATE! | findstr /r /x "/tmp/dana-apps-transfer\.[A-Za-z0-9][A-Za-z0-9]*" >nul
 if errorlevel 1 (
-    echo [FAIL] Could not prepare remote transfer location.
+    echo [FAIL] Could not create a private remote transfer location.
     goto :fail
 )
-echo [PASS] Remote transfer location is ready.
+set "REMOTE_UPLOAD_DIR=!REMOTE_UPLOAD_CANDIDATE!"
+set "REMOTE_ARCHIVE=!REMOTE_UPLOAD_DIR!/source.tar.gz"
+echo [PASS] Private remote transfer location is ready.
 echo.
 
 echo [4/6] Copying archive with SCP compression...
@@ -112,7 +127,7 @@ echo [PASS] Transfer completed.
 echo.
 
 echo [5/6] Replacing remote source tree and extracting...
-ssh.exe "%REMOTE%" "set -e; rm -rf '%REMOTE_DIR%'; mkdir -p '%REMOTE_DIR%'; tar -xzf '%REMOTE_ARCHIVE%' -C '%REMOTE_DIR%'; test -f '%REMOTE_DIR%/package.json'; rm -f '%REMOTE_ARCHIVE%'; echo REMOTE_EXTRACT_OK"
+ssh.exe "%REMOTE%" "set -e; rm -rf '%REMOTE_DIR%.incoming'; mkdir -p '%REMOTE_DIR%.incoming'; tar -xzf '%REMOTE_ARCHIVE%' -C '%REMOTE_DIR%.incoming'; test -f '%REMOTE_DIR%.incoming/package.json'; test -f '%REMOTE_DIR%.incoming/manufacturing/compose.yml'; if [ -f '%REMOTE_DIR%/manufacturing/.env' ]; then cp -p '%REMOTE_DIR%/manufacturing/.env' '%REMOTE_DIR%.incoming/manufacturing/.env'; elif [ ! -f '%REMOTE_DIR%/manufacturing/compose.yml' ] && [ -f '%REMOTE_DIR%/.env' ]; then cp -p '%REMOTE_DIR%/.env' '%REMOTE_DIR%.incoming/manufacturing/.env'; fi; if [ -f '%REMOTE_DIR%/manufacturing/compose.yml' ] && [ -f '%REMOTE_DIR%/.env' ]; then cp -p '%REMOTE_DIR%/.env' '%REMOTE_DIR%.incoming/.env'; fi; rm -rf '%REMOTE_DIR%.previous'; if [ -d '%REMOTE_DIR%' ]; then mv '%REMOTE_DIR%' '%REMOTE_DIR%.previous'; fi; mv '%REMOTE_DIR%.incoming' '%REMOTE_DIR%'; rm -rf '%REMOTE_UPLOAD_DIR%'; echo REMOTE_EXTRACT_OK"
 if errorlevel 1 (
     echo [FAIL] Remote extraction or verification failed.
     goto :fail
@@ -140,16 +155,17 @@ echo.
 echo Next:
 echo   ssh %REMOTE%
 echo   cd %REMOTE_DIR%
-echo   docker compose config
-echo   docker compose build --progress=plain
-echo   docker compose up -d --no-build
-echo   docker compose ps
+echo   docker compose --env-file manufacturing/.env -f manufacturing/compose.yml config
+echo   docker compose --env-file manufacturing/.env -f manufacturing/compose.yml build --progress=plain
+echo   docker compose --env-file manufacturing/.env -f manufacturing/compose.yml up -d --no-build
+echo   docker compose --env-file manufacturing/.env -f manufacturing/compose.yml ps
 echo.
 pause
 exit /b 0
 
 :fail
 echo.
+if defined REMOTE_UPLOAD_DIR ssh.exe "%REMOTE%" "rm -rf '%REMOTE_UPLOAD_DIR%'" >nul 2>&1
 if exist "%LOCAL_ARCHIVE%" del /q "%LOCAL_ARCHIVE%" >nul 2>&1
 echo ============================================================
 echo   TRANSFER FAILED

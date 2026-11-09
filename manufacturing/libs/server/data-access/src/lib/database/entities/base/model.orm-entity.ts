@@ -1,8 +1,8 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index } from 'typeorm';
 
-import { AbstractOrmEntity } from '@libs/server/util-common';
-import { IModel } from '@libs/shared/util-types';
+import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { IModel } from '@gearapps/manufacturing/shared/util-types';
 
 @Entity({ name: 'models' })
 @Index(['model_number', 'model_type'], { unique: true })

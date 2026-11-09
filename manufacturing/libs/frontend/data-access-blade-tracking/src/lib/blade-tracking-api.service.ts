@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { catchError, defer, EMPTY, expand, forkJoin, map, Observable, of, reduce, throwError } from 'rxjs';
-import { ContainerWorkflowEligibility, TrayWorkflowEligibility } from '@libs/shared/util-constants';
+import { ContainerWorkflowEligibility, TrayWorkflowEligibility } from '@gearapps/manufacturing/shared/util-constants';
 import {
   BladeHistoryEvent,
   BladeStatus,
@@ -15,7 +15,7 @@ import {
   IPartSummary,
   ITray,
   IPartType,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 
 
 export type AssetTagKind = 'TRAY' | 'CONTAINER' | 'LOCATION';

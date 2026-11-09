@@ -3,7 +3,7 @@ import { COATER_SHIPMENT_SCHEMA } from './coater-shipment.schema';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { STARTUP_SCHEMA_LOCK_SQL } from '@libs/shared/util-constants';
+import { STARTUP_SCHEMA_LOCK_SQL } from '@gearapps/manufacturing/shared/util-constants';
 import { CUTTER_BODY_SHELF_SCHEMA } from './cutter-body-shelf.schema';
 
 /**

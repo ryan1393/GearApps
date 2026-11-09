@@ -1,10 +1,10 @@
-import { ServerFeatUserModule } from '@libs/server/feat-user';
-import { STRATEGY_JWT_ACCESS } from '@libs/server/util-common';
+import { ServerFeatUserModule } from '@gearapps/manufacturing/server/feat-user';
+import { STRATEGY_JWT_ACCESS } from '@gearapps/manufacturing/server/util-common';
 import {
   ENV_JWT_ACCESS_EXPIRATION_TIME,
   ENV_JWT_ACCESS_SECRET,
   ENV_SOCIAL_GOOGLE_ENABLED,
-} from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-constants';
 import { forwardRef, Module, Provider } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';

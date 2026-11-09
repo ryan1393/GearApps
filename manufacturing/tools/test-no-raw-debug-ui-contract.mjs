@@ -16,7 +16,7 @@ function walk(dir) {
     if (entry.isDirectory()) {
       walk(full);
     } else if (
-      entry.isFile() &&
+      entry.isFile() && !/\.(spec|test)\.ts$/.test(full) &&
       (full.endsWith('.html') || full.endsWith('.ts'))
     ) {
       files.push(full);

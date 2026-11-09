@@ -9,7 +9,7 @@ import {
   RunningMachineRow,
   RunningMachinesBoard,
   greenshedApiErrorText,
-} from '@libs/frontend/data-access-greenshed';
+} from '@gearapps/manufacturing/frontend/data-access-greenshed';
 import {
   DanaTableDirective,
   DanaTableShellDirective,
@@ -53,6 +53,7 @@ export class GreenshedMachinesComponent implements OnInit, OnDestroy {
   actionMachine: string | null = null;
   selectedMachine: RunningMachineRow | null = null;
   @ViewChild('machineActions', { static: true }) private machineActions!: ElementRef<HTMLDialogElement>;
+  @ViewChild('closeActionsButton') private closeActionsButton?: ElementRef<HTMLButtonElement>;
 
   // DANA-R61R14-COUNT-REFRESH
   private r14Timer: ReturnType<typeof setInterval> | null = null;
@@ -144,6 +145,11 @@ export class GreenshedMachinesComponent implements OnInit, OnDestroy {
     this.actionMachine = machine.machine_number;
     this.selectedMachine = { ...machine };
     this.machineActions.nativeElement.showModal();
+    setTimeout(() => {
+      if (!this.r14Destroyed && this.machineActions.nativeElement.open) {
+        this.closeActionsButton?.nativeElement.focus({ preventScroll: true });
+      }
+    });
   }
 
   closeActions(): void {

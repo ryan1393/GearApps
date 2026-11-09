@@ -17,10 +17,10 @@
   <section *ngIf="canEdit" class="gear-panel operations-panel">
     <div class="gear-panel-heading panel-heading"><h2>Cutter Operations</h2><p>Choose the workflow you need to perform.</p></div>
     <div danaOperationGrid class="operation-grid three-up">
-      <a routerLink="/cutter-builder/cancel-last" class="operation-card" danaOperationCard icon="search" tone="orange" heading="Cancel Last Build" description="Review the last transaction and its cancellation history."></a>
-      <a routerLink="/cutter-builder/build" class="operation-card" danaOperationCard icon="build-cutter" tone="blue" heading="Build Cutter" description="Build a cutter from a complete returned tray."></a>
-      <a routerLink="/cutter-builder/teardown" class="operation-card" danaOperationCard icon="teardown" tone="green" heading="Tear Down Cutter" description="Return blades to a tray and close the current build."></a>
-      <a routerLink="/cutter-builder/lookup" class="operation-card" danaOperationCard icon="search" tone="purple" heading="Build Lookup" description="Find cutter status, body, build, and history."></a>
+      <a routerLink="/cutter-builder/cancel-last" class="operation-card" danaOperationCard icon="search" tone="orange" heading="Cancel Last Build" description="Review the last transaction and its cancellation history." aria-label="Cancel Last Build"></a>
+      <a routerLink="/cutter-builder/build" class="operation-card" danaOperationCard icon="build-cutter" tone="blue" heading="Build Cutter" description="Build a cutter from a complete returned tray." aria-label="Build Cutter"></a>
+      <a routerLink="/cutter-builder/teardown" class="operation-card" danaOperationCard icon="teardown" tone="green" heading="Tear Down Cutter" description="Return blades to a tray and close the current build." aria-label="Tear Down Cutter"></a>
+      <a routerLink="/cutter-builder/lookup" class="operation-card" danaOperationCard icon="search" tone="purple" heading="Build Lookup" description="Find cutter status, body, build, and history." aria-label="Build Lookup"></a>
     </div>
   </section>
 

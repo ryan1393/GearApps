@@ -1,7 +1,7 @@
 name: dana-apps
 
 x-gear-server-image: &gear-server-image
-  image: dana-apps-gear-app-server:70.2.1
+  image: dana-apps-gear-app-server:70.3.0
 
 x-gear-db-environment: &gear-db-environment
   ENVIRONMENT: docker
@@ -44,7 +44,7 @@ services:
       DANA_FRESH_DB_BOOTSTRAP: "YES"
       SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?Set SEED_ADMIN_PASSWORD in .env (12+ chars)}
       SEED_USER_PASSWORD: ${SEED_USER_PASSWORD:?Set SEED_USER_PASSWORD in .env (12+ chars)}
-    command: ["node", "dist/apps/server-bootstrap/main.js"]
+    command: ["node", "dist/manufacturing/apps/server-bootstrap/main.js"]
     depends_on:
       dana-postgres:
         condition: service_healthy
@@ -57,7 +57,7 @@ services:
     environment:
       <<: *gear-db-environment
       DATABASE_SYNCHRONIZE: "false"
-    command: ["node", "tools/base-data/import-base-data.mjs", "--bootstrap-only"]
+    command: ["node", "manufacturing/tools/base-data/import-base-data.mjs", "--bootstrap-only"]
     depends_on:
       gear-db-bootstrap:
         condition: service_completed_successfully
@@ -65,8 +65,8 @@ services:
   gear-app-server:
     <<: *gear-server-image
     build:
-      context: .
-      dockerfile: apps/server/Dockerfile
+      context: ..
+      dockerfile: manufacturing/apps/server/Dockerfile
     restart: unless-stopped
     env_file:
       - .env
@@ -76,8 +76,8 @@ services:
       SERVER_PORT: 3333
       PUBLIC_API_BASE_URL: ${GEAR_PUBLIC_API_BASE_URL:-http://localhost:3333}
       PUBLIC_WEB_BASE_URL: ${GEAR_PUBLIC_WEB_BASE_URL:-http://localhost:4200}
-      EMAIL_TEMPLATE_DIR: /app/dist/apps/server/assets/templates
-      EMAIL_PARTIALS_DIR: /app/dist/apps/server/assets/templates/partials
+      EMAIL_TEMPLATE_DIR: /app/dist/manufacturing/apps/server/assets/templates
+      EMAIL_PARTIALS_DIR: /app/dist/manufacturing/apps/server/assets/templates/partials
     ports:
       - "${GEAR_API_PORT:-3333}:3333"
     depends_on:
@@ -91,10 +91,10 @@ services:
       start_period: 30s
 
   blade-tracking:
-    image: dana-apps-blade-tracking:70.2.1
+    image: dana-apps-blade-tracking:70.3.0
     build:
-      context: .
-      dockerfile: apps/blade-tracking/Dockerfile
+      context: ..
+      dockerfile: manufacturing/apps/blade-tracking/Dockerfile
     restart: unless-stopped
     ports:
       - "${GEAR_BLADE_UI_PORT:-4200}:80"
@@ -108,10 +108,10 @@ services:
       retries: 5
 
   cutter-builder:
-    image: dana-apps-cutter-builder:70.2.1
+    image: dana-apps-cutter-builder:70.3.0
     build:
-      context: .
-      dockerfile: apps/cutter-builder/Dockerfile
+      context: ..
+      dockerfile: manufacturing/apps/cutter-builder/Dockerfile
     restart: unless-stopped
     ports:
       - "${GEAR_CUTTER_UI_PORT:-4201}:80"
@@ -125,10 +125,10 @@ services:
       retries: 5
 
   greenshed:
-    image: dana-apps-greenshed:70.2.1
+    image: dana-apps-greenshed:70.3.0
     build:
-      context: .
-      dockerfile: apps/greenshed/Dockerfile
+      context: ..
+      dockerfile: manufacturing/apps/greenshed/Dockerfile
     restart: unless-stopped
     ports:
       - "${GEAR_GREENSHED_UI_PORT:-4202}:80"

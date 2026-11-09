@@ -1,12 +1,12 @@
 
-import { ServerUtilMailerService } from '@libs/server/util-mailer';
-import { mockMailerFactory } from '@libs/server/util-mailer/testing';
-import { mockRepoFactory } from '@libs/server/util-testing';
+import { ServerUtilMailerService } from '@gearapps/manufacturing/server/util-mailer';
+import { mockMailerFactory } from '@gearapps/manufacturing/server/util-mailer/testing';
+import { mockRepoFactory } from '@gearapps/manufacturing/server/util-testing';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ServerFeatBladeTrayService } from './server-feat-blade-tray.service';
 import { ServerFeatBladeTrayController } from './server-feat-blade-tray.controller';
-import { BladeTrayOrmEntity } from '@libs/server/data-access';
+import { BladeTrayOrmEntity } from '@gearapps/manufacturing/server/data-access';
 
 describe('ServerFeatBladeTrayController', () => {
   let controller: ServerFeatBladeTrayController;

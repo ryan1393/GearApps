@@ -10,8 +10,8 @@ import {
 import {
   PAGINATION_DEFAULT_PAGE,
   PAGINATION_DEFAULT_PER_PAGE,
-} from '@libs/shared/util-constants';
-import { IPaginationMeta } from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-constants';
+import { IPaginationMeta } from '@gearapps/manufacturing/shared/util-types';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PaginationMetaDto implements IPaginationMeta {

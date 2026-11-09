@@ -1,11 +1,11 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const pkg=JSON.parse(fs.readFileSync('package.json','utf8').replace(/^\uFEFF/,''));
-const lock=JSON.parse(fs.readFileSync('package-lock.json','utf8').replace(/^\uFEFF/,''));
+const pkg=JSON.parse(fs.readFileSync(contractPath(process.cwd(), 'package.json'),'utf8').replace(/^\uFEFF/,''));
+const lock=JSON.parse(fs.readFileSync(contractPath(process.cwd(), 'package-lock.json'),'utf8').replace(/^\uFEFF/,''));
 const rootLock=lock.packages?.[''] ?? {};
 
 const removed=[
-  '@angular/language-service',
   '@commitlint/config-conventional',
   '@commitlint/config-nx-scopes',
   '@commitlint/cz-commitlint',

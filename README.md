@@ -1,8 +1,6 @@
-# GearApps
+# GearApps 70.3.0
 
-Dana gear-manufacturing plant-floor apps. The root Nx workspace holds **Lapper**.
-The recovered **Blade Tracking, Cutter Builder, and Greenshed** release lives in
-[`manufacturing/`](manufacturing/README.md) with its own pinned build system.
+Dana gear-manufacturing plant-floor apps: **Lapper, Blade Tracking, Cutter Builder, and Greenshed**.
 
 | App             | Stack                                         | Path                 |
 | --------------- | --------------------------------------------- | -------------------- |
@@ -24,40 +22,49 @@ dotnet test apps/lapper-read/LapperRead.Tests/LapperRead.Tests.csproj -c Release
 
 See its setup notes for service credentials, the licensed FANUC DLLs, writable
 checkpoint storage, and the API idempotency requirement. The collector has a
-dedicated Windows CI workflow; the existing API and client targets are unchanged.
+dedicated Windows CI workflow. Its release metadata inherits 70.3.0 through
+Directory.Build.props; its functional source is preserved.
 
-## Manufacturing workspace
+## One shared workspace
 
-The uploaded GearApps 70.2.0 release has been restored and hardened as 70.2.1 under
-`manufacturing/`. It contains three Angular 19 applications, their NestJS 10 API,
-PostgreSQL schema/bootstrap, deployment tools, and regression tests. Its dependencies
-and Nx targets are separate from Lapper's newer framework versions; root targets
-continue to build Lapper. Run manufacturing commands from that directory:
+GearApps **70.3.0** contains Lapper, Blade Tracking, Cutter Builder, and Greenshed
+in one Nx workspace. Install dependencies once, at this repository root.
+All applications share Angular 20.3.35, NestJS 11.2.9, TypeORM 1.1.2, Nx 24.0.5,
+TypeScript 5.9.3, Jest 30, and Dana UI 0.3.3. The root package.json and package-lock.json
+are the dependency authority; manufacturing/ contains application sources and tools.
 
 ```sh
-cd manufacturing
-npm install --global npm@11.6.2
+nvm use                         # Node 24.22.1
+npm install --global npm@11.9.0
 npm ci
+npm run test:versions
 npm test
 npm run test:contracts
+npm run lint
+npm run build
+npm run package:release          # full source ZIP + SHA-256 checksum
 ```
 
-See the manufacturing README and changelog for PostgreSQL/Docker setup, environment
-settings, and upgrade notes. Default API/UI ports overlap with Lapper's development
-defaults; use separate hosts or configure ports before running both stacks together.
-Existing manufacturing users must sign in again after the authentication upgrade.
-Email recovery requires SMTP and the public frontend origin to be configured.
+Manufacturing setup, PostgreSQL configuration, and production deployment are documented
+in [manufacturing/README.md](manufacturing/README.md). Run npm and Nx commands at the
+repository root. The two APIs retain their existing routes and database configuration.
+Their default development ports overlap; configure SERVER_PORT and frontend proxy
+settings before running both APIs on the same host.
 
-Download the rebuilt standalone release: [GearApps 70.2.1 ZIP](releases/GearApps-70.2.1.zip).
+All four clients consume the same [Dana UI source](libs/shared/dana-ui). Its build
+updates the root vendor package used for published styles. No separate Dana UI install
+is required. Update dependency versions in the root manifest, regenerate the root lock,
+and run the version check and full validation before publishing.
 
-The original upload is retained at
-[`source-archives/GearApps-70.2.0.zip`](source-archives/GearApps-70.2.0.zip) for recovery.
-The root Lapper API paths, source, and database configuration are preserved.
+Download the complete workspace: [GearApps 70.3.0 ZIP](releases/GearApps-70.3.0.zip).
+Validation details are in [the release report](docs/RELEASE_VERIFICATION_70.3.0.json).
+Previous releases and the original upload remain in releases/ and source-archives/
+as historical archives.
 
 ## Quick start
 
 ```sh
-nvm use                      # Node 22
+nvm use                      # Node 24.22.1
 npm ci
 cp .env.example .env         # defaults to a local SQLite database, no setup needed
 npx nx serve lapper-api      # http://localhost:3333/api/v1  ·  Swagger: /api/docs
@@ -93,7 +100,9 @@ libs/
   client/ui              Small Dana-styled building blocks (dialog, badge, value field, segmented)
   client/shell           Dana app shell: sidebar, topbar, health pill
   client/feature-*       One lib per screen area
-vendor/dana-ui/          Pinned @dana/ui package (same mechanism as Truck Log)
+  shared/dana-ui/        Canonical Dana UI source and compatibility styles
+manufacturing/          Blade Tracking, Cutter Builder, Greenshed, and PostgreSQL API
+vendor/dana-ui/package/ Generated @dana/ui package shared by all clients
 ```
 
 ### Conventions
@@ -111,7 +120,3 @@ npx nx graph                            # project graph
 npx nx g @nx/angular:library libs/client/feature-x --standalone   # new screen area
 docker compose up --build               # client on :8080, API behind nginx at /api
 ```
-
-## Upgrading Dana UI
-
-Drop the new `dana-ui-x.y.z.tgz` into `vendor/dana-ui/`, update the `@dana/ui` entry in `package.json`, run `npm install`.

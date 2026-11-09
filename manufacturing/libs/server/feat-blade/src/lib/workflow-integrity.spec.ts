@@ -6,14 +6,14 @@ import {
   CutterBodyOrmEntity, CutterBladeRequirementOrmEntity,
   CutterPartTypeOrmEntity, CutterMachineRunOrmEntity, LocationOrmEntity,
   MachineOrmEntity, PartSummaryOrmEntity, TrayOrmEntity,
-} from '@libs/server/data-access';
-import { BladeStatus } from '@libs/shared/util-types';
-import { ServerFeatBladeTrayService } from '@libs/server/feat-blade-tray';
-import { ServerFeatTrayService } from '@libs/server/feat-tray';
-import { ServerFeatContainerService } from '@libs/server/feat-container';
-import { ServerFeatLocationService } from '@libs/server/feat-location';
-import { ServerFeatCutterBuildService } from '@libs/server/feat-cutter-build';
-import { ServerFeatGreenshedService } from '@libs/server/feat-greenshed';
+} from '@gearapps/manufacturing/server/data-access';
+import { BladeStatus } from '@gearapps/manufacturing/shared/util-types';
+import { ServerFeatBladeTrayService } from '@gearapps/manufacturing/server/feat-blade-tray';
+import { ServerFeatTrayService } from '@gearapps/manufacturing/server/feat-tray';
+import { ServerFeatContainerService } from '@gearapps/manufacturing/server/feat-container';
+import { ServerFeatLocationService } from '@gearapps/manufacturing/server/feat-location';
+import { ServerFeatCutterBuildService } from '@gearapps/manufacturing/server/feat-cutter-build';
+import { ServerFeatGreenshedService } from '@gearapps/manufacturing/server/feat-greenshed';
 import { ServerFeatBladeService } from './server-feat-blade.service';
 
 function repository(value: object | null = null) {

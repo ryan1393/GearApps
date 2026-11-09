@@ -1,0 +1,20 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const p=path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../../dist/libs/shared/dana-ui/package.json');
+if(!fs.existsSync(p))throw new Error('dist/package.json not found.');
+const pkg=JSON.parse(fs.readFileSync(p,'utf8'));
+pkg.style='./styles/dana-ui.css';
+pkg.sideEffects=['**/*.css'];
+pkg.exports=pkg.exports||{};
+pkg.exports['./styles/dana-ui.css']='./styles/dana-ui.css';
+pkg.exports['./styles/dana-core.css']='./styles/dana-core.css';
+pkg.exports['./styles/gear-compat.css']='./styles/gear-compat.css';
+pkg.exports['./styles/gear-compat-features.css']='./styles/gear-compat-features.css';
+pkg.exports['./styles/gear-compat-overrides.css']='./styles/gear-compat-overrides.css';
+pkg.exports['./tailwind/tailwind-preset.cjs']='./tailwind/tailwind-preset.cjs';
+pkg.exports['./styles/*']='./styles/*';
+pkg.exports['./assets/*']='./assets/*';
+fs.writeFileSync(p,JSON.stringify(pkg,null,2)+'\n');
+console.log('[PASS] Dana UI package exports finalized.');

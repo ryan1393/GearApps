@@ -8,7 +8,7 @@ import {
   BladeTrackingApiService,
   InventoryLocationRow,
   apiErrorText,
-} from '@libs/frontend/data-access-blade-tracking';
+} from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
 import {
   DanaSummaryCardDirective,
   DanaSummaryGridDirective,

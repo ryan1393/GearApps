@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
@@ -5,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const files = [];
 for (const subdirectory of ['', 'data-import', 'test-data']) {
-  for (const name of fs.readdirSync(path.join(root, 'tools', subdirectory))) {
+  for (const name of fs.readdirSync(contractPath(root, 'tools', subdirectory))) {
     if (
       /^test-.*-contract\.mjs$/.test(name) &&
       name !== 'test-start-grinding-db-contract.mjs'
@@ -16,7 +17,7 @@ for (const subdirectory of ['', 'data-import', 'test-data']) {
 files.sort();
 let failures = 0;
 for (const file of files) {
-  const result = spawnSync(process.execPath, [path.join(root, 'tools', file)], {
+  const result = spawnSync(process.execPath, [contractPath(root, 'tools', file)], {
     cwd: root,
     encoding: 'utf8',
   });

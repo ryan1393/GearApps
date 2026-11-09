@@ -1,0 +1,161 @@
+/* Searchable dropdown with column headers (dana-combobox). */
+.dana-combobox {
+  position: relative;
+  display: block;
+  min-width: 0;
+}
+
+.dana-combobox-control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.dana-combobox-input {
+  width: 100%;
+  min-height: var(--dana-control-height);
+  padding: 9px 64px 9px 11px;
+  border: 1px solid var(--dana-control-border);
+  border-radius: var(--dana-radius-field);
+  background: #fff;
+  color: var(--dana-text);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  text-overflow: ellipsis;
+}
+
+.dana-combobox-input::placeholder { color: var(--dana-placeholder); }
+
+.dana-combobox-input:focus {
+  border-color: var(--dana-focus-border);
+  box-shadow: var(--dana-focus-ring);
+}
+
+.dana-combobox-input:disabled {
+  background: #f4f6f9;
+  color: var(--dana-muted);
+  cursor: not-allowed;
+}
+
+.dana-combobox-toggle,
+.dana-combobox-clear {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  padding: 0;
+  background: transparent;
+  color: var(--dana-muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.dana-combobox-toggle { right: 6px; }
+.dana-combobox-clear { right: 34px; font-size: 18px; line-height: 1; }
+.dana-combobox-toggle:hover,
+.dana-combobox-clear:hover { background: #f1f4f8; color: var(--dana-text); }
+
+.dana-combobox-toggle span {
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg);
+  transition: transform .12s ease;
+}
+
+.dana-combobox.is-open .dana-combobox-toggle span { margin-top: 4px; transform: rotate(-135deg); }
+
+.dana-combobox-panel {
+  position: fixed;
+  z-index: 1250;
+  max-width: calc(100vw - 32px);
+  overflow: hidden;
+  border: 1px solid var(--dana-border);
+  border-radius: var(--dana-radius-md);
+  background: #fff;
+  box-shadow: var(--dana-shadow-raised);
+  font-weight: 500;
+  letter-spacing: normal;
+  text-transform: none;
+}
+
+.dana-combobox-head,
+.dana-combobox-option {
+  display: grid;
+  grid-template-columns: var(--dana-combobox-columns, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+}
+
+.dana-combobox-head {
+  min-height: 34px;
+  border-bottom: 1px solid var(--dana-border);
+  background: #fbfcfe;
+  color: var(--dana-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dana-combobox-list {
+  max-height: var(--dana-combobox-list-max, 336px);
+  margin: 0;
+  padding: 4px 0;
+  overflow-y: auto;
+  list-style: none;
+  overscroll-behavior: contain;
+}
+
+.dana-combobox-option {
+  min-height: var(--dana-combobox-row-height, 42px);
+  border-left: 3px solid transparent;
+  color: var(--dana-text);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.dana-combobox-option > span,
+.dana-combobox-head > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dana-combobox-option > span:first-child { font-weight: 700; }
+.dana-combobox-option.is-active { background: #eef4fb; }
+.dana-combobox-option.is-selected { border-left-color: var(--dana-primary); background: #f3f7fd; }
+.dana-combobox-option.is-active.is-selected { background: #e6eefa; }
+.dana-combobox .is-end { text-align: right; justify-self: end; }
+
+.dana-combobox-empty {
+  padding: 14px 12px;
+  color: var(--dana-muted);
+  font-size: 13px;
+}
+
+.dana-combobox-foot {
+  padding: 7px 12px;
+  border-top: 1px solid var(--dana-border);
+  color: var(--dana-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  /* Narrow screens: keep the first two columns; the rest stay in the accessible label. */
+  .dana-combobox-head > span:nth-child(n+3),
+  .dana-combobox-option > span:nth-child(n+3) { display: none; }
+  .dana-combobox-head,
+  .dana-combobox-option { grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); }
+}

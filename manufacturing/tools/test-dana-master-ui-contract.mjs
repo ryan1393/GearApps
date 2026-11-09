@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs'; import path from 'node:path';
 import { readDanaUiSource } from './lib/dana-ui-source.mjs';
-const root=path.resolve(process.argv[2]||'.'); const read=p=>fs.readFileSync(path.join(root,p),'utf8'); const must=(c,m)=>{if(!c)throw new Error(m)};
+const root=path.resolve(process.argv[2]||'.'); const read=p=>fs.readFileSync(contractPath(root,p),'utf8'); const must=(c,m)=>{if(!c)throw new Error(m)};
 const idx=readDanaUiSource(root, 'index.ts'); const tabs=readDanaUiSource(root, 'lib/components/navigation/dana-tabs.directive.ts'); const confirm=readDanaUiSource(root, 'lib/components/feedback/dana-confirm-dialog.component.ts'); const page=readDanaUiSource(root, 'lib/components/layout/dana-page-header.component.ts'); const op=readDanaUiSource(root, 'lib/components/navigation/dana-operation-card.component.ts'); const prim=read('vendor/dana-ui/package/styles/gear-apps/components/primitives.css'); const gearToast=read('libs/frontend/util-common/src/lib/toast/gear-toast.service.ts');
 for(const name of ['DanaButtonDirective','DanaIconButtonDirective','DanaToolbarDirective','DanaAlertDirective','DanaDetailGridDirective','DanaDetailItemComponent','DanaTabsDirective','DanaTabDirective','DanaToastService','DanaToastHostComponent','DanaConfirmDialogComponent']) must(idx.includes(name),'Missing shared Dana export: '+name);
 must(idx.includes('DANA_APPS_GLOBAL_STYLESHEET'),'Dana canonical stylesheet export missing.');

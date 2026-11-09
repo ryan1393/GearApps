@@ -1,5 +1,6 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
-const read=(p)=>fs.readFileSync(p,'utf8');
+const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8');
 const shelf=read('libs/shared/util-constants/src/lib/shelf-location.constants.ts');
 const locationService=read('libs/server/feat-location/src/lib/server-feat-location.service.ts');
 const locationTray=read('libs/server/feat-location-tray/src/lib/server-feat-location-tray.service.ts');

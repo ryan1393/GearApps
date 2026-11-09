@@ -10,14 +10,14 @@ import {
   CreateBladeDto,
   PaginationService,
   TrayOrmEntity,
-} from '@libs/server/data-access';
+} from '@gearapps/manufacturing/server/data-access';
 import {
   BladeHistoryEvent,
   BladeStatus,
   IBladeEntity,
   SortOrderType,
   Uuid,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,

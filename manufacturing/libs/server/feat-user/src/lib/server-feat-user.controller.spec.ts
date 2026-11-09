@@ -1,7 +1,7 @@
-import { UserOrmEntity, DepartmentOrmEntity } from '@libs/server/data-access';
-import { ServerUtilMailerService } from '@libs/server/util-mailer';
-import { mockMailerFactory } from '@libs/server/util-mailer/testing';
-import { mockRepoFactory } from '@libs/server/util-testing';
+import { UserOrmEntity, DepartmentOrmEntity } from '@gearapps/manufacturing/server/data-access';
+import { ServerUtilMailerService } from '@gearapps/manufacturing/server/util-mailer';
+import { mockMailerFactory } from '@gearapps/manufacturing/server/util-mailer/testing';
+import { mockRepoFactory } from '@gearapps/manufacturing/server/util-testing';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';

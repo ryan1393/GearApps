@@ -3,6 +3,8 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 process.env.TS_NODE_PROJECT = path.resolve(__dirname, '../apps/server/tsconfig.app.json');
+// The server's path aliases belong to the single repository workspace.
+process.env.TS_NODE_BASEURL = path.resolve(__dirname, '../..');
 process.env.TS_NODE_TRANSPILE_ONLY = '1';
 require('ts-node/register');require('tsconfig-paths/register');
 const { validationSchema } = require('../libs/server/util-common/src/lib/config/schema.ts');

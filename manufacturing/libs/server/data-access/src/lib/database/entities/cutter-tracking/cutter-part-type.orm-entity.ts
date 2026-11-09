@@ -1,8 +1,8 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index } from 'typeorm';
 
-import { AbstractOrmEntity } from '@libs/server/util-common';
-import { IPartType } from '@libs/shared/util-types';
+import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { IPartType } from '@gearapps/manufacturing/shared/util-types';
 
 /**
  * Shared part type reference used by Blade Tracking and Cutter Tracking.

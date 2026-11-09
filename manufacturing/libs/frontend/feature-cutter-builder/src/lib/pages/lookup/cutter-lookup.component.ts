@@ -1,3 +1,4 @@
+import { GearScannerFocusDirective } from '@gearapps/manufacturing/frontend/util-common';
 import { Subject, takeUntil } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -10,7 +11,7 @@ import {
   CutterBuilderApiService,
   cutterApiErrorText,
   downloadCutterCardArtifacts,
-} from '@libs/frontend/data-access-cutter-builder';
+} from '@gearapps/manufacturing/frontend/data-access-cutter-builder';
 import {
   DanaPageHeaderComponent,
   DanaTableDirective,
@@ -21,7 +22,7 @@ import {
 @Component({
   selector: 'gear-cutter-lookup',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaPageHeaderComponent, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
+  imports: [CommonModule, GearScannerFocusDirective, FormsModule, DanaPageHeaderComponent, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
   templateUrl: './cutter-lookup.component.html',
 })
 export class CutterLookupComponent implements OnInit, OnDestroy {

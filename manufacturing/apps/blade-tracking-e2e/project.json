@@ -1,35 +1,26 @@
 {
   "name": "blade-tracking-e2e",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/blade-tracking-e2e/src",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "manufacturing/apps/blade-tracking-e2e/src",
   "projectType": "application",
   "targets": {
     "e2e": {
-      "executor": "@nx/cypress:cypress",
+      "executor": "nx:run-commands",
       "options": {
-        "cypressConfig": "apps/blade-tracking-e2e/cypress.config.ts",
-        "devServerTarget": "blade-tracking:serve:development",
-        "testingType": "e2e"
+        "command": "cypress run --config-file manufacturing/apps/blade-tracking-e2e/cypress.config.ts",
+        "cwd": "."
       },
-      "configurations": {
-        "production": {
-          "devServerTarget": "blade-tracking:serve:production"
-        },
-        "ci": {
-          "devServerTarget": "blade-tracking:serve-static"
-        }
-      }
+      "dependsOn": [
+        "blade-tracking:serve-static"
+      ]
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": [
-          "apps/blade-tracking-e2e/**/*.ts"
-        ]
-      }
+        "command": "eslint .",
+        "cwd": "manufacturing/apps/blade-tracking-e2e"
+      },
+      "cache": true
     }
   },
   "tags": [

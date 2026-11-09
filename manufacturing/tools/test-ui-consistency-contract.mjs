@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const read=(p)=>fs.readFileSync(p,'utf8');
+const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8');
 
 const navs={
   blade:read('apps/blade-tracking/src/app/layout/app-nav/app-nav.component.html'),

@@ -1,7 +1,7 @@
 import { defer, EMPTY, expand, map, Observable, reduce } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { ILocation, IPaginatedResponse, ITray } from '@libs/shared/util-types';
+import { ILocation, IPaginatedResponse, ITray } from '@gearapps/manufacturing/shared/util-types';
 
 export interface CutterBody {
   id: string;

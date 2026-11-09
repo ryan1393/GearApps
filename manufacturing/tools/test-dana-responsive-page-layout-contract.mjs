@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const read = (p) => fs.readFileSync(p, 'utf8');
+const read = (p) => fs.readFileSync(contractPath(process.cwd(), p), 'utf8');
 const must = (ok, msg) => {
   if (!ok) throw new Error(msg);
 };

@@ -1,10 +1,11 @@
+import { contractPath } from '../lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..', '..');
-const read = (p) => fs.readFileSync(path.join(root,p),'utf8');
+const read = (p) => fs.readFileSync(contractPath(root,p),'utf8');
 const assert=(c,m)=>{if(!c) throw new Error(m);};
 
 const entity=read('libs/server/data-access/src/lib/database/entities/cutter-tracking/cutter-body.orm-entity.ts');

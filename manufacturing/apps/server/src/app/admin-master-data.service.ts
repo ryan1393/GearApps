@@ -3,8 +3,8 @@ import {
   CutterMachineRunOrmEntity,
   MachineOrmEntity,
   ModelOrmEntity,
-} from '@libs/server/data-access';
-import { Uuid } from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/server/data-access';
+import { Uuid } from '@gearapps/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,

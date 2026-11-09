@@ -6,14 +6,14 @@ import {
   TokenResponseDto,
   UserDto,
   UserLoginDto,
-} from '@libs/server/data-access';
+} from '@gearapps/manufacturing/server/data-access';
 import {
   Auth,
   JwtRefreshTokenGuard,
   ReqUserId,
   SkipAuth,
-} from '@libs/server/util-common';
-import { IRequestUserData, RoleType, Uuid } from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/server/util-common';
+import { IRequestUserData, RoleType, Uuid } from '@gearapps/manufacturing/shared/util-types';
 import {
   Body,
   Controller,

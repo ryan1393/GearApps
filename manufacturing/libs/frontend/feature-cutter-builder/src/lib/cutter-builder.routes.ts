@@ -1,6 +1,6 @@
-import { WorkflowCancellationComponent } from '@libs/frontend/util-common';
+import { WorkflowCancellationComponent } from '@gearapps/manufacturing/frontend/util-common';
 import { Route } from '@angular/router';
-import { departmentEditorGuard } from '@libs/frontend/data-access-common';
+import { departmentEditorGuard } from '@gearapps/manufacturing/frontend/data-access-common';
 import { CutterBuilderDashboardComponent } from './pages/dashboard/cutter-builder-dashboard.component';
 import { CutterBuildComponent } from './pages/build/cutter-build.component';
 import { CutterTeardownComponent } from './pages/teardown/cutter-teardown.component';

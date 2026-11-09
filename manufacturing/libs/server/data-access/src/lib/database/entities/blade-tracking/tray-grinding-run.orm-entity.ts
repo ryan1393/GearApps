@@ -1,8 +1,8 @@
 import { instanceToPlain } from 'class-transformer';
 import { Check, Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
-import { AbstractOrmEntity } from '@libs/server/util-common';
-import { ITrayGrindingRun } from '@libs/shared/util-types';
+import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { ITrayGrindingRun } from '@gearapps/manufacturing/shared/util-types';
 import { PartSummaryOrmEntity } from '../base/part-summary.orm-entity';
 import { CutterPartTypeOrmEntity } from '../cutter-tracking/cutter-part-type.orm-entity';
 import { UserOrmEntity } from '../user.orm-entity';

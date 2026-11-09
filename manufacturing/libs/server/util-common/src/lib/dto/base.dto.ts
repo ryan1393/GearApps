@@ -1,4 +1,4 @@
-import { IBaseEntity, Uuid } from '@libs/shared/util-types';
+import { IBaseEntity, Uuid } from '@gearapps/manufacturing/shared/util-types';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { AbstractOrmEntity } from '../database';

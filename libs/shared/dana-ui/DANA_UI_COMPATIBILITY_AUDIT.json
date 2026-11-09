@@ -1,0 +1,185 @@
+{
+  "danaUiVersion": "0.3.2",
+  "canonicalVisualSource": "Truck Log",
+  "scannedFiles": 80,
+  "compatibilityFiles": 35,
+  "gearMarkers": 1943,
+  "domainMarkers": 335,
+  "files": [
+    {
+      "file": "src/styles/gear-compat-overrides.css",
+      "gearMarkers": 580,
+      "domainMarkers": 6
+    },
+    {
+      "file": "src/styles/gear-apps/features/admin-core.css",
+      "gearMarkers": 402,
+      "domainMarkers": 1
+    },
+    {
+      "file": "src/styles/gear-apps/components/primitives.css",
+      "gearMarkers": 232,
+      "domainMarkers": 38
+    },
+    {
+      "file": "src/styles/gear-apps/components/workflow-layout.css",
+      "gearMarkers": 227,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/styles/gear-apps/features/inventory-relations.css",
+      "gearMarkers": 19,
+      "domainMarkers": 102
+    },
+    {
+      "file": "src/styles/gear-apps/components/data-display.css",
+      "gearMarkers": 89,
+      "domainMarkers": 30
+    },
+    {
+      "file": "src/styles/gear-apps/foundation/tokens.css",
+      "gearMarkers": 103,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/styles/gear-apps/components/icons.css",
+      "gearMarkers": 64,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/styles/gear-apps/features/inventory-core.css",
+      "gearMarkers": 26,
+      "domainMarkers": 37
+    },
+    {
+      "file": "src/styles/gear-apps/features/cutter-builder.css",
+      "gearMarkers": 0,
+      "domainMarkers": 62
+    },
+    {
+      "file": "src/styles/gear-apps/foundation/responsive.css",
+      "gearMarkers": 29,
+      "domainMarkers": 22
+    },
+    {
+      "file": "src/styles/gear-apps/features/blade-dashboard.css",
+      "gearMarkers": 3,
+      "domainMarkers": 24
+    },
+    {
+      "file": "src/styles/gear-apps/components/toast.css",
+      "gearMarkers": 23,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/styles/gear-apps/features/dashboard.css",
+      "gearMarkers": 19,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/styles/gear-apps/layout/navigation-shell.css",
+      "gearMarkers": 17,
+      "domainMarkers": 2
+    },
+    {
+      "file": "src/styles/gear-compat-features.css",
+      "gearMarkers": 10,
+      "domainMarkers": 8
+    },
+    {
+      "file": "src/styles/gear-apps.css",
+      "gearMarkers": 17,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/styles/gear-apps/features/scrap-blades.css",
+      "gearMarkers": 15,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/styles/gear-apps/features/typography.css",
+      "gearMarkers": 12,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/lib/components/data/dana-table.directive.ts",
+      "gearMarkers": 10,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/styles/gear-apps/layout/app-shell.css",
+      "gearMarkers": 7,
+      "domainMarkers": 3
+    },
+    {
+      "file": "src/lib/components/actions/dana-button.directive.ts",
+      "gearMarkers": 6,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/lib/components/feedback/dana-toast-host.component.ts",
+      "gearMarkers": 6,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/lib/components/feedback/dana-alert.directive.ts",
+      "gearMarkers": 4,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/lib/components/layout/dana-page-header.component.ts",
+      "gearMarkers": 4,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/styles/gear-apps/foundation/base.css",
+      "gearMarkers": 4,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/index.ts",
+      "gearMarkers": 3,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/lib/components/data/dana-detail-item.component.ts",
+      "gearMarkers": 3,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/lib/components/navigation/dana-operation-card.component.ts",
+      "gearMarkers": 2,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/styles/gear-apps/components/access-states.css",
+      "gearMarkers": 2,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/lib/components/data/dana-detail-grid.directive.ts",
+      "gearMarkers": 1,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/lib/components/layout/dana-responsive-grid.directive.ts",
+      "gearMarkers": 1,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/lib/components/layout/dana-stack.directive.ts",
+      "gearMarkers": 1,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/lib/components/layout/dana-toolbar.directive.ts",
+      "gearMarkers": 1,
+      "domainMarkers": 0
+    },
+    {
+      "file": "src/styles/gear-compat.css",
+      "gearMarkers": 1,
+      "domainMarkers": 0
+    }
+  ]
+}

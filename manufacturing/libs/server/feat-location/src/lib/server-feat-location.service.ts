@@ -10,11 +10,11 @@ import {
   PartSummaryOrmEntity,
   InventoryListQueryDto,
   PaginationService,
-} from '@libs/server/data-access';
+} from '@gearapps/manufacturing/server/data-access';
 import {
   ILocationEntity,
   Uuid,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 import {
   CuttergrindNumberedShelfTag,
   CuttergrindRoughShelfTag,
@@ -22,7 +22,7 @@ import {
   parseCuttergrindRoughShelfTag,
   parseSummaryShelfTag,
   SummaryShelfTag,
-} from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-constants';
 import {
   ConflictException,
   Injectable,

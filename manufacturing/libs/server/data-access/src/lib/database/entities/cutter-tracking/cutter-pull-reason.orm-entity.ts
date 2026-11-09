@@ -1,8 +1,8 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index } from 'typeorm';
 
-import { AbstractOrmEntity } from '@libs/server/util-common';
-import { ICutterPullReason } from '@libs/shared/util-types';
+import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { ICutterPullReason } from '@gearapps/manufacturing/shared/util-types';
 
 @Entity({ name: 'cutter_pull_reasons' })
 export class CutterPullReasonOrmEntity extends AbstractOrmEntity {

@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -13,7 +14,7 @@ function walk(dir,out=[]){
 }
 
 const entityTables=new Set();
-for(const file of walk(path.join(root,'libs','server','data-access','src','lib','database','entities'))){
+for(const file of walk(contractPath(root,'libs','server','data-access','src','lib','database','entities'))){
   const text=fs.readFileSync(file,'utf8');
   const m=text.match(/@Entity\(\{\s*name:\s*['"]([^'"]+)['"]/);
   if(m) entityTables.add(m[1]);

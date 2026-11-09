@@ -1,8 +1,9 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
+const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8');
 const fail = (message) => { console.error(`[FAIL] ${message}`); process.exit(1); };
 const requireText = (text, marker, label) => { if (!text.includes(marker)) fail(`${label} missing marker: ${marker}`); };
 

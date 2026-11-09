@@ -1,16 +1,16 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../../dist/out-tsc",
+    "outDir": "../../../../dist/out-tsc",
     "declaration": true,
     "types": [],
-    "target": "es2021"
+    "target": "es2022"
   },
   "include": [
     "src/**/*.ts"
   ],
   "exclude": [
-    "jest.config.ts",
+    "jest.config.cts",
     "src/**/*.spec.ts",
     "src/**/*.test.ts"
   ]

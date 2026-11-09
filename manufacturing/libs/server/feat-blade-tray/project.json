@@ -1,7 +1,7 @@
 {
   "name": "server-feat-blade-tray",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/server/feat-blade-tray/src",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "manufacturing/libs/server/feat-blade-tray/src",
   "projectType": "library",
   "tags": [
     "type:feature",
@@ -10,29 +10,37 @@
   ],
   "targets": {
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": [
-          "libs/server/feat-blade-tray/**/*.ts"
-        ]
-      }
+        "command": "eslint .",
+        "cwd": "manufacturing/libs/server/feat-blade-tray"
+      },
+      "cache": true
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
+        "{workspaceRoot}/coverage/manufacturing/libs/server/feat-blade-tray"
       ],
       "options": {
-        "jestConfig": "libs/server/feat-blade-tray/jest.config.ts",
-        "passWithNoTests": true
+        "command": "jest --config manufacturing/libs/server/feat-blade-tray/jest.config.cts --runInBand --passWithNoTests",
+        "cwd": ".",
+        "env": {
+          "NODE_ENV": "test",
+          "ENVIRONMENT": "test",
+          "NX_DAEMON": "false",
+          "JWT_ACCESS_SECRET": "unit-test-access-secret-no-production-use",
+          "JWT_REFRESH_SECRET": "unit-test-refresh-secret-no-production-use",
+          "DATABASE_TYPE": "better-sqlite3",
+          "DATABASE_PATH": ":memory:",
+          "EMAIL_ENABLED": "false",
+          "SOCIAL_GOOGLE_ENABLED": "false",
+          "SENTRY_DSN": ""
+        }
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "jest --config manufacturing/libs/server/feat-blade-tray/jest.config.cts --runInBand --passWithNoTests --ci --coverage"
         }
       }
     }

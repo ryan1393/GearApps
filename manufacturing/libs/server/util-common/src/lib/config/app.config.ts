@@ -1,4 +1,4 @@
-import { ENV_SERVER_HOST, ENV_SERVER_PORT } from '@libs/shared/util-constants';
+import { ENV_SERVER_HOST, ENV_SERVER_PORT } from '@gearapps/manufacturing/shared/util-constants';
 import { registerAs } from '@nestjs/config';
 
 export const appConfig = registerAs('app', () => ({

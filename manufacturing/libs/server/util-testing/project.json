@@ -1,19 +1,16 @@
 {
   "name": "server-util-testing",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/server/util-testing/src",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "manufacturing/libs/server/util-testing/src",
   "projectType": "library",
   "targets": {
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": [
-          "libs/server/util-testing/**/*.ts"
-        ]
-      }
+        "command": "eslint .",
+        "cwd": "manufacturing/libs/server/util-testing"
+      },
+      "cache": true
     }
   },
   "tags": [

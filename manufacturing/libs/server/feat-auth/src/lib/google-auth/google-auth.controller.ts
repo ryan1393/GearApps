@@ -1,5 +1,5 @@
-import { SkipAuth } from '@libs/server/util-common';
-import { AuthProviderType, ITokenResponse } from '@libs/shared/util-types';
+import { SkipAuth } from '@gearapps/manufacturing/server/util-common';
+import { AuthProviderType, ITokenResponse } from '@gearapps/manufacturing/shared/util-types';
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 

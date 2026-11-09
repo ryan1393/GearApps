@@ -1,9 +1,9 @@
 {
   "name": "blade-tracking",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "prefix": "gear",
-  "sourceRoot": "apps/blade-tracking/src",
+  "sourceRoot": "manufacturing/apps/blade-tracking/src",
   "tags": [
     "type:app",
     "scope:frontend",
@@ -12,35 +12,34 @@
   ],
   "targets": {
     "build": {
-      "executor": "@nx/angular:webpack-browser",
+      "executor": "@angular/build:application",
       "outputs": [
-        "{options.outputPath}"
+        "{workspaceRoot}/dist/manufacturing/apps/blade-tracking"
       ],
       "options": {
-        "outputPath": "dist/apps/blade-tracking",
-        "index": "apps/blade-tracking/src/index.html",
-        "main": "apps/blade-tracking/src/main.ts",
+        "outputPath": "dist/manufacturing/apps/blade-tracking",
         "polyfills": [
           "zone.js"
         ],
-        "tsConfig": "apps/blade-tracking/tsconfig.app.json",
+        "tsConfig": "manufacturing/apps/blade-tracking/tsconfig.app.json",
         "assets": [
-          "apps/blade-tracking/src/favicon.ico",
-          "apps/blade-tracking/src/assets",
+          "manufacturing/apps/blade-tracking/src/favicon.ico",
+          "manufacturing/apps/blade-tracking/src/assets",
           {
             "glob": "**/*",
-            "input": "assets",
+            "input": "manufacturing/assets",
             "output": "assets"
           }
         ],
         "styles": [
-          "apps/blade-tracking/src/styles.css",
-          "node_modules/@dana/ui/styles/gear-compat.css",
-          "node_modules/@dana/ui/styles/gear-compat-features.css",
-          "node_modules/@dana/ui/styles/dana-ui.css",
-          "node_modules/@dana/ui/styles/gear-compat-overrides.css"
+          "manufacturing/apps/blade-tracking/src/styles.css",
+          "libs/shared/dana-ui/src/styles/gear-compat.css",
+          "libs/shared/dana-ui/src/styles/gear-compat-features.css",
+          "libs/shared/dana-ui/src/styles/dana-ui.css",
+          "libs/shared/dana-ui/src/styles/gear-compat-overrides.css"
         ],
-        "scripts": []
+        "browser": "manufacturing/apps/blade-tracking/src/main.ts",
+        "index": "manufacturing/apps/blade-tracking/src/index.html"
       },
       "configurations": {
         "production": {
@@ -59,20 +58,17 @@
           "outputHashing": "all"
         },
         "development": {
-          "buildOptimizer": false,
           "optimization": false,
-          "vendorChunk": true,
           "extractLicenses": false,
-          "sourceMap": true,
-          "namedChunks": true
+          "sourceMap": true
         }
       },
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@angular/build:dev-server",
       "options": {
-        "proxyConfig": "apps/blade-tracking/proxy.conf.json"
+        "proxyConfig": "manufacturing/apps/blade-tracking/proxy.conf.json"
       },
       "configurations": {
         "production": {
@@ -82,40 +78,47 @@
           "buildTarget": "blade-tracking:build:development"
         }
       },
-      "defaultConfiguration": "development"
+      "defaultConfiguration": "development",
+      "continuous": true
     },
     "extract-i18n": {
-      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "executor": "@angular/build:extract-i18n",
       "options": {
         "buildTarget": "blade-tracking:build"
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": [
-          "apps/blade-tracking/**/*.ts",
-          "apps/blade-tracking/**/*.html"
-        ]
-      }
+        "command": "eslint .",
+        "cwd": "manufacturing/apps/blade-tracking"
+      },
+      "cache": true
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
+        "{workspaceRoot}/coverage/manufacturing/apps/blade-tracking"
       ],
       "options": {
-        "jestConfig": "apps/blade-tracking/jest.config.ts",
-        "passWithNoTests": true,
-        "tsConfig": "apps/blade-tracking/tsconfig.spec.json"
+        "command": "jest --config manufacturing/apps/blade-tracking/jest.config.cts --runInBand --passWithNoTests",
+        "cwd": ".",
+        "env": {
+          "NODE_ENV": "test",
+          "ENVIRONMENT": "test",
+          "NX_DAEMON": "false",
+          "JWT_ACCESS_SECRET": "unit-test-access-secret-no-production-use",
+          "JWT_REFRESH_SECRET": "unit-test-refresh-secret-no-production-use",
+          "DATABASE_TYPE": "better-sqlite3",
+          "DATABASE_PATH": ":memory:",
+          "EMAIL_ENABLED": "false",
+          "SOCIAL_GOOGLE_ENABLED": "false",
+          "SENTRY_DSN": ""
+        }
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "jest --config manufacturing/apps/blade-tracking/jest.config.cts --runInBand --passWithNoTests --ci --coverage"
         }
       }
     },
@@ -123,7 +126,13 @@
       "executor": "@nx/web:file-server",
       "options": {
         "buildTarget": "blade-tracking:build",
-        "port": 4200
+        "port": 4200,
+        "staticFilePath": "dist/manufacturing/apps/blade-tracking/browser",
+        "spa": true
+      },
+      "continuous": true,
+      "readyWhen": {
+        "signal": true
       }
     }
   }

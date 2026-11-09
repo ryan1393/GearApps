@@ -4,7 +4,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const projects = [];
 function visit(directory) {
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -15,21 +15,25 @@ function visit(directory) {
     )
       continue;
     const folder = path.join(directory, entry.name);
-    const config = path.join(folder, 'jest.config.ts');
-    if (fs.existsSync(config)) projects.push(config);
+    const config = ['jest.config.cts','jest.config.ts','jest.config.js'].map(name => path.join(folder,name)).find(file => fs.existsSync(file));
+    if (config) projects.push(config);
     else visit(folder);
   }
 }
 visit(path.join(root, 'apps'));
 visit(path.join(root, 'libs'));
+visit(path.join(root, 'manufacturing/apps'));
+visit(path.join(root, 'manufacturing/libs'));
 projects.sort();
 
 // ts-jest retains a compiler per project. Recycling the process between small,
 // sequential batches avoids retaining the whole server and browser graph at once.
 const backend = projects.filter(
   (file) =>
-    file.startsWith(path.join(root, 'libs/server') + path.sep) ||
-    file.startsWith(path.join(root, 'apps/server') + path.sep),
+    file.startsWith(path.join(root, 'manufacturing/libs/server') + path.sep) ||
+    file.startsWith(path.join(root, 'manufacturing/apps/server') + path.sep) ||
+    file.startsWith(path.join(root, 'libs/api') + path.sep) ||
+    file.startsWith(path.join(root, 'apps/lapper-api') + path.sep),
 );
 const other = projects.filter((file) => !backend.includes(file));
 const batches = [];

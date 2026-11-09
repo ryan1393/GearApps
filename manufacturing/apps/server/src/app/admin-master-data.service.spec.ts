@@ -2,7 +2,7 @@ import { ConflictException } from '@nestjs/common';
 import {
   CutterMachineRunOrmEntity,
   MachineOrmEntity,
-} from '@libs/server/data-access';
+} from '@gearapps/manufacturing/server/data-access';
 import { DataSource } from 'typeorm';
 import { AdminMasterDataService } from './admin-master-data.service';
 

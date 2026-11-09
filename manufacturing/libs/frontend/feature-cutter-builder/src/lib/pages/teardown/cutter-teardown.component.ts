@@ -4,19 +4,19 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { GearToastService } from '@libs/frontend/util-common';
+import { GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
 import {
   CutterBuildCard,
   CutterTeardownResult,
   CutterBuilderApiService,
   CutterDashboardData,
   cutterApiErrorText,
-} from '@libs/frontend/data-access-cutter-builder';
+} from '@gearapps/manufacturing/frontend/data-access-cutter-builder';
 import {
   DEPARTMENT_CUTTERGRIND,
   parseCuttergrindNumberedShelfTag,
-} from '@libs/shared/util-constants';
-import { ILocation, ITray } from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-constants';
+import { ILocation, ITray } from '@gearapps/manufacturing/shared/util-types';
 import {
   DanaPageHeaderComponent,
 } from '@dana/ui';
@@ -24,7 +24,7 @@ import {
 @Component({
   selector: 'gear-cutter-teardown',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaPageHeaderComponent],
+  imports: [CommonModule, GearScannerFocusDirective, FormsModule, DanaPageHeaderComponent],
   templateUrl: './cutter-teardown.component.html',
 })
 export class CutterTeardownComponent implements OnInit, OnDestroy {

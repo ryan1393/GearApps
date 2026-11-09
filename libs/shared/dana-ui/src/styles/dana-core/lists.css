@@ -1,0 +1,86 @@
+/* Lists, cards and small indicators shared by Dana apps. */
+
+/* A list where each row ends in an action (work queues). */
+.dana-action-list { margin: 0; padding: 0; list-style: none; }
+.dana-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px;
+  padding: 12px 18px;
+  border-bottom: 1px solid #edf1f5;
+}
+.dana-action-row:last-child { border-bottom: 0; }
+.dana-action-main { flex: 1 1 240px; min-width: 0; }
+.dana-action-main strong { display: block; color: var(--dana-text); font-size: 15px; }
+.dana-action-main span { display: block; margin-top: 2px; color: var(--dana-muted); font-size: 13px; overflow-wrap: anywhere; }
+.dana-action-meta { min-width: 96px; text-align: right; }
+.dana-action-meta span { display: block; color: var(--dana-muted); font-size: 12px; }
+.dana-action-meta strong { font-size: 14px; }
+.dana-action-row > .dana-btn { min-width: 150px; }
+.dana-list-empty { margin: 0; padding: 16px 18px; color: var(--dana-muted); font-size: 13px; }
+
+/* Card for one item in a board (for example one dock). Tone tints it for aging/overdue. */
+.dana-card {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--dana-border);
+  border-radius: var(--dana-radius-lg);
+  background: var(--dana-surface);
+  box-shadow: var(--dana-shadow-panel);
+}
+.dana-card[data-tone] { border-left-width: 4px; }
+.dana-card[data-tone="warning"] { border-color: #f4d7aa; border-left-color: #d99a2b; background: #fffcf6; }
+.dana-card[data-tone="danger"] { border-color: #f1c7c3; border-left-color: #c8443a; background: #fffafa; }
+.dana-card[data-tone="success"] { border-left-color: var(--dana-success); }
+.dana-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.dana-card-eyebrow { display: block; color: var(--dana-muted); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.dana-card-title { display: block; margin: 0; color: var(--dana-primary-dark); font-size: 26px; font-weight: 800; line-height: 1.1; }
+.dana-card-subtitle { display: block; color: var(--dana-text); font-size: 16px; font-weight: 800; }
+.dana-card-section { padding: 12px; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-md); background: #f8fafc; }
+.dana-card-section[data-tone="success"] { border-color: #b7dfcf; background: var(--dana-success-soft); }
+.dana-card-section[data-tone="warning"] { border-color: #f4d7aa; background: var(--dana-warning-soft); }
+
+/* Progress toward a goal (for example required fields completed). */
+.dana-progress { width: 220px; height: 8px; overflow: hidden; border-radius: 999px; background: #e3e9f0; }
+.dana-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--dana-primary); transition: width .2s ease; }
+.dana-progress[data-tone="success"] > span { background: var(--dana-success); }
+
+/* Small rounded labels in a row (for example missing items). */
+.dana-chip-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.dana-chip { padding: 3px 8px; border-radius: 999px; background: var(--dana-neutral-soft); color: #4a5b70; font-size: 12px; font-weight: 700; }
+.dana-chip[data-tone="warning"] { background: var(--dana-warning-soft); color: #8a4b06; }
+.dana-chip[data-tone="info"] { background: var(--dana-info-soft); color: var(--dana-info); }
+
+/* A status indicator that is also a button (for example system health in the topbar). */
+.dana-pill-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 6px 13px;
+  border: 1px solid var(--dana-border);
+  border-radius: 999px;
+  background: var(--dana-neutral-soft);
+  color: #4a5b70;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.dana-pill-button::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.dana-pill-button[data-tone="success"] { border-color: #c2e6d5; background: var(--dana-success-soft); color: #146746; }
+.dana-pill-button[data-tone="warning"] { border-color: #ead5a5; background: var(--dana-warning-soft); color: #7b5c18; }
+.dana-pill-button[data-tone="danger"] { border-color: #f0c8c4; background: var(--dana-danger-soft); color: var(--dana-danger); }
+
+@media (max-width: 760px) {
+  .dana-action-row { grid-template-columns: 1fr; gap: 8px; }
+  .dana-action-meta { text-align: left; }
+  .dana-action-row > .dana-btn { width: 100%; }
+  .dana-progress { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .dana-progress > span { transition: none; } }

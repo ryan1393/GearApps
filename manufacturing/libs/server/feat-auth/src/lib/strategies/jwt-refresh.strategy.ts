@@ -1,10 +1,10 @@
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
-import { ServerFeatUserService } from '@libs/server/feat-user';
-import { STRATEGY_JWT_REFRESH } from '@libs/server/util-common';
-import { ENV_JWT_REFRESH_SECRET } from '@libs/shared/util-constants';
-import { IJwtPayload, IRequestUserData } from '@libs/shared/util-types';
+import { ServerFeatUserService } from '@gearapps/manufacturing/server/feat-user';
+import { STRATEGY_JWT_REFRESH } from '@gearapps/manufacturing/server/util-common';
+import { ENV_JWT_REFRESH_SECRET } from '@gearapps/manufacturing/shared/util-constants';
+import { IJwtPayload, IRequestUserData } from '@gearapps/manufacturing/shared/util-types';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
@@ -20,7 +20,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get(ENV_JWT_REFRESH_SECRET),
+      secretOrKey: configService.getOrThrow<string>(ENV_JWT_REFRESH_SECRET),
       passReqToCallback: true,
     });
   }

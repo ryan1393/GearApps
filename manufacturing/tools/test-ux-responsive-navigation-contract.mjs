@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import { readDanaUiSource } from './lib/dana-ui-source.mjs';
-const read=(p)=>fs.readFileSync(p,'utf8');
+const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
 const navCss=read('vendor/dana-ui/package/styles/gear-apps/layout/navigation-shell.css');
 const responsive=read('vendor/dana-ui/package/styles/gear-apps/foundation/responsive.css');

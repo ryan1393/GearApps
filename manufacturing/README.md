@@ -1,8 +1,9 @@
-# Gear Apps 70.2.1
+# Gear Apps 70.3.0
 
 Gear Apps is the Dana manufacturing workspace for three workflows sharing one API and database:
-**Blade Tracking**, **Cutter Builder** and **Green Shed**. It is an Nx monorepo: three Angular 19
-frontends, a NestJS 10 API, PostgreSQL 16, all run with Docker Compose.
+**Blade Tracking**, **Cutter Builder** and **Green Shed**. It belongs to the root GearApps Nx workspace alongside Lapper. All frontends use
+Angular 20.3.35 and Dana UI 0.3.3; the APIs use NestJS 11.2.9 and TypeORM 1.1.2.
+Manufacturing retains PostgreSQL 16 and Docker Compose.
 
 | Service | Port | |
 |---|---|---|
@@ -11,17 +12,29 @@ frontends, a NestJS 10 API, PostgreSQL 16, all run with Docker Compose.
 | Green Shed | 4202 | `apps/greenshed` |
 | API | 3333 | `apps/server` (`/api/v1`, health at `/api/v1/health/ready`) |
 
-## What changed in 70.2.1
+## What changed in 70.3.0
 
-Authentication, password recovery, manufacturing inventory safeguards, scan reliability,
-and deployment preservation have been corrected. Dana UI 0.3.2 keeps the existing Gear
-compatibility styles and fixes shared component lifecycle and keyboard behavior.
-See CHANGELOG.md for details and upgrade notes.
+Lapper, Blade Tracking, Cutter Builder, and Greenshed now share one root dependency
+manifest, lockfile, Nx graph, and Dana UI source. The root runtime is Node 24.22.1
+with npm 11.9.0. Run npm and Nx commands from the repository root; do not install
+dependencies inside manufacturing/.
 
-This release is maintained under `manufacturing/` in the GearApps GitHub repository.
-Its pinned Nx/Angular/Nest dependencies are independent of the root Lapper workspace.
-Run commands from the manufacturing directory. The default development ports overlap
-with Lapper; configure ports or use separate hosts when running both stacks.
+```sh
+nvm use
+npm ci
+npm run test:versions
+npm test
+npm run test:contracts
+npm run lint
+npm run build
+npx nx serve blade-tracking
+```
+
+The authentication, recovery, inventory, scanning, and deployment fixes from 70.2.1
+are retained. API routes and PostgreSQL workflow rules remain compatible. The default
+development ports overlap with Lapper; configure SERVER_PORT and the matching client
+proxy when running both APIs on one host. Manufacturing environment settings stay
+in manufacturing/.env; Lapper uses the root .env.
 
 Users must sign in again after upgrading. Emailed recovery requires SMTP and the public
 frontend origin (`PUBLIC_WEB_BASE_URL`, or Docker `GEAR_PUBLIC_WEB_BASE_URL`).
@@ -54,9 +67,18 @@ Full detail is in `CHANGELOG.md`. In short:
 
 ## Deploy
 
-`Deploy-GearApps.cmd` (or `node tools/deploy/deploy-remote.mjs`) deploys this folder to the Linux
+Run deployment from the repository root with
+`node manufacturing/tools/deploy/deploy-remote.mjs` (Windows:
+`manufacturing\Deploy-GearApps.cmd`). The archive contains the single root workspace;
+Docker builds use the root lockfile and pinned Node 24.22.1/npm 11.9.0. Manufacturing
+configuration stays in `manufacturing/.env`, independently of Lapper's root `.env`.
+The deployer carries a legacy root Gear `.env` into the new manufacturing location,
+preserves a consolidated host's Lapper `.env`, and keeps the previous tree for rollback.
+
+
+`Deploy-GearApps.cmd` (or `node manufacturing/tools/deploy/deploy-remote.mjs`) deploys the shared repository to the Linux
 Docker host behind your active **SSH Docker context** (`docker context use <name>`). It needs `ssh`,
-`scp`, `tar`, `docker` and Node 20+ on the Windows machine.
+`scp`, `tar`, `docker`, Node 24.22.1 and npm 11.9.0 on the Windows machine.
 
 1. **Preflight (changes nothing):** `Deploy-GearApps.cmd --check`. This checks the version, the SSH
    context, host Docker, and the host `.env` (JWT secrets 32+ random characters, no
@@ -68,13 +90,13 @@ Docker host behind your active **SSH Docker context** (`docker context use <name
    2. copies the source to `~/dana-apps`, keeping the previous release in `~/dana-apps.prev`
       and the host's own `.env`;
    3. runs `docker compose build` and `up -d` (never `down`, never touches volumes);
-   4. waits for every service and checks that the API reports `70.2.1`. Only then does the old
+   4. waits for every service and checks that the API reports `70.3.0`. Only then does the old
       release become `~/dana-apps.prev`. If the deploy fails, the last good release is protected
       (a retry discards the failed one) and `--rollback` brings it back.
 3. **Rollback:** `Deploy-GearApps.cmd --rollback` swaps `~/dana-apps.prev` back in and restarts it.
    Schema changes in this app are additive, so the previous release runs against the current database.
    To restore data as well, load the backup taken before the deploy:
-   `cd ~/dana-apps && gunzip -c ~/dana-apps-backups/<file>.sql.gz | docker compose exec -T dana-postgres psql -U <GEAR_DB_USERNAME> -d GearApps`
+   `cd ~/dana-apps && gunzip -c ~/dana-apps-backups/<file>.sql.gz | docker compose --env-file manufacturing/.env -f manufacturing/compose.yml exec -T dana-postgres psql -U <GEAR_DB_USERNAME> -d GearApps`
    (restore into an emptied database).
 
 **First 70.1.0 deploy:** earlier releases lived in `/tmp/dana-apps.v0.1` on the host, and most
@@ -97,7 +119,7 @@ out once; nothing else changes).
 
 | Command | Needs | What it covers |
 |---|---|---|
-| `node tools/<test>-contract.mjs` (83 files) | nothing | Source contracts: workflows, UI shell, styling, data rules |
+| `npm run test:contracts` | nothing | Source contracts: workflows, UI shell, styling, data rules |
 | `npm run test:version` | nothing | One version across every place it is written |
 | `npm test` | installed dependencies | Isolated unit/behavior and deployment/configuration tests |
 | `npm run test:contracts` | installed dependencies | Portable source contracts |

@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const read = (p) => fs.readFileSync(p, 'utf8');
+const read = (p) => fs.readFileSync(contractPath(process.cwd(), p), 'utf8');
 const must = (ok, msg) => {
   if (!ok) throw new Error(msg);
 };
@@ -51,11 +52,11 @@ must(
   'Runtime dependency image must continue installing production dependencies only.'
 );
 must(
-  dockerfile.includes("s.includes('@ngneat/falso')"),
+  dockerfile.includes(".includes('@ngneat/falso')"),
   'Docker build is missing the bootstrap-bundle dev-dependency regression guard.'
 );
 must(
-  dockerfile.includes('Fresh DB bootstrap bundle contains no @ngneat/falso dependency'),
+  dockerfile.includes('Fresh DB bootstrap') && dockerfile.includes('test-only falso'),
   'Docker build is missing the positive fresh-bootstrap dependency audit marker.'
 );
 

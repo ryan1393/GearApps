@@ -1,7 +1,7 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index, JoinColumn, OneToOne } from 'typeorm';
-import { AbstractOrmEntity } from '@libs/server/util-common';
-import { ICutterCmmCheck } from '@libs/shared/util-types';
+import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { ICutterCmmCheck } from '@gearapps/manufacturing/shared/util-types';
 import { CutterEventOrmEntity } from './cutter-event.orm-entity';
 @Entity({ name: 'cutter_cmm_checks' })
 export class CutterCmmCheckOrmEntity extends AbstractOrmEntity {

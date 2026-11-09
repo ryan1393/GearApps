@@ -1,0 +1,163 @@
+/* Wall display: full-screen boards for TVs read from across a room (dock boards, management overviews).
+   Text scales with the screen width. Use inside .dana-app-shell.is-fullscreen or on its own page.
+   Grid column counts are set by the app with --dana-wall-columns. */
+@media screen {
+  .dana-wall {
+    --dana-wall-text: #163149;
+    --dana-wall-muted: #496075;
+    --dana-wall-border: #ccd6df;
+    --dana-wall-accent: #174e77;
+    box-sizing: border-box; display: flex; flex-direction: column; gap: 12px;
+    width: 100%; height: 100vh; height: 100dvh; min-height: 600px; padding: 18px 24px 12px;
+    background: #edf2f6; color: var(--dana-wall-text); font-family: var(--dana-font-sans);
+    font-size: clamp(18px, 1.15vw, 28px); line-height: 1.25;
+  }
+  .dana-wall *, .dana-wall *::before, .dana-wall *::after { box-sizing: border-box; }
+  .dana-wall h1, .dana-wall h2, .dana-wall h3, .dana-wall p { margin: 0; }
+
+  /* Header: title on the left, controls and clock on the right. */
+  .dana-wall-header { display: flex; flex-shrink: 0; align-items: flex-start; justify-content: space-between; gap: 18px; }
+  .dana-wall-title { min-width: 0; padding-top: 5px; }
+  .dana-wall-title > span { color: var(--dana-wall-muted); font-size: 14px; font-weight: 800; letter-spacing: .08em; }
+  .dana-wall-title h1 { font-size: clamp(28px, 2vw, 48px); font-weight: 800; line-height: 1.15; letter-spacing: -.025em; }
+  .dana-wall-title p { margin-top: 3px; color: var(--dana-wall-muted); font-size: 19px; }
+  .dana-wall-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 7px 9px; max-width: 640px; }
+  .dana-wall-controls form { display: inline-flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; margin: 0; font-size: 14px; font-weight: 600; }
+  .dana-wall-controls .dana-input { width: 78px; min-height: 36px; padding: 5px 8px; font-size: 16px; font-weight: 750; font-variant-numeric: tabular-nums; }
+  .dana-wall-controls .dana-field-hint,
+  .dana-wall-controls .dana-field-error { flex-basis: 100%; text-align: right; overflow-wrap: anywhere; }
+  .dana-wall-clock { width: 100%; text-align: right; font-size: clamp(16px, 1.2vw, 26px); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  /* Live-data strip under the header. */
+  .dana-wall-status {
+    display: flex; flex-shrink: 0; flex-wrap: wrap; align-items: center; gap: 6px 18px; padding: 7px 12px;
+    border-left: 5px solid #267045; background: #e4f1e8; color: #19502f; font-size: 16px;
+  }
+  .dana-wall-status[data-tone="warning"] { border-color: #99631c; background: #fff1d5; color: #624315; }
+  .dana-wall-status[data-tone="danger"] { border-color: #a32126; background: #fae8e8; color: #7c1f22; }
+  .dana-wall-note { flex-shrink: 0; color: #624315; font-size: 15px; }
+
+  /* KPI tiles: label and note on the left, a large number on the right. */
+  .dana-wall-kpis { display: grid; flex-shrink: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .dana-wall-kpi {
+    display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 3px 10px; padding: 10px 14px;
+    border: 1px solid var(--dana-wall-border); border-top: 3px solid var(--dana-wall-accent); border-radius: 9px;
+    background: #fff; box-shadow: 0 2px 5px rgb(22 49 73 / 4%);
+  }
+  .dana-wall-kpi > span { font-size: clamp(14px, .95vw, 21px); font-weight: 800; }
+  .dana-wall-kpi > strong { grid-column: 2; grid-row: 1 / span 2; font-size: clamp(28px, 2.6vw, 62px); font-variant-numeric: tabular-nums; }
+  .dana-wall-kpi > small { color: var(--dana-wall-muted); font-size: clamp(13px, .85vw, 20px); }
+
+  /* Panels and their titles. */
+  .dana-wall-panel { display: flex; min-width: 0; min-height: 0; flex-direction: column; gap: 8px; }
+  .dana-wall-panel-title { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 10px; }
+  .dana-wall-panel-title h2 { font-size: clamp(19px, 1.25vw, 30px); font-weight: 750; }
+  .dana-wall-panel-title > span { color: var(--dana-wall-muted); font-size: 15px; white-space: nowrap; }
+
+  /* Card grid; the app sets --dana-wall-columns. */
+  .dana-wall-grid { display: grid; flex: 1; min-height: 0; grid-template-columns: repeat(var(--dana-wall-columns, 3), minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 12px; }
+  .dana-wall-card {
+    display: flex; min-width: 0; min-height: 0; flex-direction: column; gap: 6px; padding: 10px 15px;
+    border: 1px solid var(--dana-wall-border); border-left: 6px solid #5d7b90; border-radius: 10px;
+    background: #fff; box-shadow: 0 2px 6px rgb(22 49 73 / 4%);
+  }
+  .dana-wall-card[data-tone="warning"] { border-left-color: #aa710b; }
+  .dana-wall-card[data-tone="danger"] { border-left-color: #b52d2f; }
+  .dana-wall-card.is-compact { justify-content: center; gap: 4px; padding: 9px 12px; border-left-width: 5px; border-left-color: #b28122; }
+  .dana-wall-card.is-compact > strong { font-size: 22px; overflow-wrap: anywhere; }
+  .dana-wall-card.is-compact > span { color: var(--dana-wall-muted); font-size: 16px; overflow-wrap: anywhere; }
+  .dana-wall-card.is-summary { gap: 3px; padding: 10px 12px; border-left-width: 4px; border-left-color: #51728c; }
+  .dana-wall-card.is-summary > strong { font-size: 23px; overflow-wrap: anywhere; }
+  .dana-wall-card.is-summary > span, .dana-wall-card.is-summary > small { color: var(--dana-wall-muted); font-size: 16px; }
+  .dana-wall-card-title { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+  .dana-wall-card-title h3 { font-size: clamp(24px, 1.7vw, 40px); font-weight: 800; overflow-wrap: anywhere; }
+  .dana-wall-badge { flex-shrink: 0; padding: 4px 8px; border: 1px solid #aebccc; border-radius: 5px; font-size: 14px; font-weight: 800; }
+  .dana-wall-badge[data-tone="warning"] { border-color: #b68e36; background: #fff0cc; color: #79520d; }
+  .dana-wall-badge[data-tone="danger"] { border-color: #cf8c8c; background: #fae8e8; color: #942323; }
+  .dana-wall-headline { font-size: clamp(21px, 1.45vw, 36px); overflow-wrap: anywhere; }
+  .dana-wall-subline { font-size: clamp(18px, 1.15vw, 28px); overflow-wrap: anywhere; }
+  .dana-wall-detail { color: var(--dana-wall-muted); font-size: clamp(14px, .94vw, 23px); overflow-wrap: anywhere; }
+  .dana-wall-status-text { color: #78500c; font-size: 15px; font-weight: 700; }
+
+  /* Facts row at the bottom of a card: label over value. */
+  .dana-wall-facts { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 12px; margin-top: auto; padding-top: 6px; border-top: 1px solid #e1e7ee; }
+  .dana-wall-fact { display: grid; min-width: 0; align-content: start; gap: 4px; }
+  .dana-wall-fact > span { color: var(--dana-wall-muted); font-size: clamp(11px, .73vw, 17px); font-weight: 750; letter-spacing: .055em; text-transform: uppercase; }
+  .dana-wall-fact > b { font-size: clamp(17px, 1.08vw, 27px); overflow-wrap: anywhere; }
+
+  /* Elapsed time shown as large numbers with small units (e.g. 1 H 05 M). */
+  .dana-wall-age { display: inline-flex; flex-wrap: wrap; align-items: flex-start; gap: 5px 9px; max-width: 100%; min-width: 0; vertical-align: middle; }
+  .dana-wall-age-part { display: inline-flex; min-width: 24px; flex-direction: column; align-items: center; gap: 2px; }
+  .dana-wall-age-part > b,
+  .dana-wall-age.is-unavailable > b { font-size: clamp(22px, 1.4vw, 34px); font-weight: 800; font-variant-numeric: tabular-nums; letter-spacing: -.02em; line-height: 1.05; white-space: nowrap; }
+  .dana-wall-age-part > span { color: var(--dana-wall-muted); font-size: clamp(10px, .65vw, 15px); font-weight: 700; letter-spacing: .035em; line-height: 1; text-transform: uppercase; white-space: nowrap; }
+  .dana-wall-age.is-unavailable { color: var(--dana-wall-muted); }
+  .dana-wall-card.is-compact .dana-wall-age-part > b { font-size: clamp(20px, 1.1vw, 28px); }
+
+  /* Large table. Rows take data-tone; cells take data-label for the phone layout. */
+  .dana-wall-table { width: 100%; border-collapse: collapse; table-layout: fixed; background: #fff; font-size: clamp(18px, 1.1vw, 27px); }
+  .dana-wall-table th { padding: 10px; background: #e0e8ef; color: #243e55; font-size: 16px; text-align: left; }
+  .dana-wall-table td { padding: 10px; border-bottom: 1px solid var(--dana-wall-border); line-height: 1.25; overflow-wrap: anywhere; vertical-align: middle; }
+  .dana-wall-table td > small { display: block; margin-top: 3px; color: var(--dana-wall-muted); font-size: 15px; }
+  .dana-wall-table tr[data-tone="warning"] td:first-child { box-shadow: inset 5px 0 #aa710b; }
+  .dana-wall-table tr[data-tone="danger"] td:first-child { box-shadow: inset 5px 0 #b52d2f; }
+  .dana-wall-table .dana-wall-age-part > b { font-size: clamp(20px, 1.25vw, 30px); }
+  .dana-wall-table td > [data-tone="warning"] { color: #79520d; }
+  .dana-wall-table td > [data-tone="danger"] { color: #942323; font-weight: 800; }
+
+  .dana-wall-empty,
+  .dana-wall-loading { padding: 18px; border: 1px solid var(--dana-wall-border); border-radius: 8px; background: #fff; color: var(--dana-wall-muted); }
+  .dana-wall-empty { grid-column: 1 / -1; font-size: 20px; }
+  .dana-wall-loading { display: grid; flex: 1; place-content: center; gap: 12px; text-align: center; }
+
+  .dana-wall-footer { display: flex; flex-shrink: 0; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; }
+  .dana-wall-footer > div { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; }
+}
+
+@media screen and (max-width: 1399px) {
+  .dana-wall { gap: 10px; padding: 12px 18px 10px; }
+  .dana-wall-title h1 { font-size: 28px; }
+  .dana-wall-controls { max-width: 550px; }
+  .dana-wall-kpi { padding: 8px 10px; }
+}
+
+@media screen and (max-height: 819px) {
+  .dana-wall { gap: 8px; padding-top: 8px; }
+  .dana-wall-title h1 { font-size: 28px; }
+  .dana-wall-title p { font-size: 16px; }
+  .dana-wall-kpi { padding: 6px 10px; }
+  .dana-wall-kpi > small { font-size: 12px; }
+  .dana-wall-card.is-compact > strong { font-size: 20px; }
+  .dana-wall-card.is-compact > span { font-size: 14px; }
+  .dana-wall-table th, .dana-wall-table td { padding: 8px; }
+}
+
+@media screen and (max-width: 699px) {
+  .dana-wall { min-height: 650px; gap: 7px; padding: 10px; }
+  .dana-wall-header { flex-direction: column; gap: 7px; }
+  .dana-wall-title { padding: 0; }
+  .dana-wall-title > span { font-size: 10px; }
+  .dana-wall-title h1 { font-size: 22px; }
+  .dana-wall-title p, .dana-wall-clock { font-size: 13px; text-align: left; }
+  .dana-wall-controls { width: 100%; max-width: 100%; justify-content: flex-start; gap: 6px; }
+  .dana-wall-controls form { flex-basis: 100%; justify-content: flex-start; }
+  .dana-wall-controls .dana-field-hint, .dana-wall-controls .dana-field-error { text-align: left; }
+  .dana-wall-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .dana-wall-kpi > span { font-size: 11px; }
+  .dana-wall-kpi > small { font-size: 10px; }
+  .dana-wall-kpi > strong { font-size: 26px; }
+  .dana-wall-status { padding: 5px 8px; font-size: 12px; }
+  .dana-wall-panel-title h2 { font-size: 15px; }
+  .dana-wall-panel-title > span { font-size: 11px; white-space: normal; }
+  .dana-wall-grid { grid-template-columns: 1fr; }
+  .dana-wall-card { gap: 5px; padding: 10px; }
+  .dana-wall-card.is-summary > strong { font-size: 18px; }
+  .dana-wall-card.is-summary > span { font-size: 12px; }
+  .dana-wall-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .dana-wall-table, .dana-wall-table tbody, .dana-wall-table tr { display: block; }
+  .dana-wall-table td { display: grid; grid-template-columns: 95px minmax(0, 1fr); column-gap: 6px; padding: 4px 7px; font-size: 14px; }
+  .dana-wall-table td::before { content: attr(data-label); grid-column: 1; grid-row: 1 / span 2; font-weight: 650; }
+  .dana-wall-table td > * { grid-column: 2; font-size: 14px; }
+  .dana-wall-table td > small { font-size: 12px; }
+  .dana-wall-footer { flex-direction: column; gap: 5px; font-size: 11px; }
+}

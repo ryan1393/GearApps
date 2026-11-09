@@ -36,7 +36,7 @@ for(const [service,nginxRel,dockerfileRel] of frontends){
 
   const dockerfile=fs.readFileSync(dockerfileRel,'utf8');
   must(dockerfile.includes('FROM nginx:1.27-alpine'),`${dockerfileRel} runtime image changed unexpectedly.`);
-  must(dockerfile.includes(`COPY ${nginxRel} /etc/nginx/conf.d/default.conf`),
+  must(dockerfile.includes(`COPY manufacturing/${nginxRel} /etc/nginx/conf.d/default.conf`),
     `${dockerfileRel} must install its maintained nginx.conf.`);
 }
 

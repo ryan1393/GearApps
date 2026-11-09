@@ -1,8 +1,9 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
+const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8');
 const fail = (message) => { console.error(`[FAIL] ${message}`); process.exit(1); };
 const requireText = (text, marker, label) => { if (!text.includes(marker)) fail(`${label} missing marker: ${marker}`); };
 const forbidText = (text, marker, label) => { if (text.includes(marker)) fail(`${label} still contains unsafe location-number display: ${marker}`); };
@@ -54,7 +55,7 @@ const allowedMasterViews = [
   'libs/frontend/feature-blade-tracking/src/lib/pages/inventory-lookup/inventory-lookup.component.html',
 ];
 for (const rel of allowedMasterViews) {
-  if (!fs.existsSync(path.join(root, rel))) fail(`Expected location master view missing: ${rel}`);
+  if (!fs.existsSync(contractPath(root, rel))) fail(`Expected location master view missing: ${rel}`);
 }
 
 console.log('[PASS] Location identity display contract passed: operator-facing physical placements use location serial/tag; location.number remains metadata/validation only.');

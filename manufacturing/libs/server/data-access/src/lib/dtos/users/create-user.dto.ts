@@ -17,12 +17,12 @@ import {
   PASSWORD_MIN_NUMBER,
   PASSWORD_MIN_SYMBOL,
   PASSWORD_MIN_UPPERCASE,
-} from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-constants';
 import {
   AuthProviderType,
   ICreateUser,
   RoleType,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 import {
   ApiHideProperty,
   ApiProperty,

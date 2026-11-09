@@ -6,7 +6,7 @@ import {
   IPaginatedResponse,
   IUpdateUser,
   IUser,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 
 @Injectable({ providedIn: 'root' })
 export class UserApiService {

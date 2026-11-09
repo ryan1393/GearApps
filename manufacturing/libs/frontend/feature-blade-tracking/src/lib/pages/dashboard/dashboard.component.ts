@@ -10,10 +10,10 @@ import {
   BladeTrackingDashboardData,
   InventoryAvailabilityData,
   apiErrorText,
-} from '@libs/frontend/data-access-blade-tracking';
-import { AuthSessionService } from '@libs/frontend/data-access-user';
-import { canEditGearApp } from '@libs/shared/util-constants';
-import { IPartSummary, IPartType } from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
+import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
+import { canEditGearApp } from '@gearapps/manufacturing/shared/util-constants';
+import { IPartSummary, IPartType } from '@gearapps/manufacturing/shared/util-types';
 import {
   DanaCountBadgeDirective,
   DanaDashboardGridComponent,
@@ -101,7 +101,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   trackStage(_index: number, stage: { code: string }): string { return stage.code; }
   trackTray(_index: number, tray: { id: string }): string { return tray.id; }
 
-  constructor(private readonly router: Router) {}
+  private readonly router = inject(Router);
 
   ngOnInit(): void {
     this.refreshDashboard();

@@ -1,4 +1,4 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 param(
     [switch]$NoBrowser,
     [switch]$NoReset,
@@ -8,7 +8,8 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
-Set-Location $ProjectRoot
+$WorkspaceRoot = (Resolve-Path (Join-Path $ProjectRoot '..')).Path
+Set-Location $WorkspaceRoot
 
 Write-Host ''
 Write-Host 'Unblocking downloaded Gear Apps files...' -ForegroundColor Yellow
@@ -54,7 +55,7 @@ function Start-GearProcess {
         [Parameter(Mandatory=$true)][string]$Command
     )
 
-    $escapedRoot = $ProjectRoot.Replace("'", "''")
+    $escapedRoot = $WorkspaceRoot.Replace("'", "''")
     $escapedTitle = $Title.Replace("'", "''")
     $launch = @"
 `$Host.UI.RawUI.WindowTitle = '$escapedTitle'
@@ -122,7 +123,7 @@ if (-not $NoReset) {
     Write-Host '[1/5] Nx reset skipped.' -ForegroundColor DarkGray
 }
 
-$NxWorker = Join-Path $ProjectRoot 'node_modules\nx\dist\src\project-graph\plugins\isolation\plugin-worker.js'
+$NxWorker = Join-Path $WorkspaceRoot 'node_modules\nx\dist\src\project-graph\plugins\isolation\plugin-worker.js'
 if (-not (Test-Path $NxWorker)) {
     throw 'Nx dependencies are not installed. Run commands\SETUP-GEAR-APPS.cmd first.'
 }
@@ -160,7 +161,7 @@ Write-Host '[2/5] Starting API server...' -ForegroundColor Yellow
 if (Test-Api) {
     Write-Host "      API is already responding on port $ServerPort." -ForegroundColor Green
 } else {
-    Start-GearProcess -Title 'Gear Apps - API Server' -Command 'npx nx serve gear-app-server'
+    Start-GearProcess -Title 'Gear Apps - API Server' -Command 'node --env-file=manufacturing/.env node_modules/nx/bin/nx.js serve gear-app-server'
 
     $deadline = (Get-Date).AddSeconds($ServerWaitSeconds)
     Write-Host '      Waiting for API to respond' -NoNewline

@@ -1,11 +1,11 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
-import { AbstractOrmEntity } from '@libs/server/util-common';
+import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
 import {
   ILocationTray,
   ILocationTrayEntity,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 import { UserOrmEntity } from '../user.orm-entity';
 import { TrayOrmEntity } from './tray.orm-entity';
 import { LocationOrmEntity } from './location.orm-entity';

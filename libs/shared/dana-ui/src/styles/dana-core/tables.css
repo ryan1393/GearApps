@@ -1,0 +1,236 @@
+/* Truck Log-inspired shared tables. */
+.dana-table-shell {
+  width: 100%;
+  min-width: 0;
+  overflow: auto;
+}
+
+table[danaTable],
+table.dana-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--dana-text);
+  font-family: var(--dana-font-sans);
+  font-size: 13px;
+}
+
+table[danaTable] th,
+table.dana-table th {
+  padding: 11px 12px;
+  border-bottom: 1px solid var(--dana-border);
+  background: #fbfcfe;
+  color: var(--dana-muted);
+  text-align: left;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+table[danaTable] td,
+table.dana-table td {
+  padding: 13px 12px;
+  border-bottom: 1px solid #edf1f5;
+  vertical-align: middle;
+}
+
+table[danaTable] tbody tr:last-child td,
+table.dana-table tbody tr:last-child td { border-bottom: 0; }
+
+table[danaTable] tbody tr:hover td,
+table.dana-table tbody tr:hover td { background: #fbfdff; }
+
+.dana-status-badge,
+[danaStatusBadge],
+.dana-count-badge,
+[danaCountBadge] {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 5px 8px;
+  background: #eef4fb;
+  color: #28558d;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.dana-status-badge::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.dana-status-badge[data-tone="success"] { background: #e9f7f1; color: var(--dana-success); }
+.dana-status-badge[data-tone="warning"] { background: #fff5e7; color: var(--dana-warning); }
+.dana-status-badge[data-tone="danger"] { background: #fff0ef; color: var(--dana-danger); }
+
+.dana-table-empty,
+td[danaTableEmpty] {
+  padding: 22px !important;
+  color: var(--dana-muted);
+  text-align: center;
+}
+
+/* Functional table controls also work without the optional compatibility layer. */
+:where(.dana-table-sortable) {
+  position: relative;
+  min-width: 0;
+  cursor: pointer;
+}
+:where(.dana-table-sortable:focus-visible) {
+  outline: 1px solid var(--dana-focus-border);
+  outline-offset: -2px;
+}
+:where(.dana-table-header-tools) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+:where(.dana-table-sort-indicator) {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  color: var(--dana-muted);
+  opacity: .55;
+}
+:where(.dana-table-sort-active .dana-table-sort-indicator) {
+  color: var(--dana-text);
+  opacity: 1;
+}
+:where(.dana-table-filter-trigger) {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--dana-radius-sm);
+  background: transparent;
+  color: var(--dana-muted);
+  cursor: pointer;
+}
+:where(.dana-table-filter-trigger:hover),
+:where(.dana-table-filter-trigger:focus-visible),
+:where(.dana-table-filter-trigger-active) {
+  border-color: var(--dana-border);
+  background: var(--dana-neutral-soft);
+  color: var(--dana-text);
+  outline: 0;
+}
+:where(.dana-table-filter-funnel) {
+  display: block;
+  width: 14px;
+  height: 14px;
+}
+:where(.dana-table-filter-funnel svg),
+:where(.dana-table-filter-search-icon svg) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+:where(.dana-table-filter-popover) {
+  position: fixed;
+  z-index: 1250;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 24px);
+  overflow: auto;
+  box-sizing: border-box;
+  padding: 16px;
+  border: 1px solid var(--dana-control-border);
+  border-radius: var(--dana-radius-lg);
+  background: var(--dana-surface);
+  box-shadow: var(--dana-shadow-raised);
+  cursor: default;
+}
+:where(.dana-table-filter-popover-heading),
+:where(.dana-table-filter-popover-footer) {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+:where(.dana-table-filter-popover-heading) { margin-bottom: 12px; }
+:where(.dana-table-filter-popover-footer) { margin-top: 12px; }
+:where(.dana-table-filter-popover-title) {
+  color: var(--dana-text);
+  font-size: 13px;
+  font-weight: 700;
+}
+:where(.dana-table-filter-popover-close) {
+  display: inline-grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--dana-radius-sm);
+  background: transparent;
+  color: var(--dana-muted);
+  cursor: pointer;
+}
+:where(.dana-table-filter-popover-close:hover) {
+  background: var(--dana-neutral-soft);
+  color: var(--dana-text);
+}
+:where(.dana-table-filter-search-wrap) {
+  display: flex;
+  height: var(--dana-control-height);
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--dana-control-border);
+  border-radius: var(--dana-radius-field);
+  background: var(--dana-surface);
+}
+:where(.dana-table-filter-search-wrap:focus-within) {
+  border-color: var(--dana-focus-border);
+  box-shadow: 0 0 0 1px var(--dana-focus-border);
+}
+:where(.dana-table-filter-search-icon) {
+  display: grid;
+  width: 2rem;
+  height: 100%;
+  place-items: center;
+  flex: 0 0 2rem;
+  color: var(--dana-muted);
+}
+:where(.dana-table-filter-search-icon svg) { width: 15px; height: 15px; }
+:where(.dana-table-filter-popover-input) {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  flex: 1 1 auto;
+  padding: 0 12px 0 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  box-shadow: none;
+}
+:where(.dana-table-filter-status) {
+  color: var(--dana-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+:where(.dana-table-filter-clear) {
+  padding: .34rem .62rem;
+  border: 1px solid var(--dana-border);
+  border-radius: var(--dana-radius-sm);
+  background: var(--dana-neutral-soft);
+  color: var(--dana-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+:where(.dana-table-filter-clear:hover) {
+  border-color: var(--dana-control-border);
+  background: var(--dana-surface);
+}

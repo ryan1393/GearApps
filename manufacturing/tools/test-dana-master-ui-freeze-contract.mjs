@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const read = (p) => fs.readFileSync(p, 'utf8');
+const read = (p) => fs.readFileSync(contractPath(process.cwd(), p), 'utf8');
 const must = (ok, msg) => {
   if (!ok) throw new Error(msg);
 };
@@ -84,8 +85,8 @@ for (const [tsPath, htmlPath] of navs) {
 for (const project of ['blade-tracking', 'cutter-builder', 'greenshed']) {
   const cfg = JSON.parse(read(`apps/${project}/project.json`));
   const styles = cfg?.targets?.build?.options?.styles ?? [];
-  const dana = 'node_modules/@dana/ui/styles/gear-compat.css';
-  const gear = 'node_modules/@dana/ui/styles/gear-compat-features.css';
+  const dana = 'libs/shared/dana-ui/src/styles/gear-compat.css';
+  const gear = 'libs/shared/dana-ui/src/styles/gear-compat-features.css';
   const danaAt = styles.indexOf(dana);
   const gearAt = styles.indexOf(gear);
   must(danaAt >= 0, `${project} does not load Dana shared UI`);

@@ -20,7 +20,7 @@
         <form class="gear-workflow-scan-row" (ngSubmit)="scanBuild()">
           <label class="gear-field">
             Build number
-            <input autofocus [ngModel]="buildNumber" (ngModelChange)="buildChanged($event)" [disabled]="busy" name="buildNumber" class="gear-input font-mono" placeholder="Scan build number..." />
+            <input gearScannerFocus [ngModel]="buildNumber" (ngModelChange)="buildChanged($event)" [disabled]="busy" name="buildNumber" class="gear-input font-mono" placeholder="Scan build number..." />
           </label>
           <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy">Scan</button>
         </form>

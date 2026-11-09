@@ -1,4 +1,4 @@
-import { containerWorkflowEligibility } from '@libs/shared/util-constants';
+import { containerWorkflowEligibility } from '@gearapps/manufacturing/shared/util-constants';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
 
 import {
@@ -9,13 +9,13 @@ import {
   CreateContainerDto,
   InventoryListQueryDto,
   PaginationService,
-} from '@libs/server/data-access';
+} from '@gearapps/manufacturing/server/data-access';
 import {
   IPaginatedResponse,
   IContainer,
   IContainerEntity,
   Uuid,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,

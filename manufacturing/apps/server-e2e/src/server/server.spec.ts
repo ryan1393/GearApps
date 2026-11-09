@@ -1,12 +1,12 @@
 import * as Joi from 'joi';
 import * as request from 'supertest';
 
-import { ServerFeatureHealthModule } from '@libs/server/feat-health';
+import { ServerFeatureHealthModule } from '@gearapps/manufacturing/server/feat-health';
 import {
   ENV_DATABASE_LOGGING_ENABLED,
   ENV_DATABASE_PATH,
   ENV_ENVIRONMENT,
-} from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-constants';
 import { INestApplication, Logger, VersioningType } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';

@@ -1,6 +1,6 @@
 <div class="dana-app-shell">
-  <aside class="dana-sidebar" [class.is-open]="mobileNavOpen()" aria-label="GearApps navigation">
-    <a routerLink="/dashboard" class="dana-brand-row" (click)="mobileNavOpen.set(false)">
+  <aside danaMobileNav [desktopMinWidth]="761" #mobileNav="danaMobileNav" id="lapper-navigation" (keydown.escape)="closeNavigation(mobileNav)" class="dana-sidebar" [class.is-open]="mobileNav.open" aria-label="GearApps navigation">
+    <a routerLink="/dashboard" class="dana-brand-row" (click)="mobileNav.close()">
       <span class="dana-brand-mark" aria-hidden="true"
         ><img src="assets/branding/dana-diamond.png" alt=""
       /></span>
@@ -14,6 +14,7 @@
           @for (item of group.items; track item.route) {
             <a
               class="dana-side-link"
+              (click)="mobileNav.close()"
               [routerLink]="item.route"
               routerLinkActive="is-active"
               ariaCurrentWhenActive="page"
@@ -33,15 +34,17 @@
         <span>Signed in</span>
       </div>
       <button type="button" class="gear-signout" (click)="signOut()">Sign out</button>
-      <div class="dana-sidebar-version">Lapper · GearApps</div>
+      <div class="dana-sidebar-version">Lapper · v{{ appVersion }}</div>
     </div>
   </aside>
+  @if (mobileNav.open) {
   <button
     type="button"
     class="dana-sidebar-backdrop gear-backdrop"
     aria-label="Close navigation"
-    (click)="mobileNavOpen.set(false)"
+    (click)="closeNavigation(mobileNav)"
   ></button>
+  }
 
   <div class="dana-main">
     <header class="dana-topbar">
@@ -49,8 +52,9 @@
         class="dana-menu-button"
         type="button"
         aria-label="Open navigation"
-        [attr.aria-expanded]="mobileNavOpen()"
-        (click)="mobileNavOpen.set(!mobileNavOpen())"
+        [attr.aria-expanded]="mobileNav.open"
+        (click)="toggleNavigation(mobileNav)"
+        aria-controls="lapper-navigation"
       >
         &#9776;
       </button>

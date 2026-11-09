@@ -1,15 +1,16 @@
+import { contractPath } from './contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
 // Gear Apps styles all ship in @dana/ui (vendored at vendor/dana-ui/package).
 export const GEAR_APPS_STYLE_ENTRY = 'vendor/dana-ui/package/styles/gear-apps.css';
-export const GEAR_APPS_STYLE_ENTRY_INSTALLED = 'node_modules/@dana/ui/styles/gear-compat.css';
-export const GEAR_APPS_DOMAIN_STYLE_ENTRY_INSTALLED = 'node_modules/@dana/ui/styles/gear-compat-features.css';
+export const GEAR_APPS_STYLE_ENTRY_INSTALLED = 'libs/shared/dana-ui/src/styles/gear-compat.css';
+export const GEAR_APPS_DOMAIN_STYLE_ENTRY_INSTALLED = 'libs/shared/dana-ui/src/styles/gear-compat-features.css';
 export const GEAR_APPS_DOMAIN_STYLE_ENTRY = 'vendor/dana-ui/package/styles/gear-compat-features.css';
 const IMPORT_PATTERN = /@import\s+['"]([^'"]+)['"]\s*;/g;
 
 function listStyleModules(root, entryRel) {
-  const entryPath=path.resolve(root,entryRel); if(!fs.existsSync(entryPath)) return [];
+  const entryPath=contractPath(root,entryRel); if(!fs.existsSync(entryPath)) return [];
   const entry=fs.readFileSync(entryPath,'utf8'); const modules=[];
   for(const match of entry.matchAll(IMPORT_PATTERN)){
     const absolutePath=path.resolve(path.dirname(entryPath),match[1]);
@@ -21,7 +22,7 @@ export function listGearAppsStyleModules(root=process.cwd()){ return listStyleMo
 export function listGearAppsDomainStyleModules(root=process.cwd()){ return listStyleModules(root,GEAR_APPS_DOMAIN_STYLE_ENTRY); }
 
 function readStyleGraph(root, entryRel){
-  const entryPath=path.resolve(root,entryRel); if(!fs.existsSync(entryPath)) return '';
+  const entryPath=contractPath(root,entryRel); if(!fs.existsSync(entryPath)) return '';
   const seen=new Set();
   const readFileGraph=(filePath)=>{
     const absolutePath=path.resolve(filePath); if(seen.has(absolutePath)) throw new Error(`Circular Gear Apps stylesheet import detected: ${absolutePath}`); seen.add(absolutePath);

@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import {
   SeedModule,
   UserDatabaseSeedService,
-} from '@libs/server/data-access';
+} from '@gearapps/manufacturing/server/data-access';
 import { DataSource } from 'typeorm';
 
 const required = (name: string): string => {

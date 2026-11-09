@@ -1,4 +1,4 @@
-import { IPaginatedResponse } from '@libs/shared/util-types';
+import { IPaginatedResponse } from '@gearapps/manufacturing/shared/util-types';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { PaginationMetaDto } from './pagination-meta.dto';

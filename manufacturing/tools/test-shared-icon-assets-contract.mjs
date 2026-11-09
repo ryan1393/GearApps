@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { readDanaUiSource } from './lib/dana-ui-source.mjs';
@@ -10,7 +11,7 @@ const requiredIcons = [
 
 for (const icon of requiredIcons) {
   const rel = `assets/icons/${icon}.svg`;
-  const abs = path.join(root, rel);
+  const abs = contractPath(root, rel);
   if (!fs.existsSync(abs)) throw new Error(`Shared icon is missing: ${rel}`);
   const svg = fs.readFileSync(abs, 'utf8');
   if (!svg.includes('<svg') || !svg.includes('viewBox="0 0 24 24"')) {
@@ -19,7 +20,7 @@ for (const icon of requiredIcons) {
 }
 
 const iconCssRel = 'vendor/dana-ui/package/styles/gear-apps/components/icons.css';
-const iconCss = fs.readFileSync(path.join(root, iconCssRel), 'utf8');
+const iconCss = fs.readFileSync(contractPath(root, iconCssRel), 'utf8');
 if (!iconCss.includes('.gear-glyph')) throw new Error('Shared icon CSS base class is missing.');
 for (const icon of requiredIcons) {
   if (!iconCss.includes(`.gear-glyph-${icon}`) || !iconCss.includes(`/assets/icons/${icon}.svg`)) {
@@ -27,7 +28,7 @@ for (const icon of requiredIcons) {
   }
 }
 
-const entry = fs.readFileSync(path.join(root, 'vendor/dana-ui/package/styles/gear-apps.css'), 'utf8');
+const entry = fs.readFileSync(contractPath(root, 'vendor/dana-ui/package/styles/gear-apps.css'), 'utf8');
 if (!entry.includes("@import './gear-apps/components/icons.css';")) {
   throw new Error('Gear Apps design-system entry point does not load shared icon CSS.');
 }
@@ -38,7 +39,7 @@ const navs = [
   'apps/greenshed/src/app/layout/greenshed-nav/greenshed-nav.component.html',
 ];
 for (const rel of navs) {
-  const text = fs.readFileSync(path.join(root, rel), 'utf8');
+  const text = fs.readFileSync(contractPath(root, rel), 'utf8');
   if (!text.includes('gear-glyph-dashboard')) throw new Error(`${rel} is missing the semantic dashboard icon.`);
   if (!text.includes('gear-glyph-admin')) throw new Error(`${rel} is missing the semantic admin icon.`);
   if (!text.includes('gear-glyph-search')) throw new Error(`${rel} is missing the semantic search icon.`);
@@ -64,7 +65,7 @@ const dashboardChecks = [
   },
 ];
 for (const { rel, kpi, operation } of dashboardChecks) {
-  const text = fs.readFileSync(path.join(root, rel), 'utf8');
+  const text = fs.readFileSync(contractPath(root, rel), 'utf8');
   for (const marker of kpi) {
     if (!text.includes(marker)) throw new Error(`${rel} is missing semantic KPI icon ${marker}.`);
   }
@@ -93,14 +94,14 @@ if (/[⚙↺↔⇩⇣▥▤▦▣⌕⌖⊘✓⌂•]/u.test(operationCard)) {
 }
 
 for (const app of ['blade-tracking', 'cutter-builder', 'greenshed']) {
-  const project = JSON.parse(fs.readFileSync(path.join(root, `apps/${app}/project.json`), 'utf8'));
+  const project = JSON.parse(fs.readFileSync(contractPath(root, `apps/${app}/project.json`), 'utf8'));
   const assets = project.targets?.build?.options?.assets ?? [];
-  if (!assets.some((entry) => typeof entry === 'object' && entry.input === 'assets' && entry.output === 'assets')) {
+  if (!assets.some((entry) => typeof entry === 'object' && entry.input === 'manufacturing/assets' && entry.output === 'assets')) {
     throw new Error(`${app} does not publish the shared semantic icon assets.`);
   }
 }
 
-if (!fs.existsSync(path.join(root, 'assets/icons/README.md'))) {
+if (!fs.existsSync(contractPath(root, 'assets/icons/README.md'))) {
   throw new Error('Shared icon asset instructions are missing.');
 }
 

@@ -2,9 +2,9 @@ import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
-import { Auth, DepartmentAppEdit, ReqUserId } from '@libs/server/util-common';
-import { RoleType, Uuid } from '@libs/shared/util-types';
-import { cancelWorkflow, getWorkflowCancellation, ReversalApp } from '@libs/server/data-access';
+import { Auth, DepartmentAppEdit, ReqUserId } from '@gearapps/manufacturing/server/util-common';
+import { RoleType, Uuid } from '@gearapps/manufacturing/shared/util-types';
+import { cancelWorkflow, getWorkflowCancellation, ReversalApp } from '@gearapps/manufacturing/server/data-access';
 
 class CancelWorkflowDto {
   @IsString() @MinLength(1) @MaxLength(200) identifier!: string;

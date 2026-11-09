@@ -1,19 +1,19 @@
 import { AdminMasterDataController } from './admin-master-data.controller';
 import { AdminMasterDataService } from './admin-master-data.service';
-import { ServerFeatGreenshedModule } from '@libs/server/feat-greenshed';
-import { ServerFeatCutterBuildModule } from '@libs/server/feat-cutter-build';
-import { ServerFeatCutterConfigModule } from '@libs/server/feat-cutter-config';
-import { ServerFeatAuthModule } from '@libs/server/feat-auth';
-import { ServerFeatBladeModule } from '@libs/server/feat-blade';
-import { ServerFeatBladeTrayModule } from '@libs/server/feat-blade-tray';
-import { ServerFeatContainerModule } from '@libs/server/feat-container';
-import { ServerFeatContainerTrayModule } from '@libs/server/feat-container-tray';
-import { ServerFeatureHealthModule } from '@libs/server/feat-health';
-import { ServerFeatLocationModule } from '@libs/server/feat-location';
-import { ServerFeatLocationTrayModule } from '@libs/server/feat-location-tray';
-import { ServerFeatPartSummaryModule } from '@libs/server/feat-part-summary';
-import { ServerFeatTrayModule } from '@libs/server/feat-tray';
-import { ServerFeatUserModule } from '@libs/server/feat-user';
+import { ServerFeatGreenshedModule } from '@gearapps/manufacturing/server/feat-greenshed';
+import { ServerFeatCutterBuildModule } from '@gearapps/manufacturing/server/feat-cutter-build';
+import { ServerFeatCutterConfigModule } from '@gearapps/manufacturing/server/feat-cutter-config';
+import { ServerFeatAuthModule } from '@gearapps/manufacturing/server/feat-auth';
+import { ServerFeatBladeModule } from '@gearapps/manufacturing/server/feat-blade';
+import { ServerFeatBladeTrayModule } from '@gearapps/manufacturing/server/feat-blade-tray';
+import { ServerFeatContainerModule } from '@gearapps/manufacturing/server/feat-container';
+import { ServerFeatContainerTrayModule } from '@gearapps/manufacturing/server/feat-container-tray';
+import { ServerFeatureHealthModule } from '@gearapps/manufacturing/server/feat-health';
+import { ServerFeatLocationModule } from '@gearapps/manufacturing/server/feat-location';
+import { ServerFeatLocationTrayModule } from '@gearapps/manufacturing/server/feat-location-tray';
+import { ServerFeatPartSummaryModule } from '@gearapps/manufacturing/server/feat-part-summary';
+import { ServerFeatTrayModule } from '@gearapps/manufacturing/server/feat-tray';
+import { ServerFeatUserModule } from '@gearapps/manufacturing/server/feat-user';
 import {
   appConfig,
   dbConfig,
@@ -23,8 +23,8 @@ import {
   QueryFailedFilter,
   TypeormConfigService,
   validationSchema,
-} from '@libs/server/util-common';
-import { ServerUtilMailerModule } from '@libs/server/util-mailer';
+} from '@gearapps/manufacturing/server/util-common';
+import { ServerUtilMailerModule } from '@gearapps/manufacturing/server/util-mailer';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER } from '@nestjs/core';
@@ -53,7 +53,7 @@ const featureModules = [
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: 'manufacturing/.env',
       load: [appConfig, dbConfig, googleConfig, mailerConfig],
       validationSchema,
     }),

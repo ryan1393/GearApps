@@ -4,9 +4,9 @@ import {
   LocationDto,
   InventoryListQueryDto,
   UpdateLocationDto,
-} from '@libs/server/data-access';
-import { DepartmentAppEdit, Auth, ReqUserId } from '@libs/server/util-common';
-import { RoleType, Uuid } from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/server/data-access';
+import { DepartmentAppEdit, Auth, ReqUserId } from '@gearapps/manufacturing/server/util-common';
+import { RoleType, Uuid } from '@gearapps/manufacturing/shared/util-types';
 import {
   Body,
   Controller,

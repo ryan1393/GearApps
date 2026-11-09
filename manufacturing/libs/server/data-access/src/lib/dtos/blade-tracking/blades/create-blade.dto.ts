@@ -1,7 +1,7 @@
 import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { BladeStatus, ICreateBlade, Uuid } from '@libs/shared/util-types';
+import { BladeStatus, ICreateBlade, Uuid } from '@gearapps/manufacturing/shared/util-types';
 
 export class CreateBladeDto implements ICreateBlade {
   @ApiProperty({ type: String, format: 'uuid' })

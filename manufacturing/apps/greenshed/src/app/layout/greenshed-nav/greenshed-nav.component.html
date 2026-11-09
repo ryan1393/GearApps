@@ -1,6 +1,6 @@
 <ng-container *ngIf="session.authState$ | async as user">
   <aside danaMobileNav [desktopMinWidth]="1024" #mobileNav="danaMobileNav" class="gear-sidebar" [class.mobile-open]="mobileNav.open" aria-label="Application navigation">
-    <a routerLink="/greenshed" class="brand-row">
+    <a (click)="mobileNav.close()" routerLink="/greenshed" class="brand-row">
       <span class="brand-mark dana-diamond-mark"><img src="assets/brand/dana-logo.svg" alt="" class="dana-diamond-image" aria-hidden="true" /></span>
       <span class="brand-copy">
         <small>GEAR APPS</small>
@@ -8,20 +8,20 @@
       </span>
     </a>
 
-    <nav (click)="mobileNav.close()" class="side-nav" aria-label="Greenshed">
-      <a routerLink="/greenshed" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active" class="side-link primary">
+    <nav class="side-nav" aria-label="Greenshed">
+      <a (click)="mobileNav.close()" routerLink="/greenshed" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active" class="side-link primary">
         <span class="nav-icon"><span class="gear-glyph gear-glyph-dashboard" aria-hidden="true"></span></span><span>Greenshed Dashboard</span><span class="nav-current">ACTIVE</span>
       </a>
 
       <ng-container *ngIf="canEdit(user)">
         <div class="nav-heading">GEAR QUALITY</div>
-        <a routerLink="/greenshed/machines" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Running Machines</span></a>
-        <a routerLink="/greenshed/setup" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-setup" aria-hidden="true"></span></span><span>Machine Setup</span></a>
-        <a routerLink="/greenshed/check" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-quality-check" aria-hidden="true"></span></span><span>Quality Check</span></a>
-        <a routerLink="/greenshed/pull" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-pull" aria-hidden="true"></span></span><span>Cutter Pull</span></a>
+        <a (click)="mobileNav.close()" routerLink="/greenshed/machines" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Running Machines</span></a>
+        <a (click)="mobileNav.close()" routerLink="/greenshed/setup" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-setup" aria-hidden="true"></span></span><span>Machine Setup</span></a>
+        <a (click)="mobileNav.close()" routerLink="/greenshed/check" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-quality-check" aria-hidden="true"></span></span><span>Quality Check</span></a>
+        <a (click)="mobileNav.close()" routerLink="/greenshed/pull" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-pull" aria-hidden="true"></span></span><span>Cutter Pull</span></a>
 
         <div class="nav-heading">REFERENCE</div>
-        <a routerLink="/greenshed/lookup" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span><span>Cutter Lookup</span></a>
+        <a (click)="mobileNav.close()" routerLink="/greenshed/lookup" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span><span>Cutter Lookup</span></a>
       </ng-container>
 
       <div *ngIf="!canEdit(user)" class="sidebar-view-only">
@@ -30,11 +30,11 @@
       </div>
 
       <div class="nav-heading">SHARED APPS</div>
-      <a [href]="bladeTrackingUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-blade" aria-hidden="true"></span></span><span>Blade Tracking</span></a>
-      <a [href]="cutterBuilderUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Cutter Builder</span></a>
+      <a (click)="mobileNav.close()" [href]="bladeTrackingUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-blade" aria-hidden="true"></span></span><span>Blade Tracking</span></a>
+      <a (click)="mobileNav.close()" [href]="cutterBuilderUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Cutter Builder</span></a>
 
       <div class="nav-heading">ADMINISTRATION</div>
-      <a *ngIf="user.role === 'admin'" routerLink="/admin" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span><span>Admin</span></a>
+      <a (click)="mobileNav.close()" *ngIf="user.role === 'admin'" routerLink="/admin" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span><span>Admin</span></a>
     </nav>
 
     <div class="sidebar-footer">

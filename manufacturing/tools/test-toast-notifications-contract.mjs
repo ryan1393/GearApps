@@ -1,9 +1,10 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { readDanaUiSource } from './lib/dana-ui-source.mjs';
 
 const root = process.cwd();
-const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
+const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8');
 const assert = (condition, message) => { if (!condition) throw new Error(message); };
 
 const compatService = read('libs/frontend/util-common/src/lib/toast/gear-toast.service.ts');
@@ -63,6 +64,8 @@ for (const rel of actionFiles) {
   assert(source.includes('GearToastService'), `${rel} must continue using the compatibility toast service.`);
 }
 
+const legacyPath = contractPath(root, 'libs/frontend/util-common/src/lib/directives/upsert-dialog-directive/upsert-dialog.directive.ts');
+if (fs.existsSync(legacyPath)) {
 const legacyDirective = read('libs/frontend/util-common/src/lib/directives/upsert-dialog-directive/upsert-dialog.directive.ts');
 const upsertActionType = read('libs/frontend/util-common/src/lib/directives/upsert-dialog-directive/upsert-dialog-data.interface.ts');
 assert(!legacyDirective.includes('HotToastService'), 'Legacy upsert flow must not bypass the Dana/Gear toast system.');
@@ -70,6 +73,15 @@ assert(legacyDirective.includes('GearToastService'), 'Legacy upsert flow must us
 assert(upsertActionType.includes("export type UpsertDialogDataActionType = 'add' | 'edit'"), 'Upsert action contract must remain add/edit.');
 assert(legacyDirective.includes("this.action === 'add' ? 'Created' : 'Updated'"), 'Upsert toast title must use the valid add/edit action literals.');
 assert(!legacyDirective.includes("this.action === 'create'"), 'Upsert toast logic must not compare add/edit action data to an invalid create literal.');
+
+} else {
+  const directiveExports=read('libs/frontend/util-common/src/lib/directives/index.ts');
+  assert(!directiveExports.includes('upsert-dialog.directive'), 'A retired dialog directive must not remain exported');
+  for (const rel of actionFiles) {
+    const source=read(rel);
+    assert(!source.includes('UpsertDialogDirective') && !source.includes('HotToastService'), `${rel} must use the native form and Dana toast flow`);
+  }
+}
 
 const brandCss = read('vendor/dana-ui/package/styles/gear-apps/layout/brand.css');
 const responsiveCss = read('vendor/dana-ui/package/styles/gear-apps/foundation/responsive.css');

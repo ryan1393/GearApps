@@ -1,6 +1,6 @@
 // user.dto.ts
-import { AbstractDto, AbstractDtoOptions } from '@libs/server/util-common';
-import { RoleType } from '@libs/shared/util-types';
+import { AbstractDto, AbstractDtoOptions } from '@gearapps/manufacturing/server/util-common';
+import { RoleType } from '@gearapps/manufacturing/shared/util-types';
 import { ApiProperty } from '@nestjs/swagger';
 
 import { UserOrmEntity } from '../../database/entities/user.orm-entity';

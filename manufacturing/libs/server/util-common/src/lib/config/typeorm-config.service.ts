@@ -1,4 +1,4 @@
-import { ENV_ENVIRONMENT } from '@libs/shared/util-constants';
+import { ENV_ENVIRONMENT } from '@gearapps/manufacturing/shared/util-constants';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';

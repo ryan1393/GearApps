@@ -3,9 +3,9 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, ViewChild, inject, OnDestroy } from '@angular/core';
-import { GearToastService } from '@libs/frontend/util-common';
-import { ILocation, ILocationTray, ITray } from '@libs/shared/util-types';
-import { BladeTrackingApiService, InventoryLocationRow, InventoryTrayRow, apiErrorText } from '@libs/frontend/data-access-blade-tracking';
+import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { ILocation, ILocationTray, ITray } from '@gearapps/manufacturing/shared/util-types';
+import { BladeTrackingApiService, InventoryLocationRow, InventoryTrayRow, apiErrorText } from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
 import { ScanMessage } from '../../models/scan-message';
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import {

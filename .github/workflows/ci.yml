@@ -1,15 +1,28 @@
 name: CI
 on:
-  push: { branches: [main] }
+  push:
+    branches: [main]
   pull_request:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    env:
+      CYPRESS_INSTALL_BINARY: '0'
+      NX_DAEMON: 'false'
+      NX_NO_CLOUD: 'true'
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 0 }
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
-        with: { node-version: 22, cache: npm }
+        with:
+          node-version: 24.22.1
+          cache: npm
+      - run: npm install -g npm@11.9.0
       - run: npm ci
-      - run: npx nx format:check
-      - run: npx nx run-many -t lint test build --configuration=production
+      - run: npm run test:versions
+      - run: npm run lint
+      - run: npm test
+      - run: npm run test:contracts
+      - run: npm run build
+      - run: npx nx run gear-app-server:build-fresh-db-bootstrap --configuration=production

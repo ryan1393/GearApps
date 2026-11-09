@@ -6,7 +6,7 @@ import {
   IUpdateUser,
   IUser,
   IUserLogin,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 
 import { AuthSessionService } from './auth-session.service';
 import { UserApiService } from './user-api.service';

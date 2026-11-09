@@ -1,4 +1,4 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 param(
     [switch]$SkipInstall,
     [switch]$CleanInstall,
@@ -10,9 +10,11 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$ManufacturingRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$ProjectRoot = (Resolve-Path (Join-Path $ManufacturingRoot '..')).Path
 Set-Location $ProjectRoot
 
+$env:CYPRESS_INSTALL_BINARY = '0'
 $env:NX_DAEMON = 'false'
 $env:NX_ISOLATE_PLUGINS = 'false'
 $env:NX_CACHE_PROJECT_GRAPH = 'false'
@@ -66,21 +68,10 @@ $npmVersion = (& npm --version).Trim()
 Write-Host "[PASS] Node.js detected: $nodeVersion" -ForegroundColor Green
 Write-Host "[PASS] npm detected:     $npmVersion" -ForegroundColor Green
 
-$nodeMatch = [regex]::Match($nodeVersion, '^v(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)')
-if (-not $nodeMatch.Success) {
-    throw "Could not parse Node.js version '$nodeVersion'."
+if ($nodeVersion -ne 'v24.22.1' -or $npmVersion -ne '11.9.0') {
+    throw "This workspace requires Node.js 24.22.1 and npm 11.9.0. Detected $nodeVersion / $npmVersion."
 }
-$nodeMajor = [int]$nodeMatch.Groups['major'].Value
-$nodeMinor = [int]$nodeMatch.Groups['minor'].Value
-$nodeSupported = (
-    ($nodeMajor -eq 22 -and $nodeMinor -ge 12) -or
-    ($nodeMajor -eq 24) -or
-    ($nodeMajor -eq 26)
-)
-if (-not $nodeSupported) {
-    throw "Nx 23 requires Node 22.12+, Node 24, or Node 26. Detected $nodeVersion."
-}
-Write-Host '[PASS] Node.js version is supported by Nx 23.' -ForegroundColor Green
+Write-Host '[PASS] Shared Node.js/npm versions match the root workspace.' -ForegroundColor Green
 
 if (-not (Test-Path (Join-Path $ProjectRoot 'package.json'))) {
     throw 'package.json was not found. Run this script from the extracted Gear Apps project.'

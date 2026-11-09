@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const read = (rel) => fs.readFileSync(rel, 'utf8').replace(/^\uFEFF/, '');
+const read = (rel) => fs.readFileSync(contractPath(process.cwd(), rel), 'utf8').replace(/^\uFEFF/, '');
 
 const routes = read('libs/frontend/feature-blade-tracking/src/lib/lib.routes.ts');
 const nav = read('apps/blade-tracking/src/app/layout/app-nav/app-nav.component.html');

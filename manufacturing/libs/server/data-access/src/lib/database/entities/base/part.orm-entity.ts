@@ -8,8 +8,8 @@ import {
   OneToOne,
 } from 'typeorm';
 
-import { AbstractOrmEntity } from '@libs/server/util-common';
-import { IPart } from '@libs/shared/util-types';
+import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { IPart } from '@gearapps/manufacturing/shared/util-types';
 import { PartSummaryOrmEntity } from './part-summary.orm-entity';
 import { CutterPartTypeOrmEntity } from '../cutter-tracking/cutter-part-type.orm-entity';
 import { RollMasterOrmEntity } from './roll-master.orm-entity';

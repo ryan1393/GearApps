@@ -5,7 +5,7 @@ import {
   mailerConfig,
   TypeormConfigService,
   validationSchema,
-} from '@libs/server/util-common';
+} from '@gearapps/manufacturing/server/util-common';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -17,7 +17,7 @@ import { UserDatabaseSeedService } from './users.database-seed';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: 'manufacturing/.env',
       load: [appConfig, dbConfig, googleConfig, mailerConfig],
       validationSchema,
     }),

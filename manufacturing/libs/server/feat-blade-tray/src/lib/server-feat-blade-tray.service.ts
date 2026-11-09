@@ -1,8 +1,8 @@
 import { randomUUID } from 'crypto';
-import { isPendingGrindingStatus } from '@libs/shared/util-constants';
+import { isPendingGrindingStatus } from '@gearapps/manufacturing/shared/util-constants';
 import { FindOptionsWhere, Repository } from 'typeorm';
 
-import { beginWorkflowJournal } from '@libs/server/data-access';
+import { beginWorkflowJournal } from '@gearapps/manufacturing/server/data-access';
 import {
   BladeHistoryOrmEntity,
   BladeOrmEntity,
@@ -19,7 +19,7 @@ import {
   TrayOrmEntity,
   TrayStageOrmEntity,
   LocationTrayOrmEntity,
-} from '@libs/server/data-access';
+} from '@gearapps/manufacturing/server/data-access';
 import {
   BladeHistoryEvent,
   BladeStatus,
@@ -27,7 +27,7 @@ import {
   IBladeTrayEntity,
   IPaginatedResponse,
   Uuid,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,

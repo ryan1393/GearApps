@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthSessionService } from '@libs/frontend/data-access-user';
+import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
 
 import { REDIRECT_URL_QUERY_PARAM } from '../constants';
 

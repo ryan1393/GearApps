@@ -19,3 +19,5 @@ export * from './lib/cutter-tracking/cutter-build';
 export * from './lib/cutter-tracking/check-cmm';
 export * from './lib/cutter-tracking/check-frequency';
 export * from './lib/cutter-tracking/retired-cutter';
+
+export * from './lib/app-version';

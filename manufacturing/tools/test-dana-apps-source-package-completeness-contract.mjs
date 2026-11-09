@@ -1,22 +1,64 @@
+import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import path from 'node:path';
+import { readContract, workspaceRoot } from './lib/contract-paths.mjs';
+import { packageFileAllowed } from '../../tools/package-release.mjs';
 
-const read = (p) => fs.readFileSync(p, 'utf8');
-const must = (ok, msg) => { if (!ok) throw new Error(msg); };
-
-const packager = read('tools/package-dana-apps-source.ps1');
-const routes = read('libs/frontend/feature-cutter-builder/src/lib/cutter-builder.routes.ts');
-const runner = read('tools/run-all-tests.ps1');
-const buildTs = 'libs/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.ts';
-const buildHtml = 'libs/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.html';
-
-must(fs.existsSync(buildTs), `Live Cutter Builder source missing ${buildTs}`);
-must(fs.existsSync(buildHtml), `Live Cutter Builder source missing ${buildHtml}`);
-must(routes.includes("./pages/build/cutter-build.component"), 'Cutter Builder build route no longer references the protected build page.');
-must(packager.includes('$ExcludedRootPaths'), 'Source packager does not use root-only Robocopy exclusions.');
-must(!packager.includes(') + $ExcludedDirectories + @('), 'Source packager still has bare-name Robocopy /XD exclusions.');
-must(packager.includes('Assert-StagedSourceCompleteness'), 'Source packager is missing staged-source completeness validation.');
-must(packager.includes(buildTs), 'Source packager does not explicitly protect Cutter Builder nested build-page source.');
-must(runner.includes('test-dana-apps-source-package-completeness-contract.mjs'), 'Authoritative Gear runner does not include source-package completeness contract.');
-must(runner.includes("Add-MasterResult 'Dana Apps source package completeness contract' 'PASS'"), 'Authoritative Gear runner does not record source-package completeness PASS status.');
-
-console.log('[PASS] Dana Apps source package completeness contract: root-only exclusions and staged inventory preserve legitimate nested build source.');
+const routes = readContract(
+  'libs/frontend/feature-cutter-builder/src/lib/cutter-builder.routes.ts',
+);
+const runner = readContract('tools/run-all-tests.ps1');
+assert.ok(
+  routes.includes('./pages/build/cutter-build.component'),
+  'Cutter Builder must retain its build route.',
+);
+for (const file of [
+  'package.json',
+  'package-lock.json',
+  'nx.json',
+  'apps/lapper-api/src/main.ts',
+  'apps/lapper-client/src/main.ts',
+  'apps/lapper-read/Directory.Build.props',
+  'apps/lapper-read/LapperRead/Program.cs',
+  'apps/lapper-read/LapperReadLibrary/BusinessLogic/Fanuc.cs',
+  'apps/lapper-read/LapperRead.Tests/ApiTests.cs',
+  'manufacturing/apps/blade-tracking/project.json',
+  'manufacturing/apps/cutter-builder/project.json',
+  'manufacturing/apps/greenshed/project.json',
+  'manufacturing/apps/server/src/main.ts',
+  'manufacturing/libs/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.ts',
+  'manufacturing/libs/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.html',
+  'libs/shared/dana-ui/src/index.ts',
+  'vendor/dana-ui/package/index.d.ts',
+]) {
+  assert.ok(
+    fs.existsSync(path.join(workspaceRoot, file)),
+    `Live release source missing: ${file}`,
+  );
+  assert.equal(
+    packageFileAllowed(file),
+    true,
+    `Release policy omitted live source: ${file}`,
+  );
+}
+for (const generated of [
+  'dist/manufacturing/apps/server/main.js',
+  'manufacturing/node_modules/a/index.js',
+]) {
+  assert.equal(
+    packageFileAllowed(generated),
+    false,
+    `Generated output must be excluded: ${generated}`,
+  );
+}
+assert.ok(
+  runner.includes('test-dana-apps-source-package-completeness-contract.mjs'),
+);
+assert.ok(
+  runner.includes(
+    "Add-MasterResult 'Dana Apps source package completeness contract' 'PASS'",
+  ),
+);
+console.log(
+  '[PASS] Unified release preserves every app group, one dependency authority, shared UI and legitimate nested build-page source.',
+);

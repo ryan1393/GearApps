@@ -5,7 +5,7 @@ import {
   IsString,
 } from 'class-validator';
 
-import { ICreateContainer } from '@libs/shared/util-types';
+import { ICreateContainer } from '@gearapps/manufacturing/shared/util-types';
 import {
   ApiProperty,
   ApiPropertyOptional,

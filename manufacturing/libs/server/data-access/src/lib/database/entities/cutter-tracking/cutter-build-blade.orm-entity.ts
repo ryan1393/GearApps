@@ -1,7 +1,7 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
-import { AbstractOrmEntity } from '@libs/server/util-common';
-import { ICutterBuildBlade } from '@libs/shared/util-types';
+import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { ICutterBuildBlade } from '@gearapps/manufacturing/shared/util-types';
 import { BladeOrmEntity } from '../blade-tracking/blade.orm-entity';
 import { CutterBuildOrmEntity } from './cutter-build.orm-entity';
 @Entity({ name: 'cutter_build_blades' })

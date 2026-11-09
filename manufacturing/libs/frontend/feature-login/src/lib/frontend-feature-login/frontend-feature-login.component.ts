@@ -9,10 +9,10 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
-import { REDIRECT_URL_QUERY_PARAM } from '@libs/frontend/data-access-common';
-import { AuthSessionService } from '@libs/frontend/data-access-user';
-import { PASSWORD_MIN_LENGTH } from '@libs/shared/util-constants';
-import { IUserLogin } from '@libs/shared/util-types';
+import { REDIRECT_URL_QUERY_PARAM } from '@gearapps/manufacturing/frontend/data-access-common';
+import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
+import { PASSWORD_MIN_LENGTH } from '@gearapps/manufacturing/shared/util-constants';
+import { IUserLogin } from '@gearapps/manufacturing/shared/util-types';
 
 type LoginFormType = Record<keyof IUserLogin, FormControl<string>>;
 

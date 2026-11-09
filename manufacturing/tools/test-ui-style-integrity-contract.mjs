@@ -1,11 +1,12 @@
+import { contractPath } from './lib/contract-paths.mjs';
 ﻿import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 
 const root=process.cwd();
-const req=createRequire(path.join(root,"package.json"));
+const req=createRequire(contractPath(root,"package.json"));
 const postcss=req("postcss");
-const entry=path.join(root,"vendor","dana-ui","package","styles","gear-apps.css");
+const entry=contractPath(root,"vendor","dana-ui","package","styles","gear-apps.css");
 
 if(!fs.existsSync(entry)) throw new Error("Missing shared Gear Apps CSS entrypoint.");
 

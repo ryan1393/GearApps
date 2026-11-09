@@ -1,8 +1,8 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index, JoinColumn, OneToOne } from 'typeorm';
 
-import { AbstractOrmEntity } from '@libs/server/util-common';
-import { IRollMaster } from '@libs/shared/util-types';
+import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { IRollMaster } from '@gearapps/manufacturing/shared/util-types';
 import { PartOrmEntity } from './part.orm-entity';
 
 @Entity({ name: 'roll_masters' })

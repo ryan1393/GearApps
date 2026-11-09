@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 // Read-only regression checks. Run with: node tools/test-numbered-rough-shelves-contract.mjs
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
@@ -7,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const require=createRequire(import.meta.url),ts=require('typescript');
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 function load(rel,overrides={}) {
- const code=ts.transpileModule(fs.readFileSync(path.join(root,rel),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
+ const code=ts.transpileModule(fs.readFileSync(contractPath(root,rel),'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
  const module={exports:{}};
  new Function('require','exports','module',code)(name => name in overrides ? overrides[name] : require(name),module.exports,module);
  return module.exports;

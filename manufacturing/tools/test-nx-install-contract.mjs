@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const read=(p)=>fs.readFileSync(p,'utf8').replace(/^\uFEFF/,'');
+const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8').replace(/^\uFEFF/,'');
 const setup=read('tools/setup-gear-apps.ps1');
 const start=read('tools/start-gear-apps.ps1');
 const tests=read('tools/run-all-tests.ps1');

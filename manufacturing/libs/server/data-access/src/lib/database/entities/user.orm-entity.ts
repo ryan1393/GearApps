@@ -9,13 +9,13 @@ import {
   VirtualColumn,
 } from 'typeorm';
 
-import { AbstractOrmEntity } from '@libs/server/util-common';
+import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
 import {
   AuthProviderType,
   IUser,
   IUserEntity,
   RoleType,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 
 import { UserDto, UserDtoOptions } from '../../dtos';
 import { DepartmentOrmEntity } from './base/department.orm-entity';

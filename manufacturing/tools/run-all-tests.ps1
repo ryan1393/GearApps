@@ -44,6 +44,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $ProjectRoot = (Resolve-Path (Split-Path -Parent $PSScriptRoot)).Path
+$WorkspaceRoot = (Resolve-Path (Join-Path $ProjectRoot '..')).Path
 $RouteManifestPath = (Resolve-Path (Join-Path $PSScriptRoot 'api-route-manifest.json')).Path
 $StartedServer = $false
 $ServerProcess = $null
@@ -81,6 +82,7 @@ function Invoke-ChildTest {
 
     # Hashtable splatting preserves named PowerShell parameters.
     # Array splatting of '-Name', value pairs is intentionally not used.
+    Push-Location $ProjectRoot
     try {
         $global:LASTEXITCODE = 0
         & $ScriptPath @Parameters
@@ -88,6 +90,8 @@ function Invoke-ChildTest {
     } catch {
         Add-MasterResult $Name 'FAIL' $_.Exception.Message
         throw
+    } finally {
+        Pop-Location
     }
 
     if ($childExitCode -ne 0) {
@@ -278,7 +282,7 @@ function Start-GearAppsApi {
     }
 
     Write-Host "Starting Gear Apps API in a separate PowerShell process..." -ForegroundColor Yellow
-    $escapedRoot = $ProjectRoot.Replace("'", "''")
+    $escapedRoot = $WorkspaceRoot.Replace("'", "''")
     $command = "Set-Location '$escapedRoot'; `$env:NX_DAEMON='false'; `$env:NX_ISOLATE_PLUGINS='false'; npx nx serve gear-app-server"
     $script:ServerProcess = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-Command',$command) -PassThru
     $script:StartedServer = $true

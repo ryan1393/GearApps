@@ -1,9 +1,9 @@
 {
   "name": "greenshed",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "prefix": "gear",
-  "sourceRoot": "apps/greenshed/src",
+  "sourceRoot": "manufacturing/apps/greenshed/src",
   "tags": [
     "type:app",
     "scope:frontend",
@@ -12,35 +12,34 @@
   ],
   "targets": {
     "build": {
-      "executor": "@nx/angular:webpack-browser",
+      "executor": "@angular/build:application",
       "outputs": [
-        "{options.outputPath}"
+        "{workspaceRoot}/dist/manufacturing/apps/greenshed"
       ],
       "options": {
-        "outputPath": "dist/apps/greenshed",
-        "index": "apps/greenshed/src/index.html",
-        "main": "apps/greenshed/src/main.ts",
+        "outputPath": "dist/manufacturing/apps/greenshed",
         "polyfills": [
           "zone.js"
         ],
-        "tsConfig": "apps/greenshed/tsconfig.app.json",
+        "tsConfig": "manufacturing/apps/greenshed/tsconfig.app.json",
         "assets": [
-          "apps/greenshed/src/favicon.ico",
-          "apps/greenshed/src/assets",
+          "manufacturing/apps/greenshed/src/favicon.ico",
+          "manufacturing/apps/greenshed/src/assets",
           {
             "glob": "**/*",
-            "input": "assets",
+            "input": "manufacturing/assets",
             "output": "assets"
           }
         ],
         "styles": [
-          "apps/greenshed/src/styles.css",
-          "node_modules/@dana/ui/styles/gear-compat.css",
-          "node_modules/@dana/ui/styles/gear-compat-features.css",
-          "node_modules/@dana/ui/styles/dana-ui.css",
-          "node_modules/@dana/ui/styles/gear-compat-overrides.css"
+          "manufacturing/apps/greenshed/src/styles.css",
+          "libs/shared/dana-ui/src/styles/gear-compat.css",
+          "libs/shared/dana-ui/src/styles/gear-compat-features.css",
+          "libs/shared/dana-ui/src/styles/dana-ui.css",
+          "libs/shared/dana-ui/src/styles/gear-compat-overrides.css"
         ],
-        "scripts": []
+        "browser": "manufacturing/apps/greenshed/src/main.ts",
+        "index": "manufacturing/apps/greenshed/src/index.html"
       },
       "configurations": {
         "production": {
@@ -59,20 +58,17 @@
           "outputHashing": "all"
         },
         "development": {
-          "buildOptimizer": false,
           "optimization": false,
-          "vendorChunk": true,
           "extractLicenses": false,
-          "sourceMap": true,
-          "namedChunks": true
+          "sourceMap": true
         }
       },
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@angular-devkit/build-angular:dev-server",
+      "executor": "@angular/build:dev-server",
       "options": {
-        "proxyConfig": "apps/greenshed/proxy.conf.json",
+        "proxyConfig": "manufacturing/apps/greenshed/proxy.conf.json",
         "port": 4202
       },
       "configurations": {
@@ -83,42 +79,61 @@
           "buildTarget": "greenshed:build:development"
         }
       },
-      "defaultConfiguration": "development"
+      "defaultConfiguration": "development",
+      "continuous": true
     },
     "extract-i18n": {
-      "executor": "@angular-devkit/build-angular:extract-i18n",
+      "executor": "@angular/build:extract-i18n",
       "options": {
         "buildTarget": "greenshed:build"
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": [
-          "apps/greenshed/**/*.ts",
-          "apps/greenshed/**/*.html"
-        ]
-      }
+        "command": "eslint .",
+        "cwd": "manufacturing/apps/greenshed"
+      },
+      "cache": true
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
+        "{workspaceRoot}/coverage/manufacturing/apps/greenshed"
       ],
       "options": {
-        "jestConfig": "apps/greenshed/jest.config.ts",
-        "passWithNoTests": true,
-        "tsConfig": "apps/greenshed/tsconfig.spec.json"
+        "command": "jest --config manufacturing/apps/greenshed/jest.config.cts --runInBand --passWithNoTests",
+        "cwd": ".",
+        "env": {
+          "NODE_ENV": "test",
+          "ENVIRONMENT": "test",
+          "NX_DAEMON": "false",
+          "JWT_ACCESS_SECRET": "unit-test-access-secret-no-production-use",
+          "JWT_REFRESH_SECRET": "unit-test-refresh-secret-no-production-use",
+          "DATABASE_TYPE": "better-sqlite3",
+          "DATABASE_PATH": ":memory:",
+          "EMAIL_ENABLED": "false",
+          "SOCIAL_GOOGLE_ENABLED": "false",
+          "SENTRY_DSN": ""
+        }
+      },
+      "configurations": {
+        "ci": {
+          "command": "jest --config manufacturing/apps/greenshed/jest.config.cts --runInBand --passWithNoTests --ci --coverage"
+        }
       }
     },
     "serve-static": {
       "executor": "@nx/web:file-server",
       "options": {
         "buildTarget": "greenshed:build",
-        "port": 4202
+        "port": 4202,
+        "staticFilePath": "dist/manufacturing/apps/greenshed/browser",
+        "spa": true
+      },
+      "continuous": true,
+      "readyWhen": {
+        "signal": true
       }
     }
   }

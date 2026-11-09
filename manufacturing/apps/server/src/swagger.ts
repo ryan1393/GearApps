@@ -6,7 +6,7 @@ import {
   ENV_SERVER_PORT,
   ENV_SWAGGER_JSON_FILE,
   GEAR_APPS_VERSION,
-} from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-constants';
 import { INestApplication, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';

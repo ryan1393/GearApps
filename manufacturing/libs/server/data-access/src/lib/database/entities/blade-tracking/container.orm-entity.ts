@@ -1,11 +1,11 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
-import { AbstractOrmEntity } from '@libs/server/util-common';
+import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
 import {
   IContainer,
   IContainerEntity,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 import { ContainerDto, ContainerDtoOptions } from '../../../dtos/blade-tracking/containers';
 import { UserOrmEntity } from '../user.orm-entity';
 

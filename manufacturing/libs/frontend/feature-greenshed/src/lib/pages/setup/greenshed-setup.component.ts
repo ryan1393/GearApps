@@ -4,7 +4,7 @@ import { Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { GearToastService } from '@libs/frontend/util-common';
+import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
 import {
   GreenshedApiService,
   GreenshedBuild,
@@ -12,7 +12,7 @@ import {
   GreenshedSetupResult,
   PartMasterRow,
   greenshedApiErrorText,
-} from '@libs/frontend/data-access-greenshed';
+} from '@gearapps/manufacturing/frontend/data-access-greenshed';
 import {
   DanaPageHeaderComponent,
   DanaButtonDirective,

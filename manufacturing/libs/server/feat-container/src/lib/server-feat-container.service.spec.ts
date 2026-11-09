@@ -1,9 +1,9 @@
 import { Repository } from 'typeorm';
 
-import { ContainerOrmEntity } from '@libs/server/data-access';
-import { ServerUtilMailerService } from '@libs/server/util-mailer';
-import { mockMailerFactory } from '@libs/server/util-mailer/testing';
-import { mockRepoFactory, MockType } from '@libs/server/util-testing';
+import { ContainerOrmEntity } from '@gearapps/manufacturing/server/data-access';
+import { ServerUtilMailerService } from '@gearapps/manufacturing/server/util-mailer';
+import { mockMailerFactory } from '@gearapps/manufacturing/server/util-mailer/testing';
+import { mockRepoFactory, MockType } from '@gearapps/manufacturing/server/util-testing';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 

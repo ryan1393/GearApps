@@ -11,7 +11,7 @@ import {
   CutterEventOrmEntity,
   CutterMachineRunOrmEntity,
   MachineOrmEntity,
-} from '@libs/server/data-access';
+} from '@gearapps/manufacturing/server/data-access';
 import {
   NotFoundException,
   UnprocessableEntityException,

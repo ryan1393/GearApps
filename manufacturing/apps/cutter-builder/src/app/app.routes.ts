@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { adminRoleGuard, authGuard } from '@libs/frontend/data-access-common';
+import { adminRoleGuard, authGuard } from '@gearapps/manufacturing/frontend/data-access-common';
 
 export const appRoutes: Route[] = [
   { path: '', pathMatch: 'full', redirectTo: 'cutter-builder' },
@@ -7,7 +7,7 @@ export const appRoutes: Route[] = [
     path: 'cutter-builder',
     canActivate: [authGuard],
     loadChildren: () =>
-      import('@libs/frontend/feature-cutter-builder').then(
+      import('@gearapps/manufacturing/frontend/feature-cutter-builder').then(
         (m) => m.frontendFeatureCutterBuilderRoutes,
       ),
   },
@@ -15,18 +15,18 @@ export const appRoutes: Route[] = [
     path: 'admin',
     canActivate: [authGuard, adminRoleGuard],
     loadChildren: () =>
-      import('@libs/frontend/feature-admin-users').then(
+      import('@gearapps/manufacturing/frontend/feature-admin-users').then(
         (m) => m.frontendFeatureAdminUsersRoutes,
       ),
   },
   {
     path: 'login',
     loadChildren: () =>
-      import('@libs/frontend/feature-login').then(
+      import('@gearapps/manufacturing/frontend/feature-login').then(
         (m) => m.frontendFeatureLoginRoutes,
       ),
   },
-  { path: 'forgot-password', loadChildren: () => import('@libs/frontend/feature-login').then(m => m.frontendForgotPasswordRoutes) },
-  { path: 'reset-password', loadChildren: () => import('@libs/frontend/feature-login').then(m => m.frontendResetPasswordRoutes) },
+  { path: 'forgot-password', loadChildren: () => import('@gearapps/manufacturing/frontend/feature-login').then(m => m.frontendForgotPasswordRoutes) },
+  { path: 'reset-password', loadChildren: () => import('@gearapps/manufacturing/frontend/feature-login').then(m => m.frontendResetPasswordRoutes) },
   { path: '**', redirectTo: 'cutter-builder' },
 ];

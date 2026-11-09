@@ -142,7 +142,7 @@
     <span>Click a machine number for actions</span>
   </div>
 </section>
-<dialog #machineActions class="machine-actions-dialog" aria-labelledby="machine-actions-title" (cancel)="closeActions()" (click)="closeFromBackdrop($event)">
+<dialog #machineActions class="machine-actions-dialog" aria-labelledby="machine-actions-title" (cancel)="closeActions()" (pointerup)="closeFromBackdrop($event)">
   <h2 id="machine-actions-title">Machine {{ selectedMachine?.machine_number }}</h2>
   <p>Build ID <strong class="font-mono">{{ selectedMachine?.build_number }}</strong></p>
   <div *ngIf="selectedMachine as machine" class="dialog-actions">
@@ -150,6 +150,6 @@
     <button type="button" class="gear-btn gear-btn-secondary" (click)="cmmCheck(machine)">ZEISS / CMM Check</button>
     <button type="button" class="gear-btn gear-btn-secondary" (click)="changeover(machine)">Cutter Change Over</button>
     <button type="button" class="gear-btn gear-btn-secondary" (click)="deathCertificate(machine)">Cutter Death Certificate</button>
-    <button type="button" autofocus class="gear-btn gear-btn-secondary" (click)="closeActions()">Close</button>
+    <button type="button" #closeActionsButton class="gear-btn gear-btn-secondary" (click)="closeActions()">Close</button>
   </div>
 </dialog>

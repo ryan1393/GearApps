@@ -4,7 +4,7 @@ import {
   IsString,
 } from 'class-validator';
 
-import { ICreateContainerTray, Uuid } from '@libs/shared/util-types';
+import { ICreateContainerTray, Uuid } from '@gearapps/manufacturing/shared/util-types';
 import {
   ApiProperty,
   ApiPropertyOptional,

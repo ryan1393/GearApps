@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
@@ -92,7 +93,7 @@ function validateTemplate(file) {
   return errors;
 }
 
-const files = scanRoots.flatMap((dir) => walk(path.join(root, dir))).sort();
+const files = scanRoots.flatMap((dir) => walk(contractPath(root, dir))).sort();
 if (files.length === 0) {
   console.error('[FAIL] Angular template structure contract found no templates to scan.');
   process.exit(1);

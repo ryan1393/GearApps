@@ -1,0 +1,56 @@
+{
+  "name": "dana-ui",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/shared/dana-ui/src",
+  "tags": [
+    "scope:shared",
+    "type:ui"
+  ],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/dist/libs/shared/dana-ui",
+        "{workspaceRoot}/vendor/dana-ui/package"
+      ],
+      "options": {
+        "command": "node libs/shared/dana-ui/tools/build.mjs",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build"
+      ],
+      "options": {
+        "command": "node libs/shared/dana-ui/tools/check.mjs",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "test-browser": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build"
+      ],
+      "options": {
+        "command": "node libs/shared/dana-ui/tools/check.mjs --browser",
+        "cwd": "{workspaceRoot}"
+      }
+    },
+    "pack": {
+      "executor": "nx:run-commands",
+      "dependsOn": [
+        "build"
+      ],
+      "outputs": [
+        "{workspaceRoot}/dist/packages"
+      ],
+      "options": {
+        "command": "node libs/shared/dana-ui/tools/pack.mjs",
+        "cwd": "{workspaceRoot}"
+      }
+    }
+  }
+}

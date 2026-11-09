@@ -5,6 +5,9 @@
 /.nx/workspace-data
 package-lock.json
 .angular
-# Imported manufacturing source retains its own formatting configuration.
+# Retain existing manufacturing source formatting during dependency migration.
 /manufacturing
 /source-archives
+
+/vendor
+/releases

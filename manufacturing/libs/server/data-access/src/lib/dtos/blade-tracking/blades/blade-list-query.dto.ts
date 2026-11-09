@@ -1,7 +1,7 @@
 import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-import { BladeStatus } from '@libs/shared/util-types';
+import { BladeStatus } from '@gearapps/manufacturing/shared/util-types';
 import { PaginationOptionsDto } from '../../pagination';
 
 export class BladeListQueryDto extends PaginationOptionsDto {

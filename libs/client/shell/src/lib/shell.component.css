@@ -43,3 +43,73 @@
   border: 0;
   padding: 0;
 }
+
+
+/* The shared core shell provides a compact rail; Lapper uses an explicit mobile drawer. */
+.dana-brand-row {
+  text-decoration: none;
+}
+.dana-sidebar-identity strong,
+.dana-sidebar-identity span {
+  display: block;
+}
+.dana-menu-button {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--dana-control-border);
+  border-radius: var(--dana-radius-field);
+  background: var(--dana-surface);
+  color: var(--dana-text);
+  font: inherit;
+  font-size: 20px;
+  cursor: pointer;
+}
+.dana-menu-button:focus-visible {
+  outline: 2px solid var(--dana-primary);
+  outline-offset: 3px;
+}
+@media (max-width: 760px) {
+  .dana-menu-button {
+    display: inline-flex;
+  }
+  .dana-sidebar {
+    width: min(var(--dana-sidebar-width), calc(100vw - 56px));
+    padding: 18px 14px;
+    visibility: hidden;
+    transform: translateX(-100%);
+  }
+  .dana-sidebar.is-open {
+    visibility: visible;
+    transform: translateX(0);
+  }
+  .dana-sidebar .dana-brand-copy,
+  .dana-sidebar .dana-nav-heading,
+  .dana-sidebar .dana-sidebar-footer {
+    display: block;
+  }
+  .dana-sidebar .dana-side-link span {
+    display: inline;
+  }
+  .dana-sidebar .dana-brand-row,
+  .dana-sidebar .dana-side-link {
+    justify-content: flex-start;
+  }
+  .dana-sidebar .dana-brand-row {
+    padding: 10px 11px 20px;
+  }
+  .dana-main {
+    width: 100%;
+    margin-left: 0;
+  }
+  .gear-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1090;
+    background: rgb(4 15 27 / 52%);
+    cursor: pointer;
+  }
+}

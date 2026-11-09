@@ -1,4 +1,4 @@
-import * as jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 
 import { HttpClient } from '@angular/common/http';
@@ -9,7 +9,7 @@ import {
   ITokenResponse,
   IUserLogin,
   RefreshToken,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 
 import {
   LOCAL_STORAGE_KEY_ACCESS_TOKEN,
@@ -79,7 +79,7 @@ export class AuthSessionService {
 
   private decodeAccessToken(token: string): IJwtPayload | null {
     try {
-      return jwtDecode.default(token) as IJwtPayload;
+      return jwtDecode<IJwtPayload>(token);
     } catch {
       localStorage.removeItem(LOCAL_STORAGE_KEY_ACCESS_TOKEN);
       this._accessToken = null;

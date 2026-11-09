@@ -1,4 +1,4 @@
-import { ServerDataAccessModule } from '@libs/server/data-access';
+import { ServerDataAccessModule } from '@gearapps/manufacturing/server/data-access';
 import { Module } from '@nestjs/common';
 
 import { ServerFeatCutterBuildController } from './server-feat-cutter-build.controller';

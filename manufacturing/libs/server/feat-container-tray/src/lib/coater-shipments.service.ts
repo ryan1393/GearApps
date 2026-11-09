@@ -2,8 +2,8 @@ import { randomUUID } from 'node:crypto';
 import { ConflictException, Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
-import { CoaterManifest, CoaterShipment, CoaterPackingSlip, CoaterShipmentList, CoaterAvailableContainer } from '@libs/shared/util-types';
-import { lockCoaterInventory } from '@libs/server/data-access';
+import { CoaterManifest, CoaterShipment, CoaterPackingSlip, CoaterShipmentList, CoaterAvailableContainer } from '@gearapps/manufacturing/shared/util-types';
+import { lockCoaterInventory } from '@gearapps/manufacturing/server/data-access';
 import { coaterContentHash, readCoaterManifest } from './coater-manifest';
 
 const dateText = (date: any): string => new Date(date).toISOString();

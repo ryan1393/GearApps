@@ -2,9 +2,9 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
 import { of, Subject, throwError } from 'rxjs';
-import { BladeTrackingApiService, InventoryLookupResult } from '@libs/frontend/data-access-blade-tracking';
-import { GearToastService } from '@libs/frontend/util-common';
-import { IContainer } from '@libs/shared/util-types';
+import { BladeTrackingApiService, InventoryLookupResult } from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
+import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { IContainer } from '@gearapps/manufacturing/shared/util-types';
 import { LoadContainerComponent } from './load-container.component';
 import { InventoryLookupComponent } from '../inventory-lookup/inventory-lookup.component';
 

@@ -1,4 +1,4 @@
-import { ServerFeatUserService } from '@libs/server/feat-user';
+import { ServerFeatUserService } from '@gearapps/manufacturing/server/feat-user';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';

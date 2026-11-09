@@ -5,15 +5,15 @@ import {
   TokenResponseDto,
   UserLoginDto,
   UserOrmEntity,
-} from '@libs/server/data-access';
-import { ServerFeatUserService } from '@libs/server/feat-user';
-import { UserNotFoundException } from '@libs/server/util-common';
+} from '@gearapps/manufacturing/server/data-access';
+import { ServerFeatUserService } from '@gearapps/manufacturing/server/feat-user';
+import { UserNotFoundException } from '@gearapps/manufacturing/server/util-common';
 import {
   ENV_JWT_ACCESS_EXPIRATION_TIME,
   ENV_JWT_ACCESS_SECRET,
   ENV_JWT_REFRESH_EXPIRATION_TIME,
   ENV_JWT_REFRESH_SECRET,
-} from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-constants';
 import {
   AuthProviderType,
   IForgotPasswordPayload,
@@ -21,7 +21,7 @@ import {
   ISocialPayload,
   ITokenResponse,
   Uuid,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 import {
   ForbiddenException,
   Injectable,

@@ -1,13 +1,14 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { afterNextRender, ChangeDetectionStrategy, Component, ElementRef, inject, Injector } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService, LayoutService, SCALE_MAX, SCALE_MIN } from '@gearapps/client/core';
-import { DanaToastHostComponent } from '@dana/ui';
+import { DanaMobileNavDirective, DanaToastHostComponent } from '@dana/ui';
+import { GEAR_APPS_VERSION } from '@gearapps/shared/domain';
 import { HealthService } from './health.service';
 import { NAV } from './nav';
 
 @Component({
   selector: 'gear-shell',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, DanaToastHostComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, DanaMobileNavDirective, DanaToastHostComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.css',
@@ -17,11 +18,27 @@ export class ShellComponent {
   protected readonly layout = inject(LayoutService);
   protected readonly health = inject(HealthService);
   private readonly router = inject(Router);
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
 
+  protected readonly appVersion = GEAR_APPS_VERSION;
   protected readonly nav = NAV;
-  protected readonly mobileNavOpen = signal(false);
   protected readonly SCALE_MIN = SCALE_MIN;
   protected readonly SCALE_MAX = SCALE_MAX;
+
+  protected toggleNavigation(nav: DanaMobileNavDirective): void {
+    nav.toggle();
+    if (nav.open) {
+      afterNextRender(() => {
+        this.element.nativeElement.querySelector<HTMLElement>('#lapper-navigation a')?.focus();
+      }, { injector: this.injector });
+    }
+  }
+
+  protected closeNavigation(nav: DanaMobileNavDirective): void {
+    nav.close();
+    this.element.nativeElement.querySelector<HTMLElement>('.dana-menu-button')?.focus();
+  }
 
   protected initials() {
     const name = this.auth.displayName();

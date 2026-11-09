@@ -4,20 +4,20 @@ import {
   CreatePartSummaryDto,
   PaginationOptionsDto,
   PaginationService,
-} from '@libs/server/data-access';
+} from '@gearapps/manufacturing/server/data-access';
 import {
   IPaginatedResponse,
   IPartSummary,
   IPartSummaryEntity,
   Uuid,
-} from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-types';
 import {
   Injectable,
   Logger,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PartSummaryOrmEntity } from '@libs/server/data-access';
+import { PartSummaryOrmEntity } from '@gearapps/manufacturing/server/data-access';
 
 @Injectable()
 export class ServerFeatPartSummaryService extends PaginationService<PartSummaryOrmEntity> {

@@ -6,7 +6,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
-import { RoleType } from '@libs/shared/util-types';
+import { RoleType } from '@gearapps/manufacturing/shared/util-types';
 import { ROLES_REQUEST_KEY, SKIP_AUTH_KEY } from '../constants';
 import { RolesGuard } from '../guards/role.guard';
 import { JwtAccessTokenGuard } from '../guards/jwt-access.guard';

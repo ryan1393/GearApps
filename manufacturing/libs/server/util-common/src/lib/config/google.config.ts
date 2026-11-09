@@ -2,7 +2,7 @@ import {
   ENV_SOCIAL_GOOGLE_CLIENT_ID,
   ENV_SOCIAL_GOOGLE_CLIENT_SECRET,
   ENV_SOCIAL_GOOGLE_ENABLED,
-} from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-constants';
 import { registerAs } from '@nestjs/config';
 
 export const googleConfig = registerAs('google', () => ({

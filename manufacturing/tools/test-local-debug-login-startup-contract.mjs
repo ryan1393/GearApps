@@ -1,9 +1,10 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
-const loginPath = path.join(root, 'libs/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.ts');
-const startPath = path.join(root, 'tools/start-gear-apps.ps1');
+const loginPath = contractPath(root, 'libs/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.ts');
+const startPath = contractPath(root, 'tools/start-gear-apps.ps1');
 const login = fs.readFileSync(loginPath, 'utf8');
 const start = fs.readFileSync(startPath, 'utf8');
 

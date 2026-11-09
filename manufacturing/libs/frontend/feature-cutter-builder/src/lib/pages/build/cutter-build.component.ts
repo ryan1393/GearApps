@@ -1,5 +1,5 @@
 import { Subject, takeUntil } from 'rxjs';
-import { cutterBodyBladeCapacity, cutterBodyMatchesRequirement } from '@libs/shared/util-constants';
+import { cutterBodyBladeCapacity, cutterBodyMatchesRequirement } from '@gearapps/manufacturing/shared/util-constants';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, inject } from '@angular/core';
@@ -12,15 +12,15 @@ import {
   CutterDashboardData,
   CutterTrayValidation,
   cutterApiErrorText,
-} from '@libs/frontend/data-access-cutter-builder';
-import { GearToastService } from '@libs/frontend/util-common';
+} from '@gearapps/manufacturing/frontend/data-access-cutter-builder';
+import { GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
 import { DanaPageHeaderComponent } from '@dana/ui';
-import { ITray } from '@libs/shared/util-types';
+import { ITray } from '@gearapps/manufacturing/shared/util-types';
 
 @Component({
   selector: 'gear-cutter-build',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaPageHeaderComponent],
+  imports: [CommonModule, GearScannerFocusDirective, FormsModule, DanaPageHeaderComponent],
   templateUrl: './cutter-build.component.html',
 })
 export class CutterBuildComponent implements OnDestroy {

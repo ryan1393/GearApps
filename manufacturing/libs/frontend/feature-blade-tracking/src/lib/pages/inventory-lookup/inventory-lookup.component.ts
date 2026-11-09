@@ -11,7 +11,7 @@ import {
   InventoryLookupResult,
   InventoryTrayRow,
   apiErrorText,
-} from '@libs/frontend/data-access-blade-tracking';
+} from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
 import { ScanMessage } from '../../models/scan-message';
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import {

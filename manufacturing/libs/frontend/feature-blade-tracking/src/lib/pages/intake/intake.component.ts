@@ -3,9 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { GearToastService } from '@libs/frontend/util-common';
-import { BladeStatus, IPartSummary, IPartType } from '@libs/shared/util-types';
-import { BladeTrackingApiService, InventoryTrayRow, apiErrorText } from '@libs/frontend/data-access-blade-tracking';
+import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { BladeStatus, IPartSummary, IPartType } from '@gearapps/manufacturing/shared/util-types';
+import { BladeTrackingApiService, InventoryTrayRow, apiErrorText } from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import { DanaPageHeaderComponent } from '@dana/ui';
 

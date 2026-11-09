@@ -1,4 +1,4 @@
-import { ServerDataAccessModule } from '@libs/server/data-access';
+import { ServerDataAccessModule } from '@gearapps/manufacturing/server/data-access';
 import { Module } from '@nestjs/common';
 
 import { ServerFeatAssetTagController } from './server-feat-asset-tag.controller';

@@ -3,9 +3,9 @@ import {
   PaginationOptionsDto,
   UpdateUserDto,
   UserDto,
-} from '@libs/server/data-access';
-import { Auth, ReqUserId, UUIDParam } from '@libs/server/util-common';
-import { RoleType, Uuid } from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/server/data-access';
+import { Auth, ReqUserId, UUIDParam } from '@gearapps/manufacturing/server/util-common';
+import { RoleType, Uuid } from '@gearapps/manufacturing/shared/util-types';
 import {
   Body,
   Controller,

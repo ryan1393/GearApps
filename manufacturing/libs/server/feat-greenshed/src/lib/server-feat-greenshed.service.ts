@@ -1,5 +1,5 @@
 // DANA-R61R14-COUNT-SERVICE
-import { beginWorkflowJournal, UserOrmEntity } from '@libs/server/data-access';
+import { beginWorkflowJournal, UserOrmEntity } from '@gearapps/manufacturing/server/data-access';
 import { initializeShiftTracking } from './greenshed-shift-counts';
 import { DataSource, In, IsNull } from 'typeorm';
 
@@ -17,12 +17,12 @@ import {
   PartOrmEntity,
   CutterPullReasonOrmEntity,
   LocationOrmEntity,
-} from '@libs/server/data-access';
+} from '@gearapps/manufacturing/server/data-access';
 import {
   buildSummaryShelfTag,
   normalizeSummaryNumber,
-} from '@libs/shared/util-constants';
-import { Uuid } from '@libs/shared/util-types';
+} from '@gearapps/manufacturing/shared/util-constants';
+import { Uuid } from '@gearapps/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,

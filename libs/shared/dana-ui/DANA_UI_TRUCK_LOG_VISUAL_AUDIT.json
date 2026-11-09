@@ -1,0 +1,72 @@
+{
+  "danaUiVersion": "0.3.2",
+  "visualSource": "Truck Log",
+  "truckLogSourceFiles": 12,
+  "files": [
+    {
+      "file": "src/styles/dana-core.css",
+      "danaSelectors": 0,
+      "danaTokens": 0,
+      "gearMarkers": 0
+    },
+    {
+      "file": "src/styles/dana-core/tokens.css",
+      "danaSelectors": 0,
+      "danaTokens": 35,
+      "gearMarkers": 0
+    },
+    {
+      "file": "src/styles/dana-core/base.css",
+      "danaSelectors": 0,
+      "danaTokens": 4,
+      "gearMarkers": 0
+    },
+    {
+      "file": "src/styles/dana-core/icons.css",
+      "danaSelectors": 30,
+      "danaTokens": 29,
+      "gearMarkers": 0
+    },
+    {
+      "file": "src/styles/dana-core/shell.css",
+      "danaSelectors": 25,
+      "danaTokens": 13,
+      "gearMarkers": 0
+    },
+    {
+      "file": "src/styles/dana-core/primitives.css",
+      "danaSelectors": 53,
+      "danaTokens": 54,
+      "gearMarkers": 0
+    },
+    {
+      "file": "src/styles/dana-core/forms.css",
+      "danaSelectors": 22,
+      "danaTokens": 5,
+      "gearMarkers": 0
+    },
+    {
+      "file": "src/styles/dana-core/tables.css",
+      "danaSelectors": 42,
+      "danaTokens": 39,
+      "gearMarkers": 0
+    },
+    {
+      "file": "src/styles/dana-core/feedback.css",
+      "danaSelectors": 18,
+      "danaTokens": 14,
+      "gearMarkers": 0
+    },
+    {
+      "file": "src/styles/dana-core/responsive.css",
+      "danaSelectors": 32,
+      "danaTokens": 1,
+      "gearMarkers": 0
+    }
+  ],
+  "totals": {
+    "danaSelectors": 222,
+    "danaTokens": 194,
+    "gearMarkers": 0
+  }
+}

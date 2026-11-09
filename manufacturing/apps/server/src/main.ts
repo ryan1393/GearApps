@@ -1,9 +1,9 @@
-import { LoggingInterceptor, warnOnWeakJwtSecrets } from '@libs/server/util-common';
+import { LoggingInterceptor, warnOnWeakJwtSecrets } from '@gearapps/manufacturing/server/util-common';
 import {
   ENV_API_PREFIX,
   ENV_ENABLE_SWAGGER,
   ENV_SERVER_PORT,
-} from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-constants';
 import {
   ClassSerializerInterceptor,
   HttpStatus,

@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthSessionService } from '@libs/frontend/data-access-user';
+import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
 import { of } from 'rxjs';
 import { FrontendFeatureLoginComponent } from './frontend-feature-login.component';
 

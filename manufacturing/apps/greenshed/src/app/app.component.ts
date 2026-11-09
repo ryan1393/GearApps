@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { GearToastHostComponent } from '@libs/frontend/util-common';
+import { GearToastHostComponent } from '@gearapps/manufacturing/frontend/util-common';
 import { GreenshedNavComponent } from './layout/greenshed-nav/greenshed-nav.component';
 
 @Component({

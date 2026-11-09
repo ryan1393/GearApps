@@ -1,6 +1,6 @@
 import { OAuth2Client } from 'google-auth-library';
 
-import { ISocialPayload } from '@libs/shared/util-types';
+import { ISocialPayload } from '@gearapps/manufacturing/shared/util-types';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
@@ -12,8 +12,8 @@ export class GoogleAuthService {
 
   constructor(private configService: ConfigService) {
     this.google = new OAuth2Client(
-      configService.get('google.clientId', { infer: true }),
-      configService.get('google.clientSecret', { infer: true }),
+      configService.get<string>('google.clientId'),
+      configService.get<string>('google.clientSecret'),
     );
   }
 
@@ -23,7 +23,7 @@ export class GoogleAuthService {
     const ticket = await this.google.verifyIdToken({
       idToken: loginDto.idToken,
       audience: [
-        this.configService.getOrThrow('google.clientId', { infer: true }),
+        this.configService.getOrThrow<string>('google.clientId'),
       ],
     });
 

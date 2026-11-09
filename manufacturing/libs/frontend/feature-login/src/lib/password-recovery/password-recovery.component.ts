@@ -24,7 +24,7 @@ import {
   PASSWORD_MIN_NUMBER,
   PASSWORD_MIN_SYMBOL,
   PASSWORD_MIN_UPPERCASE,
-} from '@libs/shared/util-constants';
+} from '@gearapps/manufacturing/shared/util-constants';
 
 function strongPassword(control: AbstractControl): ValidationErrors | null {
   const value = String(control.value ?? '');

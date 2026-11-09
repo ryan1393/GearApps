@@ -1,5 +1,5 @@
-import { GEAR_APPS_VERSION } from '@libs/shared/util-constants';
-import { SkipAuth } from '@libs/server/util-common';
+import { GEAR_APPS_VERSION } from '@gearapps/manufacturing/shared/util-constants';
+import { SkipAuth } from '@gearapps/manufacturing/server/util-common';
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {

@@ -1,7 +1,7 @@
 {
   "name": "gear-app-server",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/server/src",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "manufacturing/apps/server/src",
   "projectType": "application",
   "tags": [
     "type:app",
@@ -10,26 +10,26 @@
   ],
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
+      "executor": "nx:run-commands",
       "outputs": [
-        "{options.outputPath}"
+        "{workspaceRoot}/dist/manufacturing/apps/server"
       ],
       "defaultConfiguration": "production",
       "options": {
-        "target": "node",
-        "compiler": "tsc",
-        "outputPath": "dist/apps/server",
-        "main": "apps/server/src/main.ts",
-        "tsConfig": "apps/server/tsconfig.app.json",
-        "assets": [
-          "apps/server/src/assets"
-        ],
-        "isolatedConfig": true,
-        "webpackConfig": "apps/server/webpack.config.js"
+        "command": "webpack-cli build --config webpack.config.js --mode production",
+        "cwd": "manufacturing/apps/server",
+        "env": {
+          "NODE_ENV": "production"
+        }
       },
       "configurations": {
-        "development": {},
-        "production": {}
+        "production": {},
+        "development": {
+          "command": "webpack-cli build --config webpack.config.js --mode development",
+          "env": {
+            "NODE_ENV": "development"
+          }
+        }
       }
     },
     "serve": {
@@ -48,50 +48,61 @@
       }
     },
     "lint": {
-      "executor": "@nx/eslint:lint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
+      "executor": "nx:run-commands",
       "options": {
-        "lintFilePatterns": [
-          "apps/server/**/*.ts"
-        ]
-      }
+        "command": "eslint .",
+        "cwd": "manufacturing/apps/server"
+      },
+      "cache": true
     },
     "test": {
-      "executor": "@nx/jest:jest",
+      "executor": "nx:run-commands",
       "outputs": [
-        "{workspaceRoot}/coverage/{projectRoot}"
+        "{workspaceRoot}/coverage/manufacturing/apps/server"
       ],
       "options": {
-        "jestConfig": "apps/server/jest.config.ts",
-        "passWithNoTests": true
+        "command": "jest --config manufacturing/apps/server/jest.config.cts --runInBand --passWithNoTests",
+        "cwd": ".",
+        "env": {
+          "NODE_ENV": "test",
+          "ENVIRONMENT": "test",
+          "NX_DAEMON": "false",
+          "JWT_ACCESS_SECRET": "unit-test-access-secret-no-production-use",
+          "JWT_REFRESH_SECRET": "unit-test-refresh-secret-no-production-use",
+          "DATABASE_TYPE": "better-sqlite3",
+          "DATABASE_PATH": ":memory:",
+          "EMAIL_ENABLED": "false",
+          "SOCIAL_GOOGLE_ENABLED": "false",
+          "SENTRY_DSN": ""
+        }
       },
       "configurations": {
         "ci": {
-          "ci": true,
-          "codeCoverage": true
+          "command": "jest --config manufacturing/apps/server/jest.config.cts --runInBand --passWithNoTests --ci --coverage"
         }
       }
     },
     "build-fresh-db-bootstrap": {
-      "executor": "@nx/webpack:webpack",
+      "executor": "nx:run-commands",
       "outputs": [
-        "{options.outputPath}"
+        "{workspaceRoot}/dist/manufacturing/apps/server-bootstrap"
       ],
       "defaultConfiguration": "production",
       "options": {
-        "target": "node",
-        "compiler": "tsc",
-        "outputPath": "dist/apps/server-bootstrap",
-        "main": "apps/server/src/fresh-db-bootstrap.ts",
-        "tsConfig": "apps/server/tsconfig.app.json",
-        "isolatedConfig": true,
-        "webpackConfig": "apps/server/webpack.config.js"
+        "command": "webpack-cli build --config webpack.bootstrap.config.js --mode production",
+        "cwd": "manufacturing/apps/server",
+        "env": {
+          "NODE_ENV": "production"
+        }
       },
       "configurations": {
-        "development": {},
-        "production": {}
+        "production": {},
+        "development": {
+          "command": "webpack-cli build --config webpack.bootstrap.config.js --mode development",
+          "env": {
+            "NODE_ENV": "development"
+          }
+        }
       }
     }
   }

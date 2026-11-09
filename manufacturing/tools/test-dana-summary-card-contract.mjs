@@ -1,8 +1,9 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const root = path.resolve(process.argv[2] || '.');
-const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8').replace(/\r\n/g, '\n');
+const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8').replace(/\r\n/g, '\n');
 const must = (condition, message) => { if (!condition) throw new Error(message); };
 const count = (text, needle) => text.split(needle).length - 1;
 
