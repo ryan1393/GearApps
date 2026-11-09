@@ -1,16 +1,54 @@
-# GearApps · Lapper — client (nginx) + API (NestJS). Configure the API via .env (see .env.example).
+# GearApps · Lapper — full stack: Postgres + API (NestJS) + client (nginx).
+#
+#   cp .env.docker.example .env      # then set JWT_SECRET and POSTGRES_PASSWORD
+#   docker compose up -d --build
+#   open http://localhost:8080
+#
+# Postgres data persists in the `pg-data` volume across restarts and rebuilds.
+
+name: gearapps
+
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gearapps}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-gearapps}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    # Expose only on the host's loopback (for psql / pgAdmin); remove to keep it internal.
+    ports:
+      - '127.0.0.1:${POSTGRES_PORT:-5432}:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
   lapper-api:
     build: { context: ., dockerfile: apps/lapper-api/Dockerfile }
     image: gearapps/lapper-api
     env_file: .env
     environment:
+      # Database is always the postgres service in this stack.
+      DATABASE_TYPE: postgres
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USERNAME: ${POSTGRES_USER:-gearapps}
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD}
+      DATABASE_NAME: ${POSTGRES_DB:-gearapps}
+      # Creates/updates tables on start. Set false once you manage schema with migrations.
+      DATABASE_SYNCHRONIZE: ${DATABASE_SYNCHRONIZE:-true}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET (32+ chars) in .env}
       HOST: 0.0.0.0
       PORT: 3333
-      # Behind nginx the client is same-origin; leave CORS_ORIGINS empty unless kiosks call the API directly.
+      # Same-origin behind nginx, so CORS stays off unless kiosks call the API directly.
       CORS_ORIGINS: ${CORS_ORIGINS:-}
-    volumes:
-      - lapper-data:/app/tmp # only used when DATABASE_TYPE=better-sqlite3
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: unless-stopped
 
   lapper-client:
@@ -19,29 +57,9 @@ services:
     ports:
       - '${LAPPER_PORT:-8080}:80'
     depends_on:
-      - lapper-api
-    restart: unless-stopped
-
-  # Optional local Postgres:  docker compose --profile postgres up
-  # then set DATABASE_TYPE=postgres DATABASE_HOST=postgres DATABASE_USERNAME=gearapps ... in .env
-  postgres:
-    image: postgres:16-alpine
-    profiles: [postgres]
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER:-gearapps}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gearapps}
-      POSTGRES_DB: ${POSTGRES_DB:-gearapps}
-    ports:
-      - '${POSTGRES_PORT:-5432}:5432'
-    volumes:
-      - pg-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-gearapps}']
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      lapper-api:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
-  lapper-data:
   pg-data:

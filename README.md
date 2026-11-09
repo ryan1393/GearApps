@@ -7,19 +7,38 @@ Dana gear-manufacturing plant-floor apps. This Nx monorepo currently holds the *
 | `lapper-client` | Angular 20 · [Dana UI](vendor/dana-ui)        | `apps/lapper-client` |
 | `lapper-api`    | NestJS 11 · TypeORM 1.x · SQL Server / SQLite | `apps/lapper-api`    |
 
-## Quick start
+## Run it with Docker (recommended)
+
+Postgres, the API and the client run as three containers:
+
+```sh
+cp .env.docker.example .env      # set POSTGRES_PASSWORD and JWT_SECRET (32+ chars)
+docker compose up -d --build
+```
+
+- App: http://localhost:8080 — register the first account at `/register`
+- API docs: http://localhost:8080/api/docs
+- Postgres: `localhost:5432` (loopback only), user/db `gearapps`; data lives in the `pg-data` volume
+
+```sh
+docker compose logs -f lapper-api     # API logs
+docker compose down                    # stop (keeps data)
+docker compose down -v                 # stop and DELETE the database volume
+```
+
+Tables are created automatically on first start (`DATABASE_SYNCHRONIZE=true`). On Postgres, TypeORM uses lowercase table names (`machines`, `macro_logs`, …); column names keep their case, so quote mixed-case ones in hand-written SQL (`"y03_2_stack_inCycle"`).
+
+## Local development (without Docker)
 
 ```sh
 nvm use                      # Node 22
 npm ci
-cp .env.example .env         # defaults to a local SQLite database, no setup needed
+cp .env.example .env         # defaults to a local SQLite file, no database server needed
 npx nx serve lapper-api      # http://localhost:3333/api/v1  ·  Swagger: /api/docs
 npx nx serve lapper-client   # http://localhost:4200  (proxies /api to the API)
 ```
 
-Register the first account at `/register`, then sign in.
-
-Set `DATABASE_TYPE` to `postgres`, `mssql` or `better-sqlite3` and the matching `DATABASE_*` values in `.env` (see `.env.example`). `docker compose --profile postgres up` starts a local Postgres 16. Keep `DATABASE_SYNCHRONIZE=false` against a shared database and manage schema changes deliberately.
+`DATABASE_TYPE` can also be `postgres` or `mssql` with the matching `DATABASE_*` values (see `.env.example`). To develop against the Docker Postgres, run `docker compose up -d postgres` and point `.env` at `localhost:5432`.
 
 ## Features (Lapper)
 
@@ -62,7 +81,7 @@ vendor/dana-ui/          Pinned @dana/ui package (same mechanism as Truck Log)
 npx nx run-many -t lint test build      # what CI runs
 npx nx graph                            # project graph
 npx nx g @nx/angular:library libs/client/feature-x --standalone   # new screen area
-docker compose up --build               # client on :8080, API behind nginx at /api
+docker compose up -d --build            # Postgres + API + client on :8080
 ```
 
 ## Upgrading Dana UI
