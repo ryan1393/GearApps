@@ -12,7 +12,9 @@ import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, Length } from 'class
 
 export class LoginRequestDto implements LoginPayload {
   @ApiProperty({ example: 'operator@example.com' })
-  @IsEmail()
+  @IsString()
+  @IsNotEmpty()
+  @Length(1, 254)
   email!: string;
 
   @ApiProperty({ example: 'Sup3r$ecret' })

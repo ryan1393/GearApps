@@ -1,5 +1,12 @@
 import { UserEntity } from '@gearapps/api/data-access';
-import { CreateUser, PublicUser, UpdateUser, User } from '@gearapps/shared/domain';
+import {
+  AccessTokenPayload,
+  CreateUser,
+  PublicUser,
+  UpdateUser,
+  User,
+} from '@gearapps/shared/domain';
+import { RequestUser } from '@gearapps/api/core';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -12,6 +19,15 @@ export const toPublicUser = ({ password: _password, ...rest }: User): PublicUser
 @Injectable()
 export class UsersService {
   constructor(@InjectRepository(UserEntity) private readonly repo: Repository<User>) {}
+
+  registrationEnabled(): boolean {
+    return true;
+  }
+
+  async validateToken(payload: AccessTokenPayload): Promise<RequestUser> {
+    const user = await this.findOne(payload.sub);
+    return { userId: user.id, email: user.email, fname: user.fname, lname: user.lname };
+  }
 
   async findOne(id: string): Promise<User> {
     const user = await this.repo.findOneBy({ id });

@@ -4,10 +4,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { UsersService } from './users.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(@Inject(jwtConfig.KEY) jwt: ConfigType<typeof jwtConfig>) {
+  constructor(
+    @Inject(jwtConfig.KEY) jwt: ConfigType<typeof jwtConfig>,
+    private readonly users: UsersService,
+  ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -16,8 +20,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   /** Passport has already verified the signature; shape the payload for `req.user`. */
-  validate(payload: AccessTokenPayload): RequestUser {
-    const { sub, email, fname, lname } = payload;
-    return { userId: sub, email, fname, lname };
+  validate(payload: AccessTokenPayload): Promise<RequestUser> {
+    return this.users.validateToken(payload);
   }
 }

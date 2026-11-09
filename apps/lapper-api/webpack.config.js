@@ -19,8 +19,8 @@ module.exports = {
       optimization: false,
       outputHashing: 'none',
       generatePackageJson: true,
-      // TypeORM loads database drivers dynamically; include both supported backends.
-      runtimeDependencies: ['better-sqlite3', 'mssql'],
+      // TypeORM loads database drivers dynamically; include every supported backend.
+      runtimeDependencies: ['better-sqlite3', 'mssql', 'pg'],
       sourceMap: true,
     }),
   ],

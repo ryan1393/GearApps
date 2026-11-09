@@ -80,8 +80,9 @@ for (const project of ['LapperRead', 'LapperReadLibrary', 'LapperRead.Tests']) {
 const tags = [
   ...read('compose.yml').matchAll(/image: (dana-apps-[a-z-]+):(\S+)/g),
 ];
-if (tags.length !== 4)
-  fail(`compose.yml should tag 4 Gear images; found ${tags.length}`);
+const expectedImages = ['gear-app-server','lapper-api','lapper-client','blade-tracking','cutter-builder','greenshed'];
+if (tags.length !== expectedImages.length || expectedImages.some(name => !tags.some(([,image]) => image === 'dana-apps-' + name)))
+  fail(`compose.yml should tag all ${expectedImages.length} Gear images; found ${tags.length}`);
 for (const [, image, tag] of tags)
   if (tag !== version) fail(`compose.yml ${image}:${tag} != ${version}`);
 

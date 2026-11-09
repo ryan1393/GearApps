@@ -13,6 +13,7 @@ export interface AccessTokenPayload {
   email: string;
   fname?: string;
   lname?: string;
+  token_use?: 'lapper-access';
   iat?: number;
   exp?: number;
 }

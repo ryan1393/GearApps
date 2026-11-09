@@ -1,7 +1,7 @@
 import { LoginRequestDto, TokenResponseDto } from '@gearapps/api/data-access';
 import { Public } from '@gearapps/api/core';
 import { AccessTokenPayload, TokenResponse } from '@gearapps/shared/domain';
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 
@@ -9,6 +9,12 @@ import { AuthService } from './auth.service';
 @ApiTags('Authentication')
 export class AuthController {
   constructor(private readonly auth: AuthService) {}
+
+  @Get('capabilities')
+  @Public()
+  capabilities(): { registrationEnabled: boolean } {
+    return this.auth.capabilities();
+  }
 
   @Post('login')
   @Public()

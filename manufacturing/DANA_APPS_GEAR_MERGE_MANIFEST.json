@@ -17,19 +17,19 @@
     "typescript": "5.9.3"
   },
   "rootHashes": {
-    "package.json": "2B2F29F74CB204EEFA2A9B55941D55715518C173C0130710373B3B5E0EF5D570",
-    "package-lock.json": "B9AAA5CA9D755E0481ECB897481FF811EB59D5E186075BAD0A88E5EE40A6168D",
-    "nx.json": "70665B73BCA488DA1CBA39928CA99A5C5911A292E4E2DC2594B6D8A0002945DE",
-    "tsconfig.base.json": "39F3E1CCAB5AFA57C8CB50ACBE1D65811C50FD8574C33DC10F0DD31EF46CF833"
+    "package.json": "367FB546402D8D98B9353DCD45C084B97F8C2CAA2BC82AE4CD7B6F4361B1CF4A",
+    "package-lock.json": "C4F7A8ADD00CDBCB9F29E0196849E9C27C68C1132D9EF3415B062E482DCC2BF1",
+    "nx.json": "A21225DC43443C85FCB8B57D6CA8C56A04DF03B02723D9C1C06064A60FF6DA75",
+    "tsconfig.base.json": "BEA7591E40B5A436D04C93B6CCC6084B2206BB883220179208A1A9DFB6BEFA80"
   },
   "composeFiles": [
     {
       "path": "docker-compose.yml",
-      "sha256": "C2342D13EB171044A3719EFFCA3B8A65F31551221B98FAD82DDCAC215C43A421"
+      "sha256": "373DC4347BC666375794961333C405C108560FA84015C4303B9B8C54BAC4AAA7"
     },
     {
       "path": "manufacturing/compose.yml",
-      "sha256": "1981FCAF7DB3447ADF1F096374AFB302A3C223C5197295A0D7BCEC3570CAAC7B"
+      "sha256": "95A7DECBAE1197508640FF1E05AE3B094C93CF3206088E9EB283BAE4C78AEAE1"
     }
   ],
   "runtimeProjects": [
@@ -207,6 +207,16 @@
     {
       "name": "api-feature-scanner",
       "root": "libs/api/feature-scanner",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "api-postgres",
+      "root": "libs/api/postgres",
       "projectType": "library",
       "tags": [],
       "targets": [],

@@ -14,6 +14,7 @@ import {
   NotFoundException,
   Param,
   ParseUUIDPipe,
+  Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -31,8 +32,11 @@ export class MachinesService extends BaseCrudService<Machine> {
     super(repo, 'Machine');
   }
 
-  async findByIp(ip: string): Promise<Machine> {
-    const machine = await this.repo.findOne({ where: { ip }, relations: this.relations });
+  async findByIp(ip: string, number?: string): Promise<Machine> {
+    const machine = await this.repo.findOne({
+      where: { ip, ...(number ? { number } : {}) },
+      relations: this.relations,
+    });
     if (!machine) throw new NotFoundException(`Machine with IP ${ip} not found`);
     return machine;
   }
@@ -66,8 +70,8 @@ export class MachinesController extends crudController<Machine>({
   @Get('ip/:ip')
   @ApiOperation({ summary: 'Find a machine by IP address' })
   @ApiOkResponse({ type: MachineDto })
-  findByIp(@Param('ip') ip: string): Promise<Machine> {
-    return this.service.findByIp(ip);
+  findByIp(@Param('ip') ip: string, @Query('number') number?: string): Promise<Machine> {
+    return this.service.findByIp(ip, number);
   }
 
   @Get('gearset/:gearsetId')

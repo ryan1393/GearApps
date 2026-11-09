@@ -65,7 +65,7 @@ public sealed class Worker : BackgroundService
             token.ThrowIfCancellationRequested();
             try
             {
-                _machine = await _database.GetMachineByIp(_settings.MachineIp, token)
+                _machine = await _database.GetMachineByIp(_settings.MachineIp, token, _settings.MachineNumber)
                     ?? throw new IOException("Machine configuration is missing.");
                 _scannerDetail = await _database.GetScannerByIp(_settings.ScannerIp, token)
                     ?? throw new IOException("Scanner configuration is missing.");
@@ -73,6 +73,9 @@ public sealed class Worker : BackgroundService
                     ?? throw new IOException("Machine-variable configuration is missing.");
                 if (string.IsNullOrWhiteSpace(_machine.id) || string.IsNullOrWhiteSpace(_scannerDetail.id) || string.IsNullOrWhiteSpace(_variables.id))
                     throw new IOException("API configuration contains a missing record ID.");
+                var scannerMachine = _scannerDetail.machine_id ?? _scannerDetail.machine?.id;
+                if (!string.Equals(scannerMachine, _machine.id, StringComparison.OrdinalIgnoreCase))
+                    throw new IOException("The configured scanner is not assigned to this machine in GearApps.");
                 await _fanuc.InitializeAsync(token);
                 return;
             }

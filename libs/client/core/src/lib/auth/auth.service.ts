@@ -32,6 +32,10 @@ export class AuthService {
   });
   readonly userId = computed(() => this.user()?.sub ?? null);
 
+  capabilities(): Observable<{ registrationEnabled: boolean }> {
+    return this.http.get<{ registrationEnabled: boolean }>(`${this.url}/capabilities`);
+  }
+
   login(payload: LoginPayload): Observable<TokenResponse> {
     return this.http
       .post<TokenResponse>(`${this.url}/login`, payload)

@@ -25,6 +25,7 @@
       "@gearapps/api/feature-gear": ["./libs/api/feature-gear/src/index.ts"],
       "@gearapps/api/feature-cutter-tracking": ["./libs/api/feature-cutter-tracking/src/index.ts"],
       "@gearapps/api/feature-scanner": ["./libs/api/feature-scanner/src/index.ts"],
+      "@gearapps/api/postgres": ["./libs/api/postgres/src/index.ts"],
       "@gearapps/client/core": ["./libs/client/core/src/index.ts"],
       "@gearapps/client/ui": ["./libs/client/ui/src/index.ts"],
       "@gearapps/client/shell": ["./libs/client/shell/src/index.ts"],

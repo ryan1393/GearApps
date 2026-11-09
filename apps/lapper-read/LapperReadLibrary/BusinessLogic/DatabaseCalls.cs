@@ -114,8 +114,9 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
             ?? throw new JsonException("API returned an empty response for " + path);
     }
 
-    public Task<Equipment?> GetMachineByIp(string ip, CancellationToken cancellationToken = default) =>
-        ReadAsync<Equipment>(HttpMethod.Get, "api/v1/machine/ip/" + Uri.EscapeDataString(ip), null, cancellationToken);
+    public Task<Equipment?> GetMachineByIp(string ip, CancellationToken cancellationToken = default, string? machineNumber = null) =>
+        ReadAsync<Equipment>(HttpMethod.Get, "api/v1/machine/ip/" + Uri.EscapeDataString(ip) +
+            (string.IsNullOrWhiteSpace(machineNumber) ? "" : "?number=" + Uri.EscapeDataString(machineNumber)), null, cancellationToken);
 
     public Task<ScannerDetail?> GetScannerByIp(string ip, CancellationToken cancellationToken = default) =>
         ReadAsync<ScannerDetail>(HttpMethod.Get, "api/v1/scanner-detail/ip/" + Uri.EscapeDataString(ip), null, cancellationToken);
@@ -161,13 +162,8 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
 
     public Task<ScannerDetail?> PutScannerDetailsSerialNumbers(string? process, string? queue, string? scannerSerial,
         ScannerDetail scanner, CancellationToken cancellationToken = default) =>
-        ReadAsync<ScannerDetail>(HttpMethod.Patch, "api/v1/scanner-detail/" + Uri.EscapeDataString(scanner.id),
-            new
-            {
-                scanner.model, scanner.type, scanner.description, sn_procces = process, sn_queue = queue,
-                sn_scanner = scannerSerial, machine_id = scanner.machine_id ?? scanner.machine?.id,
-                scanner.ip, scanner.status
-            }, cancellationToken);
+        ReadAsync<ScannerDetail>(HttpMethod.Patch, "api/v1/scanner-detail/" + Uri.EscapeDataString(scanner.id) + "/serial-numbers",
+            new { sn_procces = process, sn_queue = queue, sn_scanner = scannerSerial }, cancellationToken);
 
     public Task<MachineCycle?> PostMachineCycle(string? serialNumber, int consec, string machineId, string gearsetId,
         DateTimeOffset? timestamp = null, string? requestId = null, CancellationToken cancellationToken = default)
@@ -181,7 +177,7 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
     public Task<MacroLog?> PostMacroLog(MachineCycle cycle, string macroId, decimal value,
         string? requestId = null, CancellationToken cancellationToken = default) =>
         ReadAsync<MacroLog>(HttpMethod.Post, "api/v1/macro-log",
-            new { machine_cycle_id = cycle.id, macro_id = macroId, value = value.ToString(CultureInfo.InvariantCulture) }, cancellationToken, requestId);
+            new { machine_cycle_id = cycle.id, macro_id = macroId, value }, cancellationToken, requestId);
 
     public Task<Macro[]?> GetMacroList(CancellationToken cancellationToken = default) =>
         ReadAsync<Macro[]>(HttpMethod.Get, "api/v1/macro", null, cancellationToken);

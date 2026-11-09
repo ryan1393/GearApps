@@ -5,6 +5,7 @@ export interface RequestUser {
   email: string;
   fname?: string;
   lname?: string;
+  role?: string;
 }
 
 /** Injects the authenticated user (from the validated JWT) into a handler parameter. */

@@ -9,6 +9,8 @@ services:
       PORT: 3333
       # Behind nginx the client is same-origin; leave CORS_ORIGINS empty unless kiosks call the API directly.
       CORS_ORIGINS: ${CORS_ORIGINS:-}
+    ports:
+      - '${LAPPER_API_PORT:-3334}:3333'
     volumes:
       - lapper-data:/app/tmp # only used when DATABASE_TYPE=better-sqlite3
     restart: unless-stopped

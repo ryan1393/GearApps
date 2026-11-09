@@ -6,7 +6,7 @@ public interface IDatabaseCalls
 {
     Task<Auth?> Login(CancellationToken cancellationToken = default);
     Task<bool> CheckToken(CancellationToken cancellationToken = default);
-    Task<Equipment?> GetMachineByIp(string ip, CancellationToken cancellationToken = default);
+    Task<Equipment?> GetMachineByIp(string ip, CancellationToken cancellationToken = default, string? machineNumber = null);
     Task<ScannerDetail?> GetScannerByIp(string ip, CancellationToken cancellationToken = default);
     Task<ScannerDetail?> GetScannerById(string id, CancellationToken cancellationToken = default);
     Task<Gearset?> GetGearsetByNumber(int partNumber, CancellationToken cancellationToken = default);

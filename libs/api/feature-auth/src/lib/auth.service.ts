@@ -34,6 +34,7 @@ export class AuthService {
       email: user.email,
       fname: user.fname,
       lname: user.lname,
+      token_use: 'lapper-access',
     };
     return { access_token: await this.jwt.signAsync(claims) };
   }
@@ -41,9 +42,15 @@ export class AuthService {
   /** Returns the decoded payload if the token is valid, otherwise 401. */
   async verify(token: string): Promise<AccessTokenPayload> {
     try {
-      return await this.jwt.verifyAsync<AccessTokenPayload>(token);
+      const payload = await this.jwt.verifyAsync<AccessTokenPayload>(token);
+      await this.users.validateToken(payload);
+      return payload;
     } catch {
       throw new UnauthorizedException('Token is invalid or expired');
     }
+  }
+
+  capabilities(): { registrationEnabled: boolean } {
+    return { registrationEnabled: this.users.registrationEnabled() };
   }
 }

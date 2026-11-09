@@ -11,6 +11,7 @@
     "test:deployment": "node --test manufacturing/tools/base-data/bootstrap-policy.test.mjs manufacturing/tools/set-version.test.mjs manufacturing/tools/test-deployment-config.cjs manufacturing/tools/deploy/deploy-layout.test.mjs manufacturing/tools/package-release.test.mjs",
     "test:contracts": "node manufacturing/tools/run-contract-tests.mjs",
     "test:versions": "node tools/check-workspace-versions.mjs",
+    "test:lapper-postgres": "node --test tools/test-lapper-postgres.cjs",
     "serve:lapper-api": "nx serve lapper-api",
     "serve:lapper-client": "nx serve lapper-client",
     "setup:gear-apps": "node tools/run-manufacturing-command.mjs setup:gear-apps",

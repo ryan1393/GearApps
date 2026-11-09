@@ -86,9 +86,29 @@ public class ApiTests
         try
         {
             CultureInfo.CurrentCulture = new CultureInfo("fr-FR"); await Database(http).PostMacroLog(Fixtures.Cycle, "m", 1.25m);
-            using var body = JsonDocument.Parse(http.Calls.Last().Body); Assert.Equal("1.25", body.RootElement.GetProperty("value").GetString());
+            using var body = JsonDocument.Parse(http.Calls.Last().Body); Assert.Equal(1.25m, body.RootElement.GetProperty("value").GetDecimal());
         }
         finally { CultureInfo.CurrentCulture = previous; }
+    }
+
+    [Fact]
+    public async Task MachineLookupDisambiguatesSharedIpByAssetNumber()
+    {
+        using var http = new HttpDouble { Respond = call => call.Path.Contains("/machine/ip/") ? Fixtures.Json(Fixtures.Machine) : null };
+        await Database(http).GetMachineByIp("127.0.0.1", machineNumber: "01 094&5");
+        Assert.EndsWith("?number=01%20094%265", http.Calls.Last().Path);
+    }
+
+    [Fact]
+    public async Task ScannerTelemetryOnlySendsSerialNumbers()
+    {
+        using var http = new HttpDouble { Respond = call => call.Path.EndsWith("/serial-numbers") ? Fixtures.Json(Fixtures.Scanner) : null };
+        await Database(http).PutScannerDetailsSerialNumbers("process", null, "scanned", Fixtures.Scanner);
+        Assert.EndsWith("/scanner-detail/scanner/serial-numbers", http.Calls.Last().Path);
+        using var body = JsonDocument.Parse(http.Calls.Last().Body);
+        Assert.Equal(3, body.RootElement.EnumerateObject().Count());
+        Assert.Equal("process", body.RootElement.GetProperty("sn_procces").GetString());
+        Assert.Equal(JsonValueKind.Null, body.RootElement.GetProperty("sn_queue").ValueKind);
     }
 
     [Fact]

@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-const read = (path) => fs.readFileSync(path, 'utf8');
+const read = (path) => fs.readFileSync(path, 'utf8').replace(/\r\n/g, '\n');
 const shelf = read('libs/shared/util-constants/src/lib/shelf-location.constants.ts');
 const greenshedService = read('libs/server/feat-greenshed/src/lib/server-feat-greenshed.service.ts');
 const greenshedPull = read('libs/frontend/feature-greenshed/src/lib/pages/pull/greenshed-pull.component.ts');

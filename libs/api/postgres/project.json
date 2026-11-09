@@ -1,0 +1,7 @@
+{
+  "name": "api-postgres",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/api/postgres/src",
+  "projectType": "library",
+  "tags": []
+}

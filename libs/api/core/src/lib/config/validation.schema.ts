@@ -14,7 +14,9 @@ export const validationSchema = Joi.object({
   CORS_ORIGINS: Joi.string().allow('').optional(),
   SWAGGER_ENABLED: Joi.boolean().default(true),
 
-  DATABASE_TYPE: Joi.string().valid('mssql', 'better-sqlite3').default('better-sqlite3'),
+  DATABASE_TYPE: Joi.string()
+    .valid('postgres', 'mssql', 'better-sqlite3')
+    .default('better-sqlite3'),
   DATABASE_HOST: requiredUnlessSqlite(Joi.string()),
   DATABASE_PORT: requiredUnlessSqlite(Joi.number()),
   DATABASE_USERNAME: requiredUnlessSqlite(Joi.string()),
@@ -24,6 +26,17 @@ export const validationSchema = Joi.object({
   DATABASE_PATH: Joi.string().default('tmp/gearapps.sqlite'),
   DATABASE_SYNCHRONIZE: Joi.boolean().default(false),
   DATABASE_LOGGING_ENABLED: Joi.boolean().default(false),
+  DATABASE_SSL: Joi.boolean().default(false),
+  LAPPER_TIME_ZONE: Joi.string()
+    .default('America/Indianapolis')
+    .custom((value, helpers) => {
+      try {
+        new Intl.DateTimeFormat('en', { timeZone: value }).format();
+        return value;
+      } catch {
+        return helpers.error('any.invalid');
+      }
+    }),
 
   JWT_SECRET: Joi.string().min(32).required(),
   JWT_ACCESS_TOKEN_EXPIRES_IN: Joi.string().default('10h'),

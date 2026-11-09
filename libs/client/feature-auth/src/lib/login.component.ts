@@ -19,19 +19,19 @@ import { AuthPageComponent } from './auth-page.component';
         </div>
       }
       <form [formGroup]="form" (ngSubmit)="submit()" class="login-form">
-        <label class="field-label" for="email">Email</label>
+        <label class="field-label" for="email">Email or username</label>
         <input
           id="email"
           formControlName="email"
-          type="email"
+          type="text"
           autocomplete="username"
           required
           class="field-input"
           [class.field-error]="showError('email')"
-          placeholder="you@dana.com"
+          placeholder="Email, username or employee number"
         />
         @if (showError('email')) {
-          <small class="field-message">Enter your email address.</small>
+          <small class="field-message">Enter your email or username.</small>
         }
 
         <div class="password-label-row">
@@ -58,7 +58,11 @@ import { AuthPageComponent } from './auth-page.component';
       </form>
       <div class="login-footer">
         <span class="login-footer-dot"></span>
-        <a routerLink="/register">No account? Create one</a>
+        @if (registrationEnabled()) {
+          <a routerLink="/register">No account? Create one</a>
+        } @else {
+          <span>Use your existing GearApps account</span>
+        }
       </div>
     </gear-auth-page>
   `,
@@ -70,13 +74,21 @@ export class LoginComponent {
 
   protected readonly busy = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly registrationEnabled = signal(false);
   protected readonly form = new FormGroup({
     email: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.email],
+      validators: [Validators.required],
     }),
     password: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
   });
+
+  constructor() {
+    this.auth.capabilities().subscribe({
+      next: (capabilities) => this.registrationEnabled.set(capabilities.registrationEnabled),
+      error: () => this.registrationEnabled.set(false),
+    });
+  }
 
   protected showError(name: 'email' | 'password') {
     const c = this.form.controls[name];
@@ -98,7 +110,7 @@ export class LoginComponent {
         ),
       error: (err) => {
         this.form.controls.password.setValue('');
-        this.error.set(apiErrorMessage(err, 'Unable to sign in. Check your email and password.'));
+        this.error.set(apiErrorMessage(err, 'Unable to sign in. Check your login and password.'));
         this.busy.set(false);
       },
     });

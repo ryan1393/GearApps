@@ -2,11 +2,11 @@
 
 Dana gear-manufacturing plant-floor apps: **Lapper, Blade Tracking, Cutter Builder, and Greenshed**.
 
-| App             | Stack                                         | Path                 |
-| --------------- | --------------------------------------------- | -------------------- |
-| `lapper-client` | Angular 20 · [Dana UI](vendor/dana-ui)        | `apps/lapper-client` |
-| `lapper-api`    | NestJS 11 · TypeORM 1.x · SQL Server / SQLite | `apps/lapper-api`    |
-| `lapper-read`   | .NET 8 Windows worker · FANUC / TCP scanner   | `apps/lapper-read`   |
+| App             | Stack                                       | Path                 |
+| --------------- | ------------------------------------------- | -------------------- |
+| `lapper-client` | Angular 20 · [Dana UI](vendor/dana-ui)      | `apps/lapper-client` |
+| `lapper-api`    | NestJS 11 · TypeORM 1.x · shared PostgreSQL | `apps/lapper-api`    |
+| `lapper-read`   | .NET 8 Windows worker · FANUC / TCP scanner | `apps/lapper-read`   |
 
 ## Lapper Read collector
 
@@ -48,8 +48,9 @@ npm run package:release          # full source ZIP + SHA-256 checksum
 Manufacturing setup, PostgreSQL configuration, and production deployment are documented
 in [manufacturing/README.md](manufacturing/README.md). Run npm and Nx commands at the
 repository root. The two APIs retain their existing routes and database configuration.
-Their default development ports overlap; configure SERVER_PORT and frontend proxy
-settings before running both APIs on the same host.
+Lapper uses API port 3334 and UI port 4203; manufacturing retains API port 3333
+and client ports 4200–4202. See [Lapper PostgreSQL setup](docs/LAPPER_POSTGRES.md)
+for the shared database, collector setup, and existing-history import.
 
 All four clients consume the same [Dana UI source](libs/shared/dana-ui). Its build
 updates the root vendor package used for published styles. No separate Dana UI install
@@ -66,14 +67,18 @@ as historical archives.
 ```sh
 nvm use                      # Node 24.22.1
 npm ci
-cp .env.example .env         # defaults to a local SQLite database, no setup needed
-npx nx serve lapper-api      # http://localhost:3333/api/v1  ·  Swagger: /api/docs
-npx nx serve lapper-client   # http://localhost:4200  (proxies /api to the API)
+cp .env.example .env         # set the existing GearApps PostgreSQL credentials and JWT_SECRET
+npx nx serve lapper-api      # http://localhost:3334/api/v1  ·  Swagger: /api/docs
+npx nx serve lapper-client   # http://localhost:4203  (proxies /api to Lapper API)
 ```
 
-Register the first account at `/register`, then sign in.
+Sign in with an existing active GearApps account. Account management stays in
+GearApps; PostgreSQL mode disables Lapper registration.
 
-To run against the plant SQL Server set `DATABASE_TYPE=mssql` and the `DATABASE_*` values in `.env` (see `.env.example`). Keep `DATABASE_SYNCHRONIZE=false` against a shared database and manage schema changes deliberately.
+For the combined Docker deployment, configure `manufacturing/.env` and run
+`docker compose --env-file manufacturing/.env -f manufacturing/compose.yml up -d --build`.
+Lapper and the manufacturing apps use the same `dana-postgres` service and `GEAR_DB_NAME`.
+The legacy standalone SQLite/SQL Server backends remain selectable explicitly.
 
 ## Features (Lapper)
 
@@ -96,6 +101,7 @@ libs/
   api/feature-gear       Machines, gearsets, parts, summaries, cycles, macros, macro logs, scanners, Fanuc I/O
   api/feature-cutter-tracking
   api/feature-scanner    Scanner HTTP + FTP integration (hosts & credentials from env)
+  api/postgres           Shared GearApps catalog/auth + additive Lapper history store
   client/core            API clients, auth, layout prefs, toast, `loadable()` signal helper
   client/ui              Small Dana-styled building blocks (dialog, badge, value field, segmented)
   client/shell           Dana app shell: sidebar, topbar, health pill

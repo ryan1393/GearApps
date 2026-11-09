@@ -5,16 +5,13 @@ import {
   TypeOrmConfigService,
   validationSchema,
 } from '@gearapps/api/core';
-import { AuthModule } from '@gearapps/api/feature-auth';
-import { CutterTrackingModule } from '@gearapps/api/feature-cutter-tracking';
-import { GearModule } from '@gearapps/api/feature-gear';
-import { ScannerModule } from '@gearapps/api/feature-scanner';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { TerminusModule } from '@nestjs/terminus';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HealthController } from './health.controller';
+import { LapperFeaturesModule } from './lapper-features.module';
 
 @Module({
   imports: [
@@ -27,10 +24,7 @@ import { HealthController } from './health.controller';
     }),
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
     TerminusModule,
-    AuthModule,
-    GearModule,
-    CutterTrackingModule,
-    ScannerModule,
+    LapperFeaturesModule.register(),
   ],
   controllers: [HealthController],
   providers: [
