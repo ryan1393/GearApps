@@ -8,6 +8,23 @@ The recovered **Blade Tracking, Cutter Builder, and Greenshed** release lives in
 | --------------- | --------------------------------------------- | -------------------- |
 | `lapper-client` | Angular 20 · [Dana UI](vendor/dana-ui)        | `apps/lapper-client` |
 | `lapper-api`    | NestJS 11 · TypeORM 1.x · SQL Server / SQLite | `apps/lapper-api`    |
+| `lapper-read`   | .NET 8 Windows worker · FANUC / TCP scanner   | `apps/lapper-read`   |
+
+## Lapper Read collector
+
+The Windows collector lives beside the Lapper API and client in
+[`apps/lapper-read`](apps/lapper-read/SETUP.txt). It captures scanned serials,
+machine cycles and macro snapshots, with disk checkpoints and retryable API writes.
+It has its own .NET solution and regression suite, separate from the Nx targets:
+
+```sh
+dotnet build apps/lapper-read/LapperRead.sln -c Release
+dotnet test apps/lapper-read/LapperRead.Tests/LapperRead.Tests.csproj -c Release
+```
+
+See its setup notes for service credentials, the licensed FANUC DLLs, writable
+checkpoint storage, and the API idempotency requirement. The collector has a
+dedicated Windows CI workflow; the existing API and client targets are unchanged.
 
 ## Manufacturing workspace
 

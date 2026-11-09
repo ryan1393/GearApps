@@ -1,0 +1,64 @@
+Lapper Read inside Lapper App
+
+This Windows worker reads the FANUC controller and barcode scanner, then publishes
+cycle records and macro changes to the Lapper API. It does not control or stop the
+machine. Cycles without a confirmed scanned serial are logged as unidentified;
+they are never assigned a test serial.
+
+Build and checks
+  Install a .NET 8 SDK, or use the local .tools/dotnet SDK when present.
+  dotnet build apps/lapper-read/LapperRead.sln -c Release
+  dotnet test apps/lapper-read/LapperRead.Tests/LapperRead.Tests.csproj -c Release
+  The apps/lapper-read/review-checks/Run-ReviewChecks.ps1 script runs the same regression tests.
+
+Configuration
+  Edit apps/lapper-read/LapperRead/appsettings.json for machine/scanner IP addresses,
+  ports, polling intervals, the API address and a writable StateDirectory.
+  The ip=<address> command-line argument overrides only the machine IP.
+
+  Supply credentials through the Windows service environment or a secure
+  configuration provider. Environment variable names are:
+    LapperApi__Email
+    LapperApi__Password
+    LapperApi__BaseAddress                 (optional API-address override)
+    LapperConfiguration__StateDirectory    (optional writable-directory override)
+
+  The previous source-code passwords have been removed. Rotate them if they were
+  used on a deployed system. Do not commit credentials into appsettings.json.
+
+  Argonaut remains optional and is not invoked by the worker automatically. To
+  use it, configure Argonaut__Endpoint, Argonaut__Username and Argonaut__Password.
+  The endpoint must use HTTPS with a certificate trusted by Windows; certificate
+  validation is enabled. The endpoint must include its required locationId.
+
+Deployment
+  Publish the worker for the existing 32-bit FANUC integration:
+    dotnet publish apps/lapper-read/LapperRead/LapperRead.csproj -c Release -r win-x86 --self-contained false -p:Platform=x86
+  Install the .NET 8 x86 runtime on the service host. Place the licensed FANUC
+  FWLIB32.dll and any vendor dependencies beside the published worker executable.
+  They were not provided in the source ZIP and are not supplied by this project.
+  Give the service account write access to StateDirectory. Relative directories
+  resolve against the executable's directory. Daily logs are under state/logs.
+
+Recovery and API contract
+  Active serials, queued serials, completed-cycle macro snapshots and successful
+  cycle API responses are checkpointed on disk. Keep these files during upgrades;
+  deleting them discards unsent records. Only one worker may lease a machine's
+  checkpoint. Invalid checkpoint files stop startup instead of being reset.
+  Startup requires the API to supply machine/scanner configuration and the macro
+  list. Existing pending records remain on disk if that initial lookup is offline.
+
+  Completed cycles are queued before API publishing. A failed cycle POST or macro
+  POST stays pending. Sampling continues while the publisher retries. The original
+  part number, consecutive count, completion timestamp and macro values are used
+  on every retry. Values are not re-read from a later machine cycle.
+
+  Cycle and macro POSTs carry stable Idempotency-Key headers. The Lapper API must
+  honor those keys to prevent duplicates after an ambiguous network failure or a
+  crash between server commit and local acknowledgement. The API source was not
+  supplied here, so server-side deduplication has not been verified.
+
+  Test on the actual machine and scanner before deployment. Automated tests use
+  simulated FANUC responses, loopback TCP scanners and in-memory API responses;
+  they cannot establish machine timing, vendor DLL compatibility or plant API
+  compatibility. A missing hardware reading is never treated as a false PMC bit.

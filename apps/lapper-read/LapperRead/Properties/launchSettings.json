@@ -1,0 +1,10 @@
+﻿{
+  "profiles": {
+    "LapperRead": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
