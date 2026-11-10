@@ -16,12 +16,12 @@
   <section *ngIf="canEdit" class="gear-panel operations-panel" danaDashboardPanel>
     <div class="gear-panel-heading panel-heading"><h2>Greenshed Operations</h2><p>Choose the workflow you need to perform.</p></div>
     <div danaOperationGrid class="operation-grid">
-      <a routerLink="/greenshed/cancel-last" class="operation-card" danaOperationCard icon="search" tone="orange" heading="Cancel Last Check" description="Review the last transaction and its cancellation history." aria-label="Cancel Last Check"></a>
       <a routerLink="/greenshed/machines" class="operation-card" danaOperationCard icon="machine" tone="blue" heading="Running Machines" description="View current cutters, piece counts, and checks due." aria-label="Running Machines"></a>
       <a routerLink="/greenshed/setup" class="operation-card" danaOperationCard icon="setup" tone="green" heading="Machine Setup" description="Install a ready cutter build on the correct machine." aria-label="Machine Setup"></a>
       <a routerLink="/greenshed/check" class="operation-card" danaOperationCard icon="quality-check" tone="purple" heading="Quality Check" description="Record frequency or CMM quality verification." aria-label="Quality Check"></a>
       <a routerLink="/greenshed/pull" class="operation-card" danaOperationCard icon="pull" tone="orange" heading="Cutter Pull" description="Pull for dull, damaged, or changeover conditions." aria-label="Cutter Pull"></a>
       <a routerLink="/greenshed/lookup" class="operation-card" danaOperationCard icon="search" tone="teal" heading="Cutter Lookup" description="Find build status, history, and current placement." aria-label="Cutter Lookup"></a>
+      <a routerLink="/greenshed/cancel-last" class="operation-card" danaOperationCard icon="search" tone="orange" heading="Cancel Last Check" description="Review the last transaction and its cancellation history." aria-label="Cancel Last Check"></a>
     </div>
   </section>
 

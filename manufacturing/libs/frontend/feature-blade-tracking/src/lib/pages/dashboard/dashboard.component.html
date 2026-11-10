@@ -11,7 +11,7 @@
     </button>
 </section>
 
-  <div *ngIf="error" class="dashboard-alert">{{ error }}</div>
+  <div *ngIf="error" class="dashboard-alert" role="alert">{{ error }}</div>
 
   <section danaKpiGrid class="kpi-grid">
     <article danaKpiCard class="kpi-card">
@@ -58,25 +58,18 @@
     </div>
 
     <div danaOperationGrid class="operation-grid">
-      <a routerLink="/blades/cancel-last" class="operation-card" danaOperationCard icon="search" tone="orange" heading="Cancel Last Tray Transaction" description="Review the last transaction and its cancellation history." aria-label="Cancel Last Tray Transaction"></a>
-      <a routerLink="internal-movement" class="operation-card" danaOperationCard icon="move" tone="blue" heading="Internal Movement" description="Scan a tray and destination location to move blades." aria-label="Internal Movement"></a>
-
+      <!-- Process order: intake, grinding, coater out and back; then ad hoc moves, lookups, and the undo path last. -->
+      <a routerLink="intake" class="operation-card" danaOperationCard icon="intake" tone="blue" heading="Blade Intake" description="Create or top up blade inventory in a tray." aria-label="Blade Intake"></a>
+      <a routerLink="grinding" class="operation-card" danaOperationCard icon="cutter" tone="teal" heading="Grinding" description="Start grinding, record scrap, and select the actual CGRR-###/CGRP-### rough shelf." aria-label="Grinding"></a>
       <a routerLink="load-container" class="operation-card" danaOperationCard icon="container" tone="green" heading="Load Coater Container" description="Scan one container, then load multiple trays." aria-label="Load Coater Container"></a>
       <a routerLink="coater-shipments" class="operation-card" danaOperationCard icon="container" tone="green" heading="Coater Shipments" description="Scan containers, print one slip and dispatch." aria-label="Coater Shipments"></a>
-
       <a routerLink="receive-container" class="operation-card" danaOperationCard icon="receive" tone="purple" heading="Receive From Coater" description="Verify and unload returned trays." aria-label="Receive From Coater"></a>
-
+      <a routerLink="internal-movement" class="operation-card" danaOperationCard icon="move" tone="blue" heading="Internal Movement" description="Scan a tray and destination location to move blades." aria-label="Internal Movement"></a>
       <a routerLink="tray-contents" class="operation-card" danaOperationCard icon="tray" tone="teal" heading="Tray Contents" description="View blade records and current placement." aria-label="Tray Contents"></a>
-
-      <a routerLink="intake" class="operation-card" danaOperationCard icon="intake" tone="blue" heading="Blade Intake" description="Create or top up blade inventory in a tray." aria-label="Blade Intake"></a>
-
-      <a routerLink="grinding" class="operation-card" danaOperationCard icon="cutter" tone="teal" heading="Grinding" description="Start grinding, record scrap, and select the actual CGRR-###/CGRP-### rough shelf." aria-label="Grinding"></a>
-
       <a routerLink="inventory" class="operation-card" danaOperationCard icon="search" tone="orange" heading="Find Inventory" description="Search by tray, container, location, or serial." aria-label="Find Inventory"></a>
-
       <a routerLink="all-inventory" class="operation-card" danaOperationCard icon="inventory" tone="purple" heading="Inventory Control Center" description="Browse trays, containers, locations, blades, and their relationships." aria-label="Inventory Control Center"></a>
-
       <a routerLink="locations" class="operation-card" danaOperationCard icon="location" tone="teal" heading="Blade Locations" description="See every location, the trays there, and the blades inside each tray." aria-label="Blade Locations"></a>
+      <a routerLink="/blades/cancel-last" class="operation-card" danaOperationCard icon="search" tone="orange" heading="Cancel Last Tray Transaction" description="Review the last transaction and its cancellation history." aria-label="Cancel Last Tray Transaction"></a>
     </div>
   </section>
 
@@ -95,7 +88,7 @@
       </label>
     </div>
     <div class="mt-3 flex flex-wrap gap-3 items-center">
-      <button type="button" class="gear-button" [disabled]="!selectedSummaryId || availabilityLoading" (click)="refreshAvailability()">Refresh Availability</button>
+      <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!selectedSummaryId || availabilityLoading" (click)="refreshAvailability()">Refresh Availability</button>
       <a *ngIf="canEdit" routerLink="body-shelves" class="text-sm font-bold text-blue-700">Record Empty Body Shelf</a>
       <span class="text-sm text-slate-500">Refreshes every 30 seconds while this page is visible.</span>
     </div>
@@ -122,12 +115,12 @@
           <h3 id="availability-tray-list-title">{{selectedTrayStageName}} — Trays</h3>
           <p *ngIf="availability">Summary {{availability.summary_number}} · {{availability.part_type_code || 'All RING + PINION'}} · {{selectedTrayStage?.tray_count ?? 0}} trays</p>
         </div>
-        <button type="button" class="gear-button" (click)="closeStageTrays()">Close tray list</button>
+        <button type="button" class="gear-btn gear-btn-secondary" (click)="closeStageTrays()">Close tray list</button>
       </div>
       <p *ngIf="availabilityLoading" role="status">Refreshing matching trays…</p>
       <p *ngIf="!availabilityLoading && availabilityError" role="alert">{{availabilityError}} Use Refresh Availability to retry.</p>
       <p *ngIf="!availabilityLoading && availability && !trayListSupported" role="alert">Matching tray details are unavailable. Refresh after the matching API update; no unfiltered tray list is substituted.</p>
-      <ng-container *ngIf="!availabilityLoading && trayListSupported">
+      <ng-container *ngIf="trayListSupported">
         <div class="availability-tray-toolbar availability-tray-search">
           <label>Find a tray, shelf, or container
             <input type="search" class="gear-input" [(ngModel)]="traySearch" (ngModelChange)="resetTrayPage()"
@@ -157,9 +150,9 @@
         <div class="availability-tray-footer">
           <small>*Required is the tray’s saved blade-count requirement. A dash means it has not been recorded on that tray yet.</small>
           <nav *ngIf="trayPageCount > 1" class="availability-tray-pagination" aria-label="Matching tray pages">
-            <button type="button" class="gear-button" [disabled]="trayPage <= 1" (click)="changeTrayPage(-1)">Previous</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="trayPage <= 1" (click)="changeTrayPage(-1)">Previous</button>
             <span>Page {{trayPage}} of {{trayPageCount}}</span>
-            <button type="button" class="gear-button" [disabled]="trayPage >= trayPageCount" (click)="changeTrayPage(1)">Next</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="trayPage >= trayPageCount" (click)="changeTrayPage(1)">Next</button>
           </nav>
         </div>
       </ng-container>
@@ -218,7 +211,7 @@
           <h2>Inventory By Location</h2>
           <p>Locations with the most active trays right now.</p>
         </div>
-        <a danaPanelAction routerLink="all-inventory" class="panel-link">All locations →</a>
+        <a *ngIf="canEdit" danaPanelAction routerLink="all-inventory" class="panel-link">All locations →</a>
       </div>
 
       <div danaTableShell class="table-wrap">
@@ -295,7 +288,7 @@
           <h2>At The Coater</h2>
           <p>Containers that currently have trays loaded.</p>
         </div>
-        <a danaPanelAction routerLink="all-inventory" class="panel-link">Container inventory →</a>
+        <a *ngIf="canEdit" danaPanelAction routerLink="all-inventory" class="panel-link">Container inventory →</a>
       </div>
 
       <div danaTableShell class="table-wrap">
@@ -338,9 +331,10 @@
         name="quickScan"
         [(ngModel)]="scanValue"
         placeholder="Scan barcode or type ID..."
+        aria-label="Scan a tray, container, or location"
         autocomplete="off"
       />
-      <button type="submit">▥</button>
+      <button type="submit" aria-label="Find"><span aria-hidden="true">▥</span></button>
     </form>
 
     <div class="subheading-row">

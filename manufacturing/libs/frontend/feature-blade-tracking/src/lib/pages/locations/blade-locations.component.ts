@@ -23,7 +23,7 @@ import {
 @Component({
   selector: 'gear-blade-locations',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaSummaryGridDirective, DanaSummaryCardDirective, DanaPageHeaderComponent, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
+  imports: [CommonModule, FormsModule, DanaSummaryGridDirective, DanaSummaryCardDirective, DanaPageHeaderComponent, DanaButtonDirective, DanaAlertDirective, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
   templateUrl: './blade-locations.component.html',
 })
 export class BladeLocationsComponent implements OnInit {

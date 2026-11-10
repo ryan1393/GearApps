@@ -1240,3 +1240,31 @@ html body .gear-summary-card {
   min-width: 0;
 }
 /* END DANA-R35R5-COMPACT-TOAST */
+
+/* BEGIN GEAR KPI GRID GEOMETRY
+   danaKpiGrid puts both .dana-kpi-grid (Dana core: four equal tracks) and .kpi-grid
+   (Gear: 24 tracks, tiles spanning 6 or 8) on the same element. The Dana core loads
+   later, so its four tracks won and every 6/8-span tile wrapped onto its own row.
+   The Gear dashboards keep the 24-track geometry their tile spans are written for. */
+@media screen and (min-width: 1351px) {
+  .dana-kpi-grid.kpi-grid {
+    grid-template-columns: repeat(24, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 1350px) {
+  .dana-kpi-grid.kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dana-kpi-grid.kpi-grid > .kpi-card.kpi-card {
+    grid-column: auto;
+  }
+}
+
+@media screen and (max-width: 760px) {
+  .dana-kpi-grid.kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+/* END GEAR KPI GRID GEOMETRY */
