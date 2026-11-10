@@ -29,7 +29,9 @@ All in the root `.env` (template in `.env.example`): `DSF_DB_HOST`, `DSF_DB_PORT
 - The DSF login must be a restricted read-only role. If it is not, the reader refuses with
   `READ_ONLY_ROLE_REQUIRED` unless `DSF_PRIVILEGED_READER_ACK` carries the explicit
   acknowledgment text defined in `dsf-count.service.ts`, which is accepted for the recorded
-  plant source only. Prefer fixing the role.
+  plant source only (`10.16.80.10` / `maindblocal`, login `dana_dsf_reader` or `whiteboard`).
+  `whiteboard` is the DSF application's own login and can write to DSF, so with it the only
+  protection is the read-only session Gear Apps opens. Prefer a dedicated read-only role.
 - The API process must run in UTC (the Docker default) for cutter crediting; cutter-run
   timestamps are stored without a zone and are read as UTC.
 - The working client port and SSL mode for the plant source have not been verified from this
