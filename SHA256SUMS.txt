@@ -6,7 +6,7 @@
 f8d4f74a32b23e1fd2cb7a21265a6705e42dc15b8877417e3bdc1e682a292c9d  DEPLOY-TRUCKLOG-LINUX.py
 d8a921d48d6c96b851786e8afbeff8aeb485872dd58a63d389b54049058a1f22  DIAGNOSE-RXO-EXPEDITE.cmd
 b4207d55284bd51d19bf8ee25159dc6bb5cd5ca129ecc6d731fe34493c240ccb  DIAGNOSE-RXO-EXPEDITE.ps1
-5068513f11b11a045f3cbd0a765cd2866f56ab13dc4263235d582200ed7321af  README.md
+4573c3270c9046f599723e153bb69b1dfe9deac4cbddd06d4b3685666ce8dddb  README.md
 d9137893274711722e5f4641158419adcd884f81405e3e5132139d7ce8f5abb6  TEST-DEPLOY-TRUCKLOG-WINDOWS.py
 7bbc97a1419f6b16123dd22b7907f942817d9e7774244df1dc0aa8d2e6fcc007  TEST-DIAGNOSE-RXO-EXPEDITE.py
 2c7e491162e7bde415da37c6bce94860a54ea4e7552dd785f15655c8865cf22c  UPDATE-TRUCKLOG.cmd
@@ -55,7 +55,7 @@ f9227db6f9d3b0c8d17c7ec491247eeeb2a8cd1e49991e0d46f8c67c72b0295d  print-agents/D
 b32608dc49bf252eda0a74b32e73d46ecc4f4696e609c1b79442311cf0a10d2f  print-agents/Diagnostics/Truck-Log-Print-ReadOnly-Audit-V1.cmd
 94f092baf537074ab66d2dcee887f3c1432c956c26079c183f9b966c13db8360  print-agents/README-FIRST.txt
 5e78319b8e5918e82b8ddd2b81dd10147159ffc9fd5e9c91b2f62e8d3a84a573  print-agents/RELEASE-NOTES-W3.txt
-58b0fb881d4a68f4efb8d0685b209a3167ea93751afd27adcaf9699925c19d68  print-agents/SHA256SUMS.txt
+25f34522bff3cbcc4ff5e5252a06195ff48e394d30f92b0f9db2f5a828048a36  print-agents/SHA256SUMS.txt
 54ec64ed30ff3556b3dff49991ed198091fcfb5365d9fa0c8346fd630cef15ac  print-agents/VERIFICATION-REPORT.txt
 63d0f68f1ccb753d3b3f616e18269f3f6c254948d606d203faa9e3f3169fac63  print-agents/VERIFY-PACKAGE.py
 0eff1afa596bd12aa372f93c859bda18eaffc44eb35179ffed80212fdf7d63db  tests/test_deploy_trucklog_linux.py
@@ -65,7 +65,9 @@ e750ba34ff73f7e53106a94bc978ced6456092368eb4a664e10b20a15a75a36b  truck-log/.git
 b8b4300e34d5e9bd2a5acc036a3a525f2b50416f03728da3d9db4efef545aa32  truck-log/.nxignore
 0bdbec1c14357f0efcb8bf99a661a4d86bf4c283bfa589d6cbcfe8c45ac649aa  truck-log/BOOTSTRAP-RXO-BROWSER.cmd
 aa7bf528f0643c7284c7eb5e5b34a9fe34d3766357c89578bebaf69493fee334  truck-log/BOOTSTRAP-RXO-BROWSER.sh
-38fc996f544a1c333c85ff25afc32ce7674c10fc86bf8addf653ee9a7f20fb7b  truck-log/CHANGELOG.md
+536a81dc1299ca364c8a33a43a91e3c5564140fef1c52ef5cb9de1b771fa6675  truck-log/CHANGE-TRUCK-LOG-PASSWORDS.cmd
+62fcfe0a6ed878b9ea1934807663c76349fecbecf6b42c9ecd57881b1c2ed5dc  truck-log/CHANGE-TRUCK-LOG-PASSWORDS.sh
+58d1b4db4185d4741197bc0c20406c071018a942e977d59a348642f6d7917129  truck-log/CHANGELOG.md
 484e8732197a5399b845535b511ce0033104cb9074b59fe8346636f90c8ca71d  truck-log/CLEAR-MOCK-DATA.cmd
 1a3877845d51b56e1ac410d769f716acec144835f61bc855beeca69258d70e27  truck-log/CLEAR-MOCK-DATA.sh
 e9dd41e971d4a6961f99a830d23d25577c859d2fc0848d67160936efc15b9615  truck-log/CLEAR-TRUCK-LOG-DATA.cmd
@@ -82,10 +84,10 @@ f181b4905180740be5dfb96c8ca9aa8bb638d23995f766ae47e54efbda1812d9  truck-log/LOGS
 e92c53b46f2d722537b0de15b81a5fe663f8c4f353b1cd610a866888da516964  truck-log/LOGS-RXO-EXPORT.sh
 f0185be66d45d703d4f8590d5319b755b8f0a1412179761b1e4ce7f6ea6ad715  truck-log/LOGS-TRUCK-LOG.cmd
 f1d269e9c2da3fba70ac4e94b1b9890779783c6e5572629ea2a6721a41af54ed  truck-log/LOGS-TRUCK-LOG.sh
-5d095844f9dfef46c70074453159a43faa8a46d36133e7b2b4ea894c091e4b53  truck-log/MANIFEST-SHA256.txt
+eba00a887e8e33e7d51c9e815b0c2b7399007789b62d59a68034d69def38b308  truck-log/MANIFEST-SHA256.txt
 1f5001b1a6bf9eea574854cf25ce1a0dd22abdd2a5c0f5565f6c43d8e6d50af6  truck-log/MOCK-DATA-STATUS.cmd
 b17cd0dafe13ac5e674b828cb87bbeb4f461f78cd203e8fd748ecbbb61e101d0  truck-log/MOCK-DATA-STATUS.sh
-856e0df777cd2c3e27cbcc282bdc3eb8caad7387c537af568e9ae158e54f3162  truck-log/README.md
+ea119023cf89ef5be8555405d07557c05c452a95e22790c7fdd3376b850a54f4  truck-log/README.md
 0bd7f033ce7f3d232f109b33ecb781f800e599ce0871c3ed04582fe9fdd79189  truck-log/RELEASE-MANIFEST.json
 d1ba541629ea1809032eff7a4733ab688f24ebbca696d1f1c5f81f52c4972b91  truck-log/REMOVE-OLD-TRUCK-LOG-INSTALL.cmd
 a70d9c995f2f4065066f07e536c5c17ce9a567f8f825fd0ec5647b0ffea9e8c3  truck-log/REMOVE-OLD-TRUCK-LOG-INSTALL.sh
@@ -239,7 +241,7 @@ a6b05bdc9015f7c2912a2858f47244d2b89a06141569fb461adb1daad4db2260  truck-log/dock
 093a17dc55728909e59cb3be488318d27a13048c86b3aa7896554ea6781dac1c  truck-log/docs/truck-log/CHECK-IN-RXO-FREIGHT-LOAD-SELECTION.md
 64162be312e5b23f4e773a99718a0ebb220efa35cc0757f10af90664848d74d2  truck-log/docs/truck-log/DATABASE-MIGRATIONS.md
 8e2b445d91b5e5e6c82df7e019ac307bbc50d432ef0a9573b3ae1b378101bf47  truck-log/docs/truck-log/DEPENDENCY-SECURITY.md
-1c279a38dde7b4cb387b0c06f47256e4da1de87d86b441cd811c09207e9a997e  truck-log/docs/truck-log/DEPLOYMENT.md
+e0740ccfe212eacaa5742cc3634b7cb1d8ea34369829e5d3e77ceafdce2f18d2  truck-log/docs/truck-log/DEPLOYMENT.md
 056964b413b0c08dd5cb1dd847590144bc8cb278716d0747024895720330564a  truck-log/docs/truck-log/DOCK-AGING-ALERTS.md
 9996fdcc0ce5b619a9b70c336d17d0aff593bcad39449238d01b9e2f34363cfb  truck-log/docs/truck-log/DRIVER-PHONE-VALIDATION.md
 bd39ccea7bd83b27672778840f1525197224fdf8f507cdb3a27a111e469a28b0  truck-log/docs/truck-log/DRIVER-SLIP-SPACING-PLANT-IDENTITY.md
@@ -635,13 +637,14 @@ c21c0d99fa60349d66a8ddab19f78140d699aa51186529908d5bc3488901527e  truck-log/libs
 c1e5c4b044416272e5c4ff9277cd8cfdcb624f35cf5acd682c2c516d2b3bd6a1  truck-log/libs/truck-log/web/ui/tsconfig.json
 82be32153600b93d5858a4a7c0836d9431af207cac5ecb65edbae2df3cfda82c  truck-log/nx.json
 f8e2783ced60d1fbd7c81288c04b81211a00de3bca3986c057498fd1b4eee062  truck-log/package-lock.json
-ebbb6c361d44311ab8f33ce814261440e5ef7b6ad3f4de25344d4457a82d8c7f  truck-log/package.json
+b98bcb7c38f5d38bde95fe1cb6046d69386db0bbeb64a88f5a24d32d16e90eb4  truck-log/package.json
 9cacaab76a6eabaad0b6ebf04d903e21f71dd0e334e9878564b21907b3bcacf8  truck-log/reference-data-import/README.txt
 112da22eb2897c57617d557e6dd2ab837e0de25492099b9c2a098e3a8763b71a  truck-log/reference-data-import/REFERENCE-DATA-CSV-GUIDE.md
 f130cd211f24c4d8751884d0413d344c566e0b226c5d62c7f78016438910d941  truck-log/reference-data-import/reference-data-template.csv
 a1f93fe4b9102737647d0016d1a42cc0fcc010ae2b09fb23edb4284b01e0f346  truck-log/reference-data-import/truck-log-dock-master.csv
 0a4418597fdad4bced0d6c4dbf6902bcaeeabc048691d558054affde1eb7a69d  truck-log/tests/new-host/test-browser.mjs
 01e004b2841a5a5f8de9485c09bdece9e643f275383323cf152e903688dd5c02  truck-log/tests/new-host/test-build-inputs.mjs
+60a63a284d62d729a1a1b0e57c1296f6378155b262e4c5d11273b76da9bae8f6  truck-log/tests/new-host/test-change-passwords.mjs
 7195c683504a49637d2a8610d02f7d052d2fd66273a6cec8f68b78f66b642f00  truck-log/tests/new-host/test-compose-client.mjs
 afab5a7fdd82f83218ff3b1b79ad8f50b99f1f80e1332ea50f5aadb4a494868c  truck-log/tests/new-host/test-compose.mjs
 0c31f396f63cef8440ff0f120f928e57aa130d7cfac76d5661bed911ca37ccc5  truck-log/tests/new-host/test-control-state.mjs
@@ -649,7 +652,7 @@ c5cebc1c5db0883e3d69da2bf54693f1ad2e5816895d37a7d8e15cc73bedc8c1  truck-log/test
 0428e7d602d152e037497d52d4a1344a24b86af9d63d2698cb35446d65c980eb  truck-log/tests/new-host/test-filter-preparation.mjs
 521df61a226fbbf2b37f8ff82058cb0d9a366f9422820d0d500dfa8cf8f7c304  truck-log/tests/new-host/test-migrations.mjs
 c80a8a728cd1b3365fd94a650e6df3ef73ba36b050a6566bfbd30ab7c854b47f  truck-log/tests/new-host/test-old-install-guard.mjs
-7e6a3cccba1d0eab4d5d926161f2ac5cd4436ea7a0676da0efad7242d8bd356f  truck-log/tests/new-host/test-release-package.mjs
+9db17bfe6db87a8a9f2af63c94ca550fc62a122c7fea4440cfe135d41f55afaa  truck-log/tests/new-host/test-release-package.mjs
 6b473fbf4f2f1901ca76d9bb866fc8d6f3fa666c89d0ae293626d4e1b6cbf711  truck-log/tests/new-host/test-release-version.mjs
 720d801e65ac5909568a53740e8ddc0804e43bf7ee6c1b4d0d5fc83844780c91  truck-log/tests/new-host/test-remote-windows-context.mjs
 de9e140d93bd3608a894dae53543d9c6380abf89ade0781f5ff4e630db558583  truck-log/tests/new-host/test-rxo-web-setup.mjs
@@ -657,6 +660,7 @@ cddc61b53320e30240744702a88f38a3aaef994aa98feb68ed265cd23e8d72cb  truck-log/tool
 99738c86c3c60380271082efd5c68c8607f972c7222127e8856b33078beda3b1  truck-log/tools/truck-log/admin-auth-core.cjs
 eec07efea4241a784c94c5e529b852ab7118e1b15f4c115a516f1c347906947d  truck-log/tools/truck-log/audit-web-css.mjs
 dca0de97cc22002035adfdd1806e439c3b8efa28892f2377f2a3935ca8be4163  truck-log/tools/truck-log/build-admin-auth-core.mjs
+87adf30688a0957032d8f974eb30f419a81ecd3a07eb2f10c2b310a6ad95ac12  truck-log/tools/truck-log/change-passwords.ps1
 adb2adccc417b5b4e1701a9fbc3d5316f2264a92f433838e7cf3084cbee8f63d  truck-log/tools/truck-log/check-angular-templates.mjs
 fd5228d8d8ac0e96ee3043736afd395ca549bd0cfde326df32dc8b4d3e7e3dff  truck-log/tools/truck-log/compose-common.ps1
 9a9c1e0465293efb1404fbc20930eb5b7512e0deec3782b69798c0271aea9abe  truck-log/tools/truck-log/compose-common.sh

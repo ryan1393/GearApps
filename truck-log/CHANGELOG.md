@@ -6,6 +6,7 @@
 - Queue Expedite scans through the existing scheduler so scheduled and manual exports share the same browser lock and authentication holds. Keep export completion separate from database import status.
 - Harden Expedite's Freight on the Move navigation: reuse a visible List export, select List once, and verify the data surface independently of page-load events. Report expired sign-in or verification screens while preserving the previous verified batch on failure.
 - Keep the responsive RXO data-panel spacing improvements and consistent gaps between shipment IDs and Details buttons.
+- Add `CHANGE-TRUCK-LOG-PASSWORDS` (Windows and Linux) to change the administrator password, database password, Print Agent signing secret and RXO logins after setup. The database option updates PostgreSQL and `.env` together and keeps the HTTPS overlay on restart.
 - Keep database migrations unchanged through 0005, DANA UI at 0.3.1, and the companion print agents at V4R7/W3.
 
 ## 1.0.4 — Expedite scan reliability and diagnostics

@@ -40,9 +40,30 @@ Then open `http://<docker-host>:4300`. For production TLS, use the supported [HT
    ./SETUP-TRUCK-LOG-ADMIN.sh --bootstrap      # Windows: SETUP-TRUCK-LOG-ADMIN.cmd --bootstrap
    ```
    Sign in at `/admin/login` and change the temporary password.
+   If your ZIP came with a ready-made first-time `truck-log/.env`, replace its database password and signing secret once the site is running: `./CHANGE-TRUCK-LOG-PASSWORDS.sh --all-generated` (Windows: `CHANGE-TRUCK-LOG-PASSWORDS.cmd --all-generated`).
 2. **Register every guard PC and TV as a station.** In the web app go to **Admin → Stations**, add the station, and enter the 8-character code it shows at `/station/setup` on that PC or TV. Guard screens and the API are unavailable until a browser is paired or an administrator is signed in. See [docs/truck-log/STATIONS.md](docs/truck-log/STATIONS.md).
 3. **RXO and RXO Expedite logins:** RXO Control Center → Settings & Login (signed in as administrator), or `SETUP-RXO-INTEGRATION-CREDENTIALS` / `SETUP-RXO-EXPEDITE-CREDENTIALS`. See [docs/truck-log/RXO-WEB-CREDENTIAL-SETUP.md](docs/truck-log/RXO-WEB-CREDENTIAL-SETUP.md).
 4. **Print Agent PC (optional):** `SETUP-PRINT-AGENT-CREDENTIAL.cmd --agent-id trucklog-print-pc-01 --name "Guard shack printer"` creates the token the Windows Print Agent uses. Without a configured agent, choose **Manual / browser printing** at check-in. The saved visit provides its printable slip; automatic printing becomes available after the gate and printer are configured. Save the gate printer under Administration → Printing. Check-in offers **Print manually in browser** when automatic printing is unavailable or when you choose to print manually. Manual mode saves the visit without queuing automatic Dock Assignment or RXO printing; open the Dock Assignment slip after saving and retrieve RXO paperwork from Records.
+
+## Changing passwords and secrets
+
+Run these from the `truck-log/` folder after setup. Nothing is deleted, and no password is typed on the command line.
+
+| What | Windows | Linux |
+|---|---|---|
+| Administrator sign-in password | `CHANGE-TRUCK-LOG-PASSWORDS.cmd --admin` | `./CHANGE-TRUCK-LOG-PASSWORDS.sh --admin` |
+| Database password | `CHANGE-TRUCK-LOG-PASSWORDS.cmd --database` | `./CHANGE-TRUCK-LOG-PASSWORDS.sh --database` |
+| Print Agent claim-token signing secret | `CHANGE-TRUCK-LOG-PASSWORDS.cmd --print-secret` | `./CHANGE-TRUCK-LOG-PASSWORDS.sh --print-secret` |
+| Both generated values, one restart | `CHANGE-TRUCK-LOG-PASSWORDS.cmd --all-generated` | `./CHANGE-TRUCK-LOG-PASSWORDS.sh --all-generated` |
+| Standard RXO login | `CHANGE-TRUCK-LOG-PASSWORDS.cmd --rxo` | `./CHANGE-TRUCK-LOG-PASSWORDS.sh --rxo` |
+| RXO Expedite login | `CHANGE-TRUCK-LOG-PASSWORDS.cmd --rxo-expedite` | `./CHANGE-TRUCK-LOG-PASSWORDS.sh --rxo-expedite` |
+| Print PC token | `SETUP-PRINT-AGENT-CREDENTIAL.cmd --agent-id <id> --name "<name>" --rotate` | `./SETUP-PRINT-AGENT-CREDENTIAL.sh --agent-id <id> --name "<name>" --rotate` |
+
+`--admin` asks for the administrator's user name and a temporary password; that administrator chooses a new one at the next sign-in.
+
+`--database` generates a new password, sets it in PostgreSQL, writes it to `.env`, and restarts the services (about a minute of downtime; HTTPS installations keep their overlay). The value is never displayed. It also repairs an installation whose `.env` password no longer matches the database. `--print-secret` replaces the signing secret the same way; a print job claimed in the minutes before the change is retried by its agent.
+
+The changed `.env` is the one in the folder where you ran the command. Keep using that file for later deployments. If you ran the Linux script on the server but deploy from a Windows PC, copy the server's `.env` over the PC's `truck-log\.env` first.
 
 ## Replacing an older test install
 
