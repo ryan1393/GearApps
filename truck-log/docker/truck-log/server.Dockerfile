@@ -1,5 +1,5 @@
 FROM node:22-bookworm-slim AS build
-ARG TRUCK_LOG_RELEASE=1.0.4
+ARG TRUCK_LOG_RELEASE=1.0.5
 ENV TRUCK_LOG_RELEASE=${TRUCK_LOG_RELEASE}
 WORKDIR /app
 ENV NX_DAEMON=false NX_SKIP_NX_CACHE=true
@@ -16,7 +16,7 @@ RUN node tests/new-host/test-migrations.mjs
 RUN node ./node_modules/nx/dist/bin/nx.js build truck-log-server --skip-nx-cache
 
 FROM node:22-bookworm-slim
-ARG TRUCK_LOG_RELEASE=1.0.4
+ARG TRUCK_LOG_RELEASE=1.0.5
 LABEL com.dana.truck-log.release="${TRUCK_LOG_RELEASE}" \
       org.opencontainers.image.version="${TRUCK_LOG_RELEASE}" \
       com.dana.truck-log.component="truck-log-server"

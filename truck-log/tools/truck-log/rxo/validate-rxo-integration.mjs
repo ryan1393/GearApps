@@ -39,7 +39,7 @@ const scheduler = readSchedulerSource(root);
 for (const marker of ['scheduler-status.json','scheduler-recovery.log','schedulerHeartbeatAt','maxScanDurationMinutes','noProgressTimeoutMinutes','STALL_DETECTED','RECOVERING','RETRYING','NEEDS_REVIEW',"[EXPORTER, '--once']"]) {
   if (!scheduler.includes(marker)) throw new Error(`RXO scheduler marker missing: ${marker}`);
 }
-if (!scheduler.includes("process.env.TRUCK_LOG_RELEASE || '1.0.4'")) throw new Error('RXO scheduler release fallback does not match VERSION.');
+if (!scheduler.includes("process.env.TRUCK_LOG_RELEASE || '1.0.5'")) throw new Error('RXO scheduler release fallback does not match VERSION.');
 const dockerfile = read('Dockerfile');
 for (const marker of ['TRUCK_LOG_RELEASE=' + version,'COPY apps/rxo-integration/src ./src','COPY libs/truck-log/rxo-shared/ ./src/lib/','CMD ["node", "src/rxo-scheduler.mjs"]','RXO_MAX_SCAN_DURATION_MINUTES=30','RXO_NO_PROGRESS_TIMEOUT_MINUTES=15']) {
   if (!dockerfile.includes(marker)) throw new Error(`RXO Dockerfile marker missing: ${marker}`);

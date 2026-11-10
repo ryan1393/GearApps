@@ -6,7 +6,8 @@ import { SOURCE, ExpediteError, validateWorkbook, sha256 } from './workbook.mjs'
 import { readCredentials, credentialStatus } from './credentials.mjs';
 import { acquireLock, inspectLock, withTimeout } from './process-lock.mjs';
 import { pruneBatchDirectories } from './batch-retention.mjs';
-export const VERSION=process.env.TRUCK_LOG_RELEASE||'1.0.4';
+import { assertFreightSession, excelControls, openFreightList } from './list-view.mjs';
+export const VERSION=process.env.TRUCK_LOG_RELEASE||'1.0.5';
 export const LOGIN_URL='https://www.expedite.rxo.com/WebClient/Account/Login';
 export const FREIGHT_URL='https://www.expedite.rxo.com/WebClient/#/freight-on-the-move';
 export const XLSX_NAME='Freight On The Move.xlsx';
@@ -166,13 +167,7 @@ export async function downloadNative(context,credentials,save,{preferNonEmpty=fa
  // A fresh Freight On The Move route opens in Map mode. The native Excel export is rendered
  // only after switching to List, so select that exact visible control before looking for export.
  onStage('LIST_CONTROL');
- const exactList=/^\s*list\s*$/i;
- const listInteractive=page.locator('button:visible, a:visible, [role="button"]:visible, [ng-click]:visible, [data-ng-click]:visible, [onclick]:visible, .btn:visible, .k-button:visible').filter({hasText:exactList});
- const listLabel=page.locator('label:visible').filter({hasText:exactList});
- await listInteractive.or(listLabel).first().waitFor({state:'visible',timeout:90000}).catch(()=>{throw new ExpediteError('FREIGHT_LIST_CONTROL_REVIEW');});
- const listInteractiveCount=await listInteractive.count(),listLabelCount=await listLabel.count();
- must(listInteractiveCount===1||(listInteractiveCount===0&&listLabelCount===1),'FREIGHT_LIST_CONTROL_REVIEW');
- const listTarget=listInteractiveCount===1?listInteractive.first():listLabel.first();await listTarget.click();
+ await openFreightList(page);
  // Do not export until the list summary is visible, complete, and stable. If a prior verified
  // non-empty batch exists, a transient 0-of-0 list is never considered ready for a scheduled run.
  // RXO can render the shipment summary through nested/duplicated legacy DOM nodes. Use the
@@ -181,6 +176,7 @@ export async function downloadNative(context,credentials,save,{preferNonEmpty=fa
  onStage('LIST_DATA');
  let stableReadiness='',stableSince=0,listReady=false;const readyDeadline=Date.now()+90000;
  while(Date.now()<readyDeadline){
+  await assertFreightSession(page);
   const summary=await page.evaluate(()=>{
    const text=(document.body?.innerText||'').replace(/\r/g,' ');
    const m=/(\d+)\s+of\s+(\d+)\s+Shipments/i.exec(text);
@@ -203,8 +199,8 @@ export async function downloadNative(context,credentials,save,{preferNonEmpty=fa
  must(listReady,'FREIGHT_LIST_DATA_REVIEW');
  // The List view owns the native Export to Excel control. Keep exact-label and fail-closed rules.
  onStage('EXPORT_CONTROL');
- const interactiveExport=page.locator('button:visible, a:visible, [role="button"]:visible, [ng-click]:visible, [data-ng-click]:visible, [onclick]:visible, .btn:visible, .k-button:visible').filter({hasText:/^\s*export to excel\s*$/i});
- await interactiveExport.first().waitFor({state:'visible',timeout:90000}).catch(()=>{throw new ExpediteError('EXPORT_CONTROL_REVIEW');});
+ const interactiveExport=excelControls(page);
+ await interactiveExport.first().waitFor({state:'visible',timeout:90000}).catch(async()=>{await assertFreightSession(page);throw new ExpediteError('EXPORT_CONTROL_REVIEW');});
  must(await interactiveExport.count()===1,'EXPORT_CONTROL_REVIEW');const target=interactiveExport.first();
  onStage('EXPORT_DOWNLOAD');
  // Observe both promises before clicking. A failed click or an early download

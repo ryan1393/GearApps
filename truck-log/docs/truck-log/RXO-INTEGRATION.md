@@ -90,6 +90,18 @@ POST  /api/v1/rxo/control/sync-latest
 
 ## Manual/admin helpers
 
+### Scan Now in the webpage
+
+Sign in as a Truck Log administrator and open **RXO Control Center** (`/rxo`) or **RXO Expedite** (`/rxo-expedite`). Select **Scan Now** to queue one export in that integration's existing scheduler. The two integrations have separate scan requests and status.
+
+The button is unavailable while the integration is already scanning or its scheduler cannot accept a request. An authentication hold still requires corrected credentials or the indicated interactive sign-in; **Scan Now** does not clear that hold. Use **Recover connection** when connection recovery is needed.
+
+A queued request confirms only that the scheduler accepted the request. Watch the scan state and **Last successful export** for the export result, then **Latest import** for the database result. Export completion can appear before the imported batch changes. A failed export keeps the previous verified batch available.
+
+The administrator-only endpoints are `POST /api/v1/rxo/control/rescan` and `POST /api/v1/rxo/expedite/rescan`. They retain the application's session, origin, intent-header, and CSRF protections.
+
+### Command-line helpers
+
 The included root helpers remain useful for diagnostics or controlled manual operation:
 
 ```text

@@ -46,6 +46,14 @@ export class RxoExpediteController {
     return this.expedite.recoverConnection();
   }
 
+  @Post('rescan')
+  @HttpCode(202)
+  @Header('Cache-Control', 'no-store')
+  rescan(@Req() request: Request) {
+    this.requireJson(request);
+    return this.expedite.requestRescan();
+  }
+
   @Put('settings')
   @Header('Cache-Control', 'no-store')
   settings(@Body() body: ExpediteSettingsInput, @Req() request: Request) {

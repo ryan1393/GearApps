@@ -9,6 +9,7 @@ import { Subscription } from 'rxjs';
 import { expediteFailureDetail, expediteFailureTime } from './rxo-expedite/expedite-failure-display';
 import { RxoExpediteComponent } from './rxo-expedite/rxo-expedite.component';
 import { RxoExpediteStore, type ExpediteShipmentsResponse, type ExpediteStatus } from './rxo-expedite/rxo-expedite.store';
+import { ExpediteScanAction } from './rxo-expedite/expedite-scan-action';
 
 type ExpediteMainTab = 'data' | 'health' | 'settings';
 
@@ -29,10 +30,16 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
       <div class="dana-actions">
         <span class="dana-muted" *ngIf="lastUpdated">Updated {{lastUpdated | date:'shortTime'}}</span>
         <button class="dana-btn" type="button" (click)="refreshAll()">Refresh</button>
+        <button class="dana-btn dana-btn-primary" type="button" [disabled]="!!scan.disabledReason || recoveryBusy"
+                [attr.aria-busy]="scan.requesting" [title]="scan.disabledReason || 'Request a fresh Expedite export'"
+                (click)="scan.start()">{{scan.label}}</button>
       </div>
     </header>
 
     <tl-stale-data-notice [stale]="!!status && store.stale" [lastUpdated]="lastUpdated" subject="RXO Expedite"></tl-stale-data-notice>
+
+    <div class="dana-alert" *ngIf="scan.message" [class.dana-alert-danger]="scan.run?.status === 'FAILED'" role="status" aria-live="polite">{{scan.message}}</div>
+    <div class="dana-alert dana-alert-danger" *ngIf="scan.error" role="alert">{{scan.error}}</div>
 
     <section class="dana-alert tl-rxo-activity" [attr.data-state]="integrationState" role="status" aria-live="polite">
       <span class="dana-status-badge" [attr.data-tone]="integrationTone">{{integrationStatus}}</span>
@@ -49,7 +56,7 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
         <p class="dana-alert dana-alert-danger" role="alert" *ngIf="recoveryError">{{recoveryError}}</p>
         <p class="dana-alert dana-alert-success" role="status" *ngIf="recoveryMessage">{{recoveryMessage}}</p>
         <div class="dana-actions" *ngIf="adminAuth.canWrite(); else recoveryAdminSignIn">
-          <button class="dana-btn dana-btn-primary" type="button" [disabled]="recoveryBusy || scanRunning || !recoveryAvailable" [attr.aria-busy]="recoveryBusy" (click)="recoverConnection()">{{recoveryBusy ? 'Requesting recovery…' : 'Recover connection'}}</button>
+          <button class="dana-btn dana-btn-primary" type="button" [disabled]="recoveryBusy || scanRunning || scan.active || scan.requesting || !recoveryAvailable" [attr.aria-busy]="recoveryBusy" (click)="recoverConnection()">{{recoveryBusy ? 'Requesting recovery…' : 'Recover connection'}}</button>
           <button class="dana-btn" type="button" [disabled]="recoveryBusy" (click)="openRecoverySettings()">Settings &amp; Login</button>
         </div>
         <ng-template #recoveryAdminSignIn><a class="dana-btn dana-btn-primary" routerLink="/admin/login" [queryParams]="{ returnTo: '/rxo-expedite' }">Sign in as administrator to recover</a></ng-template>
@@ -85,7 +92,7 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
       <div class="dana-kpi-card" [attr.data-tone]="needsReview && !waitingForNextScan ? 'danger' : (needsReview || timerStatusStale ? 'warning' : null)">
         <div class="dana-kpi-label">{{timerTitle}}</div>
         <div class="dana-kpi-value" aria-live="off">{{timerLabel}}</div>
-        <div class="dana-kpi-note">{{schedulerStateLabel}} · scheduled</div>
+        <div class="dana-kpi-note">{{schedulerStateLabel}} · {{scan.run?.status === 'RUNNING' ? 'manual' : 'scheduled'}}</div>
       </div>
       <div class="dana-kpi-card">
         <div class="dana-kpi-label">Last successful export</div>
@@ -158,6 +165,7 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
   </div>`
 })
 export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
+  readonly scan: ExpediteScanAction;
   activeTab: ExpediteMainTab = 'data';
   recoveryBusy = false;
   recoveryMessage = '';
@@ -175,7 +183,7 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
     public readonly adminAuth: TruckLogAdminAuth,
     private readonly api: TruckLogApi,
     private readonly toast: ToastService,
-  ) {}
+  ) { this.scan = new ExpediteScanAction(api, adminAuth, store); }
 
   get status(): ExpediteStatus | null { return this.store.status; }
   get shipments(): ExpediteShipmentsResponse | null { return this.store.shipments; }
@@ -194,6 +202,7 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroyed = true;
     this.recoveryRequest?.unsubscribe();
+    this.scan.destroy();
     if (this.clockTimer) window.clearInterval(this.clockTimer);
   }
 
@@ -230,7 +239,7 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
   recoverConnection() {
     if (!this.adminAuth.canWrite()) { this.toast.error('Sign in as administrator to recover the Expedite connection.'); return; }
     if (this.recoveryLoginRequired) { this.openRecoverySettings(); return; }
-    if (this.recoveryBusy || this.scanRunning || !this.recoveryAvailable || this.destroyed) return;
+    if (this.recoveryBusy || this.scanRunning || this.scan.active || this.scan.requesting || !this.recoveryAvailable || this.destroyed) return;
     this.recoveryBusy = true;
     this.recoveryError = '';
     this.recoveryMessage = '';
@@ -376,7 +385,7 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
       return 'Waiting for a fresh Expedite scheduler heartbeat and API status response.';
     }
     if (this.activeExportVerified) {
-      return 'Scheduled Expedite export is running. The previous verified PostgreSQL batch remains available.';
+      return 'Expedite export is running. The previous verified PostgreSQL batch remains available.';
     }
     if (this.scanRunning) {
       return 'Expedite reports an active export but its current health needs verification.';

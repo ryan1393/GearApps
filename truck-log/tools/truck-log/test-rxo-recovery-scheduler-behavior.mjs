@@ -10,6 +10,7 @@ import { createRequire } from 'node:module';
 import { randomUUID } from 'node:crypto';
 import { acquireLock, LockBusyError } from '../../libs/truck-log/rxo-shared/process-lock.mjs';
 import * as auth from '../../libs/truck-log/rxo-shared/rxo-auth.mjs';
+import * as manualScan from '../../apps/rxo-expedite/src/lib/manual-scan.mjs';
 const ts = createRequire(import.meta.url)('typescript');
 const authFile = 'libs/truck-log/rxo-shared/rxo-auth.mjs';
 const moduleUrl = pathToFileURL(path.resolve(authFile)).href;
@@ -186,7 +187,7 @@ try {
     let scans = 0, manual = held, consumedManual = 0, context;
     const pendingAtWork = [];
     const file = 'apps/rxo-integration/src/rxo-scheduler.mjs';
-    context = vm.createContext({ fs, Date, console: { log() {}, error() {} }, DATA_DIR: root,
+    context = vm.createContext({ ...manualScan, fs, Date, console: { log() {}, error() {} }, DATA_DIR: root,
       SYNC_ON_START: true, LOOP_IDLE_BOUND_MS: 120000, HEARTBEAT_MS: 5000,
       setInterval: () => ({ unref() {} }), clearInterval() {}, currentSettings: () => ({ syncIntervalMinutes: 30 }),
       publishScheduler() {}, markLoopProgress() {}, readManualRequest: () => manual ? { id: 'coalesced-rescan' } : null,
@@ -215,7 +216,7 @@ try {
       const file = 'apps/rxo-expedite/src/scheduler.mjs';
       let scans = 0, context;
       const pendingAtWork = [];
-      context = vm.createContext({ fs, Date, console: { log() {}, error() {} }, DATA_ROOT: root, state: {},
+      context = vm.createContext({ ...manualScan, fs, Date, console: { log() {}, error() {} }, DATA_ROOT: root, state: {},
         LOOP_MARGIN_MS: 1, MAX_ACQUISITION_MS: 10000, AUTH_NOTIFICATION_TIMEOUT_MS: 1000,
         setInterval: () => ({ unref() {} }), clearInterval() {},
         readSettings: () => ({ intervalMinutes: 30, syncOnStart }), markLoop() {}, write() {},
@@ -251,7 +252,7 @@ try {
       try {
         if (role === 'standard') {
           const file = 'apps/rxo-integration/src/rxo-scheduler.mjs';
-          context = vm.createContext({ fs, Date, console: { log() {}, error() {} }, DATA_DIR: root,
+          context = vm.createContext({ ...manualScan, fs, Date, console: { log() {}, error() {} }, DATA_DIR: root,
             SYNC_ON_START: true, LOOP_IDLE_BOUND_MS: 120000, HEARTBEAT_MS: 5000,
             setInterval: () => ({ unref() {} }), clearInterval() {}, currentSettings: () => ({ syncIntervalMinutes: 30 }),
             publishScheduler() {}, markLoopProgress() {}, readManualRequest: () => null, consumeManualRequest() {},
@@ -264,7 +265,7 @@ try {
           await vm.runInContext(`let shuttingDown=false;const schedulerState={currentPhase:'WAITING'};\n${fn(file, 'waitForTrigger')}\n${fn(file, 'main')}\nmain()`, context);
         } else {
           const file = 'apps/rxo-expedite/src/scheduler.mjs';
-          context = vm.createContext({ fs, Date, console: { log() {}, error() {} }, DATA_ROOT: root, state: {},
+          context = vm.createContext({ ...manualScan, fs, Date, console: { log() {}, error() {} }, DATA_ROOT: root, state: {},
             LOOP_MARGIN_MS: 1, MAX_ACQUISITION_MS: 10000, AUTH_NOTIFICATION_TIMEOUT_MS: 1000,
             setInterval: () => ({ unref() {} }), clearInterval() {}, readSettings: () => ({ intervalMinutes: 30, syncOnStart: true }),
             markLoop() {}, write() {}, authCall: op => { try { return { value: op(), error: null }; } catch (error) { errors.push(error.code); return { value: false, error: error.code }; } },

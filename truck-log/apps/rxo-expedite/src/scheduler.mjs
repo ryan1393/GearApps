@@ -6,6 +6,7 @@ import { chromium } from 'playwright';
 import { acquireOnce, browserCloseTimedOut, MAX_ACQUISITION_MS } from './lib/acquisition.mjs';
 import { withTimeout } from './lib/process-lock.mjs';
 import { ExpediteError } from './lib/workbook.mjs';
+import { readManualScan, startManualScan, finishManualScan, failQueuedManualScan, interruptManualScan } from './lib/manual-scan.mjs';
 const DATA_ROOT='/app/data';
 const STATUS=path.join(DATA_ROOT,'expedite-scheduler-status.json');
 const SETTINGS_PATH=path.join(DATA_ROOT,'expedite-control-settings.json');
@@ -20,7 +21,7 @@ function readSettings(){
  try{const st=fs.lstatSync(SETTINGS_PATH);if(!st.isFile()||st.isSymbolicLink()||st.size>8192)return defaults;const v=JSON.parse(fs.readFileSync(SETTINGS_PATH,'utf8'));return {intervalMinutes:boundedInterval(v.intervalMinutes??defaults.intervalMinutes),syncOnStart:typeof v.syncOnStart==='boolean'?v.syncOnStart:defaults.syncOnStart};}catch{return defaults;}
 }
 const initialSettings=readSettings();
-let stopping=false,running=false,heartbeat=null,state={contractVersion:1,source:'RXO_EXPEDITE',version:process.env.TRUCK_LOG_RELEASE||'1.0.4',schedulerState:'STARTING',intervalMinutes:initialSettings.intervalMinutes,syncOnStart:initialSettings.syncOnStart,schedulerStartedAt:new Date().toISOString(),schedulerHeartbeatAt:new Date().toISOString(),schedulerLoopAt:new Date().toISOString(),schedulerLoopDeadlineAt:new Date(Date.now()+LOOP_IDLE_BOUND_MS).toISOString(),currentStartedAt:null,nextRunAt:null,lastCompletedAt:null,lastSuccessAt:null,lastFailureAt:null,lastErrorCode:null,lastDurationSeconds:null,lastSourceBatchId:null};
+let stopping=false,running=false,heartbeat=null,state={contractVersion:1,source:'RXO_EXPEDITE',version:process.env.TRUCK_LOG_RELEASE||'1.0.5',schedulerState:'STARTING',intervalMinutes:initialSettings.intervalMinutes,syncOnStart:initialSettings.syncOnStart,schedulerStartedAt:new Date().toISOString(),schedulerHeartbeatAt:new Date().toISOString(),schedulerLoopAt:new Date().toISOString(),schedulerLoopDeadlineAt:new Date(Date.now()+LOOP_IDLE_BOUND_MS).toISOString(),currentStartedAt:null,nextRunAt:null,lastCompletedAt:null,lastSuccessAt:null,lastFailureAt:null,lastErrorCode:null,lastDurationSeconds:null,lastSourceBatchId:null};
 function write(){state.schedulerHeartbeatAt=new Date().toISOString();const temp=STATUS+'.'+randomUUID()+'.tmp';fs.writeFileSync(temp,JSON.stringify(state,null,2)+'\n',{mode:0o600});fs.renameSync(temp,STATUS);}
 function markLoop(boundMs=LOOP_IDLE_BOUND_MS){const now=Date.now();state.schedulerLoopAt=new Date(now).toISOString();state.schedulerLoopDeadlineAt=new Date(now+boundMs).toISOString();}
 function errorCode(e){return (e instanceof ExpediteError||e instanceof RxoAuthError)&&typeof e.code==='string'?e.code:'EXPEDITE_SCHEDULED_EXPORT_FAILED';}
@@ -40,18 +41,31 @@ async function runOne(){
  if(stopping)return;markLoop();
  const retry=authCall(()=>consumeAuthRetry(DATA_ROOT,'expedite'),false);
  const pending=authCall(()=>hasPendingAuthRetry(DATA_ROOT,'expedite'),true);
- if(retry.error||pending.error||pending.value)return;
+ if(retry.error||pending.error||pending.value){authCall(()=>failQueuedManualScan(DATA_ROOT,pending.value?'RECOVERY_PENDING':'STATE_REVIEW'),null);return;}
  const changed=authCall(()=>consumeCredentialChangeRetry(DATA_ROOT,'expedite'),false);
  const held=authCall(()=>readAuthHold(DATA_ROOT,'expedite'),null);
- if(changed.error||held.error)return;
- if(held.value){await notifyAuthFailure();state.schedulerState='WAITING';state.lastErrorCode=held.value.code;state.nextRunAt=null;write();return;}
+ if(changed.error||held.error){authCall(()=>failQueuedManualScan(DATA_ROOT,'STATE_REVIEW'),null);return;}
+ if(held.value){authCall(()=>failQueuedManualScan(DATA_ROOT,'AUTH_REVIEW'),null);await notifyAuthFailure();state.schedulerState='WAITING';state.lastErrorCode=held.value.code;state.nextRunAt=null;write();return;}
  if(changed.value)state.lastErrorCode=null;
+ const queued=authCall(()=>readManualScan(DATA_ROOT),null);
+ if(queued.error)return;
+ const manual=authCall(()=>startManualScan(DATA_ROOT),null);
+ if(manual.error){await sleep(1000);return;}
+ if(queued.value?.status==='QUEUED'&&!manual.value&&!retry.value&&!changed.value)return;
  running=true;const started=Date.now();state.schedulerState='EXPORTING';state.currentStartedAt=new Date(started).toISOString();state.nextRunAt=null;state.lastErrorCode=null;
  // acquireOnce bounds browser launch, the export flow and browser close.
  markLoop(MAX_ACQUISITION_MS+LOOP_MARGIN_MS);write();
+ let exportError=null;
  try{const result=await acquireOnce({chromium,protectZeroRegression:true});state.lastSuccessAt=new Date().toISOString();state.lastSourceBatchId=result?.sourceBatchId??null;state.lastErrorCode=null;}
- catch(e){state.lastFailureAt=new Date().toISOString();state.lastErrorCode=errorCode(e);}
+ catch(e){state.lastFailureAt=new Date().toISOString();exportError=errorCode(e);state.lastErrorCode=exportError;}
  finally{state.lastCompletedAt=new Date().toISOString();state.lastDurationSeconds=Math.round((Date.now()-started)/100)/10;state.currentStartedAt=null;running=false;markLoop();}
+ if(manual.value)try{await finishManualScan(DATA_ROOT,manual.value.id,exportError,exportError?null:state.lastSourceBatchId);}
+ catch{
+  // A metadata failure is not a failed RXO export. Restart so startup can mark
+  // the unfinished request interrupted instead of leaving it RUNNING forever.
+  console.error('[RXO EXPEDITE] STATE_REVIEW: restarting after scan-result metadata could not be saved.');
+  stopping=true;state.schedulerState='STOPPING';state.nextRunAt=null;process.exitCode=75;
+ }
  if(browserCloseTimedOut()){
   // A wedged Chromium would keep the profile locked for every later run: exit so the
   // restart policy (init: true reaps children) starts the scheduler with a clean process tree.
@@ -64,16 +78,17 @@ async function waitForNext(baseMs){
   markLoop();
   const retry=authCall(()=>consumeAuthRetry(DATA_ROOT,'expedite'),false);if(retry.value)return;
   const pending=authCall(()=>hasPendingAuthRetry(DATA_ROOT,'expedite'),true);
-  if(pending.error||pending.value){await sleep(1000);continue;}
+  if(pending.error||pending.value){authCall(()=>failQueuedManualScan(DATA_ROOT,pending.value?'RECOVERY_PENDING':'STATE_REVIEW'),null);await sleep(1000);continue;}
   const changed=authCall(()=>consumeCredentialChangeRetry(DATA_ROOT,'expedite'),false);if(changed.value)return;
   const held=authCall(()=>readAuthHold(DATA_ROOT,'expedite'),null);
-  if(retry.error||changed.error||held.error){await sleep(5000);continue;}
-  if(held.value){await notifyAuthFailure();state.schedulerState='WAITING';state.lastErrorCode=held.value.code;state.nextRunAt=null;write();await sleep(1000);continue;}
+  if(retry.error||changed.error||held.error){authCall(()=>failQueuedManualScan(DATA_ROOT,'STATE_REVIEW'),null);await sleep(5000);continue;}
+  if(held.value){authCall(()=>failQueuedManualScan(DATA_ROOT,'AUTH_REVIEW'),null);await notifyAuthFailure();state.schedulerState='WAITING';state.lastErrorCode=held.value.code;state.nextRunAt=null;write();await sleep(1000);continue;}
+  const manual=authCall(()=>readManualScan(DATA_ROOT),null);if(manual.error){await sleep(5000);continue;}if(manual.value?.status==='QUEUED')return;
   const settings=readSettings();state.intervalMinutes=settings.intervalMinutes;state.syncOnStart=settings.syncOnStart;
   const due=baseMs+settings.intervalMinutes*60000;state.schedulerState='WAITING';state.nextRunAt=new Date(due).toISOString();write();
   const left=due-Date.now();if(left<=0)return;await sleep(Math.min(1000,left));
  }
 }
-async function main(){fs.mkdirSync(DATA_ROOT,{recursive:true});heartbeat=setInterval(()=>{try{write();}catch{}},5000);write();const initial=readSettings();state.intervalMinutes=initial.intervalMinutes;state.syncOnStart=initial.syncOnStart;if(!initial.syncOnStart)await waitForNext(Date.now());while(!stopping){await runOne();if(stopping)break;await waitForNext(Date.now());}state.schedulerState=process.exitCode===75?'STOPPING':'STOPPED';state.nextRunAt=null;write();}
+async function main(){fs.mkdirSync(DATA_ROOT,{recursive:true});authCall(()=>interruptManualScan(DATA_ROOT),null);heartbeat=setInterval(()=>{try{write();}catch{}},5000);write();const initial=readSettings();state.intervalMinutes=initial.intervalMinutes;state.syncOnStart=initial.syncOnStart;if(!initial.syncOnStart)await waitForNext(Date.now());while(!stopping){await runOne();if(stopping)break;await waitForNext(Date.now());}state.schedulerState=process.exitCode===75?'STOPPING':'STOPPED';state.nextRunAt=null;write();}
 for(const sig of ['SIGTERM','SIGINT'])process.on(sig,()=>{stopping=true;if(!running){state.schedulerState='STOPPING';state.nextRunAt=null;try{write();}catch{}}});
 try{await main();}finally{if(heartbeat)clearInterval(heartbeat);if(process.exitCode===75)setTimeout(()=>process.exit(75),1000).unref();}

@@ -2,7 +2,7 @@
 
 | Folder | What it is | Version |
 | --- | --- | --- |
-| `truck-log/` | Truck Log server and web app (Docker). Start with `truck-log/README.md`. | 1.0.4 |
+| `truck-log/` | Truck Log server and web app (Docker). Start with `truck-log/README.md`. | 1.0.5 |
 | `print-agents/` | Windows print PC programs: guard shack print agent and SAP packing-slip watcher. Start with `print-agents/README-FIRST.txt`. | V4R7 / W3 |
 
 DANA UI (the shared styling package) lives in its own repo. Truck Log builds from the pinned copy in `truck-log/vendor/dana-ui/`.
@@ -28,6 +28,8 @@ The server needs Python 3 and access to its local Docker Engine and Docker Compo
 Uploads are stored in a private `~/truck-log-releases/<unique-id>/` folder on Linux. The uploaded configuration and extracted app `.env` are private. Native build output is redacted before display and is saved on the server as `deploy.log`; a failed build returns the actual failure code. The local source `.env` stays intact, and it is excluded from the source archive. `UPDATE-TRUCKLOG.cmd` is also an alias for this SCP/SSH deployment flow.
 
 For a new installation, use `truck-log\SETUP-TRUCK-LOG.cmd` instead. Detailed instructions are in `truck-log/README.md`.
+
+After deployment, sign in as an administrator and use **Scan Now** in **RXO Control Center** or **RXO Expedite**. Each button queues that integration's own scheduler; watch its last successful export and latest import to confirm completion.
 
 ## Connect an extracted ZIP to local Git
 

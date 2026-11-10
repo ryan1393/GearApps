@@ -47,6 +47,7 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
   private recoveryLoginBlocked = false;
   private recoveryBlockedStatus: RxoControlStatusData | null = null;
   private recoveryRequest?: Subscription;
+  private scanRequest?: Subscription;
   private destroyed = false;
   lastUpdated: Date | null = null;
   importStatus: RxoImportStatusData | null = null;
@@ -101,6 +102,7 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.destroyed = true;
     this.recoveryRequest?.unsubscribe();
+    this.scanRequest?.unsubscribe();
     if (this.pageClockTimer) {
       window.clearInterval(this.pageClockTimer);
     }
@@ -297,10 +299,19 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
 
   runScanNow() {
     if (!this.adminAuth.canWrite()) { this.toast.error('Sign in to Truck Log Admin before changing RXO settings or starting a scan.'); return; }
+    if (this.destroyed || this.busy || this.recoveryBusy || this.view.scanRunning || !this.control?.exporterRunning) return;
     this.busy = true;
-    this.api.runRxoScanNow().subscribe({
-      next: () => { this.busy = false; this.toast.success('RXO scan queued. This screen will track export, sync, and import automatically.'); this.refreshControl(false); },
-      error: (error) => { this.busy = false; this.toast.error(error?.error?.message || 'Could not start RXO scan.'); },
+    this.scanRequest = this.api.runRxoScanNow().subscribe({
+      next: run => {
+        if (this.destroyed) return;
+        this.busy = false;
+        if (run?.id && ['QUEUED', 'EXPORTING', 'SYNCING', 'IMPORTING'].includes(run.status)) {
+          if (this.control) this.applyControl({ ...this.control, manualRun: run });
+          this.toast.success('RXO scan queued. This screen will track export, sync, and import automatically.');
+        } else this.toast.error('The scan request was not confirmed. Refresh status before trying again.');
+        this.refreshControl(false);
+      },
+      error: (error) => { if (this.destroyed) return; this.busy = false; this.toast.error(error?.error?.message || 'Could not start RXO scan.'); },
     });
   }
 

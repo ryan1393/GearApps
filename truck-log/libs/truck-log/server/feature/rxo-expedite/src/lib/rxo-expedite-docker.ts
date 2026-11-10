@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import type { CredentialInput, ExpediteSettingsInput } from './rxo-expedite.types';
+import { manualScanResponse } from './rxo-expedite-manual-scan';
 
 /*
  * Native Docker boundary of RXO Expedite: short-lived, network-less helper
@@ -10,7 +11,7 @@ import type { CredentialInput, ExpediteSettingsInput } from './rxo-expedite.type
  * export. Nothing here touches PostgreSQL or HTTP policy.
  */
 
-export const IMAGE = `truck-log-rxo-expedite:${process.env.TRUCK_LOG_RELEASE || '1.0.4'}`;
+export const IMAGE = `truck-log-rxo-expedite:${process.env.TRUCK_LOG_RELEASE || '1.0.5'}`;
 export const DATA_VOLUME = 'truck-log-rxo-expedite-data';
 
 export type DockerNativeRun = (
@@ -86,6 +87,21 @@ export class RxoExpediteDockerHelpers {
       let value: any; try { value = JSON.parse(result.stdout); } catch { throw new ServiceUnavailableException('Expedite returned invalid schedule settings.'); }
       if (value?.source !== 'RXO_EXPEDITE' || !value.settings) throw new ServiceUnavailableException('Expedite returned invalid schedule settings.');
       return value.settings;
+    } finally { await this.native(['rm', '-f', name], undefined, 10000); }
+  }
+
+  /** The helper only queues work; the existing scheduler owns the browser and its acquisition lock. */
+  async requestScan() {
+    const name = `truck-log-expedite-scan-${randomUUID()}`;
+    const args = ['run', '--rm', '--pull=never', '--name', name, '--network=none', '--read-only',
+      '--cap-drop=ALL', '--security-opt=no-new-privileges', '--pids-limit=64', '--memory=256m',
+      '-v', `${this.volume()}:/run/secrets:ro`, '-v', `${DATA_VOLUME}:/app/data`, IMAGE, '--request-scan'];
+    try {
+      const result = await this.native(args);
+      if (!result.ok) throw new ServiceUnavailableException('Expedite scan control is unavailable. Verify the dedicated image and scheduler.');
+      let value: unknown;
+      try { value = JSON.parse(result.stdout); } catch { throw new ServiceUnavailableException('Expedite scan control returned invalid status.'); }
+      return manualScanResponse(value);
     } finally { await this.native(['rm', '-f', name], undefined, 10000); }
   }
 

@@ -1,5 +1,5 @@
 /** Truck Log release. Must equal the VERSION file (checked by tests/new-host/test-release-version.mjs). */
-export const TRUCK_LOG_VERSION = '1.0.4';
+export const TRUCK_LOG_VERSION = '1.0.5';
 
 export const VisitStatuses = {
     DOCK_ASSIGNED: 'DOCK_ASSIGNED',
@@ -413,6 +413,17 @@ export interface RxoManualRunState {
     error?: string | null;
     sourceBatchId?: string | null;
     importSummary?: unknown;
+}
+
+/** One administrator-requested Expedite export; database import is reported separately. */
+export interface RxoExpediteManualRunState {
+    id: string;
+    status: 'QUEUED' | 'RUNNING' | 'COMPLETE' | 'FAILED';
+    requestedAt: string;
+    startedAt: string | null;
+    completedAt: string | null;
+    error: string | null;
+    sourceBatchId: string | null;
 }
 
 export interface RxoSchedulerStatusData {

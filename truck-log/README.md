@@ -1,8 +1,10 @@
-# Truck Log 1.0.4
+# Truck Log 1.0.5
 
 Truck Log runs the guard shack and dock workflow at Dana Fort Wayne: truck check-in, dock assignment and the dock board, packing slips and driver paperwork, final checkout, TV boards, and the RXO and RXO Expedite load feeds. It runs as a set of Docker containers on one Linux Docker host. Guard PCs, dock PCs and TVs use it through a web browser.
 
 What changed in this release: [CHANGELOG.md](CHANGELOG.md).
+
+Both **RXO Control Center** and **RXO Expedite** have a **Scan Now** button. Sign in as an administrator, open the relevant screen, and select the button to queue an export through that worker's existing scheduler. A queued request is not a completed scan: watch the scan status, **Last successful export**, and **Latest import** to confirm the result. Existing scans finish before another scan can run; credentials and interactive-login holds still apply.
 
 RXO and RXO Expedite now offer **Recover connection** when the connection needs review. Sign in as an administrator to queue recovery; credential and MFA issues direct you to **Settings & Login**. See [RXO connection recovery](docs/truck-log/RXO-CONNECTION-RECOVERY.md).
 
@@ -23,7 +25,7 @@ For a remote Linux host over SSH, follow [docs/truck-log/WINDOWS-REMOTE-DOCKER-I
 **Linux host**
 
 ```sh
-unzip Truck-Log-1.0.4.zip && cd Truck-Log-1.0.4
+unzip TruckLog.zip && cd TruckLog/truck-log
 ./SETUP-TRUCK-LOG.sh
 ```
 
@@ -44,7 +46,7 @@ Then open `http://<docker-host>:4300`. For production TLS, use the supported [HT
 
 ## Replacing an older test install
 
-1.0.4 does not upgrade a 0.1 database: the schema was rebuilt as one baseline, and the 0.1 builds were test installs. Setup and start check for an older install first. If they find containers or volumes with Truck Log's names that belong to another Docker Compose project (for example `truck-log-v02` or `truck-log-nxdev`), they stop and list them instead of failing halfway through.
+1.0.5 does not upgrade a 0.1 database: the schema was rebuilt as one baseline, and the 0.1 builds were test installs. Setup and start check for an older install first. If they find containers or volumes with Truck Log's names that belong to another Docker Compose project (for example `truck-log-v02` or `truck-log-nxdev`), they stop and list them instead of failing halfway through.
 
 If that install holds only test data, remove it, then run setup again. **This deletes that install's data.** The script lists what it will remove and asks you to type `REMOVE`.
 
@@ -98,7 +100,7 @@ Back up the `truck-log-postgres-data` and `truck-log-documents` volumes, extract
 
 ## Version
 
-The release is in [`VERSION`](VERSION) (`1.0.4`). Every other copy must match it, and `tests/new-host/test-release-version.mjs` fails if one drifts. To release a new version, edit `VERSION`, update the copies that test lists, and run `node tools/truck-log/refresh-manifests.mjs`.
+The release is in [`VERSION`](VERSION) (`1.0.5`). Every other copy must match it, and `tests/new-host/test-release-version.mjs` fails if one drifts. To release a new version, edit `VERSION`, update the copies that test lists, and run `node tools/truck-log/refresh-manifests.mjs`.
 
 ## Checks
 

@@ -28,6 +28,7 @@ function load(file) {
 }
 Object.assign(mocks['@truck-log/web/data-access'], load('libs/truck-log/web/data-access/src/lib/rxo-recovery-feedback.ts'));
 mocks['./rxo-expedite/expedite-failure-display'] = load('libs/truck-log/web/feature/rxo-expedite-control-center/src/lib/rxo-expedite/expedite-failure-display.ts');
+mocks['./rxo-expedite/expedite-scan-action'] = load('libs/truck-log/web/feature/rxo-expedite-control-center/src/lib/rxo-expedite/expedite-scan-action.ts');
 const standardFile='libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-control-center.component.ts';
 const expediteFile='libs/truck-log/web/feature/rxo-expedite-control-center/src/lib/rxo-expedite-control-center.component.ts';
 const {RxoControlCenterComponent}=load(standardFile);

@@ -8,7 +8,7 @@
     <div class="dana-actions">
       <span class="dana-muted" *ngIf="lastUpdated">Updated {{lastUpdated | date:'shortTime'}}</span>
       <button class="dana-btn" type="button" [disabled]="busy" (click)="refreshAll()">Refresh</button>
-      <button class="dana-btn dana-btn-primary" type="button" [disabled]="busy || view.scanRunning || !control?.exporterRunning" (click)="runScanNow()">
+      <button class="dana-btn dana-btn-primary" type="button" [disabled]="!adminAuth.canWrite() || busy || recoveryBusy || view.scanRunning || !control?.exporterRunning" [attr.aria-busy]="busy" (click)="runScanNow()">
         {{view.scanRunning ? 'Scan running…' : 'Run Scan Now'}}
       </button>
     </div>

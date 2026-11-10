@@ -3,6 +3,7 @@ import path from 'node:path';
 import { acquireOnce, browserCloseTimedOut, fullStatus, verifyLatest } from './lib/acquisition.mjs';
 import { saveCredentials } from './lib/credentials.mjs';
 import { ExpediteError } from './lib/workbook.mjs';
+import { readManualScan, requestManualScan } from './lib/manual-scan.mjs';
 const clean=(v,max=8192)=>{if(v==null)return null;if(typeof v!=='string'||v.length>max||/[\x00-\x1f\x7f]/.test(v))throw new ExpediteError('LATEST_SHIPMENTS_REVIEW');return v;};
 function latestShipments(root='/app/data'){
  const verified=verifyLatest(root);if(!verified)throw new ExpediteError('EXPEDITE_NOT_RUN');
@@ -15,7 +16,7 @@ function latestShipments(root='/app/data'){
 }
 function readSchedulerStatus(root='/app/data'){
  const p=path.join(root,'expedite-scheduler-status.json');
- if(!fs.existsSync(p))return {contractVersion:1,source:'RXO_EXPEDITE',version:process.env.TRUCK_LOG_RELEASE||'1.0.4',schedulerState:'NOT_STARTED',intervalMinutes:Number(process.env.RXO_EXPEDITE_SYNC_INTERVAL_MINUTES??30),syncOnStart:String(process.env.RXO_EXPEDITE_SYNC_ON_START??'true').toLowerCase()!=='false',schedulerStartedAt:null,schedulerHeartbeatAt:null,currentStartedAt:null,nextRunAt:null,lastCompletedAt:null,lastSuccessAt:null,lastFailureAt:null,lastErrorCode:null,lastDurationSeconds:null,lastSourceBatchId:null};
+ if(!fs.existsSync(p))return {contractVersion:1,source:'RXO_EXPEDITE',version:process.env.TRUCK_LOG_RELEASE||'1.0.5',schedulerState:'NOT_STARTED',intervalMinutes:Number(process.env.RXO_EXPEDITE_SYNC_INTERVAL_MINUTES??30),syncOnStart:String(process.env.RXO_EXPEDITE_SYNC_ON_START??'true').toLowerCase()!=='false',schedulerStartedAt:null,schedulerHeartbeatAt:null,currentStartedAt:null,nextRunAt:null,lastCompletedAt:null,lastSuccessAt:null,lastFailureAt:null,lastErrorCode:null,lastDurationSeconds:null,lastSourceBatchId:null};
  const st=fs.lstatSync(p);if(!st.isFile()||st.isSymbolicLink()||st.size>32768)throw new ExpediteError('SCHEDULER_STATUS_REVIEW');
  let v;try{v=JSON.parse(fs.readFileSync(p,'utf8'));}catch{throw new ExpediteError('SCHEDULER_STATUS_REVIEW');}
  if(!v||v.contractVersion!==1||v.source!=='RXO_EXPEDITE'||typeof v.schedulerState!=='string'||!Number.isInteger(v.intervalMinutes)||v.intervalMinutes<1||v.intervalMinutes>1440)throw new ExpediteError('SCHEDULER_STATUS_REVIEW');
@@ -38,7 +39,8 @@ function saveSettings(input){
 }
 const args=process.argv.slice(2);
 try{
- if(args.length===1&&args[0]==='--status'){const base=fullStatus();console.log(JSON.stringify({...base,schedulingEnabled:true,scheduler:readSchedulerStatus(),settings:readSettings()}));}
+ if(args.length===1&&args[0]==='--status'){const base=fullStatus();console.log(JSON.stringify({...base,schedulingEnabled:true,scheduler:readSchedulerStatus(),settings:readSettings(),manualRun:readManualScan('/app/data')}));}
+ else if(args.length===1&&args[0]==='--request-scan'){console.log(JSON.stringify({source:'RXO_EXPEDITE',...requestManualScan('/app/data')}));}
  else if(args.length===1&&args[0]==='--set-credentials'){
   let body='';for await(const chunk of process.stdin){body+=chunk; if(Buffer.byteLength(body)>12000)throw new ExpediteError('CREDENTIAL_INPUT_REVIEW');}
   let input;try{input=JSON.parse(body);}catch{throw new ExpediteError('CREDENTIAL_INPUT_REVIEW');}

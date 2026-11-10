@@ -24,6 +24,7 @@ import type {
   RxoFreightRecord,
   RxoImportStatusData,
   RxoManualRunState,
+  RxoExpediteManualRunState,
   RxoOrderRecord,
   RxoDirection,
   RxoDriverDocumentSummary,
@@ -208,6 +209,10 @@ export class TruckLogApi {
 
   runRxoScanNow() {
     return this.http.post<RxoManualRunState>(`${this.base}/rxo/control/rescan`, {});
+  }
+
+  runRxoExpediteScanNow() {
+    return this.http.post<RxoExpediteManualRunState>(`${this.base}/rxo/expedite/rescan`, {}).pipe(timeout(45000));
   }
 
   syncRxoLatestNow() {

@@ -1,5 +1,5 @@
 {
-  "release": "1.0.4",
+  "release": "1.0.5",
   "validationStatus": "SOURCE_VERIFIED",
   "site": {
     "name": "Dana Fort Wayne",
@@ -34,7 +34,7 @@
       "bytes": 2902
     },
     "apps/rxo-integration/src/lib/rxo-export-config.mjs": {
-      "sha256": "9e8fc18fb3f74f4195ca0d9a4819ddf2cc0939f55dfc356c998857f7e923f80a",
+      "sha256": "ccf21625e100604337bd92d58c42bd8a17d79d5336e8f88d1bca84d066e8201e",
       "bytes": 3453
     },
     "apps/rxo-integration/src/lib/rxo-export-data.mjs": {
@@ -54,7 +54,7 @@
       "bytes": 11676
     },
     "apps/rxo-integration/src/lib/rxo-export-login.mjs": {
-      "sha256": "173a317b2d260dcc27bae0b31fe7bf80e0496a7a8725b106745aa62699518563",
+      "sha256": "fdd2a0b718968bcdacd94373d1dfb233754398678b731f9b95034c53ae344513",
       "bytes": 3234
     },
     "apps/rxo-integration/src/lib/rxo-export-merge.mjs": {
@@ -114,7 +114,7 @@
       "bytes": 1044
     },
     "apps/rxo-integration/src/rxo-filter-test.mjs": {
-      "sha256": "bc40c8e4ce7466dbbbca3c8eceffce3d26f869dcfc9111c6151fdd7144309131",
+      "sha256": "5a0ece363825ca42b3967aad663d2122e925af0b4224f3db8f180f87ce198a1c",
       "bytes": 6828
     },
     "apps/rxo-integration/src/rxo-fort-wayne-export.mjs": {
@@ -122,7 +122,7 @@
       "bytes": 4924
     },
     "apps/rxo-integration/src/rxo-scheduler.mjs": {
-      "sha256": "d8e1077503b5f7e973a190523e25617f09a216544974ee2aac58f461b441979f",
+      "sha256": "415e02329bb1162137cd1b7321ff1fef95eacba7dd08032b05706646653a3178",
       "bytes": 25678
     },
     "apps/rxo-integration/src/test-new-host-filter-readiness.mjs": {
@@ -142,7 +142,7 @@
       "bytes": 47834
     },
     "apps/rxo-integration/Dockerfile": {
-      "sha256": "7b84a645fae50835990db5724c482ca092eebeb0a5b9a9671e56eee121821d89",
+      "sha256": "bef32984e30a5ca8455c01b61503f55f24f303b495626287ad8c144bfb38d41d",
       "bytes": 1925
     },
     "apps/rxo-integration/Dockerfile.dockerignore": {
@@ -150,9 +150,9 @@
       "bytes": 349
     },
     "apps/rxo-integration/package.json": {
-      "sha256": "1117c0e9df99e3d6163510ad5015a537ee9636c4cad455d17348fc6ae2d3425d",
+      "sha256": "612e6a2c9ade6f26cf965bc99393284204816356fc50983bf7fd99ace2b08c3b",
       "bytes": 644
     }
   },
-  "imageSourceDigest": "380dcb341aefb86e846f6db227c4e1bf403c6e710bd624ddea676f9ff519597f"
+  "imageSourceDigest": "991976be51fe6472ffac0e85c633f6d5e1b969115682feea19a659993b620630"
 }

@@ -1,10 +1,12 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import type { ExpediteAcquisitionDiagnostic, RxoConnectionRecoveryInfo } from '@truck-log/shared/contracts';
+import type { ExpediteAcquisitionDiagnostic, RxoConnectionRecoveryInfo, RxoExpediteManualRunState } from '@truck-log/shared/contracts';
 import { Observable, Subject, catchError, forkJoin, map, of, timeout } from 'rxjs';
 import { Poller, createPoller } from '@truck-log/web/data-access';
+import { isExpediteManualRun } from './expedite-scan-action';
 
 export interface ExpediteStatus {
+  manualRun?: RxoExpediteManualRunState | null;
   recovery?: RxoConnectionRecoveryInfo;
   source: 'RXO_EXPEDITE'; version: string; schedulingEnabled: boolean; databaseIngestionEnabled: boolean;
   credentialUpdatesEnabled: boolean; controlOrigin: string | null; transportWarning: boolean;
@@ -39,6 +41,7 @@ export function isExpediteStatus(value: unknown): value is ExpediteStatus {
   if (!isObject(credentials) || typeof credentials['username'] !== 'string'
     || typeof credentials['usernameConfigured'] !== 'boolean' || typeof credentials['passwordConfigured'] !== 'boolean') return false;
   if (!isObject(acquisition) || typeof acquisition['state'] !== 'string') return false;
+  if (value['manualRun'] !== undefined && value['manualRun'] !== null && !isExpediteManualRun(value['manualRun'])) return false;
   const scheduler = value['scheduler'];
   if (scheduler !== undefined && scheduler !== null && (!isObject(scheduler) || typeof scheduler['state'] !== 'string')) return false;
   const database = value['database'];

@@ -49,8 +49,8 @@ Do not open Docker TCP port 2375.
 
 ## 3. Extract the ZIP locally
 
-The ZIP has a `Truck-Log-1.0.1` top-level directory. For example,
-extract it under `C:\Truck-Log` and open `C:\Truck-Log\Truck-Log-1.0.1`.
+The complete ZIP has a `TruckLog` top-level directory. For example,
+extract it under `C:\Truck-Log` and open the app folder, `C:\Truck-Log\TruckLog\truck-log`.
 
 ## 4. Configure the operator-facing address
 
@@ -72,7 +72,7 @@ run `SETUP-TRUCK-LOG.cmd` to build and start.
 ## 5. Deploy
 
 ```powershell
-cd C:\Truck-Log\Truck-Log-1.0.1
+cd C:\Truck-Log\TruckLog\truck-log
 .\SETUP-TRUCK-LOG.cmd
 ```
 

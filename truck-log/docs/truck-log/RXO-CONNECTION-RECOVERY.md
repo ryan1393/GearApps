@@ -31,7 +31,7 @@ A request is written before a stopped scheduler is started. A running scheduler 
 
 ## Install or upgrade
 
-Keep the existing `.env` and all named volumes. Run setup from the new `truck-log/` folder and rebuild the API, web app, standard RXO worker, and Expedite worker together. All release labels must match `VERSION` (1.0.3). For HTTPS installations, use both Compose files for every lifecycle command; see [HTTPS deployment](HTTPS.md).
+Keep the existing `.env` and all named volumes. Run setup from the new `truck-log/` folder and rebuild the API, web app, standard RXO worker, and Expedite worker together. All release labels must match the installed `VERSION`. For HTTPS installations, use both Compose files for every lifecycle command; see [HTTPS deployment](HTTPS.md).
 
 No database migration is added after 0005. DANA UI remains 0.3.1, and the companion guard V4R7 / watcher W3 print agents do not require replacement for this feature.
 

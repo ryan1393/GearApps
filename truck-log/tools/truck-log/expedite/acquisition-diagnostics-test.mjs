@@ -10,6 +10,7 @@ import { acquireOnce, acquisitionStatus, verifyLatest, ACQUISITION_STAGES, ACQUI
 import { saveCredentials } from '../../../apps/rxo-expedite/src/lib/credentials.mjs';
 import { ExpediteError } from '../../../apps/rxo-expedite/src/lib/workbook.mjs';
 import { RxoAuthError } from '../../../libs/truck-log/rxo-shared/rxo-auth.mjs';
+import { assertFreightSession, excelControls, openFreightList } from '../../../apps/rxo-expedite/src/lib/list-view.mjs';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
 const sample=fs.readFileSync(path.join(here,'fixtures','Freight On The Move.xlsx'));
@@ -35,6 +36,7 @@ async function nativeFixture(kind){
   }
  });
  const page={
+  url:()=> 'https://www.expedite.rxo.com/WebClient/#/freight-on-the-move',frames:()=>[],
   setDefaultTimeout(){},locator,evaluate:async()=> '11 of 11 Shipments',waitForTimeout:async()=>{},
   waitForEvent(){
    if(kind==='success')return Promise.resolve(download);
@@ -44,6 +46,7 @@ async function nativeFixture(kind){
  const sandbox={
   console:{log(){}},Date:{now:()=>now+=1000},ExpediteError,RxoAuthError,
   authenticateExpedite:async()=>({passwordSubmissions:0}),
+  assertFreightSession,excelControls,openFreightList,
   must:(condition,code)=>{if(!condition)throw new ExpediteError(code);},
   context:{pages:()=>[page]},save:async value=>{assert.equal(value,download);saves++;},
   options:{auth:{},onStage:value=>stages.push(value)}
@@ -65,6 +68,51 @@ const tmp=fs.mkdtempSync(path.join(os.tmpdir(),'truck-log-expedite-diagnostics-'
 const json=file=>JSON.parse(fs.readFileSync(file,'utf8'));
 const nativeMessage='password=fixture-private-password https://private.invalid/?token=fixture-private-token /private/profile/location';
 const tests=[];const test=(name,action)=>tests.push({name,action});
+function listFixture(options={}){
+ let exports=options.ready?1:0,clicks=0,checks=0,clickedOptions;
+ const locator=(kind='')=>({
+  filter:({hasText})=>locator(hasText.source.includes('list')?(kind==='label'?'label':'list'):'export'),
+  or(){return this;},and(){return this;},first(){return this;},
+  waitFor:async()=>{if(options.missing)throw Object.assign(Error(),{name:'TimeoutError'});},
+  count:async()=>kind==='export'?exports:kind==='list'?(options.controls??1):kind==='label'?(options.labels??0):kind==='radio'?(options.radios??0):kind==='password'?(options.password?1:0):kind==='otp'?(options.otp?1:0):0,
+  click:async value=>{clicks++;clickedOptions=value;if(options.renderOnClick)exports=1;if(options.clickError)throw options.clickError;},
+  check:async value=>{checks++;clickedOptions=value;exports=1;},
+ });
+ const page={url:()=>options.url??'https://www.expedite.rxo.com/WebClient/#/freight-on-the-move',
+  frames:()=>[{locator:selector=>locator(selector.includes('password')?'password':selector.includes('one-time-code')?'otp':'')}],
+  locator:selector=>selector==='label:visible'?{...locator('label'),count:async()=>options.labels??0}:locator(),
+  getByRole:()=>locator('radio'),
+ };
+ return {page,clicks:()=>clicks,checks:()=>checks,clickedOptions:()=>clickedOptions};
+}
+test('restored native List export does not re-click the active List navigation',async()=>{
+ const fixture=listFixture({ready:true});await openFreightList(fixture.page);assert.equal(fixture.clicks(),0);
+});
+test('List is clicked once without waiting for a legacy document navigation',async()=>{
+ const fixture=listFixture();await openFreightList(fixture.page,{timeoutMs:250});assert.equal(fixture.clicks(),1);
+ assert.deepEqual(fixture.clickedOptions(),{timeout:250,noWaitAfter:true});
+});
+test('a visible native List radio is checked directly instead of clicking its covered label',async()=>{
+ const fixture=listFixture({controls:0,labels:1,radios:1});await openFreightList(fixture.page);
+ assert.equal(fixture.checks(),1);assert.equal(fixture.clicks(),0);
+ await openFreightList(fixture.page);assert.equal(fixture.checks(),1);
+});
+test('a timed-out click succeeds only if the native List export actually appeared',async()=>{
+ const error=Object.assign(Error('private native call log'),{name:'TimeoutError'});
+ const succeeded=listFixture({clickError:error,renderOnClick:true});await openFreightList(succeeded.page);assert.equal(succeeded.clicks(),1);
+ const blocked=listFixture({clickError:error});await assert.rejects(openFreightList(blocked.page),e=>e.code==='FREIGHT_LIST_CONTROL_TIMEOUT');assert.equal(blocked.clicks(),1);
+});
+test('ambiguous and absent List controls fail closed without export or repeated clicks',async()=>{
+ for(const options of [{controls:2},{controls:0,labels:2},{missing:true}]){
+  const fixture=listFixture(options);await assert.rejects(openFreightList(fixture.page),e=>e.code=== (options.missing?'FREIGHT_LIST_CONTROL_TIMEOUT':'FREIGHT_LIST_CONTROL_REVIEW'));
+  assert.equal(fixture.clicks(),0);
+ }
+});
+test('expired sessions and verification overlays return fixed authentication codes',async()=>{
+ for(const [options,code]of [[{url:'https://www.expedite.rxo.com/WebClient/Account/Login'},'RXO_AUTH_SESSION_REVIEW'],[{password:true},'RXO_AUTH_SESSION_REVIEW'],[{otp:true},'RXO_AUTH_VERIFICATION_REQUIRED'],[{url:'https://private.invalid/'},'RXO_AUTH_ORIGIN_REVIEW']]){
+  const fixture=listFixture(options);await assert.rejects(openFreightList(fixture.page),e=>e instanceof RxoAuthError&&e.code===code);assert.equal(fixture.clicks(),0);
+ }
+});
 function fixture(){
  const root=fs.mkdtempSync(path.join(tmp,'case-')),secret=path.join(root,'secret'),data=path.join(root,'data'),profile=path.join(root,'state','profile');
  fs.mkdirSync(secret);fs.mkdirSync(data);saveCredentials({username:'fixture-user',password:'fixture-private-password'},secret);
