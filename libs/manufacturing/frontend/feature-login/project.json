@@ -1,0 +1,50 @@
+{
+  "name": "frontend-feature-login",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/manufacturing/frontend/feature-login/src",
+  "prefix": "gear",
+  "projectType": "library",
+  "tags": [
+    "type:feature",
+    "scope:frontend",
+    "framework:angular",
+    "domain:gear-apps"
+  ],
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/manufacturing/frontend/feature-login"
+      ],
+      "options": {
+        "command": "jest --config libs/manufacturing/frontend/feature-login/jest.config.cts --runInBand --passWithNoTests",
+        "cwd": ".",
+        "env": {
+          "NODE_ENV": "test",
+          "ENVIRONMENT": "test",
+          "NX_DAEMON": "false",
+          "JWT_ACCESS_SECRET": "unit-test-access-secret-no-production-use",
+          "JWT_REFRESH_SECRET": "unit-test-refresh-secret-no-production-use",
+          "DATABASE_TYPE": "better-sqlite3",
+          "DATABASE_PATH": ":memory:",
+          "EMAIL_ENABLED": "false",
+          "SOCIAL_GOOGLE_ENABLED": "false",
+          "SENTRY_DSN": ""
+        }
+      },
+      "configurations": {
+        "ci": {
+          "command": "jest --config libs/manufacturing/frontend/feature-login/jest.config.cts --runInBand --passWithNoTests --ci --coverage"
+        }
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "libs/manufacturing/frontend/feature-login"
+      },
+      "cache": true
+    }
+  }
+}

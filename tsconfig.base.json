@@ -37,103 +37,103 @@
         "./libs/client/feature-lapping-summary/src/index.ts"
       ],
       "@gearapps/manufacturing/frontend/data-access-common": [
-        "./manufacturing/libs/frontend/data-access-common/src/index.ts"
+        "./libs/manufacturing/frontend/data-access-common/src/index.ts"
       ],
       "@gearapps/manufacturing/frontend/data-access-blade-tracking": [
-        "./manufacturing/libs/frontend/data-access-blade-tracking/src/index.ts"
+        "./libs/manufacturing/frontend/data-access-blade-tracking/src/index.ts"
       ],
       "@gearapps/manufacturing/frontend/data-access-cutter-builder": [
-        "./manufacturing/libs/frontend/data-access-cutter-builder/src/index.ts"
+        "./libs/manufacturing/frontend/data-access-cutter-builder/src/index.ts"
       ],
       "@gearapps/manufacturing/frontend/data-access-greenshed": [
-        "./manufacturing/libs/frontend/data-access-greenshed/src/index.ts"
+        "./libs/manufacturing/frontend/data-access-greenshed/src/index.ts"
       ],
       "@gearapps/manufacturing/frontend/data-access-user": [
-        "./manufacturing/libs/frontend/data-access-user/src/index.ts"
+        "./libs/manufacturing/frontend/data-access-user/src/index.ts"
       ],
       "@gearapps/manufacturing/frontend/feature-admin-users": [
-        "./manufacturing/libs/frontend/feature-admin-users/src/index.ts"
+        "./libs/manufacturing/frontend/feature-admin-users/src/index.ts"
       ],
       "@gearapps/manufacturing/frontend/feature-blade-tracking": [
-        "./manufacturing/libs/frontend/feature-blade-tracking/src/index.ts"
+        "./libs/manufacturing/frontend/feature-blade-tracking/src/index.ts"
       ],
       "@gearapps/manufacturing/frontend/feature-cutter-builder": [
-        "./manufacturing/libs/frontend/feature-cutter-builder/src/index.ts"
+        "./libs/manufacturing/frontend/feature-cutter-builder/src/index.ts"
       ],
       "@gearapps/manufacturing/frontend/feature-greenshed": [
-        "./manufacturing/libs/frontend/feature-greenshed/src/index.ts"
+        "./libs/manufacturing/frontend/feature-greenshed/src/index.ts"
       ],
       "@gearapps/manufacturing/frontend/feature-login": [
-        "./manufacturing/libs/frontend/feature-login/src/index.ts"
+        "./libs/manufacturing/frontend/feature-login/src/index.ts"
       ],
       "@gearapps/manufacturing/frontend/util-common": [
-        "./manufacturing/libs/frontend/util-common/src/index.ts"
+        "./libs/manufacturing/frontend/util-common/src/index.ts"
       ],
       "@gearapps/manufacturing/server/data-access": [
-        "./manufacturing/libs/server/data-access/src/index.ts"
+        "./libs/manufacturing/server/data-access/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-auth": [
-        "./manufacturing/libs/server/feat-auth/src/index.ts"
+        "./libs/manufacturing/server/feat-auth/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-health": [
-        "./manufacturing/libs/server/feat-health/src/index.ts"
+        "./libs/manufacturing/server/feat-health/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-user": [
-        "./manufacturing/libs/server/feat-user/src/index.ts"
+        "./libs/manufacturing/server/feat-user/src/index.ts"
       ],
       "@gearapps/manufacturing/server/util-common": [
-        "./manufacturing/libs/server/util-common/src/index.ts"
+        "./libs/manufacturing/server/util-common/src/index.ts"
       ],
       "@gearapps/manufacturing/server/util-mailer": [
-        "./manufacturing/libs/server/util-mailer/src/index.ts"
+        "./libs/manufacturing/server/util-mailer/src/index.ts"
       ],
       "@gearapps/manufacturing/server/util-mailer/testing": [
-        "./manufacturing/libs/server/util-mailer/src/testing/index.ts"
+        "./libs/manufacturing/server/util-mailer/src/testing/index.ts"
       ],
       "@gearapps/manufacturing/server/util-testing": [
-        "./manufacturing/libs/server/util-testing/src/index.ts"
+        "./libs/manufacturing/server/util-testing/src/index.ts"
       ],
       "@gearapps/manufacturing/shared/util-constants": [
-        "./manufacturing/libs/shared/util-constants/src/index.ts"
+        "./libs/manufacturing/shared/util-constants/src/index.ts"
       ],
       "@gearapps/manufacturing/shared/util-types": [
-        "./manufacturing/libs/shared/util-types/src/index.ts"
+        "./libs/manufacturing/shared/util-types/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-location": [
-        "./manufacturing/libs/server/feat-location/src/index.ts"
+        "./libs/manufacturing/server/feat-location/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-tray": [
-        "./manufacturing/libs/server/feat-tray/src/index.ts"
+        "./libs/manufacturing/server/feat-tray/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-container": [
-        "./manufacturing/libs/server/feat-container/src/index.ts"
+        "./libs/manufacturing/server/feat-container/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-part-summary": [
-        "./manufacturing/libs/server/feat-part-summary/src/index.ts"
+        "./libs/manufacturing/server/feat-part-summary/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-blade": [
-        "./manufacturing/libs/server/feat-blade/src/index.ts"
+        "./libs/manufacturing/server/feat-blade/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-location-tray": [
-        "./manufacturing/libs/server/feat-location-tray/src/index.ts"
+        "./libs/manufacturing/server/feat-location-tray/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-container-tray": [
-        "./manufacturing/libs/server/feat-container-tray/src/index.ts"
+        "./libs/manufacturing/server/feat-container-tray/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-blade-tray": [
-        "./manufacturing/libs/server/feat-blade-tray/src/index.ts"
+        "./libs/manufacturing/server/feat-blade-tray/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-cutter-config": [
-        "./manufacturing/libs/server/feat-cutter-config/src/index.ts"
+        "./libs/manufacturing/server/feat-cutter-config/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-cutter-build": [
-        "./manufacturing/libs/server/feat-cutter-build/src/index.ts"
+        "./libs/manufacturing/server/feat-cutter-build/src/index.ts"
       ],
       "@gearapps/manufacturing/server/feat-greenshed": [
-        "./manufacturing/libs/server/feat-greenshed/src/index.ts"
+        "./libs/manufacturing/server/feat-greenshed/src/index.ts"
       ],
       "@gearapps/manufacturing/shared/dana-app-config": [
-        "./manufacturing/libs/shared/dana-app-config/src/index.ts"
+        "./libs/manufacturing/shared/dana-app-config/src/index.ts"
       ],
       "@dana/ui": ["./libs/shared/dana-ui/src/index.ts"]
     }

@@ -1,0 +1,48 @@
+{
+  "name": "server-data-access",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/manufacturing/server/data-access/src",
+  "projectType": "library",
+  "tags": [
+    "type:data-access",
+    "scope:server",
+    "domain:gear-apps"
+  ],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "libs/manufacturing/server/data-access"
+      },
+      "cache": true
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/manufacturing/server/data-access"
+      ],
+      "options": {
+        "command": "jest --config libs/manufacturing/server/data-access/jest.config.cts --runInBand --passWithNoTests",
+        "cwd": ".",
+        "env": {
+          "NODE_ENV": "test",
+          "ENVIRONMENT": "test",
+          "NX_DAEMON": "false",
+          "JWT_ACCESS_SECRET": "unit-test-access-secret-no-production-use",
+          "JWT_REFRESH_SECRET": "unit-test-refresh-secret-no-production-use",
+          "DATABASE_TYPE": "better-sqlite3",
+          "DATABASE_PATH": ":memory:",
+          "EMAIL_ENABLED": "false",
+          "SOCIAL_GOOGLE_ENABLED": "false",
+          "SENTRY_DSN": ""
+        }
+      },
+      "configurations": {
+        "ci": {
+          "command": "jest --config libs/manufacturing/server/data-access/jest.config.cts --runInBand --passWithNoTests --ci --coverage"
+        }
+      }
+    }
+  }
+}

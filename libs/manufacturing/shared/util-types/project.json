@@ -1,0 +1,21 @@
+{
+  "name": "shared-util-types",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/manufacturing/shared/util-types/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "libs/manufacturing/shared/util-types"
+      },
+      "cache": true
+    }
+  },
+  "tags": [
+    "type:util",
+    "scope:shared",
+    "domain:gear-apps"
+  ]
+}

@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "release": "V70.0.2R9",
+  "files": [
+    {
+      "path": "apps/blade-tracking/src/app/app.component.html",
+      "sha256": "AA8B5C82DDF96EDDA7FD56D7DB820A3246705CE2A5C4F12F923E8F1744523A57"
+    },
+    {
+      "path": "apps/blade-tracking/src/app/layout/app-nav/app-nav.component.html",
+      "sha256": "4F1CB3D34A9A6BEDF21789299575056E1212094F925AD7B319F64CE59928ADA2"
+    },
+    {
+      "path": "apps/blade-tracking/src/index.html",
+      "sha256": "CE67D9B970C9858611ED8860F240A49CE825446146088D7E1C7E615DFC77C6E0"
+    },
+    {
+      "path": "apps/cutter-builder/src/app/app.component.html",
+      "sha256": "7E7EB1FCB29847FBF6382798C621065B6C50CA54FDB43DC96CEC15962431A850"
+    },
+    {
+      "path": "apps/cutter-builder/src/app/layout/cutter-builder-nav/cutter-builder-nav.component.html",
+      "sha256": "DAB26B9F8F3FA49162EE6B135DF768A04227CE168981C1CE562FD6C449364060"
+    },
+    {
+      "path": "apps/cutter-builder/src/index.html",
+      "sha256": "BCD9B2F0FDEA2AFF0EDDF33D3467D2C49E09C35528A60C36A96A5B2C08F91072"
+    },
+    {
+      "path": "apps/greenshed/src/app/app.component.html",
+      "sha256": "25132CFEA20BCA8C41BA69D576460482F89D87F8FFB452DB9913D792662F92CB"
+    },
+    {
+      "path": "apps/greenshed/src/app/layout/greenshed-nav/greenshed-nav.component.html",
+      "sha256": "D59DCD1DACBD7594BE320824935D1E56F7A96312561849D021598C3BDA770E7E"
+    },
+    {
+      "path": "apps/greenshed/src/index.html",
+      "sha256": "4EA07A5192EC1920E0A7ECF6AD14BC76E20E74BD915DAC6C40CF23D6B995B798"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.html",
+      "sha256": "901EAB96ACC7A97CFAA892A2957EFDE17EF523ABD28A6A5C509EA5BC2596D3F5"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/dashboard/dashboard.component.html",
+      "sha256": "3A4D153602852410ACEFE20E5A6B2BBDAB49BE432A44D4E4AD037BEF7963B67B"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/intake/intake.component.html",
+      "sha256": "E4C4412AE0523EB7F26A05C79CAEAC7FD94C0620D00564F7C8A3F09F82CA8905"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/internal-movement/internal-movement.component.html",
+      "sha256": "E08665EAD9C6B8B4B054E183AE7DF7507D85E3617AAD640803FE24B5973BD3FE"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/inventory-lookup/inventory-lookup.component.html",
+      "sha256": "3384BE565120D03F6BEB7A67FA819073B48AF88598684EC24898F9C18BE53D02"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/inventory-overview/inventory-overview.component.html",
+      "sha256": "A59F5280B7F16978DA5321B19ACDFD578441BB22CE996BBFB3287F865602EDE0"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/load-container/load-container.component.html",
+      "sha256": "4048174E6C869FE6CCD12F472A22B4CD9ED5CF657C6D6C76BB8C401B41E713C7"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/locations/blade-locations.component.html",
+      "sha256": "E5DA9B94BF4BF6D9E975A2C6FBFC943CDDC8EDCB43B76B4183FB2C47D78B14C6"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/receive-container/receive-container.component.html",
+      "sha256": "8707768C88D7BCE209B0E038552C5F80EDC9F737B349CF68BFE8125167B9F30F"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/scrap-blades/scrap-blades.component.html",
+      "sha256": "D91AF3A90BF16C38C843706237954A3D93D295A8A7C6AB1A5F164B42C46568B1"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/tray-contents/tray-contents.component.html",
+      "sha256": "B00E5734BEF4069CEC613E20C96857FEDC1C514283C8296D8F06EA0561E9858F"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-blade-tracking/src/lib/shared/scan-panel/scan-panel.component.html",
+      "sha256": "EA38FF96FD7FD775F3E5057B34D67DDC8EC07231558A08F3C98AD851B4BDEA83"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-blade-tracking/src/lib/shell/blade-tracking-shell.component.html",
+      "sha256": "E49ED22C5950DEA51898393CE00C3CAA9E0DE07E9D179FF62B963E0977909A1C"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.html",
+      "sha256": "C466FD6942969EC1B0DBB8F174C812B33173799C100E5B9D226785148ED3F483"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-cutter-builder/src/lib/pages/dashboard/cutter-builder-dashboard.component.html",
+      "sha256": "E20DF28E22C771084B5F46663383516179CF36B36CFD5E6B6F600923229E46AA"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-cutter-builder/src/lib/pages/lookup/cutter-lookup.component.html",
+      "sha256": "B875C1581E71CF13517563BEE53D80B448675C7623724B00A8066E83BBB929E1"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-cutter-builder/src/lib/pages/teardown/cutter-teardown.component.html",
+      "sha256": "D9311C3F7E11D6B392DC8ABF9522E2355ED471E07834F07706AA1A62BEC29458"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-greenshed/src/lib/pages/check/greenshed-check.component.html",
+      "sha256": "D1A575CF628CB96D803FF37C8450FB5B1AF5BC356E98951B897D526FF3782336"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-greenshed/src/lib/pages/dashboard/greenshed-dashboard.component.html",
+      "sha256": "AF706E7C1737DF2BBF9557EF1C24F00D437FD264150742CBFCE4390B6D50A36D"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-greenshed/src/lib/pages/lookup/greenshed-lookup.component.html",
+      "sha256": "F8A8471134CC8DA2934A8FE565D18EF9389F24E645D77B90EA28218C30EF6D62"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-greenshed/src/lib/pages/machines/greenshed-machines.component.html",
+      "sha256": "173CDAEA1F3FF8251F3D3EB83FE9D57924ECA236F306826F33F0F6ABD3896947"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-greenshed/src/lib/pages/pull/greenshed-pull.component.html",
+      "sha256": "D209281D9A7BC5289559EC935B702082EB6ED5D1A915B4A3E4D279B86765BFDE"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-greenshed/src/lib/pages/setup/greenshed-setup.component.html",
+      "sha256": "115EC1B4860C59647CE0DA7580EF8457CB28E8D6BDE04AE06481FCB41A81E09C"
+    },
+    {
+      "path": "libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.html",
+      "sha256": "BD95D134063E973507EB5C4F5BC1CCD3A86995662FC8BA5F2D34A52E7CA97578"
+    }
+  ]
+}

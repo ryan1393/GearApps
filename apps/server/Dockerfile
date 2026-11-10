@@ -34,6 +34,6 @@ COPY --from=production-deps /usr/local/lib/node_modules/npm /usr/local/lib/node_
 COPY --from=production-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist/apps/server ./dist/apps/server
 COPY --from=build /app/dist/apps/server-bootstrap ./dist/apps/server-bootstrap
-COPY --from=build /app/manufacturing/tools/base-data ./manufacturing/tools/base-data
+COPY --from=build /app/tools/manufacturing/base-data ./tools/manufacturing/base-data
 EXPOSE 3333
 CMD ["node", "dist/apps/server/main.js"]

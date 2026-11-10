@@ -1,0 +1,21 @@
+{
+  "name": "server-util-testing",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/manufacturing/server/util-testing/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "libs/manufacturing/server/util-testing"
+      },
+      "cache": true
+    }
+  },
+  "tags": [
+    "type:util",
+    "scope:server",
+    "domain:gear-apps"
+  ]
+}

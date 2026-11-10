@@ -15,3 +15,13 @@ tools/database/backups/
 tools/database/cleanup.sql
 tools/database/legacy-import.sql
 database-reports/
+
+# Manufacturing tool outputs (tools run from the repository root)
+tools/manufacturing/data-import/work/
+/_cutter-history-export_backup_*/
+/_cutter-history-export_incoming_*/
+/cutter-history-dynamic-migration-report.json
+/swagger.json
+/_patch_backups/
+/deploy-reports/
+/gearapps-*-results.json

@@ -11,7 +11,7 @@ if (existsSync(envFile)) process.loadEnvFile(envFile);
 const scripts = JSON.parse(readFileSync(resolve(root, 'tools/manufacturing-scripts.json'), 'utf8'));
 const [name, ...args] = process.argv.slice(2);
 if (!Object.hasOwn(scripts, name)) throw new Error(`Unknown manufacturing command: ${name}`);
-// The source tools retain paths relative to manufacturing; Nx and npm resolve at root.
+// Manufacturing commands run from the repository root, like Nx and npm.
 const env = {
   ...process.env,
   TS_NODE_BASEURL: root,
@@ -25,11 +25,11 @@ if (process.platform === 'win32') {
   child = spawn(
     process.env.ComSpec || 'cmd.exe',
     ['/d', '/s', '/c', `${scripts[name]} ${args.map(quote).join(' ')}`],
-    { cwd: resolve(root, 'manufacturing'), env, stdio: 'inherit' },
+    { cwd: root, env, stdio: 'inherit' },
   );
 } else {
   child = spawn('/bin/sh', ['-c', `${scripts[name]} "$@"`, name, ...args], {
-    cwd: resolve(root, 'manufacturing'),
+    cwd: root,
     env,
     stdio: 'inherit',
   });

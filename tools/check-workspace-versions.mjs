@@ -54,11 +54,8 @@ for (const [path, metadata] of Object.entries(lock.packages)) {
   }
 }
 for (const path of [
-  'manufacturing/package.json',
-  'manufacturing/package-lock.json',
-  'manufacturing/nx.json',
-  'manufacturing/node_modules',
-  'manufacturing/vendor/dana-ui/package',
+  // Manufacturing code lives in libs/manufacturing, tools/manufacturing, docs/manufacturing and commands/.
+  'manufacturing',
   'libs/shared/dana-ui/package-lock.json',
 ]) {
   assert.equal(

@@ -27,4 +27,4 @@ tools/database/legacy-import.sql
 **/*.zip
 **/_patch_backups
 **/deploy-reports
-manufacturing/tools/data-import/work
+tools/manufacturing/data-import/work

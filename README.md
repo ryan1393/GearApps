@@ -17,7 +17,9 @@ The root package.json and package-lock.json are the dependency authority. Use
 Node 24.22.1, npm 11.9.0 and .NET SDK 8 for the collector. All clients share [Dana UI](libs/shared/dana-ui).
 Application API routes are under /api/v1; health is /api/v1/health/ready.
 Every application and its end-to-end project lives under root `apps/`.
-Manufacturing domain libraries and maintenance tools remain in `manufacturing/`.
+Manufacturing libraries are in `libs/manufacturing/`, their maintenance tools in
+`tools/manufacturing/`, their documentation in [docs/manufacturing](docs/manufacturing/README.md),
+and the Windows/Linux launchers in `commands/`.
 
 ## Run the complete stack
 

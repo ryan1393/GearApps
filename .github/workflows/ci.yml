@@ -92,7 +92,7 @@ jobs:
       - run: npx nx build gear-app-server --configuration=production
       - run: npx nx run gear-app-server:build-fresh-db-bootstrap --configuration=production
       - run: node dist/apps/server-bootstrap/main.js
-      - run: node manufacturing/tools/base-data/import-base-data.mjs --bootstrap-only
+      - run: node tools/manufacturing/base-data/import-base-data.mjs --bootstrap-only
       - name: Verify shared API on a fresh database
         shell: bash
         run: |
