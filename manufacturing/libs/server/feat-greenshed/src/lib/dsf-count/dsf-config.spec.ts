@@ -33,6 +33,7 @@ describe('DSF connection settings', () => {
     // An acknowledgment with the wrong text, or for a different source, is refused.
     expect(invalid({ DSF_PRIVILEGED_READER_ACK: 'yes' })).toBe(false);
     expect(invalid({ DSF_PRIVILEGED_READER_ACK: DSF_PRIVILEGED_ACK, DSF_DB_HOST: '10.0.0.9' })).toBe(false);
+    expect(invalid({ DSF_PRIVILEGED_READER_ACK: DSF_PRIVILEGED_ACK, DSF_DB_USER: 'postgres' })).toBe(false);
   });
 
   it('requires a restricted read-only login unless the privileged account was explicitly acknowledged', () => {
@@ -46,5 +47,12 @@ describe('DSF connection settings', () => {
     expect(reason(() => dsfAccountPolicy(config, { ...account, read_only: false }, restricted))).toBe('SOURCE_ACCOUNT_MISMATCH');
     const acknowledged = readDsfConfig({ ...base, DSF_PRIVILEGED_READER_ACK: DSF_PRIVILEGED_ACK });
     expect(dsfAccountPolicy(acknowledged, account, privileged)).toBe('USER_APPROVED_PRIVILEGED_ACCOUNT_APP_READ_ONLY');
+    // The DSF application's own login is accepted with the acknowledgment, never without it.
+    const whiteboard = { ...account, session_login: 'whiteboard', effective_login: 'whiteboard' };
+    const whiteboardEnv = { ...base, DSF_DB_USER: 'whiteboard' };
+    expect(reason(() => dsfAccountPolicy(readDsfConfig(whiteboardEnv), whiteboard, privileged))).toBe('READ_ONLY_ROLE_REQUIRED');
+    const whiteboardAcknowledged = readDsfConfig({ ...whiteboardEnv, DSF_PRIVILEGED_READER_ACK: DSF_PRIVILEGED_ACK });
+    expect(whiteboardAcknowledged.valid).toBe(true);
+    expect(dsfAccountPolicy(whiteboardAcknowledged, whiteboard, privileged)).toBe('USER_APPROVED_PRIVILEGED_ACCOUNT_APP_READ_ONLY');
   });
 });
