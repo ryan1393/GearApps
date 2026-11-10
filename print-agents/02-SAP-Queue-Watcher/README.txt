@@ -138,7 +138,7 @@ one would break the other.
  a) On the Truck Log host (folder with docker-compose / the Truck Log code):
       SETUP-PRINT-AGENT-CREDENTIAL.cmd --agent-id trucklog-sap-watcher-01 --name "SAP packing slip watcher (USFTWLDAPP)"
     (Linux: ./SETUP-PRINT-AGENT-CREDENTIAL.sh with the same arguments, or
-     docker compose exec truck-log-server node tools/truck-log/provision-print-agent.mjs --agent-id trucklog-sap-watcher-01 --name "SAP packing slip watcher (USFTWLDAPP)")
+     docker exec truck-log-server node tools/truck-log/provision-print-agent.mjs --agent-id trucklog-sap-watcher-01 --name "SAP packing slip watcher (USFTWLDAPP)")
     It prints "Bearer token (shown once): tlpa_...". The watcher uses
     documents:upload (route settings and uploads) and the read-only
     setup-check. Use --rotate only to replace a lost/leaked token for this

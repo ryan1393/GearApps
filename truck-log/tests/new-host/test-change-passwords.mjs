@@ -111,5 +111,8 @@ check(ps.indexOf('docker exec -i truck-log-postgres psql') > 0 && ps.indexOf('do
 check(ps.includes("if ($LASTEXITCODE -ne 0) { throw 'PostgreSQL did not accept the change.") && ps.includes("-notmatch '^[A-Za-z0-9_]+$'"), 'PowerShell stops on a refused change or unsafe role name');
 check(ps.includes("'-f','docker-compose.yml','-f','docker-compose.https.yml','up','-d'"), 'PowerShell keeps the HTTPS overlay on restart');
 check(!/volume rm|docker rm|prune| down/.test(ps + sh + cmd), 'no password command deletes containers or volumes');
+// A Windows PC that deploys over SSH may have the Docker CLI without the Compose plugin;
+// then "docker compose exec ... --agent-id" fails with "unknown flag". Use the fixed container name.
+for (const file of ['SETUP-PRINT-AGENT-CREDENTIAL.cmd', 'SETUP-TRUCK-LOG-ADMIN.cmd']) check(/\ndocker exec (-it )?truck-log-server node /.test(read(file)) && !read(file).includes('docker compose'), `${file} works without the Compose plugin`);
 
 console.log(`[PASS] Change passwords: ${count} checks.`);

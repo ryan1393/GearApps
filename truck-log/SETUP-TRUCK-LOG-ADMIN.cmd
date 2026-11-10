@@ -23,7 +23,7 @@ echo.
 echo Confirm this is the intended Truck Log Docker host.
 echo No passwords are accepted as command arguments.
 echo.
-docker compose exec truck-log-server node tools/truck-log/admin-accounts.cjs %1
+docker exec -it truck-log-server node tools/truck-log/admin-accounts.cjs %1
 exit /b %errorlevel%
 :USAGE
 echo Usage: SETUP-TRUCK-LOG-ADMIN.cmd --bootstrap ^| --verify ^| --recover
