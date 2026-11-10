@@ -4,7 +4,7 @@
   "baseline": "Dana Apps V70.0.0",
   "releaseVersion": "70.5.0",
   "workspace": "single-root",
-  "authoritativeTest": "node tools/manufacturing/run-unit-tests.mjs",
+  "authoritativeTest": "nx run-many -t test --exclude=*-e2e,lapper-read,lapper-read-py",
   "sourcePackager": "tools/package-release.mjs",
   "masterUiBaseline": "docs/manufacturing/DANA_MASTER_UI_BASELINE.md",
   "gearPreMergeReadiness": "docs/manufacturing/DANA_APPS_GEAR_PREMERGE_READINESS.md",
@@ -18,7 +18,7 @@
     "typescript": "5.9.3"
   },
   "rootHashes": {
-    "package.json": "687C6A46D5E95D4488D5D9229F9E7A454784AFA2801C75F5C8F7DA923E5F48BF",
+    "package.json": "CB0701C4E4C376A452A2C3AE293EBF61AE09D38A9C97A95B1FFAEA8508C61945",
     "package-lock.json": "A9255EB2793430350E61EC8304A71CBCEE47BA321B528ECCBDE6F674B9B896BE",
     "nx.json": "70665B73BCA488DA1CBA39928CA99A5C5911A292E4E2DC2594B6D8A0002945DE",
     "tsconfig.base.json": "E799BCCAC1D667536785A48C6A507D91657DDA2DEA3C054B5077DA2A898E72AF"

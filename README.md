@@ -83,7 +83,6 @@ npm test
 npm run test:contracts
 npm run lint
 npm run build
-dotnet test apps/lapper-read/LapperRead.Tests/LapperRead.Tests.csproj -c Release
 ```
 
 The database suites require disposable restores and explicit fixture authorization.

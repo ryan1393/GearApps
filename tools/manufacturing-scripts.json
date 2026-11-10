@@ -109,8 +109,6 @@
   "docker:ps": "docker compose --env-file .env -f compose.yml ps",
   "test:fresh-db-runtime-deps": "node ./tools/manufacturing/test-dana-apps-fresh-db-runtime-deps-contract.mjs",
   "test:external-dana-ui": "node ./tools/manufacturing/test-external-dana-ui-package-contract.mjs",
-  "test": "npm run test:unit && npm run test:deployment",
-  "test:unit": "node tools/manufacturing/run-unit-tests.mjs",
   "test:contracts": "node tools/manufacturing/run-contract-tests.mjs",
   "test:deployment": "node --test tools/manufacturing/base-data/bootstrap-policy.test.mjs tools/manufacturing/set-version.test.mjs tools/manufacturing/test-deployment-config.cjs",
   "test:bootstrap-redeployment": "node tools/manufacturing/test-bootstrap-redeployment.mjs",

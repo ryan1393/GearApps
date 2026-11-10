@@ -66,7 +66,8 @@ environment is .env. See [unified API setup](../UNIFIED_API.md).
 Users must sign in again after upgrading. Emailed recovery requires SMTP and the public
 frontend origin (`PUBLIC_WEB_BASE_URL`, or Docker `GEAR_PUBLIC_WEB_BASE_URL`).
 
-Portable checks: `npm test` runs isolated unit and deployment/configuration tests;
+Portable checks: `npm test` runs every project's Nx `test` target (Jest, the .NET and Python
+collectors) and the deployment/configuration tests; `npm run test:unit` runs only the Jest projects;
 `npm run test:contracts` runs source contracts. Live workflow scripts require a dedicated
 test database and explicit `GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES`.
 
