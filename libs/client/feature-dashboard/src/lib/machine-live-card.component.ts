@@ -12,7 +12,12 @@ import {
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FanucVariablesApi, ScannerApi, ScannerDetailsApi } from '@gearapps/client/core';
+import {
+  FanucVariablesApi,
+  LapperAccess,
+  ScannerApi,
+  ScannerDetailsApi,
+} from '@gearapps/client/core';
 import { StatusBadgeComponent, ValueFieldComponent } from '@gearapps/client/ui';
 import { Machine, MachineFanucVariable, ScannerDetail } from '@gearapps/shared/domain';
 import {
@@ -39,17 +44,14 @@ import { ScannerControlsComponent } from './scanner-controls.component';
   imports: [StatusBadgeComponent, ValueFieldComponent, ScannerControlsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <article
-      class="dana-card gear-live"
-      [attr.data-tone]="fanuc()?.y03_2_stack_inCycle ? 'success' : null"
-    >
+    <article class="dana-card" [attr.data-tone]="fanuc()?.y03_2_stack_inCycle ? 'success' : null">
       <header class="dana-card-header">
         <div>
           <span class="dana-card-eyebrow">{{
             machine().description || machine().type || 'Machine'
           }}</span>
           <span class="dana-card-title">{{ machine().number || machine().ip }}</span>
-          <span class="dana-muted gear-live-meta"
+          <span class="gear-muted gear-live-meta"
             ><code>{{ machine().ip }}</code>
             @if (machine().builder) {
               · {{ machine().builder }}
@@ -59,7 +61,7 @@ import { ScannerControlsComponent } from './scanner-controls.component';
         <div class="gear-live-status">
           <gear-status-badge [status]="machine().status" />
           @if (lastUpdate()) {
-            <small class="dana-muted" title="Last refresh">{{ lastUpdate() }}</small>
+            <small class="gear-muted" title="Last refresh">{{ lastUpdate() }}</small>
           }
         </div>
       </header>
@@ -127,17 +129,17 @@ import { ScannerControlsComponent } from './scanner-controls.component';
               />
             </div>
             @if (fanucError()) {
-              <p class="dana-field-hint">No I/O snapshot recorded for this machine yet.</p>
+              <p class="gear-field-help">No I/O snapshot recorded for this machine yet.</p>
             }
           </div>
         </div>
       </div>
 
-      @if (scanner(); as s) {
+      @if (access.canEditSetup() && scanner(); as s) {
         <footer class="gear-live-foot">
           <button
             type="button"
-            class="dana-btn dana-btn-sm"
+            class="gear-btn gear-btn-secondary gear-btn-sm"
             (click)="controlsOpen.set(!controlsOpen())"
           >
             {{ controlsOpen() ? 'Hide scanner controls' : 'Scanner controls' }}
@@ -214,6 +216,7 @@ import { ScannerControlsComponent } from './scanner-controls.component';
   `,
 })
 export class MachineLiveCardComponent implements OnDestroy {
+  protected readonly access = inject(LapperAccess);
   private readonly scannerApi = inject(ScannerApi);
   private readonly scannerDetails = inject(ScannerDetailsApi);
   private readonly fanucApi = inject(FanucVariablesApi);

@@ -30,6 +30,7 @@
       <div class="nav-heading">SHARED APPS</div>
       <a (click)="mobileNav.close()" [href]="bladeTrackingUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-blade" aria-hidden="true"></span></span><span>Blade Tracking</span></a>
       <a (click)="mobileNav.close()" [href]="greenshedUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Greenshed</span></a>
+      <a (click)="mobileNav.close()" [href]="lapperUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-lapping" aria-hidden="true"></span></span><span>Lapper</span></a>
 
       <ng-container *ngIf="user.role === 'admin'">
         <div class="nav-heading">ADMINISTRATION</div>

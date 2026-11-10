@@ -1,4 +1,4 @@
-/** Static option lists carried over from the legacy forms; departments are loaded from the API when available. */
+/** Static option lists carried over from the legacy forms; departments come from the shared GearApps department list. */
 export const MACHINE_TYPES = ['L-60', '600'];
 export const MACHINE_BUILDERS = ['Klingelnberg', 'Gleason'];
 export const MACHINE_CELLS = [
@@ -17,6 +17,5 @@ export const MACHINE_CELLS = [
   '14',
   '15',
 ];
-export const FALLBACK_DEPARTMENTS = ['181', '132', '152'];
 export const STATUS_OPTIONS = ['Active', 'Inactive'];
 export const IPV4_PATTERN = /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/;

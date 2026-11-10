@@ -246,3 +246,50 @@ export function groupByForm(rows: LappingSummaryRow[]): Map<string, LappingSumma
   }
   return map;
 }
+
+/** Display name of a lapping-summary form group (`used_form`). */
+export const FORM_LABELS: Record<string, string> = {
+  gear_data: 'Gearset data',
+  general_data: 'General data',
+  mesh: 'Meshing position',
+  ...Object.fromEntries(PATH_FORMS.map((p) => [p.form, `Path · ${p.label}`])),
+};
+
+/**
+ * Where a macro appears on the lapping summary, e.g. "General data · Runout check · Enabled",
+ * or null when no summary field reads it.
+ */
+export function summaryPlacement(macro: {
+  number: number;
+  name: string;
+  used_form: string | null;
+}): string | null {
+  const form = macro.used_form ?? '';
+  const byNumber = (groups: GroupDef[]) =>
+    groups
+      .flatMap((g) => g.fields.map((f) => ({ g, f })))
+      .find(({ f }) => f.macro === macro.number);
+  if (form === 'gear_data') {
+    const f = GEARSET_FIELDS.find((x) => x.macro === macro.number);
+    return f ? `${FORM_LABELS[form]} · ${f.label}` : null;
+  }
+  if (form === 'general_data') {
+    if (macro.number === 10032) return `${FORM_LABELS[form]} · Consec (last cycle)`;
+    const hit = byNumber(GENERAL_GROUPS);
+    return hit ? `${FORM_LABELS[form]} · ${hit.g.title} · ${hit.f.label}` : null;
+  }
+  if (form === 'mesh') {
+    const hit = byNumber(MESH_GROUPS);
+    return hit ? `${FORM_LABELS[form]} · ${hit.g.title} · ${hit.f.label}` : null;
+  }
+  const path = PATH_FORMS.find((p) => p.form === form);
+  if (!path) return null;
+  const name = macro.name.toLowerCase();
+  const matches = (key: string) => name === key || name.endsWith(`_${key}`);
+  if (matches(PATH_ACTIVE_NAME)) return `${FORM_LABELS[form]} · Pass active`;
+  for (const g of PATH_GROUPS) {
+    const f = g.fields.find((x) => x.name && matches(x.name));
+    if (f) return `${FORM_LABELS[form]} · ${g.title} · ${f.label}`;
+  }
+  return null;
+}

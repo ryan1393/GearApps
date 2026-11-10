@@ -28,3 +28,9 @@ tools/database/legacy-import.sql
 **/_patch_backups
 **/deploy-reports
 manufacturing/tools/data-import/work
+
+# Python collector
+**/__pycache__
+**/*.pyc
+apps/lapper-read-py/fanuc/*.so*
+apps/lapper-read-py/state

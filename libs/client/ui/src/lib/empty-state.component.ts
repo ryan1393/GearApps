@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   selector: 'gear-empty-state',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="dana-empty-state gear-empty">
+    <div class="dana-empty-state lapper-empty">
       <strong>{{ title() }}</strong>
       @if (hint()) {
         <span>{{ hint() }}</span>
@@ -13,14 +13,10 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     </div>
   `,
   styles: `
-    .gear-empty {
+    .lapper-empty {
       display: grid;
       gap: 6px;
       justify-items: start;
-    }
-    .gear-empty strong {
-      color: var(--dana-text);
-      font-size: 14px;
     }
   `,
 })

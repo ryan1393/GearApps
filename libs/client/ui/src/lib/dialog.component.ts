@@ -9,8 +9,8 @@ import {
 } from '@angular/core';
 
 /**
- * General-purpose modal built on the native <dialog> with Dana's `.dana-dialog`
- * styling (Dana UI itself only ships a confirm dialog). Content goes in the body;
+ * General-purpose modal on the native <dialog>, dressed in Dana's confirm-dialog
+ * surface so forms match every other Gear Apps dialog. Content goes in the body;
  * put buttons in an element with `dialogActions`.
  */
 @Component({
@@ -19,30 +19,27 @@ import {
   template: `
     <dialog
       #dlg
-      class="dana-dialog gear-dialog"
-      [style.--dana-dialog-width]="width()"
+      class="dana-confirm-dialog gear-dialog"
+      aria-modal="true"
+      [attr.aria-label]="title()"
+      [style.width]="'min(' + width() + ', 100%)'"
       (cancel)="onCancel($event)"
       (mousedown)="onBackdrop($event)"
     >
-      <div class="dana-dialog-header">
-        <h2>{{ title() }}</h2>
-        @if (description()) {
-          <p>{{ description() }}</p>
-        }
-      </div>
-      <div class="dana-dialog-body"><ng-content /></div>
+      <h2>{{ title() }}</h2>
+      @if (description()) {
+        <p>{{ description() }}</p>
+      }
+      <div class="gear-dialog-body"><ng-content /></div>
       <div class="dana-dialog-actions"><ng-content select="[dialogActions]" /></div>
     </dialog>
   `,
   styles: `
-    .gear-dialog {
-      padding: 0;
-    }
     .gear-dialog:not([open]) {
       display: none;
     }
-    .gear-dialog::backdrop {
-      background: rgba(15, 31, 54, 0.46);
+    .gear-dialog-body {
+      margin-top: 18px;
     }
   `,
 })

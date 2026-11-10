@@ -2,12 +2,14 @@ export type DanaAppKey =
   | 'bladeTracking'
   | 'cutterBuilder'
   | 'greenshed'
+  | 'lapper'
   | 'truckLog';
 
 export const DANA_APP_DEFAULT_PORTS: Record<DanaAppKey, number> = {
   bladeTracking: 4200,
   cutterBuilder: 4201,
   greenshed: 4202,
+  lapper: 4203,
   truckLog: 4300,
 };
 

@@ -3,13 +3,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   inject,
   OnInit,
   signal,
   untracked,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, ParamMap } from '@angular/router';
 import {
   GearsetsApi,
   loadable,
@@ -17,14 +20,24 @@ import {
   MachinesApi,
   MacroLogsApi,
 } from '@gearapps/client/core';
-import { DanaComboboxColumn, DanaComboboxComponent } from '@dana/ui';
+import {
+  DanaComboboxColumn,
+  DanaComboboxComponent,
+  DanaCountBadgeDirective,
+  DanaDetailGridDirective,
+  DanaKpiCardDirective,
+  DanaKpiGridDirective,
+  DanaLoadingStateDirective,
+  DanaPageHeaderComponent,
+  DanaPanelHeaderDirective,
+} from '@dana/ui';
 import {
   EmptyStateComponent,
   StatusBadgeComponent,
   ValueFieldComponent,
 } from '@gearapps/client/ui';
 import { Gearset, LappingSummaryRow, Machine, MachineCycle } from '@gearapps/shared/domain';
-import { catchError, of } from 'rxjs';
+import { catchError, forkJoin, map, of, shareReplay, switchMap } from 'rxjs';
 import {
   fieldValue,
   findByName,
@@ -46,6 +59,13 @@ import { SummaryGroupComponent } from './summary-group.component';
     DatePipe,
     DecimalPipe,
     DanaComboboxComponent,
+    DanaCountBadgeDirective,
+    DanaDetailGridDirective,
+    DanaKpiCardDirective,
+    DanaKpiGridDirective,
+    DanaLoadingStateDirective,
+    DanaPageHeaderComponent,
+    DanaPanelHeaderDirective,
     EmptyStateComponent,
     StatusBadgeComponent,
     ValueFieldComponent,
@@ -60,6 +80,11 @@ export class LappingSummaryPageComponent implements OnInit {
   private readonly gearsetsApi = inject(GearsetsApi);
   private readonly cyclesApi = inject(MachineCyclesApi);
   private readonly macroLogsApi = inject(MacroLogsApi);
+  private readonly route = inject(ActivatedRoute);
+  private readonly destroyRef = inject(DestroyRef);
+
+  /** Topbar search text that matched neither a gearset nor a machine. */
+  protected readonly searchMiss = signal<string | null>(null);
 
   // Selection — each list narrows to what has actually run with the other selection.
   protected readonly allMachines = loadable<Machine[]>([]);
@@ -121,10 +146,38 @@ export class LappingSummaryPageComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.allMachines.load(this.machinesApi.list());
-    this.allGearsets.load(this.gearsetsApi.list());
-    this.machineOptions.load(this.machinesApi.list());
-    this.gearsetOptions.load(this.gearsetsApi.list());
+    const lists$ = forkJoin({
+      machines: this.machinesApi.list(),
+      gearsets: this.gearsetsApi.list(),
+    }).pipe(shareReplay(1));
+    this.allMachines.load(lists$.pipe(map((l) => l.machines)));
+    this.allGearsets.load(lists$.pipe(map((l) => l.gearsets)));
+    this.machineOptions.load(lists$.pipe(map((l) => l.machines)));
+    this.gearsetOptions.load(lists$.pipe(map((l) => l.gearsets)));
+
+    // ?gearset=<id>&machine=<id> deep links, and ?q=<text> from the topbar search.
+    this.route.queryParamMap
+      .pipe(
+        switchMap((params) => lists$.pipe(map((lists) => ({ params, ...lists })))),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(({ params, machines, gearsets }) => this.applyParams(params, machines, gearsets));
+  }
+
+  private applyParams(params: ParamMap, machines: Machine[], gearsets: Gearset[]) {
+    this.searchMiss.set(null);
+    const gearsetId = params.get('gearset');
+    const machineId = params.get('machine');
+    if (gearsetId && gearsets.some((g) => g.id === gearsetId)) this.selectGearset(gearsetId);
+    if (machineId && machines.some((m) => m.id === machineId)) this.selectMachine(machineId);
+
+    const q = params.get('q')?.trim().toLowerCase();
+    if (!q) return;
+    const gearset = gearsets.find((g) => g.number.trim().toLowerCase() === q);
+    const machine = machines.find((m) => m.number?.trim().toLowerCase() === q || m.ip.trim() === q);
+    if (gearset) this.selectGearset(gearset.id);
+    else if (machine) this.selectMachine(machine.id);
+    else this.searchMiss.set(params.get('q')?.trim() ?? null);
   }
 
   protected selectMachine(id: string | null) {
@@ -144,6 +197,7 @@ export class LappingSummaryPageComponent implements OnInit {
   }
 
   protected clear() {
+    this.searchMiss.set(null);
     this.machineId.set(null);
     this.gearsetId.set(null);
     this.machineOptions.load(this.machinesApi.list());

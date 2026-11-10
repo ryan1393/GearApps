@@ -4,7 +4,7 @@
   "projectType": "application",
   "prefix": "gear",
   "sourceRoot": "apps/lapper-client/src",
-  "tags": ["scope:client", "type:app"],
+  "tags": ["domain:gear-apps", "framework:angular", "scope:client", "type:app"],
   "targets": {
     "build": {
       "executor": "@angular/build:application",
@@ -18,11 +18,19 @@
           {
             "glob": "**/*",
             "input": "apps/lapper-client/public"
+          },
+          {
+            "glob": "**/*",
+            "input": "manufacturing/assets",
+            "output": "assets"
           }
         ],
         "styles": [
+          "apps/lapper-client/src/styles.css",
+          "libs/shared/dana-ui/src/styles/gear-compat.css",
+          "libs/shared/dana-ui/src/styles/gear-compat-features.css",
           "libs/shared/dana-ui/src/styles/dana-ui.css",
-          "apps/lapper-client/src/styles.css"
+          "libs/shared/dana-ui/src/styles/gear-compat-overrides.css"
         ],
         "polyfills": ["zone.js"],
         "inlineStyleLanguage": "scss"

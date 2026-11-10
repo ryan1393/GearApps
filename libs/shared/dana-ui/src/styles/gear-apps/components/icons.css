@@ -48,6 +48,10 @@
 .gear-glyph-sort-asc { --gear-glyph-url: url("/assets/icons/sort-asc.svg"); }
 .gear-glyph-sort-desc { --gear-glyph-url: url("/assets/icons/sort-desc.svg"); }
 .gear-glyph-close { --gear-glyph-url: url("/assets/icons/close.svg"); }
+.gear-glyph-lapping { --gear-glyph-url: url("/assets/icons/lapping.svg"); }
+.gear-glyph-gearset { --gear-glyph-url: url("/assets/icons/gearset.svg"); }
+.gear-glyph-scanner { --gear-glyph-url: url("/assets/icons/scanner.svg"); }
+.gear-glyph-summary { --gear-glyph-url: url("/assets/icons/summary.svg"); }
 
 .global-search button .gear-glyph {
   width: 14px;

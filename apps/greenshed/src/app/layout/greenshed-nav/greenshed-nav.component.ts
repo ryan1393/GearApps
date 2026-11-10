@@ -29,6 +29,10 @@ export class GreenshedNavComponent {
     return getDanaAppUrl('cutterBuilder');
   }
 
+  get lapperUrl(): string {
+    return getDanaAppUrl('lapper');
+  }
+
   search(): void {
     const value = this.searchValue.trim();
     if (!value) return;
