@@ -1,5 +1,26 @@
 # Changelog
 
+## 70.5.0 (2026-11-10)
+
+Lapper joins the shared Gear Apps experience, and gets a collector that runs in Docker.
+
+- **Lapper in the shared shell.** Lapper uses the shared sign-in, password recovery, session
+  and Admin pages, and the same sidebar, top bar and page vocabulary as Blade Tracking, Cutter
+  Builder and Greenshed. The other apps link to it under SHARED APPS and it links back.
+- **Lapper forms.** A machine's department is required and chosen from real departments. A
+  gearset's pinion and ring lists narrow to one summary family and the ratio is read-only. Part
+  summary is required. Parts and part summaries have no Delete action (the API refuses to
+  delete shared master data from Lapper); set one Inactive instead.
+- **Lapper configuration.** New Scanners, Macros and Fanuc Variables pages. Setup edits appear
+  only for Gear Apps administrators, because the API rejects them from anyone else.
+- **Python Lapper Read collector in Docker** (`apps/lapper-read-py`, compose profile
+  `collectors`). One container keeps a worker for every Active machine that has a FANUC
+  controller IP and an assigned scanner, and follows the C# worker's rules. FANUC's licensed
+  `libfwlib32.so` is mounted, never committed. Not yet verified against a real controller.
+- **Collector tokens.** Administrators create and revoke tokens in Lapper > Configuration >
+  Collector Tokens. A token is shown once, stored only as a hash, reaches only the endpoints a
+  collector needs, and stops working when revoked. New table `lapper.collector_tokens`.
+
 ## 70.4.1 (2026-11-10)
 
 Label fixes from the first tags printed on a Zebra.

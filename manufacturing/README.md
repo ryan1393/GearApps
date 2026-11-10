@@ -1,4 +1,4 @@
-# Gear Apps 70.4.1
+# Gear Apps 70.5.0
 
 Gear Apps is the Dana manufacturing workspace for four workflows sharing one API and database:
 **Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root GearApps Nx workspace. All frontends use
@@ -12,6 +12,13 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
 | Green Shed | 4202 | `../apps/greenshed` |
 | Lapper | 4203 | `../apps/lapper-client` |
 | Shared API | 3333 | `../apps/server` (`/api/v1`, health at `/api/v1/health/ready`) |
+
+## What changed in 70.5.0
+
+Lapper now shares the Gear Apps shell, sign-in and Admin with the other apps, and gains
+Scanners, Macros, Fanuc Variables and Collector Tokens pages. A Python Lapper Read collector
+runs in Docker (`docker compose --profile collectors up -d --build lapper-read`) with one
+worker per saved machine. See [CHANGELOG.md](CHANGELOG.md).
 
 ## What changed in 70.4.1
 
@@ -114,7 +121,7 @@ Docker host behind your active **SSH Docker context** (`docker context use <name
    2. copies the source to `~/dana-apps`, keeping the previous release in `~/dana-apps.prev`
       and the host's own `.env`;
    3. runs `docker compose build` and `up -d` (never `down`, never touches volumes);
-   4. waits for every service and checks that the API reports `70.4.1`. Only then does the old
+   4. waits for every service and checks that the API reports `70.5.0`. Only then does the old
       release become `~/dana-apps.prev`. If the deploy fails, the last good release is protected
       (a retry discards the failed one) and `--rollback` brings it back.
 3. **Rollback:** `Deploy-GearApps.cmd --rollback` swaps `~/dana-apps.prev` back in and restarts it.

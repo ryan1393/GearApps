@@ -1,7 +1,7 @@
 name: dana-apps
 
 x-gear-server-image: &gear-server-image
-  image: dana-apps-gear-app-server:70.4.1
+  image: dana-apps-gear-app-server:70.5.0
   pull_policy: never
 
 x-gear-db-environment: &gear-db-environment
@@ -97,7 +97,7 @@ services:
       start_period: 30s
 
   lapper-client:
-    image: dana-apps-lapper-client:70.4.1
+    image: dana-apps-lapper-client:70.5.0
     build:
       context: .
       dockerfile: apps/lapper-client/Dockerfile
@@ -114,7 +114,7 @@ services:
       retries: 5
 
   blade-tracking:
-    image: dana-apps-blade-tracking:70.4.1
+    image: dana-apps-blade-tracking:70.5.0
     build:
       context: .
       dockerfile: apps/blade-tracking/Dockerfile
@@ -131,7 +131,7 @@ services:
       retries: 5
 
   cutter-builder:
-    image: dana-apps-cutter-builder:70.4.1
+    image: dana-apps-cutter-builder:70.5.0
     build:
       context: .
       dockerfile: apps/cutter-builder/Dockerfile
@@ -148,7 +148,7 @@ services:
       retries: 5
 
   greenshed:
-    image: dana-apps-greenshed:70.4.1
+    image: dana-apps-greenshed:70.5.0
     build:
       context: .
       dockerfile: apps/greenshed/Dockerfile
@@ -169,7 +169,7 @@ services:
   # machine starts, restarts or stops its worker. Not started by default:
   #   docker compose --profile collectors up -d --build lapper-read
   lapper-read:
-    image: dana-apps-lapper-read:70.4.1
+    image: dana-apps-lapper-read:70.5.0
     build:
       context: .
       dockerfile: apps/lapper-read-py/Dockerfile

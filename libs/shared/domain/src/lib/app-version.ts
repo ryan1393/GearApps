@@ -1,2 +1,2 @@
 /** Release shared by all GearApps applications. Use npm run version:set. */
-export const GEAR_APPS_VERSION = '70.4.1';
+export const GEAR_APPS_VERSION = '70.5.0';
