@@ -147,6 +147,10 @@ one would break the other.
     and keep agent_id = trucklog-sap-watcher-01 (must match step a).
  c) On USFTWLDAPP run SETUP-TRUCK-LOG-UPLOAD.cmd as Administrator and paste
     the token (hidden). It confirms the token and agent id with Truck Log.
+    If the hidden paste is incomplete (Ctrl+V, a token copied over two lines,
+    or the "Bearer token" label included), the tool finds the token inside the
+    pasted text or reads it straight from the Windows clipboard; otherwise it
+    reports how many characters arrived. Right-click pastes most reliably.
 The token never goes into watcher.ini (the watcher refuses a token= key) and
 is redacted from logs and stored errors. http:// is refused unless
 allow_http = yes. HTTP redirects are refused (fix api_base instead).
