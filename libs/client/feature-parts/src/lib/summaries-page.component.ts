@@ -1,7 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { DanaConfirmDialogComponent, DanaTableDirective } from '@dana/ui';
+import {
+  DanaConfirmDialogComponent,
+  DanaCountBadgeDirective,
+  DanaPageHeaderComponent,
+  DanaPanelHeaderDirective,
+  DanaTableDirective,
+  DanaTableEmptyDirective,
+  DanaTableShellDirective,
+} from '@dana/ui';
 import { loadable, SummariesApi, ToastService } from '@gearapps/client/core';
-import { EmptyStateComponent, StatusBadgeComponent } from '@gearapps/client/ui';
+import { StatusBadgeComponent } from '@gearapps/client/ui';
 import { Summary } from '@gearapps/shared/domain';
 import { userName } from './shared';
 import { SummaryFormDialogComponent } from './summary-form-dialog.component';
@@ -9,39 +17,52 @@ import { SummaryFormDialogComponent } from './summary-form-dialog.component';
 @Component({
   selector: 'gear-summaries-page',
   imports: [
-    DanaTableDirective,
     DanaConfirmDialogComponent,
+    DanaCountBadgeDirective,
+    DanaPageHeaderComponent,
+    DanaPanelHeaderDirective,
+    DanaTableDirective,
+    DanaTableEmptyDirective,
+    DanaTableShellDirective,
     StatusBadgeComponent,
-    EmptyStateComponent,
     SummaryFormDialogComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="dana-page-header">
-      <div>
-        <h1>Part summaries</h1>
-        <p>Summary numbers that group parts and gearsets by model and HOS.</p>
-      </div>
-      <div class="dana-toolbar">
-        <button type="button" class="dana-btn" (click)="reload()">Refresh</button>
-        <button type="button" class="dana-btn dana-btn-primary" (click)="open(null)">
-          + Add summary
-        </button>
-      </div>
-    </div>
-
-    <section class="dana-panel">
-      <div class="dana-panel-header">
-        <div>
-          <h2>All summaries</h2>
-          <small>{{ summaries.value().length }} total</small>
+    <div class="gear-page">
+      <section
+        danaPageHeader
+        eyebrow="LAPPER / REFERENCE"
+        heading="Part Summaries"
+        description="Summary numbers that group rings, pinions and gearsets by model and hand of spiral."
+      >
+        <div danaPageHeaderAction class="dana-toolbar">
+          <button
+            type="button"
+            class="gear-btn gear-btn-secondary"
+            (click)="reload()"
+            [disabled]="summaries.loading()"
+          >
+            ↻ {{ summaries.loading() ? 'Refreshing…' : 'Refresh' }}
+          </button>
+          <button type="button" class="gear-btn gear-btn-primary" (click)="open(null)">
+            + Add summary
+          </button>
         </div>
-      </div>
-      @if (!summaries.loading() && !summaries.value().length) {
-        <div class="dana-panel-body"><gear-empty-state title="No part summaries yet" /></div>
-      } @else {
-        <div class="dana-table-shell is-sticky-head">
-          <table danaTable class="dana-table">
+      </section>
+
+      <section class="gear-panel data-panel">
+        <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+          <div>
+            <h2>All Summaries</h2>
+            <p>Sort by any column or filter with the funnel.</p>
+          </div>
+          <span danaCountBadge class="gear-count-badge count-chip">{{
+            summaries.value().length
+          }}</span>
+        </div>
+        <div danaTableShell class="table-wrap">
+          <table danaTable class="gear-table">
             <thead>
               <tr>
                 <th>Number</th>
@@ -49,40 +70,50 @@ import { SummaryFormDialogComponent } from './summary-form-dialog.component';
                 <th>HOS</th>
                 <th>Status</th>
                 <th>Created by</th>
-                <th data-dana-table-static>Actions</th>
+                <th data-dana-table-static aria-label="Actions"></th>
               </tr>
             </thead>
             <tbody>
               @for (s of summaries.value(); track s.id) {
                 <tr>
-                  <td>
-                    <strong>{{ s.number }}</strong>
-                  </td>
-                  <td>{{ s.model }}</td>
-                  <td>{{ s.hos }}</td>
+                  <td class="mono strong">{{ s.number }}</td>
+                  <td>{{ s.model || '—' }}</td>
+                  <td>{{ s.hos || '—' }}</td>
                   <td><gear-status-badge [status]="s.status" /></td>
                   <td>{{ userName(s.user) }}</td>
-                  <td>
-                    <div class="dana-table-actions">
-                      <button type="button" class="dana-btn dana-btn-sm" (click)="open(s)">
+                  <td class="right">
+                    <div class="gear-actions">
+                      <button
+                        type="button"
+                        class="gear-btn gear-btn-secondary gear-btn-sm"
+                        (click)="open(s)"
+                        [attr.aria-label]="'Edit ' + s.number"
+                      >
                         Edit
                       </button>
                       <button
                         type="button"
-                        class="dana-btn dana-btn-sm dana-btn-danger"
+                        class="gear-btn gear-btn-danger gear-btn-sm"
                         (click)="pending.set(s)"
+                        [attr.aria-label]="'Delete ' + s.number"
                       >
                         Delete
                       </button>
                     </div>
                   </td>
                 </tr>
+              } @empty {
+                <tr>
+                  <td danaTableEmpty colspan="6" class="empty-row">
+                    {{ summaries.loading() ? 'Loading summaries…' : 'No part summaries yet.' }}
+                  </td>
+                </tr>
               }
             </tbody>
           </table>
         </div>
-      }
-    </section>
+      </section>
+    </div>
 
     <gear-summary-form-dialog [(open)]="dialog" [summary]="editing()" (saved)="onSaved()" />
     <dana-confirm-dialog

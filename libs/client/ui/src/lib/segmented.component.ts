@@ -6,19 +6,34 @@ export interface SegmentOption<T = string> {
   value: T;
 }
 
-/** Dana segmented control (`.dana-segmented`) usable with reactive forms / ngModel. */
+/** Small choice group built from Gear Apps buttons, usable with reactive forms / ngModel. */
 @Component({
   selector: 'gear-segmented',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    .gear-segmented {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .gear-segmented > button {
+      flex: 1 1 0;
+      min-width: 72px;
+    }
+  `,
   providers: [
     { provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SegmentedComponent), multi: true },
   ],
   template: `
-    <div class="dana-segmented" role="group" [attr.aria-label]="ariaLabel()">
+    <div class="gear-segmented" role="radiogroup" [attr.aria-label]="ariaLabel()">
       @for (o of options(); track o.value) {
         <button
           type="button"
-          [attr.aria-pressed]="o.value === value()"
+          role="radio"
+          class="gear-btn"
+          [class.gear-btn-primary]="o.value === value()"
+          [class.gear-btn-secondary]="o.value !== value()"
+          [attr.aria-checked]="o.value === value()"
           [disabled]="disabled()"
           (click)="pick(o.value)"
         >

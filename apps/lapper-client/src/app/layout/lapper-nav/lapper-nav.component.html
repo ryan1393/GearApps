@@ -1,0 +1,175 @@
+@if (session.authState$ | async; as user) {
+  <aside
+    danaMobileNav
+    [desktopMinWidth]="1024"
+    #mobileNav="danaMobileNav"
+    class="gear-sidebar"
+    [class.mobile-open]="mobileNav.open"
+    aria-label="Application navigation"
+  >
+    <a (click)="mobileNav.close()" routerLink="/dashboard" class="brand-row">
+      <span class="brand-mark dana-diamond-mark"
+        ><img src="assets/brand/dana-logo.svg" alt="" class="dana-diamond-image" aria-hidden="true"
+      /></span>
+      <span class="brand-copy">
+        <small>GEAR APPS</small>
+        <strong>LAPPER</strong>
+      </span>
+    </a>
+
+    <nav class="side-nav" aria-label="Lapper">
+      <a
+        (click)="mobileNav.close()"
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        class="side-link primary"
+      >
+        <span class="nav-icon"
+          ><span class="gear-glyph gear-glyph-dashboard" aria-hidden="true"></span></span
+        ><span>Lapper Dashboard</span><span class="nav-current">ACTIVE</span>
+      </a>
+
+      <div class="nav-heading">OPERATIONS</div>
+      <a
+        (click)="mobileNav.close()"
+        routerLink="/lapping-summaries"
+        routerLinkActive="active-sub"
+        class="side-link"
+        ><span class="nav-icon"
+          ><span class="gear-glyph gear-glyph-lapping" aria-hidden="true"></span></span
+        ><span>Lapping Summaries</span></a
+      >
+
+      <div class="nav-heading">REFERENCE</div>
+      <a
+        (click)="mobileNav.close()"
+        routerLink="/machines"
+        routerLinkActive="active-sub"
+        class="side-link"
+        ><span class="nav-icon"
+          ><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span
+        ><span>Machines</span></a
+      >
+      <a
+        (click)="mobileNav.close()"
+        routerLink="/parts"
+        routerLinkActive="active-sub"
+        class="side-link"
+        ><span class="nav-icon"
+          ><span class="gear-glyph gear-glyph-gearset" aria-hidden="true"></span></span
+        ><span>Parts &amp; Gearsets</span></a
+      >
+      <a
+        (click)="mobileNav.close()"
+        routerLink="/part-summaries"
+        routerLinkActive="active-sub"
+        class="side-link"
+        ><span class="nav-icon"
+          ><span class="gear-glyph gear-glyph-summary" aria-hidden="true"></span></span
+        ><span>Part Summaries</span></a
+      >
+
+      <div class="nav-heading">SHARED APPS</div>
+      <a (click)="mobileNav.close()" [href]="bladeTrackingUrl" class="side-link"
+        ><span class="nav-icon"
+          ><span class="gear-glyph gear-glyph-blade" aria-hidden="true"></span></span
+        ><span>Blade Tracking</span></a
+      >
+      <a (click)="mobileNav.close()" [href]="cutterBuilderUrl" class="side-link"
+        ><span class="nav-icon"
+          ><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span
+        ><span>Cutter Builder</span></a
+      >
+      <a (click)="mobileNav.close()" [href]="greenshedUrl" class="side-link"
+        ><span class="nav-icon"
+          ><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span
+        ><span>Greenshed</span></a
+      >
+
+      @if (user.role === 'admin') {
+        <div class="nav-heading">ADMINISTRATION</div>
+        <a
+          (click)="mobileNav.close()"
+          routerLink="/admin"
+          routerLinkActive="active-sub"
+          class="side-link"
+          ><span class="nav-icon"
+            ><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span
+          ><span>Admin</span></a
+        >
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="version">
+        Gear Apps <span>v{{ appVersion }}</span>
+      </div>
+      <div class="online-row"><span>Shared manufacturing workspace</span></div>
+    </div>
+  </aside>
+
+  @if (mobileNav.open) {
+    <button
+      type="button"
+      class="gear-nav-overlay"
+      aria-label="Close navigation"
+      (click)="mobileNav.close()"
+    ></button>
+  }
+
+  <header class="gear-topbar">
+    <button
+      class="menu-button"
+      type="button"
+      aria-label="Open navigation"
+      [attr.aria-expanded]="mobileNav.open"
+      (click)="mobileNav.toggle()"
+    >
+      ☰
+    </button>
+
+    <form class="global-search" (ngSubmit)="search()">
+      <span class="search-icon"
+        ><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span
+      ></span>
+      <input
+        type="text"
+        name="globalSearch"
+        [(ngModel)]="searchValue"
+        placeholder="Search gearset or machine asset ID…"
+        aria-label="Search gearset or machine asset ID"
+        autocomplete="off"
+      />
+      <button type="submit" aria-label="Search">
+        <span class="gear-glyph gear-glyph-search" aria-hidden="true"></span>
+      </button>
+    </form>
+
+    <div class="topbar-user">
+      <div class="lapper-text-size" role="group" aria-label="Text size">
+        <button
+          type="button"
+          (click)="layout.bumpScale(-1)"
+          [disabled]="layout.textScale() <= SCALE_MIN"
+          aria-label="Smaller text"
+        >
+          A−
+        </button>
+        <button
+          type="button"
+          (click)="layout.bumpScale(1)"
+          [disabled]="layout.textScale() >= SCALE_MAX"
+          aria-label="Larger text"
+        >
+          A+
+        </button>
+      </div>
+      <div class="avatar">{{ initials(user.email) }}</div>
+      <div class="user-copy">
+        <strong>{{ user.email }}</strong
+        ><span>{{ user.departmentDescription || user.role }}</span>
+      </div>
+      <button type="button" class="signout-button" (click)="logout()">Sign out</button>
+    </div>
+  </header>
+}

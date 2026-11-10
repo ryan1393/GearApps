@@ -28,8 +28,6 @@
       "@gearapps/api/postgres": ["./libs/api/postgres/src/index.ts"],
       "@gearapps/client/core": ["./libs/client/core/src/index.ts"],
       "@gearapps/client/ui": ["./libs/client/ui/src/index.ts"],
-      "@gearapps/client/shell": ["./libs/client/shell/src/index.ts"],
-      "@gearapps/client/feature-auth": ["./libs/client/feature-auth/src/index.ts"],
       "@gearapps/client/feature-dashboard": ["./libs/client/feature-dashboard/src/index.ts"],
       "@gearapps/client/feature-machines": ["./libs/client/feature-machines/src/index.ts"],
       "@gearapps/client/feature-parts": ["./libs/client/feature-parts/src/index.ts"],

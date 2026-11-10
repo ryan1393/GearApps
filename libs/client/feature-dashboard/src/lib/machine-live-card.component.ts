@@ -38,17 +38,14 @@ import { ScannerControlsComponent } from './scanner-controls.component';
   imports: [StatusBadgeComponent, ValueFieldComponent, ScannerControlsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <article
-      class="dana-card gear-live"
-      [attr.data-tone]="fanuc()?.y03_2_stack_inCycle ? 'success' : null"
-    >
+    <article class="dana-card" [attr.data-tone]="fanuc()?.y03_2_stack_inCycle ? 'success' : null">
       <header class="dana-card-header">
         <div>
           <span class="dana-card-eyebrow">{{
             machine().description || machine().type || 'Machine'
           }}</span>
           <span class="dana-card-title">{{ machine().number || machine().ip }}</span>
-          <span class="dana-muted gear-live-meta"
+          <span class="gear-muted gear-live-meta"
             ><code>{{ machine().ip }}</code>
             @if (machine().builder) {
               · {{ machine().builder }}
@@ -58,7 +55,7 @@ import { ScannerControlsComponent } from './scanner-controls.component';
         <div class="gear-live-status">
           <gear-status-badge [status]="machine().status" />
           @if (lastUpdate()) {
-            <small class="dana-muted" title="Last refresh">{{ lastUpdate() }}</small>
+            <small class="gear-muted" title="Last refresh">{{ lastUpdate() }}</small>
           }
         </div>
       </header>
@@ -126,7 +123,7 @@ import { ScannerControlsComponent } from './scanner-controls.component';
               />
             </div>
             @if (fanucError()) {
-              <p class="dana-field-hint">No I/O snapshot recorded for this machine yet.</p>
+              <p class="gear-field-help">No I/O snapshot recorded for this machine yet.</p>
             }
           </div>
         </div>
@@ -136,7 +133,7 @@ import { ScannerControlsComponent } from './scanner-controls.component';
         <footer class="gear-live-foot">
           <button
             type="button"
-            class="dana-btn dana-btn-sm"
+            class="gear-btn gear-btn-secondary gear-btn-sm"
             (click)="controlsOpen.set(!controlsOpen())"
           >
             {{ controlsOpen() ? 'Hide scanner controls' : 'Scanner controls' }}

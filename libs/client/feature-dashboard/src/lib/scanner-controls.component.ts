@@ -4,6 +4,7 @@ import { ScannerApi, ToastService } from '@gearapps/client/core';
 interface Cmd {
   label: string;
   op: string;
+  /** Gear Apps button tone; secondary when omitted. */
   cls?: string;
 }
 
@@ -12,14 +13,14 @@ const GROUPS: { label: string; cmds: Cmd[] }[] = [
   {
     label: 'Output 1',
     cmds: [
-      { label: 'On', op: 'OUTON,1', cls: 'dana-btn-success' },
+      { label: 'On', op: 'OUTON,1', cls: 'gear-btn-success' },
       { label: 'Off', op: 'OUTOFF,1' },
     ],
   },
   {
     label: 'Output 2',
     cmds: [
-      { label: 'On', op: 'OUTON,2', cls: 'dana-btn-success' },
+      { label: 'On', op: 'OUTON,2', cls: 'gear-btn-success' },
       { label: 'Off', op: 'OUTOFF,2' },
     ],
   },
@@ -34,13 +35,13 @@ const GROUPS: { label: string; cmds: Cmd[] }[] = [
     label: 'Test',
     cmds: [
       { label: 'Start', op: 'TEST0' },
-      { label: 'Quit', op: 'QUIT', cls: 'dana-btn-warning' },
+      { label: 'Quit', op: 'QUIT', cls: 'gear-btn-danger' },
     ],
   },
   {
     label: 'Trigger',
     cmds: [
-      { label: 'On', op: 'LON01', cls: 'dana-btn-success' },
+      { label: 'On', op: 'LON01', cls: 'gear-btn-success' },
       { label: 'Off', op: 'LOFF' },
     ],
   },
@@ -54,11 +55,11 @@ const GROUPS: { label: string; cmds: Cmd[] }[] = [
       @for (g of groups; track g.label) {
         <div class="gear-ctl-group">
           <span class="dana-detail-label">{{ g.label }}</span>
-          <div class="dana-actions">
+          <div class="gear-actions">
             @for (c of g.cmds; track c.op) {
               <button
                 type="button"
-                class="dana-btn dana-btn-sm {{ c.cls ?? '' }}"
+                class="gear-btn gear-btn-sm {{ c.cls ?? 'gear-btn-secondary' }}"
                 [disabled]="pending() !== null"
                 (click)="send(c.op)"
               >

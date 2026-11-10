@@ -10,7 +10,8 @@ import {
   untracked,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { apiErrorMessage, AuthService, PartsApi } from '@gearapps/client/core';
+import { apiErrorMessage, PartsApi } from '@gearapps/client/core';
+import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
 import { DialogComponent, SegmentedComponent } from '@gearapps/client/ui';
 import { Part, Summary } from '@gearapps/shared/domain';
 import { PART_TYPE_OPTIONS, STATUS_OPTIONS } from './shared';
@@ -24,51 +25,56 @@ import { PART_TYPE_OPTIONS, STATUS_OPTIONS } from './shared';
       [open]="open()"
       (openChange)="open.set($event)"
       [title]="part() ? 'Edit part ' + part()?.number : 'Add part'"
-      description="Pinions and rings are later paired into gearsets."
+      [description]="
+        part()
+          ? 'Part number and type are owned by GearApps master data.'
+          : 'Pinions and rings are later paired into gearsets.'
+      "
       width="560px"
     >
-      <form [formGroup]="form" (ngSubmit)="save()" id="partForm" class="dana-form-grid">
-        <div class="dana-field dana-field-full">
-          <span>Type</span
-          ><gear-segmented formControlName="type" [options]="types" ariaLabel="Part type" />
+      <form [formGroup]="form" (ngSubmit)="save()" id="partForm" class="gear-form-grid">
+        <div class="gear-field dana-field-full">
+          <span>Type</span>
+          <gear-segmented formControlName="type" [options]="types" ariaLabel="Part type" />
         </div>
-        <label class="dana-field"
-          ><span class="dana-field-head"
-            ><span>Part number</span><span class="dana-field-tag is-required">Required</span></span
-          ><input class="dana-input" formControlName="number"
-        /></label>
-        <label class="dana-field"
-          ><span class="dana-field-head"
-            ><span>Teeth</span><span class="dana-field-tag is-required">Required</span></span
-          ><input class="dana-input" type="number" min="1" max="999" formControlName="teeth"
-        /></label>
-        <label class="dana-field dana-field-full">
-          <span class="dana-field-head"
-            ><span>Summary</span><span class="dana-field-tag">Optional</span></span
-          >
-          <select class="dana-select" formControlName="summary_id">
-            <option [ngValue]="null">No summary</option>
+        <label class="gear-field">
+          Part number
+          <input class="gear-input" formControlName="number" placeholder="060GP104" />
+        </label>
+        <label class="gear-field">
+          Teeth
+          <input class="gear-input" type="number" min="1" max="999" formControlName="teeth" />
+        </label>
+        <label class="gear-field dana-field-full">
+          Summary
+          <select class="gear-select" formControlName="summary_id">
+            <option [ngValue]="null" disabled>Choose a summary</option>
             @for (s of summaries(); track s.id) {
-              <option [ngValue]="s.id">{{ s.number }} · {{ s.model }}</option>
+              <option [ngValue]="s.id">
+                {{ s.number }}{{ s.model ? ' · model ' + s.model : '' }}
+              </option>
             }
           </select>
+          <small class="gear-field-help"
+            >Rings and pinions that share a summary number can be paired into a gearset.</small
+          >
         </label>
-        <div class="dana-field">
-          <span>Status</span
-          ><gear-segmented formControlName="status" [options]="statuses" ariaLabel="Status" />
+        <div class="gear-field">
+          <span>Status</span>
+          <gear-segmented formControlName="status" [options]="statuses" ariaLabel="Status" />
         </div>
         @if (error()) {
-          <p class="dana-alert dana-alert-danger dana-field-full" role="alert">{{ error() }}</p>
+          <p class="gear-alert gear-alert-danger dana-field-full" role="alert">{{ error() }}</p>
         }
       </form>
       <ng-container dialogActions>
-        <button type="button" class="dana-btn dana-btn-ghost" (click)="open.set(false)">
+        <button type="button" class="gear-btn gear-btn-secondary" (click)="open.set(false)">
           Cancel
         </button>
         <button
           type="submit"
           form="partForm"
-          class="dana-btn dana-btn-primary"
+          class="gear-btn gear-btn-primary"
           [disabled]="form.invalid || busy()"
         >
           {{ busy() ? 'Saving…' : part() ? 'Save changes' : 'Add part' }}
@@ -79,7 +85,7 @@ import { PART_TYPE_OPTIONS, STATUS_OPTIONS } from './shared';
 })
 export class PartFormDialogComponent {
   private readonly api = inject(PartsApi);
-  private readonly auth = inject(AuthService);
+  private readonly session = inject(AuthSessionService);
   readonly open = model(false);
   readonly part = input<Part | null>(null);
   readonly summaries = input<Summary[]>([]);
@@ -92,7 +98,7 @@ export class PartFormDialogComponent {
     type: new FormControl('Pinion', { nonNullable: true, validators: [Validators.required] }),
     number: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     teeth: new FormControl<number | null>(null, [Validators.required, Validators.min(1)]),
-    summary_id: new FormControl<string | null>(null),
+    summary_id: new FormControl<string | null>(null, Validators.required),
     status: new FormControl('Active', { nonNullable: true, validators: [Validators.required] }),
   });
 
@@ -122,7 +128,7 @@ export class PartFormDialogComponent {
 
   protected save() {
     if (this.form.invalid || this.busy()) return;
-    const userId = this.auth.userId();
+    const userId = this.session.currentUser?.sub ?? null;
     if (!userId) return;
     this.busy.set(true);
     this.error.set(null);

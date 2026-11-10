@@ -7,14 +7,20 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import {
   DanaConfirmDialogComponent,
+  DanaCountBadgeDirective,
+  DanaPageHeaderComponent,
+  DanaPanelHeaderDirective,
   DanaTabDirective,
   DanaTableDirective,
+  DanaTableEmptyDirective,
+  DanaTableShellDirective,
   DanaTabsDirective,
 } from '@dana/ui';
 import { GearsetsApi, loadable, PartsApi, SummariesApi, ToastService } from '@gearapps/client/core';
-import { EmptyStateComponent, StatusBadgeComponent } from '@gearapps/client/ui';
+import { StatusBadgeComponent } from '@gearapps/client/ui';
 import { Gearset, Part, Summary } from '@gearapps/shared/domain';
 import { Observable } from 'rxjs';
 import { GearsetFormDialogComponent } from './gearset-form-dialog.component';
@@ -27,182 +33,203 @@ type Tab = 'parts' | 'gearsets';
   selector: 'gear-parts-page',
   imports: [
     DecimalPipe,
-    DanaTableDirective,
-    DanaTabsDirective,
-    DanaTabDirective,
+    RouterLink,
     DanaConfirmDialogComponent,
+    DanaCountBadgeDirective,
+    DanaPageHeaderComponent,
+    DanaPanelHeaderDirective,
+    DanaTabDirective,
+    DanaTableDirective,
+    DanaTableEmptyDirective,
+    DanaTableShellDirective,
+    DanaTabsDirective,
     StatusBadgeComponent,
-    EmptyStateComponent,
     PartFormDialogComponent,
     GearsetFormDialogComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="dana-page-header">
-      <div>
-        <h1>Parts &amp; gearsets</h1>
-        <p>Pinions and rings, and the gearsets built from them.</p>
-      </div>
-      <div class="dana-toolbar">
-        <button type="button" class="dana-btn" (click)="reload()">Refresh</button>
-        @if (tab() === 'parts') {
-          <button type="button" class="dana-btn dana-btn-primary" (click)="openPart(null)">
-            + Add part
-          </button>
-        } @else {
-          <button type="button" class="dana-btn dana-btn-primary" (click)="openGearset(null)">
-            + Add gearset
-          </button>
-        }
-      </div>
-    </div>
-
-    <section class="dana-panel">
-      <div class="dana-panel-header">
-        <div class="dana-tabs" danaTabs role="tablist">
+    <div class="gear-page">
+      <section
+        danaPageHeader
+        eyebrow="LAPPER / REFERENCE"
+        heading="Parts & Gearsets"
+        description="Pinions and rings, and the gearsets they are paired into for lapping."
+      >
+        <div danaPageHeaderAction class="dana-toolbar">
           <button
-            danaTab
-            role="tab"
             type="button"
-            [active]="tab() === 'parts'"
-            (click)="tab.set('parts')"
+            class="gear-btn gear-btn-secondary"
+            (click)="reload()"
+            [disabled]="loading()"
           >
-            Parts <span class="dana-count-badge">{{ parts.value().length }}</span>
+            ↻ {{ loading() ? 'Refreshing…' : 'Refresh' }}
           </button>
-          <button
-            danaTab
-            role="tab"
-            type="button"
-            [active]="tab() === 'gearsets'"
-            (click)="tab.set('gearsets')"
-          >
-            Gearsets <span class="dana-count-badge">{{ gearsets.value().length }}</span>
-          </button>
+          @if (tab() === 'parts') {
+            <button type="button" class="gear-btn gear-btn-primary" (click)="openPart(null)">
+              + Add part
+            </button>
+          } @else {
+            <button type="button" class="gear-btn gear-btn-primary" (click)="openGearset(null)">
+              + Add gearset
+            </button>
+          }
         </div>
-      </div>
+      </section>
 
-      @if (tab() === 'parts') {
-        @if (!parts.loading() && !parts.value().length) {
-          <div class="dana-panel-body">
-            <gear-empty-state
-              title="No parts yet"
-              hint="Add pinions and rings, then combine them into gearsets."
-            />
+      <section class="gear-panel data-panel">
+        <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+          <div danaTabs aria-label="Parts and gearsets">
+            <button danaTab type="button" [active]="tab() === 'parts'" (click)="tab.set('parts')">
+              Parts
+              <span danaCountBadge class="gear-count-badge count-chip">{{
+                parts.value().length
+              }}</span>
+            </button>
+            <button
+              danaTab
+              type="button"
+              [active]="tab() === 'gearsets'"
+              (click)="tab.set('gearsets')"
+            >
+              Gearsets
+              <span danaCountBadge class="gear-count-badge count-chip">{{
+                gearsets.value().length
+              }}</span>
+            </button>
           </div>
-        } @else {
-          <div class="dana-table-shell is-sticky-head">
-            <table danaTable class="dana-table">
+        </div>
+
+        @if (tab() === 'parts') {
+          <div danaTableShell class="table-wrap">
+            <table danaTable class="gear-table">
               <thead>
                 <tr>
                   <th>Number</th>
                   <th>Type</th>
                   <th>Teeth</th>
                   <th>Summary</th>
+                  <th>Model</th>
                   <th>Status</th>
                   <th>Created by</th>
-                  <th data-dana-table-static>Actions</th>
+                  <th data-dana-table-static aria-label="Actions"></th>
                 </tr>
               </thead>
               <tbody>
                 @for (p of parts.value(); track p.id) {
                   <tr>
-                    <td>
-                      <strong>{{ p.number }}</strong>
-                    </td>
+                    <td class="mono strong">{{ p.number }}</td>
                     <td>{{ p.type }}</td>
                     <td>{{ p.teeth ?? '—' }}</td>
-                    <td>
-                      {{ p.summary?.number ?? '—' }}
-                      @if (p.summary?.model) {
-                        <span class="dana-cell-sub">{{ p.summary?.model }}</span>
-                      }
-                    </td>
+                    <td class="mono">{{ p.summary?.number ?? '—' }}</td>
+                    <td>{{ p.summary?.model || '—' }}</td>
                     <td><gear-status-badge [status]="p.status" /></td>
                     <td>{{ userName(p.user) }}</td>
-                    <td>
-                      <div class="dana-table-actions">
-                        <button type="button" class="dana-btn dana-btn-sm" (click)="openPart(p)">
+                    <td class="right">
+                      <div class="gear-actions">
+                        <button
+                          type="button"
+                          class="gear-btn gear-btn-secondary gear-btn-sm"
+                          (click)="openPart(p)"
+                          [attr.aria-label]="'Edit ' + p.number"
+                        >
                           Edit
                         </button>
                         <button
                           type="button"
-                          class="dana-btn dana-btn-sm dana-btn-danger"
+                          class="gear-btn gear-btn-danger gear-btn-sm"
                           (click)="askDelete('part', p)"
+                          [attr.aria-label]="'Delete ' + p.number"
                         >
                           Delete
                         </button>
                       </div>
                     </td>
                   </tr>
+                } @empty {
+                  <tr>
+                    <td danaTableEmpty colspan="8" class="empty-row">
+                      {{
+                        parts.loading()
+                          ? 'Loading parts…'
+                          : 'No parts yet. Add pinions and rings, then pair them into gearsets.'
+                      }}
+                    </td>
+                  </tr>
                 }
               </tbody>
             </table>
           </div>
-        }
-      } @else {
-        @if (!gearsets.loading() && !gearsets.value().length) {
-          <div class="dana-panel-body">
-            <gear-empty-state
-              title="No gearsets yet"
-              hint="A gearset pairs a pinion with a ring; the ratio is calculated from their teeth."
-            />
-          </div>
         } @else {
-          <div class="dana-table-shell is-sticky-head">
-            <table danaTable class="dana-table">
+          <div danaTableShell class="table-wrap">
+            <table danaTable class="gear-table">
               <thead>
                 <tr>
                   <th>Number</th>
                   <th>Rev</th>
-                  <th>Pinion</th>
-                  <th>Ring</th>
+                  <th>Pinion / Ring</th>
                   <th>Ratio</th>
                   <th>Summary</th>
                   <th>Status</th>
-                  <th data-dana-table-static>Actions</th>
+                  <th data-dana-table-static aria-label="Actions"></th>
                 </tr>
               </thead>
               <tbody>
                 @for (g of gearsets.value(); track g.id) {
                   <tr>
-                    <td>
-                      <strong>{{ g.number }}</strong>
-                    </td>
+                    <td class="mono strong">{{ g.number }}</td>
                     <td>{{ g.rev || '—' }}</td>
-                    <td>
-                      {{ g.pinion?.number ?? '—' }}
-                      @if (g.pinion?.teeth) {
-                        <span class="dana-cell-sub">{{ g.pinion?.teeth }} teeth</span>
-                      }
+                    <td class="mono nowrap">
+                      {{ g.pinion?.number ?? '—' }} / {{ g.ring?.number ?? '—' }}
                     </td>
-                    <td>
-                      {{ g.ring?.number ?? '—' }}
-                      @if (g.ring?.teeth) {
-                        <span class="dana-cell-sub">{{ g.ring?.teeth }} teeth</span>
-                      }
-                    </td>
-                    <td>
+                    <td class="nowrap">
                       {{
                         g.ratio !== null && g.ratio !== undefined
                           ? (g.ratio | number: '1.2-4')
                           : '—'
                       }}
+                      @if (g.pinion?.teeth && g.ring?.teeth) {
+                        <span class="gear-muted">({{ g.ring?.teeth }}:{{ g.pinion?.teeth }})</span>
+                      }
                     </td>
-                    <td>{{ g.summary?.number ?? '—' }}</td>
+                    <td class="mono">{{ g.summary?.number ?? '—' }}</td>
                     <td><gear-status-badge [status]="g.status" /></td>
-                    <td>
-                      <div class="dana-table-actions">
-                        <button type="button" class="dana-btn dana-btn-sm" (click)="openGearset(g)">
+                    <td class="right">
+                      <div class="gear-actions">
+                        <a
+                          class="gear-btn gear-btn-secondary gear-btn-sm"
+                          routerLink="/lapping-summaries"
+                          [queryParams]="{ gearset: g.id }"
+                          [attr.aria-label]="'Lapping summary for ' + g.number"
+                          >Summary</a
+                        >
+                        <button
+                          type="button"
+                          class="gear-btn gear-btn-secondary gear-btn-sm"
+                          (click)="openGearset(g)"
+                          [attr.aria-label]="'Edit ' + g.number"
+                        >
                           Edit
                         </button>
                         <button
                           type="button"
-                          class="dana-btn dana-btn-sm dana-btn-danger"
+                          class="gear-btn gear-btn-danger gear-btn-sm"
                           (click)="askDelete('gearset', g)"
+                          [attr.aria-label]="'Delete ' + g.number"
                         >
                           Delete
                         </button>
                       </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td danaTableEmpty colspan="7" class="empty-row">
+                      {{
+                        gearsets.loading()
+                          ? 'Loading gearsets…'
+                          : 'No gearsets yet. A gearset pairs a pinion with a ring from the same summary.'
+                      }}
                     </td>
                   </tr>
                 }
@@ -210,8 +237,8 @@ type Tab = 'parts' | 'gearsets';
             </table>
           </div>
         }
-      }
-    </section>
+      </section>
+    </div>
 
     <gear-part-form-dialog
       [(open)]="partDialog"
@@ -236,14 +263,6 @@ type Tab = 'parts' | 'gearsets';
       (cancel)="pending.set(null)"
     />
   `,
-  styles: `
-    .dana-panel-header .dana-tabs {
-      border-bottom: 0;
-    }
-    .dana-tab .dana-count-badge {
-      margin-left: 6px;
-    }
-  `,
 })
 export class PartsPageComponent implements OnInit {
   private readonly partsApi = inject(PartsApi);
@@ -266,9 +285,7 @@ export class PartsPageComponent implements OnInit {
     message: string;
     run: () => Observable<void>;
   } | null>(null);
-  protected readonly total = computed(
-    () => this.parts.value().length + this.gearsets.value().length,
-  );
+  protected readonly loading = computed(() => this.parts.loading() || this.gearsets.loading());
 
   ngOnInit() {
     this.reload();

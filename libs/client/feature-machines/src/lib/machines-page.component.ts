@@ -6,7 +6,15 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { DanaConfirmDialogComponent, DanaTableDirective } from '@dana/ui';
+import {
+  DanaConfirmDialogComponent,
+  DanaCountBadgeDirective,
+  DanaPageHeaderComponent,
+  DanaPanelHeaderDirective,
+  DanaTableDirective,
+  DanaTableEmptyDirective,
+  DanaTableShellDirective,
+} from '@dana/ui';
 import {
   DepartmentsApi,
   loadable,
@@ -14,120 +22,127 @@ import {
   ScannerDetailsApi,
   ToastService,
 } from '@gearapps/client/core';
-import { EmptyStateComponent, StatusBadgeComponent } from '@gearapps/client/ui';
-import { Machine, ScannerDetail } from '@gearapps/shared/domain';
+import { StatusBadgeComponent } from '@gearapps/client/ui';
+import { Department, Machine, ScannerDetail } from '@gearapps/shared/domain';
 import { MachineFormDialogComponent } from './machine-form-dialog.component';
 
 @Component({
   selector: 'gear-machines-page',
   imports: [
-    DanaTableDirective,
     DanaConfirmDialogComponent,
+    DanaCountBadgeDirective,
+    DanaPageHeaderComponent,
+    DanaPanelHeaderDirective,
+    DanaTableDirective,
+    DanaTableEmptyDirective,
+    DanaTableShellDirective,
     StatusBadgeComponent,
-    EmptyStateComponent,
     MachineFormDialogComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="dana-page-header">
-      <div>
-        <h1>Machines</h1>
-        <p>
-          Lapping machines, their cells and attached scanners. Click a column to sort; use the
-          funnel to filter.
-        </p>
-      </div>
-      <div class="dana-toolbar">
-        <button type="button" class="dana-btn" (click)="reload()" [disabled]="machines.loading()">
-          {{ machines.loading() ? 'Refreshing…' : 'Refresh' }}
-        </button>
-        <button type="button" class="dana-btn dana-btn-primary" (click)="openCreate()">
-          + Add machine
-        </button>
-      </div>
-    </div>
-
-    <section class="dana-panel">
-      <div class="dana-panel-header">
-        <div>
-          <h2>All machines</h2>
-          <small>{{ activeCount() }} active · {{ machines.value().length }} total</small>
-        </div>
-      </div>
-      @if (!machines.loading() && !machines.value().length) {
-        <div class="dana-panel-body">
-          <gear-empty-state
-            title="No machines yet"
-            hint="Add the lapping machines on the floor to start tracking cycles and watching cells live."
+    <div class="gear-page">
+      <section
+        danaPageHeader
+        eyebrow="LAPPER / REFERENCE"
+        heading="Machines"
+        description="Lapping machines, the cells they run in and the scanners attached to them."
+      >
+        <div danaPageHeaderAction class="dana-toolbar">
+          <button
+            type="button"
+            class="gear-btn gear-btn-secondary"
+            (click)="reload()"
+            [disabled]="machines.loading()"
           >
-            <button type="button" class="dana-btn dana-btn-primary" (click)="openCreate()">
-              Add the first machine
-            </button>
-          </gear-empty-state>
+            ↻ {{ machines.loading() ? 'Refreshing…' : 'Refresh' }}
+          </button>
+          <button type="button" class="gear-btn gear-btn-primary" (click)="openCreate()">
+            + Add machine
+          </button>
         </div>
-      } @else {
-        <div class="dana-table-shell is-sticky-head">
-          <table danaTable class="dana-table">
+      </section>
+
+      <section class="gear-panel data-panel">
+        <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+          <div>
+            <h2>All Machines</h2>
+            <p>{{ activeCount() }} active · sort by any column or filter with the funnel.</p>
+          </div>
+          <span danaCountBadge class="gear-count-badge count-chip">{{
+            machines.value().length
+          }}</span>
+        </div>
+        <div danaTableShell class="table-wrap">
+          <table danaTable class="gear-table">
             <thead>
               <tr>
                 <th>Asset ID</th>
                 <th>Cell</th>
+                <th>Dept</th>
                 <th>IP</th>
-                <th>Description</th>
-                <th>Type</th>
-                <th>Builder</th>
+                <th>Machine</th>
                 <th>Scanner</th>
                 <th>Status</th>
-                <th data-dana-table-static>Actions</th>
+                <th data-dana-table-static aria-label="Actions"></th>
               </tr>
             </thead>
             <tbody>
               @for (m of machines.value(); track m.id) {
-                <tr [attr.data-tone]="m.status.toLowerCase() === 'active' ? null : 'neutral'">
-                  <td>
-                    <strong>{{ m.number || '—' }}</strong>
-                    @if (m.dept_id) {
-                      <span class="dana-cell-sub">Dept {{ m.dept_id }}</span>
-                    }
-                  </td>
+                <tr>
+                  <td class="mono strong" [title]="m.description || ''">{{ m.number || '—' }}</td>
                   <td>{{ m.cell || '—' }}</td>
-                  <td>
-                    <code>{{ m.ip }}</code>
-                  </td>
-                  <td>{{ m.description || '—' }}</td>
-                  <td>{{ m.type || '—' }}</td>
-                  <td>{{ m.builder || '—' }}</td>
-                  <td>
+                  <td [title]="departmentLabel(m.dept_id)">{{ m.dept_id || '—' }}</td>
+                  <td class="mono nowrap">{{ m.ip }}</td>
+                  <td>{{ machineModel(m) }}</td>
+                  <td class="mono nowrap">
                     {{ m.scanner?.ip || m.scanner?.model || (m.scanner_id ? 'Assigned' : '—') }}
                   </td>
                   <td><gear-status-badge [status]="m.status" /></td>
-                  <td>
-                    <div class="dana-table-actions">
-                      <button type="button" class="dana-btn dana-btn-sm" (click)="openEdit(m)">
+                  <td class="right">
+                    <div class="gear-actions">
+                      <button
+                        type="button"
+                        class="gear-btn gear-btn-secondary gear-btn-sm"
+                        (click)="openEdit(m)"
+                        [attr.aria-label]="'Edit ' + (m.number || m.ip)"
+                      >
                         Edit
                       </button>
                       <button
                         type="button"
-                        class="dana-btn dana-btn-sm dana-btn-danger"
+                        class="gear-btn gear-btn-danger gear-btn-sm"
                         (click)="pendingDelete.set(m)"
+                        [attr.aria-label]="'Delete ' + (m.number || m.ip)"
                       >
                         Delete
                       </button>
                     </div>
                   </td>
                 </tr>
+              } @empty {
+                <tr>
+                  <td danaTableEmpty colspan="8" class="empty-row">
+                    @if (machines.loading()) {
+                      Loading machines…
+                    } @else {
+                      No machines yet. Add the lappers on the floor to start tracking cycles and
+                      watching cells live.
+                    }
+                  </td>
+                </tr>
               }
             </tbody>
           </table>
         </div>
-      }
-    </section>
+      </section>
+    </div>
 
     <gear-machine-form-dialog
       [(open)]="dialogOpen"
       [machine]="editing()"
       [scannerOptions]="scanners.value()"
-      [departmentOptions]="departmentNumbers()"
+      [departmentOptions]="departmentOptions()"
       (saved)="onSaved($event)"
     />
 
@@ -154,9 +169,12 @@ export class MachinesPageComponent implements OnInit {
 
   protected readonly machines = loadable<Machine[]>([]);
   protected readonly scanners = loadable<ScannerDetail[]>([]);
-  protected readonly departments = loadable<{ number: number }[]>([]);
-  protected readonly departmentNumbers = computed(() =>
-    this.departments.value().map((d) => String(d.number)),
+  protected readonly departments = loadable<Department[]>([]);
+  protected readonly departmentOptions = computed(() =>
+    this.departments.value().map((d) => ({
+      value: String(d.number),
+      label: d.description ? `${d.number} · ${d.description}` : String(d.number),
+    })),
   );
   protected readonly activeCount = computed(
     () => this.machines.value().filter((m) => m.status?.toLowerCase() === 'active').length,
@@ -165,6 +183,16 @@ export class MachinesPageComponent implements OnInit {
   protected dialogOpen = false;
   protected readonly editing = signal<Machine | null>(null);
   protected readonly pendingDelete = signal<Machine | null>(null);
+
+  protected machineModel(m: Machine): string {
+    return [m.builder, m.type].filter(Boolean).join(' ') || '—';
+  }
+
+  protected departmentLabel(code: string | null | undefined): string {
+    if (!code) return '—';
+    const match = this.departmentOptions().find((d) => d.value === String(code));
+    return match?.label ?? code;
+  }
 
   ngOnInit() {
     this.reload();

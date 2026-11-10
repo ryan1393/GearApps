@@ -15,7 +15,6 @@ import { apiErrorMessage, MachinesApi } from '@gearapps/client/core';
 import { DialogComponent, SegmentedComponent } from '@gearapps/client/ui';
 import { Machine, ScannerDetail } from '@gearapps/shared/domain';
 import {
-  FALLBACK_DEPARTMENTS,
   IPV4_PATTERN,
   MACHINE_BUILDERS,
   MACHINE_CELLS,
@@ -34,70 +33,68 @@ import {
       [title]="machine() ? 'Edit machine ' + (machine()?.number ?? '') : 'Add machine'"
       description="Asset details, cell assignment and the scanner attached to this lapper."
     >
-      <form [formGroup]="form" (ngSubmit)="save()" id="machineForm" class="dana-form-grid">
-        <label class="dana-field" [class.is-invalid]="invalid('number')">
-          <span class="dana-field-head"
-            ><span>Asset ID</span><span class="dana-field-tag is-required">Required</span></span
-          >
-          <input class="dana-input" formControlName="number" placeholder="01-094-999" />
+      <form [formGroup]="form" (ngSubmit)="save()" id="machineForm" class="gear-form-grid">
+        <label class="gear-field">
+          Asset ID
+          <input class="gear-input" formControlName="number" placeholder="01-094-999" />
           @if (invalid('number')) {
-            <small class="dana-field-error">Asset ID is required.</small>
+            <small class="gear-field-help" role="alert">Asset ID is required.</small>
           }
         </label>
-        <label class="dana-field" [class.is-invalid]="invalid('ip')">
-          <span class="dana-field-head"
-            ><span>IP address</span><span class="dana-field-tag is-required">Required</span></span
-          >
+        <label class="gear-field">
+          IP address
           <input
-            class="dana-input"
+            class="gear-input"
             formControlName="ip"
             placeholder="10.16.80.174"
             inputmode="decimal"
           />
           @if (invalid('ip')) {
-            <small class="dana-field-error">Enter a valid IPv4 address.</small>
+            <small class="gear-field-help" role="alert">Enter a valid IPv4 address.</small>
           }
         </label>
-        <label class="dana-field dana-field-full">
-          <span>Description</span>
-          <input class="dana-input" formControlName="description" placeholder="Lapper" />
+        <label class="gear-field dana-field-full"
+          >Description
+          <input class="gear-input" formControlName="description" placeholder="Lapper" />
         </label>
-        <label class="dana-field">
-          <span>Department</span>
-          <input
-            class="dana-input"
-            formControlName="dept_id"
-            list="gear-departments"
-            placeholder="181"
-          />
-          <datalist id="gear-departments">
-            @for (d of departments(); track d) {
-              <option [value]="d"></option>
+        <label class="gear-field">
+          Department
+          <select class="gear-select" formControlName="dept_id">
+            <option [ngValue]="null" disabled>Choose a department</option>
+            @for (d of departmentOptions(); track d.value) {
+              <option [ngValue]="d.value">{{ d.label }}</option>
             }
-          </datalist>
+          </select>
+          @if (machine()) {
+            <small class="gear-field-help">A machine keeps the department it was created in.</small>
+          } @else if (invalid('dept_id')) {
+            <small class="gear-field-help" role="alert"
+              >Choose the GearApps department that owns this lapper.</small
+            >
+          }
         </label>
-        <label class="dana-field">
-          <span>Cell</span>
-          <input class="dana-input" formControlName="cell" list="gear-cells" placeholder="1" />
+        <label class="gear-field"
+          >Cell
+          <input class="gear-input" formControlName="cell" list="gear-cells" placeholder="1" />
           <datalist id="gear-cells">
             @for (c of cells; track c) {
               <option [value]="c"></option>
             }
           </datalist>
         </label>
-        <label class="dana-field">
-          <span>Type</span>
-          <input class="dana-input" formControlName="type" list="gear-types" placeholder="L-60" />
+        <label class="gear-field"
+          >Type
+          <input class="gear-input" formControlName="type" list="gear-types" placeholder="L-60" />
           <datalist id="gear-types">
             @for (t of types; track t) {
               <option [value]="t"></option>
             }
           </datalist>
         </label>
-        <label class="dana-field">
-          <span>Builder</span>
+        <label class="gear-field"
+          >Builder
           <input
-            class="dana-input"
+            class="gear-input"
             formControlName="builder"
             list="gear-builders"
             placeholder="Klingelnberg"
@@ -108,33 +105,31 @@ import {
             }
           </datalist>
         </label>
-        <label class="dana-field">
-          <span class="dana-field-head"
-            ><span>Scanner</span><span class="dana-field-tag">Optional</span></span
-          >
-          <select class="dana-select" formControlName="scanner_id">
+        <label class="gear-field">
+          Scanner
+          <select class="gear-select" formControlName="scanner_id">
             <option [ngValue]="null">None</option>
             @for (s of scanners(); track s.id) {
               <option [ngValue]="s.id">{{ s.label }}</option>
             }
           </select>
         </label>
-        <div class="dana-field">
+        <div class="gear-field">
           <span>Status</span>
           <gear-segmented formControlName="status" [options]="statuses" ariaLabel="Status" />
         </div>
         @if (error()) {
-          <p class="dana-alert dana-alert-danger dana-field-full" role="alert">{{ error() }}</p>
+          <p class="gear-alert gear-alert-danger dana-field-full" role="alert">{{ error() }}</p>
         }
       </form>
       <ng-container dialogActions>
-        <button type="button" class="dana-btn dana-btn-ghost" (click)="open.set(false)">
+        <button type="button" class="gear-btn gear-btn-secondary" (click)="open.set(false)">
           Cancel
         </button>
         <button
           type="submit"
           form="machineForm"
-          class="dana-btn dana-btn-primary"
+          class="gear-btn gear-btn-primary"
           [disabled]="form.invalid || busy()"
         >
           {{ busy() ? 'Saving…' : machine() ? 'Save changes' : 'Add machine' }}
@@ -149,7 +144,7 @@ export class MachineFormDialogComponent {
   readonly open = model(false);
   readonly machine = input<Machine | null>(null);
   readonly scannerOptions = input<ScannerDetail[]>([]);
-  readonly departmentOptions = input<string[]>([]);
+  readonly departmentOptions = input<{ value: string; label: string }[]>([]);
   readonly saved = output<Machine>();
 
   protected readonly busy = signal(false);
@@ -158,9 +153,6 @@ export class MachineFormDialogComponent {
   protected readonly builders = MACHINE_BUILDERS;
   protected readonly cells = MACHINE_CELLS;
   protected readonly statuses = STATUS_OPTIONS.map((s) => ({ label: s, value: s }));
-  protected readonly departments = computed(() =>
-    this.departmentOptions().length ? this.departmentOptions() : FALLBACK_DEPARTMENTS,
-  );
   protected readonly scanners = computed(() =>
     this.scannerOptions().map((s) => ({
       id: s.id,
@@ -175,7 +167,7 @@ export class MachineFormDialogComponent {
       validators: [Validators.required, Validators.pattern(IPV4_PATTERN)],
     }),
     description: new FormControl<string | null>(null),
-    dept_id: new FormControl<string | null>(null),
+    dept_id: new FormControl<string | null>(null, { validators: [Validators.required] }),
     cell: new FormControl<string | null>(null),
     type: new FormControl<string | null>(null),
     builder: new FormControl<string | null>(null),
@@ -207,11 +199,12 @@ export class MachineFormDialogComponent {
     }
     this.busy.set(true);
     this.error.set(null);
-    const { number, ...editable } = this.form.getRawValue();
+    const { number, dept_id, ...editable } = this.form.getRawValue();
     const existing = this.machine();
+    // The API keeps a machine in the department it was created in, so edits never send it.
     const req = existing
       ? this.api.update(existing.id, editable)
-      : this.api.create({ number, ...editable });
+      : this.api.create({ number, dept_id, ...editable });
     req.subscribe({
       next: (m) => {
         this.busy.set(false);
@@ -228,6 +221,7 @@ export class MachineFormDialogComponent {
   private patch(m: Machine | null) {
     this.form.reset({ status: 'Active' });
     this.form.controls.number.enable();
+    this.form.controls.dept_id.enable();
     if (m) {
       const { id: _id, scanner: _scanner, ...rest } = m;
       this.form.patchValue({
@@ -236,6 +230,7 @@ export class MachineFormDialogComponent {
         scanner_id: m.scanner_id ?? m.scanner?.id ?? null,
       });
       this.form.controls.number.disable();
+      this.form.controls.dept_id.disable();
     }
   }
 }

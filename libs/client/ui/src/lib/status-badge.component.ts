@@ -15,7 +15,10 @@ export class StatusBadgeComponent {
   readonly tone = input<Tone>();
   readonly text = input<string>();
 
-  readonly label = computed(() => this.text() ?? this.status() ?? 'Unknown');
+  readonly label = computed(() => {
+    const raw = this.text() ?? this.status() ?? 'Unknown';
+    return this.text() ? raw : raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+  });
   readonly resolvedTone = computed<Tone>(() => {
     if (this.tone()) return this.tone() as Tone;
     const s = (this.status() ?? '').toLowerCase();
