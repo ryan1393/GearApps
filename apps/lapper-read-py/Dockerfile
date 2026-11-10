@@ -20,10 +20,12 @@ COPY apps/lapper-read-py/lapper_read ./lapper_read
 
 USER lapper
 VOLUME ["/data"]
+# Worker status: /status (full) and /machines (what the Lapper UI shows).
+EXPOSE 8080
 
-# Healthy while the sampler is reading the controller (heartbeat in /data).
+# Healthy while the supervisor keeps reading the machine list (heartbeat in /data).
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
     CMD ["python", "-m", "lapper_read", "health"]
 
 ENTRYPOINT ["python", "-m", "lapper_read"]
-CMD ["run"]
+CMD ["supervise"]

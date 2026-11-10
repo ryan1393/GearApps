@@ -37,6 +37,22 @@ class Worker:
         self.machine: dict = {}
         self.scanner_detail: dict = {}
         self.variables: dict = {}
+        # Read by the supervisor's status page.
+        self.phase = "starting"
+        self.last_error: str | None = None
+        self.last_sample_at: str | None = None
+
+    def status(self) -> dict:
+        with self._lock:
+            pending = len(self._tracker.state.pending_cycles)
+            active = self._tracker.state.active_cycle
+        return {
+            "phase": self.phase,
+            "last_sample_at": self.last_sample_at,
+            "last_error": self.last_error,
+            "pending_runs": pending,
+            "in_cycle_serial": active.serial if active else None,
+        }
 
     # -- lifecycle ----------------------------------------------------------
     def run(self) -> None:
@@ -57,8 +73,10 @@ class Worker:
                     except Exception:  # noqa: BLE001
                         log.exception("Unable to flush the final cycle checkpoint")
             self.fanuc.close()
+            self.fanuc.release_thread()
             self.scanner.close()
             self.store.release_lease()
+            self.phase = "stopped"
             log.info("Lapper Read stopped; pending cycles remain in the checkpoint")
 
     def stop(self, *_args) -> None:
@@ -79,11 +97,13 @@ class Worker:
                 if str(assigned).lower() != str(self.machine["id"]).lower():
                     raise IOError("The configured scanner is not assigned to this machine in GearApps (Lapper > Scanners).")
                 self.fanuc.initialize()
-                log.info("Collecting for machine %s (%s), scanner %s, %d macros",
-                         self.machine.get("number"), s.machine_ip, s.scanner_ip, len(self.fanuc._macros))
+                self.phase, self.last_error = "collecting", None
+                log.info("[%s] Collecting for machine %s (%s), scanner %s, %d macros",
+                         s.machine_number or s.machine_ip, self.machine.get("number"), s.machine_ip, s.scanner_ip, len(self.fanuc._macros))
                 return True
             except Exception as error:  # noqa: BLE001
-                log.error("Unable to initialize Lapper Read; retrying: %s", error)
+                self.phase, self.last_error = "waiting for setup", str(error)
+                log.error("[%s] Unable to initialize Lapper Read; retrying: %s", s.machine_number or s.machine_ip, error)
                 if not self._sleep(s.retry_delay_ms):
                     break
         return False
@@ -131,10 +151,15 @@ class Worker:
                     self._latest = Telemetry(machine, state.active_cycle.serial if state.active_cycle else None,
                                              state.queued_serial, state.scanner_serial)
                 self._heartbeat()
+                self.last_sample_at = utc_now()
+                if self.phase != "collecting" or self.last_error:
+                    self.phase, self.last_error = "collecting", None
                 if not self._sleep(s.poll_interval_ms):
                     break
             except Exception as error:  # noqa: BLE001
-                log.error("Machine polling failed; keeping the last confirmed state: %s", error)
+                self.phase, self.last_error = "controller unavailable", str(error)
+                log.error("[%s] Machine polling failed; keeping the last confirmed state: %s",
+                          s.machine_number or s.machine_ip, error)
                 if not self._sleep(s.retry_delay_ms):
                     break
 
@@ -147,7 +172,9 @@ class Worker:
                 if not self._sleep(s.poll_interval_ms):
                     break
             except Exception as error:  # noqa: BLE001
-                log.error("API publishing failed; pending records will be retried: %s", error)
+                self.last_error = f"API: {error}"
+                log.error("[%s] API publishing failed; pending records will be retried: %s",
+                          s.machine_number or s.machine_ip, error)
                 if not self._sleep(s.retry_delay_ms):
                     break
 
@@ -172,7 +199,8 @@ class Worker:
                 self._tracker.state.pending_cycles.remove(pending)
                 self._dirty = True
                 self._checkpoint()
-            log.info("Recorded cycle %s for serial %s (gearset %s): %d changed macros",
+            log.info("[%s] Recorded cycle %s for serial %s (gearset %s): %d changed macros",
+                     self.settings.machine_number or self.settings.machine_ip,
                      pending.consec, pending.serial, pending.part_number, written)
         if telemetry is not None and telemetry != self._saved:
             self.api.patch_scanner_serials(self.scanner_detail["id"], telemetry.process, telemetry.queue, telemetry.scanner)

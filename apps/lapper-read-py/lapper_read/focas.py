@@ -81,6 +81,9 @@ class FocasLibrary:
         lib.cnc_rdpmacro.restype = c_short
         lib.pmc_rdpmcrng.argtypes = [c_ushort, c_short, c_short, c_ushort, c_ushort, c_ushort, POINTER(IODBPMC)]
         lib.pmc_rdpmcrng.restype = c_short
+        if hasattr(lib, "cnc_exitthread"):
+            lib.cnc_exitthread.argtypes = []
+            lib.cnc_exitthread.restype = c_short
         if os.name != "nt" and hasattr(lib, "cnc_startupprocess"):
             # The Linux library must be started once per process before any handle is opened.
             lib.cnc_startupprocess.argtypes = [c_long, c_char_p]
@@ -99,7 +102,8 @@ class FocasLibrary:
 
 
 class FocasTransport:
-    """FOCAS calls are serialised on one lock; FANUC handles are not thread safe."""
+    """One transport per machine. Its handle is opened and used only on that machine's
+    worker thread (like the C# worker's dedicated FOCAS thread); calls are also serialised."""
 
     def __init__(self, library_path: str, log_path: str, port: int = 8193):
         self._library_path, self._log_path, self._port = library_path, log_path, port
@@ -130,6 +134,12 @@ class FocasTransport:
         if code != EW_OK:
             return None  # e.g. EW_NUMBER/EW_ATTRIB: variable not readable on this control
         return scale(data.mcr_val, data.dec_val)
+
+    def exit_thread(self) -> None:
+        """Releases the calling thread's FOCAS resources (Linux); call when a worker thread ends."""
+        instance = FocasLibrary._instance
+        if instance is not None and os.name != "nt" and hasattr(instance.lib, "cnc_exitthread"):
+            instance.lib.cnc_exitthread()
 
     def read_pmc_bit(self, handle: int, address_type: int, byte: int, bit: int) -> bool:
         with self._lock:

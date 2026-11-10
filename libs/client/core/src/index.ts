@@ -7,3 +7,4 @@ export * from './lib/util/api-error';
 export * from './lib/util/toast.service';
 export * from './lib/util/resource';
 export * from './lib/auth/lapper-access';
+export * from './lib/api/collector-api.service';

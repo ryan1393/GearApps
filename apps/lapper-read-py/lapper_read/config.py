@@ -29,22 +29,32 @@ class Settings:
     api_email: str = ""
     api_password: str = ""
     api_timeout_s: float = 10.0
+    #: Supervisor: names this machine's checkpoint (its GearApps id) so it survives IP changes.
+    state_key: str | None = None
+    #: Supervisor: how often the machine list is re-read from GearApps.
+    discover_interval_s: int = 30
+    #: Supervisor: status/health HTTP port inside the container (0 disables it).
+    status_port: int = 8080
 
     @property
     def state_file(self) -> str:
+        if self.state_key:
+            return os.path.join(self.state_dir, "machine-" + _safe(self.state_key) + ".json")
         name = self.machine_ip.replace(":", "_")
         if self.machine_number:
-            name += "-" + "".join(c if c.isalnum() or c in "-_" else "_" for c in self.machine_number)
+            name += "-" + _safe(self.machine_number)
         return os.path.join(self.state_dir, name + ".json")
 
     @property
     def heartbeat_file(self) -> str:
         return self.state_file[: -len(".json")] + ".heartbeat"
 
-    def validate(self, collecting: bool = True) -> "Settings":
-        """`collecting=False` (the one-off `check` read) only needs the controller address."""
-        addresses = [("LAPPER_MACHINE_IP", self.machine_ip)]
-        if collecting:
+    def validate(self, mode: str = "run") -> "Settings":
+        """Modes: `run` one machine, `supervise` every machine, `check` one controller read."""
+        addresses = []
+        if mode in ("run", "check"):
+            addresses.append(("LAPPER_MACHINE_IP", self.machine_ip))
+        if mode == "run":
             addresses.append(("LAPPER_SCANNER_IP", self.scanner_ip))
         for label, value in addresses:
             try:
@@ -54,16 +64,23 @@ class Settings:
         for label, port in (("LAPPER_SCANNER_INPUT1_PORT", self.scanner_input1_port), ("FOCAS_PORT", self.focas_port)):
             if not 0 < port <= 65535:
                 raise ConfigError(f"{label} must be a TCP port.")
-        if min(self.poll_interval_ms, self.retry_delay_ms, self.io_timeout_ms) <= 0 or self.api_timeout_s <= 0:
+        if not 0 <= self.status_port <= 65535:
+            raise ConfigError("LAPPER_STATUS_PORT must be a TCP port or 0.")
+        if min(self.poll_interval_ms, self.retry_delay_ms, self.io_timeout_ms, self.discover_interval_s) <= 0 \
+                or self.api_timeout_s <= 0:
             raise ConfigError("Polling intervals and timeouts must be positive.")
         url = urlparse(self.api_base_url)
         if url.scheme not in ("http", "https") or not url.netloc:
             raise ConfigError("GEARAPPS_API_BASE_URL must be an http(s) URL.")
-        if collecting and (not self.api_email or not self.api_password):
+        if mode in ("run", "supervise") and (not self.api_email or not self.api_password):
             raise ConfigError("Set GEARAPPS_API_EMAIL and GEARAPPS_API_PASSWORD (an active GearApps account).")
         if not self.state_dir:
             raise ConfigError("LAPPER_STATE_DIR is required.")
         return self
+
+
+def _safe(text: str) -> str:
+    return "".join(c if c.isalnum() or c in "-_" else "_" for c in text)
 
 
 def _int(env: dict[str, str], name: str, default: int) -> int:
@@ -74,7 +91,7 @@ def _int(env: dict[str, str], name: str, default: int) -> int:
         raise ConfigError(f"{name} must be a whole number.") from error
 
 
-def from_env(env: dict[str, str] | None = None, collecting: bool = True) -> Settings:
+def from_env(env: dict[str, str] | None = None, mode: str = "run") -> Settings:
     env = dict(os.environ if env is None else env)
     return Settings(
         machine_ip=env.get("LAPPER_MACHINE_IP", "").strip(),
@@ -92,4 +109,6 @@ def from_env(env: dict[str, str] | None = None, collecting: bool = True) -> Sett
         api_email=env.get("GEARAPPS_API_EMAIL", "").strip(),
         api_password=env.get("GEARAPPS_API_PASSWORD", ""),
         api_timeout_s=float(env.get("GEARAPPS_API_TIMEOUT_S", "10") or 10),
-    ).validate(collecting)
+        discover_interval_s=_int(env, "LAPPER_DISCOVER_INTERVAL_S", 30),
+        status_port=_int(env, "LAPPER_STATUS_PORT", 8080),
+    ).validate(mode)

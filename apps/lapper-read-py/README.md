@@ -4,7 +4,26 @@ Collects lapping runs from a FANUC controller and its barcode scanner and publis
 to the GearApps API. It is a Python port of the Windows `apps/lapper-read` service and
 uses the same API endpoints, so the Lapper screens work unchanged.
 
-One container watches one lapper:
+## Workers follow the machines saved in Lapper
+
+One container runs a **supervisor**. Every 30 seconds it reads Lapper's machines and keeps
+exactly one worker running for each machine that is:
+
+- **Active**,
+- has a **FANUC controller IP** (Machines → controller IP), and
+- has an **Active scanner assigned** (Configuration → Scanners).
+
+Saving a new machine like that starts its worker. Changing its controller IP, asset number
+or scanner restarts the worker with the new settings. Making it Inactive, clearing the IP or
+scanner, or deleting it stops the worker. Each worker keeps its unsent runs under the
+machine's GearApps id, so they survive IP changes and restarts. A worker that fails is
+rebuilt after a pause without touching the others.
+
+The Lapper **Fanuc Variables** page shows every machine's worker: Collecting (with the
+last read time and any runs waiting to send), Controller unavailable, or No worker and why.
+Full detail, including IPs and errors, is at `http://<docker-host>:8090/status`.
+
+### What each worker does
 
 1. **Controller**: reads macro #10020 (gearset number), #10032 (consec) and the PMC
    signals X6.7 front door, X1.2 cycle start and Y3.2 in cycle over FOCAS (TCP 8193).
@@ -23,34 +42,35 @@ Unsent runs stay in `/data` and are retried after network or API outages and res
 - FANUC's licensed **Linux** FOCAS library, `libfwlib32.so` (64-bit x86 build), in
   `apps/lapper-read-py/fanuc/`. It is mounted read-only into the container and is never
   committed or baked into the image. See `fanuc/README.md`.
-- The machine and its scanner set up in Lapper (Machines, and Configuration → Scanners
-  with the scanner assigned to the machine).
+- Each lapper saved in Lapper as described above.
 - An active GearApps account for the collector. It does not need admin rights.
 - Network access from the Docker host to the controller (8193) and scanner (9004).
 
 ## Run
 
-Set the `LAPPER_READ_*` values in `.env` (see `.env.example`), then:
+Set `LAPPER_READ_API_EMAIL` and `LAPPER_READ_API_PASSWORD` in `.env` (see `.env.example`), then:
 
     docker compose --profile collectors up -d --build lapper-read
     docker compose logs -f lapper-read
 
-Check the controller connection without the API or scanner:
+After that, adding or editing machines in Lapper is all it takes. There is nothing to
+change in Docker per machine.
 
-    docker compose --profile collectors run --rm lapper-read check 10021 11006
+Check one controller connection without the API or scanner:
 
-### More lappers
+    docker compose --profile collectors run --rm -e LAPPER_MACHINE_IP=10.16.81.15 lapper-read check 10021 11006
 
-Copy the `lapper-read` service in `compose.yml` once per machine, giving each copy its own
-name, `LAPPER_MACHINE_IP` / `LAPPER_SCANNER_IP` values and its own state volume.
+`python -m lapper_read run` (with `LAPPER_MACHINE_IP` and `LAPPER_SCANNER_IP`) still runs a
+single worker without the supervisor.
 
 ## Settings (environment variables)
 
 | Variable | Default | Meaning |
 | --- | --- | --- |
-| `LAPPER_MACHINE_IP` | required | FANUC controller IP |
-| `LAPPER_MACHINE_NUMBER` | | Asset number, when machines share an IP |
-| `LAPPER_SCANNER_IP` | required | Scanner IP |
+| `LAPPER_DISCOVER_INTERVAL_S` | 30 | How often saved machines are re-read |
+| `LAPPER_STATUS_PORT` | 8080 | Status port in the container (0 turns it off) |
+| `LAPPER_MACHINE_IP` / `LAPPER_SCANNER_IP` | | Only for the single-machine `run` and `check` commands |
+| `LAPPER_MACHINE_NUMBER` | | `run` only: asset number when machines share an IP |
 | `LAPPER_SCANNER_INPUT1_PORT` | 9004 | Scanner command port |
 | `FOCAS_PORT` | 8193 | FOCAS port |
 | `FOCAS_LIBRARY` | /opt/fanuc/libfwlib32.so | Library path inside the container |
@@ -61,7 +81,7 @@ name, `LAPPER_MACHINE_IP` / `LAPPER_SCANNER_IP` values and its own state volume.
 | `GEARAPPS_API_BASE_URL` | http://gear-app-server:3333 | Shared GearApps API |
 | `GEARAPPS_API_EMAIL` / `GEARAPPS_API_PASSWORD` | required | Collector account |
 
-The container is healthy while it is reading the controller (a heartbeat in `/data`).
+The container is healthy while the supervisor keeps reading the machine list.
 
 ## Develop
 

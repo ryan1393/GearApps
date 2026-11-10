@@ -2,11 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   OnInit,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { catchError, interval, of, startWith, switchMap } from 'rxjs';
 import {
   DanaConfirmDialogComponent,
   DanaCountBadgeDirective,
@@ -17,6 +20,9 @@ import {
   DanaTableShellDirective,
 } from '@dana/ui';
 import {
+  CollectorApi,
+  CollectorMachine,
+  CollectorStatus,
   FanucVariablesApi,
   LapperAccess,
   loadable,
@@ -48,13 +54,19 @@ interface FanucRow {
     FanucFormDialogComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    .lapper-collector-detail {
+      margin-top: 4px;
+      font-size: 12px;
+    }
+  `,
   template: `
     <div class="gear-page">
       <section
         danaPageHeader
         eyebrow="LAPPER / CONFIGURATION"
         heading="Fanuc Variables"
-        description="The PLC signals each lapper reports: front door, cycle start and in-cycle. They drive the live cell view."
+        description="Each Active lapper with a FANUC controller IP and a scanner gets a Lapper Read worker automatically. These are the signals it reports."
       >
         <div danaPageHeaderAction class="dana-toolbar">
           <button
@@ -73,9 +85,15 @@ interface FanucRow {
           <div>
             <h2>Machine I/O</h2>
             <p>
-              {{ withSnapshot() }} of {{ rows().length }} machines report signals ·
-              {{ inCycle() }} in cycle now.
+              {{ workerCount() }} workers running · {{ withSnapshot() }} of
+              {{ rows().length }} machines report signals · {{ inCycle() }} in cycle now.
             </p>
+            @if (collectorOffline()) {
+              <p class="gear-muted">
+                Collector status unavailable. Start it with
+                <code>docker compose --profile collectors up -d lapper-read</code>.
+              </p>
+            }
           </div>
           <span danaCountBadge class="gear-count-badge count-chip">{{ rows().length }}</span>
         </div>
@@ -85,8 +103,9 @@ interface FanucRow {
               <tr>
                 <th>Machine</th>
                 <th>Cell</th>
+                <th>Collector</th>
                 @for (s of signals; track s.key) {
-                  <th>{{ s.label }} · {{ s.address }}</th>
+                  <th [attr.title]="s.label">{{ s.short }} {{ s.address }}</th>
                 }
                 <th data-dana-table-static aria-label="Actions"></th>
               </tr>
@@ -102,6 +121,16 @@ interface FanucRow {
                       >
                     } @else {
                       —
+                    }
+                  </td>
+                  <td class="nowrap">
+                    @if (collectorFor(r.machine.id); as c) {
+                      <gear-status-badge [tone]="c.tone" [text]="c.label" />
+                      @if (c.detail) {
+                        <div class="gear-muted lapper-collector-detail">{{ c.detail }}</div>
+                      }
+                    } @else {
+                      <span class="gear-muted">—</span>
                     }
                   </td>
                   @for (s of signals; track s.key) {
@@ -141,7 +170,7 @@ interface FanucRow {
                 </tr>
               } @empty {
                 <tr>
-                  <td danaTableEmpty colspan="6" class="empty-row">
+                  <td danaTableEmpty colspan="7" class="empty-row">
                     {{ loading() ? 'Loading machines…' : 'No machines configured yet.' }}
                   </td>
                 </tr>
@@ -177,8 +206,17 @@ export class FanucVariablesPageComponent implements OnInit {
   private readonly api = inject(FanucVariablesApi);
   private readonly machinesApi = inject(MachinesApi);
   private readonly toast = inject(ToastService);
+  private readonly collectorApi = inject(CollectorApi);
+  private readonly destroyRef = inject(DestroyRef);
   protected readonly access = inject(LapperAccess);
   protected readonly signals = FANUC_SIGNALS;
+
+  /** null = the collector couldn't be reached. */
+  protected readonly collector = signal<CollectorStatus | null | undefined>(undefined);
+  protected readonly collectorOffline = computed(() => this.collector() === null);
+  protected readonly workerCount = computed(
+    () => this.collector()?.machines.filter((m) => m.worker).length ?? 0,
+  );
 
   protected readonly machines = loadable<Machine[]>([]);
   protected readonly snapshots = loadable<MachineFanucVariable[]>([]);
@@ -202,6 +240,46 @@ export class FanucVariablesPageComponent implements OnInit {
 
   ngOnInit() {
     this.reload();
+    // Worker status and signals change on their own; refresh while the page is open.
+    interval(10_000)
+      .pipe(
+        startWith(0),
+        switchMap(() => this.collectorApi.status().pipe(catchError(() => of(null)))),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((status) => this.collector.set(status));
+    interval(10_000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.snapshots.load(this.api.list()));
+  }
+
+  protected collectorFor(
+    machineId: string,
+  ): { tone: 'success' | 'warning' | 'neutral'; label: string; detail: string } | null {
+    const status = this.collector();
+    if (!status) return null;
+    const m: CollectorMachine | undefined = status.machines.find((x) => x.machine_id === machineId);
+    if (!m)
+      return {
+        tone: 'neutral',
+        label: 'Not seen yet',
+        detail: 'Waiting for the next machine check',
+      };
+    if (!m.worker)
+      return { tone: 'neutral', label: 'No worker', detail: capitalise(m.phase ?? '') };
+    if (m.phase === 'collecting') {
+      const waiting = m.pending_runs ? ` · ${m.pending_runs} runs waiting to send` : '';
+      return {
+        tone: 'success',
+        label: 'Collecting',
+        detail: `Read ${clock(m.last_sample_at)}${waiting}`,
+      };
+    }
+    return {
+      tone: 'warning',
+      label: capitalise(m.phase ?? 'Starting'),
+      detail: m.last_sample_at ? `Last read ${clock(m.last_sample_at)}` : '',
+    };
   }
 
   protected reload() {
@@ -231,4 +309,12 @@ export class FanucVariablesPageComponent implements OnInit {
       error: (err) => this.toast.error(err, 'Could not reset Fanuc I/O'),
     });
   }
+}
+
+function capitalise(text: string): string {
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
+}
+
+function clock(iso: string | null | undefined): string {
+  return iso ? new Date(iso).toLocaleTimeString() : 'never';
 }

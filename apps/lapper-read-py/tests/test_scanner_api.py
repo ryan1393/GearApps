@@ -163,8 +163,12 @@ class ConfigTests(unittest.TestCase):
         with self.assertRaises(ConfigError):
             from_env({**self.BASE, "LAPPER_MACHINE_IP": "lapper-1"})
 
+    def test_supervise_only_needs_api_credentials(self):
+        s = from_env({"GEARAPPS_API_EMAIL": "svc@plant", "GEARAPPS_API_PASSWORD": "x"}, mode="supervise")
+        self.assertEqual(s.discover_interval_s, 30)
+
     def test_check_only_needs_the_controller_address(self):
-        self.assertEqual(from_env({"LAPPER_MACHINE_IP": "10.16.81.15"}, collecting=False).machine_ip, "10.16.81.15")
+        self.assertEqual(from_env({"LAPPER_MACHINE_IP": "10.16.81.15"}, mode="check").machine_ip, "10.16.81.15")
 
 
 if __name__ == "__main__":

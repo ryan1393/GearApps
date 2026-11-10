@@ -40,6 +40,14 @@ class Fanuc:
         with self._lock:
             self._drop()
 
+    def release_thread(self) -> None:
+        exit_thread = getattr(self._transport, "exit_thread", None)
+        if exit_thread:
+            try:
+                exit_thread()
+            except Exception:  # noqa: BLE001
+                log.debug("FOCAS thread release failed", exc_info=True)
+
     def _drop(self) -> None:
         if self._handle is not None:
             try:

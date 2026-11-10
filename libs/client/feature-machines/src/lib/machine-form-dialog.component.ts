@@ -42,15 +42,20 @@ import {
           }
         </label>
         <label class="gear-field">
-          IP address
+          FANUC controller IP
           <input
             class="gear-input"
             formControlName="ip"
-            placeholder="10.16.80.174"
+            placeholder="10.16.81.15"
             inputmode="decimal"
           />
           @if (invalid('ip')) {
             <small class="gear-field-help" role="alert">Enter a valid IPv4 address.</small>
+          } @else {
+            <small class="gear-field-help"
+              >Lapper Read starts collecting from this controller once the machine is Active and has
+              a scanner.</small
+            >
           }
         </label>
         <label class="gear-field dana-field-full"

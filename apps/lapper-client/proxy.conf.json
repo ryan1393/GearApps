@@ -3,5 +3,13 @@
     "target": "http://localhost:3333",
     "secure": false,
     "changeOrigin": true
+  },
+  "/collector": {
+    "target": "http://localhost:8090",
+    "secure": false,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/collector": ""
+    }
   }
 }

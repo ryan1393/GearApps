@@ -83,7 +83,7 @@ import { MachineFormDialogComponent } from './machine-form-dialog.component';
                 <th>Asset ID</th>
                 <th>Cell</th>
                 <th>Dept</th>
-                <th>IP</th>
+                <th title="FANUC controller IP">IP</th>
                 <th>Machine</th>
                 <th>Scanner</th>
                 <th>Status</th>
