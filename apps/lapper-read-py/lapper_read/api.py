@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import threading
 import urllib.error
 import urllib.parse
@@ -26,14 +27,33 @@ def _number(value: Decimal) -> int | float:
     return int(value) if value == value.to_integral_value() else float(value)
 
 
+TOKEN_FILE_MISSING = (
+    "no Docker collector token yet: in Lapper > Configuration > Collector Tokens, click Connect Docker collector"
+)
+
+
 class GearAppsApi:
-    def __init__(self, base_url: str, email: str, password: str, timeout_s: float = 10.0, token: str = ""):
+    def __init__(self, base_url: str, email: str, password: str, timeout_s: float = 10.0, token: str = "",
+                 token_file: str = ""):
         self.base_url = base_url.rstrip("/")
         self._email, self._password, self._timeout = email, password, timeout_s
-        # A collector token never expires, so there is nothing to sign in or refresh.
-        self._collector_token = token or None
+        # A collector token never expires, so there is nothing to sign in or refresh. With a token
+        # file (written by the API when an admin connects the Docker collector) the token is read
+        # from it, and read again whenever the API rejects the current one.
+        self._token_file = "" if token else token_file
+        self._collector_token = token or self._read_token_file()
         self._token: str | None = self._collector_token
         self._auth_lock = threading.Lock()
+
+    def _read_token_file(self) -> str | None:
+        if not self._token_file:
+            return None
+        try:
+            with open(self._token_file, encoding="utf-8") as handle:
+                return handle.read().strip() or None
+        except FileNotFoundError:
+            return None
+
 
     # -- transport -------------------------------------------------------
     def _raw(self, method: str, path: str, body: Any = None, token: str | None = None,
@@ -56,6 +76,11 @@ class GearAppsApi:
             return error.code, text
 
     def _login(self) -> str:
+        if self._token_file:
+            self._collector_token = self._token = self._read_token_file()
+            if not self._collector_token:
+                raise ApiError("GET", self._token_file, 401, TOKEN_FILE_MISSING)
+            return self._collector_token
         if self._collector_token:
             return self._collector_token
         status, body = self._raw("POST", "/api/v1/auth/email/login", {"email": self._email, "password": self._password})
@@ -72,6 +97,18 @@ class GearAppsApi:
                 allow_404: bool = False) -> Any:
         used = self._access_token()
         status, payload = self._raw(method, path, body, used, idempotency_key)
+        if status == 401 and self._token_file:
+            # An admin may have reconnected the Docker collector: pick up the new token once.
+            with self._auth_lock:
+                fresh = self._read_token_file()
+                if fresh and fresh != used:
+                    self._collector_token = self._token = fresh
+            if self._token != used and self._token:
+                used = self._token
+                status, payload = self._raw(method, path, body, used, idempotency_key)
+            if status == 401:
+                raise ApiError(method, path, status,
+                               "Docker collector token is invalid or revoked; click Connect Docker collector in Lapper")
         if status == 401 and self._collector_token:
             raise ApiError(method, path, status, "collector token is invalid or revoked; create a new one in Lapper")
         if status == 401:

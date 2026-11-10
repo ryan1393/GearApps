@@ -30,6 +30,9 @@ class Settings:
     api_password: str = ""
     #: Collector token from Lapper > Configuration > Collector Tokens; replaces email/password.
     api_token: str = ""
+    #: File the GearApps API writes the Docker collector's token to (Lapper > Collector Tokens >
+    #: Connect Docker collector). Used when no api_token is set; re-read when the API rejects it.
+    api_token_file: str = ""
     api_timeout_s: float = 10.0
     #: Supervisor: names this machine's checkpoint (its GearApps id) so it survives IP changes.
     state_key: str | None = None
@@ -77,10 +80,11 @@ class Settings:
             raise ConfigError("GEARAPPS_API_BASE_URL must be an http(s) URL.")
         if self.api_token and not self.api_token.startswith("glr_"):
             raise ConfigError("GEARAPPS_API_TOKEN must be a collector token from Lapper (it starts with glr_).")
-        if mode in ("run", "supervise") and not self.api_token and (not self.api_email or not self.api_password):
+        if mode in ("run", "supervise") and not self.api_token and not self.api_token_file \
+                and (not self.api_email or not self.api_password):
             raise ConfigError(
-                "Set GEARAPPS_API_TOKEN (a collector token from Lapper > Configuration > Collector Tokens), "
-                "or GEARAPPS_API_EMAIL and GEARAPPS_API_PASSWORD."
+                "Connect the Docker collector in Lapper > Configuration > Collector Tokens (GEARAPPS_API_TOKEN_FILE), "
+                "or set GEARAPPS_API_TOKEN, or GEARAPPS_API_EMAIL and GEARAPPS_API_PASSWORD."
             )
         if not self.state_dir:
             raise ConfigError("LAPPER_STATE_DIR is required.")
@@ -117,6 +121,7 @@ def from_env(env: dict[str, str] | None = None, mode: str = "run") -> Settings:
         api_email=env.get("GEARAPPS_API_EMAIL", "").strip(),
         api_password=env.get("GEARAPPS_API_PASSWORD", ""),
         api_token=env.get("GEARAPPS_API_TOKEN", "").strip(),
+        api_token_file=env.get("GEARAPPS_API_TOKEN_FILE", "").strip(),
         api_timeout_s=float(env.get("GEARAPPS_API_TIMEOUT_S", "10") or 10),
         discover_interval_s=_int(env, "LAPPER_DISCOVER_INTERVAL_S", 30),
         status_port=_int(env, "LAPPER_STATUS_PORT", 8080),

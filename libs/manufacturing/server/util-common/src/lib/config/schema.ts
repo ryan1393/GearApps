@@ -196,6 +196,8 @@ export const validationSchema = Joi.object({
   SCANNER_FTP_PASSWORD: Joi.string().allow('').optional(),
   SCANNER_FTP_ROOT: Joi.string().default('181-lapper-scanners'),
   SCANNER_FTP_IMAGE_FILE: Joi.string().default('scanner-current.jpg'),
+  // Set by compose: where Lapper > Collector Tokens hands the Docker collector its token.
+  LAPPER_READ_TOKEN_FILE: Joi.string().allow('').optional(),
 
   // DSF (Digital Shop Floor) production counts. All optional and off by default. Only the
   // shape is checked here; the DSF reader validates the combination and stays off, with a

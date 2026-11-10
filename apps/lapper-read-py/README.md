@@ -46,15 +46,17 @@ Unsent runs stay in `/data` and are retried after network or API outages and res
   `apps/lapper-read-py/fanuc/`. It is mounted read-only into the container and is never
   committed or baked into the image. See `fanuc/README.md`.
 - Each lapper saved in Lapper as described above.
-- A **collector token**: in Lapper, an admin opens Configuration → Collector Tokens and
-  creates one. It never expires, can only send machine data, and is revoked from the same
-  page. An active GearApps account (email and password) also works.
+- A **connected collector**: in Lapper, an admin opens Configuration → Collector Tokens and
+  clicks **Connect Docker collector**. The API writes a new collector token to a private
+  volume shared only with this container (`/run/gearapps/collector/token`) and revokes the
+  previous one; the collector reads it there and picks up a replacement by itself. The token
+  never expires, can only send machine data, is never shown, and is revoked from the same page.
+  `LAPPER_READ_API_TOKEN` (a pasted token) or an account's email and password still override it.
 - Network access from the Docker host to the controller (8193) and scanner (9004).
 
 ## Run
 
-Set `LAPPER_READ_API_TOKEN` in `.env` (or `LAPPER_READ_API_EMAIL` and
-`LAPPER_READ_API_PASSWORD`; see `.env.example`), then:
+Click **Connect Docker collector** in Lapper (nothing to put in `.env`), then:
 
     docker compose --profile collectors up -d --build lapper-read
     docker compose logs -f lapper-read

@@ -1,6 +1,6 @@
 import { ReqUser, RequestUser } from '@gearapps/api/core';
 import { CreateCollectorTokenDto } from '@gearapps/api/data-access';
-import { CollectorToken, CreatedCollectorToken } from '@gearapps/shared/domain';
+import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from '@gearapps/shared/domain';
 import {
   Body,
   Controller,
@@ -21,6 +21,8 @@ export abstract class CollectorTokensService {
   abstract list(): Promise<CollectorToken[]>;
   abstract create(name: string, createdBy: string): Promise<CreatedCollectorToken>;
   abstract revoke(id: string): Promise<void>;
+  abstract dockerConnection(): Promise<DockerCollectorConnection>;
+  abstract connectDocker(createdBy: string): Promise<DockerCollectorConnection>;
 }
 
 /** Admins issue and revoke the tokens machine collectors (Lapper Read) sign in with. */
@@ -35,6 +37,23 @@ export class CollectorTokensController {
   list(@ReqUser() user: RequestUser): Promise<CollectorToken[]> {
     requireAdmin(user);
     return this.service.list();
+  }
+
+  @Get('docker')
+  @ApiOperation({ summary: 'Whether the Docker Lapper Read collector is connected, and with which token' })
+  dockerConnection(@ReqUser() user: RequestUser): Promise<DockerCollectorConnection> {
+    requireAdmin(user);
+    return this.service.dockerConnection();
+  }
+
+  @Post('docker')
+  @ApiOperation({
+    summary:
+      'Connect the Docker collector: issue it a new token on its private volume and revoke the previous one. The token is never returned.',
+  })
+  connectDocker(@ReqUser() user: RequestUser): Promise<DockerCollectorConnection> {
+    requireAdmin(user);
+    return this.service.connectDocker(user.id);
   }
 
   @Post()

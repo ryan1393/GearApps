@@ -6,7 +6,7 @@ import {
 } from '@gearapps/shared/database';
 import { LAPPER_HISTORY_INTEGRITY_SQL } from './history-integrity';
 import { LAPPER_ARCHIVE_GUARD_SQL } from './archive-guard';
-import { COLLECTOR_TOKENS_SQL } from './collector-tokens';
+import { COLLECTOR_TOKEN_PURPOSE_SQL, COLLECTOR_TOKENS_SQL } from './collector-tokens';
 
 // Compatible with the tested legacy import. Public manufacturing tables are
 // referenced, never synchronized or rebuilt by the Lapper API.
@@ -111,6 +111,11 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
       manager,
       '20261110-lapper-collector-tokens-v1',
       COLLECTOR_TOKENS_SQL,
+    );
+    await runDatabaseMigration(
+      manager,
+      '20261111-lapper-collector-token-purpose-v1',
+      COLLECTOR_TOKEN_PURPOSE_SQL,
     );
   });
 }

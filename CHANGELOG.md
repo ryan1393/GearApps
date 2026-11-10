@@ -15,6 +15,12 @@
     part used by a gearset; its status can still change.
   - As in the other apps, master data is for administrators only: the Lapper sidebar and dashboard
     show these links to admins.
+- **Connect the Docker collector from Lapper.** Configuration → Collector Tokens has a
+  **Connect Docker collector** button: the API issues the collector its own token on a private
+  volume shared only with the `lapper-read` container (new `lapper_read_credentials` volume),
+  revokes the previous one, and the collector picks it up by itself. No `.env` entry, and the
+  token is never shown. New endpoints `GET`/`POST /api/v1/collector-token/docker` (admins);
+  migration `20261111-lapper-collector-token-purpose-v1` adds `lapper.collector_tokens.purpose`.
 - **Lapper Read (Python) without a scanner.** Every Active machine with a FANUC IP now gets a
   worker. Without an Active scanner its completed cycles are recorded with no serial (gearset,
   consec, time and changed macros); with one, the strict scanned-serial rule is unchanged.

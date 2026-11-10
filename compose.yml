@@ -84,6 +84,10 @@ services:
       PUBLIC_WEB_BASE_URL: ${GEAR_PUBLIC_WEB_BASE_URL:-http://localhost:4200}
       EMAIL_TEMPLATE_DIR: /app/dist/apps/server/assets/templates
       EMAIL_PARTIALS_DIR: /app/dist/apps/server/assets/templates/partials
+      # Lapper > Collector Tokens > Connect Docker collector writes the collector's token here.
+      LAPPER_READ_TOKEN_FILE: /run/gearapps/collector/token
+    volumes:
+      - lapper_read_credentials:/run/gearapps/collector
     ports:
       - "${GEAR_API_PORT:-3333}:3333"
     depends_on:
@@ -165,8 +169,10 @@ services:
       retries: 5
 
   # FANUC + scanner collector. One container runs a worker for every Active machine saved in
-  # Lapper with a FANUC controller IP and an assigned scanner; saving, changing or deactivating a
-  # machine starts, restarts or stops its worker. Not started by default:
+  # Lapper with a FANUC controller IP (with an Active scanner its cycles get the scanned serial;
+  # without one, no serial); saving, changing or deactivating a machine starts, restarts or stops
+  # its worker. It signs in with the token an admin issues in Lapper > Collector Tokens > Connect
+  # Docker collector (no .env entry needed). Not started by default:
   #   docker compose --profile collectors up -d --build lapper-read
   lapper-read:
     image: dana-apps-lapper-read:70.5.0
@@ -178,7 +184,9 @@ services:
     command: ["supervise"]
     environment:
       GEARAPPS_API_BASE_URL: http://gear-app-server:3333
+      # Optional override; normally the token comes from the shared file below.
       GEARAPPS_API_TOKEN: ${LAPPER_READ_API_TOKEN:-}
+      GEARAPPS_API_TOKEN_FILE: /run/gearapps/collector/token
       GEARAPPS_API_EMAIL: ${LAPPER_READ_API_EMAIL:-}
       GEARAPPS_API_PASSWORD: ${LAPPER_READ_API_PASSWORD:-}
       LAPPER_SCANNER_INPUT1_PORT: ${LAPPER_READ_SCANNER_PORT:-9004}
@@ -190,6 +198,7 @@ services:
     volumes:
       - ${LAPPER_READ_FOCAS_DIR:-./apps/lapper-read-py/fanuc}:/opt/fanuc:ro
       - lapper_read_state:/data
+      - lapper_read_credentials:/run/gearapps/collector:ro
     depends_on:
       gear-app-server:
         condition: service_healthy
@@ -198,3 +207,5 @@ volumes:
   gear_postgres_data:
     name: ${DANA_POSTGRES_VOLUME_NAME:-dana-apps-gear-postgres}
   lapper_read_state:
+  # The Docker collector's token: written by gear-app-server, read by lapper-read only.
+  lapper_read_credentials:
