@@ -1,0 +1,31 @@
+{
+  "name": "lapper-read-py",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/lapper-read-py/lapper_read",
+  "projectType": "application",
+  "tags": ["platform:server", "language:python", "scope:lapper"],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "python3 -m compileall -q lapper_read tests",
+        "cwd": "apps/lapper-read-py"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "python3 -m unittest discover -s tests -t .",
+        "cwd": "apps/lapper-read-py"
+      }
+    },
+    "docker-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose --profile collectors build lapper-read",
+        "cwd": "."
+      },
+      "cache": false
+    }
+  }
+}

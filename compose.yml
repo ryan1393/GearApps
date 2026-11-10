@@ -164,6 +164,34 @@ services:
       timeout: 5s
       retries: 5
 
+  # FANUC + scanner collector, one container per lapper. Not started by default:
+  #   docker compose --profile collectors up -d lapper-read
+  # Copy this service (new name, LAPPER_READ_* values and state volume) for each further lapper.
+  lapper-read:
+    image: dana-apps-lapper-read:70.3.0
+    build:
+      context: .
+      dockerfile: apps/lapper-read-py/Dockerfile
+    profiles: ["collectors"]
+    restart: unless-stopped
+    environment:
+      LAPPER_MACHINE_IP: ${LAPPER_READ_MACHINE_IP:-}
+      LAPPER_MACHINE_NUMBER: ${LAPPER_READ_MACHINE_NUMBER:-}
+      LAPPER_SCANNER_IP: ${LAPPER_READ_SCANNER_IP:-}
+      LAPPER_SCANNER_INPUT1_PORT: ${LAPPER_READ_SCANNER_PORT:-9004}
+      LAPPER_POLL_INTERVAL_MS: ${LAPPER_READ_POLL_INTERVAL_MS:-250}
+      GEARAPPS_API_BASE_URL: http://gear-app-server:3333
+      GEARAPPS_API_EMAIL: ${LAPPER_READ_API_EMAIL:-}
+      GEARAPPS_API_PASSWORD: ${LAPPER_READ_API_PASSWORD:-}
+      TZ: ${LAPPER_TIME_ZONE:-America/Indianapolis}
+    volumes:
+      - ${LAPPER_READ_FOCAS_DIR:-./apps/lapper-read-py/fanuc}:/opt/fanuc:ro
+      - lapper_read_state:/data
+    depends_on:
+      gear-app-server:
+        condition: service_healthy
+
 volumes:
   gear_postgres_data:
     name: ${DANA_POSTGRES_VOLUME_NAME:-dana-apps-gear-postgres}
+  lapper_read_state:

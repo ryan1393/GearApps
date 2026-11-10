@@ -57,10 +57,17 @@ for (const project of ['LapperRead', 'LapperReadLibrary', 'LapperRead.Tests']) {
     fail(`${project} must inherit the shared collector release version`);
 }
 
+const pythonCollector = fs.readFileSync(
+  contractPath(process.cwd(), path.join(workspaceRoot, 'apps/lapper-read-py/lapper_read/__init__.py')),
+  'utf8',
+);
+if (/__version__\s*=\s*"([^"]+)"/.exec(pythonCollector)?.[1] !== version)
+  fail('Python Lapper Read collector version differs from root');
+
 const tags = [
   ...read('compose.yml').matchAll(/image: (dana-apps-[a-z-]+):(\S+)/g),
 ];
-const expectedImages = ['gear-app-server','lapper-client','blade-tracking','cutter-builder','greenshed'];
+const expectedImages = ['gear-app-server','lapper-client','blade-tracking','cutter-builder','greenshed','lapper-read'];
 if (tags.length !== expectedImages.length || expectedImages.some(name => !tags.some(([,image]) => image === 'dana-apps-' + name)))
   fail(`compose.yml should tag all ${expectedImages.length} Gear images; found ${tags.length}`);
 for (const [, image, tag] of tags)

@@ -26,7 +26,7 @@
   "composeFiles": [
     {
       "path": "compose.yml",
-      "sha256": "28EDF11A688F515E9246C5194F9FC278AB1F26E1451DDBB3A9F05185C2DF8CA1"
+      "sha256": "D11F152E4CCE02ED2003C198653DC2992A7740418CBA42BAAE34E5245BD113CA"
     }
   ],
   "runtimeProjects": [
@@ -642,6 +642,24 @@
         "test"
       ],
       "hasBuildTarget": true,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "lapper-read-py",
+      "root": "apps/lapper-read-py",
+      "projectType": "application",
+      "tags": [
+        "language:python",
+        "platform:server",
+        "scope:lapper"
+      ],
+      "targets": [
+        "docker-build",
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
       "hasServeTarget": false,
       "hasTestTarget": true
     },

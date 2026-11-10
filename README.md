@@ -12,6 +12,7 @@ port 3333**, one authentication service and the same PostgreSQL database.
 | Cutter Builder | cutter-builder / apps/cutter-builder | 4201                                     |
 | Greenshed      | greenshed / apps/greenshed           | 4202                                     |
 | Lapper Read    | apps/lapper-read                                   | Windows collector, outbound HTTP to 3333 |
+| Lapper Read (Docker) | lapper-read-py / apps/lapper-read-py         | Python collector container, see its README |
 
 The root package.json and package-lock.json are the dependency authority. Use
 Node 24.22.1, npm 11.9.0 and .NET SDK 8 for the collector. All clients share [Dana UI](libs/shared/dana-ui).

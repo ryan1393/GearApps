@@ -15,3 +15,8 @@ tools/database/backups/
 tools/database/cleanup.sql
 tools/database/legacy-import.sql
 database-reports/
+
+# Python collector
+__pycache__/
+*.pyc
+apps/lapper-read-py/state/
