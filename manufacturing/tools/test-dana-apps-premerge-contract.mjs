@@ -19,7 +19,7 @@ must(!fs.existsSync(path.join(root,'node_modules')), 'Manufacturing must use roo
 must(!fs.existsSync(path.join(root,'vendor/dana-ui/package')), 'Dana UI must have one root vendored output');
 const nx = json('nx.json');
 must(!nx.nxCloudAccessToken, 'Do not embed an Nx Cloud access token');
-const ignored = fs.existsSync(path.join(workspaceRoot,'.nxignore')) ? fs.readFileSync(path.join(workspaceRoot,'.nxignore'),'utf8') : '';
+const ignored = fs.existsSync(contractPath(process.cwd(), path.join(workspaceRoot,'.nxignore'))) ? fs.readFileSync(contractPath(process.cwd(), path.join(workspaceRoot,'.nxignore')),'utf8') : '';
 must(!/^\s*manufacturing\/(?:\*\*)?\s*$/m.test(ignored), 'Manufacturing projects must participate in the root graph');
 const aliases = json('tsconfig.base.json').compilerOptions?.paths ?? {};
 must(Object.keys(aliases).some(name => name.startsWith('@gearapps/manufacturing/')), 'Manufacturing source aliases must be rooted in the unified tsconfig');
@@ -35,7 +35,7 @@ must(installed.version === vendorPkg.version && vendor.packageVersion === vendor
 must(fs.realpathSync(contractPath(root,'node_modules/@dana/ui')) === fs.realpathSync(contractPath(root,'vendor/dana-ui/package')), 'Installed Dana UI must resolve to the single root vendor');
 for (const name of ['blade-tracking','cutter-builder','greenshed','server']) {
   const project = json(`apps/${name}/project.json`);
-  must(project.sourceRoot === `manufacturing/apps/${name}/src`, `${name} must build from the unified root`);
+  must(project.sourceRoot === `apps/${name}/src`, `${name} must build from the unified root`);
   must(project.targets?.build, `${name} lost its build target`);
   const dockerfile = read(`apps/${name}/Dockerfile`);
   must(dockerfile.includes('COPY package.json package-lock.json'), `${name} image must install the root lockfile`);

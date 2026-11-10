@@ -1,11 +1,12 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
 const ts=fs.readFileSync(
-  'libs/frontend/feature-blade-tracking/src/lib/pages/inventory-lookup/inventory-lookup.component.ts',
+  contractPath(process.cwd(), 'libs/frontend/feature-blade-tracking/src/lib/pages/inventory-lookup/inventory-lookup.component.ts'),
   'utf8',
 );
 const html=fs.readFileSync(
-  'libs/frontend/feature-blade-tracking/src/lib/pages/inventory-lookup/inventory-lookup.component.html',
+  contractPath(process.cwd(), 'libs/frontend/feature-blade-tracking/src/lib/pages/inventory-lookup/inventory-lookup.component.html'),
   'utf8',
 );
 

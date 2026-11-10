@@ -15,4 +15,4 @@ COPY --from=build /app/dist/apps/lapper-client/browser /usr/share/nginx/html
 # Extracted source archives may have restrictive file permissions.
 RUN chmod -R a+rX /usr/share/nginx/html
 EXPOSE 80
-HEALTHCHECK --interval=15s --timeout=5s CMD wget -qO- http://localhost/healthz || exit 1
+HEALTHCHECK --interval=15s --timeout=5s CMD wget -qO- http://127.0.0.1/healthz || exit 1

@@ -2,7 +2,7 @@
  * Entities with no custom queries: a service + controller each, built from the
  * generic CRUD base. Anything that needs bespoke endpoints lives in its own file.
  */
-import { BaseCrudService, crudController } from '@gearapps/api/core';
+import { LapperWritePolicy, CrudService, crudController } from '@gearapps/api/core';
 import {
   CreateDepartmentDto,
   CreateGearsetMarriageDto,
@@ -10,15 +10,10 @@ import {
   CreateSummaryDto,
   CreateTypeOfCheckDto,
   DepartmentDto,
-  DepartmentEntity,
   GearsetMarriageDto,
-  GearsetMarriageEntity,
   PartDto,
-  PartEntity,
   SummaryDto,
-  SummaryEntity,
   TypeOfCheckDto,
-  TypeOfCheckEntity,
   UpdateDepartmentDto,
   UpdateGearsetMarriageDto,
   UpdatePartDto,
@@ -26,20 +21,12 @@ import {
   UpdateTypeOfCheckDto,
 } from '@gearapps/api/data-access';
 import { Department, GearsetMarriage, Part, Summary, TypeOfCheck } from '@gearapps/shared/domain';
-import { Controller, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { UseInterceptors, Controller, Injectable } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Repository } from 'typeorm';
-
 // ---------- Departments ----------
 @Injectable()
-export class DepartmentsService extends BaseCrudService<Department> {
-  protected override readonly order = { number: 'ASC' as const };
-  constructor(@InjectRepository(DepartmentEntity) repo: Repository<Department>) {
-    super(repo, 'Department');
-  }
-}
-
+export abstract class DepartmentsService extends CrudService<Department> {}
+@UseInterceptors(LapperWritePolicy)
 @Controller({ path: 'department', version: '1' })
 @ApiTags('Gear · Departments')
 @ApiBearerAuth()
@@ -53,16 +40,10 @@ export class DepartmentsController extends crudController<Department>({
     super();
   }
 }
-
 // ---------- Type of checks ----------
 @Injectable()
-export class TypeOfChecksService extends BaseCrudService<TypeOfCheck> {
-  protected override readonly order = { name: 'ASC' as const };
-  constructor(@InjectRepository(TypeOfCheckEntity) repo: Repository<TypeOfCheck>) {
-    super(repo, 'Type of check');
-  }
-}
-
+export abstract class TypeOfChecksService extends CrudService<TypeOfCheck> {}
+@UseInterceptors(LapperWritePolicy)
 @Controller({ path: 'toc', version: '1' })
 @ApiTags('Gear · Type of checks')
 @ApiBearerAuth()
@@ -76,17 +57,10 @@ export class TypeOfChecksController extends crudController<TypeOfCheck>({
     super();
   }
 }
-
 // ---------- Summaries ----------
 @Injectable()
-export class SummariesService extends BaseCrudService<Summary> {
-  protected override readonly relations = { user: true };
-  protected override readonly order = { number: 'ASC' as const };
-  constructor(@InjectRepository(SummaryEntity) repo: Repository<Summary>) {
-    super(repo, 'Summary');
-  }
-}
-
+export abstract class SummariesService extends CrudService<Summary> {}
+@UseInterceptors(LapperWritePolicy)
 @Controller({ path: 'part-summary', version: '1' })
 @ApiTags('Gear · Part summaries')
 @ApiBearerAuth()
@@ -100,17 +74,10 @@ export class SummariesController extends crudController<Summary>({
     super();
   }
 }
-
 // ---------- Parts ----------
 @Injectable()
-export class PartsService extends BaseCrudService<Part> {
-  protected override readonly relations = { summary: true, user: true };
-  protected override readonly order = { number: 'ASC' as const };
-  constructor(@InjectRepository(PartEntity) repo: Repository<Part>) {
-    super(repo, 'Part');
-  }
-}
-
+export abstract class PartsService extends CrudService<Part> {}
+@UseInterceptors(LapperWritePolicy)
 @Controller({ path: 'part', version: '1' })
 @ApiTags('Gear · Parts')
 @ApiBearerAuth()
@@ -124,16 +91,10 @@ export class PartsController extends crudController<Part>({
     super();
   }
 }
-
 // ---------- Gearset marriages ----------
 @Injectable()
-export class GearsetMarriagesService extends BaseCrudService<GearsetMarriage> {
-  protected override readonly relations = { gearset: true, pinion: true, ring: true };
-  constructor(@InjectRepository(GearsetMarriageEntity) repo: Repository<GearsetMarriage>) {
-    super(repo, 'Gearset marriage');
-  }
-}
-
+export abstract class GearsetMarriagesService extends CrudService<GearsetMarriage> {}
+@UseInterceptors(LapperWritePolicy)
 @Controller({ path: 'gearset-marriage', version: '1' })
 @ApiTags('Gear · Gearset marriages')
 @ApiBearerAuth()

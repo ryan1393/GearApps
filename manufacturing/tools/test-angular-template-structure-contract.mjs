@@ -8,8 +8,8 @@ const scanRoots = ['apps', path.join('libs', 'frontend')];
 const voidTags = new Set(['area','base','br','col','embed','hr','img','input','link','meta','param','source','track','wbr']);
 
 function walk(dir, out = []) {
-  if (!fs.existsSync(dir)) return out;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+  if (!fs.existsSync(contractPath(process.cwd(), dir))) return out;
+  for (const entry of fs.readdirSync(contractPath(process.cwd(), dir), { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(full, out);
     else if (entry.isFile() && entry.name.endsWith('.html')) out.push(full);
@@ -38,7 +38,7 @@ function position(text, offset) {
 }
 
 function validateTemplate(file) {
-  const text = fs.readFileSync(file, 'utf8');
+  const text = fs.readFileSync(contractPath(process.cwd(), file), 'utf8');
   const stack = [];
   const errors = [];
   let i = 0;

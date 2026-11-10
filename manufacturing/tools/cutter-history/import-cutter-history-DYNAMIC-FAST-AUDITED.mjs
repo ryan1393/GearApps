@@ -35,7 +35,7 @@ const loadDotEnv = (filePath) => {
   return values;
 };
 const envValues = {
-  ...loadDotEnv(path.join(projectRoot, '.env')),
+  ...loadDotEnv(path.resolve(projectRoot, '..', '.env')),
   ...process.env,
 };
 const requiredDb = [

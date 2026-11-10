@@ -34,21 +34,13 @@ function fixture() {
     "export const GEAR_APPS_VERSION = '1.2.3';\n",
   );
   put(
-    'apps/lapper-api/package.json',
-    JSON.stringify({
-      name: '@gearapps/lapper-api',
-      private: true,
-      version: '1.2.3',
-    }),
-  );
-  put(
     'apps/lapper-read/Directory.Build.props',
     '<Project><PropertyGroup><Version>1.2.3</Version></PropertyGroup></Project>\n',
   );
   put('README.md', '# GearApps 1.2.3\n');
   put(
-    'manufacturing/compose.yml',
-    ['gear-app-server', 'blade-tracking', 'cutter-builder', 'greenshed']
+    'compose.yml',
+    ['gear-app-server', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed']
       .map((name) => `image: dana-apps-${name}:1.2.3`)
       .join('\n') + '\n',
   );
@@ -65,7 +57,6 @@ test('version ownership updates lock and vendor without changing dependencies', 
   try {
     setReleaseVersion(f.root, '1.2.4');
     assert.equal(f.read('package.json').version, '1.2.4');
-    assert.equal(f.read('apps/lapper-api/package.json').version, '1.2.4');
     assert.match(
       f.text('apps/lapper-read/Directory.Build.props'),
       /<Version>1\.2\.4<\/Version>/,
@@ -94,10 +85,10 @@ test('version ownership updates lock and vendor without changing dependencies', 
     assert.deepEqual(
       [
         ...f
-          .text('manufacturing/compose.yml')
+          .text('compose.yml')
           .matchAll(/dana-apps-([a-z-]+):(\S+)/g),
       ].map(([, name, version]) => [name, version]),
-      ['gear-app-server', 'blade-tracking', 'cutter-builder', 'greenshed'].map(
+      ['gear-app-server', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed'].map(
         (name) => [name, '1.2.4'],
       ),
     );
@@ -125,7 +116,6 @@ test('missing collector version marker cannot change the release partially', () 
     f.put('apps/lapper-read/Directory.Build.props', '<Project />\n');
     assert.throws(() => setReleaseVersion(f.root, '1.2.4'), /version marker/);
     assert.equal(f.read('package.json').version, '1.2.3');
-    assert.equal(f.read('apps/lapper-api/package.json').version, '1.2.3');
     assert.match(
       f.text('libs/shared/domain/src/lib/app-version.ts'),
       /GEAR_APPS_VERSION = '1\.2\.3'/,

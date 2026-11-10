@@ -1,0 +1,25 @@
+{
+  "name": "lapper-read",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/lapper-read",
+  "projectType": "application",
+  "tags": ["platform:server", "language:dotnet", "scope:lapper"],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dotnet build apps/lapper-read/LapperRead.sln --configuration Release",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "dotnet test apps/lapper-read/LapperRead.Tests/LapperRead.Tests.csproj --configuration Release",
+        "cwd": "."
+      },
+      "cache": false
+    }
+  }
+}

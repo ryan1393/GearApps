@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import { readGearAppsStyles } from './lib/read-gear-apps-styles.mjs';
 
@@ -6,9 +7,9 @@ for(const [app,nav] of [
   ['cutter-builder','gear-cutter-builder-nav'],
   ['greenshed','gear-greenshed-nav'],
 ]){
-  const ts=fs.readFileSync(`apps/${app}/src/app/app.component.ts`,'utf8');
-  const html=fs.readFileSync(`apps/${app}/src/app/app.component.html`,'utf8');
-  const css=fs.readFileSync(`apps/${app}/src/app/app.component.css`,'utf8');
+  const ts=fs.readFileSync(contractPath(process.cwd(), `apps/${app}/src/app/app.component.ts`),'utf8');
+  const html=fs.readFileSync(contractPath(process.cwd(), `apps/${app}/src/app/app.component.html`),'utf8');
+  const css=fs.readFileSync(contractPath(process.cwd(), `apps/${app}/src/app/app.component.css`),'utf8');
   if(!ts.includes('get isLoginRoute(): boolean')) throw new Error(`${app}: missing isLoginRoute`);
   if(!html.includes('@if (!isLoginRoute)') || !html.includes(`<${nav} />`)) throw new Error(`${app}: nav must hide on login`);
   if(!html.includes('[class.login-shell]="isLoginRoute"')) throw new Error(`${app}: login shell marker missing`);
@@ -16,8 +17,8 @@ for(const [app,nav] of [
   if(localRules) throw new Error(`${app}: app shell styling must come from the central Gear Apps stylesheet.`);
 }
 
-const login=fs.readFileSync('libs/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.html','utf8');
-const componentStyle=fs.readFileSync('libs/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.scss','utf8');
+const login=fs.readFileSync(contractPath(process.cwd(), 'libs/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.html'),'utf8');
+const componentStyle=fs.readFileSync(contractPath(process.cwd(), 'libs/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.scss'),'utf8');
 const sharedStyle=readGearAppsStyles();
 
 for(const marker of ['GEAR APPS','Manufacturing Operations Suite','Blade Tracking.','Cutter Builder.','Greenshed.','Sign in to Gear Apps','Local accounts','>Operator<','>Admin<']){

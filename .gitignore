@@ -9,3 +9,9 @@ coverage
 .angular
 .DS_Store
 *.log
+*.dump
+*.bak
+tools/database/backups/
+tools/database/cleanup.sql
+tools/database/legacy-import.sql
+database-reports/

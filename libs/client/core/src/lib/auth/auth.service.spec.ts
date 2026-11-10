@@ -5,7 +5,7 @@ import { AuthService } from './auth.service';
 
 const token = (exp: number) => {
   const b64 = (o: object) => btoa(JSON.stringify(o)).replace(/=/g, '');
-  return `${b64({ alg: 'HS256' })}.${b64({ sub: 'u1', email: 'a@b.c', fname: 'Ryan', exp })}.sig`;
+  return `${b64({ alg: 'HS256' })}.${b64({ sub: 'u1', email: 'a@b.c', firstName: 'Ryan', tokenUse: 'access', exp })}.sig`;
 };
 
 describe('AuthService', () => {
@@ -18,7 +18,7 @@ describe('AuthService', () => {
 
   it('stores the token on login and exposes decoded user data', () => {
     const t = token(Math.floor(Date.now() / 1000) + 3600);
-    http.post.mockReturnValue(of({ access_token: t }));
+    http.post.mockReturnValue(of({ accessToken: t, refreshToken: 'refresh' }));
     const svc = TestBed.inject(AuthService);
     svc.login({ email: 'a@b.c', password: 'x' }).subscribe();
     expect(svc.isAuthenticated()).toBe(true);

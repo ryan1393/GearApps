@@ -6,6 +6,7 @@ export const manufacturingRoot = path.resolve(path.dirname(fileURLToPath(import.
 export const workspaceRoot = path.resolve(manufacturingRoot, '..');
 const rootFiles = new Set([
   'package.json', 'package-lock.json', 'nx.json', 'tsconfig.base.json',
+  'compose.yml', '.env', '.env.example',
   'jest.preset.js', 'jest.config.ts', 'eslint.config.mjs', '.dockerignore',
 ]);
 // Manufacturing sources retain their domain directory. Toolchain, dependencies,
@@ -13,6 +14,7 @@ const rootFiles = new Set([
 export function contractPath(base, ...segments) {
   const absolute = path.resolve(base, ...segments);
   const relative = path.relative(manufacturingRoot, absolute).replaceAll('\\', '/');
+  if (relative === 'apps' || relative.startsWith('apps/')) return path.join(workspaceRoot, relative);
   if (rootFiles.has(relative) || relative.startsWith('node_modules/') || relative.startsWith('vendor/dana-ui/') || relative.startsWith('libs/shared/dana-ui/')) {
     return path.join(workspaceRoot, relative);
   }

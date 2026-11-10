@@ -38,8 +38,8 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
     {
         _auth = null;
         if (string.IsNullOrWhiteSpace(_settings.Email) || string.IsNullOrWhiteSpace(_settings.Password))
-            throw new InvalidOperationException("Configure LapperApi:Email and LapperApi:Password before starting the service.");
-        using var response = await _client.PostAsJsonAsync("api/v1/auth/login",
+            throw new InvalidOperationException("Configure GearAppsApi:Email and GearAppsApi:Password before starting the service.");
+        using var response = await _client.PostAsJsonAsync("api/v1/auth/email/login",
             new { email = _settings.Email, password = _settings.Password }, token);
         if (!response.IsSuccessStatusCode)
         {
@@ -47,7 +47,7 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
             return null;
         }
         var auth = await response.Content.ReadFromJsonAsync<Auth>(cancellationToken: token);
-        if (!string.IsNullOrWhiteSpace(auth?.access_token)) _auth = auth;
+        if (!string.IsNullOrWhiteSpace(auth?.AccessToken)) _auth = auth;
         return _auth;
     }
 
@@ -59,17 +59,14 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
         await _authentication.WaitAsync(cancellationToken);
         try
         {
-            if (string.IsNullOrWhiteSpace(_auth?.access_token))
-                return (await LoginCoreAsync(cancellationToken))?.access_token;
-            using var response = await _client.PostAsJsonAsync("api/v1/auth/check-token",
-                new { access_token = _auth.access_token }, cancellationToken);
-            if (response.IsSuccessStatusCode)
-            {
-                var validation = await response.Content.ReadFromJsonAsync<AuthValidate>(cancellationToken: cancellationToken);
-                if (validation != null && validation.exp > DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 60)
-                    return _auth.access_token;
-            }
-            return (await LoginCoreAsync(cancellationToken))?.access_token;
+            if (string.IsNullOrWhiteSpace(_auth?.AccessToken))
+                return (await LoginCoreAsync(cancellationToken))?.AccessToken;
+            using var request = new HttpRequestMessage(HttpMethod.Get, "api/v1/auth/me");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _auth.AccessToken);
+            using var response = await _client.SendAsync(request, cancellationToken);
+            if (response.IsSuccessStatusCode) return _auth.AccessToken;
+            if (response.StatusCode != HttpStatusCode.Unauthorized) response.EnsureSuccessStatusCode();
+            return (await LoginCoreAsync(cancellationToken))?.AccessToken;
         }
         finally { _authentication.Release(); }
     }
@@ -87,9 +84,9 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
         await _authentication.WaitAsync(token);
         try
         {
-            if ((_auth == null || _auth.access_token == usedToken) && await LoginCoreAsync(token) == null)
+            if ((_auth == null || _auth.AccessToken == usedToken) && await LoginCoreAsync(token) == null)
                 throw new HttpRequestException("API authentication refresh failed.");
-            usedToken = _auth!.access_token;
+            usedToken = _auth!.AccessToken;
         }
         finally { _authentication.Release(); }
         return await SendOnceAsync(method, path, body, usedToken, requestId, token);
@@ -114,8 +111,9 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
             ?? throw new JsonException("API returned an empty response for " + path);
     }
 
-    public Task<Equipment?> GetMachineByIp(string ip, CancellationToken cancellationToken = default) =>
-        ReadAsync<Equipment>(HttpMethod.Get, "api/v1/machine/ip/" + Uri.EscapeDataString(ip), null, cancellationToken);
+    public Task<Equipment?> GetMachineByIp(string ip, CancellationToken cancellationToken = default, string? machineNumber = null) =>
+        ReadAsync<Equipment>(HttpMethod.Get, "api/v1/machine/ip/" + Uri.EscapeDataString(ip) +
+            (string.IsNullOrWhiteSpace(machineNumber) ? "" : "?number=" + Uri.EscapeDataString(machineNumber)), null, cancellationToken);
 
     public Task<ScannerDetail?> GetScannerByIp(string ip, CancellationToken cancellationToken = default) =>
         ReadAsync<ScannerDetail>(HttpMethod.Get, "api/v1/scanner-detail/ip/" + Uri.EscapeDataString(ip), null, cancellationToken);
@@ -161,13 +159,8 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
 
     public Task<ScannerDetail?> PutScannerDetailsSerialNumbers(string? process, string? queue, string? scannerSerial,
         ScannerDetail scanner, CancellationToken cancellationToken = default) =>
-        ReadAsync<ScannerDetail>(HttpMethod.Patch, "api/v1/scanner-detail/" + Uri.EscapeDataString(scanner.id),
-            new
-            {
-                scanner.model, scanner.type, scanner.description, sn_procces = process, sn_queue = queue,
-                sn_scanner = scannerSerial, machine_id = scanner.machine_id ?? scanner.machine?.id,
-                scanner.ip, scanner.status
-            }, cancellationToken);
+        ReadAsync<ScannerDetail>(HttpMethod.Patch, "api/v1/scanner-detail/" + Uri.EscapeDataString(scanner.id) + "/serial-numbers",
+            new { sn_procces = process, sn_queue = queue, sn_scanner = scannerSerial }, cancellationToken);
 
     public Task<MachineCycle?> PostMachineCycle(string? serialNumber, int consec, string machineId, string gearsetId,
         DateTimeOffset? timestamp = null, string? requestId = null, CancellationToken cancellationToken = default)
@@ -181,7 +174,7 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
     public Task<MacroLog?> PostMacroLog(MachineCycle cycle, string macroId, decimal value,
         string? requestId = null, CancellationToken cancellationToken = default) =>
         ReadAsync<MacroLog>(HttpMethod.Post, "api/v1/macro-log",
-            new { machine_cycle_id = cycle.id, macro_id = macroId, value = value.ToString(CultureInfo.InvariantCulture) }, cancellationToken, requestId);
+            new { machine_cycle_id = cycle.id, macro_id = macroId, value }, cancellationToken, requestId);
 
     public Task<Macro[]?> GetMacroList(CancellationToken cancellationToken = default) =>
         ReadAsync<Macro[]>(HttpMethod.Get, "api/v1/macro", null, cancellationToken);

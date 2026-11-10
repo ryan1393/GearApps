@@ -23,8 +23,8 @@ describe('manufacturing mail templates in the shared workspace', () => {
     expect(existsSync(join(config.partialsDir, 'layout.hbs'))).toBe(true);
   });
   it('continues to find templates with the previous example environment paths', () => {
-    process.env['EMAIL_TEMPLATE_DIR'] = 'apps/server/src/assets/templates';
-    process.env['EMAIL_PARTIALS_DIR'] = 'apps/server/src/assets/templates/partials';
+    process.env['EMAIL_TEMPLATE_DIR'] = 'manufacturing/apps/server/src/assets/templates';
+    process.env['EMAIL_PARTIALS_DIR'] = 'manufacturing/apps/server/src/assets/templates/partials';
     const config = mailerConfig();
     expect(existsSync(join(config.templateDir, 'reset-password.hbs'))).toBe(true);
     expect(existsSync(join(config.partialsDir, 'layout.hbs'))).toBe(true);

@@ -20,9 +20,77 @@ jobs:
           cache: npm
       - run: npm install -g npm@11.9.0
       - run: npm ci
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
       - run: npm run test:versions
       - run: npm run lint
       - run: npm test
       - run: npm run test:contracts
       - run: npm run build
       - run: npx nx run gear-app-server:build-fresh-db-bootstrap --configuration=production
+  fresh-database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: api_test
+          POSTGRES_PASSWORD: ci-only-postgres-password
+          POSTGRES_DB: GearApps_ci_fresh_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U api_test -d GearApps_ci_fresh_test"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      CYPRESS_INSTALL_BINARY: '0'
+      NX_DAEMON: 'false'
+      NX_NO_CLOUD: 'true'
+      DATABASE_TYPE: postgres
+      DATABASE_HOST: 127.0.0.1
+      DATABASE_PORT: '5432'
+      DATABASE_USERNAME: api_test
+      DATABASE_PASSWORD: ci-only-postgres-password
+      DATABASE_NAME: GearApps_ci_fresh_test
+      DATABASE_SYNCHRONIZE: 'false'
+      DATABASE_LOGGING_ENABLED: 'false'
+      DANA_FRESH_DB_BOOTSTRAP: 'YES'
+      SEED_ADMIN_PASSWORD: ci-only-admin-password-not-for-deployment
+      SEED_USER_PASSWORD: ci-only-user-password-not-for-deployment
+      JWT_ACCESS_SECRET: ci-only-access-signing-key-not-for-deployment
+      JWT_REFRESH_SECRET: ci-only-refresh-signing-key-not-for-deployment
+      EMAIL_ENABLED: 'false'
+      SOCIAL_GOOGLE_ENABLED: 'false'
+      ENABLE_SWAGGER: 'false'
+      ENVIRONMENT: test
+      SERVER_PORT: '3333'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.22.1
+          cache: npm
+      - run: npm install -g npm@11.9.0
+      - run: npm ci
+      - run: npx nx build gear-app-server --configuration=production
+      - run: npx nx run gear-app-server:build-fresh-db-bootstrap --configuration=production
+      - run: node dist/apps/server-bootstrap/main.js
+      - run: node manufacturing/tools/base-data/import-base-data.mjs --bootstrap-only
+      - name: Verify shared API on a fresh database
+        shell: bash
+        run: |
+          node dist/apps/server/main.js > api-startup.log 2>&1 &
+          api_pid=$!
+          trap 'kill "$api_pid" 2>/dev/null || true' EXIT
+          ready=false
+          for attempt in $(seq 1 45); do
+            if curl --fail --silent http://127.0.0.1:3333/api/v1/health/ready > /dev/null; then
+              ready=true
+              break
+            fi
+            if ! kill -0 "$api_pid" 2>/dev/null; then break; fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then cat api-startup.log; exit 1; fi
+          npm run db:audit

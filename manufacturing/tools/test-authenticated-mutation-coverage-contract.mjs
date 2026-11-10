@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const manifest=JSON.parse(fs.readFileSync('tools/api-route-manifest.json','utf8').replace(/^\uFEFF/,''));
+const manifest=JSON.parse(fs.readFileSync(contractPath(process.cwd(), 'tools/api-route-manifest.json'),'utf8').replace(/^\uFEFF/,''));
 const routes=Array.isArray(manifest)?manifest:manifest.routes;
 const key=(method,path)=>`${method.toUpperCase()} ${path}`;
 
@@ -88,7 +89,7 @@ if(missing.length||stale.length){
   throw new Error(`Mutation coverage map mismatch. Missing=${JSON.stringify(missing)} stale=${JSON.stringify(stale)}`);
 }
 
-const backendScript=fs.readFileSync('tools/test-authenticated-backend-mutations.ps1','utf8');
+const backendScript=fs.readFileSync(contractPath(process.cwd(), 'tools/test-authenticated-backend-mutations.ps1'),'utf8');
 for(const marker of [
   "POST '/admin/master-data/models'",
   'DELETE "/admin/master-data/models/$($adminModel.id)"',
@@ -146,7 +147,7 @@ for(const safeguard of [
   'test-data/test-blade-status-fixture-contract.mjs',
   'test-data/test-part-machine-compatibility-contract.mjs',
 ]){
-  if(!fs.existsSync(`tools/${safeguard}`)) throw new Error(`Required regression safeguard is missing: tools/${safeguard}`);
+  if(!fs.existsSync(contractPath(process.cwd(), `tools/${safeguard}`))) throw new Error(`Required regression safeguard is missing: tools/${safeguard}`);
 }
 
 console.log(`[PASS] Mutation coverage map accounts for all ${allMutationRoutes.size} mutating API routes.`);

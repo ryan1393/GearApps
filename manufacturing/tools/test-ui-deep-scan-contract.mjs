@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8');
-const exists=(p)=>fs.existsSync(p);
+const exists=(p)=>fs.existsSync(contractPath(process.cwd(), p));
 
 const apps={
   blade:{
@@ -27,7 +27,7 @@ const apps={
 };
 
 function walk(dir,ext,out=[]){
-  for(const e of fs.readdirSync(dir,{withFileTypes:true})){
+  for(const e of fs.readdirSync(contractPath(process.cwd(), dir),{withFileTypes:true})){
     const p=path.join(dir,e.name);
     if(e.isDirectory()) walk(p,ext,out);
     else if(e.isFile() && p.endsWith(ext)) out.push(p);

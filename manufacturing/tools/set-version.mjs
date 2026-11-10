@@ -33,12 +33,6 @@ export function setReleaseVersion(root, next) {
     /(GEAR_APPS_VERSION\s*=\s*['"])[^'"]+(['"])/,
     (_all, a, b) => a + next + b,
   );
-  const apiMetadata = JSON.parse(read('apps/lapper-api/package.json'));
-  apiMetadata.version = next;
-  staged.set(
-    'apps/lapper-api/package.json',
-    JSON.stringify(apiMetadata, null, 2) + '\n',
-  );
   edit(
     'apps/lapper-read/Directory.Build.props',
     /(<Version>\s*)[^<]+(\s*<\/Version>)/,
@@ -50,7 +44,7 @@ export function setReleaseVersion(root, next) {
     (_all, prefix) => prefix + next,
   );
   edit(
-    'manufacturing/compose.yml',
+    'compose.yml',
     /(image: dana-apps-[a-z-]+:)\d+\.\d+\.\d+/g,
     (_all, prefix) => prefix + next,
   );

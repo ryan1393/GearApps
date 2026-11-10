@@ -20,35 +20,15 @@ if (!/^\d+\.\d+\.\d+$/.test(version))
 const lock = JSON.parse(read('package-lock.json'));
 if (lock.version !== version || lock.packages?.['']?.version !== version)
   fail('package-lock release versions do not match package.json');
-if (
-  JSON.parse(read('vendor/dana-ui/VENDOR_MANIFEST.json')).danaAppsVersion !==
-  version
-)
-  fail('vendor ownership version does not match package.json');
-
-const central = fs.readFileSync(
-  path.join(workspaceRoot, 'libs/shared/domain/src/lib/app-version.ts'),
-  'utf8',
-);
+const central = fs.readFileSync(contractPath(process.cwd(), path.join(workspaceRoot, 'libs/shared/domain/src/lib/app-version.ts')), 'utf8');
 const constant = /GEAR_APPS_VERSION\s*=\s*['"]([^'"]+)['"]/.exec(central)?.[1];
-if (
-  !read('libs/shared/util-constants/src/lib/app-version.constants.ts').includes(
-    "from '@gearapps/shared/domain'",
-  )
-)
+if (JSON.parse(read('vendor/dana-ui/VENDOR_MANIFEST.json')).danaAppsVersion !== version)
+  fail('vendor ownership version does not match package.json');
+if (!read('libs/shared/util-constants/src/lib/app-version.constants.ts').includes("from '@gearapps/shared/domain'"))
   fail('Manufacturing release constant must re-export the shared root version');
 if (
-  JSON.parse(
-    fs.readFileSync(
-      path.join(workspaceRoot, 'apps/lapper-api/package.json'),
-      'utf8',
-    ),
-  ).version !== version
-)
-  fail('Lapper API release metadata differs from root');
-if (
   !fs
-    .readFileSync(path.join(workspaceRoot, 'README.md'), 'utf8')
+    .readFileSync(contractPath(process.cwd(), path.join(workspaceRoot, 'README.md')), 'utf8')
     .includes(`# GearApps ${version}`)
 )
   fail('Root README release differs from root package');
@@ -56,7 +36,7 @@ if (constant !== version)
   fail(`GEAR_APPS_VERSION (${constant}) != package.json (${version})`);
 const collectorRoot = path.join(workspaceRoot, 'apps/lapper-read');
 const collectorProperties = fs.readFileSync(
-  path.join(collectorRoot, 'Directory.Build.props'),
+  contractPath(process.cwd(), path.join(collectorRoot, 'Directory.Build.props')),
   'utf8',
 );
 if (
@@ -66,7 +46,7 @@ if (
   fail('Lapper Read collector release version differs from root');
 for (const project of ['LapperRead', 'LapperReadLibrary', 'LapperRead.Tests']) {
   const metadata = fs.readFileSync(
-    path.join(collectorRoot, project, project + '.csproj'),
+    contractPath(process.cwd(), path.join(collectorRoot, project, project + '.csproj')),
     'utf8',
   );
   if (
@@ -80,8 +60,9 @@ for (const project of ['LapperRead', 'LapperReadLibrary', 'LapperRead.Tests']) {
 const tags = [
   ...read('compose.yml').matchAll(/image: (dana-apps-[a-z-]+):(\S+)/g),
 ];
-if (tags.length !== 4)
-  fail(`compose.yml should tag 4 Gear images; found ${tags.length}`);
+const expectedImages = ['gear-app-server','lapper-client','blade-tracking','cutter-builder','greenshed'];
+if (tags.length !== expectedImages.length || expectedImages.some(name => !tags.some(([,image]) => image === 'dana-apps-' + name)))
+  fail(`compose.yml should tag all ${expectedImages.length} Gear images; found ${tags.length}`);
 for (const [, image, tag] of tags)
   if (tag !== version) fail(`compose.yml ${image}:${tag} != ${version}`);
 

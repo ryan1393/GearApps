@@ -1,5 +1,6 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
-const read = (path) => fs.readFileSync(path, 'utf8');
+const read = (path) => fs.readFileSync(contractPath(process.cwd(), path), 'utf8');
 const shelf = read('libs/shared/util-constants/src/lib/shelf-location.constants.ts');
 const seed = read('tools/data-import/seed-trays-containers-mock-data.mjs');
 const fixtures = read('tools/test-data/ensure-workflow-test-fixtures.mjs');

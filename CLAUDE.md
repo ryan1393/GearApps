@@ -1,11 +1,12 @@
 # GearApps — notes for AI assistants
 
-- Nx monorepo. Lapper apps in `apps/`, libraries in `libs/{shared,api,client}`; manufacturing apps/libs in `manufacturing/`. Run all npm/Nx commands from the root. Import via `@gearapps/...` path aliases only.
+- Nx monorepo. Every application is in root `apps/`; shared/Lapper libraries are in `libs/{shared,api,client}`, and manufacturing domain libraries are in `manufacturing/libs/`. Run all npm/Nx commands from the root. Import via `@gearapps/...` path aliases only.
 - UI is **Dana UI** (source `libs/shared/dana-ui`, built package `vendor/dana-ui/package`, imported as `@dana/ui`). Do not add PrimeNG/Material; build screens from Dana classes and directives, add layout-only CSS in the component.
-- API: NestJS 11 + TypeORM 1.x. Use `BaseCrudService` / `crudController()` from `@gearapps/api/core` for new entities; keep DTOs in `libs/api/data-access` with class-validator + Swagger decorators. Never interpolate values into SQL — use QueryBuilder parameters.
+- One API: `gear-app-server` in `apps/server` serves every web client and Lapper Read on port 3333. Keep one authentication service, default JWT guard, database connection and `.env` configuration. Do not restore the removed standalone Lapper server or signing key.
+- API: NestJS 11 + TypeORM 1.x. Lapper controllers use `CrudService` contracts / `crudController()` from `@gearapps/api/core`; `@gearapps/api/postgres` supplies their shared-connection implementations. Keep DTOs in `libs/api/data-access` with class-validator + Swagger decorators. Never interpolate values into SQL — use bound parameters.
 - Keep existing API paths backwards compatible (external collectors post to them).
 - Shared types live in `libs/shared/domain` and are the single source of truth for both sides.
-- Config comes from `.env` via `@gearapps/api/core` `configuration.ts` + Joi schema. Add new settings there, and to `.env.example`.
+- Shared API configuration and validation live in `manufacturing/libs/server/util-common/src/lib/config`. Add new settings there and to `.env.example`; scanner settings also have the feature loader in `@gearapps/api/core`.
 - Verify with `npx nx run-many -t lint test build` before opening a PR.
 
 - One dependency authority: root package.json/package-lock.json. No nested dependency installs. Use Node 24.22.1/npm 11.9.0.

@@ -27,7 +27,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const userAgent = request.get('user-agent') || '';
     const { ip, method, path: url } = request;
     const correlationKey = uuidv4();
-    const userId = request.user?.userId;
+    const userId = request.user?.id;
 
     this.logger.log(
       `[${correlationKey}] ${method} ${url} ${userId} ${userAgent} ${ip}: ${

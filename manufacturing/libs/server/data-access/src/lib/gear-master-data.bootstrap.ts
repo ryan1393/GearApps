@@ -5,6 +5,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { STARTUP_SCHEMA_LOCK_SQL } from '@gearapps/manufacturing/shared/util-constants';
 import { CUTTER_BODY_SHELF_SCHEMA } from './cutter-body-shelf.schema';
+import { applySharedDatabaseIntegrity } from '@gearapps/shared/database';
 
 /**
  * Additive schema evolution for Gear Apps master-data features that must work
@@ -57,7 +58,7 @@ export class GearMasterDataBootstrap implements OnModuleInit {
       // Numbered CGRR-### / CGRP-### shelves are configured through Admin, just
       // like the other physical numbered locations. Do not invent a shelf count,
       // rename CGRR/CGRP to an assumed slot, or move historical/current placements.
-
+      await applySharedDatabaseIntegrity(manager);
     });
     this.logger.log('Gear master-data schema verified');
   }

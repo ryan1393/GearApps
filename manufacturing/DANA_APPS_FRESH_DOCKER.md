@@ -4,8 +4,8 @@ The consolidated Gear Apps workspace supports a brand-new Docker host without re
 
 ## Safety model
 
-- Gear data remains in its own PostgreSQL database and named volume.
-- Lapper uses its own database and volume.
+- Every application uses the shared GearApps PostgreSQL database and named volume.
+- Lapper history is linked to the shared masters through the `lapper` schema.
 - Runtime Gear API always starts with `DATABASE_SYNCHRONIZE=false`.
 - The one-shot `gear-db-bootstrap` service may enable TypeORM synchronize **only when the Gear database has zero public tables**.
 - A non-empty partial schema is refused rather than auto-repaired.
@@ -16,7 +16,8 @@ The consolidated Gear Apps workspace supports a brand-new Docker host without re
 
 ## Required .env values
 
-Copy `manufacturing/.env.example` to `manufacturing/.env` and set real values for at least:
+Keep the existing repository root `.env`. On a new host, copy the root
+`.env.example` to `.env` and set real values for at least:
 
 - `GEAR_DB_PASSWORD` (12+ characters)
 - `SEED_ADMIN_PASSWORD` (12+ characters)
@@ -40,13 +41,14 @@ chmod +x manufacturing/DANA-APPS-FRESH-DOCKER-UP.sh
 ./manufacturing/DANA-APPS-FRESH-DOCKER-UP.sh
 ```
 
-The helper validates secrets, validates Compose, builds all images, starts PostgreSQL, runs one-shot schema/user/reference bootstrap, imports base master data, starts the runtime API, waits for `/api/v1/health/ready`, then starts the three Gear frontends.
+The helper validates secrets, validates Compose, builds all images, starts PostgreSQL, runs one-shot schema/user/reference bootstrap, imports base master data, starts the runtime API, waits for `/api/v1/health/ready`, then starts all four web clients.
 
 ## Default ports
 
 - Blade Tracking: 4200
 - Cutter Builder: 4201
 - Greenshed: 4202
+- Lapper: 4203
 - Gear API: 3333
 - Gear PostgreSQL: 5432
 
@@ -66,7 +68,7 @@ From the repository root, `manufacturing\TRANSFER-DANA-APPS-TO-DOCKER.cmd` packa
 
 The `gear-db-bootstrap` service runs from the same production-dependency image as the Gear API. Production seed/bootstrap code therefore must not import test-only/dev-only libraries.
 
-`@ngneat/falso` remains a devDependency for unit tests, but `UserDatabaseSeedService` uses Node `crypto` for runtime-safe fallback/random seed values. The server Docker build scans `dist/manufacturing/apps/server-bootstrap/main.js` and fails immediately if `@ngneat/falso` is ever reintroduced into the bootstrap bundle.
+`@ngneat/falso` remains a devDependency for unit tests, but `UserDatabaseSeedService` uses Node `crypto` for runtime-safe fallback/random seed values. The server Docker build scans `dist/apps/server-bootstrap/main.js` and fails immediately if `@ngneat/falso` is ever reintroduced into the bootstrap bundle.
 
 ## Password recovery and upgrades
 
@@ -89,5 +91,5 @@ All Docker contexts point to the repository root. Root `package.json` and
 `package-lock.json` supply every app's dependencies; manufacturing has no separate
 installation. Node is pinned to 24.22.1 and npm to 11.9.0. CI installs once at the root
 and verifies all applications. The manufacturing stack can be managed from the root
-with `docker compose --env-file manufacturing/.env -f manufacturing/compose.yml ...`.
-This keeps manufacturing's database/environment separate from the Lapper stack.
+with `docker compose --env-file .env -f compose.yml ...`.
+Every application is under root `apps/` and uses the same API, database and root `.env`.

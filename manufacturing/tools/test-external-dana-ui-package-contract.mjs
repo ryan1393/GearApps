@@ -15,14 +15,14 @@ must(fs.realpathSync(contractPath(manufacturingRoot,'node_modules/@dana/ui'))===
 must(!fs.existsSync(path.join(manufacturingRoot,'vendor/dana-ui/package')),'Remove the duplicate manufacturing Dana UI output');
 for (const path of ['styles/dana-ui.css','styles/dana-core.css','styles/gear-compat.css','styles/gear-compat-features.css','styles/gear-compat-overrides.css','assets/branding/dana-diamond.png']) must(fs.existsSync(contractPath(manufacturingRoot,'vendor/dana-ui/package',path)),`Dana UI output missing: ${path}`);
 for (const manifest of ['DANA_UI_HTML_PRESERVATION_MANIFEST.json','DANA_UI_TEST_PRESERVATION_MANIFEST.json']) {
-  for(const entry of json(manifest).files) must(fs.existsSync(path.join(manufacturingRoot,entry.path)),`Preserved source missing: ${entry.path}`);
+  for(const entry of json(manifest).files) must(fs.existsSync(contractPath(process.cwd(), path.join(manufacturingRoot,entry.path))),`Preserved source missing: ${entry.path}`);
 }
 for(const app of ['blade-tracking','cutter-builder','greenshed']) {
   const styles=json(`apps/${app}/project.json`).targets?.build?.options?.styles??[];
   const expected=['gear-compat.css','gear-compat-features.css','dana-ui.css','gear-compat-overrides.css'].map(name=>'libs/shared/dana-ui/src/styles/'+name);
   const start=styles.indexOf(expected[0]);
   must(start>=0 && expected.every((name,index)=>styles[start+index]===name),`${app}: shared Dana compatibility ordering changed`);
-  must(styles.every(name=>name===`manufacturing/apps/${app}/src/styles.css` || name.startsWith('libs/shared/dana-ui/src/styles/')),`${app}: local visual design escaped Dana UI ownership`);
+  must(styles.every(name=>name===`apps/${app}/src/styles.css` || name.startsWith('libs/shared/dana-ui/src/styles/')),`${app}: local visual design escaped Dana UI ownership`);
 }
 const barrel=readContract('vendor/dana-ui/package/index.d.ts');
 for(const marker of ['DANA_UI_GLOBAL_STYLESHEET','DANA_UI_GEAR_COMPAT_STYLESHEET','DANA_UI_GEAR_COMPAT_FEATURES_STYLESHEET','DANA_UI_GEAR_COMPAT_OVERRIDES_STYLESHEET']) must(barrel.includes(marker),`Dana UI stylesheet export missing ${marker}`);

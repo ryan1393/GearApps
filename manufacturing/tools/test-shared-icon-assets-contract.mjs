@@ -12,8 +12,8 @@ const requiredIcons = [
 for (const icon of requiredIcons) {
   const rel = `assets/icons/${icon}.svg`;
   const abs = contractPath(root, rel);
-  if (!fs.existsSync(abs)) throw new Error(`Shared icon is missing: ${rel}`);
-  const svg = fs.readFileSync(abs, 'utf8');
+  if (!fs.existsSync(contractPath(process.cwd(), abs))) throw new Error(`Shared icon is missing: ${rel}`);
+  const svg = fs.readFileSync(contractPath(process.cwd(), abs), 'utf8');
   if (!svg.includes('<svg') || !svg.includes('viewBox="0 0 24 24"')) {
     throw new Error(`${rel} is not a normalized 24x24 Gear Apps SVG.`);
   }

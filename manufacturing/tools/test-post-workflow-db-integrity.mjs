@@ -21,7 +21,7 @@ function loadDotEnv(filePath){
 }
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
-const env={...loadDotEnv(path.join(root,'.env')),...process.env};
+const env={...loadDotEnv(path.resolve(root, '..', '.env')),...process.env};
 for(const key of ['DATABASE_HOST','DATABASE_PORT','DATABASE_USERNAME','DATABASE_PASSWORD','DATABASE_NAME']){
   if(typeof env[key]!=='string' || !env[key]) throw new Error(`Missing ${key}`);
 }

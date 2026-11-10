@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "hashEncoding": "utf8-lf",
   "baseline": "Dana Apps V70.0.0",
   "releaseVersion": "70.3.0",
   "workspace": "single-root",
@@ -17,38 +18,18 @@
     "typescript": "5.9.3"
   },
   "rootHashes": {
-    "package.json": "2B2F29F74CB204EEFA2A9B55941D55715518C173C0130710373B3B5E0EF5D570",
+    "package.json": "5668B919C560B42A59140FCBC82EB28FCB358C76A605A7D5464BFFF93423C548",
     "package-lock.json": "B9AAA5CA9D755E0481ECB897481FF811EB59D5E186075BAD0A88E5EE40A6168D",
     "nx.json": "70665B73BCA488DA1CBA39928CA99A5C5911A292E4E2DC2594B6D8A0002945DE",
-    "tsconfig.base.json": "39F3E1CCAB5AFA57C8CB50ACBE1D65811C50FD8574C33DC10F0DD31EF46CF833"
+    "tsconfig.base.json": "072FD63370AF0D3FBFD67F843B848EDF81DAD02CAE4C36198AAC7468BD8779DF"
   },
   "composeFiles": [
     {
-      "path": "docker-compose.yml",
-      "sha256": "C2342D13EB171044A3719EFFCA3B8A65F31551221B98FAD82DDCAC215C43A421"
-    },
-    {
-      "path": "manufacturing/compose.yml",
-      "sha256": "1981FCAF7DB3447ADF1F096374AFB302A3C223C5197295A0D7BCEC3570CAAC7B"
+      "path": "compose.yml",
+      "sha256": "0825D90AEB14BFB18E46B52857C8A2802C4097EE16C672A87B1F14AC1D7F42DF"
     }
   ],
   "runtimeProjects": [
-    {
-      "name": "lapper-api",
-      "root": "apps/lapper-api",
-      "projectType": "application",
-      "tags": [],
-      "targets": [
-        "copy-workspace-modules",
-        "prune",
-        "prune-lockfile",
-        "serve",
-        "test"
-      ],
-      "hasBuildTarget": false,
-      "hasServeTarget": true,
-      "hasTestTarget": true
-    },
     {
       "name": "lapper-client",
       "root": "apps/lapper-client",
@@ -67,8 +48,25 @@
       "hasTestTarget": false
     },
     {
+      "name": "lapper-read",
+      "root": "apps/lapper-read",
+      "projectType": "application",
+      "tags": [
+        "language:dotnet",
+        "platform:server",
+        "scope:lapper"
+      ],
+      "targets": [
+        "build",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
       "name": "blade-tracking",
-      "root": "manufacturing/apps/blade-tracking",
+      "root": "apps/blade-tracking",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -90,7 +88,7 @@
     },
     {
       "name": "cutter-builder",
-      "root": "manufacturing/apps/cutter-builder",
+      "root": "apps/cutter-builder",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -112,7 +110,7 @@
     },
     {
       "name": "greenshed",
-      "root": "manufacturing/apps/greenshed",
+      "root": "apps/greenshed",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -134,7 +132,7 @@
     },
     {
       "name": "gear-app-server",
-      "root": "manufacturing/apps/server",
+      "root": "apps/server",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -175,16 +173,6 @@
       "hasTestTarget": false
     },
     {
-      "name": "api-feature-auth",
-      "root": "libs/api/feature-auth",
-      "projectType": "library",
-      "tags": [],
-      "targets": [],
-      "hasBuildTarget": false,
-      "hasServeTarget": false,
-      "hasTestTarget": false
-    },
-    {
       "name": "api-feature-cutter-tracking",
       "root": "libs/api/feature-cutter-tracking",
       "projectType": "library",
@@ -215,8 +203,18 @@
       "hasTestTarget": false
     },
     {
+      "name": "api-postgres",
+      "root": "libs/api/postgres",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
       "name": "blade-tracking",
-      "root": "manufacturing/apps/blade-tracking",
+      "root": "apps/blade-tracking",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -238,7 +236,7 @@
     },
     {
       "name": "blade-tracking-e2e",
-      "root": "manufacturing/apps/blade-tracking-e2e",
+      "root": "apps/blade-tracking-e2e",
       "projectType": "application",
       "tags": [
         "domain:gear-apps"
@@ -333,7 +331,7 @@
     },
     {
       "name": "cutter-builder",
-      "root": "manufacturing/apps/cutter-builder",
+      "root": "apps/cutter-builder",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -564,7 +562,7 @@
     },
     {
       "name": "gear-app-server",
-      "root": "manufacturing/apps/server",
+      "root": "apps/server",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -584,7 +582,7 @@
     },
     {
       "name": "gear-app-server-e2e",
-      "root": "manufacturing/apps/server-e2e",
+      "root": "apps/server-e2e",
       "projectType": null,
       "tags": [
         "domain:gear-apps"
@@ -599,7 +597,7 @@
     },
     {
       "name": "greenshed",
-      "root": "manufacturing/apps/greenshed",
+      "root": "apps/greenshed",
       "projectType": "application",
       "tags": [
         "domain:gear-apps",
@@ -620,22 +618,6 @@
       "hasTestTarget": true
     },
     {
-      "name": "lapper-api",
-      "root": "apps/lapper-api",
-      "projectType": "application",
-      "tags": [],
-      "targets": [
-        "copy-workspace-modules",
-        "prune",
-        "prune-lockfile",
-        "serve",
-        "test"
-      ],
-      "hasBuildTarget": false,
-      "hasServeTarget": true,
-      "hasTestTarget": true
-    },
-    {
       "name": "lapper-client",
       "root": "apps/lapper-client",
       "projectType": "application",
@@ -651,6 +633,23 @@
       "hasBuildTarget": true,
       "hasServeTarget": true,
       "hasTestTarget": false
+    },
+    {
+      "name": "lapper-read",
+      "root": "apps/lapper-read",
+      "projectType": "application",
+      "tags": [
+        "language:dotnet",
+        "platform:server",
+        "scope:lapper"
+      ],
+      "targets": [
+        "build",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": false,
+      "hasTestTarget": true
     },
     {
       "name": "server-data-access",
@@ -969,6 +968,18 @@
       "targets": [
         "lint"
       ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "shared-database",
+      "root": "libs/shared/database",
+      "projectType": "library",
+      "tags": [
+        "platform:server"
+      ],
+      "targets": [],
       "hasBuildTarget": false,
       "hasServeTarget": false,
       "hasTestTarget": false

@@ -16,7 +16,7 @@ const headers=readDanaUiSource(root, 'lib/components/layout/dana-page-header.com
 const summary=read('tools/test-dana-summary-card-contract.mjs');
 const consolidation=read('tools/test-dana-component-consolidation-contract.mjs');
 const htmlFiles=[];
-function walk(dir){for(const e of fs.readdirSync(dir,{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())walk(p);else if(e.name.endsWith('.html'))htmlFiles.push(p)}}
+function walk(dir){for(const e of fs.readdirSync(contractPath(process.cwd(), dir),{withFileTypes:true})){const p=path.join(dir,e.name);if(e.isDirectory())walk(p);else if(e.name.endsWith('.html'))htmlFiles.push(p)}}
 walk(contractPath(root,'libs/frontend'));
 const allHtml=htmlFiles.map(p=>fs.readFileSync(contractPath(process.cwd(), p),'utf8')).join('\n');
 const count=(s,n)=>(s.match(new RegExp(n,'g'))||[]).length;

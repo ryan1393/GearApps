@@ -1,0 +1,32 @@
+{
+  "name": "blade-tracking-e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/blade-tracking-e2e/src",
+  "projectType": "application",
+  "targets": {
+    "e2e": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cypress run --config-file apps/blade-tracking-e2e/cypress.config.ts",
+        "cwd": "."
+      },
+      "dependsOn": [
+        "blade-tracking:serve-static"
+      ]
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "apps/blade-tracking-e2e"
+      },
+      "cache": true
+    }
+  },
+  "tags": [
+    "domain:gear-apps"
+  ],
+  "implicitDependencies": [
+    "blade-tracking"
+  ]
+}

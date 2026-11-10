@@ -3,6 +3,7 @@
 public class LapperConfiguration
 {
     public string MachineIp { get; set; } = "";
+    public string? MachineNumber { get; set; }
     public string ScannerIp { get; set; } = "";
     public int ScannerInput1Port { get; set; } = 9004;
     public int ScannerInput2Port { get; set; } = 9013;

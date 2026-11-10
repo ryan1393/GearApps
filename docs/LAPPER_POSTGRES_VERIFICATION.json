@@ -1,0 +1,55 @@
+{
+  "date": "2026-11-09",
+  "targetVersion": "70.3.0",
+  "baseCommit": "f29e1856514caa2122db3ab152d25e164c95a4e6",
+  "runtime": {
+    "node": "24.22.1",
+    "dotnetSdk": "8.0.427",
+    "postgresqlMajor": 16
+  },
+  "checks": {
+    "workspaceVersions": "passed",
+    "workspaceLintAndProductionBuilds": { "result": "passed", "projects": 57 },
+    "rootUnitTests": { "result": "passed", "tests": 178, "suites": 50 },
+    "deploymentTestsOnLinux": { "result": "passed", "tests": 28 },
+    "danaUiBoundaryAndAotChecks": "passed",
+    "sourceContracts": { "result": "passed", "contracts": 82 },
+    "lapperReadRegressionTests": { "result": "passed", "tests": 46 },
+    "postgresqlHttpAcceptanceTests": {
+      "result": "passed",
+      "testsIncludingParent": 7,
+      "coverage": [
+        "shared login and account deactivation",
+        "registration and account-write restrictions",
+        "token purpose validation",
+        "canonical catalog and imported GUID compatibility",
+        "historical timestamps and macro summaries",
+        "duplicate machine IP disambiguation",
+        "administrator master-data writes",
+        "operator permissions and authoritative audit user",
+        "decimal macro values and millisecond timestamps",
+        "concurrent idempotent writes and payload conflict detection",
+        "scanner serial-only updates and FANUC snapshots",
+        "pending gearset history and canonical assembly creation",
+        "gearset number reuse preserves assembly identity",
+        "shared master and production-history deletion safeguards"
+      ]
+    },
+    "freshSchemaStartupAndMigrationReplay": "passed",
+    "chromeBrowserSmokeTest": "passed",
+    "combinedAndStandaloneComposeValidation": "passed"
+  },
+  "databasePreservation": {
+    "testDatabases": "disposable restored copies only",
+    "existingPublicTablesCompared": 75,
+    "allExistingPublicDataUnchangedAfterFixtureCleanup": true,
+    "liveDatabaseChanged": false,
+    "privateBackupsOrDatabaseContentsIncludedInRepository": false
+  },
+  "deploymentRequirements": [
+    "Configure the existing GearApps PostgreSQL connection and a separate Lapper JWT secret.",
+    "Apply the separate private legacy merge package to import old Lapper history if not already applied.",
+    "Deploy the updated API/client and configure each Windows collector for the Lapper API.",
+    "Verify station timing and licensed FANUC DLL compatibility on actual hardware."
+  ]
+}

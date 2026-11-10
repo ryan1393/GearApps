@@ -1,7 +1,8 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import { readGearAppsStyles } from './lib/read-gear-apps-styles.mjs';
 
-const read = (path) => fs.readFileSync(path, 'utf8').replace(/^\uFEFF/, '');
+const read = (path) => fs.readFileSync(contractPath(process.cwd(), path), 'utf8').replace(/^\uFEFF/, '');
 
 const routes = read('libs/frontend/feature-blade-tracking/src/lib/lib.routes.ts');
 const nav = read('apps/blade-tracking/src/app/layout/app-nav/app-nav.component.html');

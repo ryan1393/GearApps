@@ -18,7 +18,7 @@ import { join } from 'node:path';
 import { DataSource } from 'typeorm';
 
 function loadDotEnv(): void {
-  const file = join(process.cwd(), '.env');
+  const file = join(__dirname, '../../..', '.env');
   if (!existsSync(file)) return;
   for (const line of readFileSync(file, 'utf8').split(/\r?\n/)) {
     const m = /^\s*([A-Z0-9_]+)\s*=\s*(.*)\s*$/.exec(line);

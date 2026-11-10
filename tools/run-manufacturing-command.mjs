@@ -1,9 +1,13 @@
 import { spawn } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve, delimiter } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+// Maintenance tools retain their domain-relative working directory while every
+// command gets configuration from the single repository environment.
+const envFile = resolve(root, '.env');
+if (existsSync(envFile)) process.loadEnvFile(envFile);
 const scripts = JSON.parse(readFileSync(resolve(root, 'tools/manufacturing-scripts.json'), 'utf8'));
 const [name, ...args] = process.argv.slice(2);
 if (!Object.hasOwn(scripts, name)) throw new Error(`Unknown manufacturing command: ${name}`);

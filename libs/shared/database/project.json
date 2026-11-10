@@ -1,0 +1,7 @@
+{
+  "name": "shared-database",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/shared/database/src",
+  "projectType": "library",
+  "tags": ["platform:server"]
+}

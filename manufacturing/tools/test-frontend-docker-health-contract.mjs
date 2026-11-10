@@ -1,18 +1,21 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
+import path from 'node:path';
 
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
-const compose=fs.readFileSync('compose.yml','utf8');
+const compose=fs.readFileSync(contractPath(process.cwd(), 'compose.yml'),'utf8').replace(/\r\n/g, '\n');
 
 const frontends=[
   ['blade-tracking','apps/blade-tracking/nginx.conf','apps/blade-tracking/Dockerfile'],
   ['cutter-builder','apps/cutter-builder/nginx.conf','apps/cutter-builder/Dockerfile'],
-  ['greenshed','apps/greenshed/nginx.conf','apps/greenshed/Dockerfile']
+  ['greenshed','apps/greenshed/nginx.conf','apps/greenshed/Dockerfile'],
+  ['lapper-client','../apps/lapper-client/nginx.conf','../apps/lapper-client/Dockerfile']
 ];
 
 const ipv4Health='wget -q -O - http://127.0.0.1/healthz >/dev/null 2>&1';
 
-must((compose.match(/http:\/\/127\.0\.0\.1\/healthz/g)||[]).length===3,
-  'compose.yml must contain exactly three IPv4 frontend /healthz probes.');
+must((compose.match(/http:\/\/127\.0\.0\.1\/healthz/g)||[]).length===frontends.length,
+  'compose.yml must contain an IPv4 /healthz probe for each of the four frontends.');
 must(!compose.includes('http://localhost/healthz'),
   'compose.yml must not use localhost for frontend /healthz probes.');
 
@@ -30,13 +33,13 @@ for(const [service,nginxRel,dockerfileRel] of frontends){
   must(block.includes('timeout: 5s'),`${service} healthcheck timeout changed unexpectedly.`);
   must(block.includes('retries: 5'),`${service} healthcheck retry budget changed unexpectedly.`);
 
-  const nginx=fs.readFileSync(nginxRel,'utf8');
+  const nginx=fs.readFileSync(contractPath(process.cwd(), nginxRel),'utf8');
   must(nginx.includes('location = /healthz'),`${nginxRel} must expose /healthz.`);
   must(/return\s+200\s+['"]ok['"];/.test(nginx),`${nginxRel} /healthz must return HTTP 200.`);
 
-  const dockerfile=fs.readFileSync(dockerfileRel,'utf8');
+  const dockerfile=fs.readFileSync(contractPath(process.cwd(), dockerfileRel),'utf8');
   must(dockerfile.includes('FROM nginx:1.27-alpine'),`${dockerfileRel} runtime image changed unexpectedly.`);
-  must(dockerfile.includes(`COPY manufacturing/${nginxRel} /etc/nginx/conf.d/default.conf`),
+  must(dockerfile.includes(`COPY ${path.posix.normalize(nginxRel.replace(/^\.\.\//, ''))} /etc/nginx/conf.d/default.conf`),
     `${dockerfileRel} must install its maintained nginx.conf.`);
 }
 

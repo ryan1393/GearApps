@@ -11,7 +11,10 @@ const EXCLUDED_DIRS = new Set([
 
 function sha256File(file) {
   if (!fs.existsSync(file)) return null;
-  return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex').toUpperCase();
+  // These inputs are text configuration files. Git may check them out with
+  // CRLF on Windows and LF on Linux; the fingerprint must describe the source.
+  const text = fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n');
+  return crypto.createHash('sha256').update(text).digest('hex').toUpperCase();
 }
 
 function readJson(file) {
@@ -44,7 +47,6 @@ export function buildGearMergeManifest(root = workspaceRoot) {
   const projectFiles = [
     ...walkProjectFiles(root, 'apps'),
     ...walkProjectFiles(root, 'libs'),
-    ...walkProjectFiles(root, 'manufacturing/apps'),
     ...walkProjectFiles(root, 'manufacturing/libs'),
   ];
 
@@ -65,7 +67,7 @@ export function buildGearMergeManifest(root = workspaceRoot) {
     String(a.name).localeCompare(String(b.name)) || a.root.localeCompare(b.root)
   );
 
-  const composeFiles = ['docker-compose.yml', 'manufacturing/compose.yml']
+  const composeFiles = ['compose.yml']
     .filter((name) => fs.existsSync(contractPath(root, name)))
     .map((name) => ({ path: name, sha256: sha256File(contractPath(root, name)) }));
 
@@ -80,7 +82,7 @@ export function buildGearMergeManifest(root = workspaceRoot) {
     if (fs.existsSync(contractPath(root, name))) rootHashes[name] = sha256File(contractPath(root, name));
   }
 
-  const runtimeNames = ['lapper-api', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed', 'gear-app-server'];
+  const runtimeNames = ['lapper-client', 'lapper-read', 'blade-tracking', 'cutter-builder', 'greenshed', 'gear-app-server'];
   const runtimeProjects = runtimeNames.map((name) => {
     const project = projects.find((p) => p.name === name);
     return project ?? { name, missing: true };
@@ -88,6 +90,7 @@ export function buildGearMergeManifest(root = workspaceRoot) {
 
   return {
     schemaVersion: 1,
+    hashEncoding: 'utf8-lf',
     baseline: 'Dana Apps V70.0.0',
     releaseVersion: pkg.version,
     workspace: 'single-root',

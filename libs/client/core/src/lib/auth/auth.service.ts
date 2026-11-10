@@ -27,15 +27,19 @@ export class AuthService {
   readonly displayName = computed(() => {
     const u = this.user();
     if (!u) return '';
-    const name = [u.fname, u.lname].filter(Boolean).join(' ');
+    const name = [u.firstName, u.lastName].filter(Boolean).join(' ');
     return name || u.email;
   });
   readonly userId = computed(() => this.user()?.sub ?? null);
 
+  capabilities(): Observable<{ registrationEnabled: boolean }> {
+    return this.http.get<{ registrationEnabled: boolean }>(`${this.url}/capabilities`);
+  }
+
   login(payload: LoginPayload): Observable<TokenResponse> {
     return this.http
-      .post<TokenResponse>(`${this.url}/login`, payload)
-      .pipe(tap(({ access_token }) => this.setToken(access_token)));
+      .post<TokenResponse>(`${this.url}/email/login`, payload)
+      .pipe(tap(({ accessToken }) => this.setToken(accessToken)));
   }
 
   logout(): void {
@@ -64,7 +68,8 @@ function readStoredToken(): string | null {
 function decode(token: string | null): AccessTokenPayload | null {
   if (!token) return null;
   try {
-    return jwtDecode<AccessTokenPayload>(token);
+    const claims = jwtDecode<AccessTokenPayload>(token);
+    return claims.tokenUse === 'access' && claims.sub && claims.email ? claims : null;
   } catch {
     return null;
   }

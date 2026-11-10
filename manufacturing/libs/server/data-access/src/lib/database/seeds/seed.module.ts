@@ -17,7 +17,7 @@ import { UserDatabaseSeedService } from './users.database-seed';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: 'manufacturing/.env',
+      envFilePath: '.env',
       load: [appConfig, dbConfig, googleConfig, mailerConfig],
       validationSchema,
     }),

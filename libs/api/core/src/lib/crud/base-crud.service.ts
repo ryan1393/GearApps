@@ -33,7 +33,8 @@ export abstract class BaseCrudService<T extends BaseEntity> {
     return entity;
   }
 
-  async create(data: DeepPartial<T>): Promise<T> {
+  async create(data: DeepPartial<T>, _requestKey?: string): Promise<T> {
+    void _requestKey; // Legacy stores do not implement PostgreSQL ingestion deduplication.
     const saved = await this.repo.save(this.repo.create(data));
     return this.findOne(saved.id);
   }

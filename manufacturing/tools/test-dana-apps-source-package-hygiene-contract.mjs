@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -8,7 +9,7 @@ const wrapper = readContract('tools/package-dana-apps-source.ps1');
 const policy = readContract('DANA_APPS_SOURCE_PACKAGE_HYGIENE.md');
 const runner = readContract('tools/run-all-tests.ps1');
 const canonical = fs.readFileSync(
-  path.join(workspaceRoot, 'tools/package-release.mjs'),
+  contractPath(process.cwd(), path.join(workspaceRoot, 'tools/package-release.mjs')),
   'utf8',
 );
 for (const marker of [
@@ -45,7 +46,7 @@ for (const file of [
   '.env.example',
   '.env.sample',
   '.env.template',
-  'manufacturing/.env.example',
+  '.env.example',
 ]) {
   assert.equal(
     packageFileAllowed(file),

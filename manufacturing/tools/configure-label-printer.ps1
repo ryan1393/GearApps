@@ -6,7 +6,7 @@
 
 $ErrorActionPreference = 'Stop'
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
-$EnvPath = Join-Path $ProjectRoot '.env'
+$EnvPath = Join-Path (Split-Path -Parent $ProjectRoot) '.env'
 
 if (-not (Test-Path -LiteralPath $EnvPath -PathType Leaf)) {
     throw "Gear Apps .env was not found at $EnvPath"

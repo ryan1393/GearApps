@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const script=fs.readFileSync('tools/test-post-workflow-db-integrity.mjs','utf8');
+const script=fs.readFileSync(contractPath(process.cwd(), 'tools/test-post-workflow-db-integrity.mjs'),'utf8');
 
 const requiredTables=[
   'trays','blade_tray','blades','container_tray','location_tray',

@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -10,8 +11,8 @@ const roots = [
 
 const files = [];
 function walk(dir) {
-  if (!fs.existsSync(dir)) return;
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+  if (!fs.existsSync(contractPath(process.cwd(), dir))) return;
+  for (const entry of fs.readdirSync(contractPath(process.cwd(), dir), { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       walk(full);
@@ -56,7 +57,7 @@ const forbidden = [
 const violations = [];
 
 for (const file of files) {
-  const text = fs.readFileSync(file, 'utf8');
+  const text = fs.readFileSync(contractPath(process.cwd(), file), 'utf8');
   const lines = text.split(/\r?\n/);
 
   for (const rule of forbidden) {

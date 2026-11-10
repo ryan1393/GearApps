@@ -1,15 +1,16 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const adminApi=fs.readFileSync('libs/frontend/feature-admin-users/src/lib/admin-api.service.ts','utf8');
-const adminComponent=fs.readFileSync('libs/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.ts','utf8');
-const cutterController=fs.readFileSync('libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts','utf8');
-const cutterBuildComponent=fs.readFileSync('libs/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.ts','utf8');
-const cutterBuildHtml=fs.readFileSync('libs/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.html','utf8');
-const cutterApi=fs.readFileSync('libs/frontend/data-access-cutter-builder/src/lib/cutter-builder-api.service.ts','utf8');
-const userService=fs.readFileSync('libs/server/feat-user/src/lib/server-feat-user.service.ts','utf8');
-const userController=fs.readFileSync('libs/server/feat-user/src/lib/server-feat-user.controller.ts','utf8');
-const partsController=fs.readFileSync('libs/server/feat-cutter-config/src/lib/server-parts.controller.ts','utf8');
-const partsService=fs.readFileSync('libs/server/feat-cutter-config/src/lib/server-feat-cutter-config.service.ts','utf8');
+const adminApi=fs.readFileSync(contractPath(process.cwd(), 'libs/frontend/feature-admin-users/src/lib/admin-api.service.ts'),'utf8');
+const adminComponent=fs.readFileSync(contractPath(process.cwd(), 'libs/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.ts'),'utf8');
+const cutterController=fs.readFileSync(contractPath(process.cwd(), 'libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts'),'utf8');
+const cutterBuildComponent=fs.readFileSync(contractPath(process.cwd(), 'libs/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.ts'),'utf8');
+const cutterBuildHtml=fs.readFileSync(contractPath(process.cwd(), 'libs/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.html'),'utf8');
+const cutterApi=fs.readFileSync(contractPath(process.cwd(), 'libs/frontend/data-access-cutter-builder/src/lib/cutter-builder-api.service.ts'),'utf8');
+const userService=fs.readFileSync(contractPath(process.cwd(), 'libs/server/feat-user/src/lib/server-feat-user.service.ts'),'utf8');
+const userController=fs.readFileSync(contractPath(process.cwd(), 'libs/server/feat-user/src/lib/server-feat-user.controller.ts'),'utf8');
+const partsController=fs.readFileSync(contractPath(process.cwd(), 'libs/server/feat-cutter-config/src/lib/server-parts.controller.ts'),'utf8');
+const partsService=fs.readFileSync(contractPath(process.cwd(), 'libs/server/feat-cutter-config/src/lib/server-feat-cutter-config.service.ts'),'utf8');
 
 if(adminComponent.includes('inject(HttpClient)') || adminComponent.includes("this.http.")){
   throw new Error('Admin component must not call HttpClient directly; all calls must go through AdminApiService.');

@@ -30,7 +30,7 @@ function Get-DotEnvValue {
         [string]$DefaultValue
     )
 
-    $envFile = Join-Path $ProjectRoot '.env'
+    $envFile = Join-Path $WorkspaceRoot '.env'
     if (Test-Path $envFile) {
         $line = Get-Content $envFile |
             Where-Object { $_ -match "^\s*$([regex]::Escape($Name))\s*=" } |
@@ -89,7 +89,7 @@ Write-Host ''
 Write-Host '==============================================' -ForegroundColor Cyan
 Write-Host ' Gear Apps - Start All Programs' -ForegroundColor Cyan
 Write-Host '==============================================' -ForegroundColor Cyan
-Write-Host "Root: $ProjectRoot"
+Write-Host "Root: $WorkspaceRoot"
 Write-Host "API:  $ApiRoot"
 Write-Host ''
 
@@ -161,7 +161,7 @@ Write-Host '[2/5] Starting API server...' -ForegroundColor Yellow
 if (Test-Api) {
     Write-Host "      API is already responding on port $ServerPort." -ForegroundColor Green
 } else {
-    Start-GearProcess -Title 'Gear Apps - API Server' -Command 'node --env-file=manufacturing/.env node_modules/nx/bin/nx.js serve gear-app-server'
+    Start-GearProcess -Title 'Gear Apps - API Server' -Command 'node --env-file=.env node_modules/nx/dist/bin/nx.js serve gear-app-server'
 
     $deadline = (Get-Date).AddSeconds($ServerWaitSeconds)
     Write-Host '      Waiting for API to respond' -NoNewline

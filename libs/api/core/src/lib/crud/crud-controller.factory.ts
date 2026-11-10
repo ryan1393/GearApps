@@ -3,6 +3,7 @@ import {
   Body,
   Delete,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -21,7 +22,7 @@ import {
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
-import { BaseCrudService } from './base-crud.service';
+import { CrudService } from './crud-service';
 
 export interface CrudDtos {
   /** Full entity DTO (response shape). */
@@ -33,10 +34,10 @@ export interface CrudDtos {
 }
 
 export interface CrudController<T extends BaseEntity> {
-  readonly service: BaseCrudService<T>;
+  readonly service: CrudService<T>;
   findAll(): Promise<T[]>;
   findOne(id: string): Promise<T>;
-  create(body: unknown): Promise<T>;
+  create(body: unknown, requestKey?: string): Promise<T>;
   upsert(id: string, body: unknown): Promise<T>;
   update(id: string, body: unknown): Promise<T>;
   remove(id: string): Promise<void>;
@@ -45,7 +46,7 @@ export interface CrudController<T extends BaseEntity> {
 /**
  * Builds a base controller class with the standard REST routes
  * (GET /, GET /:id, POST /, PUT /:id, PATCH /:id, DELETE /:id) wired to a
- * {@link BaseCrudService}. Extend the returned class and declare `service`
+ * {@link CrudService}. Extend the returned class and declare `service`
  * via constructor injection; add entity-specific routes on the subclass.
  *
  * Specific routes like `GET /by-machine/:id` must be declared on the subclass;
@@ -53,7 +54,7 @@ export interface CrudController<T extends BaseEntity> {
  */
 export function crudController<T extends BaseEntity>(dtos: CrudDtos): Type<CrudController<T>> {
   abstract class CrudControllerHost implements CrudController<T> {
-    abstract readonly service: BaseCrudService<T>;
+    abstract readonly service: CrudService<T>;
 
     @Get()
     @ApiOperation({ summary: `List all ${dtos.name} records` })
@@ -75,8 +76,8 @@ export function crudController<T extends BaseEntity>(dtos: CrudDtos): Type<CrudC
     @ApiBody({ type: dtos.create })
     @ApiCreatedResponse({ type: dtos.entity })
     @ApiBadRequestResponse()
-    create(@Body() body: unknown): Promise<T> {
-      return this.service.create(body as never);
+    create(@Body() body: unknown, @Headers('idempotency-key') requestKey?: string): Promise<T> {
+      return this.service.create(body as never, requestKey);
     }
 
     @Put(':id')
@@ -110,7 +111,7 @@ export function crudController<T extends BaseEntity>(dtos: CrudDtos): Type<CrudC
   // Point the design-time param types at the concrete DTOs so bodies are validated
   // and transformed exactly as if the routes had been hand-written with those types.
   const proto = CrudControllerHost.prototype;
-  Reflect.defineMetadata('design:paramtypes', [dtos.create], proto, 'create');
+  Reflect.defineMetadata('design:paramtypes', [dtos.create, String], proto, 'create');
   Reflect.defineMetadata('design:paramtypes', [String, dtos.entity], proto, 'upsert');
   Reflect.defineMetadata('design:paramtypes', [String, dtos.update], proto, 'update');
 

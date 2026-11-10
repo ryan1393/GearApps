@@ -26,6 +26,8 @@ const excludedDirectories = new Set([
   'test-results',
   'source-archives',
   'releases',
+  'backups',
+  'database-reports',
 ]);
 
 export function packageFileAllowed(relativePath) {
@@ -40,6 +42,7 @@ export function packageFileAllowed(relativePath) {
     return false;
   if (parts.some((part) => excludedDirectories.has(part.toLowerCase()))) return false;
   if (relative.startsWith('manufacturing/tools/data-import/work/')) return false;
+  if (/^tools\/database\/(?:cleanup|legacy-import)\.sql$/i.test(relative)) return false;
   if (
     relative.startsWith('apps/lapper-read/') &&
     parts.some((part) =>
@@ -68,7 +71,7 @@ export function packageFileAllowed(relativePath) {
     return false;
   return (
     !/\.(?:zip|tgz)\.sha256$/i.test(name) &&
-    !/\.(?:log|zip|tgz|sqlite|sqlite3|db|tmp)$/i.test(name) &&
+    !/\.(?:log|zip|tgz|sqlite|sqlite3|db|dump|bak|tmp)$/i.test(name) &&
     name !== '.DS_Store'
   );
 }

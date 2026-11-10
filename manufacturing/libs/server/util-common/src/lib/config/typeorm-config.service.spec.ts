@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { TypeormConfigService } from './typeorm-config.service';
+import { withValidatedEmptyBootstrap } from './schema-creation-policy';
 
 describe('TypeormConfigService', () => {
   let service: TypeormConfigService;
@@ -54,5 +55,23 @@ describe('TypeormConfigService', () => {
       database: ':memory:',
       synchronize: false,
     });
+  });
+
+  it('refuses automatic synchronization that could remove shared columns and indexes',()=>{
+    database['synchronize']=true;
+    expect(()=>service.createTypeOrmOptions()).toThrow('DATABASE_SYNCHRONIZE must be false');
+  });
+
+  it('permits only the validated one-shot creation scope and closes it afterward',async()=>{
+    database['synchronize']=true;
+    const options=await withValidatedEmptyBootstrap(async()=>service.createTypeOrmOptions());
+    expect(options.synchronize).toBe(true);
+    expect(()=>service.createTypeOrmOptions()).toThrow('DATABASE_SYNCHRONIZE must be false');
+  });
+
+  it('closes the one-shot scope even when creation fails',async()=>{
+    database['synchronize']=true;
+    await expect(withValidatedEmptyBootstrap(async()=>{throw new Error('creation failed');})).rejects.toThrow('creation failed');
+    expect(()=>service.createTypeOrmOptions()).toThrow('DATABASE_SYNCHRONIZE must be false');
   });
 });

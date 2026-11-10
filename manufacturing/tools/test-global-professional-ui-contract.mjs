@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import { readGearAppsStyles } from './lib/read-gear-apps-styles.mjs';
 
@@ -34,7 +35,7 @@ for(const marker of [
 }
 
 for(const file of navs){
-  const html=fs.readFileSync(file,'utf8');
+  const html=fs.readFileSync(contractPath(process.cwd(), file),'utf8');
   for(const marker of [
     '<small>GEAR APPS</small>',
     'class="brand-copy"',
@@ -54,7 +55,7 @@ const dashboardLabels = new Map([
   [navs[2], 'Greenshed Dashboard'],
 ]);
 for (const [file, label] of dashboardLabels) {
-  const html = fs.readFileSync(file, 'utf8');
+  const html = fs.readFileSync(contractPath(process.cwd(), file), 'utf8');
   if (!html.includes(`<span>${label}</span>`)) {
     throw new Error(`${file} must expose one combined ${label} primary navigation row.`);
   }
@@ -63,7 +64,7 @@ for (const [file, label] of dashboardLabels) {
   }
 }
 
-const bladeNav=fs.readFileSync(navs[0],'utf8');
+const bladeNav=fs.readFileSync(contractPath(process.cwd(), navs[0]),'utf8');
 for(const marker of [
   '<div class="nav-heading">INVENTORY</div>',
   'routerLink="/blades/all-inventory"',
@@ -75,7 +76,7 @@ for(const marker of [
 }
 
 for(const file of dashboards){
-  const html=fs.readFileSync(file,'utf8');
+  const html=fs.readFileSync(contractPath(process.cwd(), file),'utf8');
   if(/<style[\s>]/i.test(html)){
     throw new Error(
       `${file} still contains page-local dashboard CSS; dashboard styling must come from the shared global source.`,

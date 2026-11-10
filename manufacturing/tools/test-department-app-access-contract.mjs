@@ -1,19 +1,24 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
+import path from 'node:path';
+import { workspaceRoot } from './lib/contract-paths.mjs';
 
-const policy=fs.readFileSync('libs/shared/util-constants/src/lib/app-access.constants.ts','utf8');
-const roleGuard=fs.readFileSync('libs/server/util-common/src/lib/guards/role.guard.ts','utf8');
-const decorator=fs.readFileSync('libs/server/util-common/src/lib/decorators/department-app-edit.decorator.ts','utf8');
-const jwtStrategy=fs.readFileSync('libs/server/feat-auth/src/lib/strategies/jwt-access.strategy.ts','utf8');
-const authService=fs.readFileSync('libs/server/feat-auth/src/lib/server-feat-auth.service.ts','utf8');
-const requestUser=fs.readFileSync('libs/shared/util-types/src/lib/interfaces/request-user.interface.ts','utf8');
-const jwtPayload=fs.readFileSync('libs/shared/util-types/src/lib/interfaces/jwt-payload.interface.ts','utf8');
-const frontendGuard=fs.readFileSync('libs/frontend/data-access-common/src/lib/guards/department-editor.guard.ts','utf8');
-const adminUserDto=fs.readFileSync('libs/server/feat-user/src/lib/admin-create-user.dto.ts','utf8');
-const adminUserService=fs.readFileSync('libs/server/feat-user/src/lib/server-feat-user.service.ts','utf8');
-const adminHtml=fs.readFileSync('libs/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.html','utf8');
-const mutationSuite=fs.readFileSync('tools/test-authenticated-backend-mutations.ps1','utf8');
-const backendFixture=fs.readFileSync('tools/test-data/ensure-backend-mutation-test-fixtures.mjs','utf8');
-const runner=fs.readFileSync('tools/run-all-tests.ps1','utf8');
+const policy=fs.readFileSync(contractPath(process.cwd(), 'libs/shared/util-constants/src/lib/app-access.constants.ts'),'utf8');
+const roleGuard=fs.readFileSync(contractPath(process.cwd(), 'libs/server/util-common/src/lib/guards/role.guard.ts'),'utf8');
+const decorator=fs.readFileSync(contractPath(process.cwd(), 'libs/server/util-common/src/lib/decorators/department-app-edit.decorator.ts'),'utf8');
+const jwtStrategy=fs.readFileSync(contractPath(process.cwd(), 'libs/server/feat-auth/src/lib/strategies/jwt-access.strategy.ts'),'utf8');
+const authService=fs.readFileSync(contractPath(process.cwd(), 'libs/server/feat-auth/src/lib/server-feat-auth.service.ts'),'utf8');
+const requestUser=fs.readFileSync(contractPath(process.cwd(), 'libs/shared/util-types/src/lib/interfaces/request-user.interface.ts'),'utf8');
+const sharedPrincipal=fs.readFileSync(contractPath(process.cwd(), path.join(workspaceRoot,'libs/shared/domain/src/lib/auth/auth.ts')),'utf8');
+if(!requestUser.includes('extends AuthenticatedUser')) throw new Error('Request principal must extend the shared domain contract');
+const jwtPayload=fs.readFileSync(contractPath(process.cwd(), 'libs/shared/util-types/src/lib/interfaces/jwt-payload.interface.ts'),'utf8');
+const frontendGuard=fs.readFileSync(contractPath(process.cwd(), 'libs/frontend/data-access-common/src/lib/guards/department-editor.guard.ts'),'utf8');
+const adminUserDto=fs.readFileSync(contractPath(process.cwd(), 'libs/server/feat-user/src/lib/admin-create-user.dto.ts'),'utf8');
+const adminUserService=fs.readFileSync(contractPath(process.cwd(), 'libs/server/feat-user/src/lib/server-feat-user.service.ts'),'utf8');
+const adminHtml=fs.readFileSync(contractPath(process.cwd(), 'libs/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.html'),'utf8');
+const mutationSuite=fs.readFileSync(contractPath(process.cwd(), 'tools/test-authenticated-backend-mutations.ps1'),'utf8');
+const backendFixture=fs.readFileSync(contractPath(process.cwd(), 'tools/test-data/ensure-backend-mutation-test-fixtures.mjs'),'utf8');
+const runner=fs.readFileSync(contractPath(process.cwd(), 'tools/run-all-tests.ps1'),'utf8');
 
 for(const marker of [
   "BLADE_TRACKING: ['45']",
@@ -37,7 +42,7 @@ if(!decorator.includes('SetMetadata(GEAR_APP_EDIT_METADATA_KEY, app)')){
 }
 
 for(const marker of ['departmentId','departmentCode','departmentDescription']){
-  if(!requestUser.includes(marker) || !jwtPayload.includes(marker) ||
+  if(!sharedPrincipal.includes(marker) || !jwtPayload.includes(marker) ||
      !jwtStrategy.includes(marker) || !authService.includes(marker)){
     throw new Error(`Department claim ${marker} is not carried through auth/JWT/request context.`);
   }
@@ -64,7 +69,7 @@ const controllerRules=[
   ['libs/server/feat-greenshed/src/lib/server-feat-greenshed.controller.ts','GREENSHED'],
 ];
 for(const [file,app] of controllerRules){
-  const text=fs.readFileSync(file,'utf8');
+  const text=fs.readFileSync(contractPath(process.cwd(), file),'utf8');
   const mutations=[...text.matchAll(/@(Post|Patch|Delete|Put)\([^)]*\)/g)];
   if(!mutations.length) throw new Error(`${file} has no mutating routes to inspect.`);
   for(const match of mutations){
@@ -81,7 +86,7 @@ const routeRules=[
   ['libs/frontend/feature-greenshed/src/lib/greenshed.routes.ts','GREENSHED',["machines","setup","check","pull","lookup"]],
 ];
 for(const [file,app,paths] of routeRules){
-  const text=fs.readFileSync(file,'utf8');
+  const text=fs.readFileSync(contractPath(process.cwd(), file),'utf8');
   for(const path of paths){
     const marker=`departmentEditorGuard('${app}')`;
     const index=text.indexOf(`path: '${path}'`)>=0 ? text.indexOf(`path: '${path}'`) : text.indexOf(`path:'${path}'`);
@@ -98,7 +103,7 @@ const dashboardRules=[
   ['libs/frontend/feature-greenshed/src/lib/pages/dashboard/greenshed-dashboard.component.html','*ngIf="canEdit"'],
 ];
 for(const [file,marker] of dashboardRules){
-  const html=fs.readFileSync(file,'utf8');
+  const html=fs.readFileSync(contractPath(process.cwd(), file),'utf8');
   if(!html.includes('[class.view-only-dashboard]="!canEdit"') || !html.includes(marker)){
     throw new Error(`${file} must keep dashboard data visible while suppressing operational actions for view-only users.`);
   }
@@ -109,7 +114,7 @@ for(const file of [
   'apps/cutter-builder/src/app/layout/cutter-builder-nav/cutter-builder-nav.component.html',
   'apps/greenshed/src/app/layout/greenshed-nav/greenshed-nav.component.html',
 ]){
-  const text=fs.readFileSync(file,'utf8');
+  const text=fs.readFileSync(contractPath(process.cwd(), file),'utf8');
   if(!text.includes('*ngIf="canEdit(user)"') ||
      !text.includes('*ngIf="!canEdit(user)"') ||
      !text.includes('VIEW ONLY') ||

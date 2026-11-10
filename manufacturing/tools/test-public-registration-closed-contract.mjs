@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const read = (file) => fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '');
+const read = (file) => fs.readFileSync(contractPath(process.cwd(), file), 'utf8').replace(/^\uFEFF/, '');
 const manifest = JSON.parse(read('tools/api-route-manifest.json'));
 const authController = read('libs/server/feat-auth/src/lib/server-feat-auth.controller.ts');
 const authService = read('libs/server/feat-auth/src/lib/server-feat-auth.service.ts');
@@ -31,7 +32,7 @@ if (manifest.length !== 113) throw new Error(`Expected 113 API routes after clos
 // artifacts outside the Nx source tree before the source-only sweep, so its absence must not
 // make a source-only contract fail. If a current generated snapshot is present, validate it;
 // otherwise defer generated Swagger verification to the runtime/API validation stage.
-if (fs.existsSync('swagger.json')) {
+if (fs.existsSync(contractPath(process.cwd(), 'swagger.json'))) {
   const swagger = JSON.parse(read('swagger.json'));
   if (swagger.paths?.['/api/v1/auth/email/register']) {
     throw new Error('Swagger still publishes /api/v1/auth/email/register');

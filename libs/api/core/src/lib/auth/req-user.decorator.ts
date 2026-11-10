@@ -1,11 +1,7 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { AuthenticatedUser } from '@gearapps/shared/domain';
 
-export interface RequestUser {
-  userId: string;
-  email: string;
-  fname?: string;
-  lname?: string;
-}
+export type RequestUser = AuthenticatedUser;
 
 /** Injects the authenticated user (from the validated JWT) into a handler parameter. */
 export const ReqUser = createParamDecorator(
@@ -16,5 +12,5 @@ export const ReqUser = createParamDecorator(
 
 /** Shortcut for just the user id. */
 export const ReqUserId = createParamDecorator((_data: unknown, ctx: ExecutionContext): string => {
-  return ctx.switchToHttp().getRequest().user?.userId;
+  return ctx.switchToHttp().getRequest().user?.id;
 });

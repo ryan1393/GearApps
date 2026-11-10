@@ -85,8 +85,8 @@ tar.exe -czf "%LOCAL_ARCHIVE%" ^
   --exclude=".ssh" ^
   --exclude="*.pem" ^
   --exclude="*.key" ^
-  --exclude="./manufacturing/.env" ^
-  --exclude="./manufacturing/.env.local" ^
+  --exclude="./.env" ^
+  --exclude="./.env.local" ^
   --exclude="./manufacturing/node_modules" ^
   --exclude="./manufacturing/dist" ^
   --exclude="./manufacturing/.nx" ^
@@ -127,7 +127,7 @@ echo [PASS] Transfer completed.
 echo.
 
 echo [5/6] Replacing remote source tree and extracting...
-ssh.exe "%REMOTE%" "set -e; rm -rf '%REMOTE_DIR%.incoming'; mkdir -p '%REMOTE_DIR%.incoming'; tar -xzf '%REMOTE_ARCHIVE%' -C '%REMOTE_DIR%.incoming'; test -f '%REMOTE_DIR%.incoming/package.json'; test -f '%REMOTE_DIR%.incoming/manufacturing/compose.yml'; if [ -f '%REMOTE_DIR%/manufacturing/.env' ]; then cp -p '%REMOTE_DIR%/manufacturing/.env' '%REMOTE_DIR%.incoming/manufacturing/.env'; elif [ ! -f '%REMOTE_DIR%/manufacturing/compose.yml' ] && [ -f '%REMOTE_DIR%/.env' ]; then cp -p '%REMOTE_DIR%/.env' '%REMOTE_DIR%.incoming/manufacturing/.env'; fi; if [ -f '%REMOTE_DIR%/manufacturing/compose.yml' ] && [ -f '%REMOTE_DIR%/.env' ]; then cp -p '%REMOTE_DIR%/.env' '%REMOTE_DIR%.incoming/.env'; fi; rm -rf '%REMOTE_DIR%.previous'; if [ -d '%REMOTE_DIR%' ]; then mv '%REMOTE_DIR%' '%REMOTE_DIR%.previous'; fi; mv '%REMOTE_DIR%.incoming' '%REMOTE_DIR%'; rm -rf '%REMOTE_UPLOAD_DIR%'; echo REMOTE_EXTRACT_OK"
+ssh.exe "%REMOTE%" "set -e; rm -rf '%REMOTE_DIR%.incoming'; mkdir -p '%REMOTE_DIR%.incoming'; tar -xzf '%REMOTE_ARCHIVE%' -C '%REMOTE_DIR%.incoming'; test -f '%REMOTE_DIR%.incoming/package.json'; test -f '%REMOTE_DIR%.incoming/compose.yml'; if [ ! -f '%REMOTE_DIR%/compose.yml' ] && [ -f '%REMOTE_DIR%/manufacturing/compose.yml' ]; then test -f '%REMOTE_DIR%/manufacturing/.env'; cp -p '%REMOTE_DIR%/manufacturing/.env' '%REMOTE_DIR%.incoming/.env'; elif [ -f '%REMOTE_DIR%/.env' ]; then cp -p '%REMOTE_DIR%/.env' '%REMOTE_DIR%.incoming/.env'; fi; rm -rf '%REMOTE_DIR%.previous'; if [ -d '%REMOTE_DIR%' ]; then mv '%REMOTE_DIR%' '%REMOTE_DIR%.previous'; fi; mv '%REMOTE_DIR%.incoming' '%REMOTE_DIR%'; rm -rf '%REMOTE_UPLOAD_DIR%'; echo REMOTE_EXTRACT_OK"
 if errorlevel 1 (
     echo [FAIL] Remote extraction or verification failed.
     goto :fail
@@ -155,10 +155,10 @@ echo.
 echo Next:
 echo   ssh %REMOTE%
 echo   cd %REMOTE_DIR%
-echo   docker compose --env-file manufacturing/.env -f manufacturing/compose.yml config
-echo   docker compose --env-file manufacturing/.env -f manufacturing/compose.yml build --progress=plain
-echo   docker compose --env-file manufacturing/.env -f manufacturing/compose.yml up -d --no-build
-echo   docker compose --env-file manufacturing/.env -f manufacturing/compose.yml ps
+echo   docker compose --env-file .env -f compose.yml config
+echo   docker compose --env-file .env -f compose.yml build --progress=plain
+echo   docker compose --env-file .env -f compose.yml up -d --no-build
+echo   docker compose --env-file .env -f compose.yml ps
 echo.
 pause
 exit /b 0

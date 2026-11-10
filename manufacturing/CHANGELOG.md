@@ -5,6 +5,13 @@
 All four applications now belong to one root Nx workspace and use one dependency
 manifest and lockfile. Application releases share the root version constant.
 
+- All application and end-to-end projects now live under root `apps/`, including
+  the shared API and the Lapper Read collector.
+- One root `compose.yml` and existing root `.env` configure the whole stack.
+  Deployments retain the `dana-apps` project and PostgreSQL volume identity.
+- Every web client and Lapper Read uses `gear-app-server` on port 3333, the shared
+  email login and PostgreSQL connection. The standalone Lapper API is removed.
+
 - Aligned Angular 20.3.35, NestJS 11.2.9, TypeORM 1.1.2, Nx 24.0.5,
   TypeScript 5.9.3, Jest 30, Node 24.22.1, and npm 11.9.0.
 - Dana UI 0.3.3 source is included under libs/shared/dana-ui and built with the
@@ -16,12 +23,10 @@ manifest and lockfile. Application releases share the root version constant.
 - Updated JWT decoding, Nest configuration typing, public health tests, template
   resolution, and keyboard/focus handling for the shared framework versions.
 - Retained the 70.2.1 authentication and inventory safeguards, API routes,
-  PostgreSQL data preservation, and existing Lapper database support.
-- Lapper production packages explicitly retain the database drivers TypeORM loads
-  dynamically, using the root pinned versions and a generated runtime lockfile.
+  PostgreSQL data preservation, Lapper history and collector retry/checkpoint rules.
 
-Upgrade: install once at the repository root with npm ci. Manufacturing settings
-remain in manufacturing/.env; Lapper settings remain in the root .env. Use
+Upgrade: install once at the repository root with npm ci. Keep the existing root
+.env for the shared API and Compose stack. Use
 npm run test:versions to detect dependency or release-version drift.
 
 ## 70.2.1 (2026-11-09)

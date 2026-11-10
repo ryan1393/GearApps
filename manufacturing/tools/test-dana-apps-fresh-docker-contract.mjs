@@ -27,7 +27,7 @@ must(compose.includes('name: ${DANA_POSTGRES_VOLUME_NAME:-dana-apps-gear-postgre
 must(compose.includes('condition: service_completed_successfully'), 'Runtime API must wait for one-shot DB/bootstrap jobs.');
 must(compose.includes('DANA_FRESH_DB_BOOTSTRAP: "YES"'), 'Fresh DB bootstrap guard is missing.');
 must(compose.includes('SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?'), 'Fresh host must require an admin seed password.');
-must(compose.includes('command: ["node", "dist/manufacturing/apps/server-bootstrap/main.js"]'), 'Fresh schema bootstrap command is missing.');
+must(compose.includes('command: ["node", "dist/apps/server-bootstrap/main.js"]'), 'Fresh schema bootstrap command is missing.');
 must(compose.includes('command: ["node", "manufacturing/tools/base-data/import-base-data.mjs", "--bootstrap-only"]'), 'Fresh base-data bootstrap command is missing.');
 must(compose.indexOf('gear-db-bootstrap:') < compose.indexOf('gear-base-data-bootstrap:'), 'Schema bootstrap must be defined before base-data bootstrap.');
 
@@ -36,7 +36,7 @@ const webpackBootstrap=read('apps/server/webpack.bootstrap.config.js');
 must(webpackBootstrap.includes("main: './src/fresh-db-bootstrap.ts'") && webpackBootstrap.includes('NxAppWebpackPlugin'), 'Native bootstrap config must preserve its actual main source');
 for (const marker of [
   'build-fresh-db-bootstrap',
-  'dist/manufacturing/apps/server-bootstrap',
+  'dist/apps/server-bootstrap',
   'tools/base-data',
 ]) {
   must(dockerfile.includes(marker), `Server Dockerfile missing ${marker}`);
@@ -70,7 +70,7 @@ for (const command of [
   'docker compose -f compose.yml up -d',
   'docker compose -f compose.yml ps',
 ]) {
-  must(helper.includes(command.replace('docker compose -f compose.yml', 'docker compose --env-file "$ENV_FILE" -f manufacturing/compose.yml')), `Fresh Docker helper missing ${command}`);
+  must(helper.includes(command.replace('docker compose -f compose.yml', 'docker compose --env-file "$ENV_FILE" -f compose.yml')), `Fresh Docker helper missing ${command}`);
 }
 
 for (const marker of [

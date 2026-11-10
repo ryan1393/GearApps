@@ -22,7 +22,7 @@ function loadDotEnv(filePath) {
   return out;
 }
 
-const env = { ...loadDotEnv(path.join(projectRoot, '.env')), ...process.env };
+const env = { ...loadDotEnv(path.resolve(projectRoot, '..', '.env')), ...process.env };
 for (const key of ['DATABASE_HOST', 'DATABASE_PORT', 'DATABASE_USERNAME', 'DATABASE_PASSWORD', 'DATABASE_NAME']) {
   if (!env[key]) throw new Error(`${key} is required.`);
 }

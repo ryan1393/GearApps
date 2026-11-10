@@ -81,7 +81,7 @@ export const validationSchema = Joi.object({
   [ENV_JWT_REFRESH_EXPIRATION_TIME]: Joi.string().default('86400s'),
 
   // database config
-  [ENV_DATABASE_TYPE]: Joi.string().default('better-sqlite3'),
+  [ENV_DATABASE_TYPE]: Joi.string().valid('postgres', 'better-sqlite3').default('postgres'),
   [ENV_DATABASE_HOST]: Joi.when(ENV_DATABASE_TYPE, {
     is: 'better-sqlite3',
     then: Joi.optional(),
@@ -181,6 +181,20 @@ export const validationSchema = Joi.object({
   // optional local database seed credentials
   SEED_ADMIN_PASSWORD: Joi.string().min(12).optional(),
   SEED_USER_PASSWORD: Joi.string().min(12).optional(),
+
+  // Lapper and scanner configuration belongs to this same API environment.
+  LAPPER_TIME_ZONE: Joi.string().default('America/Indianapolis').custom((value, helpers) => {
+    try { new Intl.DateTimeFormat('en', { timeZone: value }).format(); return value; }
+    catch { return helpers.error('any.invalid'); }
+  }),
+  SCANNER_DEFAULT_HOST: Joi.string().allow('').optional(),
+  SCANNER_ALLOW_INSECURE_TLS: Joi.boolean().default(true),
+  SCANNER_TIMEOUT_MS: Joi.number().integer().min(1).default(4000),
+  SCANNER_FTP_HOST: Joi.string().allow('').optional(),
+  SCANNER_FTP_USER: Joi.string().allow('').optional(),
+  SCANNER_FTP_PASSWORD: Joi.string().allow('').optional(),
+  SCANNER_FTP_ROOT: Joi.string().default('181-lapper-scanners'),
+  SCANNER_FTP_IMAGE_FILE: Joi.string().default('scanner-current.jpg'),
 
   // social config
   [ENV_SOCIAL_GOOGLE_ENABLED]: Joi.boolean().optional().default(false),

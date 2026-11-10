@@ -40,15 +40,15 @@ internal sealed class HttpDouble : HttpMessageHandler
     public int LoginCount;
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken token)
     {
-        var call = new Call(request.Method.Method, request.RequestUri!.AbsolutePath,
+        var call = new Call(request.Method.Method, request.RequestUri!.PathAndQuery,
             request.Content == null ? "" : await request.Content.ReadAsStringAsync(token),
             request.Headers.Authorization?.Parameter,
             request.Headers.TryGetValues("Idempotency-Key", out var keys) ? keys.Single() : null);
         Calls.Enqueue(call);
         if (BeforeResponse != null) await BeforeResponse(call, token);
         if (Respond?.Invoke(call) is { } response) return response;
-        if (call.Path.EndsWith("/login")) return Fixtures.Json(new Auth("token-" + Interlocked.Increment(ref LoginCount)));
-        if (call.Path.EndsWith("/check-token")) return Fixtures.Json(new { exp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 3600 });
+        if (call.Path.EndsWith("/login")) return Fixtures.Json(new Auth("token-" + Interlocked.Increment(ref LoginCount), "refresh-token"));
+        if (call.Path.EndsWith("/auth/me")) return Fixtures.Json(new { id = "user" });
         return Fixtures.Json(new { });
     }
 }
@@ -63,9 +63,9 @@ internal sealed class DatabaseDouble : IDatabaseCalls
     public int CycleFailures, MacroFailures;
     public Macro[] Macros = [Fixtures.Macro("m")];
     public MacroLog[] Summary = [];
-    public Task<Auth?> Login(CancellationToken cancellationToken = default) => Task.FromResult<Auth?>(new("test"));
+    public Task<Auth?> Login(CancellationToken cancellationToken = default) => Task.FromResult<Auth?>(new("test", "refresh-test"));
     public Task<bool> CheckToken(CancellationToken cancellationToken = default) => Task.FromResult(true);
-    public Task<Equipment?> GetMachineByIp(string ip, CancellationToken cancellationToken = default) => Task.FromResult<Equipment?>(Fixtures.Machine);
+    public Task<Equipment?> GetMachineByIp(string ip, CancellationToken cancellationToken = default, string? machineNumber = null) => Task.FromResult<Equipment?>(Fixtures.Machine);
     public Task<ScannerDetail?> GetScannerByIp(string ip, CancellationToken cancellationToken = default) => Task.FromResult<ScannerDetail?>(Fixtures.Scanner);
     public Task<ScannerDetail?> GetScannerById(string id, CancellationToken cancellationToken = default) => Task.FromResult<ScannerDetail?>(Fixtures.Scanner);
     public Task<Gearset?> GetGearsetByNumber(int partNumber, CancellationToken cancellationToken = default) => Task.FromResult<Gearset?>(Fixtures.Gear with { number = partNumber.ToString() });

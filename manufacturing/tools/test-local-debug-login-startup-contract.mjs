@@ -5,8 +5,8 @@ import path from 'node:path';
 const root = process.cwd();
 const loginPath = contractPath(root, 'libs/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.ts');
 const startPath = contractPath(root, 'tools/start-gear-apps.ps1');
-const login = fs.readFileSync(loginPath, 'utf8');
-const start = fs.readFileSync(startPath, 'utf8');
+const login = fs.readFileSync(contractPath(process.cwd(), loginPath), 'utf8');
+const start = fs.readFileSync(contractPath(process.cwd(), startPath), 'utf8');
 
 for (const marker of [
   "['localhost', '127.0.0.1'].includes(window.location.hostname)",

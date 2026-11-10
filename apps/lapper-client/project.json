@@ -4,16 +4,11 @@
   "projectType": "application",
   "prefix": "gear",
   "sourceRoot": "apps/lapper-client/src",
-  "tags": [
-    "scope:client",
-    "type:app"
-  ],
+  "tags": ["scope:client", "type:app"],
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "outputs": ["{options.outputPath}"],
       "defaultConfiguration": "production",
       "options": {
         "outputPath": "dist/apps/lapper-client",
@@ -29,9 +24,7 @@
           "libs/shared/dana-ui/src/styles/dana-ui.css",
           "apps/lapper-client/src/styles.css"
         ],
-        "polyfills": [
-          "zone.js"
-        ],
+        "polyfills": ["zone.js"],
         "inlineStyleLanguage": "scss"
       },
       "configurations": {
@@ -72,12 +65,10 @@
           "buildTarget": "lapper-client:build:development"
         }
       },
-      "dependsOn": [
-        "lapper-api:serve"
-      ],
+      "dependsOn": ["lapper-api:serve"],
       "options": {
         "proxyConfig": "apps/lapper-client/proxy.conf.json",
-        "port": 4200
+        "port": 4203
       }
     },
     "serve-static": {
@@ -85,9 +76,7 @@
       "readyWhen": {
         "signal": true
       },
-      "dependsOn": [
-        "build"
-      ],
+      "dependsOn": ["build"],
       "executor": "@nx/web:file-server",
       "options": {
         "buildTarget": "lapper-client:build",
