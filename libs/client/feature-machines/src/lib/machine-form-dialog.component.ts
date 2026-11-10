@@ -223,9 +223,8 @@ export class MachineFormDialogComponent {
     this.form.controls.number.enable();
     this.form.controls.dept_id.enable();
     if (m) {
-      const { id: _id, scanner: _scanner, ...rest } = m;
       this.form.patchValue({
-        ...rest,
+        ...m,
         number: m.number ?? '',
         scanner_id: m.scanner_id ?? m.scanner?.id ?? null,
       });

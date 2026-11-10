@@ -12,7 +12,12 @@ import {
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FanucVariablesApi, ScannerApi, ScannerDetailsApi } from '@gearapps/client/core';
+import {
+  FanucVariablesApi,
+  LapperAccess,
+  ScannerApi,
+  ScannerDetailsApi,
+} from '@gearapps/client/core';
 import { StatusBadgeComponent, ValueFieldComponent } from '@gearapps/client/ui';
 import { Machine, MachineFanucVariable, ScannerDetail } from '@gearapps/shared/domain';
 import {
@@ -129,7 +134,7 @@ import { ScannerControlsComponent } from './scanner-controls.component';
         </div>
       </div>
 
-      @if (scanner(); as s) {
+      @if (access.canEditSetup() && scanner(); as s) {
         <footer class="gear-live-foot">
           <button
             type="button"
@@ -210,6 +215,7 @@ import { ScannerControlsComponent } from './scanner-controls.component';
   `,
 })
 export class MachineLiveCardComponent implements OnDestroy {
+  protected readonly access = inject(LapperAccess);
   private readonly scannerApi = inject(ScannerApi);
   private readonly scannerDetails = inject(ScannerDetailsApi);
   private readonly fanucApi = inject(FanucVariablesApi);

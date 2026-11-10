@@ -19,7 +19,14 @@ import {
   DanaTableShellDirective,
   DanaTabsDirective,
 } from '@dana/ui';
-import { GearsetsApi, loadable, PartsApi, SummariesApi, ToastService } from '@gearapps/client/core';
+import {
+  LapperAccess,
+  GearsetsApi,
+  loadable,
+  PartsApi,
+  SummariesApi,
+  ToastService,
+} from '@gearapps/client/core';
 import { StatusBadgeComponent } from '@gearapps/client/ui';
 import { Gearset, Part, Summary } from '@gearapps/shared/domain';
 import { Observable } from 'rxjs';
@@ -66,13 +73,17 @@ type Tab = 'parts' | 'gearsets';
             ↻ {{ loading() ? 'Refreshing…' : 'Refresh' }}
           </button>
           @if (tab() === 'parts') {
-            <button type="button" class="gear-btn gear-btn-primary" (click)="openPart(null)">
-              + Add part
-            </button>
+            @if (access.canEditSetup()) {
+              <button type="button" class="gear-btn gear-btn-primary" (click)="openPart(null)">
+                + Add part
+              </button>
+            }
           } @else {
-            <button type="button" class="gear-btn gear-btn-primary" (click)="openGearset(null)">
-              + Add gearset
-            </button>
+            @if (access.canEditSetup()) {
+              <button type="button" class="gear-btn gear-btn-primary" (click)="openGearset(null)">
+                + Add gearset
+              </button>
+            }
           }
         </div>
       </section>
@@ -126,24 +137,26 @@ type Tab = 'parts' | 'gearsets';
                     <td><gear-status-badge [status]="p.status" /></td>
                     <td>{{ userName(p.user) }}</td>
                     <td class="right">
-                      <div class="gear-actions">
-                        <button
-                          type="button"
-                          class="gear-btn gear-btn-secondary gear-btn-sm"
-                          (click)="openPart(p)"
-                          [attr.aria-label]="'Edit ' + p.number"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          class="gear-btn gear-btn-danger gear-btn-sm"
-                          (click)="askDelete('part', p)"
-                          [attr.aria-label]="'Delete ' + p.number"
-                        >
-                          Delete
-                        </button>
-                      </div>
+                      @if (access.canEditSetup()) {
+                        <div class="gear-actions">
+                          <button
+                            type="button"
+                            class="gear-btn gear-btn-secondary gear-btn-sm"
+                            (click)="openPart(p)"
+                            [attr.aria-label]="'Edit ' + p.number"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            class="gear-btn gear-btn-danger gear-btn-sm"
+                            (click)="askDelete('part', p)"
+                            [attr.aria-label]="'Delete ' + p.number"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      }
                     </td>
                   </tr>
                 } @empty {
@@ -203,22 +216,24 @@ type Tab = 'parts' | 'gearsets';
                           [attr.aria-label]="'Lapping summary for ' + g.number"
                           >Summary</a
                         >
-                        <button
-                          type="button"
-                          class="gear-btn gear-btn-secondary gear-btn-sm"
-                          (click)="openGearset(g)"
-                          [attr.aria-label]="'Edit ' + g.number"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          class="gear-btn gear-btn-danger gear-btn-sm"
-                          (click)="askDelete('gearset', g)"
-                          [attr.aria-label]="'Delete ' + g.number"
-                        >
-                          Delete
-                        </button>
+                        @if (access.canEditSetup()) {
+                          <button
+                            type="button"
+                            class="gear-btn gear-btn-secondary gear-btn-sm"
+                            (click)="openGearset(g)"
+                            [attr.aria-label]="'Edit ' + g.number"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            class="gear-btn gear-btn-danger gear-btn-sm"
+                            (click)="askDelete('gearset', g)"
+                            [attr.aria-label]="'Delete ' + g.number"
+                          >
+                            Delete
+                          </button>
+                        }
                       </div>
                     </td>
                   </tr>
@@ -269,6 +284,7 @@ export class PartsPageComponent implements OnInit {
   private readonly gearsetsApi = inject(GearsetsApi);
   private readonly summariesApi = inject(SummariesApi);
   private readonly toast = inject(ToastService);
+  protected readonly access = inject(LapperAccess);
 
   protected readonly parts = loadable<Part[]>([]);
   protected readonly gearsets = loadable<Gearset[]>([]);

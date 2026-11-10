@@ -69,6 +69,35 @@
         ><span>Part Summaries</span></a
       >
 
+      <div class="nav-heading">CONFIGURATION</div>
+      <a
+        (click)="mobileNav.close()"
+        routerLink="/scanners"
+        routerLinkActive="active-sub"
+        class="side-link"
+        ><span class="nav-icon"
+          ><span class="gear-glyph gear-glyph-scanner" aria-hidden="true"></span></span
+        ><span>Scanners</span></a
+      >
+      <a
+        (click)="mobileNav.close()"
+        routerLink="/macros"
+        routerLinkActive="active-sub"
+        class="side-link"
+        ><span class="nav-icon"
+          ><span class="gear-glyph gear-glyph-setup" aria-hidden="true"></span></span
+        ><span>Macros</span></a
+      >
+      <a
+        (click)="mobileNav.close()"
+        routerLink="/fanuc-variables"
+        routerLinkActive="active-sub"
+        class="side-link"
+        ><span class="nav-icon"
+          ><span class="gear-glyph gear-glyph-quality-check" aria-hidden="true"></span></span
+        ><span>Fanuc Variables</span></a
+      >
+
       <div class="nav-heading">SHARED APPS</div>
       <a (click)="mobileNav.close()" [href]="bladeTrackingUrl" class="side-link"
         ><span class="nav-icon"

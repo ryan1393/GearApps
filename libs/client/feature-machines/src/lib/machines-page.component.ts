@@ -21,6 +21,7 @@ import {
   MachinesApi,
   ScannerDetailsApi,
   ToastService,
+  LapperAccess,
 } from '@gearapps/client/core';
 import { StatusBadgeComponent } from '@gearapps/client/ui';
 import { Department, Machine, ScannerDetail } from '@gearapps/shared/domain';
@@ -57,9 +58,11 @@ import { MachineFormDialogComponent } from './machine-form-dialog.component';
           >
             ↻ {{ machines.loading() ? 'Refreshing…' : 'Refresh' }}
           </button>
-          <button type="button" class="gear-btn gear-btn-primary" (click)="openCreate()">
-            + Add machine
-          </button>
+          @if (access.canEditSetup()) {
+            <button type="button" class="gear-btn gear-btn-primary" (click)="openCreate()">
+              + Add machine
+            </button>
+          }
         </div>
       </section>
 
@@ -100,24 +103,26 @@ import { MachineFormDialogComponent } from './machine-form-dialog.component';
                   </td>
                   <td><gear-status-badge [status]="m.status" /></td>
                   <td class="right">
-                    <div class="gear-actions">
-                      <button
-                        type="button"
-                        class="gear-btn gear-btn-secondary gear-btn-sm"
-                        (click)="openEdit(m)"
-                        [attr.aria-label]="'Edit ' + (m.number || m.ip)"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        class="gear-btn gear-btn-danger gear-btn-sm"
-                        (click)="pendingDelete.set(m)"
-                        [attr.aria-label]="'Delete ' + (m.number || m.ip)"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    @if (access.canEditSetup()) {
+                      <div class="gear-actions">
+                        <button
+                          type="button"
+                          class="gear-btn gear-btn-secondary gear-btn-sm"
+                          (click)="openEdit(m)"
+                          [attr.aria-label]="'Edit ' + (m.number || m.ip)"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          class="gear-btn gear-btn-danger gear-btn-sm"
+                          (click)="pendingDelete.set(m)"
+                          [attr.aria-label]="'Delete ' + (m.number || m.ip)"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    }
                   </td>
                 </tr>
               } @empty {
@@ -166,6 +171,7 @@ export class MachinesPageComponent implements OnInit {
   private readonly scannersApi = inject(ScannerDetailsApi);
   private readonly departmentsApi = inject(DepartmentsApi);
   private readonly toast = inject(ToastService);
+  protected readonly access = inject(LapperAccess);
 
   protected readonly machines = loadable<Machine[]>([]);
   protected readonly scanners = loadable<ScannerDetail[]>([]);

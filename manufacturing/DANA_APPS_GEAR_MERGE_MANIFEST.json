@@ -21,7 +21,7 @@
     "package.json": "5668B919C560B42A59140FCBC82EB28FCB358C76A605A7D5464BFFF93423C548",
     "package-lock.json": "B9AAA5CA9D755E0481ECB897481FF811EB59D5E186075BAD0A88E5EE40A6168D",
     "nx.json": "70665B73BCA488DA1CBA39928CA99A5C5911A292E4E2DC2594B6D8A0002945DE",
-    "tsconfig.base.json": "201269C3A1D21CDF22A6751D4DD313A72B7319DCA1A31A5BAD6D4E813ACBA78A"
+    "tsconfig.base.json": "96BD2CC2A01A21CE9D302FC2072BF40B7DC66B7A065E02C5DC8BA2EED5759297"
   },
   "composeFiles": [
     {
@@ -254,6 +254,16 @@
     {
       "name": "client-core",
       "root": "libs/client/core",
+      "projectType": "library",
+      "tags": [],
+      "targets": [],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
+      "name": "client-feature-config",
+      "root": "libs/client/feature-config",
       "projectType": "library",
       "tags": [],
       "targets": [],

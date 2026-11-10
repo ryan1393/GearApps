@@ -147,6 +147,42 @@ import { groupByCell } from './cells';
         </div>
       </section>
 
+      <section class="gear-panel operations-panel">
+        <div class="gear-panel-heading panel-heading">
+          <h2>Configuration</h2>
+          <p>Scanners, macro variables and machine I/O the lappers report.</p>
+        </div>
+        <div danaOperationGrid class="operation-grid">
+          <a
+            routerLink="/scanners"
+            danaOperationCard
+            icon="scanner"
+            tone="teal"
+            heading="Scanners"
+            description="Scanner addresses, assigned machines and last serial numbers."
+            aria-label="Scanners"
+          ></a>
+          <a
+            routerLink="/macros"
+            danaOperationCard
+            icon="setup"
+            tone="purple"
+            heading="Macros"
+            description="Every Fanuc macro and the summary field that shows it."
+            aria-label="Macros"
+          ></a>
+          <a
+            routerLink="/fanuc-variables"
+            danaOperationCard
+            icon="quality-check"
+            tone="gray"
+            heading="Fanuc Variables"
+            description="Front door, cycle start and in-cycle signals per machine."
+            aria-label="Fanuc Variables"
+          ></a>
+        </div>
+      </section>
+
       <section class="gear-panel data-panel">
         <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
           <div>

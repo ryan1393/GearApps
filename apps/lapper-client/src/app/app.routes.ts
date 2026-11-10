@@ -30,6 +30,19 @@ export const appRoutes: Route[] = [
         path: 'part-summaries',
         loadChildren: () => import('@gearapps/client/feature-parts').then((m) => m.summariesRoutes),
       },
+      {
+        path: 'scanners',
+        loadChildren: () => import('@gearapps/client/feature-config').then((m) => m.scannersRoutes),
+      },
+      {
+        path: 'macros',
+        loadChildren: () => import('@gearapps/client/feature-config').then((m) => m.macrosRoutes),
+      },
+      {
+        path: 'fanuc-variables',
+        loadChildren: () =>
+          import('@gearapps/client/feature-config').then((m) => m.fanucVariablesRoutes),
+      },
       // Bookmarks from the original Lapper app
       { path: 'cell-dashboard', redirectTo: 'dashboard' },
       { path: 'machine', redirectTo: 'machines' },

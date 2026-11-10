@@ -1,5 +1,5 @@
 import { LappingSummaryRow } from '@gearapps/shared/domain';
-import { fieldValue, findByName, groupByForm, isOn } from './macro-map';
+import { fieldValue, findByName, groupByForm, isOn, summaryPlacement } from './macro-map';
 
 const row = (
   number: number,
@@ -55,5 +55,32 @@ describe('macro-map', () => {
     ]);
     expect(g.get('mesh')?.length).toBe(2);
     expect(g.get('drive')?.length).toBe(1);
+  });
+});
+
+describe('summaryPlacement', () => {
+  it('names the summary field that reads a numbered macro', () => {
+    expect(summaryPlacement({ number: 10203, name: 'runout', used_form: 'general_data' })).toBe(
+      'General data · Runout check · Enabled',
+    );
+    expect(summaryPlacement({ number: 10028, name: 'x', used_form: 'gear_data' })).toBe(
+      'Gearset data · Pinion diameter',
+    );
+  });
+
+  it('matches path macros by name suffix', () => {
+    expect(summaryPlacement({ number: 1, name: 'coast_heel_rpm', used_form: 'coast' })).toBe(
+      'Path · Coast · Heel · RPM',
+    );
+    expect(summaryPlacement({ number: 2, name: 'drive_pass_active', used_form: 'drive' })).toBe(
+      'Path · Drive · Pass active',
+    );
+  });
+
+  it('returns null for macros no summary field reads', () => {
+    expect(
+      summaryPlacement({ number: 99999, name: 'spare', used_form: 'general_data' }),
+    ).toBeNull();
+    expect(summaryPlacement({ number: 1, name: 'spare', used_form: null })).toBeNull();
   });
 });

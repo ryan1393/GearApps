@@ -8,7 +8,7 @@ import {
   DanaTableEmptyDirective,
   DanaTableShellDirective,
 } from '@dana/ui';
-import { loadable, SummariesApi, ToastService } from '@gearapps/client/core';
+import { LapperAccess, loadable, SummariesApi, ToastService } from '@gearapps/client/core';
 import { StatusBadgeComponent } from '@gearapps/client/ui';
 import { Summary } from '@gearapps/shared/domain';
 import { userName } from './shared';
@@ -45,9 +45,11 @@ import { SummaryFormDialogComponent } from './summary-form-dialog.component';
           >
             ↻ {{ summaries.loading() ? 'Refreshing…' : 'Refresh' }}
           </button>
-          <button type="button" class="gear-btn gear-btn-primary" (click)="open(null)">
-            + Add summary
-          </button>
+          @if (access.canEditSetup()) {
+            <button type="button" class="gear-btn gear-btn-primary" (click)="open(null)">
+              + Add summary
+            </button>
+          }
         </div>
       </section>
 
@@ -82,24 +84,26 @@ import { SummaryFormDialogComponent } from './summary-form-dialog.component';
                   <td><gear-status-badge [status]="s.status" /></td>
                   <td>{{ userName(s.user) }}</td>
                   <td class="right">
-                    <div class="gear-actions">
-                      <button
-                        type="button"
-                        class="gear-btn gear-btn-secondary gear-btn-sm"
-                        (click)="open(s)"
-                        [attr.aria-label]="'Edit ' + s.number"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        class="gear-btn gear-btn-danger gear-btn-sm"
-                        (click)="pending.set(s)"
-                        [attr.aria-label]="'Delete ' + s.number"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    @if (access.canEditSetup()) {
+                      <div class="gear-actions">
+                        <button
+                          type="button"
+                          class="gear-btn gear-btn-secondary gear-btn-sm"
+                          (click)="open(s)"
+                          [attr.aria-label]="'Edit ' + s.number"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          class="gear-btn gear-btn-danger gear-btn-sm"
+                          (click)="pending.set(s)"
+                          [attr.aria-label]="'Delete ' + s.number"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    }
                   </td>
                 </tr>
               } @empty {
@@ -130,6 +134,7 @@ import { SummaryFormDialogComponent } from './summary-form-dialog.component';
 export class SummariesPageComponent implements OnInit {
   private readonly api = inject(SummariesApi);
   private readonly toast = inject(ToastService);
+  protected readonly access = inject(LapperAccess);
   protected readonly summaries = loadable<Summary[]>([]);
   protected readonly userName = userName;
   protected dialog = false;
