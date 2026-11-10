@@ -26,6 +26,12 @@ The printer must be on the network and reachable **from the Gear Apps server** (
 - **Test Connection** opens a connection from the server and reports what to check if it fails (no answer, connection refused, name not found, no route). Nothing is printed.
 - **Print Test Tag** (tag printers) prints a tag reading `TEST`. If the connection works but nothing prints, switch the printer between IPL and ZPL.
 
+## If the label is off-centre or cut off
+
+Each printer has **Move right (dots)** and **Move down (dots)** in its *Edit* form. They move everything that printer prints: tags and cutter cards, IPL and ZPL. 8 dots are about 1 mm (203 dots per inch); a negative number moves left or up. Save, then **Print Test Tag** and repeat until the tag sits squarely.
+
+Before adjusting a Zebra that prints far off the label, run its media calibration first; the adjustment is for the last millimetre or two, not for a printer that has lost track of the gap.
+
 ## Choosing a printer at a workstation
 
 Every screen with a Print Tag or Print Cutter Card button shows **Print tags to** / **Print cards to**. It starts on the default. A workstation next to its own printer can choose it there; the choice is remembered in that browser and used by every print button for that label. If the chosen printer is later removed or turned off, the workstation goes back to the default.
@@ -44,7 +50,7 @@ Every screen with a Print Tag or Print Cutter Card button shows **Print tags to*
 
 Tags and cards are generated in the language of the printer they are sent to. The cutter card in IPL is the supplied `CutterLabel_FILLED.prn` template; the ZPL card is the same card rebuilt element for element. Tag layout is described in [ASSET-TAG-IPL.md](ASSET-TAG-IPL.md).
 
-The ZPL tag, the ZPL card and the corrected IPL tag layout are checked by unit tests and against a stand-in network printer. They have **not** been confirmed on physical printers; check the first label of each kind.
+What has been confirmed on a real printer: a Zebra printed the ZPL tag at the right scale with a readable barcode and text, which is what the current position allowance was measured from. Not yet confirmed on a printer: the re-centred ZPL tag layout, the ZPL cutter card, and the corrected IPL tag layout. Check the first label of each kind.
 
 ## Storage
 

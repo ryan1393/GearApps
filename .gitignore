@@ -16,6 +16,11 @@ tools/database/cleanup.sql
 tools/database/legacy-import.sql
 database-reports/
 
+# Python collector
+__pycache__/
+*.pyc
+apps/lapper-read-py/state/
+
 # Manufacturing tool outputs (tools run from the repository root)
 tools/manufacturing/data-import/work/
 /_cutter-history-export_backup_*/

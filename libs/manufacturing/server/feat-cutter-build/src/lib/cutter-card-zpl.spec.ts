@@ -53,6 +53,16 @@ describe('cutter card ZPL', () => {
     expect(zpl).not.toContain('B78499^FS');
   });
 
+  it("moves every field by the printer's adjustment", () => {
+    const fields = { buildId: 'P1955FC-1042-001', buildDate: '2026-11-10 11:34', name: 'Pat', bodyNumber: '1042', machine: 'G12', coated: true, honed: false };
+    const origins = (zpl: string) => [...zpl.matchAll(/\^FO(\d+),(\d+)/g)].map((match) => [Number(match[1]), Number(match[2])]);
+    const base = origins(buildCutterCardZpl(fields).toString('utf8'));
+    const moved = origins(buildCutterCardZpl(fields, { right: 12, down: 30 }).toString('utf8'));
+
+    expect(moved).toHaveLength(base.length);
+    expect(moved).toEqual(base.map(([x, y]) => [x + 12, y + 30]));
+  });
+
   it('keeps printer command characters out of the fields', () => {
     const zpl = card({ name: 'Pat^XZ~JR Operator', bodyNumber: '10^FD42' });
 

@@ -1,21 +1,37 @@
 /*
- * GearApps · Lapper global styles.
- * The visual foundation comes from Dana UI (node_modules/@dana/ui/styles/dana-ui.css, loaded via project.json).
- * Only app-level additions live here; components use Dana classes directly.
+ * Lapper global styles.
+ * Visual styling comes from @dana/ui (gear-compat.css, gear-compat-features.css,
+ * dana-ui.css, gear-compat-overrides.css), the same stack as the other Gear Apps.
+ * Only layout tweaks for Lapper-specific data live here.
  */
-code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 0.92em;
-}
-.dana-table td code {
-  color: var(--dana-text);
+
+/* Row actions stay on one line at the end of data tables. */
+.gear-table .gear-actions {
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 6px;
 }
 
-/* Keep row actions on one line; Dana's default wraps in narrow columns. */
-.dana-table td:has(> .dana-table-actions) {
+.gear-table td.right {
+  text-align: right;
   white-space: nowrap;
-  width: 1%;
 }
-.dana-table-actions {
-  flex-wrap: nowrap;
+
+/* Padded body for panels that hold forms, detail grids or empty states. */
+.lapper-panel-body {
+  padding: 18px;
+}
+
+/* Vertical rhythm between stacked page sections. */
+.gear-page > :is(.gear-panel, .kpi-grid) {
+  margin-bottom: 16px;
+}
+
+.gear-table td.nowrap {
+  white-space: nowrap;
+}
+
+/* Keep inputs their natural height when a neighbouring field shows help text. */
+.gear-form-grid {
+  align-items: start;
 }

@@ -1,7 +1,7 @@
 name: dana-apps
 
 x-gear-server-image: &gear-server-image
-  image: dana-apps-gear-app-server:70.4.0
+  image: dana-apps-gear-app-server:70.5.0
   pull_policy: never
 
 x-gear-db-environment: &gear-db-environment
@@ -97,7 +97,7 @@ services:
       start_period: 30s
 
   lapper-client:
-    image: dana-apps-lapper-client:70.4.0
+    image: dana-apps-lapper-client:70.5.0
     build:
       context: .
       dockerfile: apps/lapper-client/Dockerfile
@@ -114,7 +114,7 @@ services:
       retries: 5
 
   blade-tracking:
-    image: dana-apps-blade-tracking:70.4.0
+    image: dana-apps-blade-tracking:70.5.0
     build:
       context: .
       dockerfile: apps/blade-tracking/Dockerfile
@@ -131,7 +131,7 @@ services:
       retries: 5
 
   cutter-builder:
-    image: dana-apps-cutter-builder:70.4.0
+    image: dana-apps-cutter-builder:70.5.0
     build:
       context: .
       dockerfile: apps/cutter-builder/Dockerfile
@@ -148,7 +148,7 @@ services:
       retries: 5
 
   greenshed:
-    image: dana-apps-greenshed:70.4.0
+    image: dana-apps-greenshed:70.5.0
     build:
       context: .
       dockerfile: apps/greenshed/Dockerfile
@@ -164,6 +164,37 @@ services:
       timeout: 5s
       retries: 5
 
+  # FANUC + scanner collector. One container runs a worker for every Active machine saved in
+  # Lapper with a FANUC controller IP and an assigned scanner; saving, changing or deactivating a
+  # machine starts, restarts or stops its worker. Not started by default:
+  #   docker compose --profile collectors up -d --build lapper-read
+  lapper-read:
+    image: dana-apps-lapper-read:70.5.0
+    build:
+      context: .
+      dockerfile: apps/lapper-read-py/Dockerfile
+    profiles: ["collectors"]
+    restart: unless-stopped
+    command: ["supervise"]
+    environment:
+      GEARAPPS_API_BASE_URL: http://gear-app-server:3333
+      GEARAPPS_API_TOKEN: ${LAPPER_READ_API_TOKEN:-}
+      GEARAPPS_API_EMAIL: ${LAPPER_READ_API_EMAIL:-}
+      GEARAPPS_API_PASSWORD: ${LAPPER_READ_API_PASSWORD:-}
+      LAPPER_SCANNER_INPUT1_PORT: ${LAPPER_READ_SCANNER_PORT:-9004}
+      LAPPER_POLL_INTERVAL_MS: ${LAPPER_READ_POLL_INTERVAL_MS:-250}
+      LAPPER_DISCOVER_INTERVAL_S: ${LAPPER_READ_DISCOVER_INTERVAL_S:-30}
+      TZ: ${LAPPER_TIME_ZONE:-America/Indianapolis}
+    ports:
+      - "${LAPPER_READ_STATUS_PORT:-8090}:8080"
+    volumes:
+      - ${LAPPER_READ_FOCAS_DIR:-./apps/lapper-read-py/fanuc}:/opt/fanuc:ro
+      - lapper_read_state:/data
+    depends_on:
+      gear-app-server:
+        condition: service_healthy
+
 volumes:
   gear_postgres_data:
     name: ${DANA_POSTGRES_VOLUME_NAME:-dana-apps-gear-postgres}
+  lapper_read_state:

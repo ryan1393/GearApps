@@ -55,6 +55,11 @@ const SOURCE_OPTIONS_SQL = `SELECT wm.id::text AS mapping_id,wm.whiteboard_id::t
 
 // DSFCONNECT2: a user-approved exception, NOT removal of source/readonly/mapping guards.
 export const DSF_PRIVILEGED_ACK = 'TEMPORARY_APP_READ_ONLY_ACCEPTED';
+// The only source and logins the acknowledgment is accepted for. 'whiteboard' is the DSF
+// application's own login and can write to DSF; Gear Apps relies on its read-only session.
+const DSF_ACK_LOGINS:readonly string[] = ['dana_dsf_reader','whiteboard'];
+const dsfAckSource = (host:unknown,database:unknown,user:unknown):boolean =>
+  host==='10.16.80.10' && database==='maindblocal' && typeof user==='string' && DSF_ACK_LOGINS.includes(user);
 export const DSF_ACCOUNT_SQL = `SELECT current_database()::text AS database_name,
  session_user::text AS session_login,current_user::text AS effective_login,
  current_setting('transaction_read_only')='on' AS read_only`;
@@ -64,8 +69,7 @@ export function dsfAccountPolicy(config:Config,account:any,rights:any):string {
      account.read_only!==true || rights?.can_read!==true)throw new DsfRefusal('SOURCE_ACCOUNT_MISMATCH');
   if(rights.role_safe===true && rights.no_database_create===true && rights.no_schema_create===true && rights.no_source_writes===true)
     return 'RESTRICTED_ROLE_CHECKS_PASSED';
-  if(config.privilegedAccountAcknowledged===true && config.client['host']==='10.16.80.10' &&
-     config.client['database']==='maindblocal' && config.client['user']==='dana_dsf_reader')
+  if(config.privilegedAccountAcknowledged===true && dsfAckSource(config.client['host'],config.client['database'],config.client['user']))
     return 'USER_APPROVED_PRIVILEGED_ACCOUNT_APP_READ_ONLY';
   throw new DsfRefusal('READ_ONLY_ROLE_REQUIRED');
 }
@@ -83,7 +87,7 @@ export function readDsfConfig(env:NodeJS.ProcessEnv): Config {
   const port=integer('DSF_DB_PORT',5432,1,65535);
   const acknowledgment=env['DSF_PRIVILEGED_READER_ACK'];
   const privilegedAccountAcknowledged=acknowledgment===DSF_PRIVILEGED_ACK;
-  if(acknowledgment && (!privilegedAccountAcknowledged || host!=='10.16.80.10' || database!=='maindblocal' || user!=='dana_dsf_reader'))return off;
+  if(acknowledgment && (!privilegedAccountAcknowledged || !dsfAckSource(host,database,user)))return off;
   const machineValues=(env['DSF_COUNT_MACHINES']||'').split(',').map(x=>x.trim()).filter(Boolean);
   if(!host||!database||!user||!Number.isFinite(port)||!Number.isFinite(interval)||!machineValues.length||
     machineValues.length>200||machineValues.some(x=>!/^[A-Za-z0-9-]{1,20}$/.test(x))||new Set(machineValues).size!==machineValues.length) return off;

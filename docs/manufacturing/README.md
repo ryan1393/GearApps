@@ -1,4 +1,4 @@
-# Gear Apps 70.4.0
+# Gear Apps 70.5.0
 
 Gear Apps is the Dana manufacturing workspace for four workflows sharing one API and database:
 **Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root GearApps Nx workspace. All frontends use
@@ -12,6 +12,19 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
 | Green Shed | 4202 | `../apps/greenshed` |
 | Lapper | 4203 | `../apps/lapper-client` |
 | Shared API | 3333 | `../apps/server` (`/api/v1`, health at `/api/v1/health/ready`) |
+
+## What changed in 70.5.0
+
+Lapper now shares the Gear Apps shell, sign-in and Admin with the other apps, and gains
+Scanners, Macros, Fanuc Variables and Collector Tokens pages. A Python Lapper Read collector
+runs in Docker (`docker compose --profile collectors up -d --build lapper-read`) with one
+worker per saved machine. See [CHANGELOG.md](CHANGELOG.md).
+
+## What changed in 70.4.1
+
+Label fixes from the first tags printed on a Zebra: a centred, wider barcode; an allowance for
+where that printer lands the tag; and a per-printer Move right / Move down adjustment in
+Admin > Label Printers for tags and cutter cards. See [CHANGELOG.md](CHANGELOG.md).
 
 ## What changed in 70.4.0
 
@@ -83,7 +96,10 @@ Full detail is in `CHANGELOG.md`. In short:
 
 Run deployment from the repository root with
 `node tools/manufacturing/deploy/deploy-remote.mjs` (Windows:
-`commands\Deploy-GearApps.cmd`). The archive contains the single root workspace;
+`commands\Deploy-GearApps.cmd`). To deploy to the plant Docker host in one step, run
+`commands\Deploy-To-usftwvmdocker.cmd`: it creates the `usftwvmdocker`
+Docker context for `image@usftwvmdocker` if this PC does not have it, then runs the same
+deployment. The archive contains the single root workspace;
 Docker builds use the root lockfile and pinned Node 24.22.1/npm 11.9.0. Manufacturing
 configuration is the repository root `.env`, shared by every feature.
 The deployer preserves that file and keeps the previous tree for rollback.
@@ -105,7 +121,7 @@ Docker host behind your active **SSH Docker context** (`docker context use <name
    2. copies the source to `~/dana-apps`, keeping the previous release in `~/dana-apps.prev`
       and the host's own `.env`;
    3. runs `docker compose build` and `up -d` (never `down`, never touches volumes);
-   4. waits for every service and checks that the API reports `70.4.0`. Only then does the old
+   4. waits for every service and checks that the API reports `70.5.0`. Only then does the old
       release become `~/dana-apps.prev`. If the deploy fails, the last good release is protected
       (a retry discards the failed one) and `--rollback` brings it back.
 3. **Rollback:** `Deploy-GearApps.cmd --rollback` swaps `~/dana-apps.prev` back in and restarts it.

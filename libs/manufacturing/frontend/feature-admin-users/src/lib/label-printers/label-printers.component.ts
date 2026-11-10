@@ -17,6 +17,8 @@ interface LabelPrinter {
   language: LabelLanguage;
   is_default: boolean;
   enabled: boolean;
+  offset_right: number;
+  offset_down: number;
 }
 interface LabelPrinterBoard {
   available: boolean;
@@ -31,10 +33,14 @@ interface PrinterForm {
   language: LabelLanguage;
   is_default: boolean;
   enabled: boolean;
+  offset_right: number;
+  offset_down: number;
 }
 interface TestOutcome { ok: boolean; text: string }
 
-const emptyForm = (): PrinterForm => ({ name: '', host: '', port: 9100, label_type: 'ASSET_TAG', language: 'IPL', is_default: false, enabled: true });
+const emptyForm = (): PrinterForm => ({ name: '', host: '', port: 9100, label_type: 'ASSET_TAG', language: 'IPL', is_default: false, enabled: true, offset_right: 0, offset_down: 0 });
+/** The API accepts adjustments of up to this many dots either way. */
+const ADJUSTMENT_LIMIT = 100;
 const API = '/api/v1/label-printers';
 
 /**
@@ -81,6 +87,15 @@ export class LabelPrintersComponent implements OnInit {
     return labelType === 'ASSET_TAG' ? 'None: tags download as files' : 'None: cards download as files';
   }
 
+  /** "moved 5 right, 3 up" for a printer whose labels have been nudged; empty when untouched. */
+  adjustmentText(printer: LabelPrinter): string {
+    const parts = [
+      printer.offset_right ? `${Math.abs(printer.offset_right)} ${printer.offset_right > 0 ? 'right' : 'left'}` : '',
+      printer.offset_down ? `${Math.abs(printer.offset_down)} ${printer.offset_down > 0 ? 'down' : 'up'}` : '',
+    ].filter(Boolean);
+    return parts.length ? `Moved ${parts.join(', ')} (dots)` : '';
+  }
+
   typeName(labelType: LabelType): string { return labelType === 'CUTTER_CARD' ? 'Cutter cards' : 'Tray / container / location tags'; }
   languageName(language: LabelLanguage): string { return language === 'ZPL' ? 'ZPL (Zebra)' : 'IPL (Intermec)'; }
 
@@ -95,7 +110,7 @@ export class LabelPrintersComponent implements OnInit {
 
   edit(printer: LabelPrinter): void {
     this.editingId = printer.id;
-    this.form = { name: printer.name, host: printer.host, port: printer.port, label_type: printer.label_type, language: printer.language, is_default: printer.is_default, enabled: printer.enabled };
+    this.form = { name: printer.name, host: printer.host, port: printer.port, label_type: printer.label_type, language: printer.language, is_default: printer.is_default, enabled: printer.enabled, offset_right: printer.offset_right, offset_down: printer.offset_down };
     this.error = ''; this.confirmRemoveId = null;
     setTimeout(() => this.nameInput?.nativeElement.focus());
   }
@@ -110,7 +125,13 @@ export class LabelPrintersComponent implements OnInit {
     if (!name) { this.error = 'Give the printer a name operators will recognise, for example Cutter Grind Zebra.'; return; }
     if (!host) { this.error = 'Enter the printer IP address, for example 10.16.40.25.'; return; }
     if (!Number.isInteger(port) || port < 1 || port > 65535) { this.error = 'Port must be a whole number from 1 to 65535. Raw label printing is normally 9100.'; return; }
-    const body = { ...this.form, name, host, port, is_default: this.form.enabled && this.form.is_default };
+    const offsetRight = Number(this.form.offset_right ?? 0);
+    const offsetDown = Number(this.form.offset_down ?? 0);
+    if (![offsetRight, offsetDown].every((value) => Number.isInteger(value) && Math.abs(value) <= ADJUSTMENT_LIMIT)) {
+      this.error = `Position adjustments are whole dots from -${ADJUSTMENT_LIMIT} to ${ADJUSTMENT_LIMIT}. 8 dots are about 1 mm.`;
+      return;
+    }
+    const body = { ...this.form, name, host, port, offset_right: offsetRight, offset_down: offsetDown, is_default: this.form.enabled && this.form.is_default };
     this.saving = true; this.error = '';
     const request = this.editingId ? this.http.put<LabelPrinter>(`${API}/${this.editingId}`, body) : this.http.post<LabelPrinter>(API, body);
     request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -134,8 +155,8 @@ export class LabelPrintersComponent implements OnInit {
   private change(printer: LabelPrinter, patch: Partial<PrinterForm>, done: string): void {
     if (this.busyId) return;
     this.busyId = printer.id; this.error = '';
-    const { name, host, port, label_type, language, is_default, enabled } = printer;
-    this.http.put<LabelPrinter>(`${API}/${printer.id}`, { name, host, port, label_type, language, is_default, enabled, ...patch })
+    const { name, host, port, label_type, language, is_default, enabled, offset_right, offset_down } = printer;
+    this.http.put<LabelPrinter>(`${API}/${printer.id}`, { name, host, port, label_type, language, is_default, enabled, offset_right, offset_down, ...patch })
       .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => { this.busyId = null; this.toast.success(done, 'Printer updated'); this.refresh(); },
         error: (error: HttpErrorResponse) => { this.busyId = null; this.error = adminApiErrorText(error) || 'Could not update the printer.'; this.cdr.markForCheck(); },
@@ -174,7 +195,7 @@ export class LabelPrintersComponent implements OnInit {
         next: (result) => {
           this.busyId = null;
           this.tests[printer.id] = result.printed
-            ? { ok: true, text: `Test tag sent in ${printer.language}. If nothing printed, the printer speaks the other language: edit it and switch between IPL and ZPL.` }
+            ? { ok: true, text: `Test tag sent in ${printer.language}. If nothing printed, switch the printer between IPL and ZPL. If it sits off-centre, Edit the printer and move it right or down.` }
             : { ok: false, text: result.failure_reason || 'The printer did not accept the test tag.' };
           this.cdr.markForCheck();
         },

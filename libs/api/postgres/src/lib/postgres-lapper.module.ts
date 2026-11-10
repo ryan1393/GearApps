@@ -1,4 +1,6 @@
 import {
+  CollectorTokensController,
+  CollectorTokensService,
   DepartmentsController,
   DepartmentsService,
   GearsetMarriagesController,
@@ -29,6 +31,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LapperWritePolicy, scannerConfig } from '@gearapps/api/core';
 import { PostgresLapperCatalog } from './catalog';
+import { PostgresCollectorTokens } from './collector-tokens';
+import { COLLECTOR_TOKEN_RESOLVER } from '@gearapps/shared/domain';
 import { PostgresLapperStore } from './postgres-lapper.store';
 import {
   PostgresCrudAdapter,
@@ -57,6 +61,7 @@ import {
     MacrosController,
     MacroLogsController,
     ScannerController,
+    CollectorTokensController,
   ],
   providers: [
     PostgresLapperCatalog,
@@ -83,6 +88,11 @@ import {
       useFactory: (store: PostgresLapperStore) => new PostgresCrudAdapter(store, resource),
     })),
     LapperWritePolicy,
+    PostgresCollectorTokens,
+    { provide: CollectorTokensService, useExisting: PostgresCollectorTokens },
+    // Read by the global access guard to accept collector tokens.
+    { provide: COLLECTOR_TOKEN_RESOLVER, useExisting: PostgresCollectorTokens },
   ],
+  exports: [COLLECTOR_TOKEN_RESOLVER],
 })
 export class PostgresLapperModule {}

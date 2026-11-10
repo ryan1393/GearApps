@@ -1,0 +1,35 @@
+/* Layout only: the A−/A+ text-size pair that floor operators use on shared screens. */
+.lapper-text-size {
+  display: inline-flex;
+  margin-right: 4px;
+  border: 1px solid var(--dana-border, #dce4ee);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.lapper-text-size button {
+  min-width: 34px;
+  height: 32px;
+  border: 0;
+  background: #fff;
+  color: var(--dana-text, #26384d);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lapper-text-size button + button {
+  border-left: 1px solid var(--dana-border, #dce4ee);
+}
+
+.lapper-text-size button:disabled {
+  color: var(--dana-placeholder, #7a8a9d);
+  cursor: default;
+}
+
+@media (max-width: 760px) {
+  .lapper-text-size {
+    display: none;
+  }
+}

@@ -79,6 +79,12 @@
   grid-column: span 6;
 }
 
+/* dana-core's .dana-kpi-grid (4 tracks) loads after this file and sits on the
+   same element; keep the 24-track desktop geometry so spans stay balanced. */
+@media (min-width: 1351px) {
+  .dana-kpi-grid.kpi-grid { grid-template-columns: repeat(24, minmax(0, 1fr)); }
+}
+
 .kpi-grid:where(:has(> .kpi-card:nth-child(1):last-child)) > .kpi-card { grid-column: span 24; }
 .kpi-grid:where(:has(> .kpi-card:nth-child(2):last-child)) > .kpi-card { grid-column: span 12; }
 .kpi-grid:where(:has(> .kpi-card:nth-child(3):last-child)) > .kpi-card { grid-column: span 8; }

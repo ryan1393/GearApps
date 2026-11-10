@@ -24,12 +24,12 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
           <span class="dana-detail-value"
             >{{ numeric() | number: digits() }}
             @if (unit()) {
-              <small class="dana-muted">{{ unit() }}</small>
+              <small class="gear-muted">{{ unit() }}</small>
             }
           </span>
         }
         @default {
-          <span class="dana-detail-value" [class.dana-muted]="isEmpty()">{{ display() }}</span>
+          <span class="dana-detail-value" [class.gear-muted]="isEmpty()">{{ display() }}</span>
         }
       }
     </div>

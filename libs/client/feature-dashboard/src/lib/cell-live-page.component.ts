@@ -8,6 +8,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { DanaPageHeaderComponent } from '@dana/ui';
 import { loadable, MachinesApi } from '@gearapps/client/core';
 import { EmptyStateComponent } from '@gearapps/client/ui';
 import { Machine } from '@gearapps/shared/domain';
@@ -16,50 +17,56 @@ import { MachineLiveCardComponent } from './machine-live-card.component';
 
 @Component({
   selector: 'gear-cell-live-page',
-  imports: [RouterLink, EmptyStateComponent, MachineLiveCardComponent],
+  imports: [RouterLink, DanaPageHeaderComponent, EmptyStateComponent, MachineLiveCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="dana-page-header">
-      <div>
-        <h1>Cell {{ cell() }}</h1>
-        <p>
-          {{ machines().length }} machine{{ machines().length === 1 ? '' : 's' }} · live scanner
-          image, serial numbers and machine I/O.
-        </p>
-      </div>
-      <div class="dana-toolbar">
-        <div class="dana-segmented gear-rates" role="group" aria-label="Refresh rate">
-          @for (r of rates; track r.ms) {
-            <button
-              type="button"
-              [attr.aria-pressed]="pollMs() === r.ms"
-              (click)="pollMs.set(r.ms)"
-            >
-              {{ r.label }}
-            </button>
-          }
-        </div>
-        <a class="dana-btn" routerLink="/dashboard">‹ All cells</a>
-      </div>
-    </div>
-
-    @if (!all.loading() && !machines().length) {
-      <section class="dana-panel">
-        <div class="dana-panel-body">
-          <gear-empty-state [title]="'No machines in cell ' + cell()"
-            ><a class="dana-btn dana-btn-primary" routerLink="/dashboard"
-              >Back to cells</a
-            ></gear-empty-state
-          >
+    <div class="gear-page">
+      <section
+        danaPageHeader
+        eyebrow="LAPPER · LIVE VIEW"
+        [heading]="'Cell ' + cell()"
+        [description]="
+          machines().length +
+          ' machine' +
+          (machines().length === 1 ? '' : 's') +
+          ' · live scanner image, serial numbers and machine I/O.'
+        "
+      >
+        <div danaPageHeaderAction class="dana-toolbar">
+          <div class="gear-rates" role="group" aria-label="Refresh rate">
+            @for (r of rates; track r.ms) {
+              <button
+                type="button"
+                class="gear-btn"
+                [class.gear-btn-primary]="pollMs() === r.ms"
+                [class.gear-btn-secondary]="pollMs() !== r.ms"
+                [attr.aria-pressed]="pollMs() === r.ms"
+                (click)="pollMs.set(r.ms)"
+              >
+                {{ r.label }}
+              </button>
+            }
+          </div>
+          <a class="gear-btn gear-btn-secondary" routerLink="/dashboard">‹ All cells</a>
         </div>
       </section>
-    } @else {
-      <div class="gear-live-grid">
-        @for (m of machines(); track m.id) {
-          <gear-machine-live-card [machine]="m" [pollMs]="pollMs()" />
-        }
-      </div>
-    }
+
+      @if (!all.loading() && !machines().length) {
+        <section class="gear-panel">
+          <div class="lapper-panel-body">
+            <gear-empty-state [title]="'No machines in cell ' + cell()">
+              <a class="gear-btn gear-btn-primary" routerLink="/dashboard">Back to cells</a>
+            </gear-empty-state>
+          </div>
+        </section>
+      } @else {
+        <div class="gear-live-grid">
+          @for (m of machines(); track m.id) {
+            <gear-machine-live-card [machine]="m" [pollMs]="pollMs()" />
+          }
+        </div>
+      }
+    </div>
   `,
   styles: `
     .gear-live-grid {
@@ -68,10 +75,8 @@ import { MachineLiveCardComponent } from './machine-live-card.component';
       gap: 14px;
     }
     .gear-rates {
-      min-width: 180px;
-    }
-    .gear-rates > button {
-      min-height: 40px;
+      display: inline-flex;
+      gap: 4px;
     }
   `,
 })

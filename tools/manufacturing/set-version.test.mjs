@@ -37,10 +37,11 @@ function fixture() {
     'apps/lapper-read/Directory.Build.props',
     '<Project><PropertyGroup><Version>1.2.3</Version></PropertyGroup></Project>\n',
   );
+  put('apps/lapper-read-py/lapper_read/__init__.py', '__version__ = "1.2.3"\n');
   put('README.md', '# GearApps 1.2.3\n');
   put(
     'compose.yml',
-    ['gear-app-server', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed']
+    ['gear-app-server', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed', 'lapper-read']
       .map((name) => `image: dana-apps-${name}:1.2.3`)
       .join('\n') + '\n',
   );
@@ -60,6 +61,10 @@ test('version ownership updates lock and vendor without changing dependencies', 
     assert.match(
       f.text('apps/lapper-read/Directory.Build.props'),
       /<Version>1\.2\.4<\/Version>/,
+    );
+    assert.match(
+      f.text('apps/lapper-read-py/lapper_read/__init__.py'),
+      /__version__ = "1\.2\.4"/,
     );
     assert.equal(f.read('package.json').dependencies.sample, '1.2.3');
     assert.equal(f.read('package-lock.json').version, '1.2.4');
@@ -88,7 +93,7 @@ test('version ownership updates lock and vendor without changing dependencies', 
           .text('compose.yml')
           .matchAll(/dana-apps-([a-z-]+):(\S+)/g),
       ].map(([, name, version]) => [name, version]),
-      ['gear-app-server', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed'].map(
+      ['gear-app-server', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed', 'lapper-read'].map(
         (name) => [name, '1.2.4'],
       ),
     );

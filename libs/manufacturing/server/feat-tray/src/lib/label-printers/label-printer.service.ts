@@ -24,6 +24,8 @@ export interface LabelPrinterRow {
   language: LabelLanguage;
   is_default: boolean;
   enabled: boolean;
+  offset_right: number;
+  offset_down: number;
   updated_at: string;
 }
 
@@ -34,11 +36,13 @@ export interface LabelPrinterTarget {
   host: string;
   port: number;
   language: LabelLanguage;
+  offset_right: number;
+  offset_down: number;
 }
 
 export type LabelPrinterSendResult = { ok: true } | { ok: false; reason: string };
 
-const COLUMNS = 'id, name, host, port, label_type, language, is_default, enabled, updated_at';
+const COLUMNS = 'id, name, host, port, label_type, language, is_default, enabled, offset_right, offset_down, updated_at';
 const ENVIRONMENT_PRINTER_NAME = 'Server default printer';
 
 /**
@@ -193,18 +197,18 @@ export class LabelPrinterService implements OnModuleInit {
             [dto.label_type, id],
           );
         }
-        const values = [name, host, dto.port, dto.label_type, dto.language, isDefault, enabled, userId];
+        const values = [name, host, dto.port, dto.label_type, dto.language, isDefault, enabled, userId, dto.offset_right ?? 0, dto.offset_down ?? 0];
         const saved = (id
           ? await manager.query(
               `UPDATE public.gear_label_printers
                   SET name = $1, host = $2, port = $3, label_type = $4, language = $5, is_default = $6, enabled = $7,
-                      updated_by = $8, updated_at = clock_timestamp()
-                WHERE id = $9 RETURNING ${COLUMNS}`,
+                      updated_by = $8, offset_right = $9, offset_down = $10, updated_at = clock_timestamp()
+                WHERE id = $11 RETURNING ${COLUMNS}`,
               [...values, id],
             )
           : await manager.query(
-              `INSERT INTO public.gear_label_printers (name, host, port, label_type, language, is_default, enabled, updated_by)
-               VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING ${COLUMNS}`,
+              `INSERT INTO public.gear_label_printers (name, host, port, label_type, language, is_default, enabled, updated_by, offset_right, offset_down)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING ${COLUMNS}`,
               values,
             )) as unknown;
         // node-postgres returns [rows, count] for UPDATE ... RETURNING and rows for INSERT ... RETURNING.
@@ -240,6 +244,8 @@ export class LabelPrinterService implements OnModuleInit {
       host,
       port: positiveInteger(process.env['GEAR_LABEL_PRINTER_PORT'], 9100),
       language: process.env['GEAR_LABEL_PRINTER_LANGUAGE']?.trim().toUpperCase() === 'ZPL' ? 'ZPL' : 'IPL',
+      offset_right: 0,
+      offset_down: 0,
     };
   }
 }

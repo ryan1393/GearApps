@@ -41,6 +41,15 @@
           </select>
         </label>
       </div>
+      <div class="label-printers-adjust">
+        <label class="gear-field">Move right (dots)
+          <input class="gear-input mono" name="printerOffsetRight" type="number" min="-100" max="100" step="1" [(ngModel)]="form.offset_right" />
+        </label>
+        <label class="gear-field">Move down (dots)
+          <input class="gear-input mono" name="printerOffsetDown" type="number" min="-100" max="100" step="1" [(ngModel)]="form.offset_down" />
+        </label>
+        <p class="label-printers-help">Only if the label does not sit squarely on the stock. 8 dots are about 1 mm; use a negative number to move left or up. Save, then Print Test Tag to check.</p>
+      </div>
       <div class="label-printers-checks">
         <label><input type="checkbox" name="printerDefault" [(ngModel)]="form.is_default" [disabled]="!form.enabled" /> Default printer for {{ typeName(form.label_type).toLowerCase() }}</label>
         <label><input type="checkbox" name="printerEnabled" [(ngModel)]="form.enabled" /> Available for printing</label>
@@ -61,6 +70,7 @@
             <tr *ngFor="let printer of printers" [class.label-printers-editing]="printer.id === editingId">
               <td><strong>{{ printer.name }}</strong>
                 <small class="label-printers-sub label-printers-kind">{{ typeName(printer.label_type) }} · {{ languageName(printer.language) }}</small>
+                <small class="label-printers-sub label-printers-kind" *ngIf="adjustmentText(printer) as moved">{{ moved }}</small>
                 <small class="label-printers-sub" *ngIf="tests[printer.id] as test" [class.label-printers-ok]="test.ok" [class.label-printers-problem]="!test.ok" role="status">{{ test.ok ? '✓' : '!' }} {{ test.text }}</small>
               </td>
               <td class="mono">{{ printer.host }}:{{ printer.port }}</td>

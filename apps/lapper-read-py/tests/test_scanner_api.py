@@ -1,0 +1,187 @@
+import json
+import socket
+import threading
+import time
+import unittest
+from decimal import Decimal
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+
+from lapper_read.api import GearAppsApi
+from lapper_read.config import ConfigError, from_env
+from lapper_read.scanner import Scanner
+from lapper_read.state import ScannerState
+
+
+class ScriptedScanner(threading.Thread):
+    """Loopback scanner that answers each command with scripted raw chunks."""
+
+    def __init__(self, replies):
+        super().__init__(daemon=True)
+        self.replies, self.commands = replies, []
+        self.server = socket.socket()
+        self.server.bind(("127.0.0.1", 0))
+        self.server.listen()
+        self.port = self.server.getsockname()[1]
+
+    def run(self):
+        conn, _ = self.server.accept()
+        with conn:
+            buffer = b""
+            for reply in self.replies:
+                while b"\r" not in buffer:
+                    data = conn.recv(64)
+                    if not data:
+                        return
+                    buffer += data
+                command, buffer = buffer.split(b"\r", 1)
+                self.commands.append(command.decode())
+                for chunk in reply:
+                    conn.sendall(chunk)
+            time.sleep(1)  # hold the connection open, like a scanner that stops answering
+
+
+class ScannerTests(unittest.TestCase):
+    def test_fragmented_and_coalesced_frames_produce_a_complete_serial(self):
+        fake = ScriptedScanner([
+            [b"OK,INCHK,O", b"N\r\n"],
+            [b"OK,AMON\r"],
+            [b"OK,LON\r\nD12345", b"6789\r\n"],
+        ])
+        fake.start()
+        scanner = Scanner("127.0.0.1", fake.port, 2)
+        state = scanner.read(ScannerState(None, None))
+        scanner.close()
+        self.assertEqual(state, ScannerState("D123456789", None))
+        self.assertEqual(fake.commands, ["INCHK,1", "AMON", "LON01"])
+
+    def test_empty_input_moves_the_scanned_serial_to_the_queue(self):
+        fake = ScriptedScanner([[b"OK,INCHK,OFF\r"]])
+        fake.start()
+        scanner = Scanner("127.0.0.1", fake.port, 2)
+        self.assertEqual(scanner.read(ScannerState("D123456789", None)), ScannerState(None, "D123456789"))
+        scanner.close()
+
+    def test_timeout_drops_the_connection_so_the_next_poll_reconnects(self):
+        fake = ScriptedScanner([[]])  # never answers
+        fake.start()
+        scanner = Scanner("127.0.0.1", fake.port, 0.3)
+        with self.assertRaises(TimeoutError):
+            scanner.read(ScannerState(None, None))
+        self.assertIsNone(scanner._input1._socket)
+
+
+class FakeServer(BaseHTTPRequestHandler):
+    log = []
+    tokens = iter([])
+
+    def log_message(self, *args):
+        pass
+
+    def _reply(self, status, body=None):
+        raw = json.dumps(body).encode() if body is not None else b""
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(raw)))
+        self.end_headers()
+        self.wfile.write(raw)
+
+    def _handle(self):
+        length = int(self.headers.get("Content-Length") or 0)
+        body = json.loads(self.rfile.read(length)) if length else None
+        FakeServer.log.append((self.command, self.path, self.headers.get("Authorization"),
+                               self.headers.get("Idempotency-Key"), body))
+        if self.path.endswith("/auth/email/login"):
+            return self._reply(200, {"accessToken": next(FakeServer.tokens)})
+        if self.headers.get("Authorization") == "Bearer expired":
+            return self._reply(401, {"message": "expired"})
+        if self.path.startswith("/api/v1/gearset/number/404"):
+            return self._reply(404, {"message": "missing"})
+        if self.path.startswith("/api/v1/gearset/number/500"):
+            return self._reply(500, {"message": "boom"})
+        return self._reply(201 if self.command == "POST" else 200, {"id": "x1", **(body or {})})
+
+    do_GET = do_POST = do_PATCH = _handle
+
+
+class ApiTests(unittest.TestCase):
+    def setUp(self):
+        FakeServer.log = []
+        self.server = ThreadingHTTPServer(("127.0.0.1", 0), FakeServer)
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+        self.api = GearAppsApi(f"http://127.0.0.1:{self.server.server_port}", "svc@plant", "secret", 3)
+
+    def tearDown(self):
+        self.server.shutdown()
+
+    def test_unauthorized_write_refreshes_and_retries_with_the_same_key_and_payload(self):
+        FakeServer.tokens = iter(["expired", "fresh"])
+        self.api.post_cycle("D123456789", 4, "m1", "g1", "2026-11-10T03:00:00Z", "key-1")
+        writes = [entry for entry in FakeServer.log if entry[1] == "/api/v1/machine-cycle"]
+        self.assertEqual([w[2] for w in writes], ["Bearer expired", "Bearer fresh"])
+        self.assertEqual({w[3] for w in writes}, {"key-1"})
+        self.assertEqual(writes[0][4], writes[1][4])
+
+    def test_only_not_found_creates_a_pending_gearset(self):
+        FakeServer.tokens = iter(["t"])
+        self.api.gearset_by_number(404)
+        self.assertEqual(FakeServer.log[-1][:2], ("POST", "/api/v1/gearset"))
+        self.assertEqual(FakeServer.log[-1][4]["number"], "404")
+        with self.assertRaises(IOError):
+            self.api.gearset_by_number(500)
+        self.assertNotEqual(FakeServer.log[-1][:2], ("POST", "/api/v1/gearset"))
+
+    def test_macro_values_are_json_numbers_and_keep_whole_numbers_whole(self):
+        FakeServer.tokens = iter(["t"])
+        self.api.post_macro_log("c1", "m1", Decimal("1800"), "k1")
+        self.api.post_macro_log("c1", "m2", Decimal("0.125"), "k2")
+        values = [entry[4]["value"] for entry in FakeServer.log if entry[1] == "/api/v1/macro-log"]
+        self.assertEqual(values, [1800, 0.125])
+        self.assertIsInstance(values[0], int)
+
+    def test_collector_token_is_sent_without_signing_in(self):
+        api = GearAppsApi(f"http://127.0.0.1:{self.server.server_port}", "", "", 3, token="glr_abc")
+        api.request("GET", "/api/v1/macro")
+        self.assertEqual(FakeServer.log[-1][2], "Bearer glr_abc")
+        self.assertFalse(any(e[1].endswith("/auth/email/login") for e in FakeServer.log))
+
+    def test_blank_serial_cannot_be_posted(self):
+        with self.assertRaises(ValueError):
+            self.api.post_cycle(" ", 1, "m", "g", "2026-11-10T03:00:00Z", "k")
+
+    def test_machine_lookup_disambiguates_a_shared_ip_by_asset_number(self):
+        FakeServer.tokens = iter(["t"])
+        self.api.machine_by_ip("10.16.81.15", "01-094-101")
+        self.assertEqual(FakeServer.log[-1][1], "/api/v1/machine/ip/10.16.81.15?number=01-094-101")
+
+
+class ConfigTests(unittest.TestCase):
+    BASE = {"LAPPER_MACHINE_IP": "10.16.81.15", "LAPPER_SCANNER_IP": "10.16.80.57",
+            "GEARAPPS_API_EMAIL": "svc@plant", "GEARAPPS_API_PASSWORD": "x"}
+
+    def test_valid_settings_and_defaults(self):
+        s = from_env(self.BASE)
+        self.assertEqual((s.focas_port, s.scanner_input1_port, s.poll_interval_ms), (8193, 9004, 250))
+        self.assertTrue(s.state_file.endswith("/10.16.81.15.json"))
+
+    def test_missing_credentials_or_bad_ip_fail_fast(self):
+        with self.assertRaises(ConfigError):
+            from_env({**self.BASE, "GEARAPPS_API_PASSWORD": ""})
+        with self.assertRaises(ConfigError):
+            from_env({**self.BASE, "LAPPER_MACHINE_IP": "lapper-1"})
+
+    def test_a_collector_token_replaces_email_and_password(self):
+        s = from_env({"GEARAPPS_API_TOKEN": "glr_abc"}, mode="supervise")
+        self.assertEqual(s.api_token, "glr_abc")
+        with self.assertRaises(ConfigError):
+            from_env({"GEARAPPS_API_TOKEN": "eyJhbGciOi.jwt"}, mode="supervise")
+
+    def test_supervise_only_needs_api_credentials(self):
+        s = from_env({"GEARAPPS_API_EMAIL": "svc@plant", "GEARAPPS_API_PASSWORD": "x"}, mode="supervise")
+        self.assertEqual(s.discover_interval_s, 30)
+
+    def test_check_only_needs_the_controller_address(self):
+        self.assertEqual(from_env({"LAPPER_MACHINE_IP": "10.16.81.15"}, mode="check").machine_ip, "10.16.81.15")
+
+
+if __name__ == "__main__":
+    unittest.main()
