@@ -233,14 +233,20 @@ To check Dana UI on its own, run `npx nx test dana-ui` (it builds the publishabl
 
 ## Admin management
 
-The shared `/admin` screen is available in Blade Tracking, Cutter Builder, and Greenshed for admin-role accounts. It uses the same centralized Gear Apps design system and provides create/list workflows for:
+The shared `/admin` screen is available in Blade Tracking, Cutter Builder, Greenshed, and Lapping for admin-role accounts. It uses the same centralized Gear Apps design system and provides create/list workflows for:
 
 - Users
 - Part Summaries
-- Parts
-- Models
+- Parts (create and edit; gearset parts come from Gearsets)
+- Gearsets (pinion + ring assemblies used by Lapping)
+- Roll Master, Models
 - Machines
+- Lapping Machines (the FANUC controller, cell and scanner Lapping uses for a shared machine)
+- DSF Mappings, Label Printers, Trays, Containers, Locations
 - Cutter Bodies
+
+Open a tab directly with `/admin?tab=<tab>` (for example `/admin?tab=gearsets`); Lapping's old
+Machines, Parts and Part Summaries links redirect there.
 
 The existing Users feature was retained as the admin route but rebuilt into the shared Gear Apps administration workspace. Part Summary and Cutter Body creation reuse their existing backend APIs. Admin-only master-data endpoints were added for Models, Machines, and Department lookup, and an admin-only `POST /api/v1/users` route was added so the selected User/Admin role is preserved.
 

@@ -206,3 +206,90 @@ describe('ServerFeatCutterConfigService tray validation', () => {
     expect(result.already_assigned_to_build).toBe(true);
   });
 });
+
+describe('ServerFeatCutterConfigService gearset part guards', () => {
+  const types: Record<string, { id: string; code: string; enabled: boolean }> = {
+    ring: { id: 'ring', code: 'RING', enabled: true },
+    pinion: { id: 'pinion', code: 'PINION', enabled: true },
+    gearset: { id: 'gearset', code: 'GEARSET', enabled: true },
+  };
+  const ringPart = {
+    id: 'part-1',
+    part_number: 'R100',
+    summary_id: 'summary-1',
+    part_type_id: 'ring',
+    teeth: 41,
+    active: true,
+    enabled: true,
+  };
+
+  const createService = (inGearset: boolean) => {
+    const query = jest.fn().mockResolvedValue(inGearset ? [{ '?column?': 1 }] : []);
+    const partRepo = {
+      findOne: jest.fn(async ({ where }: { where: { id?: string; part_number?: string } }) =>
+        where.id === ringPart.id ? { ...ringPart } : null,
+      ),
+      create: jest.fn((value) => value),
+      save: jest.fn(async (value) => value),
+      findOneOrFail: jest.fn(async () => ({ ...ringPart })),
+      manager: { query },
+    };
+    const partTypeRepo = {
+      findOne: jest.fn(async ({ where }: { where: { id: string } }) => types[where.id] ?? null),
+    };
+    const summaryRepo = {
+      findOne: jest.fn().mockResolvedValue({ id: 'summary-1', enabled: true }),
+    };
+    const service = new ServerFeatCutterConfigService(
+      {} as never,
+      partTypeRepo as never,
+      summaryRepo as never,
+      partRepo as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+      {} as never,
+    );
+    return { service, partRepo, query };
+  };
+
+  it('refuses to create a bare GEARSET-type part', async () => {
+    const { service, partRepo } = createService(false);
+    await expect(
+      service.createPart(
+        { part_number: 'GS1', summary_id: 'summary-1', part_type_id: 'gearset' },
+        'user-1',
+      ),
+    ).rejects.toThrow('Use Admin > Gearsets');
+    expect(partRepo.save).not.toHaveBeenCalled();
+  });
+
+  it('refuses to change a part to the GEARSET type', async () => {
+    const { service, partRepo } = createService(false);
+    await expect(
+      service.updatePart('part-1', { part_type_id: 'gearset' }, 'user-1'),
+    ).rejects.toThrow('to or from the Gearset type');
+    expect(partRepo.save).not.toHaveBeenCalled();
+  });
+
+  it('fixes identity fields of a part used by a gearset but allows status changes', async () => {
+    const { service, partRepo, query } = createService(true);
+    await expect(
+      service.updatePart('part-1', { teeth: 43 }, 'user-1'),
+    ).rejects.toThrow('belongs to a gearset');
+    expect(query.mock.calls[0][1]).toEqual(['part-1']);
+    expect(partRepo.save).not.toHaveBeenCalled();
+
+    await service.updatePart('part-1', { active: false }, 'user-1');
+    expect(partRepo.save).toHaveBeenCalledWith(
+      expect.objectContaining({ active: false, teeth: 41 }),
+    );
+  });
+
+  it('lets parts outside a gearset change summary and teeth', async () => {
+    const { service, partRepo } = createService(false);
+    await service.updatePart('part-1', { teeth: 43 }, 'user-1');
+    expect(partRepo.save).toHaveBeenCalledWith(expect.objectContaining({ teeth: 43 }));
+  });
+});

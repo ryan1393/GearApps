@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+- **Lapping master data is in Admin.** The shared Admin screen (every app's `/admin`) now edits
+  everything Lapper's own Machines, Parts & Gearsets and Part Summaries pages did, and those
+  pages are gone; their old links open the matching Admin tab (`/admin?tab=…`).
+  - New **Gearsets** tab: assemble a pinion and ring from one Part Summary, change revision and
+    status, delete pending collector gearsets.
+  - New **Lapping Machines** tab: the Lapping setup of a shared machine (FANUC IP, type, builder,
+    cell, scanner, status). Removing it keeps the shared machine and its history.
+  - **Parts** can now be edited (number, Summary, type, teeth). The GEARSET type is no longer
+    offered: gearset parts are created with their assembly. The parts API refuses a bare GEARSET
+    part, a change to or from that type, and identity changes (number, type, Summary, teeth) on a
+    part used by a gearset; its status can still change.
+  - As in the other apps, master data is for administrators only: the Lapper sidebar and dashboard
+    show these links to admins.
+- **Repository layout.** The `manufacturing/` folder is gone (`libs/manufacturing`,
+  `tools/manufacturing`, `docs/manufacturing`, `commands/`); manufacturing commands are targets of
+  the `manufacturing-tools` Nx project; `npm test` runs through Nx; Dana UI has one copy (the
+  `libs/shared/dana-ui` source, no vendored package); release archives and stale reports are no
+  longer committed.
+
 ## 70.5.0 (2026-11-10)
 
 Lapper joins the shared Gear Apps experience, and gets a collector that runs in Docker.

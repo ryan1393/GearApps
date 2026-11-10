@@ -1,5 +1,10 @@
-import { Route } from '@angular/router';
+import { inject } from '@angular/core';
+import { Route, Router } from '@angular/router';
 import { adminRoleGuard, authGuard } from '@gearapps/manufacturing/frontend/data-access-common';
+
+/** Redirect an old Lapper page to its tab in the shared Admin screen. */
+const adminTab = (tab: string) => () =>
+  inject(Router).createUrlTree(['/admin'], { queryParams: { tab } });
 
 export const appRoutes: Route[] = [
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
@@ -18,19 +23,6 @@ export const appRoutes: Route[] = [
           import('@gearapps/client/feature-lapping-summary').then((m) => m.lappingSummaryRoutes),
       },
       {
-        path: 'machines',
-        loadChildren: () =>
-          import('@gearapps/client/feature-machines').then((m) => m.machinesRoutes),
-      },
-      {
-        path: 'parts',
-        loadChildren: () => import('@gearapps/client/feature-parts').then((m) => m.partsRoutes),
-      },
-      {
-        path: 'part-summaries',
-        loadChildren: () => import('@gearapps/client/feature-parts').then((m) => m.summariesRoutes),
-      },
-      {
         path: 'scanners',
         loadChildren: () => import('@gearapps/client/feature-config').then((m) => m.scannersRoutes),
       },
@@ -45,9 +37,14 @@ export const appRoutes: Route[] = [
       },
       // Bookmarks from the original Lapper app
       { path: 'cell-dashboard', redirectTo: 'dashboard' },
-      { path: 'machine', redirectTo: 'machines' },
-      { path: 'part', redirectTo: 'parts' },
-      { path: 'part-summary', redirectTo: 'part-summaries' },
+      // Machines, parts, gearsets and summaries are shared master data edited in Admin.
+      { path: 'machines', redirectTo: adminTab('lapping-machines') },
+      { path: 'machine', redirectTo: adminTab('lapping-machines') },
+      { path: 'parts', redirectTo: adminTab('parts') },
+      { path: 'part', redirectTo: adminTab('parts') },
+      { path: 'gearsets', redirectTo: adminTab('gearsets') },
+      { path: 'part-summaries', redirectTo: adminTab('part-summaries') },
+      { path: 'part-summary', redirectTo: adminTab('part-summaries') },
       { path: 'register', redirectTo: 'login' },
     ],
   },

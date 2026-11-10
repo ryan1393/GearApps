@@ -30,15 +30,30 @@ import {
     <gear-dialog
       [open]="open()"
       (openChange)="open.set($event)"
-      [title]="machine() ? 'Edit machine ' + (machine()?.number ?? '') : 'Add machine'"
-      description="Asset details, cell assignment and the scanner attached to this lapper."
+      [title]="machine() ? 'Edit Lapping setup for ' + (machine()?.number ?? '') : 'Add Lapping setup'"
+      description="The FANUC controller, cell and scanner Lapping uses for this shared machine."
     >
       <form [formGroup]="form" (ngSubmit)="save()" id="machineForm" class="gear-form-grid">
         <label class="gear-field">
           Asset ID
-          <input class="gear-input" formControlName="number" placeholder="01-094-999" />
+          <input
+            class="gear-input"
+            formControlName="number"
+            placeholder="01-094-999"
+            list="lappingMachineNumbers"
+          />
+          <datalist id="lappingMachineNumbers">
+            @for (number of machineNumberOptions(); track number) {
+              <option [value]="number"></option>
+            }
+          </datalist>
           @if (invalid('number')) {
             <small class="gear-field-help" role="alert">Asset ID is required.</small>
+          } @else if (!machine()) {
+            <small class="gear-field-help"
+              >Pick a machine from the Machines tab; a new number also creates the shared
+              machine.</small
+            >
           }
         </label>
         <label class="gear-field">
@@ -150,6 +165,8 @@ export class MachineFormDialogComponent {
   readonly machine = input<Machine | null>(null);
   readonly scannerOptions = input<ScannerDetail[]>([]);
   readonly departmentOptions = input<{ value: string; label: string }[]>([]);
+  /** Shared machine numbers without a Lapping setup yet. */
+  readonly machineNumberOptions = input<string[]>([]);
   readonly saved = output<Machine>();
 
   protected readonly busy = signal(false);

@@ -17,7 +17,7 @@ import { apiErrorMessage, GearsetsApi } from '@gearapps/client/core';
 import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
 import { DialogComponent, SegmentedComponent } from '@gearapps/client/ui';
 import { Gearset, Part, Summary } from '@gearapps/shared/domain';
-import { STATUS_OPTIONS, toStatusOption } from './shared';
+import { STATUS_OPTIONS, toStatusOption } from './lapping-shared';
 
 @Component({
   selector: 'gear-gearset-form-dialog',

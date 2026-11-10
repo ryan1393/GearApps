@@ -141,7 +141,15 @@ export class ServerFeatCutterConfigService {
   }
 
   async createPart(dto: CreatePartDto, userId: Uuid): Promise<PartOrmEntity> {
-    await this.assertReferences(dto.summary_id, dto.part_type_id);
+    const { partType } = await this.assertReferences(
+      dto.summary_id,
+      dto.part_type_id,
+    );
+    if (isGearsetType(partType.code)) {
+      throw new ConflictException(
+        'Gearset parts are created with their assembly. Use Admin > Gearsets.',
+      );
+    }
 
     const partNumber = dto.part_number.trim().toUpperCase();
     const existing = await this.partRepo.findOne({
@@ -177,10 +185,32 @@ export class ServerFeatCutterConfigService {
 
     const summaryId = dto.summary_id ?? current.summary_id;
     const partTypeId = dto.part_type_id ?? current.part_type_id;
-    await this.assertReferences(summaryId, partTypeId);
+    const { partType } = await this.assertReferences(summaryId, partTypeId);
 
     const partNumber =
       dto.part_number?.trim().toUpperCase() ?? current.part_number;
+
+    const typeChanges = partTypeId !== current.part_type_id;
+    if (typeChanges) {
+      const currentType = await this.partTypeRepo.findOne({
+        where: { id: current.part_type_id },
+      });
+      if (isGearsetType(partType.code) || isGearsetType(currentType?.code)) {
+        throw new ConflictException(
+          'A part cannot be changed to or from the Gearset type.',
+        );
+      }
+    }
+    const identityChanges =
+      typeChanges ||
+      partNumber !== current.part_number ||
+      summaryId !== current.summary_id ||
+      (dto.teeth !== undefined && dto.teeth !== current.teeth);
+    if (identityChanges && (await this.belongsToGearset(id))) {
+      throw new ConflictException(
+        `Part ${current.part_number} belongs to a gearset, so its number, type, summary and teeth are fixed. Its status can still change.`,
+      );
+    }
 
     const duplicate = await this.partRepo.findOne({
       where: { part_number: partNumber },
@@ -518,10 +548,19 @@ export class ServerFeatCutterConfigService {
     await requirement.save();
   }
 
+  // Gearset assemblies (public.gearsets) pin their gearset, ring and pinion parts.
+  private async belongsToGearset(partId: Uuid): Promise<boolean> {
+    const rows: unknown[] = await this.partRepo.manager.query(
+      'SELECT 1 FROM public.gearsets WHERE gearset_part_id = $1 OR ring_part_id = $1 OR pinion_part_id = $1 LIMIT 1',
+      [partId],
+    );
+    return rows.length > 0;
+  }
+
   private async assertReferences(
     summaryId: Uuid,
     partTypeId: Uuid,
-  ): Promise<void> {
+  ): Promise<{ partType: CutterPartTypeOrmEntity }> {
     const [summary, partType] = await Promise.all([
       this.summaryRepo.findOne({
         where: { id: summaryId, enabled: true },
@@ -533,5 +572,9 @@ export class ServerFeatCutterConfigService {
 
     if (!summary) throw new NotFoundException('Part summary not found or disabled');
     if (!partType) throw new NotFoundException('Part type not found or disabled');
+    return { partType };
   }
 }
+
+const isGearsetType = (code: string | null | undefined) =>
+  code?.trim().toUpperCase() === 'GEARSET';

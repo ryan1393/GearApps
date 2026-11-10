@@ -73,7 +73,8 @@ GearAppsApi settings.
 ## Database and validation
 
 Public users, departments, machines, parts, summaries and gearsets are shared
-masters. Lapper profiles, scanner/FANUC snapshots and production history live in
+masters, edited by administrators in the shared Admin screen (`/admin` in every app,
+including Lapping's Gearsets and Lapping Machines tabs). Lapper profiles, scanner/FANUC snapshots and production history live in
 the linked lapper schema. [Database integrity](docs/DATABASE_INTEGRITY.md) explains
 the preserved history, migrations, backup-first tools and outstanding review items.
 

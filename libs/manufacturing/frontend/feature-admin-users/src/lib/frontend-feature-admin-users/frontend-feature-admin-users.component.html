@@ -1,5 +1,5 @@
 <section class="gear-page gear-admin-page" [class.gear-roll-master-page]="activeTab === 'roll-masters'">
-  <header class="gear-page-header" danaPageHeader eyebrow="ADMIN / MASTER DATA" heading="Gear Apps Administration" description="Create the reference records that drive Blade Tracking, Cutter Builder, and Greenshed. Changes here are shared across every Gear Apps frontend."></header>
+  <header class="gear-page-header" danaPageHeader eyebrow="ADMIN / MASTER DATA" heading="Gear Apps Administration" description="Create the reference records that drive Blade Tracking, Cutter Builder, Greenshed, and Lapping. Changes here are shared across every Gear Apps frontend."></header>
 
   <div *ngIf="error" class="gear-alert gear-alert-danger mb-4">
     <strong>Unable to continue.</strong>
@@ -14,9 +14,11 @@
     <button type="button" [class.active]="activeTab === 'users'" (click)="setTab('users')">Users</button>
     <button type="button" [class.active]="activeTab === 'part-summaries'" (click)="setTab('part-summaries')">Part Summaries</button>
     <button type="button" [class.active]="activeTab === 'parts'" (click)="setTab('parts')">Parts</button>
+    <button type="button" [class.active]="activeTab === 'gearsets'" (click)="setTab('gearsets')">Gearsets</button>
     <button type="button" [class.active]="activeTab === 'roll-masters'" (click)="setTab('roll-masters')">Roll Master</button>
     <button type="button" [class.active]="activeTab === 'models'" (click)="setTab('models')">Models</button>
     <button type="button" [class.active]="activeTab === 'machines'" (click)="setTab('machines')">Machines</button>
+    <button type="button" [class.active]="activeTab === 'lapping-machines'" (click)="setTab('lapping-machines')">Lapping Machines</button>
     <button type="button" [class.active]="activeTab === 'dsf-mappings'" (click)="setTab('dsf-mappings')">DSF Mappings</button>
     <button type="button" [class.active]="activeTab === 'label-printers'" (click)="setTab('label-printers')">Label Printers</button>
     <button type="button" [class.active]="activeTab === 'trays'" (click)="setTab('trays')">Trays</button>
@@ -25,6 +27,8 @@
     <button type="button" [class.active]="activeTab === 'cutter-bodies'" (click)="setTab('cutter-bodies')">Cutter Bodies</button>
   </nav>
 
+  <gear-admin-lapping-gearsets *ngIf="activeTab === 'gearsets'" />
+  <gear-admin-lapping-machines *ngIf="activeTab === 'lapping-machines'" [sharedMachines]="machines" />
   <gear-admin-dsf-machine-mappings *ngIf="activeTab === 'dsf-mappings'" />
   <gear-admin-label-printers *ngIf="activeTab === 'label-printers'" />
   <gear-label-printer-picker *ngIf="activeTab === 'trays' || activeTab === 'containers' || activeTab === 'locations'" labelType="ASSET_TAG" label="Print tags to" />
@@ -175,7 +179,7 @@
 
   <div class="gear-admin-layout" *ngIf="activeTab === 'parts'">
     <form class="gear-panel gear-admin-form" (ngSubmit)="createPart()">
-      <div class="gear-step-title"><span class="gear-step-number">1</span><span>Create Part</span></div>
+      <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingPartId ? 'Edit Part' : 'Create Part' }}</span></div>
 
       <label class="gear-field">
         Part Number
@@ -201,7 +205,7 @@
         Part Type
         <select class="gear-select" [(ngModel)]="partForm.part_type_id" name="partType">
           <option value="">Select Part Type...</option>
-          <option *ngFor="let partType of partTypes" [value]="partType.id">
+          <option *ngFor="let partType of partTypeChoices" [value]="partType.id">
             {{ partType.code }} — {{ partType.name }}
           </option>
         </select>
@@ -219,9 +223,12 @@
         />
       </label>
 
-      <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">
-        Create Part
-      </button>
+      <small class="gear-field-help">Gearset parts are created with their assembly in the Gearsets tab. A part used in a gearset keeps its number, type, Summary and teeth.</small>
+
+      <div class="gear-admin-actions">
+        <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">{{ editingPartId ? 'Save Part' : 'Create Part' }}</button>
+        <button *ngIf="editingPartId" class="gear-btn gear-btn-secondary" type="button" [disabled]="busy" (click)="cancelPartEdit()">Cancel Edit</button>
+      </div>
     </form>
 
     <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
@@ -263,6 +270,8 @@
             </div>
           </div>
           <div class="gear-admin-actions gear-admin-record-actions">
+            <button *ngIf="!isGearsetPart(part)" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditPart(part)">Edit</button>
+            <button *ngIf="isGearsetPart(part)" type="button" class="gear-btn gear-btn-secondary" (click)="setTab('gearsets')">Open in Gearsets</button>
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="togglePartEnabled(part)">{{ part.enabled ? 'Disable' : 'Enable' }}</button>
           </div>
         </div>

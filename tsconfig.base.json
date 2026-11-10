@@ -29,9 +29,7 @@
       "@gearapps/client/core": ["./libs/client/core/src/index.ts"],
       "@gearapps/client/ui": ["./libs/client/ui/src/index.ts"],
       "@gearapps/client/feature-dashboard": ["./libs/client/feature-dashboard/src/index.ts"],
-      "@gearapps/client/feature-machines": ["./libs/client/feature-machines/src/index.ts"],
       "@gearapps/client/feature-config": ["./libs/client/feature-config/src/index.ts"],
-      "@gearapps/client/feature-parts": ["./libs/client/feature-parts/src/index.ts"],
       "@gearapps/client/feature-lapping-summary": [
         "./libs/client/feature-lapping-summary/src/index.ts"
       ],

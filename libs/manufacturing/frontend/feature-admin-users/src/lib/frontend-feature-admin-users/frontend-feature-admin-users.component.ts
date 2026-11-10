@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
 import { Observable } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
 import {
   CuttergrindNumberedShelfTag,
@@ -39,16 +40,21 @@ import {
 } from '../admin-api.service';
 import { DsfMachineMappingsComponent } from '../dsf-machine-mappings/dsf-machine-mappings.component';
 import { LabelPrintersComponent } from '../label-printers/label-printers.component';
+import { LappingGearsetsComponent } from '../lapping/lapping-gearsets.component';
+import { LappingMachinesComponent } from '../lapping/lapping-machines.component';
 import {
   DanaPageHeaderComponent,
 } from '@dana/ui';
 
-type AdminTab = 'users' | 'part-summaries' | 'parts' | 'roll-masters' | 'models' | 'machines' | 'dsf-mappings' | 'label-printers' | 'trays' | 'containers' | 'locations' | 'cutter-bodies';
+type AdminTab = 'users' | 'part-summaries' | 'parts' | 'gearsets' | 'roll-masters' | 'models' | 'machines' | 'lapping-machines' | 'dsf-mappings' | 'label-printers' | 'trays' | 'containers' | 'locations' | 'cutter-bodies';
+// Every tab, for ?tab= deep links; `satisfies` keeps it in step with AdminTab.
+const ADMIN_TABS = ['users', 'part-summaries', 'parts', 'gearsets', 'roll-masters', 'models', 'machines', 'lapping-machines', 'dsf-mappings', 'label-printers', 'trays', 'containers', 'locations', 'cutter-bodies'] as const satisfies readonly AdminTab[];
+const isAdminTab = (value: unknown): value is AdminTab => ADMIN_TABS.includes(value as AdminTab);
 
 @Component({
   selector: 'gear-admin-users-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, GearLabelPrinterPickerComponent],
+  imports: [CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, GearLabelPrinterPickerComponent, LappingGearsetsComponent, LappingMachinesComponent],
   templateUrl: './frontend-feature-admin-users.component.html',
   styleUrls: ['./frontend-feature-admin-users.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,6 +64,9 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly toast = inject(GearToastService);
   readonly session = inject(AuthSessionService);
+  // Optional so the page also renders outside a router (component tests).
+  private readonly route = inject(ActivatedRoute, { optional: true });
+  private readonly router = inject(Router, { optional: true });
 
   activeTab: AdminTab = 'users';
   busy = false;
@@ -89,6 +98,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   cutterBodySearch = '';
   editingUserId: string | null = null;
   editingPartSummaryId: string | null = null;
+  editingPartId: string | null = null;
   editingMachineId: string | null = null;
   editingLocationId: string | null = null;
   editingCutterBodyId: string | null = null;
@@ -169,12 +179,18 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   };
 
   ngOnInit(): void {
+    // ?tab= deep links, e.g. the old Lapping master-data pages redirect to /admin?tab=gearsets.
+    const requested = this.route?.snapshot.queryParamMap.get('tab');
+    if (isAdminTab(requested)) this.activeTab = requested;
     this.refreshAll();
   }
 
   setTab(tab: AdminTab): void {
     this.activeTab = tab;
     this.clearNotice();
+    if (this.route && this.router) {
+      void this.router.navigate([], { relativeTo: this.route, queryParams: { tab }, queryParamsHandling: 'merge', replaceUrl: true });
+    }
   }
 
   createUser(): void {
@@ -269,27 +285,51 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       this.error = 'Part number, Part Summary, and Part Type are required.';
       return;
     }
-
+    const payload = {
+      part_number: partNumber,
+      summary_id: this.partForm.summary_id,
+      part_type_id: this.partForm.part_type_id,
+      teeth: this.partForm.teeth,
+    };
+    // Active/enabled are set on create only; an edit must not silently re-enable a disabled record.
+    const editing = this.editingPartId;
     this.runCreate(
-      this.api.createPart({
-        part_number: partNumber,
-        summary_id: this.partForm.summary_id,
-        part_type_id: this.partForm.part_type_id,
-        teeth: this.partForm.teeth,
-        active: true,
-        enabled: true,
-      }),
-      'Part created.',
+      editing
+        ? this.api.updatePart(editing, payload)
+        : this.api.createPart({ ...payload, active: true, enabled: true }),
+      editing ? 'Part updated.' : 'Part created.',
       () => {
-        this.partForm = {
-          part_number: '',
-          summary_id: '',
-          part_type_id: '',
-          teeth: null,
-        };
+        this.resetPartForm();
         this.loadParts();
       },
     );
+  }
+
+  beginEditPart(part: PartRow): void {
+    this.editingPartId = part.id;
+    this.partForm = {
+      part_number: part.part_number,
+      summary_id: part.summary_id,
+      part_type_id: part.part_type_id,
+      teeth: part.teeth,
+    };
+    this.clearNotice(); this.cdr.markForCheck();
+  }
+
+  cancelPartEdit(): void { this.resetPartForm(); this.clearNotice(); this.cdr.markForCheck(); }
+
+  /** Gearset-type parts exist only as part of a gearset assembly (Admin > Gearsets). */
+  isGearsetPart(part: PartRow): boolean {
+    return (part.part_type?.code ?? '').trim().toUpperCase() === 'GEARSET';
+  }
+
+  get partTypeChoices(): PartTypeRow[] {
+    return this.partTypes.filter((type) => type.code.trim().toUpperCase() !== 'GEARSET');
+  }
+
+  private resetPartForm(): void {
+    this.editingPartId = null;
+    this.partForm = { part_number: '', summary_id: '', part_type_id: '', teeth: null };
   }
 
   togglePartEnabled(part: PartRow): void {

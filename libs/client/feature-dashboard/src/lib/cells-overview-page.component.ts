@@ -12,7 +12,7 @@ import {
   DanaTableEmptyDirective,
   DanaTableShellDirective,
 } from '@dana/ui';
-import { apiErrorMessage, loadable, MachinesApi } from '@gearapps/client/core';
+import { apiErrorMessage, LapperAccess, loadable, MachinesApi } from '@gearapps/client/core';
 import { StatusBadgeComponent } from '@gearapps/client/ui';
 import { Machine } from '@gearapps/shared/domain';
 import { groupByCell } from './cells';
@@ -117,33 +117,39 @@ import { groupByCell } from './cells';
             description="Latest machine parameters run for a gearset on a lapper."
             aria-label="Lapping Summaries"
           ></a>
-          <a
-            routerLink="/machines"
-            danaOperationCard
-            icon="machine"
-            tone="purple"
-            heading="Machines"
-            description="Lappers, cells, departments and attached scanners."
-            aria-label="Machines"
-          ></a>
-          <a
-            routerLink="/parts"
-            danaOperationCard
-            icon="gearset"
-            tone="green"
-            heading="Parts &amp; Gearsets"
-            description="Pinions, rings and the gearsets they pair into."
-            aria-label="Parts and Gearsets"
-          ></a>
-          <a
-            routerLink="/part-summaries"
-            danaOperationCard
-            icon="summary"
-            tone="orange"
-            heading="Part Summaries"
-            description="Summary numbers shared by rings, pinions and gearsets."
-            aria-label="Part Summaries"
-          ></a>
+          @if (access.canEditSetup()) {
+            <!-- Shared master data lives in Admin, like the other Gear apps. -->
+            <a
+              routerLink="/admin"
+              [queryParams]="{ tab: 'lapping-machines' }"
+              danaOperationCard
+              icon="machine"
+              tone="purple"
+              heading="Lapping Machines"
+              description="FANUC controllers, cells and scanners of the lappers (Admin)."
+              aria-label="Lapping Machines"
+            ></a>
+            <a
+              routerLink="/admin"
+              [queryParams]="{ tab: 'gearsets' }"
+              danaOperationCard
+              icon="gearset"
+              tone="green"
+              heading="Gearsets"
+              description="Pinions and rings paired into gearsets (Admin)."
+              aria-label="Gearsets"
+            ></a>
+            <a
+              routerLink="/admin"
+              [queryParams]="{ tab: 'part-summaries' }"
+              danaOperationCard
+              icon="summary"
+              tone="orange"
+              heading="Part Summaries"
+              description="Summary numbers shared by rings, pinions and gearsets (Admin)."
+              aria-label="Part Summaries"
+            ></a>
+          }
         </div>
       </section>
 
@@ -241,7 +247,14 @@ import { groupByCell } from './cells';
                       Loading cells…
                     } @else {
                       No machines are assigned to a cell yet.
-                      <a routerLink="/machines">Add a machine</a> to get started.
+                      @if (access.canEditSetup()) {
+                        <a routerLink="/admin" [queryParams]="{ tab: 'lapping-machines' }"
+                          >Add a Lapping setup</a
+                        >
+                        to get started.
+                      } @else {
+                        An administrator adds them in Admin.
+                      }
                     }
                   </td>
                 </tr>
@@ -255,6 +268,7 @@ import { groupByCell } from './cells';
 })
 export class CellsOverviewPageComponent implements OnInit {
   private readonly api = inject(MachinesApi);
+  protected readonly access = inject(LapperAccess);
   protected readonly machines = loadable<Machine[]>([]);
   protected readonly cells = computed(() => groupByCell(this.machines.value()));
   protected readonly activeCount = computed(

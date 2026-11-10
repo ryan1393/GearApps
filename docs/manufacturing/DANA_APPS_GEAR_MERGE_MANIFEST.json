@@ -21,7 +21,7 @@
     "package.json": "13272836A850B93F2BCCD2393B64CF8F70E187BBBFDAB39CD04EFEAA06588D11",
     "package-lock.json": "AE0FD8AC8FF366D873A89D64D243C4F6E2A4B0328520B32E147F6FAACA69D86D",
     "nx.json": "73A2F6BD253030EAD5B14930871A240C60AFD9B5378940CC224689ABC36E5ACD",
-    "tsconfig.base.json": "E799BCCAC1D667536785A48C6A507D91657DDA2DEA3C054B5077DA2A898E72AF"
+    "tsconfig.base.json": "1F66B611B9F5B6574D4916B73B0B493B6353B49FA1A88E467098FF67BC1C5AE1"
   },
   "composeFiles": [
     {
@@ -284,26 +284,6 @@
     {
       "name": "client-feature-lapping-summary",
       "root": "libs/client/feature-lapping-summary",
-      "projectType": "library",
-      "tags": [],
-      "targets": [],
-      "hasBuildTarget": false,
-      "hasServeTarget": false,
-      "hasTestTarget": false
-    },
-    {
-      "name": "client-feature-machines",
-      "root": "libs/client/feature-machines",
-      "projectType": "library",
-      "tags": [],
-      "targets": [],
-      "hasBuildTarget": false,
-      "hasServeTarget": false,
-      "hasTestTarget": false
-    },
-    {
-      "name": "client-feature-parts",
-      "root": "libs/client/feature-parts",
       "projectType": "library",
       "tags": [],
       "targets": [],
