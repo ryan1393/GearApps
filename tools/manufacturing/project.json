@@ -825,7 +825,7 @@
     "test-deployment": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node --test tools/manufacturing/base-data/bootstrap-policy.test.mjs tools/manufacturing/set-version.test.mjs tools/manufacturing/test-deployment-config.cjs tools/manufacturing/deploy/deploy-layout.test.mjs tools/manufacturing/package-release.test.mjs tools/manufacturing/gear-merge-manifest.test.mjs",
+        "command": "node --test tools/manufacturing/base-data/bootstrap-policy.test.mjs tools/manufacturing/set-version.test.mjs tools/manufacturing/test-deployment-config.cjs tools/manufacturing/deploy/deploy-layout.test.mjs tools/manufacturing/deploy/deploy-verify.test.mjs tools/manufacturing/package-release.test.mjs tools/manufacturing/gear-merge-manifest.test.mjs",
         "cwd": "."
       },
       "cache": false
