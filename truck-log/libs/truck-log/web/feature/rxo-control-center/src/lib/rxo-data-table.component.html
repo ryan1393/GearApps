@@ -1,5 +1,5 @@
 <!-- RXO Data -->
-<div class="dana-panel-header">
+<div class="dana-panel-header tl-rxo-data-header">
   <div>
     <h2>{{data.dataKindLabel}} <span class="dana-count-badge">{{data.dataPage?.total ?? 0}}</span></h2>
     <small>Active loads only — yesterday, today and tomorrow in Fort Wayne time</small>
@@ -10,9 +10,9 @@
     <button type="button" [attr.aria-pressed]="data.dataKind==='freight'" (click)="data.changeKind('freight')">Freight on the move</button>
   </div>
 </div>
-<div class="dana-panel-body tl-stack">
+<div class="dana-panel-body tl-stack tl-rxo-data-body">
   <input #rxoDriverDocumentFile type="file" accept="application/pdf,.pdf" hidden (change)="data.uploadRxoDriverDocument($event)">
-  <form class="dana-filter-row" (ngSubmit)="data.applyDataFilters()">
+  <form class="dana-filter-row tl-rxo-data-filters" (ngSubmit)="data.applyDataFilters()">
     <label class="tl-rxo-search">Search<input name="rxoSearch" [(ngModel)]="data.dataSearch" placeholder="Shipment, order, carrier, PRO, trailer, status"></label>
     <label>Direction<select name="rxoDirection" [(ngModel)]="data.dataDirection" (change)="data.applyDataFilters()"><option value="">All directions</option><option value="OUTBOUND">Outbound</option><option value="INBOUND">Inbound</option></select></label>
     <div class="dana-actions tl-filter-actions">
@@ -48,13 +48,15 @@
         <ng-container *ngFor="let raw of data.dataPage?.rows; trackBy: data.trackRxoDataRow"><ng-container *ngIf="asShipment(raw) as row">
         <tr>
           <td>
-            <b>{{row.shipment_id || '-'}}</b>
-            <button class="dana-btn dana-btn-ghost dana-btn-sm tl-rxo-details" type="button"
-              [id]="data.rxoDetailsId('shipments', row) + '-toggle'"
-              [attr.aria-expanded]="data.rxoDetailsOpen('shipments', row)"
-              [attr.aria-controls]="data.rxoDetailsId('shipments', row)"
-              [attr.aria-label]="(data.rxoDetailsOpen('shipments', row) ? 'Hide' : 'Show') + ' details for shipment ' + (row.shipment_id || 'without ID') + ', ' + row.direction"
-              (click)="data.toggleRxoDetails('shipments', row)">{{data.rxoDetailsOpen('shipments', row) ? 'Hide details' : 'Details'}}</button>
+            <div class="tl-rxo-identity">
+              <b>{{row.shipment_id || '-'}}</b>
+              <button class="dana-btn dana-btn-ghost dana-btn-sm tl-rxo-details" type="button"
+                [id]="data.rxoDetailsId('shipments', row) + '-toggle'"
+                [attr.aria-expanded]="data.rxoDetailsOpen('shipments', row)"
+                [attr.aria-controls]="data.rxoDetailsId('shipments', row)"
+                [attr.aria-label]="(data.rxoDetailsOpen('shipments', row) ? 'Hide' : 'Show') + ' details for shipment ' + (row.shipment_id || 'without ID') + ', ' + row.direction"
+                (click)="data.toggleRxoDetails('shipments', row)">{{data.rxoDetailsOpen('shipments', row) ? 'Hide details' : 'Details'}}</button>
+            </div>
           </td>
           <td><span class="dana-status-badge" [attr.data-tone]="statusTone(row.current_status || row.shipment_status)">{{row.current_status || row.shipment_status || 'Unspecified'}}</span><span class="dana-cell-sub" *ngIf="row.eta_status">{{row.eta_status}}</span></td>
           <td><span class="dana-status-badge is-plain" [attr.data-tone]="directionTone(row.direction)">{{row.direction}}</span></td>
@@ -104,13 +106,15 @@
         <ng-container *ngFor="let raw of data.dataPage?.rows; trackBy: data.trackRxoDataRow"><ng-container *ngIf="asOrder(raw) as row">
         <tr>
           <td>
-            <b>{{row.order_number || '-'}}</b>
-            <button class="dana-btn dana-btn-ghost dana-btn-sm tl-rxo-details" type="button"
-              [id]="data.rxoDetailsId('orders', row) + '-toggle'"
-              [attr.aria-expanded]="data.rxoDetailsOpen('orders', row)"
-              [attr.aria-controls]="data.rxoDetailsId('orders', row)"
-              [attr.aria-label]="(data.rxoDetailsOpen('orders', row) ? 'Hide' : 'Show') + ' details for order ' + (row.order_number || 'without ID') + ', ' + row.direction"
-              (click)="data.toggleRxoDetails('orders', row)">{{data.rxoDetailsOpen('orders', row) ? 'Hide details' : 'Details'}}</button>
+            <div class="tl-rxo-identity">
+              <b>{{row.order_number || '-'}}</b>
+              <button class="dana-btn dana-btn-ghost dana-btn-sm tl-rxo-details" type="button"
+                [id]="data.rxoDetailsId('orders', row) + '-toggle'"
+                [attr.aria-expanded]="data.rxoDetailsOpen('orders', row)"
+                [attr.aria-controls]="data.rxoDetailsId('orders', row)"
+                [attr.aria-label]="(data.rxoDetailsOpen('orders', row) ? 'Hide' : 'Show') + ' details for order ' + (row.order_number || 'without ID') + ', ' + row.direction"
+                (click)="data.toggleRxoDetails('orders', row)">{{data.rxoDetailsOpen('orders', row) ? 'Hide details' : 'Details'}}</button>
+            </div>
           </td>
           <td><span class="dana-status-badge" [attr.data-tone]="statusTone(row.status)">{{row.status || 'Unspecified'}}</span></td>
           <td>{{row.shipment_id || '-'}}</td>
@@ -146,13 +150,15 @@
         <ng-container *ngFor="let raw of data.dataPage?.rows; trackBy: data.trackRxoDataRow"><ng-container *ngIf="asFreight(raw) as row">
         <tr>
           <td>
-            <b>{{row.shipment_id || '-'}}</b>
-            <button class="dana-btn dana-btn-ghost dana-btn-sm tl-rxo-details" type="button"
-              [id]="data.rxoDetailsId('freight', row) + '-toggle'"
-              [attr.aria-expanded]="data.rxoDetailsOpen('freight', row)"
-              [attr.aria-controls]="data.rxoDetailsId('freight', row)"
-              [attr.aria-label]="(data.rxoDetailsOpen('freight', row) ? 'Hide' : 'Show') + ' details for freight shipment ' + (row.shipment_id || 'without ID') + ', ' + row.direction"
-              (click)="data.toggleRxoDetails('freight', row)">{{data.rxoDetailsOpen('freight', row) ? 'Hide details' : 'Details'}}</button>
+            <div class="tl-rxo-identity">
+              <b>{{row.shipment_id || '-'}}</b>
+              <button class="dana-btn dana-btn-ghost dana-btn-sm tl-rxo-details" type="button"
+                [id]="data.rxoDetailsId('freight', row) + '-toggle'"
+                [attr.aria-expanded]="data.rxoDetailsOpen('freight', row)"
+                [attr.aria-controls]="data.rxoDetailsId('freight', row)"
+                [attr.aria-label]="(data.rxoDetailsOpen('freight', row) ? 'Hide' : 'Show') + ' details for freight shipment ' + (row.shipment_id || 'without ID') + ', ' + row.direction"
+                (click)="data.toggleRxoDetails('freight', row)">{{data.rxoDetailsOpen('freight', row) ? 'Hide details' : 'Details'}}</button>
+            </div>
           </td>
           <td><span class="dana-status-badge" [attr.data-tone]="statusTone(row.status)">{{row.status || 'Unspecified'}}</span><span class="dana-cell-sub" *ngIf="row.eta_status">{{row.eta_status}}</span></td>
           <td><span class="dana-status-badge is-plain" [attr.data-tone]="directionTone(row.direction)">{{row.direction}}</span></td>

@@ -485,7 +485,7 @@ dc2a8e1ca0a1fbc0c2ba69297a26c0b97f982ed381249a86e764d4332a6f146a  libs/truck-log
 405f6314e04ced94bfd2b7db83a4b967381a649e1c8e72f15369bcda5d80e3cf  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-control-center.component.html
 d0864c6f448d138fe3dddc49412d95ecb4c80751c5ee3abd7f2e4162e84d0581  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-control-center.component.ts
 65bbcc733058340d1d894beba8845eaf0451e4c45af04c918da314125daec616  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-control-center.presenter.ts
-504c0c45e4f0e93fa000130cb2f6dc7da1d4cd95cff25aaf7e0229706d8d4e10  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-data-table.component.html
+76ea8d29d35531da10f0164f3a2c62efe977ad95f6f9b2f137166dee297a9d0a  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-data-table.component.html
 e0f4910f1c250084c979cdc3e7ce83fe7f770c9ddc494ab43186143696af864d  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-data-table.component.ts
 581b30c9e53cd38d2c610848296facbeb0ec85f64fa9a07455293eda5e896ac2  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-data.store.ts
 a81e549f2b4a64e53464ae886e17c264e17c91a3b23d241bdf2b3f8538b7fada  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-settings-panel.component.html
@@ -513,7 +513,7 @@ f5b9fcddc7742d074fe176442c62a9291c01dd96fe97e2da575261e5c61330cd  libs/truck-log
 de57de0dcb65cfebaae8f46c47a74a85235cdeb8577adaef240a2069cd89431a  libs/truck-log/web/styles/src/styles/dock-board.css
 3f6c3dc8b19bedb991112e8b6f238254b1d8cd3181c28ad3625fb9b23def9ceb  libs/truck-log/web/styles/src/styles/operations.css
 7aff9f48f8635e17ce4560e9a0c306359dca9fac479427026ac96a900a22ab9b  libs/truck-log/web/styles/src/styles/records.css
-708ecda6b030454e0abbfc8e8554108a510ff12c738a6305f4c4e4e6bdaa4363  libs/truck-log/web/styles/src/styles/rxo.css
+09c29b4d46984855e4d259b36262aace2f2d62481f294f3a18fae9d3745eb8d2  libs/truck-log/web/styles/src/styles/rxo.css
 8dc85d35760b4ef9700ab5bb98b051e2aa735f2139931137fb9d17886df62187  libs/truck-log/web/styles/src/styles/shell.css
 0d6187fb5e39bea02ede0098d51fea11ecce313d026f2b99b84aaaa2aec874ff  libs/truck-log/web/styles/src/styles/truck-log.css
 4351cbe1315223ef10089b21143234c647174b1aef8f924dcab933053395ded4  libs/truck-log/web/styles/src/styles/tv.css
