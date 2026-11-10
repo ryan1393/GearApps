@@ -31,6 +31,12 @@ For a new installation, use `truck-log\SETUP-TRUCK-LOG.cmd` instead. Detailed in
 
 After deployment, sign in as an administrator and use **Scan Now** in **RXO Control Center** or **RXO Expedite**. Each button queues that integration's own scheduler; watch its last successful export and latest import to confirm completion.
 
+## Print agent reports HTTP 401
+
+A running Windows service can be offline in Truck Log when its saved credential is rejected. On the print PC, run `print-agents\01-Guard-Shack-Agent\REPAIR-PRINT-AGENT-CREDENTIAL.cmd` as administrator. It checks the configured server, agent identity and existing credential first. If a replacement is needed, it displays the command to create a credential on that Truck Log Docker host and accepts the new token in a hidden local prompt.
+
+The repair validates the replacement before changing the installed credential. It preserves the configured printers and print journals and restarts a previously running service. The server application remains version 1.0.5; this repair tool runs on the Windows print PC.
+
 ## Connect an extracted ZIP to local Git
 
 Install Git for Windows, then run this from the complete package folder:

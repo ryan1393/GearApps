@@ -1,5 +1,11 @@
 TRUCK LOG — TWO WINDOWS PRINT AGENTS
-Updated 2026-10-29 (watcher W3; guard unchanged V4R7). Target print PC: USFTWLDAPP.
+Updated 2026-11-10 (credential repair; services remain V4R7 / W3). Target print PC: USFTWLDAPP.
+
+RUNNING GUARD SERVICE WITH HTTP 401 / OFFLINE:
+ Run 01-Guard-Shack-Agent\REPAIR-PRINT-AGENT-CREDENTIAL.cmd as administrator
+ on the print PC. It checks the installed server address and credential, then
+ guides an in-place credential replacement when authentication is rejected.
+ Its token prompt is hidden and local; the existing V4R7 service stays installed.
 
 THIS ZIP HAS TWO SEPARATE COMPONENTS:
 

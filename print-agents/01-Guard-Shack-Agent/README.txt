@@ -102,3 +102,28 @@ result contract (result recorded exactly once).
 No live guard job, API call, printer/Windows service action was part of that
 isolated test. Real slip+uploaded-documents packet printing must still be
 checked against the installed Truck Log server/API on both gates.
+
+REPAIR AN EXISTING SERVICE THAT REPORTS HTTP 401:
+ Run REPAIR-PRINT-AGENT-CREDENTIAL.cmd as administrator on USFTWLDAPP.
+ The standalone tool uses the installed Node runtime and service host. It checks
+ the configured API address, exact agent identity, enabled state, gate mappings
+ and current credential. If authentication already works, it leaves the install
+ unchanged. Other connection errors are reported for diagnosis.
+
+ For a rejected credential, the tool displays a command to run on the matching
+ Truck Log Docker host. That command creates an additional token for this same
+ identity without revoking other credentials. Paste the returned token into the
+ repair tool's hidden prompt on the print PC. Token entry stays local.
+
+ A replacement must pass the authenticated setup check before service or file
+ changes. The repair preserves config, activation, polling, jobs, result outbox
+ and review records. A previously running service resumes its normal work.
+ The V4R7 service and fresh installer are unchanged; this is a separate repair
+ tool, not a service reinstall. See the tool's output for the confirmed result
+ and heartbeat status.
+
+ Credential repair nonprinting tests:
+   cd original-source
+   node repair-credential-test.cjs
+ Expected: 25/25 PASS. These simulate API, Windows service and credential-store
+ operations; the Windows ACL/DPAPI/service operations run on the installed PC.

@@ -6,12 +6,12 @@
 f8d4f74a32b23e1fd2cb7a21265a6705e42dc15b8877417e3bdc1e682a292c9d  DEPLOY-TRUCKLOG-LINUX.py
 d8a921d48d6c96b851786e8afbeff8aeb485872dd58a63d389b54049058a1f22  DIAGNOSE-RXO-EXPEDITE.cmd
 b4207d55284bd51d19bf8ee25159dc6bb5cd5ca129ecc6d731fe34493c240ccb  DIAGNOSE-RXO-EXPEDITE.ps1
-cfa462542019dcf61781e78215437d9315a0b36e1d9952c5417d86d95641a427  README.md
+5068513f11b11a045f3cbd0a765cd2866f56ab13dc4263235d582200ed7321af  README.md
 d9137893274711722e5f4641158419adcd884f81405e3e5132139d7ce8f5abb6  TEST-DEPLOY-TRUCKLOG-WINDOWS.py
 7bbc97a1419f6b16123dd22b7907f942817d9e7774244df1dc0aa8d2e6fcc007  TEST-DIAGNOSE-RXO-EXPEDITE.py
 2c7e491162e7bde415da37c6bce94860a54ea4e7552dd785f15655c8865cf22c  UPDATE-TRUCKLOG.cmd
 2123dd0b3e645c64a639a2874d7214146928e6373fffd5cdfaf9fefec5bb64e5  UPDATE-TRUCKLOG.ps1
-c8d50e3198e7f1e1fb83d71add72b191f7a0854878d933a105fc9673a7825cec  print-agents/01-Guard-Shack-Agent/README.txt
+2e6c60c7330ee67e33aa84187ea43ae111d9e66a7b9c85ca7eef70fc48ccafd3  print-agents/01-Guard-Shack-Agent/README.txt
 2bc234e14c61bb1cadd4c905ea752d5c80f53c29ec8853c885796e01e620fafd  print-agents/01-Guard-Shack-Agent/Truck-Log-Dual-Gate-Print-Agent-Service-V4R7.cmd
 1f85189d3941d6f6660b08e563943490a29975c4196daf3c8c901284db903249  print-agents/01-Guard-Shack-Agent/original-source/ServiceHost.cs
 7f9b64bc922f9f4b1a52b4313bcd5b388128c8f1493b68d744e2addb9aaebaac  print-agents/01-Guard-Shack-Agent/original-source/agent.cjs
@@ -53,7 +53,7 @@ f9227db6f9d3b0c8d17c7ec491247eeeb2a8cd1e49991e0d46f8c67c72b0295d  print-agents/D
 8bf875e274093e8b35eb782338a7a66edfb977ee12b2bf8a5e6f4c0b961b2bbf  print-agents/Diagnostics/Truck-Log-PDF24-Network-Trace-V3R3.cmd
 0ae032a37be641fcaeb6e306efc97b4f3c399aaa53a9cbc95ad2820d73b33e06  print-agents/Diagnostics/Truck-Log-Print-Agent-Health-V2.cmd
 b32608dc49bf252eda0a74b32e73d46ecc4f4696e609c1b79442311cf0a10d2f  print-agents/Diagnostics/Truck-Log-Print-ReadOnly-Audit-V1.cmd
-9c5410ec7ece528ee5453850ca939d1731365698be5eebbdc207e87a6d4d6185  print-agents/README-FIRST.txt
+94f092baf537074ab66d2dcee887f3c1432c956c26079c183f9b966c13db8360  print-agents/README-FIRST.txt
 5e78319b8e5918e82b8ddd2b81dd10147159ffc9fd5e9c91b2f62e8d3a84a573  print-agents/RELEASE-NOTES-W3.txt
 58b0fb881d4a68f4efb8d0685b209a3167ea93751afd27adcaf9699925c19d68  print-agents/SHA256SUMS.txt
 54ec64ed30ff3556b3dff49991ed198091fcfb5365d9fa0c8346fd630cef15ac  print-agents/VERIFICATION-REPORT.txt
@@ -784,3 +784,6 @@ ea6b8a0ff0193a5f2b3c147227964ede3a5c3f926c4436db91f68736f21f51d4  truck-log/tool
 cf7f31ae34d4dfcf8432c5e79591f86b9f10e1b43432a71bae69ed6de538e73c  truck-log/tools/truck-log/expedite/list-view-browser-test.mjs
 f9ffe08630c8b54fc51bc92a270bec44eb9f1923a05e8e7c3e361f3b2dd906e4  truck-log/tools/truck-log/expedite/manual-scan-test.mjs
 1fc771018479e1c26b48591594d9710063e71f71eb14733b5df4ac79b1f76bd2  truck-log/tools/truck-log/test-rxo-manual-scan-ui.mjs
+5bd2feeb841ea3c452c5c8c95024c3c52ff5a57ae621388c94212444e511e56e  print-agents/01-Guard-Shack-Agent/REPAIR-PRINT-AGENT-CREDENTIAL.cmd
+122652e401b3e2c98498ff1f60b26b245514935e4b0281eb1fec07f400e1621d  print-agents/01-Guard-Shack-Agent/original-source/repair-credential-test.cjs
+ebc03d6046955d71a994986f0eaf49650fe2d4c96f1f0b9079821f2e6174ebd8  print-agents/01-Guard-Shack-Agent/original-source/repair-credential.cjs
