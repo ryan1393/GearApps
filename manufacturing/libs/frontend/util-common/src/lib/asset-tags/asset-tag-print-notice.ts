@@ -6,6 +6,10 @@ export interface AssetTagPrintOutcome {
   printer_configured: boolean;
   serial_number: string;
   file_name: string;
+  /** The printer the tag went to, or was meant for. */
+  printer_name?: string | null;
+  /** What to check, when the printer did not take the tag. */
+  failure_reason?: string | null;
 }
 
 export interface AssetTagPrintNotice {
@@ -20,19 +24,19 @@ export interface AssetTagPrintNotice {
  */
 export function assetTagPrintNotice(result: AssetTagPrintOutcome): AssetTagPrintNotice {
   if (result.printed) {
-    return { tone: 'success', title: 'Tag sent to printer', text: `${result.serial_number} tag sent to the label printer.` };
+    return { tone: 'success', title: 'Tag sent to printer', text: `${result.serial_number} tag sent to ${result.printer_name || 'the label printer'}.` };
   }
   if (result.printer_configured) {
     return {
       tone: 'warning',
-      title: 'Label printer did not respond',
-      text: `The ${result.serial_number} tag was not printed. Check that the label printer is on and connected, then select Print Tag again. ${result.file_name} was downloaded as a backup.`,
+      title: `${result.printer_name || 'Label printer'} did not print`,
+      text: `The ${result.serial_number} tag was not printed. ${result.failure_reason || 'Check that the label printer is on and connected.'} ${result.file_name} was downloaded as a backup.`,
     };
   }
   return {
     tone: 'info',
     title: 'Tag file downloaded',
-    text: `No label printer is set up for Gear Apps, so ${result.file_name} was downloaded. Send that file to the label printer.`,
+    text: `No tag printer is set up, so ${result.file_name} was downloaded. An administrator can add a printer in Admin › Label Printers.`,
   };
 }
 

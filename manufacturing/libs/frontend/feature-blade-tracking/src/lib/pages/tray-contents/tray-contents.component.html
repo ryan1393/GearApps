@@ -1,6 +1,8 @@
 <section class="gear-page space-y-5">
   <header class="gear-page-header" danaPageHeader eyebrow="TRAY INVENTORY" heading="Tray Contents" description="Scan a tray to review its current placement and tracked blade contents."></header>
 
+  <gear-label-printer-picker labelType="ASSET_TAG" label="Print tags to" />
+
   <div *ngIf="message" class="rounded-xl border px-4 py-3 text-sm font-semibold" [class.border-emerald-200]="message.tone === 'success'" [class.bg-emerald-50]="message.tone === 'success'" [class.text-emerald-800]="message.tone === 'success'" [class.border-red-200]="message.tone === 'error'" [class.bg-red-50]="message.tone === 'error'" [class.text-red-800]="message.tone === 'error'" [class.border-blue-200]="message.tone === 'info'" [class.bg-blue-50]="message.tone === 'info'" [class.text-blue-800]="message.tone === 'info'" [attr.role]="message.tone === 'error' ? 'alert' : 'status'" [attr.aria-live]="message.tone === 'error' ? 'assertive' : 'polite'">{{ message.text }}</div>
 
   <gear-scan-panel

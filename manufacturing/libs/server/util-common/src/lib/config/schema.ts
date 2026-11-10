@@ -72,6 +72,7 @@ export const validationSchema = Joi.object({
   [ENV_SENTRY_DSN]: Joi.string().allow('').optional(),
   GEAR_LABEL_PRINTER_HOST: Joi.string().allow('').optional(),
   GEAR_LABEL_PRINTER_PORT: Joi.number().integer().min(1).max(65535).default(9100),
+  GEAR_LABEL_PRINTER_LANGUAGE: Joi.string().valid('IPL', 'ZPL', 'ipl', 'zpl').default('IPL'),
   GEAR_LABEL_PRINTER_TIMEOUT_MS: Joi.number().integer().min(250).max(60000).default(5000),
 
   // auth config

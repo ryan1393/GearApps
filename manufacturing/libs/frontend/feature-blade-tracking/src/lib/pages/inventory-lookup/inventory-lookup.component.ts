@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
 import {
   AssetTagKind,
   BladeTrackingApiService,
@@ -24,7 +24,7 @@ import {
 @Component({
   selector: 'gear-inventory-lookup',
   standalone: true,
-  imports: [CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
+  imports: [GearLabelPrinterPickerComponent, CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
   templateUrl: './inventory-lookup.component.html',
 })
 export class InventoryLookupComponent implements OnInit, OnDestroy {

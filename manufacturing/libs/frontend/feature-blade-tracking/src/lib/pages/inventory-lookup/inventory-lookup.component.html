@@ -1,6 +1,8 @@
 <section class="gear-page space-y-5">
   <header class="gear-page-header" danaPageHeader eyebrow="INVENTORY SEARCH" heading="Find Inventory" description="Scan a tray, container, or location serial."></header>
 
+  <gear-label-printer-picker labelType="ASSET_TAG" label="Print tags to" />
+
   <div *ngIf="message" class="gear-alert" [class.gear-alert-success]="message.tone === 'success'" [class.gear-alert-danger]="message.tone === 'error'" [attr.role]="message.tone === 'error' ? 'alert' : 'status'">
     {{ message.text }}
   </div>

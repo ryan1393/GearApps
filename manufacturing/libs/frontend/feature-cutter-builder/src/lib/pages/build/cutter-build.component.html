@@ -230,7 +230,9 @@
     <div *ngIf="r.build.comments" class="gear-workflow-comments"><strong>Comments:</strong> {{ r.build.comments }}</div>
 
     <div class="gear-workflow-actions gear-print-hide">
-      <button type="button" class="gear-btn gear-btn-secondary" (click)="print()">Print Cutter Card</button>
+      <gear-label-printer-picker labelType="CUTTER_CARD" label="Print cards to" />
+      <button type="button" class="gear-btn gear-btn-secondary" (click)="print()" [disabled]="printing">{{ printing ? 'Printing…' : 'Print Cutter Card' }}</button>
+      <button type="button" class="gear-btn gear-btn-secondary" (click)="browserPrint()">Browser Print</button>
       <button type="button" class="gear-btn gear-btn-primary" (click)="reset()">Build Another</button>
     </div>
   </div>

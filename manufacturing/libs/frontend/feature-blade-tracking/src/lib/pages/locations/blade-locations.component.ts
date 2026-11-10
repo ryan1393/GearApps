@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
 
 import {
   AssetTagKind,
@@ -24,7 +24,7 @@ import {
 @Component({
   selector: 'gear-blade-locations',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaSummaryGridDirective, DanaSummaryCardDirective, DanaPageHeaderComponent, DanaButtonDirective, DanaAlertDirective, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
+  imports: [GearLabelPrinterPickerComponent, CommonModule, FormsModule, DanaSummaryGridDirective, DanaSummaryCardDirective, DanaPageHeaderComponent, DanaButtonDirective, DanaAlertDirective, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
   templateUrl: './blade-locations.component.html',
 })
 export class BladeLocationsComponent implements OnInit {

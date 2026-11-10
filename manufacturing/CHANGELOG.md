@@ -4,6 +4,16 @@
 
 Workflow and UI review. No schema changes; API changes are additive.
 
+- **Label printers.** Admin has a Label Printers tab: add each network printer with its
+  address, its language (IPL for Intermec, ZPL for Zebra) and what it is loaded with, test the
+  connection, print a test tag, and choose the default for tags and for cutter cards. Print
+  screens show "Print tags to" / "Print cards to", so a workstation can pick its own printer;
+  the choice is remembered on that computer. Tags and cutter cards are generated in the chosen
+  printer's language. Print Cutter Card now sends the card to the card printer instead of only
+  saving files. A failed print says what to check (no answer, refused, name not found). The
+  IPL tag layout was corrected: it was laid along the 0.625 in feed, where it cannot fit.
+  New table `gear_label_printers`, created at startup; `GEAR_LABEL_PRINTER_HOST` remains the
+  fallback tag printer. See docs/printing/LABEL-PRINTERS.md.
 - **Printing.** Creating a tray works again; the API was rejecting the Admin screen's own
   request, so no new tray could be added or tagged. Every Print Tag button now reports the
   outcome in a notice that stays visible on long lists, and a tag the printer did not accept

@@ -109,9 +109,11 @@
     <div *ngIf="c.comments" class="gear-workflow-comments"><strong>Comments:</strong> {{ c.comments }}</div>
 
     <div class="gear-workflow-actions gear-print-hide">
+      <gear-label-printer-picker labelType="CUTTER_CARD" label="Print cards to" />
       <button type="button" (click)="print()" [disabled]="busy" class="gear-btn gear-btn-dark">
-        {{ busy ? 'Preparing PRN + PNG…' : 'Print Cutter Card (PRN + PNG)' }}
+        {{ busy ? 'Working…' : 'Print Cutter Card' }}
       </button>
+      <button type="button" (click)="saveCardFiles()" [disabled]="busy" class="gear-btn gear-btn-secondary">Save Card Files</button>
       <button type="button" (click)="browserPrint()" [disabled]="busy" class="gear-btn gear-btn-secondary">Browser Print</button>
       <button type="button" (click)="card = null; search()" class="gear-btn gear-btn-secondary">Back to Results</button>
     </div>

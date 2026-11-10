@@ -13,14 +13,14 @@ import {
   CutterTrayValidation,
   cutterApiErrorText,
 } from '@gearapps/manufacturing/frontend/data-access-cutter-builder';
-import { GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
 import { DanaPageHeaderComponent } from '@dana/ui';
 import { ITray } from '@gearapps/manufacturing/shared/util-types';
 
 @Component({
   selector: 'gear-cutter-build',
   standalone: true,
-  imports: [CommonModule, GearScannerFocusDirective, FormsModule, DanaPageHeaderComponent],
+  imports: [CommonModule, GearScannerFocusDirective, GearLabelPrinterPickerComponent, FormsModule, DanaPageHeaderComponent],
   templateUrl: './cutter-build.component.html',
 })
 export class CutterBuildComponent implements OnDestroy {
@@ -253,7 +253,28 @@ export class CutterBuildComponent implements OnDestroy {
       });
   }
 
+  printing = false;
+
+  /** Sends the new card to the card printer; with no card printer set up, opens the browser print as before. */
   print(): void {
+    const buildNumber = this.result?.build.build_number;
+    if (!buildNumber || this.printing) return;
+    this.printing = true;
+    this.api.printCard(buildNumber).pipe(takeUntil(this.destroyed$)).subscribe({
+      next: (outcome) => {
+        this.printing = false;
+        if (outcome.printed) this.toast.success(`Cutter card ${outcome.build_number} sent to ${outcome.printer_name}.`, 'Card sent to printer');
+        else if (outcome.printer_configured) this.toast.warning(`${outcome.printer_name} did not print the card. ${outcome.failure_reason ?? ''} Select Print Cutter Card to try again, or use Browser Print.`, 'Card not printed');
+        else this.browserPrint();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.printing = false;
+        this.toast.error(cutterApiErrorText(err, 'Could not print the Cutter Card.'), 'Card not printed');
+      },
+    });
+  }
+
+  browserPrint(): void {
     globalThis.print();
   }
 

@@ -18,6 +18,7 @@
     <button type="button" [class.active]="activeTab === 'models'" (click)="setTab('models')">Models</button>
     <button type="button" [class.active]="activeTab === 'machines'" (click)="setTab('machines')">Machines</button>
     <button type="button" [class.active]="activeTab === 'dsf-mappings'" (click)="setTab('dsf-mappings')">DSF Mappings</button>
+    <button type="button" [class.active]="activeTab === 'label-printers'" (click)="setTab('label-printers')">Label Printers</button>
     <button type="button" [class.active]="activeTab === 'trays'" (click)="setTab('trays')">Trays</button>
     <button type="button" [class.active]="activeTab === 'containers'" (click)="setTab('containers')">Containers</button>
     <button type="button" [class.active]="activeTab === 'locations'" (click)="setTab('locations')">Locations</button>
@@ -25,6 +26,8 @@
   </nav>
 
   <gear-admin-dsf-machine-mappings *ngIf="activeTab === 'dsf-mappings'" />
+  <gear-admin-label-printers *ngIf="activeTab === 'label-printers'" />
+  <gear-label-printer-picker *ngIf="activeTab === 'trays' || activeTab === 'containers' || activeTab === 'locations'" labelType="ASSET_TAG" label="Print tags to" />
 
   <div class="gear-admin-layout" *ngIf="activeTab === 'users'">
     <form class="gear-panel gear-admin-form" (ngSubmit)="createUser()">

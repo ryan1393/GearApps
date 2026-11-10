@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
-import { GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
 
 import {
   AssetTagKind,
@@ -36,6 +36,7 @@ interface InventoryPageState<T> {
   selector: 'gear-inventory-overview',
   standalone: true,
   imports: [
+    GearLabelPrinterPickerComponent,
     CommonModule,
     FormsModule,
     DanaSummaryGridDirective,

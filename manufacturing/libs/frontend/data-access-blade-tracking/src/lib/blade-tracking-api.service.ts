@@ -1,6 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { catchError, defer, EMPTY, expand, forkJoin, map, Observable, of, reduce, throwError } from 'rxjs';
+import { LabelPrinterChoiceService } from '@gearapps/manufacturing/frontend/util-common';
 import { ContainerWorkflowEligibility, TrayWorkflowEligibility } from '@gearapps/manufacturing/shared/util-constants';
 import {
   BladeHistoryEvent,
@@ -24,10 +25,12 @@ export interface AssetTagPrintResult {
   kind: AssetTagKind;
   record_id: string;
   serial_number: string;
-  language: 'IPL';
+  language: 'IPL' | 'ZPL';
   symbology: 'CODE128';
   printed: boolean;
   printer_configured: boolean;
+  printer_name: string | null;
+  failure_reason: string | null;
   file_name: string;
   prn_base64: string;
   message: string;
@@ -226,12 +229,15 @@ export interface TrayGrindingRunView {
 @Injectable({ providedIn: 'root' })
 export class BladeTrackingApiService {
   private readonly http = inject(HttpClient);
+  private readonly printerChoice = inject(LabelPrinterChoiceService);
 
 
   printAssetTag(kind: AssetTagKind, recordId: string) {
     return this.http.post<AssetTagPrintResult>('/api/v1/asset-tags/print', {
       kind,
       record_id: recordId,
+      // The printer chosen on this computer; left out, the default tag printer is used.
+      printer_id: this.printerChoice.selectedId('ASSET_TAG') ?? undefined,
     });
   }
 

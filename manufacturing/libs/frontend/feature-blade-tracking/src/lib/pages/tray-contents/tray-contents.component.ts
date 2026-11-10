@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, ViewChild, inject, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
 import {
   AssetTagKind,
   BladeHistoryView,
@@ -22,7 +22,7 @@ import {
 @Component({
   selector: 'gear-tray-contents',
   standalone: true,
-  imports: [CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
+  imports: [GearLabelPrinterPickerComponent, CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
   templateUrl: './tray-contents.component.html',
 })
 export class TrayContentsComponent implements OnInit, OnDestroy {

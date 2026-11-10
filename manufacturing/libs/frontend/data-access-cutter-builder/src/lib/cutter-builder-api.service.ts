@@ -1,6 +1,7 @@
 import { defer, EMPTY, expand, map, Observable, reduce } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { LabelPrinterChoiceService } from '@gearapps/manufacturing/frontend/util-common';
 import { ILocation, IPaginatedResponse, ITray } from '@gearapps/manufacturing/shared/util-types';
 
 export interface CutterBody {
@@ -64,6 +65,20 @@ export interface CutterBuildResult {
   build: CutterBuildCard;
   blade_ids: string[];
   tray_released: boolean;
+}
+
+/** What happened when a cutter card was sent to the card printer. */
+export interface CutterCardPrintResult {
+  build_number: string;
+  language: 'IPL' | 'ZPL';
+  printed: boolean;
+  printer_configured: boolean;
+  printer_name: string | null;
+  failure_reason: string | null;
+  /** The card in the printer's language, for saving when no printer took it. */
+  file_name: string;
+  file_base64: string;
+  card: CutterBuildCard;
 }
 
 export interface CutterTeardownResult {
@@ -194,6 +209,7 @@ export interface CutterTrayValidation {
 @Injectable({ providedIn: 'root' })
 export class CutterBuilderApiService {
   private readonly http = inject(HttpClient);
+  private readonly printerChoice = inject(LabelPrinterChoiceService);
 
 
   startGrinding(trayId: string) {
@@ -340,6 +356,14 @@ export class CutterBuilderApiService {
   getBuild(buildNumber: string) {
     return this.http.get<CutterBuildDetails>(
       `/api/v1/cutter-builder/builds/${encodeURIComponent(buildNumber.trim())}`,
+    );
+  }
+
+  /** Sends the card to the card printer chosen on this computer, or the default one. */
+  printCard(buildNumber: string) {
+    return this.http.post<CutterCardPrintResult>(
+      `/api/v1/cutter-builder/builds/${encodeURIComponent(buildNumber.trim())}/card/print`,
+      { printer_id: this.printerChoice.selectedId('CUTTER_CARD') ?? undefined },
     );
   }
 
@@ -550,9 +574,15 @@ function cutterCardPng(card: CutterBuildCard): Promise<Blob> {
   });
 }
 
+/**
+ * Saves the card as a printer file plus a PNG preview. `printerFile` is the card in the language
+ * of the printer it was meant for; without it the IPL file is saved.
+ */
 export async function downloadCutterCardArtifacts(
   card: CutterBuildCard,
+  printerFile?: { file_name: string; file_base64: string },
 ): Promise<{ prnFileName: string; pngFileName: string }> {
+  if (printerFile) card = { ...card, prn_base64: printerFile.file_base64, prn_file_name: printerFile.file_name };
   if (!card.prn_base64) {
     throw new Error('The Gear Apps API did not return a native Cutter Card PRN. Restart the API after installing the cutter-card export patch.');
   }

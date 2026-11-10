@@ -8,7 +8,7 @@ import {
   OnInit,
   } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
 import { Observable } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
@@ -38,16 +38,17 @@ import {
   AssetTagKind,
 } from '../admin-api.service';
 import { DsfMachineMappingsComponent } from '../dsf-machine-mappings/dsf-machine-mappings.component';
+import { LabelPrintersComponent } from '../label-printers/label-printers.component';
 import {
   DanaPageHeaderComponent,
 } from '@dana/ui';
 
-type AdminTab = 'users' | 'part-summaries' | 'parts' | 'roll-masters' | 'models' | 'machines' | 'dsf-mappings' | 'trays' | 'containers' | 'locations' | 'cutter-bodies';
+type AdminTab = 'users' | 'part-summaries' | 'parts' | 'roll-masters' | 'models' | 'machines' | 'dsf-mappings' | 'label-printers' | 'trays' | 'containers' | 'locations' | 'cutter-bodies';
 
 @Component({
   selector: 'gear-admin-users-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent],
+  imports: [CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, GearLabelPrinterPickerComponent],
   templateUrl: './frontend-feature-admin-users.component.html',
   styleUrls: ['./frontend-feature-admin-users.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
