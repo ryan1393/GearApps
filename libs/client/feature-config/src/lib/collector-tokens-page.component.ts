@@ -82,6 +82,13 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
             <h2>Docker collector</h2>
             @if (docker.loading()) {
               <p>Checking…</p>
+            } @else if (docker.error()) {
+              <p class="gear-alert gear-alert-danger" role="alert">
+                Could not check the Docker collector: {{ dockerError() }}
+                <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="reload()">
+                  Retry
+                </button>
+              </p>
             } @else if (!docker.value().available) {
               <p>
                 This API is not running in the Docker stack. For the Docker collector, deploy with
@@ -102,7 +109,7 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
               </p>
             }
           </div>
-          @if (docker.value().available) {
+          @if (docker.value().available && !docker.error()) {
             <div class="dana-toolbar">
               <gear-status-badge
                 [tone]="docker.value().token ? 'success' : 'neutral'"
@@ -301,6 +308,10 @@ export class CollectorTokensPageComponent implements OnInit {
   protected readonly tokens = loadable<CollectorToken[]>([]);
   protected readonly docker = loadable<DockerCollectorConnection>({ available: false, token: null });
   protected readonly connecting = signal(false);
+  protected readonly dockerError = computed(() => {
+    const error = this.docker.error();
+    return error ? apiErrorMessage(error) : '';
+  });
   protected readonly activeCount = computed(
     () => this.tokens.value().filter((t) => !t.revoked_at).length,
   );

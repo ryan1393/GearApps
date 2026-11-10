@@ -146,6 +146,12 @@ export const ENVIRONMENT_SETTING_GROUPS: readonly EnvironmentSettingGroup[] = [
       secret('SCANNER_FTP_PASSWORD', 'Scanner FTP password'),
       text('SCANNER_FTP_ROOT', 'Scanner FTP folder'),
       text('SCANNER_FTP_IMAGE_FILE', 'Scanner image file name'),
+      text(
+        'LAPPER_READ_TOKEN_FILE',
+        'Docker collector token file',
+        'Set by Docker Compose. Lapper > Collector Tokens > Connect Docker collector writes the collector\'s token here.',
+        { locked: SERVER_FILE },
+      ),
     ],
   },
   {
