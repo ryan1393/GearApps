@@ -82,9 +82,10 @@ export class ServerFeatUserController {
   async updateUser(
     @Param('id', new ParseUUIDPipe()) id: Uuid,
     @Body() dto: UpdateUserDto,
+    @ReqUserId() adminUserId: Uuid,
   ) {
     this.logger.debug(`Updating user ${id}`);
-    return this.userService.updateUser(id, dto);
+    return this.userService.updateUserAsAdmin(adminUserId, id, dto);
   }
 
   @Delete(':id')

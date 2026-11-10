@@ -1,4 +1,4 @@
-# GearApps 70.3.0
+# GearApps 70.4.0
 
 One Nx monorepo contains Lapper, Lapper Read, Blade Tracking, Cutter Builder and
 Greenshed. All four web applications and the collector use **one NestJS API on
@@ -34,7 +34,7 @@ API image shared by the bootstrap jobs and the running API. All four nginx clien
 proxy /api to gear-app-server:3333. Keep the existing PostgreSQL volume.
 
 For an existing installation, follow [the unified API upgrade procedure](docs/UNIFIED_API.md).
-The application source ZIP is [GearApps 70.3.0](releases/GearApps-70.3.0.zip).
+The application source ZIP is [GearApps 70.4.0](releases/GearApps-70.4.0.zip).
 
 Docker dependency stages include Python, Make and a C++ compiler, as required by
 [node-gyp](https://github.com/nodejs/node-gyp#on-unix), so native npm

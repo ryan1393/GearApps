@@ -4,7 +4,7 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
 import {
   buildSummaryShelfTag,
   normalizeSummaryNumber,
@@ -22,7 +22,7 @@ import { DanaPageHeaderComponent } from '@dana/ui';
 @Component({
   selector: 'gear-greenshed-pull',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaPageHeaderComponent],
+  imports: [CommonModule, FormsModule, DanaPageHeaderComponent, GearScannerFocusDirective],
   templateUrl: './greenshed-pull.component.html',
 })
 export class GreenshedPullComponent implements OnInit {
@@ -48,6 +48,8 @@ export class GreenshedPullComponent implements OnInit {
     part_type_code: string;
   }> = [];
   reasonCode = '';
+  /** Readable name of the reason on the last completed pull (the API result carries only its code). */
+  resultReasonName = '';
   shelfSerial = '';
   shelf: ILocation | null = null;
   comments = '';
@@ -124,7 +126,9 @@ export class GreenshedPullComponent implements OnInit {
       ? this.requestedReason
       : this.requestedReason === 'CHANGEOVER'
         ? (changeover?.code ?? '')
-        : (this.refs.pull_reasons[0]?.code ?? '');
+        // No requested reason: the operator chooses. Defaulting to the first reason in the list
+        // would preselect a teardown disposition for what may be an intact changeover.
+        : '';
   }
   get expectedShelfSerial(): string | null {
     return this.build
@@ -324,6 +328,7 @@ export class GreenshedPullComponent implements OnInit {
           if (generation !== this.generation) return;
           this.busy = false;
           this.result = result;
+          this.resultReasonName = reason.name;
           this.contextValid = false;
           const message = reason.returns_to_shelf
             ? `Cutter returned intact to ${shelf?.serial_number}.`

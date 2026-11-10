@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
-  "danaAppsVersion": "70.3.0",
+  "danaAppsVersion": "70.4.0",
   "packageName": "@dana/ui",
   "packageVersion": "0.3.3",
   "visualSource": "Truck Log",
   "dependency": "file:vendor/dana-ui/package",
   "sourceProject": "libs/shared/dana-ui",
-  "vendoredTreeSha256": "6EE77578359D1D10192E4DFABC62C6032C540DFA832D85C71FE93500AF23CD71",
+  "vendoredTreeSha256": "B5E8CF98385289E7DE99BA426618517AD31E83837EFA9BF2FF84F02C18C05973",
   "vendoredTreeHashAlgorithm": "SHA-256 of sorted UTF-8 lines: uppercase file SHA-256, two spaces, relative POSIX path, newline"
 }

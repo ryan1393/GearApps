@@ -74,8 +74,9 @@ export class ServerFeatCutterConfigService {
         'rollMaster.enabled = :rollMasterEnabled',
         { rollMasterEnabled: true },
       )
-      .orderBy('part.part_number', 'ASC')
-      .take(250);
+      // The part master is a bounded reference list. Machine Setup and Admin both need all of
+      // it; a row cap here silently hid every part that sorted after the cap.
+      .orderBy('part.part_number', 'ASC');
 
     if (filters.includeDisabled?.trim().toLowerCase() !== 'true') {
       qb.where('part.enabled = :enabled', { enabled: true });

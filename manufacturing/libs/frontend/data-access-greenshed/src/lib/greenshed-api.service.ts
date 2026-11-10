@@ -50,6 +50,8 @@ export interface GreenshedReferenceData {
     description: string | null;
   }>;
   check_interval: number;
+  /** True when DSF credits production to cutters: the running count moves on its own. Absent on older APIs. */
+  dsf_cutter_counts?: boolean;
 }
 
 export interface GreenshedBuild {
@@ -62,6 +64,9 @@ export interface GreenshedBuild {
   part_type_code: string;
   status_code: string;
   built_at: string;
+  /** For a cutter on a Greenshed shelf: the counts its next setup continues from. */
+  changeover_piece_count?: number | null;
+  changeover_last_check_piece_count?: number | null;
   machine_run: null | {
     id: string;
     machine_number: string;
@@ -274,9 +279,28 @@ export interface GreenshedHistoryEvent {
   } | null;
 }
 
+/** One machine's current-shift production as read from DSF (Digital Shop Floor). */
+export interface DsfCountRow {
+  machine_id: string; machine_number: string; department: string;
+  status: 'NOT_CONFIGURED' | 'WAITING' | 'OK' | 'STALE' | 'MAPPING_REVIEW' | 'SHIFT_REVIEW' | 'DATA_REVIEW' | 'UNAVAILABLE' | 'INACTIVE';
+  count: number | null; note: string; shift_number: number | null; shift_date: string | null;
+  shift_start: string | null; shift_end: string | null; as_of: string | null; refreshed_at: string | null;
+}
+export interface DsfCountsBoard {
+  format: string; status: string; configured: boolean; interval_seconds: number;
+  last_success_at: string | null; served_at: string;
+  /** False when DSF production is credited to the installed cutter rather than only shown for comparison. */
+  counts_are_comparison_only: boolean; cutter_write_enabled: boolean; rows: DsfCountRow[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class GreenshedApiService {
   private readonly http = inject(HttpClient);
+
+  /** Reads the API's in-memory DSF snapshot. Never triggers a DSF read. */
+  getDsfCounts() {
+    return this.http.get<DsfCountsBoard>('/api/v1/greenshed/dsf-counts');
+  }
 
   getDashboard() {
     return this.http.get<GreenshedDashboard>('/api/v1/greenshed/dashboard');

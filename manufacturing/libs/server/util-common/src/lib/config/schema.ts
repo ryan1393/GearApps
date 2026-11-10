@@ -72,6 +72,7 @@ export const validationSchema = Joi.object({
   [ENV_SENTRY_DSN]: Joi.string().allow('').optional(),
   GEAR_LABEL_PRINTER_HOST: Joi.string().allow('').optional(),
   GEAR_LABEL_PRINTER_PORT: Joi.number().integer().min(1).max(65535).default(9100),
+  GEAR_LABEL_PRINTER_LANGUAGE: Joi.string().valid('IPL', 'ZPL', 'ipl', 'zpl').default('IPL'),
   GEAR_LABEL_PRINTER_TIMEOUT_MS: Joi.number().integer().min(250).max(60000).default(5000),
 
   // auth config
@@ -195,6 +196,24 @@ export const validationSchema = Joi.object({
   SCANNER_FTP_PASSWORD: Joi.string().allow('').optional(),
   SCANNER_FTP_ROOT: Joi.string().default('181-lapper-scanners'),
   SCANNER_FTP_IMAGE_FILE: Joi.string().default('scanner-current.jpg'),
+
+  // DSF (Digital Shop Floor) production counts. All optional and off by default. Only the
+  // shape is checked here; the DSF reader validates the combination and stays off, with a
+  // startup warning, if it is unsafe or incomplete. No defaults are set here on purpose.
+  DSF_COUNT_ENABLED: Joi.string().valid('true', 'false', '').optional(),
+  DSF_CUTTER_WRITE_ENABLED: Joi.string().valid('true', 'false', '').optional(),
+  DSF_COUNT_INTERVAL_SECONDS: Joi.number().integer().min(30).max(3600).empty('').optional(),
+  DSF_COUNT_MACHINES: Joi.string().allow('').pattern(/^[A-Za-z0-9-]{1,20}(\s*,\s*[A-Za-z0-9-]{1,20})*$/).optional(),
+  DSF_DB_HOST: Joi.string().allow('').optional(),
+  DSF_DB_PORT: Joi.number().integer().min(1).max(65535).empty('').optional(),
+  DSF_DB_NAME: Joi.string().allow('').optional(),
+  DSF_DB_USER: Joi.string().allow('').optional(),
+  DSF_DB_PASSWORD: Joi.string().allow('').optional(),
+  DSF_DB_PASSWORD_FILE: Joi.string().allow('').optional(),
+  DSF_DB_SSL_MODE: Joi.string().valid('verify-full', 'disable', '').optional(),
+  DSF_DB_SSL_CA_FILE: Joi.string().allow('').optional(),
+  DSF_DB_SSL_CA_PEM: Joi.string().allow('').optional(),
+  DSF_PRIVILEGED_READER_ACK: Joi.string().allow('').optional(),
 
   // social config
   [ENV_SOCIAL_GOOGLE_ENABLED]: Joi.boolean().optional().default(false),

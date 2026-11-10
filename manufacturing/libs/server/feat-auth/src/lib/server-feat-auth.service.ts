@@ -9,6 +9,7 @@ import {
 import { ServerFeatUserService } from '@gearapps/manufacturing/server/feat-user';
 import { UserNotFoundException } from '@gearapps/manufacturing/server/util-common';
 import {
+  ENV_EMAIL_ENABLED,
   ENV_JWT_ACCESS_EXPIRATION_TIME,
   ENV_JWT_ACCESS_SECRET,
   ENV_JWT_REFRESH_EXPIRATION_TIME,
@@ -40,6 +41,11 @@ export class ServerFeatAuthService {
     private userService: ServerFeatUserService,
     private configService: ConfigService,
   ) {}
+
+  /** Emailed password reset needs outgoing mail; without it the forgot-password form can only fail silently. */
+  get passwordResetEmailEnabled(): boolean {
+    return this.configService.get(ENV_EMAIL_ENABLED) === 'true';
+  }
 
   async generateAccessToken(data: UserOrmEntity): Promise<string> {
     const payload = {

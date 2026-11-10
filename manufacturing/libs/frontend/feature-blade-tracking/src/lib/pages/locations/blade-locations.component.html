@@ -5,8 +5,10 @@
     </button>
 </header>
 
+  <gear-label-printer-picker labelType="ASSET_TAG" label="Print tags to" />
+
   <div *ngIf="error" danaAlert="danger">{{ error }}</div>
-  <div *ngIf="printMessage" danaAlert="success">{{ printMessage }}</div>
+  <div *ngIf="printMessage" [danaAlert]="printTone">{{ printMessage }}</div>
 
   <section danaSummaryGrid class="blade-location-summary-grid" aria-label="Location inventory summary">
     <article danaSummaryCard class="gear-metric-card blade-location-summary-card">

@@ -10,8 +10,10 @@
     </button>
 </header>
 
+  <gear-label-printer-picker labelType="ASSET_TAG" label="Print tags to" />
+
   <div *ngIf="error" class="gear-alert">{{ error }}</div>
-  <div *ngIf="printMessage" class="gear-alert gear-alert-success">{{ printMessage }}</div>
+  <div *ngIf="printMessage" class="gear-alert" role="status" [class.gear-alert-success]="printTone === 'success'" [class.gear-alert-warning]="printTone === 'warning'">{{ printMessage }}</div>
 
   <section danaSummaryGrid class="inventory-overview-kpis inventory-overview-kpis-four">
     <button danaSummaryCard

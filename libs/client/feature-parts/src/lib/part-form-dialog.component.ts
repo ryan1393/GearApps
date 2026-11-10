@@ -13,7 +13,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { apiErrorMessage, AuthService, PartsApi } from '@gearapps/client/core';
 import { DialogComponent, SegmentedComponent } from '@gearapps/client/ui';
 import { Part, Summary } from '@gearapps/shared/domain';
-import { PART_TYPE_OPTIONS, STATUS_OPTIONS } from './shared';
+import { PART_TYPE_OPTIONS, STATUS_OPTIONS, toStatusOption } from './shared';
 
 @Component({
   selector: 'gear-part-form-dialog',
@@ -111,7 +111,7 @@ export class PartFormDialogComponent {
             number: p.number,
             teeth: p.teeth,
             summary_id: p.summary_id,
-            status: p.status,
+            status: toStatusOption(p.status),
           });
           this.form.controls.number.disable();
           this.form.controls.type.disable();

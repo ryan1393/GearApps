@@ -1,6 +1,6 @@
 ﻿# Gear Apps native asset tags (IPL)
 
-Gear Apps asset tags use Intermec Printer Language (IPL), matching the printer-native language of the existing Cutter Build label reference.
+Gear Apps asset tags are sent to the printer in its own language: Intermec Printer Language (IPL), matching the existing Cutter Build label reference, or Zebra ZPL. Which one is set per printer in Admin > Label Printers.
 
 ## Database-backed encoded value
 
@@ -43,27 +43,39 @@ The existing Cutter Build IPL coordinates indicate the Intermec 203 dpi family. 
 
 The IPL asset format uses a 431-dot print width and 127-dot label height. The printer's gap sensor/media calibration handles the physical top/bottom gap and advances to the next label.
 
-## Printer transport
+## Printers
 
-The backend can send raw IPL over TCP.
+Printers are set up in **Admin > Label Printers**; see [LABEL-PRINTERS.md](LABEL-PRINTERS.md). Each printer has a network address, a language (IPL for Intermec / Honeywell, ZPL for Zebra) and what it is loaded with. The tag is generated in the language of the printer it is sent to, and sent as raw bytes over TCP.
 
-Run `commands\CONFIGURE-GEAR-APPS-LABEL-PRINTER.cmd` to set these values safely, or edit the optional environment values directly:
+`GEAR_LABEL_PRINTER_HOST`, `GEAR_LABEL_PRINTER_PORT` and `GEAR_LABEL_PRINTER_LANGUAGE` are only the fallback tag printer, used until a default tag printer is chosen in Admin. `GEAR_LABEL_PRINTER_TIMEOUT_MS` is how long any printer is given to answer.
 
-```text
-GEAR_LABEL_PRINTER_HOST=
-GEAR_LABEL_PRINTER_PORT=9100
-GEAR_LABEL_PRINTER_TIMEOUT_MS=5000
-```
+Every **Print Tag** button reports one of three outcomes in a notice that stays on screen wherever the list is scrolled:
 
-When `GEAR_LABEL_PRINTER_HOST` is blank, Gear Apps still generates the native `.prn` payload. The browser downloads the `.prn` file instead of pretending the tag was printed.
+- **Tag sent to printer** — the named printer accepted the tag.
+- **<printer> did not print** (warning) — the tag was not printed; the notice says what to check, and the tag file is downloaded as a backup.
+- **Tag file downloaded** — no tag printer is set up, so the tag file is downloaded.
 
-If the host is configured but the printer cannot be reached, the API returns the same `.prn` payload as a fallback.
+A failed or downloaded tag is never reported as printed. A printer accepting the bytes does not prove a label came out: a printer sent the wrong language accepts the job and prints nothing.
 
-## Barcode
+## Layout
 
-The IPL format uses `c6`, matching the Cutter Build label reference and producing Code 128.
+Both languages produce the same tag: a Code 128 barcode of the stored serial across the top and the serial as text under it, read across the 2.125 in web.
 
-The current asset-tag format uses reserved IPL format number `97`. It does not erase all printer formats.
+Serials of up to 14 characters print with a two-dot narrow bar; longer serials use a one-dot narrow bar. A serial longer than 32 characters cannot fit, so the print request is refused with a message instead of printing a barcode that runs off the label.
+
+### IPL
+
+The format uses `c6` (Code 128), as the Cutter Build card does, and reserved format number `97`. It does not erase the printer's other formats.
+
+In IPL the first origin value runs **along the feed** and the second **across the web**, and a direction-0 field reads along the feed. Fields that read across the web are direction 3 with their top edge at the larger feed value. This is how the Cutter Build card is laid out (its barcode is `o82,59;f3` on a 1320-dot-long card), and the tag follows it: a field meant to sit N dots below the top of the tag has its origin at `127 - N`.
+
+Earlier versions wrote the tag fields as direction 0, which lays the barcode along the 0.625 in feed length where it does not fit, and included a stray `L127;` line field. Both are corrected. **This corrected layout has not yet been confirmed on a printer**; use *Print Test Tag* in Admin > Label Printers and check the first tag.
+
+### ZPL
+
+`^FO` is across the web, then down the feed. The barcode is `^BC` Code 128 with automatic subset selection, the text is font 0 centred with `^FB`, and `^PW431` / `^LL127` set the label size.
+
+Reference output for both languages is in [samples](samples); the unit tests compare generated tags with those files byte for byte.
 
 ## Admin printing
 

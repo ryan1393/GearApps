@@ -72,7 +72,7 @@
           <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Machine</span><strong>{{ b.machine_run?.machine_number || '—' }}</strong></div>
           <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Shelf</span><strong>{{ b.shelf_location?.serial_number || '—' }}</strong></div>
         </div>
-        <div class="gear-workflow-actions"><button type="button" (click)="build = null" class="gear-btn gear-btn-secondary">Back</button></div>
+        <div class="gear-workflow-actions"><button type="button" (click)="back()" class="gear-btn gear-btn-secondary">Back to results</button></div>
       </div>
     </section>
 
@@ -89,7 +89,7 @@
               <td>{{ e.event_type?.name }}<strong *ngIf="e.canceled_at"> · Canceled</strong><div *ngIf="e.recorded_by">{{ e.recorded_by }}</div></td>
               <td>{{ e.machine_number || '—' }}</td>
               <td>{{ e.piece_count }}</td>
-              <td>{{ e.check_result?.code || e.pull_reason?.code || '—' }}</td>
+              <td>{{ e.check_result?.code || e.pull_reason?.name || e.pull_reason?.code || '—' }}</td>
               <td>{{ e.comments || '—' }}<div *ngIf="e.canceled_at">Canceled by {{ e.canceled_by }} · {{ e.canceled_at | date:'MMM d, y, h:mm a' }}</div></td>
             </tr>
             <tr *ngIf="!history.length"><td danaTableEmpty colspan="6" class="empty-row">No cutter history is recorded for this build.</td></tr>

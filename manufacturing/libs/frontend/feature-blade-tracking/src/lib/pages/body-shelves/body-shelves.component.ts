@@ -4,11 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { BladeTrackingApiService, EmptyBodyShelfView, apiErrorText } from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
-import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
 import { DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
 
 @Component({ selector:'gear-body-shelves', standalone:true,
-  imports:[CommonModule, FormsModule, RouterLink, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
+  imports:[CommonModule, FormsModule, RouterLink, GearScannerFocusDirective, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
   templateUrl:'./body-shelves.component.html' })
 export class BodyShelvesComponent implements OnInit, OnDestroy {
   private readonly api=inject(BladeTrackingApiService);
@@ -19,6 +19,12 @@ export class BodyShelvesComponent implements OnInit, OnDestroy {
   ngOnDestroy():void { this.destroyed$.next(); this.destroyed$.complete(); }
   get filteredRows():EmptyBodyShelfView[] { const q=this.search.trim().toUpperCase(); return this.rows.filter(r=>!q || (r.body_serial+' '+r.shelf_serial+' '+r.state).toUpperCase().includes(q)); }
   refresh():void { if(this.loading) return; this.loading=true; this.error=''; this.api.getEmptyBodyShelves().pipe(takeUntil(this.destroyed$)).subscribe({next:r=>{this.rows=r;this.loading=false;},error:e=>{this.rows=[];this.loading=false;this.error=apiErrorText(e,'Could not load empty-body shelves.');}}); }
+  /** A scanner ends each scan with Enter. After the body serial, move to the shelf field instead of submitting half a form. */
+  bodyScanned(event:Event, shelfInput:HTMLInputElement):void {
+    if(this.shelfSerial.trim())return;
+    event.preventDefault();
+    if(this.bodyIdentifier.trim())shelfInput.focus();
+  }
   place():void {
     if(this.busy||this.loading||!this.bodyIdentifier.trim()||!this.shelfSerial.trim())return;
     const body=this.bodyIdentifier.trim().toUpperCase(); const shelf=this.shelfSerial.trim().toUpperCase();

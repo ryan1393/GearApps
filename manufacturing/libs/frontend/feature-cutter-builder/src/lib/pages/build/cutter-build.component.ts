@@ -13,14 +13,14 @@ import {
   CutterTrayValidation,
   cutterApiErrorText,
 } from '@gearapps/manufacturing/frontend/data-access-cutter-builder';
-import { GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
 import { DanaPageHeaderComponent } from '@dana/ui';
 import { ITray } from '@gearapps/manufacturing/shared/util-types';
 
 @Component({
   selector: 'gear-cutter-build',
   standalone: true,
-  imports: [CommonModule, GearScannerFocusDirective, FormsModule, DanaPageHeaderComponent],
+  imports: [CommonModule, GearScannerFocusDirective, GearLabelPrinterPickerComponent, FormsModule, DanaPageHeaderComponent],
   templateUrl: './cutter-build.component.html',
 })
 export class CutterBuildComponent implements OnDestroy {
@@ -65,18 +65,24 @@ export class CutterBuildComponent implements OnDestroy {
     this.refreshAvailableSelections();
   }
 
+  /** Pick lists that have answered, and those that failed: only an answered empty list means "none available". */
+  selectionState = { bodies: 'loading', trays: 'loading', machines: 'loading' } as Record<'bodies' | 'trays' | 'machines', 'loading' | 'ready' | 'failed'>;
+  get selectionsFailed(): boolean { return Object.values(this.selectionState).includes('failed'); }
+
   refreshAvailableSelections(): void {
+    this.selectionState = { bodies: 'loading', trays: 'loading', machines: 'loading' };
     this.api.listCutterBodies().pipe(takeUntil(this.destroyed$)).subscribe({
-      next: (rows) => (this.availableCutterBodies = rows.filter((body) => body.enabled)),
-      error: () => (this.availableCutterBodies = []),
+      next: (rows) => { this.availableCutterBodies = rows.filter((body) => body.enabled); this.selectionState.bodies = 'ready'; },
+      error: () => { this.availableCutterBodies = []; this.selectionState.bodies = 'failed'; },
     });
     this.api.getDashboard().pipe(takeUntil(this.destroyed$)).subscribe({
-      next: (data) => (this.availableReadyTrays = data.ready_for_cutter ?? []),
-      error: () => (this.availableReadyTrays = []),
+      next: (data) => { this.availableReadyTrays = data.ready_for_cutter ?? []; this.selectionState.trays = 'ready'; },
+      error: () => { this.availableReadyTrays = []; this.selectionState.trays = 'failed'; },
     });
     this.api.listCutterBuilderMachines().pipe(takeUntil(this.destroyed$)).subscribe({
       next: (rows) => {
         this.availableCutterBuilderMachines = rows;
+        this.selectionState.machines = 'ready';
         if (this.selectedCutterBuilderMachineId && !rows.some((row) => row.id === this.selectedCutterBuilderMachineId)) {
           this.selectedCutterBuilderMachineId = '';
         }
@@ -84,6 +90,7 @@ export class CutterBuildComponent implements OnDestroy {
       error: () => {
         this.availableCutterBuilderMachines = [];
         this.selectedCutterBuilderMachineId = '';
+        this.selectionState.machines = 'failed';
       },
     });
   }
@@ -231,6 +238,8 @@ export class CutterBuildComponent implements OnDestroy {
         next: (result) => {
           this.busy = false;
           this.result = result;
+          // The body and tray just used are no longer available: reload the pick lists for the next build.
+          this.refreshAvailableSelections();
           this.toast.success(
             `Build ${result.build.build_number} created with ${result.build.blade_count} blades.`,
             'Cutter build complete',
@@ -244,7 +253,28 @@ export class CutterBuildComponent implements OnDestroy {
       });
   }
 
+  printing = false;
+
+  /** Sends the new card to the card printer; with no card printer set up, opens the browser print as before. */
   print(): void {
+    const buildNumber = this.result?.build.build_number;
+    if (!buildNumber || this.printing) return;
+    this.printing = true;
+    this.api.printCard(buildNumber).pipe(takeUntil(this.destroyed$)).subscribe({
+      next: (outcome) => {
+        this.printing = false;
+        if (outcome.printed) this.toast.success(`Cutter card ${outcome.build_number} sent to ${outcome.printer_name}.`, 'Card sent to printer');
+        else if (outcome.printer_configured) this.toast.warning(`${outcome.printer_name} did not print the card. ${outcome.failure_reason ?? ''} Select Print Cutter Card to try again, or use Browser Print.`, 'Card not printed');
+        else this.browserPrint();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.printing = false;
+        this.toast.error(cutterApiErrorText(err, 'Could not print the Cutter Card.'), 'Card not printed');
+      },
+    });
+  }
+
+  browserPrint(): void {
     globalThis.print();
   }
 
@@ -297,6 +327,7 @@ export class CutterBuildComponent implements OnDestroy {
 
   private resetTrayDownstream(): void {
     this.traySerial = '';
+    this.selectedTraySerial = '';
     this.tray = null;
     this.trayValidation = null;
   }

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { DanaConfirmDialogComponent, DanaTableDirective } from '@dana/ui';
+import { DanaTableDirective } from '@dana/ui';
 import { loadable, SummariesApi, ToastService } from '@gearapps/client/core';
 import { EmptyStateComponent, StatusBadgeComponent } from '@gearapps/client/ui';
 import { Summary } from '@gearapps/shared/domain';
@@ -10,7 +10,6 @@ import { SummaryFormDialogComponent } from './summary-form-dialog.component';
   selector: 'gear-summaries-page',
   imports: [
     DanaTableDirective,
-    DanaConfirmDialogComponent,
     StatusBadgeComponent,
     EmptyStateComponent,
     SummaryFormDialogComponent,
@@ -67,13 +66,6 @@ import { SummaryFormDialogComponent } from './summary-form-dialog.component';
                       <button type="button" class="dana-btn dana-btn-sm" (click)="open(s)">
                         Edit
                       </button>
-                      <button
-                        type="button"
-                        class="dana-btn dana-btn-sm dana-btn-danger"
-                        (click)="pending.set(s)"
-                      >
-                        Delete
-                      </button>
                     </div>
                   </td>
                 </tr>
@@ -85,15 +77,6 @@ import { SummaryFormDialogComponent } from './summary-form-dialog.component';
     </section>
 
     <gear-summary-form-dialog [(open)]="dialog" [summary]="editing()" (saved)="onSaved()" />
-    <dana-confirm-dialog
-      [open]="!!pending()"
-      title="Delete summary"
-      [message]="'Delete summary ' + pending()?.number + '? Parts referencing it lose the link.'"
-      confirmLabel="Delete"
-      [danger]="true"
-      (confirm)="deleteConfirmed()"
-      (cancel)="pending.set(null)"
-    />
   `,
 })
 export class SummariesPageComponent implements OnInit {
@@ -103,7 +86,6 @@ export class SummariesPageComponent implements OnInit {
   protected readonly userName = userName;
   protected dialog = false;
   protected readonly editing = signal<Summary | null>(null);
-  protected readonly pending = signal<Summary | null>(null);
 
   ngOnInit() {
     this.reload();
@@ -119,16 +101,6 @@ export class SummariesPageComponent implements OnInit {
     this.toast.success('Summary saved');
     this.reload();
   }
-  protected deleteConfirmed() {
-    const s = this.pending();
-    if (!s) return;
-    this.pending.set(null);
-    this.api.delete(s.id).subscribe({
-      next: () => {
-        this.toast.success('Summary deleted', s.number);
-        this.reload();
-      },
-      error: (err) => this.toast.error(err, 'Could not delete summary'),
-    });
-  }
+  // Part summaries are shared GearApps master data. The API refuses to delete them from Lapper,
+  // so no Delete action is offered here; set one Inactive with Edit instead.
 }

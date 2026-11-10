@@ -1,9 +1,11 @@
+import { PrintToPrinterDto } from '@gearapps/manufacturing/server/feat-tray';
 import { DepartmentAppEdit, Auth, ReqUserId } from '@gearapps/manufacturing/server/util-common';
 import { RoleType, Uuid } from '@gearapps/manufacturing/shared/util-types';
 import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Param,
   Patch,
   Post,
@@ -18,12 +20,16 @@ import {
   CreateCutterTeardownDto,
   UpdateCutterBodyDto,
 } from './cutter-build.dto';
+import { CutterCardPrintService } from './cutter-card-print.service';
 import { ServerFeatCutterBuildService } from './server-feat-cutter-build.service';
 
 @Controller({ path: 'cutter-builder', version: '1' })
 @ApiTags('Cutter Builder')
 export class ServerFeatCutterBuildController {
-  constructor(private readonly service: ServerFeatCutterBuildService) {}
+  constructor(
+    private readonly service: ServerFeatCutterBuildService,
+    private readonly cardPrinter: CutterCardPrintService,
+  ) {}
 
   @Post('cutter-bodies')
   @DepartmentAppEdit('CUTTER_BUILDER')
@@ -146,5 +152,14 @@ export class ServerFeatCutterBuildController {
   @Auth([RoleType.ADMIN, RoleType.USER])
   getCutterCard(@Param('buildNumber') buildNumber: string) {
     return this.service.getCutterCard(buildNumber);
+  }
+
+  /** Sends the card to the card printer chosen on this computer, or the default one. */
+  @Post('builds/:buildNumber/card/print')
+  @HttpCode(200)
+  @DepartmentAppEdit('CUTTER_BUILDER')
+  @Auth([RoleType.ADMIN, RoleType.USER])
+  printCutterCard(@Param('buildNumber') buildNumber: string, @Body() dto: PrintToPrinterDto) {
+    return this.cardPrinter.print(buildNumber, dto.printer_id);
   }
 }

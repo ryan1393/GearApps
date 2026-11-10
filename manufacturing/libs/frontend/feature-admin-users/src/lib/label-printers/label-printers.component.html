@@ -1,0 +1,94 @@
+<section class="label-printers" aria-labelledby="label-printers-title">
+  <div class="gear-panel p-5 label-printers-lead">
+    <div>
+      <h2 id="label-printers-title" class="text-xl font-black">Label Printers</h2>
+      <p class="text-sm text-slate-600">Add each label printer by its network address and the language it speaks. The default printer is used by every Print button; a workstation next to its own printer can choose it on the print screen.</p>
+    </div>
+    <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || saving">{{ loading ? 'Refreshing…' : '↻ Refresh' }}</button>
+  </div>
+
+  <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert"><strong>Unable to continue.</strong><span>{{ error }}</span></div>
+  <div *ngIf="board && !board.available" class="gear-alert gear-alert-warning" role="status"><strong>Printers cannot be saved.</strong><span>The printer table could not be created in the database. Check the API log, then restart the API.</span></div>
+
+  <ng-container *ngIf="board as current">
+    <dl class="gear-panel p-5 label-printers-defaults" aria-label="Default printers">
+      <div><dt>Tags print to</dt><dd>{{ defaultSummary('ASSET_TAG') }}</dd></div>
+      <div><dt>Cutter cards print to</dt><dd>{{ defaultSummary('CUTTER_CARD') }}</dd></div>
+    </dl>
+
+    <form class="gear-panel p-5 label-printers-form" (ngSubmit)="save()" aria-label="Printer details">
+      <h3 class="text-lg font-black">{{ editingId ? 'Edit printer' : 'Add a printer' }}</h3>
+      <div class="label-printers-fields">
+        <label class="gear-field">Name
+          <input #nameInput class="gear-input" name="printerName" [(ngModel)]="form.name" maxlength="60" placeholder="Cutter Grind Zebra" autocomplete="off" required />
+        </label>
+        <label class="gear-field">IP address
+          <input class="gear-input mono" name="printerHost" [(ngModel)]="form.host" maxlength="253" placeholder="10.16.40.25" autocomplete="off" inputmode="url" required />
+        </label>
+        <label class="gear-field">Port
+          <input class="gear-input mono" name="printerPort" type="number" min="1" max="65535" [(ngModel)]="form.port" required />
+        </label>
+        <label class="gear-field">Printer language
+          <select class="gear-select" name="printerLanguage" [(ngModel)]="form.language">
+            <option value="IPL">IPL (Intermec)</option>
+            <option value="ZPL">ZPL (Zebra)</option>
+          </select>
+        </label>
+        <label class="gear-field">Loaded with
+          <select class="gear-select" name="printerLabelType" [(ngModel)]="form.label_type">
+            <option value="ASSET_TAG">Tags, 2.125 × 0.625 in</option>
+            <option value="CUTTER_CARD">Cutter cards, 4 × 6.5 in</option>
+          </select>
+        </label>
+      </div>
+      <div class="label-printers-checks">
+        <label><input type="checkbox" name="printerDefault" [(ngModel)]="form.is_default" [disabled]="!form.enabled" /> Default printer for {{ typeName(form.label_type).toLowerCase() }}</label>
+        <label><input type="checkbox" name="printerEnabled" [(ngModel)]="form.enabled" /> Available for printing</label>
+      </div>
+      <p class="label-printers-help">The printer must be on the network with raw printing on (port 9100 on most printers), and reachable from the Gear Apps server. A printer plugged into one PC by USB cannot be used. The first printer added for a label becomes its default.</p>
+      <div class="gear-admin-actions">
+        <button type="submit" class="gear-btn gear-btn-primary" [disabled]="saving || !current.available">{{ saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Printer' }}</button>
+        <button type="button" class="gear-btn gear-btn-secondary" *ngIf="editingId" (click)="cancelEdit()" [disabled]="saving">Cancel</button>
+      </div>
+    </form>
+
+    <div class="gear-panel p-5">
+      <h3 class="text-lg font-black">Printers</h3>
+      <div danaTableShell class="table-wrap">
+        <table danaTable class="gear-table">
+          <thead><tr><th>Printer</th><th>Address</th><th>Status</th><th data-dana-table-static>Actions</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let printer of printers" [class.label-printers-editing]="printer.id === editingId">
+              <td><strong>{{ printer.name }}</strong>
+                <small class="label-printers-sub label-printers-kind">{{ typeName(printer.label_type) }} · {{ languageName(printer.language) }}</small>
+                <small class="label-printers-sub" *ngIf="tests[printer.id] as test" [class.label-printers-ok]="test.ok" [class.label-printers-problem]="!test.ok" role="status">{{ test.ok ? '✓' : '!' }} {{ test.text }}</small>
+              </td>
+              <td class="mono">{{ printer.host }}:{{ printer.port }}</td>
+              <td>
+                <span class="gear-badge" *ngIf="printer.is_default">Default</span>
+                <span class="gear-badge" *ngIf="!printer.enabled">Off</span>
+                <span *ngIf="printer.enabled && !printer.is_default">Available</span>
+              </td>
+              <td><div class="label-printers-actions">
+                <ng-container *ngIf="confirmRemoveId !== printer.id; else confirmRemove">
+                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="testConnection(printer)" [disabled]="busyId !== null">{{ busyId === printer.id ? 'Working…' : 'Test Connection' }}</button>
+                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" *ngIf="printer.label_type === 'ASSET_TAG'" (click)="printTestTag(printer)" [disabled]="busyId !== null || !printer.enabled">Print Test Tag</button>
+                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" *ngIf="printer.enabled && !printer.is_default" (click)="makeDefault(printer)" [disabled]="busyId !== null">Make Default</button>
+                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="edit(printer)" [disabled]="busyId !== null">Edit</button>
+                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="setEnabled(printer, !printer.enabled)" [disabled]="busyId !== null">{{ printer.enabled ? 'Turn Off' : 'Turn On' }}</button>
+                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="confirmRemoveId = printer.id" [disabled]="busyId !== null">Remove</button>
+                </ng-container>
+                <ng-template #confirmRemove>
+                  <span>Remove {{ printer.name }}?</span>
+                  <button type="button" class="gear-btn gear-btn-danger gear-btn-sm" (click)="remove(printer)" [disabled]="busyId !== null">Yes, Remove</button>
+                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="confirmRemoveId = null" [disabled]="busyId !== null">Keep</button>
+                </ng-template>
+              </div></td>
+            </tr>
+            <tr *ngIf="printers.length === 0"><td danaTableEmpty colspan="4" class="empty-row">No printers added yet. Add one above; until then labels download as files.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+</section>

@@ -2,7 +2,7 @@ import { RouterLink } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { isPendingGrindingStatus, parseCuttergrindRoughShelfTag, cuttergrindRoughShelfForPartType } from '@gearapps/manufacturing/shared/util-constants';
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
 import { BladeStatus } from '@gearapps/manufacturing/shared/util-types';
@@ -28,6 +28,7 @@ export class GrindingComponent implements OnInit, OnDestroy {
   private readonly destroyed$ = new Subject<void>();
   private selectionVersion = 0;
   private shelfRequestVersion = 0;
+  @ViewChild('trayScanner') trayScanner?: ScanPanelComponent;
   tray: InventoryTrayRow | null = null;
   availableTrays: InventoryTrayRow[] = [];
   selectedTraySerial = '';
@@ -75,7 +76,20 @@ export class GrindingComponent implements OnInit, OnDestroy {
       (this.tray.current_stage?.code === 'GRINDING' && this.pendingGrindingCount > 0 && this.grindingScrapValid && !this.requirementLoading &&
        this.requiredBlades !== null && this.previouslyReadyCount + this.returnedAfterGrinding <= this.requiredBlades && (!this.fullAfterGrinding || (!this.shelvesLoading && this.hasSelectedRoughShelf)))));
   }
-  get stageLabel(): string { return this.waitingToStart ? 'WAITING FOR GRINDING' : this.tray?.current_stage?.code ?? 'GRINDING'; }
+  /** Blades still missing after grinding was recorded; a short tray is not ready for coating whatever its stored stage says. */
+  get bladesShort(): number {
+    const tray = this.tray;
+    if (!tray || tray.current_stage?.code !== 'READY_FOR_COATING' || this.requiredBlades === null) return 0;
+    return Math.max(this.requiredBlades - tray.blade_count, 0);
+  }
+  get stageLabel(): string {
+    if (this.bladesShort > 0) return 'Needs replacement blades';
+    return this.tray?.current_stage?.name || 'Grinding';
+  }
+  get stageTone(): 'ready' | 'attention' | 'active' {
+    if (this.bladesShort > 0) return 'attention';
+    return this.tray?.current_stage?.code === 'READY_FOR_COATING' ? 'ready' : 'active';
+  }
 
   refreshShelves(): void {
     const request = ++this.shelfRequestVersion;
@@ -167,7 +181,8 @@ export class GrindingComponent implements OnInit, OnDestroy {
         const base=`${result.scrapped_blade_count} scrapped; ${result.returned_blade_count} returned. Tray ${result.active_blade_count}/${result.required_blade_count}.`;
         if(result.complete) this.toast.success(`${base} Staged on ${result.rough_shelf_serial_number}.`,'Grinding complete');
         else this.toast.info(`${base} Add ${result.blades_needed} replacement blade(s) in Blade Intake.`,'Tray needs replacements');
-        this.refreshPickers(); this.loadTray(serial,false);
+        this.trayScanner?.clearAndFocus();
+        this.refreshPickers(); this.refreshShelves(); this.loadTray(serial,false);
       },
       error:e=>{ this.busy=false; this.tray=null; this.roughShelfSerial=''; this.refreshPickers(); this.toast.error(apiErrorText(e,'Could not record grinding. Refresh or scan the tray before trying again.'),'Grinding result needs refresh'); },
     });

@@ -11,13 +11,18 @@
     radial-gradient(circle at 30% -5%, rgba(66,153,225,.13), transparent 19rem),
     linear-gradient(180deg, #0b2036 0%, #091a2c 58%, #071522 100%);
   border-right: 1px solid rgba(255,255,255,.065);
-  box-shadow: 18px 0 40px rgba(5,19,33,.22);
+  box-shadow: none;
   transform: translateX(-105%);
-  transition: transform .18s ease;
+  /* A closed drawer stays out of the tab order and casts no shadow onto the page. */
+  visibility: hidden;
+  transition: transform .18s ease, visibility 0s linear .18s;
 }
 
 .gear-sidebar.mobile-open {
+  box-shadow: 18px 0 40px rgba(5,19,33,.22);
   transform: translateX(0);
+  visibility: visible;
+  transition: transform .18s ease;
 }
 
 .gear-topbar {
@@ -54,12 +59,19 @@
     width: var(--gear-sidebar-width);
     box-shadow: 12px 0 32px rgba(5,19,33,.08);
     transform: none;
+    visibility: visible;
+    transition: none;
+  }
+
+  /* The sidebar is always docked on desktop, so the drawer toggle has nothing to open. */
+  .gear-topbar .menu-button {
+    display: none;
   }
 
   .gear-topbar {
     right: 0;
     left: var(--gear-sidebar-width);
-    grid-template-columns: auto minmax(360px, 620px) 1fr;
+    grid-template-columns: minmax(360px, 620px) 1fr;
     gap: 28px;
     height: var(--gear-topbar-height);
     padding: 0 30px;
@@ -211,8 +223,6 @@
 .side-link.primary {
   min-height: 47px;
   margin-bottom: 8px;
-  border-color: rgba(90,155,212,.17);
-  background: rgba(255,255,255,.035);
   color: #f4f8fc;
   font-weight: 780;
 }
@@ -245,6 +255,11 @@
 .side-link.primary.active .nav-icon {
   background: rgba(63,151,229,.16);
   color: #bfe2ff;
+}
+
+/* The ACTIVE pill belongs to the current page only. */
+.side-link:not(.active) > .nav-current {
+  display: none;
 }
 
 .nav-current {
@@ -370,6 +385,8 @@
 }
 
 .topbar-user {
+  /* Always the last column, with or without the search form (view-only users have none). */
+  grid-column: -2 / -1;
   justify-self: end;
   display: flex;
   align-items: center;

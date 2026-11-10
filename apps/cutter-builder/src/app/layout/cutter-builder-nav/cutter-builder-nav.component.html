@@ -31,8 +31,10 @@
       <a (click)="mobileNav.close()" [href]="bladeTrackingUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-blade" aria-hidden="true"></span></span><span>Blade Tracking</span></a>
       <a (click)="mobileNav.close()" [href]="greenshedUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Greenshed</span></a>
 
-      <div class="nav-heading">ADMINISTRATION</div>
-      <a (click)="mobileNav.close()" *ngIf="user.role === 'admin'" routerLink="/admin" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span><span>Admin</span></a>
+      <ng-container *ngIf="user.role === 'admin'">
+        <div class="nav-heading">ADMINISTRATION</div>
+        <a (click)="mobileNav.close()" routerLink="/admin" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span><span>Admin</span></a>
+      </ng-container>
     </nav>
 
     <div class="sidebar-footer">

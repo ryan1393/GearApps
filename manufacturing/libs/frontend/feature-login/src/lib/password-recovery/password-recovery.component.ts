@@ -61,6 +61,8 @@ export class PasswordRecoveryComponent {
   private generation = 0;
   private code = '';
   mode: 'forgot' | 'reset' = 'forgot';
+  /** False when the server has no outgoing email: a reset link can never arrive, so say who can help instead. */
+  resetByEmailAvailable = true;
   codeValid = true;
   submitting = false;
   success = false;
@@ -80,6 +82,14 @@ export class PasswordRecoveryComponent {
     }),
   });
   constructor() {
+    this.http
+      .get<{ passwordResetEnabled?: boolean }>('/api/v1/auth/capabilities')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        // Older servers do not report this; assume email works rather than block the form.
+        next: (capabilities) => { this.resetByEmailAvailable = capabilities.passwordResetEnabled !== false; this.cdr.markForCheck(); },
+        error: () => undefined,
+      });
     combineLatest([this.route.data, this.route.queryParamMap])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([data, params]) => {

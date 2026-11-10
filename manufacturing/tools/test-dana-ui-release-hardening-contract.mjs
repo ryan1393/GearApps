@@ -37,7 +37,8 @@ must(headers.includes("class: 'dana-page-header gear-page-header'"),'Dana page h
 must(consolidation.includes('20 page headers')&&consolidation.includes('DanaPageHeaderComponent'),'Dana page-header consolidation regression contract missing.');
 must(count(allHtml,'danaOperationCard')>=16,'Dana operation cards were removed.');
 must(count(allHtml,'danaKpiCard')===15,'Dana KPI-card coverage changed unexpectedly.');
-must(count(allHtml,'danaSummaryCard')===8,'Dana summary-card coverage changed unexpectedly.');
+// 4 Inventory Control Center + 4 Blade Locations + 4 Admin DSF Mappings.
+must(count(allHtml,'danaSummaryCard')===12,'Dana summary-card coverage changed unexpectedly.');
 must(summary.includes('Dana summary card contract'),'Summary-card regression contract missing.');
 must(!/\sstyle="/.test(allHtml),'Inline style attribute introduced into Gear Apps feature templates.');
 console.log('[PASS] Dana UI release-hardening contract: stabilized shared components, KPI/icon geometry, summary cards, page headers, loading semantics, and dangerous historical regressions are protected.');

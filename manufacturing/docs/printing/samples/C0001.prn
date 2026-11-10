@@ -2,9 +2,8 @@
 CW431
 P
 E97;F97;
-L127;
-B0,AssetTagBarcode;o10,28;f0;h55;w2;c6;i0;d3,C0001;
-H1,AssetTagText;o78,165;f0;h21;w20;c26;r0;b0;d3,C0001;
+B0,AssetTagBarcode;o117,28;f3;h55;w2;c6;i0;d3,C0001;
+H1,AssetTagText;o49,165;f3;h21;w20;c26;r0;b0;d3,C0001;
 R
 E97
 

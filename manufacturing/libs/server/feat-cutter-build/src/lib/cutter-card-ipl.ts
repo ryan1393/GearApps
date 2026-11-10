@@ -25,11 +25,22 @@ function safeIplField(value: string | null | undefined, maxLength = 80): string 
     .slice(0, maxLength);
 }
 
+/**
+ * The card is read on the shop floor, so the build date is printed in plant time. The API host
+ * usually runs in UTC, which would put an evening build on the next day's date.
+ */
+export const CUTTER_CARD_TIME_ZONE = 'America/Indiana/Indianapolis';
+
+const cardDateParts = new Intl.DateTimeFormat('en-US', {
+  timeZone: CUTTER_CARD_TIME_ZONE,
+  year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+});
+
 function formatDate(value: string | Date): string {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return safeIplField(String(value), 30);
-  const pad = (number: number) => String(number).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  const part = Object.fromEntries(cardDateParts.formatToParts(date).map(({ type, value: text }) => [type, text]));
+  return `${part['year']}-${part['month']}-${part['day']} ${part['hour']}:${part['minute']}`;
 }
 
 export function buildCutterCardIpl(fields: CutterCardIplFields): Buffer {

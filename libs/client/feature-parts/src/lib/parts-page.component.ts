@@ -124,13 +124,7 @@ type Tab = 'parts' | 'gearsets';
                         <button type="button" class="dana-btn dana-btn-sm" (click)="openPart(p)">
                           Edit
                         </button>
-                        <button
-                          type="button"
-                          class="dana-btn dana-btn-sm dana-btn-danger"
-                          (click)="askDelete('part', p)"
-                        >
-                          Delete
-                        </button>
+                        <!-- Parts are shared GearApps master data: the API refuses to delete them from Lapper. Set one Inactive with Edit. -->
                       </div>
                     </td>
                   </tr>

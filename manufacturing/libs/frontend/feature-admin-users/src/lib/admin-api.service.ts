@@ -1,9 +1,12 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { LabelPrinterChoiceService } from '@gearapps/manufacturing/frontend/util-common';
 import { Observable } from 'rxjs';
 
 export interface PagedResponse<T> {
   data: T[];
+  /** Paging facts from the API; `hasNextPage` is what tells a loader to stop. */
+  meta?: { hasNextPage?: boolean; page?: number; totalPages?: number; totalItems?: number };
 }
 
 export type AssetTagKind = 'TRAY' | 'CONTAINER' | 'LOCATION';
@@ -12,10 +15,12 @@ export interface AssetTagPrintResult {
   kind: AssetTagKind;
   record_id: string;
   serial_number: string;
-  language: 'IPL';
+  language: 'IPL' | 'ZPL';
   symbology: 'CODE128';
   printed: boolean;
   printer_configured: boolean;
+  printer_name: string | null;
+  failure_reason: string | null;
   file_name: string;
   prn_base64: string;
   message: string;
@@ -144,6 +149,7 @@ export interface AdminLocationRow {
 @Injectable({ providedIn: 'root' })
 export class AdminApiService {
   private readonly http = inject(HttpClient);
+  private readonly printerChoice = inject(LabelPrinterChoiceService);
 
   listUsers(page: number, perPage = 50) {
     return this.http.get<PagedResponse<AdminUser>>(
@@ -333,6 +339,8 @@ export class AdminApiService {
     return this.http.post<AssetTagPrintResult>('/api/v1/asset-tags/print', {
       kind,
       record_id: recordId,
+      // The printer chosen on this computer; left out, the default tag printer is used.
+      printer_id: this.printerChoice.selectedId('ASSET_TAG') ?? undefined,
     });
   }
 
@@ -348,8 +356,12 @@ export class AdminApiService {
     const anchor = document.createElement('a');
     anchor.href = url;
     anchor.download = result.file_name;
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
     anchor.click();
-    URL.revokeObjectURL(url);
+    anchor.remove();
+    // Releasing the file straight away can cancel the save in some browsers.
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   createLocation(input: {

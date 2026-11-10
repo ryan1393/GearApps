@@ -31,7 +31,7 @@ export class WorkflowCancellationController {
   @Get('blade-tracking')
   @Auth([RoleType.ADMIN, RoleType.USER])
   getTray(@Query('identifier') identifier = '') {
-    return getWorkflowCancellation(this.source, 'BLADE_TRACKING', identifier.trim());
+    return getWorkflowCancellation(this.source, 'BLADE_TRACKING', identifier.trim().toUpperCase());
   }
 
   @Post('greenshed')
@@ -56,6 +56,6 @@ export class WorkflowCancellationController {
   }
 
   private cancel(app: ReversalApp, dto: CancelWorkflowDto, user: Uuid) {
-    return cancelWorkflow(this.source, app, app === 'BLADE_TRACKING' ? dto.identifier.trim() : dto.identifier.trim().toUpperCase(), dto.operation_id, dto.reason, user);
+    return cancelWorkflow(this.source, app, dto.identifier.trim().toUpperCase(), dto.operation_id, dto.reason, user);
   }
 }

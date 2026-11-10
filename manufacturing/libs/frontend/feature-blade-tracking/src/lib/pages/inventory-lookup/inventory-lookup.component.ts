@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
 import {
   AssetTagKind,
   BladeTrackingApiService,
@@ -23,7 +24,7 @@ import {
 @Component({
   selector: 'gear-inventory-lookup',
   standalone: true,
-  imports: [CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
+  imports: [GearLabelPrinterPickerComponent, CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
   templateUrl: './inventory-lookup.component.html',
 })
 export class InventoryLookupComponent implements OnInit, OnDestroy {
@@ -31,6 +32,7 @@ export class InventoryLookupComponent implements OnInit, OnDestroy {
   private lookupVersion = 0;
   ngOnDestroy(): void { ++this.lookupVersion; this.destroyed$.next(); this.destroyed$.complete(); }
   private readonly api = inject(BladeTrackingApiService);
+  private readonly toast = inject(GearToastService);
   private readonly route = inject(ActivatedRoute);
 
   @ViewChild('scanner') scanner?: ScanPanelComponent;
@@ -41,8 +43,11 @@ export class InventoryLookupComponent implements OnInit, OnDestroy {
   printingTagSerial: string | null = null;
 
   ngOnInit(): void {
-    const serial = this.route.snapshot.queryParamMap.get('serial')?.trim();
-    if (serial) this.lookup(serial);
+    // The top-bar search navigates here with a new ?serial= even when this page is already open.
+    this.route.queryParamMap.pipe(takeUntil(this.destroyed$)).subscribe((params) => {
+      const serial = params.get('serial')?.trim();
+      if (serial) this.lookup(serial);
+    });
   }
 
   get tray(): InventoryTrayRow | null {
@@ -74,12 +79,8 @@ export class InventoryLookupComponent implements OnInit, OnDestroy {
         if (!result.printed) {
           this.api.downloadAssetTagPrn(result);
         }
-        this.message = {
-          tone: 'success',
-          text: result.printed
-            ? `${result.serial_number} tag sent to the IPL printer.`
-            : `${result.message} ${result.file_name} downloaded.`,
-        };
+        const notice = announceAssetTagPrint(this.toast, result);
+        this.message = { tone: result.printed ? 'success' : 'info', text: notice.text };
       },
       error: (error: HttpErrorResponse) => {
         this.printingTagSerial = null;
@@ -87,6 +88,7 @@ export class InventoryLookupComponent implements OnInit, OnDestroy {
           tone: 'error',
           text: apiErrorText(error, `Could not print ${serialNumber} tag.`),
         };
+        this.toast.error(this.message.text, 'Tag not printed');
       },
     });
   }
@@ -110,10 +112,10 @@ export class InventoryLookupComponent implements OnInit, OnDestroy {
         this.busy = false;
         this.message = {
           tone: 'error',
-          text: apiErrorText(
-            err,
-            `No inventory object found for ${serial}.`,
-          ),
+          // The lookup tries tray, then container, then location; the last 404 only names a location.
+          text: err.status === 404
+            ? `No tray, container, or location has serial ${serial.trim().toUpperCase()}.`
+            : apiErrorText(err, `Could not look up ${serial}.`),
         };
         this.scanner?.select();
       },

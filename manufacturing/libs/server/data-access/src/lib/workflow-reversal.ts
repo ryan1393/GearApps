@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { ConflictException, Injectable, NotFoundException, OnModuleInit } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
+import { dsfCutterCountsEnabled } from '@gearapps/manufacturing/server/util-common';
 import { STARTUP_SCHEMA_LOCK_SQL } from '@gearapps/manufacturing/shared/util-constants';
 
 export type ReversalApp = 'GREENSHED' | 'CUTTER_BUILDER' | 'BLADE_TRACKING';
@@ -297,7 +298,13 @@ export async function cancelWorkflow(source: DataSource, app: ReversalApp, ident
       }
       // last_check_piece_count holds the prior check, or the setup starting count
       // before the first check. Do not restore an intermediate production entry.
-      await manager.query('UPDATE public.cutter_machine_runs SET current_piece_count = $2, last_check_piece_count = $2, "updatedAt" = clock_timestamp(), "updatedBy" = $3 WHERE id = $1', [runs[0].id, count, userId]);
+      if (dsfCutterCountsEnabled()) {
+        // DSF credits production to this cutter, so its running count is not an inspection
+        // entry: put back only the previous check point and leave the running count alone.
+        await manager.query('UPDATE public.cutter_machine_runs SET last_check_piece_count = $2, "updatedAt" = clock_timestamp(), "updatedBy" = $3 WHERE id = $1', [runs[0].id, count, userId]);
+      } else {
+        await manager.query('UPDATE public.cutter_machine_runs SET current_piece_count = $2, last_check_piece_count = $2, "updatedAt" = clock_timestamp(), "updatedBy" = $3 WHERE id = $1', [runs[0].id, count, userId]);
+      }
     }
     await manager.query('UPDATE public.dana_workflow_journal_v1 SET canceled_at = clock_timestamp(), canceled_by = $2, reason = $3 WHERE id = $1', [operation.id, userId, reason.trim()]);
     const saved = await latest(manager, app, identifier);
