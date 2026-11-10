@@ -33,8 +33,10 @@ export class TrayContentsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Card drilldown supplies only a serial; the normal authenticated scan/detail
     // endpoints still resolve the tray. Opening a link never moves inventory.
-    const serial = this.route.snapshot.queryParamMap.get('serial');
-    if (serial?.trim()) this.scan(serial);
+    this.route.queryParamMap.pipe(takeUntil(this.destroyed$)).subscribe((params) => {
+      const serial = params.get('serial');
+      if (serial?.trim()) this.scan(serial);
+    });
   }
 
   @ViewChild('scanner') scanner?: ScanPanelComponent;
@@ -159,10 +161,10 @@ export class TrayContentsComponent implements OnInit, OnDestroy {
     this.api.getBladeHistory(bladeId).pipe(takeUntil(this.destroyed$)).subscribe({
       next: (history) => {
         this.historyByBladeId[bladeId] = history;
-        this.historyLoadingBladeId = null;
+        if (this.historyLoadingBladeId === bladeId) this.historyLoadingBladeId = null;
       },
       error: (error: HttpErrorResponse) => {
-        this.historyLoadingBladeId = null;
+        if (this.historyLoadingBladeId === bladeId) this.historyLoadingBladeId = null;
         this.historyErrorByBladeId[bladeId] = apiErrorText(
           error,
           'Could not load this blade history.',

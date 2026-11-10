@@ -101,10 +101,10 @@ export class ScrapBladesComponent implements OnInit {
     this.api.getBladeHistory(blade.id).subscribe({
       next: (history) => {
         this.historyByBladeId[blade.id] = history;
-        this.historyLoadingBladeId = null;
+        if (this.historyLoadingBladeId === blade.id) this.historyLoadingBladeId = null;
       },
       error: (error: HttpErrorResponse) => {
-        this.historyLoadingBladeId = null;
+        if (this.historyLoadingBladeId === blade.id) this.historyLoadingBladeId = null;
         this.historyErrorByBladeId[blade.id] = apiErrorText(
           error,
           'Could not load this blade history.',

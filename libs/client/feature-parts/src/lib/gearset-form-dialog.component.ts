@@ -16,7 +16,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { apiErrorMessage, AuthService, GearsetsApi } from '@gearapps/client/core';
 import { DialogComponent, SegmentedComponent } from '@gearapps/client/ui';
 import { Gearset, Part, Summary } from '@gearapps/shared/domain';
-import { STATUS_OPTIONS } from './shared';
+import { STATUS_OPTIONS, toStatusOption } from './shared';
 
 @Component({
   selector: 'gear-gearset-form-dialog',
@@ -151,7 +151,7 @@ export class GearsetFormDialogComponent {
             ring_id: g.ring_id,
             ratio: g.ratio,
             summary_id: g.summary_id,
-            status: g.status,
+            status: toStatusOption(g.status),
           });
           ['number', 'pinion_id', 'ring_id', 'ratio', 'summary_id'].forEach((k) =>
             this.form.get(k)?.disable(),

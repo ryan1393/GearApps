@@ -25,7 +25,9 @@ export class GreenshedSetupComponent {
   private selectedMachineNumber='';
   private buildRequest=0; private machineRequest=0; private partRequest=0; private choicesRequest=0;
   buildNumber='';machineNumber='';partNumber='';startingPieceCount=0;comments='';
-  availableBuilds:GreenshedBuild[]=[];
+  availableBuilds:Array<Pick<GreenshedBuild,'build_number'|'summary_number'|'part_type_code'>>=[];
+  /** Which pick lists failed to load; a failed load must not read as "nothing configured". */
+  choiceErrors={builds:false,machines:false,parts:false};
   availableMachineNumbers:string[]=[];
   availableParts:PartMasterRow[]=[];
   build:GreenshedBuild|null=null;part:PartMasterRow|null=null;machine:GreenshedMachine|null=null;busy=false;error='';message='';result:GreenshedSetupResult|null=null;
@@ -42,20 +44,19 @@ export class GreenshedSetupComponent {
 
   get machineLocked():boolean { return !!this.selectedMachineNumber; }
 
-  private rows<T>(value:any):T[] {
-    if(Array.isArray(value)) return value as T[];
-    if(Array.isArray(value?.data)) return value.data as T[];
-    if(Array.isArray(value?.items)) return value.items as T[];
-    return [];
-  }
+  get choicesFailed():boolean { return this.choiceErrors.builds||this.choiceErrors.machines||this.choiceErrors.parts; }
+
+  reloadChoices():void { if(!this.busy)this.loadSetupChoices(); }
 
   private loadSetupChoices():void {
     const request=++this.choicesRequest;
-    this.http.get<any>('/api/v1/greenshed/builds').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next:value=>{if(request!==this.choicesRequest)return;this.availableBuilds=this.rows<GreenshedBuild>(value)
-        .filter(row=>['READY','SHELF'].includes(row.status_code))
+    this.choiceErrors={builds:false,machines:false,parts:false};
+    // The dashboard lists every READY/SHELF build. The general build search returns only the
+    // newest 100 open builds of any status, which pushed older shelf stock out of this picker.
+    this.api.getDashboard().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next:dashboard=>{if(request!==this.choicesRequest)return;this.availableBuilds=[...dashboard.available_cutters]
         .sort((a,b)=>a.build_number.localeCompare(b.build_number));},
-      error:()=>{if(request===this.choicesRequest)this.availableBuilds=[];}
+      error:()=>{if(request===this.choicesRequest){this.availableBuilds=[];this.choiceErrors.builds=true;}}
     });
     this.api.getRunningMachines('ALL').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next:board=>{
@@ -73,13 +74,13 @@ export class GreenshedSetupComponent {
           .filter((value,index,all)=>all.indexOf(value)===index)
           .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
       },
-      error:()=>{if(request===this.choicesRequest)this.availableMachineNumbers=[];}
+      error:()=>{if(request===this.choicesRequest){this.availableMachineNumbers=[];this.choiceErrors.machines=true;}}
     });
     this.http.get<PartMasterRow[]>('/api/v1/parts?active=ALL').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next:parts=>{if(request!==this.choicesRequest)return;this.availableParts=parts
         .filter(row=>row.active && row.enabled)
         .sort((a,b)=>a.part_number.localeCompare(b.part_number,undefined,{numeric:true}));},
-      error:()=>{if(request===this.choicesRequest)this.availableParts=[];}
+      error:()=>{if(request===this.choicesRequest){this.availableParts=[];this.choiceErrors.parts=true;}}
     });
   }
 
@@ -173,6 +174,13 @@ export class GreenshedSetupComponent {
   startAnother(){
     this.buildRequest++;this.choicesRequest++;this.busy=false;
     this.buildNumber='';this.build=null;this.resetSetupDownstream();this.startingPieceCount=0;this.comments='';this.result=null;this.error='';this.message='';
+  }
+
+  /** After a completed setup the machine now has a cutter: release a machine locked from the board and reload every list. */
+  setupAnother(){
+    this.selectedMachineNumber='';
+    this.startAnother();
+    this.loadSetupChoices();
   }
 
   private resetSetupDownstream(){

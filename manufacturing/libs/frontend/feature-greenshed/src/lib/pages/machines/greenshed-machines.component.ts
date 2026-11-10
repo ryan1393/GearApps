@@ -74,10 +74,20 @@ export class GreenshedMachinesComponent implements OnInit, OnDestroy {
     const filter = this.activeFilter;
     this.api.getRunningMachines(filter).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (board) => {
-        if (!this.r14Destroyed && !this.busy && this.r14Generation === generation && this.activeFilter === filter) this.applyBoard(board);
+        if (!this.r14Destroyed && !this.busy && this.r14Generation === generation && this.activeFilter === filter) {
+          this.applyBoard(board);
+          // A live board replaces any earlier load or refresh failure message.
+          this.error = '';
+        }
         this.r14Loading = false;
       },
-      error: () => { this.r14Loading = false; },
+      error: () => {
+        this.r14Loading = false;
+        // Do not let the board go quietly stale: say that what is shown is the last good refresh.
+        if (!this.r14Destroyed && !this.busy && this.r14Generation === generation && this.board) {
+          this.error = 'Could not refresh Running Machines. Showing the last refreshed board; it will retry automatically.';
+        }
+      },
     });
   }
 
@@ -108,6 +118,11 @@ export class GreenshedMachinesComponent implements OnInit, OnDestroy {
         );
       },
     });
+  }
+
+  /** A failed or held check is not a completed quality check, however recently it was recorded. */
+  checkNeedsAttention(machine: RunningMachineRow): boolean {
+    return machine.last_check_code !== 'CS' && ['FAIL', 'HOLD'].includes(String(machine.last_check_result ?? '').toUpperCase());
   }
 
   private applyBoard(board: RunningMachinesBoard): void {

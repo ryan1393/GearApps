@@ -41,8 +41,11 @@ export class InventoryLookupComponent implements OnInit, OnDestroy {
   printingTagSerial: string | null = null;
 
   ngOnInit(): void {
-    const serial = this.route.snapshot.queryParamMap.get('serial')?.trim();
-    if (serial) this.lookup(serial);
+    // The top-bar search navigates here with a new ?serial= even when this page is already open.
+    this.route.queryParamMap.pipe(takeUntil(this.destroyed$)).subscribe((params) => {
+      const serial = params.get('serial')?.trim();
+      if (serial) this.lookup(serial);
+    });
   }
 
   get tray(): InventoryTrayRow | null {
@@ -110,10 +113,10 @@ export class InventoryLookupComponent implements OnInit, OnDestroy {
         this.busy = false;
         this.message = {
           tone: 'error',
-          text: apiErrorText(
-            err,
-            `No inventory object found for ${serial}.`,
-          ),
+          // The lookup tries tray, then container, then location; the last 404 only names a location.
+          text: err.status === 404
+            ? `No tray, container, or location has serial ${serial.trim().toUpperCase()}.`
+            : apiErrorText(err, `Could not look up ${serial}.`),
         };
         this.scanner?.select();
       },

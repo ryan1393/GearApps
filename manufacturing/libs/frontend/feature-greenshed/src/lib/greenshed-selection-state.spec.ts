@@ -183,9 +183,19 @@ describe('Greenshed selected context safety', () => {
     pending.error(new HttpErrorResponse({ status: 404 }));
     expect(c.shelf).toBeNull();
   });
+  it('does not preselect a pull reason and refuses to pull until one is chosen', () => {
+    setup({ build: 'BUILD-A' });
+    const c = pull();
+    const confirm = jest.spyOn(globalThis, 'confirm').mockReturnValue(true);
+    expect(c.reasonCode).toBe('');
+    c.pull();
+    expect(confirm).not.toHaveBeenCalled();
+    expect(api['pullCutter']).not.toHaveBeenCalled();
+  });
   it('sends the validated machine and run as pull preconditions', () => {
     setup({ build: 'BUILD-A' });
     const c = pull();
+    c.reasonCode = 'TEARDOWN';
     jest.spyOn(globalThis, 'confirm').mockReturnValue(true);
     c.pull();
     expect(api['pullCutter']).toHaveBeenCalledWith(
@@ -201,6 +211,7 @@ describe('Greenshed selected context safety', () => {
     const c = pull();
     const pending = new Subject<never>();
     api['pullCutter'].mockReturnValue(pending);
+    c.reasonCode = 'TEARDOWN';
     jest.spyOn(globalThis, 'confirm').mockReturnValue(true);
     c.pull();
     c.reset();

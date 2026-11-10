@@ -47,13 +47,17 @@ export class CutterLookupComponent implements OnInit, OnDestroy {
   readonly partTypes = ['', 'RING', 'PINION'];
 
   ngOnInit(): void {
-    const build = this.route.snapshot.queryParamMap.get('build')?.trim();
-    if (build) {
-      this.searchText = build;
-      this.openCard(build);
-      return;
-    }
-    this.search();
+    // The top-bar search navigates here with ?build=<text> even when this page is already open,
+    // so follow the query string instead of reading it once.
+    this.route.queryParamMap.pipe(takeUntil(this.destroyed$)).subscribe((queryParamMap) => {
+      const text = queryParamMap.get('build')?.trim();
+      if (text) {
+        this.searchText = text;
+        this.openCard(text, true);
+      } else {
+        this.search();
+      }
+    });
   }
 
   search(): void {
@@ -84,7 +88,8 @@ export class CutterLookupComponent implements OnInit, OnDestroy {
     });
   }
 
-  openCard(buildNumber: string): void {
+  /** `searchIfMissing`: the text came from the search box and may be a body serial or Summary rather than a build number. */
+  openCard(buildNumber: string, searchIfMissing = false): void {
     if (this.exporting) return;
     const version = ++this.requestVersion;
     this.card = null;
@@ -100,6 +105,7 @@ export class CutterLookupComponent implements OnInit, OnDestroy {
       },
       error: (err: HttpErrorResponse) => {
         if (version !== this.requestVersion) return;
+        if (searchIfMissing && err.status === 404) { this.search(); return; }
         this.busy = false;
         this.error = cutterApiErrorText(err, 'Cutter build not found.');
       },

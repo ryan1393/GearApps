@@ -64,7 +64,7 @@ export class CutterTeardownComponent implements OnInit, OnDestroy {
   private rows<T>(value:any):T[]{ return Array.isArray(value)?value:Array.isArray(value?.data)?value.data:Array.isArray(value?.items)?value.items:Array.isArray(value?.rows)?value.rows:[]; }
   refreshEligibleSelections():void{
     this.api.getDashboard().pipe(takeUntil(this.destroyed$)).subscribe({next:d=>this.availablePulledBuilds=d.pulled_builds??[],error:()=>this.availablePulledBuilds=[]});
-    this.api.getSelectionTrays().pipe(takeUntil(this.destroyed$)).subscribe({next:v=>this.availableEmptyTrays=this.rows<ITray>(v).filter(t=>t.blade_count===0&&(t as any).active!==false&&(t as any).enabled!==false),error:()=>this.availableEmptyTrays=[]});
+    this.api.getSelectionTrays().pipe(takeUntil(this.destroyed$)).subscribe({next:v=>this.availableEmptyTrays=this.rows<ITray>(v).filter(t=>t.blade_count===0&&!(t as any).current_container&&!(t as any).current_cutter_build&&(t as any).active!==false&&(t as any).enabled!==false),error:()=>this.availableEmptyTrays=[]});
     this.api.getSelectionLocations().pipe(takeUntil(this.destroyed$)).subscribe({next:v=>this.availableLocations=this.rows<ILocation>(v),error:()=>this.availableLocations=[]});
   }
   get eligibleDullShelves():ILocation[]{
@@ -279,8 +279,10 @@ export class CutterTeardownComponent implements OnInit, OnDestroy {
 
   private clearTeardownDownstream(): void {
     this.traySerial = '';
+    this.selectedTraySerial = '';
     this.tray = null;
     this.shelfLocationSerial = '';
+    this.selectedShelfSerial = '';
     this.shelfLocation = null;
     this.scrappedBladeCount = 0;
     this.comments = '';

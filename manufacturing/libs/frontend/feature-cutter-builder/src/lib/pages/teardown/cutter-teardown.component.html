@@ -54,7 +54,7 @@
         <form class="gear-workflow-scan-row" (ngSubmit)="scanTray()">
           <label class="gear-field">
             Tray serial
-            <input [ngModel]="traySerial" (ngModelChange)="trayChanged($event)" [disabled]="busy || !build" name="traySerial" class="gear-input" placeholder="Scan empty tray..." />
+            <input [gearScannerFocus]="2" [ngModel]="traySerial" (ngModelChange)="trayChanged($event)" [disabled]="busy || !build" name="traySerial" class="gear-input" placeholder="Scan empty tray..." autocomplete="off" />
           </label>
           <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy">Scan</button>
         </form>
@@ -123,14 +123,14 @@
           <form class="gear-workflow-scan-row" (ngSubmit)="scanShelf()">
             <label class="gear-field">
               Dull shelf tag
-              <input [ngModel]="shelfLocationSerial" (ngModelChange)="shelfChanged($event)" [disabled]="busy" name="shelfLocationSerial" class="gear-input" placeholder="Scan CGDR-/CGDP- shelf tag..." />
+              <input [gearScannerFocus]="3" [ngModel]="shelfLocationSerial" (ngModelChange)="shelfChanged($event)" [disabled]="busy" name="shelfLocationSerial" class="gear-input" placeholder="Scan CGDR-/CGDP- shelf tag..." autocomplete="off" />
             </label>
             <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy">Scan</button>
           </form>
           <div class="gear-workflow-divider">OR</div>
-          <label class="gear-field">Select Compatible Empty Dull Shelf
+          <label class="gear-field">Select Compatible Dull Shelf
             <select [(ngModel)]="selectedShelfSerial" name="selectedShelfSerial" class="gear-input" (change)="selectDullShelf()" [disabled]="busy">
-              <option value="">Choose compatible empty dull shelf...</option>
+              <option value="">Choose compatible dull shelf...</option>
               <option *ngFor="let location of eligibleDullShelves" [value]="location.serial_number">{{location.serial_number}} · {{location.description || 'Available shelf'}}</option>
             </select>
           </label>

@@ -17,6 +17,7 @@ import { StatusBadgeComponent, ValueFieldComponent } from '@gearapps/client/ui';
 import { Machine, MachineFanucVariable, ScannerDetail } from '@gearapps/shared/domain';
 import {
   catchError,
+  exhaustMap,
   filter,
   forkJoin,
   fromEvent,
@@ -253,7 +254,9 @@ export class MachineLiveCardComponent implements OnDestroy {
         .pipe(
           switchMap((visible) => (visible ? interval(period).pipe(startWith(0)) : of())),
           filter(() => this.doc.visibilityState === 'visible'),
-          switchMap(() =>
+          // exhaustMap, not switchMap: a scanner image slower than the poll period would be
+          // cancelled by every tick, so the card (and its serials and machine I/O) never updated.
+          exhaustMap(() =>
             forkJoin({
               image: scannerId
                 ? this.scannerApi.image(scannerId).pipe(catchError(() => of(null)))

@@ -176,16 +176,22 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   }
 
   createUser(): void {
-    if (!this.userForm.email.trim() || !this.userForm.departmentId || (!this.editingUserId && !this.userForm.password)) {
+    const email = this.userForm.email.trim();
+    if (this.editingUserId ? !this.userForm.departmentId : (!email || !this.userForm.departmentId || !this.userForm.password)) {
       this.error = this.editingUserId
-        ? 'Email and department are required.'
+        ? 'Department is required.'
         : 'Email, password, and department are required.';
+      return;
+    }
+    if (this.editingUserId && this.isSelf(this.editingUserId) && this.userForm.role !== 'admin') {
+      this.error = 'You cannot remove your own administrator role. Ask another administrator.';
       return;
     }
 
     const request = this.editingUserId
       ? this.api.updateUser(this.editingUserId, {
-          email: this.userForm.email.trim(),
+          // Accounts imported without an email keep none unless one is typed in.
+          ...(email ? { email } : {}),
           firstName: this.userForm.firstName.trim() || null,
           lastName: this.userForm.lastName.trim() || null,
           role: this.userForm.role,
@@ -217,8 +223,12 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
 
   cancelUserEdit(): void { this.resetUserForm(); this.clearNotice(); this.cdr.markForCheck(); }
 
+  /** The signed-in administrator's own account: it cannot be disabled or demoted from here. */
+  isSelf(userId: string): boolean { return this.session.currentUser?.sub === userId; }
+
   toggleUserEnabled(user: AdminUser): void {
     const active = !user.active;
+    if (!active && this.isSelf(user.id)) { this.error = 'You cannot disable your own account. Ask another administrator.'; return; }
     this.runCreate(this.api.updateUser(user.id, { active }), `User ${active ? 'enabled' : 'disabled'}.`, () => this.loadUsers());
   }
 
@@ -227,11 +237,12 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     if (!number) { this.error = 'Part Summary number is required.'; return; }
     const payload = {
       number, revision: this.summaryForm.revision.trim(), model_id: this.summaryForm.model_id || null,
-      hos: this.summaryForm.hos.trim() || null, active: true, enabled: true,
+      hos: this.summaryForm.hos.trim() || null,
     };
+    // Active/enabled are set on create only; an edit must not silently re-enable a disabled record.
     const request = this.editingPartSummaryId
       ? this.api.updatePartSummary(this.editingPartSummaryId, payload)
-      : this.api.createPartSummary(payload);
+      : this.api.createPartSummary({ ...payload, active: true, enabled: true });
     this.runCreate(request, this.editingPartSummaryId ? 'Part Summary updated.' : 'Part Summary created.', () => {
       this.resetPartSummaryForm(); this.loadPartSummaries();
     });
@@ -316,11 +327,11 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     const payload = {
       machine_number: this.machineForm.machine_number.trim(), department_id: this.machineForm.department_id,
       cell: this.machineForm.cell, description: this.machineForm.description.trim() || null,
-      machine_type: this.machineForm.machine_type, active: true,
+      machine_type: this.machineForm.machine_type,
     };
     const request = this.editingMachineId
       ? this.api.updateMachine(this.editingMachineId, payload)
-      : this.api.createMachine(payload);
+      : this.api.createMachine({ ...payload, active: true });
     this.runCreate(request, this.editingMachineId ? 'Machine updated.' : 'Machine created.', () => {
       this.resetMachineForm(); this.loadMachines();
     });
@@ -367,13 +378,18 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     );
   }
 
+  /** The part-summary list returns model_id only; look the model up in the loaded Models list. */
+  summaryModel(summary: PartSummaryRow): ModelRow | undefined {
+    return summary.model ?? this.models.find((model) => model.id === summary.model_id);
+  }
+
   get filteredPartSummaries(): PartSummaryRow[] {
     return this.partSummaries.filter((summary) =>
       this.adminSearchMatches(this.partSummarySearch, [
         summary.number,
         summary.revision,
-        summary.model?.model_number,
-        summary.model?.model_type,
+        this.summaryModel(summary)?.model_number,
+        this.summaryModel(summary)?.model_type,
         summary.hos,
         summary.active ? 'active' : 'inactive',
         summary.enabled ? 'enabled' : 'disabled',
@@ -465,9 +481,9 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     }
     const existing = this.rollMasters.find((row) => row.part_id === part.id) ?? part.roll_master ?? null;
     const request = existing
-      ? this.api.updateRollMaster(existing.id, { current_quantity: edit.current_quantity, minimum_quantity: edit.minimum_quantity, active: true, enabled: true })
+      ? this.api.updateRollMaster(existing.id, { current_quantity: edit.current_quantity, minimum_quantity: edit.minimum_quantity })
       : this.api.createRollMaster({ part_id: part.id, current_quantity: edit.current_quantity, minimum_quantity: edit.minimum_quantity, active: true, enabled: true });
-    this.runCreate(request, `Roll Master quantity saved for ${part.part_number}.`, () => { this.loadRollMasters(); this.loadParts(); });
+    this.runCreate(request, `Roll Master quantity saved for ${part.part_number}.`, () => { this.loadRollMasters(part.id); this.loadParts(); });
   }
 
   private normalizeSequentialAssetSerial(prefix: 'T' | 'C', input: string): string {
@@ -772,7 +788,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
         next: (response) => {
           const rows = response.data ?? [];
           const combined = [...accumulated, ...rows];
-          if (rows.length === 50) {
+          if (response.meta?.hasNextPage) {
             this.loadUsers(page + 1, combined);
             return;
           }
@@ -791,7 +807,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
         next: (response) => {
           const rows = response.data ?? [];
           const combined = [...accumulated, ...rows];
-          if (rows.length === 50) {
+          if (response.meta?.hasNextPage) {
             this.loadPartSummaries(page + 1, combined);
             return;
           }
@@ -822,11 +838,13 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     });
   }
 
-  private loadRollMasters(): void {
+  /** `savedPartId`: only that part's typed values are now saved; keep the unsaved edits typed for other parts. */
+  private loadRollMasters(savedPartId?: string): void {
     this.api.listRollMasters().subscribe({
       next: (rows) => {
         this.rollMasters = rows ?? [];
-        this.rollMasterEdits = {};
+        if (savedPartId) delete this.rollMasterEdits[savedPartId];
+        else this.rollMasterEdits = {};
         this.cdr.markForCheck();
       },
       error: (error) => this.handleLoadError(error),
@@ -871,7 +889,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       next: (response) => {
         const rows = response.data ?? [];
         const combined = [...accumulated, ...rows];
-        if (rows.length === 50) {
+        if (response.meta?.hasNextPage) {
           this.loadTrays(page + 1, combined);
           return;
         }
@@ -890,7 +908,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       next: (response) => {
         const rows = response.data ?? [];
         const combined = [...accumulated, ...rows];
-        if (rows.length === 50) {
+        if (response.meta?.hasNextPage) {
           this.loadContainers(page + 1, combined);
           return;
         }
@@ -909,7 +927,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       next: (response) => {
         const rows = response.data ?? [];
         const combined = [...accumulated, ...rows];
-        if (rows.length === 50) {
+        if (response.meta?.hasNextPage) {
           this.loadLocations(page + 1, combined);
           return;
         }

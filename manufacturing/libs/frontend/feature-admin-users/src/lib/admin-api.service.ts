@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 
 export interface PagedResponse<T> {
   data: T[];
+  /** Paging facts from the API; `hasNextPage` is what tells a loader to stop. */
+  meta?: { hasNextPage?: boolean; page?: number; totalPages?: number; totalItems?: number };
 }
 
 export type AssetTagKind = 'TRAY' | 'CONTAINER' | 'LOCATION';

@@ -13,7 +13,7 @@ import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { apiErrorMessage, AuthService, SummariesApi } from '@gearapps/client/core';
 import { DialogComponent, SegmentedComponent } from '@gearapps/client/ui';
 import { Summary } from '@gearapps/shared/domain';
-import { STATUS_OPTIONS } from './shared';
+import { STATUS_OPTIONS, toStatusOption } from './shared';
 
 @Component({
   selector: 'gear-summary-form-dialog',
@@ -93,7 +93,7 @@ export class SummaryFormDialogComponent {
         this.form.reset({ status: 'Active' });
         this.form.enable();
         if (s) {
-          this.form.patchValue(s);
+          this.form.patchValue({ ...s, status: toStatusOption(s.status) });
           ['number', 'model', 'hos'].forEach((k) => this.form.get(k)?.disable());
         }
       });

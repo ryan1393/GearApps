@@ -9,6 +9,7 @@
 
   <div *ngIf="error" class="gear-feedback" role="alert">{{ error }}</div>
   <div *ngIf="message" class="gear-feedback" role="status" aria-live="polite">{{ message }}</div>
+  <div *ngIf="choicesFailed" class="gear-feedback" role="alert">Could not load {{ choiceErrors.builds ? 'available cutter builds' : choiceErrors.machines ? 'available machines' : 'the part list' }}. The lists below may be incomplete. <button type="button" class="gear-btn gear-btn-secondary" (click)="reloadChoices()" [disabled]="busy">Retry</button></div>
 
   <div *ngIf="!result" class="gear-workflow-grid">
     <section class="gear-workflow-section">
@@ -20,6 +21,7 @@
             <option *ngFor="let row of availableBuilds" [value]="row.build_number">{{row.build_number}} · Summary {{row.summary_number}} · {{row.part_type_code}}</option>
           </select>
         </label>
+        <p *ngIf="!choiceErrors.builds && !availableBuilds.length && !build" class="gear-workflow-help">No cutter builds are ready for setup. Build a cutter in Cutter Builder, or return one to a Greenshed shelf with a changeover pull.</p>
         <div *ngIf="build" class="gear-workflow-selection">
           <div class="gear-workflow-selection-title font-mono">{{ build.build_number }}</div>
           <div class="gear-workflow-detail-grid">
@@ -51,7 +53,7 @@
             <option *ngFor="let row of matchingParts" [value]="row.part_number">{{row.part_number}}</option>
           </select>
         </label>
-        <div *ngIf="build && matchingParts.length===0" class="gear-workflow-state gear-workflow-state-warning">No active {{build.part_type_code}} parts are assigned to Summary {{build.summary_number}}.</div>
+        <div *ngIf="build && !choiceErrors.parts && matchingParts.length===0" class="gear-workflow-state gear-workflow-state-warning">No active {{build.part_type_code}} parts are assigned to Summary {{build.summary_number}}.</div>
         <div *ngIf="part" class="gear-workflow-state gear-workflow-state-success">
           <div class="gear-workflow-detail-grid gear-workflow-detail-grid-four">
             <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Part</span><strong>{{part.part_number}}</strong></div>
@@ -70,7 +72,7 @@
         <div *ngIf="part && !selectedRollMaster" class="gear-workflow-state gear-workflow-state-info">No Roll Master quantity is configured for {{ part.part_number }}.</div>
 
         <div class="gear-workflow-form-grid">
-          <label class="gear-field">Starting Piece Count<input type="number" min="0" step="1" [disabled]="busy" [(ngModel)]="startingPieceCount" name="count" class="gear-input" /></label>
+          <label class="gear-field">Starting Piece Count<input type="number" min="0" max="2147483647" step="1" [disabled]="busy" [(ngModel)]="startingPieceCount" name="count" class="gear-input" /></label>
           <label class="gear-field gear-workflow-span-full">Comments<textarea [(ngModel)]="comments" [disabled]="busy" name="comments" rows="3" class="gear-textarea"></textarea></label>
         </div>
         <div class="gear-workflow-actions">
@@ -87,7 +89,7 @@
       <p>Next 25-piece quality check is due at piece <strong>{{ result.next_check_piece_count }}</strong>.</p>
     </div>
     <div class="gear-workflow-result-footer gear-workflow-actions">
-      <button type="button" (click)="startAnother()" class="gear-btn gear-btn-dark">Setup Another Cutter</button>
+      <button type="button" (click)="setupAnother()" class="gear-btn gear-btn-dark">Setup Another Cutter</button>
     </div>
   </div>
 </section>
