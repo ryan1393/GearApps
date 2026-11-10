@@ -1,4 +1,4 @@
-import { CutterCardIplFields } from './cutter-card-ipl';
+import { CutterCardAdjustment, CutterCardIplFields } from './cutter-card-ipl';
 
 /*
  * The Cutter Build card in Zebra ZPL II, for sites whose card printer is a Zebra.
@@ -45,7 +45,7 @@ function fitted(x: number, y: number, value: string, available: number, preferre
 const text = (x: number, y: number, height: number, value: string): string => `^FO${x},${y}^A0N,${height},${height}^FD${value}^FS`;
 const box = (x: number, y: number, width: number, height: number, line = 4): string => `^FO${x},${y}^GB${width},${height},${line}^FS`;
 
-export function buildCutterCardZpl(fields: CutterCardIplFields): Buffer {
+export function buildCutterCardZpl(fields: CutterCardIplFields, adjustment: CutterCardAdjustment = { right: 0, down: 0 }): Buffer {
   const buildId = safeZplField(fields.buildId, 72);
   const bodyNumber = safeZplField(fields.bodyNumber, 48);
   const name = safeZplField(fields.name, 48);
@@ -109,5 +109,11 @@ export function buildCutterCardZpl(fields: CutterCardIplFields): Buffer {
     '^PQ1',
     '^XZ',
   ];
-  return Buffer.from(commands.join('\r\n') + '\r\n', 'utf8');
+  // Field data never contains ^ (see safeZplField), so every ^FO here is a real field origin.
+  const placed = commands.map((command) =>
+    command.replace(/\^FO(\d+),(\d+)/g, (_origin, x: string, y: string) =>
+      `^FO${Math.max(0, Number(x) + adjustment.right)},${Math.max(0, Number(y) + adjustment.down)}`,
+    ),
+  );
+  return Buffer.from(placed.join('\r\n') + '\r\n', 'utf8');
 }

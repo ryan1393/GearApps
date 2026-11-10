@@ -9,6 +9,7 @@
 .label-printers-form { display: grid; gap: .75rem; }
 .label-printers-form h3 { margin: 0; }
 .label-printers-fields { display: grid; grid-template-columns: minmax(12rem, 1.4fr) minmax(10rem, 1fr) 7rem minmax(11rem, 1fr) minmax(14rem, 1.6fr); gap: .75rem; align-items: end; }
+.label-printers-adjust { display: grid; grid-template-columns: 11rem 11rem minmax(0, 1fr); gap: .75rem; align-items: end; }
 .label-printers-checks { display: flex; flex-wrap: wrap; gap: 1.5rem; }
 .label-printers-checks label { display: inline-flex; align-items: center; gap: .5rem; }
 .label-printers-help { margin: 0; max-width: 62rem; font-size: .875rem; opacity: .8; }
@@ -20,4 +21,4 @@
 .label-printers-actions .gear-btn { white-space: nowrap; }
 .label-printers-editing > td { background: #eef4fb; }
 @media (max-width: 1200px) { .label-printers-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 640px) { .label-printers-fields, .label-printers-defaults { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .label-printers-fields, .label-printers-defaults, .label-printers-adjust { grid-template-columns: 1fr; } }

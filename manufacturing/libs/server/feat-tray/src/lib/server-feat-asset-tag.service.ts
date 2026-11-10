@@ -64,7 +64,7 @@ export class ServerFeatAssetTagService {
     const printer = await this.printers.resolve('ASSET_TAG', printerId);
     // With no printer set up the file is still offered, in the language these tags were first built in.
     const language: LabelLanguage = printer?.language ?? 'IPL';
-    const payload = buildAssetTag(language, serialNumber);
+    const payload = buildAssetTag(language, serialNumber, { right: printer?.offset_right ?? 0, down: printer?.offset_down ?? 0 });
 
     let printed = false;
     let failureReason: string | null = null;

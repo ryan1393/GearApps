@@ -26,6 +26,9 @@ export const LABEL_PRINTER_SCHEMA_SQL = [
   `CREATE UNIQUE INDEX IF NOT EXISTS gear_label_printers_name_uq ON public.gear_label_printers (lower(name))`,
   // One default per kind of label.
   `CREATE UNIQUE INDEX IF NOT EXISTS gear_label_printers_default_uq ON public.gear_label_printers (label_type) WHERE is_default`,
+  // Fine adjustment of where the label lands on this printer's stock, in dots (203 per inch).
+  `ALTER TABLE public.gear_label_printers ADD COLUMN IF NOT EXISTS offset_right integer NOT NULL DEFAULT 0`,
+  `ALTER TABLE public.gear_label_printers ADD COLUMN IF NOT EXISTS offset_down integer NOT NULL DEFAULT 0`,
 ];
 
 export async function ensureLabelPrinterSchema(database: SchemaDatabase): Promise<void> {

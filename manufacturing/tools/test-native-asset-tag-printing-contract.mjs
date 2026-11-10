@@ -56,14 +56,17 @@ requireText(label, 'W${ASSET_TAG_WIDTH_DOTS}', 'IPL print width');
 requireText(label, 'c6;i0;d3,${serial}', 'IPL Code 128 field');
 requireText(label, 'c26;r0;b0;d3,${serial}', 'IPL human-readable field');
 requireText(label, '^PW${ASSET_TAG_WIDTH_DOTS}', 'ZPL print width');
-requireText(label, '^LL${ASSET_TAG_HEIGHT_DOTS}', 'ZPL label height');
-requireText(label, '^BCN,${BARCODE_HEIGHT_DOTS},N,N,N,A^FD${serial}^FS', 'ZPL Code 128 field');
-requireText(service, "buildAssetTag(language, serialNumber)", 'tag built in the printer language');
+// The label length is left to the printer's media calibration; the tag is positioned from its measured registration.
+requireText(label, 'const ZPL_REGISTRATION: LabelAdjustment = { right: 23, down: 20 }', 'measured ZPL registration');
+requireText(label, '^BCN,${BARCODE_HEIGHT_DOTS},N,N,N,N^FD${serial}^FS', 'ZPL Code 128 field');
+requireText(service, "buildAssetTag(language, serialNumber, { right: printer?.offset_right ?? 0, down: printer?.offset_down ?? 0 })", 'tag built in the printer language at its adjusted position');
 requireText(service, "this.printers.resolve('ASSET_TAG', printerId)", 'chosen or default tag printer');
 requireText(printers, 'GEAR_LABEL_PRINTER_HOST', 'environment fallback printer');
 requireText(printers, "labelType === 'ASSET_TAG' ? this.environmentPrinter() : null", 'environment printer is the tag fallback only');
 requireText(printerSchema, "language text NOT NULL CHECK (language IN ('IPL','ZPL'))", 'printer language');
 requireText(printerSchema, 'ON public.gear_label_printers (label_type) WHERE is_default', 'one default printer per label');
+requireText(printerSchema, 'ADD COLUMN IF NOT EXISTS offset_right integer NOT NULL DEFAULT 0', 'per-printer position adjustment added to an existing table');
+requireText(printerSchema, 'ADD COLUMN IF NOT EXISTS offset_down integer NOT NULL DEFAULT 0', 'per-printer position adjustment added to an existing table');
 requireText(service, "payload.toString('base64')", 'native tag file fallback');
 for(const forbidden of ['TRAY-','CONT-','CONTAINER-']) { forbidText(service, forbidden, 'native label generator'); forbidText(label, forbidden, 'native label generator'); }
 

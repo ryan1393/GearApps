@@ -17,7 +17,7 @@ const PRINTER_ENV = ['GEAR_LABEL_PRINTER_HOST', 'GEAR_LABEL_PRINTER_PORT', 'GEAR
 
 /** The printer registry over a stand-in for the Admin printer table. */
 async function printerRegistry(saved: Partial<LabelPrinterRow>[] = []): Promise<LabelPrinterService> {
-  const rows = saved.map((row) => ({ label_type: 'ASSET_TAG', language: 'IPL', is_default: false, enabled: true, port: 9100, ...row }));
+  const rows = saved.map((row) => ({ label_type: 'ASSET_TAG', language: 'IPL', is_default: false, enabled: true, port: 9100, offset_right: 0, offset_down: 0, ...row }));
   const query = jest.fn(async (sql: string, parameters: unknown[] = []) => {
     if (!sql.includes('SELECT')) return [];
     if (sql.includes('WHERE id = $1')) return rows.filter((row) => row.id === parameters[0] && row.label_type === parameters[1] && row.enabled);
@@ -140,7 +140,7 @@ describe('ServerFeatAssetTagService', () => {
   });
 
   it('keeps every tag field on the 431 x 127 dot label in both languages', () => {
-    for (const serial of ['T0001', 'CGDR-1.955FC', 'A'.repeat(32)]) {
+    for (const serial of ['T0001', 'CGDR-1.955FC', 'A'.repeat(30)]) {
       const modules = 11 * (serial.length + 2) + 13;
       const ipl = buildAssetTag('IPL', serial).toString('latin1');
       const [, barFeed, barAcross, barHeight, barDots] = /B0,AssetTagBarcode;o(\d+),(\d+);f3;h(\d+);w(\d);c6/.exec(ipl)!.map(Number);
@@ -151,15 +151,52 @@ describe('ServerFeatAssetTagService', () => {
       expect(textFeed - textHeight).toBeGreaterThanOrEqual(0);
       expect(barAcross + modules * barDots).toBeLessThanOrEqual(431);
       expect(textAcross + serial.length * textWidth).toBeLessThanOrEqual(431);
+      // Centred: the same room on both sides of the barcode.
+      expect(Math.abs(barAcross - (431 - barAcross - modules * barDots))).toBeLessThanOrEqual(1);
 
       const zpl = buildAssetTag('ZPL', serial).toString('ascii');
-      const [, zplDots] = /\^BY(\d),3,55/.exec(zpl)!.map(Number);
-      const [, zplAcross, zplDown] = /\^FO(\d+),(\d+)\^BCN,55,N,N,N,A/.exec(zpl)!.map(Number);
+      const [, zplDots] = /\^BY(\d),3,54/.exec(zpl)!.map(Number);
+      const [, zplAcross, zplDown] = /\^FO(\d+),(\d+)\^BCN,54,N,N,N,N/.exec(zpl)!.map(Number);
+      const [, textX, textY, textH, blockWidth] = /\^FO(\d+),(\d+)\^A0N,(\d+),\d+\^FB(\d+),1,0,C,0/.exec(zpl)!.map(Number);
       expect(zplAcross + modules * zplDots).toBeLessThanOrEqual(431);
-      expect(zplDown + 55).toBeLessThan(78);
+      expect(textX + blockWidth).toBeLessThanOrEqual(431);
+      expect(zplDown + 54).toBeLessThanOrEqual(textY);
+      // On the label both for a printer that registers exactly and for the measured Zebra,
+      // which prints 20 dots high: 127 dots of label start at 0 or at 20.
+      for (const labelTop of [0, 20]) {
+        expect(zplDown - labelTop).toBeGreaterThanOrEqual(0);
+        expect(textY + textH - labelTop).toBeLessThanOrEqual(127);
+      }
       expect(zpl).toContain(`^FD${serial}^FS`);
+      expect(zpl).not.toContain('^LL');
       expect(zpl.startsWith('^XA')).toBe(true);
       expect(zpl.trimEnd().endsWith('^XZ')).toBe(true);
+    }
+  });
+
+  it("moves the whole tag by a printer's own adjustment", () => {
+    const origin = (label: string, pattern: RegExp) => pattern.exec(label)!.slice(1, 3).map(Number);
+    const zplBar = /\^FO(\d+),(\d+)\^BCN/;
+    const [x, y] = origin(buildAssetTag('ZPL', 'T0001').toString('ascii'), zplBar);
+    expect(origin(buildAssetTag('ZPL', 'T0001', { right: 8, down: -5 }).toString('ascii'), zplBar)).toEqual([x + 8, y - 5]);
+
+    // IPL: across is the second value; down the tag is toward the smaller feed value.
+    const iplBar = /B0,AssetTagBarcode;o(\d+),(\d+);/;
+    const [feed, across] = origin(buildAssetTag('IPL', 'T0001').toString('latin1'), iplBar);
+    expect(origin(buildAssetTag('IPL', 'T0001', { right: 8, down: -5 }).toString('latin1'), iplBar)).toEqual([feed + 5, across + 8]);
+  });
+
+  it('sends a tag moved by the adjustment saved on the printer', async () => {
+    const printer = await listen();
+    try {
+      const service = await serviceFor({ tray: 'T0001' }, [
+        { id: '22222222-2222-4222-8222-222222222222', name: 'Nudged', host: '127.0.0.1', port: printer.port, language: 'ZPL', is_default: true, offset_right: 6, offset_down: 4 },
+      ]);
+      await service.printTag({ kind: 'TRAY', record_id: RECORD_ID });
+
+      expect((await printer.received).equals(buildAssetTag('ZPL', 'T0001', { right: 6, down: 4 }))).toBe(true);
+    } finally {
+      printer.server.close();
     }
   });
 
@@ -171,9 +208,9 @@ describe('ServerFeatAssetTagService', () => {
   });
 
   it('refuses a serial whose barcode would run off the label', async () => {
-    const fits = 'A'.repeat(32);
+    const fits = 'A'.repeat(30);
     await expect((await serviceFor({ location: fits })).printTag({ kind: 'LOCATION', record_id: RECORD_ID })).resolves.toMatchObject({ serial_number: fits });
-    await expect((await serviceFor({ location: 'A'.repeat(33) })).printTag({ kind: 'LOCATION', record_id: RECORD_ID })).rejects.toBeInstanceOf(BadRequestException);
+    await expect((await serviceFor({ location: 'A'.repeat(31) })).printTag({ kind: 'LOCATION', record_id: RECORD_ID })).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it('refuses a tray whose stored serial is not a T serial', async () => {

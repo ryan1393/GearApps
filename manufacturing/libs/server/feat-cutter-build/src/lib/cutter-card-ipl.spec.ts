@@ -1,4 +1,4 @@
-import { buildCutterCardIpl, cutterCardBuildDate } from './cutter-card-ipl';
+import { buildCutterCardIpl, cutterCardBuildDate, moveCutterCardIpl } from './cutter-card-ipl';
 
 describe('cutter card IPL', () => {
   it('prints the build date in plant time, not the API host time', () => {
@@ -25,5 +25,17 @@ describe('cutter card IPL', () => {
     expect(card).toContain('d3,Pat Operator;');
     expect(card).toContain('Coated  ;o1080,570;f3;h1;w1;c31;r0;b0;d3,X;');
     expect(card).toContain('Honed   ;o1127,571;f3;h1;w1;c31;r0;b0;d3,;');
+  });
+
+  it("moves every field of the card by the printer's adjustment and leaves the rest alone", () => {
+    const card = buildCutterCardIpl({ buildId: 'P1955FC-1042-001', buildDate: '2026-11-10 11:34', name: 'Pat', bodyNumber: '1042', machine: 'G12', coated: true, honed: false });
+    const origins = (text: string) => [...text.matchAll(/;o(\d+),(\d+);/g)].map((match) => [Number(match[1]), Number(match[2])]);
+    const before = card.toString('latin1');
+    const after = moveCutterCardIpl(card, { right: 10, down: 25 }).toString('latin1');
+
+    // Across the web is the second value; down the card is toward the smaller feed value.
+    expect(origins(after)).toEqual(origins(before).map(([feed, across]) => [feed - 25, across + 10]));
+    expect(after.replace(/;o\d+,\d+;/g, ';o;')).toBe(before.replace(/;o\d+,\d+;/g, ';o;'));
+    expect(moveCutterCardIpl(card, { right: 0, down: 0 })).toBe(card);
   });
 });
