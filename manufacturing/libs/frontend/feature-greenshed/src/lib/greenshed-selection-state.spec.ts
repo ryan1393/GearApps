@@ -70,6 +70,7 @@ describe('Greenshed selected context safety', () => {
       pullCutter: jest.fn(() => of({ status_code: 'PULLED' })),
       qualityCheck: jest.fn(() => of({})),
       getRunningMachines: jest.fn(() => of({ departments: [] })),
+      getDsfCounts: jest.fn(() => of({ format: 'DSFCOUNT1', configured: false, rows: [] })),
       getMachine: jest.fn(),
       getPartByNumber: jest.fn(),
       setupCutter: jest.fn(() => of({})),

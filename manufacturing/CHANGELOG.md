@@ -48,6 +48,26 @@ Workflow and UI review. No schema changes; API changes are additive.
 - **API.** Piece counts above the integer column range return a validation error instead
   of a database error. "Cancel last tray transaction" accepts a serial in any letter case.
 
+DSF (Digital Shop Floor / Ignition) production counts for cutting Departments 132 and 152,
+restored from the earlier integration. Off by default; see `docs/DSF_COUNTS.md`.
+
+- **Reader** (`DSF_COUNT_ENABLED`). The API pulls RUN production from the DSF PostgreSQL source
+  in a read-only session and Running Machines shows a **DSF Count** column. Nothing is written
+  to DSF, and nothing else changes.
+- **Cutter crediting** (`DSF_CUTTER_WRITE_ENABLED`). DSF production is added to the installed
+  cutter's Part Count through a machine + cutter run + shift ledger, so the 25-piece check comes
+  due without a count being entered. Crediting starts at activation and does not back-fill; it
+  stops for review rather than guess when the source total drops or a count is changed by hand.
+- **Admin > DSF Mappings.** Choose, change or remove the DSF source for each machine, with
+  the reader's status and the reason for its last failed read. Changes are audited.
+- **Changeover.** A cutter returning from a Greenshed shelf continues with the piece count and
+  last-check count of its previous run instead of the typed starting count.
+- With crediting on, a quality check records the count it was taken at and cancelling a check
+  leaves the running count alone. With it off, both behave exactly as before.
+- Four additive tables are created the first time the reader is enabled. Department 45
+  grinder balances are not included: they depend on grinder tracking and loose blade sets that
+  this codebase does not have.
+
 ## 70.3.0 (2026-11-09)
 
 - Fixed clean Linux Docker builds when a native dependency's prebuilt download

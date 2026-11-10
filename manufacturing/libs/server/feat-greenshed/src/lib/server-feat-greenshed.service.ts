@@ -22,6 +22,7 @@ import {
   buildSummaryShelfTag,
   normalizeSummaryNumber,
 } from '@gearapps/manufacturing/shared/util-constants';
+import { dsfCutterCountsEnabled } from '@gearapps/manufacturing/server/util-common';
 import { Uuid } from '@gearapps/manufacturing/shared/util-types';
 import {
   ConflictException,
@@ -68,6 +69,9 @@ export class ServerFeatGreenshedService {
       pull_reasons: pullReasons,
       check_results: checkResults,
       check_interval: ServerFeatGreenshedService.CHECK_INTERVAL,
+      // True when DSF credits production to cutters: the running count then moves on its own
+      // and a check records the count it was taken at instead of setting the running count.
+      dsf_cutter_counts: dsfCutterCountsEnabled(),
     };
   }
 
@@ -79,7 +83,7 @@ export class ServerFeatGreenshedService {
   async getBuild(buildNumber: string) {
     const build = await this.findBuild(buildNumber);
 
-    const [run, location] = await Promise.all([
+    const [run, location, previousRun] = await Promise.all([
       this.dataSource.getRepository(CutterMachineRunOrmEntity).findOne({
         where: { cutter_build_id: build.id, enabled: true },
         relations: { part: true },
@@ -88,6 +92,13 @@ export class ServerFeatGreenshedService {
         where: { cutter_build_id: build.id, enabled: true },
         relations: { location: true },
       }),
+      // A cutter on a Greenshed shelf keeps the counts from its last machine run.
+      build.status.code === 'SHELF'
+        ? this.dataSource.getRepository(CutterMachineRunOrmEntity).findOne({
+            where: { cutter_build_id: build.id, enabled: false },
+            order: { removed_at: 'DESC' },
+          })
+        : Promise.resolve(null),
     ]);
 
     return {
@@ -100,6 +111,9 @@ export class ServerFeatGreenshedService {
       part_type_code: build.part_type.code,
       status_code: build.status.code,
       built_at: build.built_at,
+      // What the next setup will start from when this cutter comes back off the shelf.
+      changeover_piece_count: previousRun?.current_piece_count ?? null,
+      changeover_last_check_piece_count: previousRun?.last_check_piece_count ?? null,
       machine_run: run
         ? {
             id: run.id,
@@ -208,7 +222,8 @@ export class ServerFeatGreenshedService {
 
       const buildNumber = dto.build_number.trim().toUpperCase();
       const machineNumber = normalizeMachine(dto.machine_number);
-      const startingPieceCount = dto.starting_piece_count ?? 0;
+      let startingPieceCount = dto.starting_piece_count ?? 0;
+      let startingLastCheckPieceCount = startingPieceCount;
 
       const lockedMachineDefinition = await machineRepo.findOne({
         where: { machine_number: machineNumber, enabled: true },
@@ -260,6 +275,20 @@ export class ServerFeatGreenshedService {
         throw new ConflictException(
           `Cutter ${buildNumber} cannot be setup while status is ${build.status.code}`,
         );
+      }
+
+      // An intact cutter coming back from a Greenshed shelf continues where it stopped: it
+      // carries the piece count and last-check count of its previous run, whatever was typed.
+      // Only a cutter new to a machine uses the requested starting count.
+      if (build.status.code === 'SHELF') {
+        const previousRun = await runRepo.findOne({
+          where: { cutter_build_id: build.id, enabled: false },
+          order: { removed_at: 'DESC' },
+        });
+        if (previousRun) {
+          startingPieceCount = previousRun.current_piece_count;
+          startingLastCheckPieceCount = previousRun.last_check_piece_count;
+        }
       }
 
       const buildPartType = build.part_type.code.trim().toUpperCase();
@@ -363,7 +392,7 @@ export class ServerFeatGreenshedService {
           installed_at: installedAt,
           removed_at: null,
           current_piece_count: startingPieceCount,
-          last_check_piece_count: startingPieceCount,
+          last_check_piece_count: startingLastCheckPieceCount,
           installed_by_user_id: userId,
           removed_by_user_id: null,
           enabled: true,
@@ -401,7 +430,7 @@ export class ServerFeatGreenshedService {
         part_number: part.part_number,
         current_piece_count: startingPieceCount,
         next_check_piece_count:
-          startingPieceCount + ServerFeatGreenshedService.CHECK_INTERVAL,
+          startingLastCheckPieceCount + ServerFeatGreenshedService.CHECK_INTERVAL,
         status_code: runningStatus.code,
         installed_at: installedAt,
       };
@@ -535,7 +564,16 @@ export class ServerFeatGreenshedService {
           'The active machine run has changed. Reopen the cutter before recording a check.',
         );
       }
-      if (dto.piece_count < run.current_piece_count) {
+      // Operator-counted cutters: a check also sets the running count, so it cannot go backwards.
+      // DSF-counted cutters: the running count moves on its own and is usually already past the
+      // check point, so a check records the count it was taken at, at or after the previous check.
+      const dsfCounts = dsfCutterCountsEnabled();
+      if (dsfCounts && dto.piece_count < run.last_check_piece_count) {
+        throw new UnprocessableEntityException(
+          `Check piece count cannot be below previous check count ${run.last_check_piece_count}`,
+        );
+      }
+      if (!dsfCounts && dto.piece_count < run.current_piece_count) {
         throw new UnprocessableEntityException(
           `Check piece count cannot be below current machine count ${run.current_piece_count}`,
         );
@@ -624,7 +662,9 @@ export class ServerFeatGreenshedService {
         );
       }
 
-      run.current_piece_count = dto.piece_count;
+      run.current_piece_count = dsfCounts
+        ? Math.max(run.current_piece_count, dto.piece_count)
+        : dto.piece_count;
       run.last_check_piece_count = dto.piece_count;
       run.updatedBy = userId;
       await runRepo.save(run);

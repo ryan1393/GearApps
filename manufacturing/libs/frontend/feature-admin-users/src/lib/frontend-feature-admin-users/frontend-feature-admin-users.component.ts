@@ -37,16 +37,17 @@ import {
   AdminTrayRow,
   AssetTagKind,
 } from '../admin-api.service';
-
-type AdminTab = 'users' | 'part-summaries' | 'parts' | 'roll-masters' | 'models' | 'machines' | 'trays' | 'containers' | 'locations' | 'cutter-bodies';
+import { DsfMachineMappingsComponent } from '../dsf-machine-mappings/dsf-machine-mappings.component';
 import {
   DanaPageHeaderComponent,
 } from '@dana/ui';
 
+type AdminTab = 'users' | 'part-summaries' | 'parts' | 'roll-masters' | 'models' | 'machines' | 'dsf-mappings' | 'trays' | 'containers' | 'locations' | 'cutter-bodies';
+
 @Component({
   selector: 'gear-admin-users-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaPageHeaderComponent],
+  imports: [CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent],
   templateUrl: './frontend-feature-admin-users.component.html',
   styleUrls: ['./frontend-feature-admin-users.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,

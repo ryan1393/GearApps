@@ -17,11 +17,14 @@
     <button type="button" [class.active]="activeTab === 'roll-masters'" (click)="setTab('roll-masters')">Roll Master</button>
     <button type="button" [class.active]="activeTab === 'models'" (click)="setTab('models')">Models</button>
     <button type="button" [class.active]="activeTab === 'machines'" (click)="setTab('machines')">Machines</button>
+    <button type="button" [class.active]="activeTab === 'dsf-mappings'" (click)="setTab('dsf-mappings')">DSF Mappings</button>
     <button type="button" [class.active]="activeTab === 'trays'" (click)="setTab('trays')">Trays</button>
     <button type="button" [class.active]="activeTab === 'containers'" (click)="setTab('containers')">Containers</button>
     <button type="button" [class.active]="activeTab === 'locations'" (click)="setTab('locations')">Locations</button>
     <button type="button" [class.active]="activeTab === 'cutter-bodies'" (click)="setTab('cutter-bodies')">Cutter Bodies</button>
   </nav>
+
+  <gear-admin-dsf-machine-mappings *ngIf="activeTab === 'dsf-mappings'" />
 
   <div class="gear-admin-layout" *ngIf="activeTab === 'users'">
     <form class="gear-panel gear-admin-form" (ngSubmit)="createUser()">

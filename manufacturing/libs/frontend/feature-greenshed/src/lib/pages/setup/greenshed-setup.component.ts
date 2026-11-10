@@ -44,6 +44,12 @@ export class GreenshedSetupComponent {
 
   get machineLocked():boolean { return !!this.selectedMachineNumber; }
 
+  /** The count a shelf cutter resumes from, or null for a cutter new to a machine. */
+  get carriedPieceCount():number|null {
+    const count=this.build?.status_code==='SHELF' ? this.build.changeover_piece_count : null;
+    return typeof count==='number' ? count : null;
+  }
+
   get choicesFailed():boolean { return this.choiceErrors.builds||this.choiceErrors.machines||this.choiceErrors.parts; }
 
   reloadChoices():void { if(!this.busy)this.loadSetupChoices(); }
@@ -129,6 +135,8 @@ export class GreenshedSetupComponent {
       next:b=>{
         if(request!==this.buildRequest)return;
         this.build=b;this.buildNumber=b.build_number;this.busy=false;this.loadSetupChoices();
+        // An intact cutter returning from a Greenshed shelf continues the count of its last run; the API enforces it.
+        this.startingPieceCount=this.carriedPieceCount ?? 0;
         if(!['READY','SHELF'].includes(b.status_code)){this.error=`Build ${b.build_number} is ${b.status_code} and cannot be setup.`;return;}
         if(this.machineLocked)this.scanMachine();
       },

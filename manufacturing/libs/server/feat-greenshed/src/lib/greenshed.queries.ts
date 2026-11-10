@@ -4,6 +4,7 @@
  * setup/check/pull writes stay in the service.
  */
 import { loadCurrentShiftCounts } from './greenshed-shift-counts';
+import { loadDsfCutterShiftCounts } from './dsf-count/dsf-cutter-shift-counts';
 import { DataSource, In, IsNull } from 'typeorm';
 import {
   CutterBuildLocationOrmEntity,
@@ -239,6 +240,15 @@ export async function loadRunningMachines(
     refreshedAt,
   );
 
+  // With DSF cutter crediting on, Shift Count is what DSF credited to the installed cutter in
+  // this shift (keyed by cutter run, so a previous cutter's pieces never show under a new one).
+  // Otherwise it stays the machine's recorded increases, exactly as before.
+  const dsfShiftCounts = await loadDsfCutterShiftCounts(
+    dataSource,
+    shiftCounts.currentShift.starts_at,
+    machines.map((machine) => machine.id),
+  );
+
   const rows = await Promise.all(
     machines.map(async (machine) => {
       const run = await runRepo.findOne({
@@ -272,7 +282,7 @@ export async function loadRunningMachines(
           part_type_code: null,
           cutter_body_serial_number: null,
           shift: null,
-          shift_piece_count: shiftCounts.counts.get(machine.id) ?? 0,
+          shift_piece_count: dsfShiftCounts ? 0 : (shiftCounts.counts.get(machine.id) ?? 0),
           current_piece_count: 0,
           last_check_code: null,
           last_check_name: null,
@@ -319,7 +329,9 @@ export async function loadRunningMachines(
           run.cutter_build.cutter_body,
         ),
         shift: run.shift,
-        shift_piece_count: shiftCounts.counts.get(machine.id) ?? 0,
+        shift_piece_count: dsfShiftCounts
+          ? (dsfShiftCounts.get(run.id) ?? 0)
+          : (shiftCounts.counts.get(machine.id) ?? 0),
         current_piece_count: run.current_piece_count,
         last_check_code: lastEvent?.event_type?.code ?? 'CS',
         last_check_name: lastEvent?.event_type?.name ?? 'Setup',

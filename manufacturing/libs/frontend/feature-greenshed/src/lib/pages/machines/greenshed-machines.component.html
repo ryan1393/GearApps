@@ -1,4 +1,4 @@
-<section class="gear-page running-machines-page">
+<section class="gear-page running-machines-page" [class.dsf-count-enabled]="dsfShown">
   <div class="running-machines-header">
     <!-- DANA-R61R6-LOGO-REMOVED -->
     <div class="running-title-wrap">
@@ -57,6 +57,7 @@
               </th>
               <th class="part-count-col" title="Recorded total on the active cutter run"><span class="column-heading-stack"><span>PART</span><span>COUNT</span></span></th>
               <th class="shift-count-col" [attr.title]="board?.current_shift?.label || 'Recorded count increases during the current shift'"><span class="column-heading-stack"><span>SHIFT</span><span>COUNT</span></span></th>
+              <th *ngIf="dsfShown" class="dsf-count-col" title="Digital Shop Floor production for this machine in the current shift"><span class="column-heading-stack"><span>DSF</span><span>COUNT</span></span></th>
               <th class="machine-check-col">
                 <span class="column-heading-stack">
                   
@@ -98,6 +99,14 @@
               
               <td class="part-count-cell"><span *ngIf="machine.has_cutter" class="part-count-value">{{ machine.current_piece_count | number:'1.0-0' }}</span></td>
               <td class="shift-count-cell" [attr.title]="board?.current_shift?.is_complete ? 'Recorded count increases during the current shift' : 'Partial shift: tracking began after this shift started'"><span class="shift-count-value">{{ (machine.shift_piece_count === null || machine.shift_piece_count === undefined) ? '—' : (machine.shift_piece_count | number:'1.0-0') }}<sup *ngIf="board?.current_shift && !board?.current_shift?.is_complete">*</sup></span></td>
+              <td *ngIf="dsfShown" class="dsf-count-cell">
+                <ng-container *ngIf="dsfCell(machine) as dsf">
+                  <span [attr.title]="dsf.title" [class.dsf-count-warning]="dsf.warning">
+                    <span class="dsf-count-value">{{ dsf.value === null ? '—' : (dsf.value | number:'1.0-0') }}</span>
+                    <span class="dsf-count-state">{{ dsf.label }}</span>
+                  </span>
+                </ng-container>
+              </td>
               <td class="machine-check-cell">
                 
                 <span
@@ -143,6 +152,8 @@
     <span>Active/Inactive comes from the Machine master record</span>
     <span>Cutter occupancy comes from the active machine run</span>
     <span>Click a machine number for actions</span>
+    <span *ngIf="dsfShown" class="shift-count-note">DSF Count = RUN production for the machine in the current DSF shift, read every {{ dsfBoard?.interval_seconds }} seconds. {{ dsfBoard?.cutter_write_enabled ? 'It is credited to the installed cutter (Part Count).' : 'Shown for comparison only; Part Count is unchanged.' }}</span>
+    <span *ngIf="dsfShown && dsfTransportFailed" class="shift-count-note" role="status">DSF counts could not be refreshed; showing the last values.</span>
   </div>
 </section>
 <dialog #machineActions class="machine-actions-dialog" aria-labelledby="machine-actions-title" (cancel)="closeActions()" (pointerup)="closeFromBackdrop($event)">
