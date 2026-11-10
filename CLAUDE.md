@@ -7,7 +7,7 @@
 - API: NestJS 11 + TypeORM 1.x. Lapper controllers use `CrudService` contracts / `crudController()` from `@gearapps/api/core`; `@gearapps/api/postgres` supplies their shared-connection implementations. Keep DTOs in `libs/api/data-access` with class-validator + Swagger decorators. Never interpolate values into SQL — use bound parameters.
 - Keep existing API paths backwards compatible (external collectors post to them).
 - Shared types live in `libs/shared/domain` and are the single source of truth for both sides.
-- Shared API configuration and validation live in `libs/manufacturing/server/util-common/src/lib/config`. Add new settings there and to `.env.example`; scanner settings also have the feature loader in `@gearapps/api/core`.
+- Shared API configuration and validation live in `libs/manufacturing/server/util-common/src/lib/config`. Add new settings there and to `.env.example`; scanner settings also have the feature loader in `@gearapps/api/core`. Every schema key must also be listed in `environment-settings.ts` beside it (a test enforces this): that list drives Admin > Server Settings, whose saved values are laid over the environment at startup by `apps/server/src/load-saved-settings.ts`. Mark a new setting `locked` if the API needs it before the database, it signs logins, or it names a server file; mark passwords `secret`.
 - Verify with `npx nx run-many -t lint test build` before opening a PR.
 
 - One dependency authority: root package.json/package-lock.json. No nested dependency installs. Use Node 24.22.1/npm 11.9.0.

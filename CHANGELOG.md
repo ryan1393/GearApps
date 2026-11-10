@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- **Server settings are in Admin.** The new **Server Settings** tab of the shared Admin screen
+  (`/admin?tab=server-settings`) lists every API setting from the server environment file and
+  lets an administrator change it without editing `.env`.
+  - A saved value is kept in the database (`gear_environment_settings`) and used in place of the
+    `.env` / Docker value **the next time the API starts**; the page says when a restart is
+    needed and, under Docker, offers **Restart API Now**. **Use Server Value** removes the saved
+    value again.
+  - Every save is checked with the same rules the API applies at startup, so a saved value cannot
+    stop it starting. If saved settings ever become invalid or unreadable, the API starts on the
+    environment file alone and says so in its log.
+  - Passwords and other secrets are never sent to the browser and are stored encrypted with a key
+    derived from `JWT_ACCESS_SECRET`; if that secret is changed they must be entered again.
+  - Locked (shown, not editable): the database connection, the JWT signing secrets, the listen
+    address and port, the API path, settings that name files on the server, the seed passwords
+    and `DSF_PRIVILEGED_READER_ACK`. The Docker host settings (published ports, the PostgreSQL
+    container, the Lapper Read collector) are not API settings and stay in `.env`.
 - **Lapping master data is in Admin.** The shared Admin screen (every app's `/admin`) now edits
   everything Lapper's own Machines, Parts & Gearsets and Part Summaries pages did, and those
   pages are gone; their old links open the matching Admin tab (`/admin?tab=…`).

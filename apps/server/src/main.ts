@@ -8,12 +8,16 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 
-import { AppModule } from './app/app.module';
 import { setupSwagger } from './swagger';
 import * as Sentry from '@sentry/node';
 import { configureApi } from './configure-api';
+import { applySavedEnvironmentSettings } from './load-saved-settings';
 
 async function bootstrap() {
+  // Settings saved in Admin > Server Settings join the environment first. The application
+  // module validates and reads the environment as it is imported, so it is loaded afterwards.
+  await applySavedEnvironmentSettings();
+  const { AppModule } = await import(/* webpackMode: "eager" */ './app/app.module');
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);

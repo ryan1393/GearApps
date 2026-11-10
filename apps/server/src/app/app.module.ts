@@ -1,5 +1,7 @@
 import { AdminMasterDataController } from './admin-master-data.controller';
 import { AdminMasterDataService } from './admin-master-data.service';
+import { EnvironmentSettingsController } from './environment-settings.controller';
+import { EnvironmentSettingsService } from './environment-settings.service';
 import { ServerFeatGreenshedModule } from '@gearapps/manufacturing/server/feat-greenshed';
 import { ServerFeatCutterBuildModule } from '@gearapps/manufacturing/server/feat-cutter-build';
 import { ServerFeatCutterConfigModule } from '@gearapps/manufacturing/server/feat-cutter-config';
@@ -51,7 +53,7 @@ const featureModules = [
 ];
 
 @Module({
-  controllers: [AdminMasterDataController],
+  controllers: [AdminMasterDataController, EnvironmentSettingsController],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -67,6 +69,7 @@ const featureModules = [
   ],
   providers: [
     AdminMasterDataService,
+    EnvironmentSettingsService,
     { provide: APP_GUARD, useClass: JwtAccessTokenGuard },
     { provide: APP_FILTER, useClass: EntityNotFoundFilter },
     { provide: APP_FILTER, useClass: QueryFailedFilter },

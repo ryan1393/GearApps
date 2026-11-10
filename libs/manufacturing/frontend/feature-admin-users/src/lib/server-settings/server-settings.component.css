@@ -1,0 +1,30 @@
+/* Layout only. Colours, type and controls come from Dana UI. */
+.server-settings, .server-settings-form { display: grid; gap: 1rem; }
+.server-settings-lead, .server-settings-restart { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1rem; }
+.server-settings-lead { align-items: flex-start; }
+.server-settings-lead h2 { margin: 0; }
+.server-settings-lead p { margin: .35rem 0 0; max-width: 60rem; }
+.server-settings-restart { align-items: center; }
+/* The list is long, so Save stays in reach at the bottom of the screen. */
+.server-settings-bar { position: sticky; bottom: 0; z-index: 2; display: flex; justify-content: flex-end; padding: .75rem 1.25rem; }
+.server-settings-bar .gear-admin-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: .75rem; margin: 0; }
+.server-settings-search { max-width: 32rem; }
+.server-settings-count { font-weight: 700; }
+.server-settings-group { min-width: 0; margin: 0; }
+.server-settings-group legend { float: left; width: 100%; padding: 0; }
+.server-settings-group legend + p { clear: both; margin-bottom: .5rem; }
+.server-settings-row { display: grid; grid-template-columns: minmax(12rem, 1fr) minmax(14rem, 1.4fr) minmax(12rem, 1fr); gap: .5rem 1.25rem; align-items: start; padding: .85rem .5rem; border-top: 1px solid rgb(100 116 139 / .25); }
+.server-settings-changed { background: #eef4fb; }
+.server-settings-name label { display: block; font-weight: 700; }
+.server-settings-name code { font-size: .8rem; opacity: .75; overflow-wrap: anywhere; }
+.server-settings-control { display: grid; gap: .35rem; min-width: 0; }
+.server-settings-control .gear-input, .server-settings-control .gear-select, .server-settings-control .gear-textarea { width: 100%; }
+.server-settings-inline { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+.server-settings-inline .gear-input { flex: 1 1 12rem; width: auto; }
+.server-settings-state { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; min-width: 0; }
+.server-settings-state .gear-btn { white-space: nowrap; }
+.server-settings-help { margin: 0; font-size: .875rem; opacity: .8; overflow-wrap: anywhere; }
+.server-settings-waiting, .server-settings-problem { color: #92400e; }
+.server-settings-problem { font-size: .875rem; font-weight: 600; }
+@media (max-width: 1100px) { .server-settings-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); } .server-settings-state { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .server-settings-row { grid-template-columns: 1fr; } }
