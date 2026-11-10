@@ -1,0 +1,106 @@
+<section class="server-settings" aria-labelledby="server-settings-title">
+  <div class="gear-panel p-5 server-settings-lead">
+    <div>
+      <h2 id="server-settings-title" class="text-xl font-black">Server Settings</h2>
+      <p class="text-sm text-slate-600">Every API setting from the server environment file (.env). A value saved here is used in place of the server value the next time the API starts. Locked settings can only be changed on the server.</p>
+    </div>
+    <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || saving || restarting">{{ loading ? 'Refreshing…' : '↻ Refresh' }}</button>
+  </div>
+
+  <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert"><strong>Unable to continue.</strong><span>{{ error }}</span></div>
+
+  <ng-container *ngIf="board as current">
+    <div *ngIf="!current.available" class="gear-alert gear-alert-warning" role="status"><strong>Settings cannot be saved.</strong><span>Saved settings need the PostgreSQL database and their table could not be used. Check the API log, then restart the API.</span></div>
+
+    <div *ngIf="restarting" class="gear-alert gear-alert-warning" role="status"><strong>Restarting the API…</strong><span>This page reloads by itself when the API is back.</span></div>
+    <div *ngIf="current.restart_required && !restarting" class="gear-alert gear-alert-warning server-settings-restart" role="status">
+      <div><strong>Restart needed.</strong><span> Saved changes are not in use yet. They take effect when the API restarts.</span></div>
+      <button *ngIf="current.can_restart" type="button" class="gear-btn gear-btn-dark" (click)="restart()" [disabled]="saving || changedCount > 0">Restart API Now</button>
+      <span *ngIf="!current.can_restart">Restart the API where it was started.</span>
+    </div>
+
+    <form class="server-settings-form" (ngSubmit)="save()" aria-label="Server settings">
+      <div class="gear-panel p-5">
+        <label class="gear-field server-settings-search">Find a setting
+          <input class="gear-input" name="settingSearch" type="search" [(ngModel)]="search" placeholder="Name or key, for example email or SCANNER" autocomplete="off" />
+        </label>
+      </div>
+
+      <p *ngIf="!visibleGroups.length" class="gear-panel p-5">No setting matches “{{ search }}”.</p>
+
+      <fieldset *ngFor="let group of visibleGroups; trackBy: trackGroup" class="gear-panel p-5 server-settings-group" [disabled]="saving || restarting">
+        <legend class="text-lg font-black">{{ group.title }}</legend>
+        <p class="server-settings-help">{{ group.description }}</p>
+
+        <div *ngFor="let setting of group.settings; trackBy: trackSetting" class="server-settings-row" [class.server-settings-changed]="isChanged(setting)">
+          <div class="server-settings-name">
+            <label [attr.for]="'setting-' + setting.key">{{ setting.label }}</label>
+            <code class="mono">{{ setting.key }}</code>
+            <p *ngIf="setting.help" class="server-settings-help">{{ setting.help }}</p>
+          </div>
+
+          <div class="server-settings-control">
+            <!-- Locked: shown, never editable. -->
+            <ng-container *ngIf="!setting.editable">
+              <input class="gear-input mono" [id]="'setting-' + setting.key" [value]="setting.secret ? (setting.is_set ? '••••••••' : '') : setting.value" [placeholder]="setting.secret ? 'Not set' : 'Blank'" disabled />
+              <p class="server-settings-help">🔒 {{ setting.locked_reason }}</p>
+            </ng-container>
+
+            <ng-container *ngIf="setting.editable">
+              <ng-container *ngIf="setting.secret; else plainControl">
+                <div *ngIf="!isReplacing(setting)" class="server-settings-inline">
+                  <span class="gear-badge">{{ setting.is_set ? 'Set' : 'Not set' }}</span>
+                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" [id]="'setting-' + setting.key" (click)="startReplacing(setting)" [disabled]="isResetting(setting) || !current.available">{{ setting.is_set ? 'Replace' : 'Set' }}</button>
+                </div>
+                <div *ngIf="isReplacing(setting)" class="server-settings-inline">
+                  <input class="gear-input mono" type="password" [id]="'setting-' + setting.key" [name]="setting.key" [(ngModel)]="draft[setting.key]" autocomplete="new-password" placeholder="New value. Leave blank to clear it." />
+                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="cancelReplacing(setting)">Cancel</button>
+                </div>
+                <p class="server-settings-help">Saved values are never shown again.</p>
+              </ng-container>
+              <ng-template #plainControl>
+                <ng-container [ngSwitch]="setting.type">
+                  <select *ngSwitchCase="'boolean'" class="gear-select" [id]="'setting-' + setting.key" [name]="setting.key" [(ngModel)]="draft[setting.key]" [disabled]="isResetting(setting)">
+                    <option *ngIf="setting.value === ''" value="">Not set</option>
+                    <option value="true">On</option>
+                    <option value="false">Off</option>
+                  </select>
+                  <select *ngSwitchCase="'select'" class="gear-select" [id]="'setting-' + setting.key" [name]="setting.key" [(ngModel)]="draft[setting.key]" [disabled]="isResetting(setting)">
+                    <option *ngIf="setting.value === ''" value="">Not set</option>
+                    <option *ngFor="let option of setting.options" [value]="option">{{ option }}</option>
+                  </select>
+                  <textarea *ngSwitchCase="'multiline'" class="gear-textarea mono" rows="4" [id]="'setting-' + setting.key" [name]="setting.key" [(ngModel)]="draft[setting.key]" [disabled]="isResetting(setting)" spellcheck="false"></textarea>
+                  <input *ngSwitchCase="'number'" class="gear-input mono" inputmode="numeric" pattern="[0-9]*" [id]="'setting-' + setting.key" [name]="setting.key" [(ngModel)]="draft[setting.key]" [disabled]="isResetting(setting)" autocomplete="off" />
+                  <input *ngSwitchDefault class="gear-input mono" [id]="'setting-' + setting.key" [name]="setting.key" [(ngModel)]="draft[setting.key]" [disabled]="isResetting(setting)" autocomplete="off" spellcheck="false" />
+                </ng-container>
+              </ng-template>
+            </ng-container>
+          </div>
+
+          <div class="server-settings-state">
+            <ng-container *ngIf="setting.editable">
+              <span class="gear-badge">{{ setting.source === 'ADMIN' ? 'Saved here' : 'Server value' }}</span>
+              <span *ngIf="setting.pending" class="gear-badge server-settings-waiting">Restart needed</span>
+              <span *ngIf="setting.unreadable" class="server-settings-problem">The saved value can no longer be read. Enter it again.</span>
+              <ng-container *ngIf="setting.source === 'ADMIN'">
+                <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="toggleReset(setting)" [disabled]="!current.available">{{ isResetting(setting) ? 'Keep Saved Value' : 'Use Server Value' }}</button>
+                <span class="server-settings-help">{{ isResetting(setting) ? 'Will go back to' : 'Server value' }}: {{ environmentText(setting) }}</span>
+              </ng-container>
+            </ng-container>
+            <span *ngIf="!setting.editable" class="gear-badge">Locked</span>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="gear-panel server-settings-bar">
+        <div class="gear-admin-actions">
+          <span class="server-settings-count" aria-live="polite">{{ changedCount === 0 ? 'No unsaved changes' : changedCount === 1 ? '1 unsaved change' : changedCount + ' unsaved changes' }}</span>
+          <button type="button" class="gear-btn gear-btn-secondary" (click)="discard()" [disabled]="saving || changedCount === 0">Discard</button>
+          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="saving || restarting || changedCount === 0 || !current.available">{{ saving ? 'Saving…' : 'Save Changes' }}</button>
+        </div>
+      </div>
+    </form>
+
+    <p class="gear-panel p-5 server-settings-help">Not on this page: the Docker host settings (published ports, the PostgreSQL container, the Lapper Read collector). Docker reads those from .env before the API exists, so they are changed on the server.</p>
+  </ng-container>
+</section>

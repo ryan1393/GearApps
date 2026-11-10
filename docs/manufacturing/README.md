@@ -242,7 +242,7 @@ The shared `/admin` screen is available in Blade Tracking, Cutter Builder, Green
 - Roll Master, Models
 - Machines
 - Lapping Machines (the FANUC controller, cell and scanner Lapping uses for a shared machine)
-- DSF Mappings, Label Printers, Trays, Containers, Locations
+- DSF Mappings, Label Printers, Server Settings, Trays, Containers, Locations
 - Cutter Bodies
 
 Open a tab directly with `/admin?tab=<tab>` (for example `/admin?tab=gearsets`); Lapping's old

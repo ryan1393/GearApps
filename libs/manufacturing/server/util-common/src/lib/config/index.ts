@@ -6,3 +6,4 @@ export * from './google.config';
 export * from './mailer.config';
 export * from './weak-secret-warning';
 export * from './dsf.config';
+export * from './environment-settings';
