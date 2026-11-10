@@ -1,8 +1,10 @@
 # Changelog
 
-## Unreleased
+## 70.4.0 (2026-11-10)
 
-Workflow and UI review. No schema changes; API changes are additive.
+Label printers with IPL or ZPL, DSF production counts, and a workflow and UI review.
+API changes are additive. New tables are created at startup when missing; no existing table
+or data is changed.
 
 - **Label printers.** Admin has a Label Printers tab: add each network printer with its
   address, its language (IPL for Intermec, ZPL for Zebra) and what it is loaded with, test the

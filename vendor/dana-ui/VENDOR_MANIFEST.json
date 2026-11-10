@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "danaAppsVersion": "70.3.0",
+  "danaAppsVersion": "70.4.0",
   "packageName": "@dana/ui",
   "packageVersion": "0.3.3",
   "visualSource": "Truck Log",

@@ -1,4 +1,4 @@
-# Gear Apps 70.3.0
+# Gear Apps 70.4.0
 
 Gear Apps is the Dana manufacturing workspace for four workflows sharing one API and database:
 **Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root GearApps Nx workspace. All frontends use
@@ -12,6 +12,21 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
 | Green Shed | 4202 | `../apps/greenshed` |
 | Lapper | 4203 | `../apps/lapper-client` |
 | Shared API | 3333 | `../apps/server` (`/api/v1`, health at `/api/v1/health/ready`) |
+
+## What changed in 70.4.0
+
+- **Label printers.** Admin > Label Printers holds the network label printers: address,
+  language (IPL for Intermec, ZPL for Zebra), what each is loaded with, and the default for
+  tags and for cutter cards. Print screens let a workstation choose its own printer. Tags and
+  cutter cards are sent in the chosen printer's language. See
+  [docs/printing/LABEL-PRINTERS.md](docs/printing/LABEL-PRINTERS.md).
+- **DSF production counts** for cutting Departments 132 and 152, read-only from the Digital
+  Shop Floor database and off by default. See [docs/DSF_COUNTS.md](docs/DSF_COUNTS.md).
+- **Workflow and UI review** of every scan screen, dashboard and Admin tab, and a fix for
+  creating trays. Details are in [CHANGELOG.md](CHANGELOG.md).
+
+Two tables are added at API startup when missing: `gear_label_printers`, and the DSF side
+tables when the DSF reader is switched on. No existing table or data is changed.
 
 ## What changed in 70.3.0
 
@@ -90,7 +105,7 @@ Docker host behind your active **SSH Docker context** (`docker context use <name
    2. copies the source to `~/dana-apps`, keeping the previous release in `~/dana-apps.prev`
       and the host's own `.env`;
    3. runs `docker compose build` and `up -d` (never `down`, never touches volumes);
-   4. waits for every service and checks that the API reports `70.3.0`. Only then does the old
+   4. waits for every service and checks that the API reports `70.4.0`. Only then does the old
       release become `~/dana-apps.prev`. If the deploy fails, the last good release is protected
       (a retry discards the failed one) and `--rollback` brings it back.
 3. **Rollback:** `Deploy-GearApps.cmd --rollback` swaps `~/dana-apps.prev` back in and restarts it.
