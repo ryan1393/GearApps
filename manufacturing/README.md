@@ -83,7 +83,10 @@ Full detail is in `CHANGELOG.md`. In short:
 
 Run deployment from the repository root with
 `node manufacturing/tools/deploy/deploy-remote.mjs` (Windows:
-`manufacturing\Deploy-GearApps.cmd`). The archive contains the single root workspace;
+`manufacturing\Deploy-GearApps.cmd`). To deploy to the plant Docker host in one step, run
+`Deploy-To-usftwvmdocker.cmd` in the repository root: it creates the `usftwvmdocker`
+Docker context for `image@usftwvmdocker` if this PC does not have it, then runs the same
+deployment. The archive contains the single root workspace;
 Docker builds use the root lockfile and pinned Node 24.22.1/npm 11.9.0. Manufacturing
 configuration is the repository root `.env`, shared by every feature.
 The deployer preserves that file and keeps the previous tree for rollback.
