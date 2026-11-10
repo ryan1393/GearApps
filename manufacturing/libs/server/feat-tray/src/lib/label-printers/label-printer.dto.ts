@@ -9,6 +9,15 @@ export type LabelType = (typeof LABEL_TYPES)[number];
 export const LABEL_LANGUAGES = ['IPL', 'ZPL'] as const;
 export type LabelLanguage = (typeof LABEL_LANGUAGES)[number];
 
+/** Where a label lands differs a little from printer to printer; this is the most it can be nudged, in dots. */
+export const LABEL_ADJUSTMENT_LIMIT = 100;
+
+/** How far to move a label from where the format puts it. 203 dots are one inch. */
+export interface LabelAdjustment {
+  right: number;
+  down: number;
+}
+
 /** A DNS name or IPv4 address: no scheme, port, path or spaces. */
 const HOST_PATTERN = /^(?=.{1,253}$)[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$/;
 
@@ -40,6 +49,22 @@ export class SaveLabelPrinterDto {
   @IsOptional()
   @IsBoolean()
   enabled?: boolean;
+
+  /** Moves everything this printer prints right (negative: left), in dots. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(-LABEL_ADJUSTMENT_LIMIT)
+  @Max(LABEL_ADJUSTMENT_LIMIT)
+  offset_right?: number;
+
+  /** Moves everything this printer prints down (negative: up), in dots. */
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(-LABEL_ADJUSTMENT_LIMIT)
+  @Max(LABEL_ADJUSTMENT_LIMIT)
+  offset_down?: number;
 }
 
 export class LabelPrinterChoicesQueryDto {

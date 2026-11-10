@@ -1,5 +1,21 @@
 # Changelog
 
+## 70.4.1 (2026-11-10)
+
+Label fixes from the first tags printed on a Zebra.
+
+- **Tag layout.** The barcode is centred and wider (three-dot bars for T and C serials, two for
+  a typical location serial) with the serial centred under it, instead of a small barcode in
+  the top corner. The first prints landed about 2.5 mm high and 2.9 mm left, with the top of
+  the barcode in the gap before the label; ZPL tags are positioned to allow for that, and the
+  layout leaves room for a printer that registers exactly.
+- **Position adjustment per printer.** Admin > Label Printers > Edit has Move right and Move
+  down, in dots, for a printer whose labels do not sit squarely. It applies to tags and cutter
+  cards in both IPL and ZPL. Two columns are added to `gear_label_printers` at startup.
+- Tags fit serials of up to 30 characters (was 32), so a long barcode keeps its quiet zones.
+- `Deploy-To-usftwvmdocker.cmd` in the repository root deploys to the plant Docker host in one
+  step.
+
 ## 70.4.0 (2026-11-10)
 
 Label printers with IPL or ZPL, DSF production counts, and a workflow and UI review.

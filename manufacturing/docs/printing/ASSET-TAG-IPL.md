@@ -59,9 +59,17 @@ A failed or downloaded tag is never reported as printed. A printer accepting the
 
 ## Layout
 
-Both languages produce the same tag: a Code 128 barcode of the stored serial across the top and the serial as text under it, read across the 2.125 in web.
+Both languages produce the same tag: a Code 128 barcode of the stored serial, centred, with the serial as text centred under it, read across the 2.125 in web. Barcode and text together are 86 dots tall on the 127-dot label, so the tag stays on the label when a printer starts a couple of millimetres early or late.
 
-Serials of up to 14 characters print with a two-dot narrow bar; longer serials use a one-dot narrow bar. A serial longer than 32 characters cannot fit, so the print request is refused with a message instead of printing a barcode that runs off the label.
+| Serial length | Narrow bar | Example |
+| --- | --- | --- |
+| up to 6 | 3 dots | `T0001`, `C0001` |
+| 7 to 12 | 2 dots | `CGDR-1.955FC` |
+| 13 to 30 | 1 dot | long location serials |
+
+A serial longer than 30 characters cannot keep its quiet zones on the label, so the print request is refused with a message instead of printing a barcode that runs off the label.
+
+Where the tag lands can be nudged per printer with **Move right** / **Move down** in Admin > Label Printers; see [LABEL-PRINTERS.md](LABEL-PRINTERS.md).
 
 ### IPL
 
@@ -73,7 +81,9 @@ Earlier versions wrote the tag fields as direction 0, which lays the barcode alo
 
 ### ZPL
 
-`^FO` is across the web, then down the feed. The barcode is `^BC` Code 128 with automatic subset selection, the text is font 0 centred with `^FB`, and `^PW431` / `^LL127` set the label size.
+`^FO` is across the web, then down the feed. The barcode is `^BC` Code 128 in subset B, so its width is known and it can be centred; the text is font 0 centred with `^FB`. `^PW431` sets the print width. No label length is sent: on gap stock the printer's own media calibration knows where each label starts.
+
+The first tags printed on a Zebra from the earlier layout landed about 20 dots (2.5 mm) above and 23 dots (2.9 mm) left of where the format placed them, with the top of the barcode in the gap before the label. ZPL tags are therefore positioned 23 dots right and 20 dots down in printer coordinates (`ZPL_REGISTRATION` in `asset-tag-label.ts`). A Zebra that registers differently is corrected with its own adjustment.
 
 Reference output for both languages is in [samples](samples); the unit tests compare generated tags with those files byte for byte.
 
