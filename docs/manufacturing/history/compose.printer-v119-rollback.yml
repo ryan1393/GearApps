@@ -1,3 +1,0 @@
-services:
-  gear-app-server:
-    image: dana-v119-previous-gear-app-server:20261008-102515

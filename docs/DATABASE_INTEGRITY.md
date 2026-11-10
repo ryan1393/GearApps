@@ -143,9 +143,7 @@ It intentionally leaves fixture history in its disposable database.
 The runner's fresh before-update backup is the recovery point for the actual
 target. Retain the current database before any recovery and account for newer
 production records. Original imported history can also be queried through the
-archive and reconstruction views without restoring the entire database. The
-verification report describes restored-copy testing; this update has not been
-applied to the owner's live server from this workstation.
+archive and reconstruction views without restoring the entire database.
 
-See [verification results](DATABASE_INTEGRITY_VERIFICATION.json) for the test
-counts and the preserved review items.
+Run `npm run test:database-integrity` against a disposable restored copy to
+repeat that verification.

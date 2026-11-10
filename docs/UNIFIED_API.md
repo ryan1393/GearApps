@@ -109,5 +109,5 @@ route collisions, collector writes and public-row preservation after fixture cle
 It deliberately leaves test history in lapper and must not use the running database.
 
 Run npm run db:audit against a chosen database for read-only structural checks.
-Unit/deployment/contracts/build/collector results are recorded in
-[UNIFIED_API_VERIFICATION.json](UNIFIED_API_VERIFICATION.json).
+CI (`.github/workflows/ci.yml`) runs the unit, deployment, contract, build and
+collector checks on every change.

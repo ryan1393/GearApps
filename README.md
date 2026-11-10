@@ -85,5 +85,4 @@ dotnet test apps/lapper-read/LapperRead.Tests/LapperRead.Tests.csproj -c Release
 ```
 
 The database suites require disposable restores and explicit fixture authorization.
-See [unified API verification](docs/UNIFIED_API_VERIFICATION.json).
 Historical releases remain in releases/ and source-archives/.
