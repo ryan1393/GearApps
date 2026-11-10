@@ -22,11 +22,17 @@ class DesiredMachinesTests(unittest.TestCase):
         _, skipped = desired_machines([
             machine("off", status="Inactive"),
             machine("noip", ip=""),
-            machine("noscan", scanner_ip=None),
         ], [])
         self.assertEqual(skipped["off"], ("off", "machine is inactive"))
         self.assertEqual(skipped["noip"][1], "no FANUC controller IP")
-        self.assertIn("no scanner", skipped["noscan"][1])
+
+    def test_a_machine_without_an_active_scanner_still_gets_a_worker(self):
+        inactive = machine("inactive")
+        inactive["scanner"]["status"] = "Inactive"
+        wanted, skipped = desired_machines([machine("noscan", scanner_ip=None), inactive], [])
+        self.assertEqual(skipped, {})
+        self.assertEqual(wanted["noscan"], MachineSpec("noscan", "noscan", "10.16.81.15", "", "1"))
+        self.assertEqual(wanted["inactive"].scanner_ip, "")
 
     def test_scanner_can_come_from_the_scanner_list(self):
         m = machine("m1", scanner_ip=None)

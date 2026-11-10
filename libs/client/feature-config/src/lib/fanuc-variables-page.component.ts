@@ -66,7 +66,7 @@ interface FanucRow {
         danaPageHeader
         eyebrow="LAPPER / CONFIGURATION"
         heading="Fanuc Variables"
-        description="Each Active lapper with a FANUC controller IP and a scanner gets a Lapper Read worker automatically. These are the signals it reports."
+        description="Each Active lapper with a FANUC controller IP gets a Lapper Read worker automatically (without a scanner, its cycles are recorded without a serial). These are the signals it reports."
       >
         <div danaPageHeaderAction class="dana-toolbar">
           <button

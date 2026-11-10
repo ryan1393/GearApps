@@ -2,9 +2,11 @@
 
 Every `discover_interval_s` the supervisor reads Lapper's machines and scanners:
 
-- an Active machine with a FANUC controller IP and an assigned scanner gets a worker;
+- an Active machine with a FANUC controller IP gets a worker;
+- with an Active scanner assigned, its cycles are recorded under the scanned serial; without
+  one, every completed cycle is recorded without a serial (gearset, consec, time, macros);
 - changing its controller IP, asset number or scanner restarts that worker;
-- making it Inactive, removing its IP or scanner, or deleting it stops the worker.
+- making it Inactive, removing its IP, or deleting it stops the worker.
 
 Each worker runs on its own thread, so its FOCAS handle is opened and used on one thread,
 and keeps its checkpoint under the machine's GearApps id (it survives IP changes).
@@ -35,7 +37,7 @@ class MachineSpec:
     machine_id: str
     number: str | None
     controller_ip: str
-    scanner_ip: str
+    scanner_ip: str  # "" when the machine has no Active scanner: cycles are recorded without a serial
     cell: str | None
 
 
@@ -60,12 +62,8 @@ def desired_machines(
             continue
         scanner = m.get("scanner") or by_machine.get(mid)
         scanner_ip = ((scanner or {}).get("ip") or "").strip()
-        if not _is_ip(scanner_ip):
-            skipped[mid] = (label, "no scanner assigned (Configuration > Scanners)")
-            continue
-        if str((scanner or {}).get("status", "active")).lower() != "active":
-            skipped[mid] = (label, "assigned scanner is inactive")
-            continue
+        if not _is_ip(scanner_ip) or str((scanner or {}).get("status", "active")).lower() != "active":
+            scanner_ip = ""
         wanted[mid] = MachineSpec(mid, m.get("number"), ip, scanner_ip, m.get("cell"))
     return wanted, skipped
 
@@ -147,7 +145,7 @@ class Supervisor:
                     scanner_ip=spec.scanner_ip, state_key=spec.machine_id)
         transport = FocasTransport(s.focas_library, s.focas_log, s.focas_port)
         fanuc = Fanuc(transport, s.machine_ip, s.io_timeout_ms, self.api)
-        scanner = Scanner(s.scanner_ip, s.scanner_input1_port, s.io_timeout_ms / 1000)
+        scanner = Scanner(s.scanner_ip, s.scanner_input1_port, s.io_timeout_ms / 1000) if s.scanner_ip else None
         return Worker(s, self.api, fanuc, scanner, CycleStateStore(s.state_file))
 
     # -- reconcile ---------------------------------------------------------------------
@@ -164,8 +162,9 @@ class Supervisor:
                 del self._slots[mid]
         for mid, spec in wanted.items():
             if mid not in self._slots:
-                log.info("[%s] Starting worker: controller %s, scanner %s",
-                         spec.number or spec.controller_ip, spec.controller_ip, spec.scanner_ip)
+                log.info("[%s] Starting worker: controller %s, %s",
+                         spec.number or spec.controller_ip, spec.controller_ip,
+                         f"scanner {spec.scanner_ip}" if spec.scanner_ip else "no scanner (cycles recorded without a serial)")
                 slot = _Slot(spec, self._factory, self.settings.retry_delay_ms / 1000 * 6)
                 self._slots[mid] = slot
                 slot.start()

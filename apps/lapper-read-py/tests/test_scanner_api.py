@@ -144,9 +144,13 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(FakeServer.log[-1][2], "Bearer glr_abc")
         self.assertFalse(any(e[1].endswith("/auth/email/login") for e in FakeServer.log))
 
-    def test_blank_serial_cannot_be_posted(self):
-        with self.assertRaises(ValueError):
-            self.api.post_cycle(" ", 1, "m", "g", "2026-11-10T03:00:00Z", "k")
+    def test_a_cycle_without_a_scanner_is_posted_with_a_null_serial(self):
+        FakeServer.tokens = iter(["t"])
+        for serial in (None, " "):
+            self.api.post_cycle(serial, 1, "m", "g", "2026-11-10T03:00:00Z", "k")
+            self.assertIsNone(FakeServer.log[-1][4]["serial_number"])
+        self.api.post_cycle(" D000000001 ", 2, "m", "g", "2026-11-10T03:00:00Z", "k2")
+        self.assertEqual(FakeServer.log[-1][4]["serial_number"], "D000000001")
 
     def test_machine_lookup_disambiguates_a_shared_ip_by_asset_number(self):
         FakeServer.tokens = iter(["t"])

@@ -68,8 +68,8 @@ import {
             <small class="gear-field-help" role="alert">Enter a valid IPv4 address.</small>
           } @else {
             <small class="gear-field-help"
-              >Lapper Read starts collecting from this controller once the machine is Active and has
-              a scanner.</small
+              >Lapper Read starts collecting from this controller once the machine is Active. With
+              a scanner each cycle gets its scanned serial; without one, cycles have no serial.</small
             >
           }
         </label>

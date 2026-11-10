@@ -122,10 +122,10 @@ class GearAppsApi:
             })
         return self._required(found, "gearset")
 
-    def post_cycle(self, serial: str, consec: int, machine_id: str, gearset_id: str,
+    def post_cycle(self, serial: str | None, consec: int, machine_id: str, gearset_id: str,
                    completed_at: str, key: str) -> dict:
-        if not serial or not serial.strip():
-            raise ValueError("A scanned serial number is required.")
+        """serial None: a machine without a scanner (the API stores serial_number as null)."""
+        serial = serial.strip() if serial and serial.strip() else None
         return self._required(self.request("POST", "/api/v1/machine-cycle", {
             "serial_number": serial, "machine_id": machine_id, "gearset_id": gearset_id,
             "consec": consec, "timestamp": completed_at,

@@ -56,7 +56,8 @@ class Settings:
         addresses = []
         if mode in ("run", "check"):
             addresses.append(("LAPPER_MACHINE_IP", self.machine_ip))
-        if mode == "run":
+        if mode == "run" and self.scanner_ip:
+            # Optional: without a scanner the cycles are recorded without a serial.
             addresses.append(("LAPPER_SCANNER_IP", self.scanner_ip))
         for label, value in addresses:
             try:

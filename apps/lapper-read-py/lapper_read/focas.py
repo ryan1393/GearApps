@@ -1,8 +1,10 @@
 """ctypes binding to FANUC's FOCAS library (libfwlib32.so on Linux, FWLIB32.dll on Windows).
 
 Only the four calls Lapper needs are bound: connect, read a P-code macro, read a PMC
-byte and disconnect. Structures use C `long`, exactly like fwlib32.h, so the same code
-matches the 4-byte Windows build and the 8-byte 64-bit Linux build.
+byte and disconnect. FOCAS's `long` is 32 bits in every build, including FANUC's 64-bit
+Linux libfwlib32-linux-x64 (its cnc_rdpmacro writes mcr_val at byte 8 and dec_val at
+byte 12), so the bindings use a fixed 32-bit integer, never the platform's C `long`
+(8 bytes on 64-bit Linux).
 """
 
 from __future__ import annotations
@@ -10,10 +12,12 @@ from __future__ import annotations
 import ctypes
 import os
 import threading
-from ctypes import POINTER, Structure, Union, byref, c_char, c_char_p, c_double, c_float, c_long, c_short, c_ushort
+from ctypes import POINTER, Structure, Union, byref, c_char_p, c_double, c_float, c_int32, c_short, c_ubyte, c_ushort
 from decimal import Decimal
 
 EW_OK = 0
+# FOCAS `long` (32-bit in the Windows and the 64-bit Linux libraries).
+FOCAS_LONG = c_int32
 PMC_Y = 2
 PMC_X = 3
 PMC_BYTE = 0
@@ -28,14 +32,16 @@ class FocasError(IOError):
 class ODBPM(Structure):
     """cnc_rdpmacro: read P-code macro variable."""
 
-    _fields_ = [("datano", c_long), ("dummy", c_short), ("mcr_val", c_long), ("dec_val", c_short)]
+    _fields_ = [("datano", FOCAS_LONG), ("dummy", c_short), ("mcr_val", FOCAS_LONG), ("dec_val", c_short)]
 
 
 class _PmcData(Union):
     _fields_ = [
-        ("cdata", c_char * 5),
+        # Unsigned bytes, not c_char: ctypes turns a c_char array field into a bytes string cut
+        # off at the first zero byte, so an all-off PMC byte would read as empty.
+        ("cdata", c_ubyte * 5),
         ("idata", c_short * 5),
-        ("ldata", c_long * 5),
+        ("ldata", FOCAS_LONG * 5),
         ("fdata", c_float * 5),
         ("dfdata", c_double * 5),
     ]
@@ -51,6 +57,11 @@ class IODBPMC(Structure):
         ("datano_e", c_ushort),
         ("u", _PmcData),
     ]
+
+
+def pmc_bit(data: IODBPMC, bit: int) -> bool:
+    """Bit `bit` of the first byte a one-byte pmc_rdpmcrng read returned."""
+    return bool(data.u.cdata[0] >> bit & 1)
 
 
 def scale(mcr_val: int, dec_val: int) -> Decimal:
@@ -73,11 +84,11 @@ class FocasLibrary:
         loader = ctypes.WinDLL if os.name == "nt" else ctypes.CDLL  # type: ignore[attr-defined]
         self.lib = loader(path)
         lib = self.lib
-        lib.cnc_allclibhndl3.argtypes = [c_char_p, c_ushort, c_long, POINTER(c_ushort)]
+        lib.cnc_allclibhndl3.argtypes = [c_char_p, c_ushort, FOCAS_LONG, POINTER(c_ushort)]
         lib.cnc_allclibhndl3.restype = c_short
         lib.cnc_freelibhndl.argtypes = [c_ushort]
         lib.cnc_freelibhndl.restype = c_short
-        lib.cnc_rdpmacro.argtypes = [c_ushort, c_long, POINTER(ODBPM)]
+        lib.cnc_rdpmacro.argtypes = [c_ushort, FOCAS_LONG, POINTER(ODBPM)]
         lib.cnc_rdpmacro.restype = c_short
         lib.pmc_rdpmcrng.argtypes = [c_ushort, c_short, c_short, c_ushort, c_ushort, c_ushort, POINTER(IODBPMC)]
         lib.pmc_rdpmcrng.restype = c_short
@@ -86,7 +97,7 @@ class FocasLibrary:
             lib.cnc_exitthread.restype = c_short
         if os.name != "nt" and hasattr(lib, "cnc_startupprocess"):
             # The Linux library must be started once per process before any handle is opened.
-            lib.cnc_startupprocess.argtypes = [c_long, c_char_p]
+            lib.cnc_startupprocess.argtypes = [FOCAS_LONG, c_char_p]
             lib.cnc_startupprocess.restype = c_short
             os.makedirs(os.path.dirname(log_path) or ".", exist_ok=True)
             code = lib.cnc_startupprocess(0, log_path.encode())
@@ -148,4 +159,4 @@ class FocasTransport:
             code = self._lib.pmc_rdpmcrng(handle, address_type, PMC_BYTE, byte, byte, length, byref(data))
         if code != EW_OK:
             raise FocasError("read PMC", code)
-        return bool(data.u.cdata[0][0] >> bit & 1)
+        return pmc_bit(data, bit)

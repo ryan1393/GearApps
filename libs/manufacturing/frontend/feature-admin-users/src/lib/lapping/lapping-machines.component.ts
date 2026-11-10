@@ -52,7 +52,7 @@ import { MachineFormDialogComponent } from './machine-form-dialog.component';
           <h2>Lapping Machines</h2>
           <p>
             {{ activeCount() }} active · Lapper Read collects from active machines that have a FANUC
-            IP and a scanner.
+            IP; without a scanner their cycles are recorded without a serial.
           </p>
         </div>
         <div class="dana-toolbar">

@@ -3,17 +3,38 @@ import unittest
 from decimal import Decimal
 
 from lapper_read.fanuc import Fanuc
-from lapper_read.focas import IODBPMC, ODBPM, scale
+from lapper_read.focas import FOCAS_LONG, IODBPMC, ODBPM, pmc_bit, scale
 from tests.fakes import FakeApi, FakeTransport
 
 CYCLE = {"id": "cycle-1", "machine_id": "machine-1", "gearset_id": "gs-373"}
 
 
 class FocasBindingTests(unittest.TestCase):
-    def test_structures_follow_the_c_header_layout(self):
-        long = ctypes.sizeof(ctypes.c_long)
-        self.assertEqual(ODBPM.mcr_val.offset, 2 * long if long == 8 else 8)
+    def test_structures_match_the_focas_library_layout(self):
+        # FANUC's 64-bit Linux libfwlib32 (1.0.5) cnc_rdpmacro stores datano at byte 0,
+        # mcr_val at byte 8 and dec_val at byte 12: FOCAS longs are 32-bit there too.
+        # A platform C long (8 bytes on 64-bit Linux) put mcr_val at byte 16, so every
+        # macro read as 0 and the controller looked unavailable.
+        self.assertEqual(ctypes.sizeof(FOCAS_LONG), 4)
+        self.assertEqual((ODBPM.datano.offset, ODBPM.mcr_val.offset, ODBPM.dec_val.offset), (0, 8, 12))
         self.assertEqual(IODBPMC.u.offset, 8)
+
+    def test_macro_value_is_read_from_where_the_library_writes_it(self):
+        data = ODBPM()
+        raw = (ctypes.c_ubyte * ctypes.sizeof(ODBPM)).from_buffer(data)
+        ctypes.memmove(ctypes.addressof(raw), (10020).to_bytes(4, "little"), 4)
+        ctypes.memmove(ctypes.addressof(raw) + 8, (373).to_bytes(4, "little"), 4)
+        ctypes.memmove(ctypes.addressof(raw) + 12, (0).to_bytes(2, "little"), 2)
+        self.assertEqual((data.datano, scale(data.mcr_val, data.dec_val)), (10020, Decimal(373)))
+
+    def test_pmc_bits_are_read_from_the_first_data_byte(self):
+        # pmc_rdpmcrng puts the byte at offset 8. Reading it as c_char failed on real hardware
+        # ("'int' object is not subscriptable") and would drop an all-zero byte entirely.
+        for value, bits in ((0b1000_0100, {2: True, 7: True, 0: False}), (0, {2: False, 7: False})):
+            data = IODBPMC()
+            ctypes.memmove(ctypes.addressof(data) + 8, bytes([value]), 1)
+            for bit, expected in bits.items():
+                self.assertIs(pmc_bit(data, bit), expected, (value, bit))
 
     def test_macro_scaling_matches_the_csharp_worker(self):
         self.assertEqual(scale(18005, 1), Decimal("1800.5"))

@@ -17,7 +17,7 @@
 //   --legacy-root <path>    Old release folder to carry .env from (default: /tmp/dana-apps.v0.1)
 //   --upload-env            First deploy only: copy root .env when the host has none
 //   --skip-backup           Do not pg_dump before deploying (not recommended)
-//   --allow-weak-secrets    Deploy even if the host .env has placeholder/short JWT secrets
+//   --allow-weak-secrets    Accepted for older scripts; weak JWT secrets only warn now
 import cp from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -56,7 +56,7 @@ function run(cmd, args, { capture = false, allowFail = false, input } = {}) {
     maxBuffer: 64 * 1024 * 1024,
   });
   if (r.error) {
-    if (allowFail) return { status: 127, output: String(r.error.message) };
+    if (allowFail) return { status: 127, output: String(r.error.message), stdout: '' };
     throw r.error;
   }
   const output = (r.stdout ?? '') + (r.stderr ?? '');
@@ -64,7 +64,7 @@ function run(cmd, args, { capture = false, allowFail = false, input } = {}) {
     if (output.trim()) console.error(output.trimEnd());
     fail(`${cmd} ${args.join(' ')} failed (exit ${r.status})`);
   }
-  return { status: r.status ?? 1, output };
+  return { status: r.status ?? 1, output, stdout: r.stdout ?? '' };
 }
 
 function sshContext() {
@@ -207,11 +207,16 @@ function localEnvCheck(text) {
 }
 
 // ---------- runtime checks ----------
+// Returns null when the container is missing or the ssh/docker call failed; callers retry. Only
+// stdout is trusted: an ssh or docker warning on stderr must never be mistaken for a container id.
 function containerState(ctx, service) {
-  const id = run('docker', ['--context', ctx.name, 'ps', '-a', '-q', '--filter', `label=com.docker.compose.project=${PROJECT}`, '--filter', `label=com.docker.compose.service=${service}`], { capture: true, allowFail: true }).output.trim().split(/\r?\n/)[0];
-  if (!id) return null;
+  const ps = run('docker', ['--context', ctx.name, 'ps', '-a', '-q', '--filter', `label=com.docker.compose.project=${PROJECT}`, '--filter', `label=com.docker.compose.service=${service}`], { capture: true, allowFail: true });
+  if (ps.status !== 0) return null;
+  const id = ps.stdout.trim().split(/\r?\n/)[0];
+  if (!/^[0-9a-f]{12,64}$/i.test(id)) return null;
   const r = run('docker', ['--context', ctx.name, 'inspect', id], { capture: true, allowFail: true });
-  try { return { id, state: JSON.parse(r.output)[0].State }; } catch { return null; }
+  if (r.status !== 0) return null;
+  try { return { id, state: JSON.parse(r.stdout)[0].State }; } catch { return null; }
 }
 
 async function waitFor(ctx, service, { oneShot = false, minutes = 8 } = {}) {
@@ -239,12 +244,14 @@ async function waitFor(ctx, service, { oneShot = false, minutes = 8 } = {}) {
 
 // Asks the API from inside its own container, so host firewalls and ssh aliases don't matter.
 async function verifyVersion(ctx, expected) {
-  const api = containerState(ctx, 'gear-app-server');
-  if (!api) fail('gear-app-server container not found');
   const probe = "fetch('http://127.0.0.1:3333/api/v1/health/live').then(r=>r.json()).then(j=>console.log(j.version||'none')).catch(e=>console.log('error '+e.message))";
   let seen = '';
   for (let i = 0; i < 10; i++) {
-    seen = run('docker', ['--context', ctx.name, 'exec', api.id, 'node', '-e', probe], { capture: true, allowFail: true }).output.trim();
+    // Look the container up on every attempt: one failed ssh call must not end the deploy.
+    const api = containerState(ctx, 'gear-app-server');
+    seen = api
+      ? run('docker', ['--context', ctx.name, 'exec', api.id, 'node', '-e', probe], { capture: true, allowFail: true }).stdout.trim()
+      : 'gear-app-server container not found';
     if (seen === expected) return console.log(`[PASS] API reports version ${seen}.`);
     await sleep(3000);
   }
@@ -298,13 +305,13 @@ async function main() {
     console.warn('[WARN] GEAR_DB_PASSWORD is shorter than 12 characters. Postgres only reads it when the volume is first created,\n' +
       '       so change it inside Postgres first (ALTER USER ... PASSWORD ...), then in .env, then deploy.');
   }
+  // The owner decides on the host's secrets, so weak ones only warn (the API does the same at
+  // startup). The API itself still refuses secrets under 16 characters.
   if (weak.length) {
-    const msg = `The .env being deployed has weak or placeholder values: ${weak.map((w) => w.slice(5)).join(', ')}.\n` +
-      '  JWT secrets must be 32+ random characters (anyone who knows them can sign an admin login).\n' +
-      '  Generate one with:  node -e "console.log(require(\'crypto\').randomBytes(48).toString(\'base64url\'))"\n' +
-      '  Changing the JWT secrets signs everyone out once; nothing else is affected.';
-    if (!flag('--allow-weak-secrets')) fail(msg + '\n  Fix the .env, or re-run with --allow-weak-secrets.');
-    console.warn('[WARN] ' + msg);
+    console.warn(`[WARN] The .env being deployed has weak or placeholder values: ${weak.map((w) => w.slice(5)).join(', ')}.\n` +
+      '       JWT secrets should be 32+ random characters (anyone who knows them can sign an admin login).\n' +
+      '       Generate one with:  node -e "console.log(require(\'crypto\').randomBytes(48).toString(\'base64url\'))"\n' +
+      '       Changing the JWT secrets signs everyone out once; nothing else is affected. Deploying anyway.');
   }
 
   if (MODE === 'check') {
@@ -361,7 +368,7 @@ async function main() {
   console.log(`Blade Tracking: http://${ctx.host}:4200   Cutter Builder: http://${ctx.host}:4201   Greenshed: http://${ctx.host}:4202`);
 }
 
-export { envCheckScript, stageScript, finalizeScript, rollbackSwapScript };
+export { envCheckScript, stageScript, finalizeScript, rollbackSwapScript, containerState, verifyVersion };
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   main().catch((e) => {

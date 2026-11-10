@@ -17,6 +17,9 @@ RUN apt-get update \
 
 WORKDIR /app
 COPY apps/lapper-read-py/lapper_read ./lapper_read
+# The deploy unpacks releases with umask 077, so source files arrive owner-only (root).
+# The collector runs as the unprivileged `lapper` user: make the code world-readable.
+RUN chmod -R a+rX /app
 
 USER lapper
 VOLUME ["/data"]
