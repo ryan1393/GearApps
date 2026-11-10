@@ -11,8 +11,8 @@ const packageJson = JSON.parse(read('package.json'));
 const baseline = read('docs/manufacturing/DANA_MASTER_UI_BASELINE.md');
 const readiness = read('docs/manufacturing/DANA_APPS_GEAR_PREMERGE_READINESS.md');
 const runner = read('tools/manufacturing/run-all-tests.ps1');
-const sharedStyles = read('vendor/dana-ui/package/styles/gear-apps.css');
-const gearStyles = read('vendor/dana-ui/package/styles/gear-compat-features.css');
+const sharedStyles = read('libs/shared/dana-ui/src/styles/gear-apps.css');
+const gearStyles = read('libs/shared/dana-ui/src/styles/gear-compat-features.css');
 
 must(packageJson.scripts?.['test:gear-apps'], 'package.json is missing authoritative test:gear-apps script.');
 
@@ -21,9 +21,9 @@ for (const p of [
   'apps/cutter-builder/project.json',
   'apps/greenshed/project.json',
   'apps/server/project.json',
-  'vendor/dana-ui/package/index.d.ts',
-  'vendor/dana-ui/package/styles/gear-apps.css',
-  'vendor/dana-ui/package/styles/gear-compat-features.css',
+  'libs/shared/dana-ui/src/index.ts',
+  'libs/shared/dana-ui/src/styles/gear-apps.css',
+  'libs/shared/dana-ui/src/styles/gear-compat-features.css',
   'tools/manufacturing/test-dana-master-ui-freeze-contract.mjs',
   'tools/manufacturing/test-dana-apps-premerge-contract.mjs',
 ]) {

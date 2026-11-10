@@ -26,10 +26,6 @@ function fixture() {
     }),
   );
   put(
-    'vendor/dana-ui/VENDOR_MANIFEST.json',
-    JSON.stringify({ danaAppsVersion: '1.2.3', packageVersion: '0.3.0' }),
-  );
-  put(
     'libs/shared/domain/src/lib/app-version.ts',
     "export const GEAR_APPS_VERSION = '1.2.3';\n",
   );
@@ -53,7 +49,7 @@ function fixture() {
     read: (file) => JSON.parse(fs.readFileSync(path.join(root, file), 'utf8')),
   };
 }
-test('version ownership updates lock and vendor without changing dependencies', () => {
+test('version ownership updates package and lock versions without changing dependencies', () => {
   const f = fixture();
   try {
     setReleaseVersion(f.root, '1.2.4');
@@ -72,14 +68,6 @@ test('version ownership updates lock and vendor without changing dependencies', 
     assert.equal(
       f.read('package-lock.json').packages['node_modules/sample'].version,
       '1.2.3',
-    );
-    assert.equal(
-      f.read('vendor/dana-ui/VENDOR_MANIFEST.json').danaAppsVersion,
-      '1.2.4',
-    );
-    assert.equal(
-      f.read('vendor/dana-ui/VENDOR_MANIFEST.json').packageVersion,
-      '0.3.0',
     );
     assert.match(
       f.text('libs/shared/domain/src/lib/app-version.ts'),

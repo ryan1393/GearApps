@@ -2,14 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const root=process.cwd();
-const sharedStyle='vendor/dana-ui/package/styles/gear-apps.css';
+const sharedStyle='libs/shared/dana-ui/src/styles/gear-apps.css';
 const minimalStyle=`@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /*
  * Gear Apps visual styling is centralized in:
- * vendor/dana-ui/package/styles/gear-apps.css
+ * libs/shared/dana-ui/src/styles/gear-apps.css
  */
 `;
 const tailwindProxy=`module.exports = require('../../tools/manufacturing/tailwind/create-app-tailwind-config')(__dirname);

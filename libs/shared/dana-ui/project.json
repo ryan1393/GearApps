@@ -11,8 +11,7 @@
     "build": {
       "executor": "nx:run-commands",
       "outputs": [
-        "{workspaceRoot}/dist/libs/shared/dana-ui",
-        "{workspaceRoot}/vendor/dana-ui/package"
+        "{workspaceRoot}/dist/libs/shared/dana-ui"
       ],
       "options": {
         "command": "node libs/shared/dana-ui/tools/build.mjs",

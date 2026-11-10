@@ -7,11 +7,11 @@ const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8');
 const fail = (message) => { console.error(`[FAIL] ${message}`); process.exit(1); };
 const need = (text, marker, label) => { if (!text.includes(marker)) fail(`${label} missing marker: ${marker}`); };
 
-const tokensPath = 'vendor/dana-ui/package/styles/gear-apps/foundation/tokens.css';
-const primitivesPath = 'vendor/dana-ui/package/styles/gear-apps/components/primitives.css';
-const dataPath = 'vendor/dana-ui/package/styles/gear-apps/components/data-display.css';
-const relationsPath = 'vendor/dana-ui/package/styles/gear-apps/features/inventory-relations.css';
-const navPath = 'vendor/dana-ui/package/styles/gear-apps/layout/navigation-shell.css';
+const tokensPath = 'libs/shared/dana-ui/src/styles/gear-apps/foundation/tokens.css';
+const primitivesPath = 'libs/shared/dana-ui/src/styles/gear-apps/components/primitives.css';
+const dataPath = 'libs/shared/dana-ui/src/styles/gear-apps/components/data-display.css';
+const relationsPath = 'libs/shared/dana-ui/src/styles/gear-apps/features/inventory-relations.css';
+const navPath = 'libs/shared/dana-ui/src/styles/gear-apps/layout/navigation-shell.css';
 
 const tokens = read(tokensPath);
 const primitives = read(primitivesPath);

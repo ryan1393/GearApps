@@ -1,16 +1,16 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
-import { readDanaUiSource } from './lib/dana-ui-source.mjs';
+import { danaUiBundleText, danaUiPublicApiText, readDanaUiSource } from './lib/dana-ui-source.mjs';
 const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8');
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
-const navCss=read('vendor/dana-ui/package/styles/gear-apps/layout/navigation-shell.css');
-const responsive=read('vendor/dana-ui/package/styles/gear-apps/foundation/responsive.css');
-const appShell=read('vendor/dana-ui/package/styles/gear-apps/layout/app-shell.css');
-const mobile=read('vendor/dana-ui/package/fesm2022/dana-ui.mjs');
+const navCss=read('libs/shared/dana-ui/src/styles/gear-apps/layout/navigation-shell.css');
+const responsive=read('libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css');
+const appShell=read('libs/shared/dana-ui/src/styles/gear-apps/layout/app-shell.css');
+const mobile=danaUiBundleText();
 const mobileSource=readDanaUiSource(process.cwd(),'lib/components/navigation/dana-mobile-nav.directive.ts');
-const grid=read('vendor/dana-ui/package/fesm2022/dana-ui.mjs');
-const stack=read('vendor/dana-ui/package/fesm2022/dana-ui.mjs');
-const barrel=read('vendor/dana-ui/package/index.d.ts');
+const grid=danaUiBundleText();
+const stack=danaUiBundleText();
+const barrel=danaUiPublicApiText();
 
 for(const marker of ['.gear-sidebar.mobile-open','transform: translateX(-105%)','.gear-nav-overlay','@media (min-width: 1024px)','grid-template-columns: auto minmax(0, 1fr) auto']) must(navCss.includes(marker),'Responsive navigation CSS missing '+marker);
 must(appShell.includes('padding-top: var(--gear-topbar-height)'),'Mobile content shell must reserve topbar height.');

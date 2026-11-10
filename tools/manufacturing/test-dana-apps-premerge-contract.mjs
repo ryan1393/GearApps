@@ -16,7 +16,7 @@ must(lock.name === pkg.name && lock.packages?.['']?.name === pkg.name, 'Lockfile
 for (const kind of ['dependencies','devDependencies']) must(JSON.stringify(canonicalRecord(pkg[kind])) === JSON.stringify(canonicalRecord(lock.packages?.['']?.[kind])), `${kind} differ between the single package and lock`);
 for (const file of ['package.json','package-lock.json','nx.json','jest.preset.js','.eslintrc.json']) must(!fs.existsSync(path.join(root,'manufacturing',file)), `Detached manufacturing toolchain file remains: ${file}`);
 must(!fs.existsSync(path.join(root,'manufacturing','node_modules')), 'Manufacturing must use root node_modules');
-must(!fs.existsSync(path.join(root,'manufacturing','vendor','dana-ui','package')), 'Dana UI must have one root vendored output');
+must(!fs.existsSync(path.join(root,'vendor')), 'Dana UI must have one source copy (libs/shared/dana-ui); do not restore a vendored output');
 const nx = json('nx.json');
 must(!nx.nxCloudAccessToken, 'Do not embed an Nx Cloud access token');
 const ignored = fs.existsSync(contractPath(process.cwd(), path.join(workspaceRoot,'.nxignore'))) ? fs.readFileSync(contractPath(process.cwd(), path.join(workspaceRoot,'.nxignore')),'utf8') : '';
@@ -26,13 +26,10 @@ must(Object.keys(aliases).some(name => name.startsWith('@gearapps/manufacturing/
 must(Object.keys(aliases).every(name => !name.startsWith('@libs/')), 'Retired @libs aliases must not return');
 const boundaries = read('eslint.config.mjs');
 must(boundaries.includes('@nx/enforce-module-boundaries'), 'Root lint must enforce Nx project boundaries');
-const vendorPkg = json('vendor/dana-ui/package/package.json');
-const vendor = json('vendor/dana-ui/VENDOR_MANIFEST.json');
-const installed = json('node_modules/@dana/ui/package.json');
-must(pkg.devDependencies?.['@dana/ui'] === 'file:vendor/dana-ui/package', 'All apps must install the same root Dana UI package');
-must(vendorPkg.name === '@dana/ui' && installed.name === '@dana/ui', 'Dana UI package identity is invalid');
-must(installed.version === vendorPkg.version && vendor.packageVersion === vendorPkg.version, 'Installed and vendored Dana UI versions differ');
-must(fs.realpathSync(contractPath(root,'node_modules/@dana/ui')) === fs.realpathSync(contractPath(root,'vendor/dana-ui/package')), 'Installed Dana UI must resolve to the single root vendor');
+const danaUi = json('libs/shared/dana-ui/package.json');
+must(danaUi.name === '@dana/ui', 'Dana UI package identity is invalid');
+must(pkg.devDependencies?.['@dana/ui'] === undefined && pkg.dependencies?.['@dana/ui'] === undefined, 'All apps compile the one libs/shared/dana-ui source; do not install a Dana UI package');
+must(JSON.stringify(aliases['@dana/ui']) === JSON.stringify(['./libs/shared/dana-ui/src/index.ts']), '@dana/ui must resolve to the libs/shared/dana-ui source');
 for (const name of ['blade-tracking','cutter-builder','greenshed','server']) {
   const project = json(`apps/${name}/project.json`);
   must(project.sourceRoot === `apps/${name}/src`, `${name} must build from the unified root`);

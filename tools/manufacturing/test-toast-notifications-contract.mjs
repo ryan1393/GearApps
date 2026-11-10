@@ -11,8 +11,8 @@ const compatService = read('libs/manufacturing/frontend/util-common/src/lib/toas
 const compatHost = read('libs/manufacturing/frontend/util-common/src/lib/toast/gear-toast-host.component.ts');
 const danaService = readDanaUiSource(root, 'lib/components/feedback/dana-toast.service.ts');
 const danaHost = readDanaUiSource(root, 'lib/components/feedback/dana-toast-host.component.ts');
-const sharedCss = read('vendor/dana-ui/package/styles/gear-apps.css');
-const toastCss = read('vendor/dana-ui/package/styles/gear-apps/components/toast.css');
+const sharedCss = read('libs/shared/dana-ui/src/styles/gear-apps.css');
+const toastCss = read('libs/shared/dana-ui/src/styles/gear-apps/components/toast.css');
 const utilIndex = read('libs/manufacturing/frontend/util-common/src/index.ts');
 const danaIndex = readDanaUiSource(root, 'index.ts');
 
@@ -83,8 +83,8 @@ assert(!legacyDirective.includes("this.action === 'create'"), 'Upsert toast logi
   }
 }
 
-const brandCss = read('vendor/dana-ui/package/styles/gear-apps/layout/brand.css');
-const responsiveCss = read('vendor/dana-ui/package/styles/gear-apps/foundation/responsive.css');
+const brandCss = read('libs/shared/dana-ui/src/styles/gear-apps/layout/brand.css');
+const responsiveCss = read('libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css');
 assert(/dana-diamond-mark[\s\S]*?width:\s*56px;[\s\S]*?height:\s*38px;/.test(brandCss), 'Normal Dana Diamond must remain 56x38.');
 assert(/dana-diamond-mark[\s\S]*?width:\s*64px;[\s\S]*?height:\s*44px;/.test(responsiveCss), 'Large-screen Dana Diamond must remain 64x44.');
 

@@ -1,3 +1,2 @@
-# Built release archives and the vendored Dana UI package are not Nx projects.
+# Built release archives are not Nx projects.
 releases/**
-vendor/**

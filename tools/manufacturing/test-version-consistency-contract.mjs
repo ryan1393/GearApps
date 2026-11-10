@@ -21,8 +21,6 @@ if (lock.version !== version || lock.packages?.['']?.version !== version)
   fail('package-lock release versions do not match package.json');
 const central = fs.readFileSync(contractPath(process.cwd(), path.join(workspaceRoot, 'libs/shared/domain/src/lib/app-version.ts')), 'utf8');
 const constant = /GEAR_APPS_VERSION\s*=\s*['"]([^'"]+)['"]/.exec(central)?.[1];
-if (JSON.parse(read('vendor/dana-ui/VENDOR_MANIFEST.json')).danaAppsVersion !== version)
-  fail('vendor ownership version does not match package.json');
 if (!read('libs/manufacturing/shared/util-constants/src/lib/app-version.constants.ts').includes("from '@gearapps/shared/domain'"))
   fail('Manufacturing release constant must re-export the shared root version');
 if (

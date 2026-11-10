@@ -550,7 +550,7 @@ try {
         Add-MasterResult 'External Dana UI package contract' 'FAIL' "Exit code $LASTEXITCODE"
         throw 'External Dana UI package contract failed.'
     }
-    Add-MasterResult 'External Dana UI package contract' 'PASS' 'Gear Apps consumes vendored @dana/ui 0.2.0 from the Truck Log visual baseline while retaining temporary local compatibility/domain layers.'
+    Add-MasterResult 'External Dana UI package contract' 'PASS' 'Gear Apps compiles the one libs/shared/dana-ui source from the Truck Log visual baseline while retaining temporary local compatibility/domain layers.'
 
     & node "$PSScriptRoot\audit-dana-ui-migration-test-surface.mjs"
     if ($LASTEXITCODE -ne 0) {

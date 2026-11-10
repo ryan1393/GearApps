@@ -2,9 +2,10 @@ import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { readContract, workspaceRoot } from './lib/contract-paths.mjs';
+import { danaUiPublicApiText } from './lib/dana-ui-source.mjs';
 const sourceRoot=path.join(workspaceRoot,'libs/shared/dana-ui/src');
 const source=fs.readFileSync(contractPath(process.cwd(), path.join(sourceRoot,'index.ts')),'utf8');
-const declarations=readContract('vendor/dana-ui/package/index.d.ts');
+const declarations=danaUiPublicApiText();
 const exports=[...source.matchAll(/export(?:\s+type)?\s+(?:\{[^}]+\}|\*)\s+from\s+['"](\.\/[^'"]+)['"]/g)].map(match=>match[1]);
 if(exports.length<20) throw new Error(`Shared UI source barrel export scan was unexpectedly small: ${exports.length}`);
 for(const spec of exports) {

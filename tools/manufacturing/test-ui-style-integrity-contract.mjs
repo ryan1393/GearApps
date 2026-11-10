@@ -6,7 +6,7 @@ import { createRequire } from "node:module";
 const root=process.cwd();
 const req=createRequire(contractPath(root,"package.json"));
 const postcss=req("postcss");
-const entry=contractPath(root,"vendor","dana-ui","package","styles","gear-apps.css");
+const entry=contractPath(root,"libs","shared","dana-ui","src","styles","gear-apps.css");
 
 if(!fs.existsSync(contractPath(process.cwd(), entry))) throw new Error("Missing shared Gear Apps CSS entrypoint.");
 

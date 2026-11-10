@@ -8,18 +8,15 @@ export function setReleaseVersion(root, next) {
   const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
   const pkg = JSON.parse(read('package.json'));
   const lock = JSON.parse(read('package-lock.json'));
-  const vendor = JSON.parse(read('vendor/dana-ui/VENDOR_MANIFEST.json'));
   if (!lock.packages?.[''])
     throw new Error('package-lock.json root package entry is missing');
   const staged = new Map();
   pkg.version = next;
   lock.version = next;
   lock.packages[''].version = next;
-  vendor.danaAppsVersion = next;
   for (const [file, value] of [
     ['package.json', pkg],
     ['package-lock.json', lock],
-    ['vendor/dana-ui/VENDOR_MANIFEST.json', vendor],
   ])
     staged.set(file, JSON.stringify(value, null, 2) + '\n');
   const edit = (file, pattern, replace) => {

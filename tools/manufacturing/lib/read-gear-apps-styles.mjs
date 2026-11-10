@@ -2,11 +2,11 @@ import { contractPath } from './contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Gear Apps styles all ship in @dana/ui (vendored at vendor/dana-ui/package).
-export const GEAR_APPS_STYLE_ENTRY = 'vendor/dana-ui/package/styles/gear-apps.css';
+// Gear Apps styles all ship in @dana/ui (source: libs/shared/dana-ui/src/styles).
+export const GEAR_APPS_STYLE_ENTRY = 'libs/shared/dana-ui/src/styles/gear-apps.css';
 export const GEAR_APPS_STYLE_ENTRY_INSTALLED = 'libs/shared/dana-ui/src/styles/gear-compat.css';
 export const GEAR_APPS_DOMAIN_STYLE_ENTRY_INSTALLED = 'libs/shared/dana-ui/src/styles/gear-compat-features.css';
-export const GEAR_APPS_DOMAIN_STYLE_ENTRY = 'vendor/dana-ui/package/styles/gear-compat-features.css';
+export const GEAR_APPS_DOMAIN_STYLE_ENTRY = 'libs/shared/dana-ui/src/styles/gear-compat-features.css';
 const IMPORT_PATTERN = /@import\s+['"]([^'"]+)['"]\s*;/g;
 
 function listStyleModules(root, entryRel) {

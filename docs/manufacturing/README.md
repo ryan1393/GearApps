@@ -201,9 +201,9 @@ See `docs/manufacturing/MIGRATION.md` for migration behavior and `docs/manufactu
 
 ## Styling (Dana UI)
 
-All visual styling comes from **@dana/ui** (Dana UI), the same package Truck Log uses. It is
-vendored in `vendor/dana-ui/package` (see `VENDOR_MANIFEST.json` for version and checksums) and
-installed as `node_modules/@dana/ui`.
+All visual styling comes from **@dana/ui** (Dana UI), the same UI Truck Log uses. Its only copy
+is the `libs/shared/dana-ui` Nx library; the `@dana/ui` TypeScript path alias and the app style
+lists point straight at that source, so there is no built package to vendor or install.
 
 Rules for this app:
 
@@ -213,24 +213,23 @@ Rules for this app:
 - Layout for a single screen (grid, ordering, spacing between sections) is fine in the screen's
   own template.
 - If something needs a new look or a new shared component, it belongs in Dana UI so Truck Log and
-  Gear Apps both get it. Change Dana UI, release it, then update the vendored copy here.
+  Gear Apps both get it. Change `libs/shared/dana-ui` directly.
 
 Each app loads, in this order (`../apps/<app>/project.json`):
 
 1. `../apps/<app>/src/styles.css`: Tailwind directives only
-2. `@dana/ui/styles/gear-compat.css`: Gear's current shell, panels and primitives
-3. `@dana/ui/styles/gear-compat-features.css`: Gear screen styles (dashboards, inventory, Running Machines...)
-4. `@dana/ui/styles/dana-ui.css`: the shared Dana UI look (what Truck Log loads)
-5. `@dana/ui/styles/gear-compat-overrides.css`: keeps Gear's current look where Dana UI differs
+2. `libs/shared/dana-ui/src/styles/gear-compat.css`: Gear's current shell, panels and primitives
+3. `libs/shared/dana-ui/src/styles/gear-compat-features.css`: Gear screen styles (dashboards, inventory, Running Machines...)
+4. `libs/shared/dana-ui/src/styles/dana-ui.css`: the shared Dana UI look (what Truck Log loads)
+5. `libs/shared/dana-ui/src/styles/gear-compat-overrides.css`: keeps Gear's current look where Dana UI differs
 
 Files 2, 3 and 5 are a temporary compatibility layer that lives in Dana UI and only Gear loads.
 They shrink as screens move to the shared look, and go away when that is done.
-The Tailwind preset also comes from Dana UI (`@dana/ui/tailwind/tailwind-preset.cjs`), through
+The Tailwind preset also comes from Dana UI (`libs/shared/dana-ui/src/tailwind/tailwind-preset.cjs`), through
 `tools/manufacturing/tailwind/create-app-tailwind-config.js`.
 
-To update Dana UI: build the release in the Dana UI repo, replace `vendor/dana-ui/package` with its
-`dist`, update `VENDOR_MANIFEST.json` and the `vendor/dana-ui/package` version in
-`package-lock.json`, then run `npm install` and the tests.
+To check Dana UI on its own, run `npx nx test dana-ui` (it builds the publishable package into
+`dist/libs/shared/dana-ui` and runs its boundary, visual and consumer checks).
 
 ## Admin management
 

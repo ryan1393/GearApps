@@ -5,16 +5,16 @@ import { fileURLToPath } from 'node:url';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'../..');
 const read=(rel)=>fs.readFileSync(contractPath(root,rel),'utf8').replace(/^\uFEFF/,'');
 const must=(ok,msg)=>{if(!ok) throw new Error(msg)};
-const sharedEntry=read('vendor/dana-ui/package/styles/gear-apps.css');
-const gearEntry=read('vendor/dana-ui/package/styles/gear-compat-features.css');
+const sharedEntry=read('libs/shared/dana-ui/src/styles/gear-apps.css');
+const gearEntry=read('libs/shared/dana-ui/src/styles/gear-compat-features.css');
 const moved=['blade-dashboard.css','cutter-builder.css','greenshed-running-machines.css','inventory-core.css','inventory-relations.css','scrap-blades.css'];
 for(const name of moved){
   must(!sharedEntry.includes(`/features/${name}`),`gear-apps.css must not import Gear workflow CSS (it belongs in gear-compat-features.css): ${name}`);
-  must(!read('vendor/dana-ui/package/styles/dana-ui.css').includes(name),`dana-ui.css (Truck Log) must not import ${name}`);
+  must(!read('libs/shared/dana-ui/src/styles/dana-ui.css').includes(name),`dana-ui.css (Truck Log) must not import ${name}`);
   must(gearEntry.includes(`./gear-apps/features/${name}`),`Dana UI gear-compat-features.css does not import ${name}`);
   // Since Dana UI 0.3.0 Gear owns no CSS: Gear workflow styles live in Dana UI's optional Gear layer,
   // never in the canonical dana-ui.css that Truck Log loads.
-  must(fs.existsSync(contractPath(root,'vendor/dana-ui/package/styles/gear-apps/features',name)),`Dana UI Gear layer is missing: ${name}`);
+  must(fs.existsSync(contractPath(root,'libs/shared/dana-ui/src/styles/gear-apps/features',name)),`Dana UI Gear layer is missing: ${name}`);
 }
 for(const project of ['blade-tracking','cutter-builder','greenshed']){
   const cfg=JSON.parse(read(`apps/${project}/project.json`)); const styles=cfg?.targets?.build?.options?.styles??[];

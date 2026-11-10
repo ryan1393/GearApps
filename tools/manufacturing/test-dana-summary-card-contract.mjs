@@ -1,6 +1,7 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
+import { danaUiPublicApiText } from './lib/dana-ui-source.mjs';
 
 const root = path.resolve(process.argv[2] || '.');
 const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8').replace(/\r\n/g, '\n');
@@ -9,11 +10,11 @@ const count = (text, needle) => text.split(needle).length - 1;
 
 const inventory = read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/inventory-overview/inventory-overview.component.html');
 const locations = read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/locations/blade-locations.component.html');
-const dataDisplay = read('vendor/dana-ui/package/styles/gear-apps/components/data-display.css');
-const inventoryCore = read('vendor/dana-ui/package/styles/gear-apps/features/inventory-core.css');
-const inventoryRelations = read('vendor/dana-ui/package/styles/gear-apps/features/inventory-relations.css');
-const responsive = read('vendor/dana-ui/package/styles/gear-apps/foundation/responsive.css');
-const index = read('vendor/dana-ui/package/index.d.ts');
+const dataDisplay = read('libs/shared/dana-ui/src/styles/gear-apps/components/data-display.css');
+const inventoryCore = read('libs/shared/dana-ui/src/styles/gear-apps/features/inventory-core.css');
+const inventoryRelations = read('libs/shared/dana-ui/src/styles/gear-apps/features/inventory-relations.css');
+const responsive = read('libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css');
+const index = danaUiPublicApiText();
 
 must(count(inventory, 'danaSummaryGrid') === 1, 'Inventory Control Center must use one Dana summary grid.');
 must(count(inventory, 'danaSummaryCard') === 4, 'Inventory Control Center must use four Dana summary cards.');

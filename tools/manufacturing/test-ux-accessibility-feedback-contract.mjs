@@ -5,7 +5,7 @@ const scanTs=read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/sh
 const scanHtml=read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/shared/scan-panel/scan-panel.component.html');
 for(const m of ['implements AfterViewInit','@Input() autoFocus = true','readonly inputId','ngAfterViewInit()']) if(!scanTs.includes(m)) throw new Error(`Shared scan autofocus missing ${m}`);
 for(const m of ['[for]="inputId"','[id]="inputId"']) if(!scanHtml.includes(m)) throw new Error(`Shared scan label association missing ${m}`);
-const css=read('vendor/dana-ui/package/styles/gear-apps/components/primitives.css');
+const css=read('libs/shared/dana-ui/src/styles/gear-apps/components/primitives.css');
 if(!css.includes(':focus-visible')) throw new Error('Shared focus-visible styling missing.');
 const loginTs=read('libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.ts');
 const loginHtml=read('libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.html');

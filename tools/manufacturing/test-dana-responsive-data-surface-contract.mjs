@@ -1,13 +1,14 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
+import { danaUiBundleText } from './lib/dana-ui-source.mjs';
 
 const read = (p) => fs.readFileSync(contractPath(process.cwd(), p), 'utf8');
 const must = (ok, msg) => {
   if (!ok) throw new Error(msg);
 };
 
-const shell = read('vendor/dana-ui/package/fesm2022/dana-ui.mjs');
-const responsive = read('vendor/dana-ui/package/styles/gear-apps/foundation/responsive.css');
+const shell = danaUiBundleText();
+const responsive = read('libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css');
 const runner = read('tools/manufacturing/run-all-tests.ps1');
 
 for (const marker of [

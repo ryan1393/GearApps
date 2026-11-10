@@ -57,6 +57,7 @@ for (const path of [
   // Manufacturing code lives in libs/manufacturing, tools/manufacturing, docs/manufacturing and commands/.
   'manufacturing',
   'libs/shared/dana-ui/package-lock.json',
+  'vendor/dana-ui',
 ]) {
   assert.equal(
     existsSync(resolve(root, path)),
@@ -66,7 +67,8 @@ for (const path of [
 }
 const ui = json('libs/shared/dana-ui/package.json');
 assert.equal(ui.version, '0.3.3');
-assert.equal(pkg.devDependencies['@dana/ui'], 'file:vendor/dana-ui/package');
-assert.equal(json('vendor/dana-ui/package/package.json').version, ui.version);
+// Dana UI has one copy: the libs/shared/dana-ui source, resolved through the @dana/ui path alias.
+assert.equal(pkg.dependencies?.['@dana/ui'] ?? pkg.devDependencies?.['@dana/ui'], undefined, 'Do not install a separate @dana/ui package');
+assert.deepEqual(json('tsconfig.base.json').compilerOptions.paths['@dana/ui'], ['./libs/shared/dana-ui/src/index.ts']);
 assert.equal(ui.devDependencies, undefined, 'Dana UI uses root build dependencies');
 console.log(`GearApps ${pkg.version}: one lockfile, one framework stack, Dana UI ${ui.version}.`);

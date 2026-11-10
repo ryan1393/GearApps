@@ -1,15 +1,16 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
+import { danaUiPublicApiText } from './lib/dana-ui-source.mjs';
 
 const read = (p) => fs.readFileSync(contractPath(process.cwd(), p), 'utf8');
 const must = (ok, msg) => {
   if (!ok) throw new Error(msg);
 };
 
-const barrel = read('vendor/dana-ui/package/index.d.ts');
-const sharedStyles = read('vendor/dana-ui/package/styles/gear-apps.css');
-const gearStyles = read('vendor/dana-ui/package/styles/gear-compat-features.css');
-const responsive = read('vendor/dana-ui/package/styles/gear-apps/foundation/responsive.css');
+const barrel = danaUiPublicApiText();
+const sharedStyles = read('libs/shared/dana-ui/src/styles/gear-apps.css');
+const gearStyles = read('libs/shared/dana-ui/src/styles/gear-compat-features.css');
+const responsive = read('libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css');
 const baseline = read('docs/manufacturing/DANA_MASTER_UI_BASELINE.md');
 const runner = read('tools/manufacturing/run-all-tests.ps1');
 

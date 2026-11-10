@@ -8,17 +8,17 @@ const root = process.cwd();
 const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8');
 const stripComments = (text) => text.replace(/\/\*[\s\S]*?\*\//g, '').trim();
 
-const entry = read('vendor/dana-ui/package/styles/gear-apps.css');
-const tokens = read('vendor/dana-ui/package/styles/gear-apps/foundation/tokens.css');
-const designTokens = read('vendor/dana-ui/package/styles/gear-apps/features/design-tokens.css');
-const cleanup = read('vendor/dana-ui/package/styles/gear-apps/features/ui-cleanup.css');
-const data = read('vendor/dana-ui/package/styles/gear-apps/components/data-display.css');
-const dashboard = read('vendor/dana-ui/package/styles/gear-apps/features/dashboard.css');
-const typography = read('vendor/dana-ui/package/styles/gear-apps/features/typography.css');
-const primitives = read('vendor/dana-ui/package/styles/gear-apps/components/primitives.css');
-const admin = read('vendor/dana-ui/package/styles/gear-apps/features/admin-core.css');
+const entry = read('libs/shared/dana-ui/src/styles/gear-apps.css');
+const tokens = read('libs/shared/dana-ui/src/styles/gear-apps/foundation/tokens.css');
+const designTokens = read('libs/shared/dana-ui/src/styles/gear-apps/features/design-tokens.css');
+const cleanup = read('libs/shared/dana-ui/src/styles/gear-apps/features/ui-cleanup.css');
+const data = read('libs/shared/dana-ui/src/styles/gear-apps/components/data-display.css');
+const dashboard = read('libs/shared/dana-ui/src/styles/gear-apps/features/dashboard.css');
+const typography = read('libs/shared/dana-ui/src/styles/gear-apps/features/typography.css');
+const primitives = read('libs/shared/dana-ui/src/styles/gear-apps/components/primitives.css');
+const admin = read('libs/shared/dana-ui/src/styles/gear-apps/features/admin-core.css');
 const directive = readDanaUiSource(root, 'lib/components/data/dana-table.directive.ts');
-const icons = read('vendor/dana-ui/package/styles/gear-apps/components/icons.css');
+const icons = read('libs/shared/dana-ui/src/styles/gear-apps/components/icons.css');
 const navs = [
   'apps/blade-tracking/src/app/layout/app-nav/app-nav.component.html',
   'apps/cutter-builder/src/app/layout/cutter-builder-nav/cutter-builder-nav.component.html',

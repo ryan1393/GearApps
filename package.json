@@ -180,7 +180,6 @@
     "webpack": "5.110.3",
     "webpack-cli": "7.3.1",
     "webpack-dev-server": "5.2.7",
-    "@dana/ui": "file:vendor/dana-ui/package",
     "angular-eslint": "20.7.0",
     "@ngneat/falso": "7.4.0",
     "@swc-node/register": "1.12.1",

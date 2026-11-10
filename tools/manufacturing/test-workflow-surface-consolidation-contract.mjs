@@ -4,8 +4,8 @@ import path from 'node:path';
 
 const root = process.cwd();
 const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8').replace(/^\uFEFF/, '');
-const entry = read('vendor/dana-ui/package/styles/gear-apps.css');
-const cssRel = 'vendor/dana-ui/package/styles/gear-apps/components/workflow-layout.css';
+const entry = read('libs/shared/dana-ui/src/styles/gear-apps.css');
+const cssRel = 'libs/shared/dana-ui/src/styles/gear-apps/components/workflow-layout.css';
 const css = read(cssRel);
 
 if (!entry.includes("@import './gear-apps/components/workflow-layout.css';")) {

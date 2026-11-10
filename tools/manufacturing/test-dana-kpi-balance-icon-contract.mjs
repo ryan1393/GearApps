@@ -1,13 +1,13 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
-import { readDanaUiSource } from './lib/dana-ui-source.mjs';
+import { danaUiBundleText, readDanaUiSource } from './lib/dana-ui-source.mjs';
 const root=path.resolve(process.argv[2]||'.');
 const read=r=>fs.readFileSync(contractPath(root,r),'utf8').replace(/\r\n/g,'\n');
 const must=(c,m)=>{if(!c)throw new Error(m)};
-const dash=read('vendor/dana-ui/package/styles/gear-apps/features/dashboard.css');
-const responsive=read('vendor/dana-ui/package/styles/gear-apps/foundation/responsive.css');
-const op=read('vendor/dana-ui/package/fesm2022/dana-ui.mjs');
+const dash=read('libs/shared/dana-ui/src/styles/gear-apps/features/dashboard.css');
+const responsive=read('libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css');
+const op=danaUiBundleText();
 const grid=readDanaUiSource(root,'lib/components/dashboard/dana-kpi-grid.directive.ts');
 const card=readDanaUiSource(root,'lib/components/dashboard/dana-kpi-card.directive.ts');
 const hostClasses=source=>(/\bhost\s*:\s*\{[^}]*\bclass\s*:\s*(['"])(.*?)\1/s.exec(source)?.[2]??'').split(/\s+/);

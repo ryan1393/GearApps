@@ -1,7 +1,7 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
-import { readDanaUiSource } from './lib/dana-ui-source.mjs';
+import { danaUiBundleText, danaUiPublicApiText, readDanaUiSource } from './lib/dana-ui-source.mjs';
 const root = path.resolve(process.argv[2] || '.');
 const read = (r) => fs.readFileSync(contractPath(root, r), 'utf8').replace(/\r\n/g, '\n');
 const must = (c,m) => { if(!c) throw new Error(m); };
@@ -43,11 +43,11 @@ const opFiles = new Map([
     5
   ]
 ]);
-const pageHeader = read('vendor/dana-ui/package/fesm2022/dana-ui.mjs');
+const pageHeader = danaUiBundleText();
 const opCard = readDanaUiSource(root, 'lib/components/navigation/dana-operation-card.component.ts');
 const opGrid = readDanaUiSource(root, 'lib/components/navigation/dana-operation-grid.directive.ts');
 const hostClasses = source => (/\bhost\s*:\s*\{[^}]*\bclass\s*:\s*(['"])(.*?)\1/s.exec(source)?.[2] ?? '').split(/\s+/);
-const index = read('vendor/dana-ui/package/index.d.ts');
+const index = danaUiPublicApiText();
 must(pageHeader.includes("selector: '[danaPageHeader]'") && pageHeader.includes("class: 'dana-page-header gear-page-header'"), 'DanaPageHeaderComponent must own canonical dana-page-header and preserve gear-page-header compatibility alias.');
 must(pageHeader.includes('dana-eyebrow') && pageHeader.includes('dana-page-title') && pageHeader.includes('dana-page-description'), 'DanaPageHeaderComponent is missing canonical Dana title vocabulary.');
 must(pageHeader.includes('gear-eyebrow') && pageHeader.includes('gear-page-title') && pageHeader.includes('gear-page-description'), 'DanaPageHeaderComponent must preserve legacy Gear title aliases during migration.');

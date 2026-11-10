@@ -11,7 +11,7 @@ const digest = text => crypto.createHash('sha256').update(text).digest('hex').to
 const receipt = JSON.parse(read('docs/manufacturing/DANA_UI_DASHBOARD_VISUAL_QA.json'));
 // Since Dana UI 0.3.0 this CSS ships as gear-compat-overrides.css, with a packaging header and the
 // compact toast block appended after the dashboard polish; the reviewed content is unchanged.
-const css = norm(read('vendor/dana-ui/package/styles/gear-compat-overrides.css'))
+const css = norm(read('libs/shared/dana-ui/src/styles/gear-compat-overrides.css'))
   .replace(/^\/\* @dana\/ui Gear compatibility: overrides[\s\S]*?\*\/\n/, '')
   .replace(/\n*\/\* Compact toast stack for Gear Apps[\s\S]*$/, '\n');
 const begin = '/* BEGIN DANA-APPS DASHBOARD VISUAL QA V70.0.4';
@@ -24,7 +24,7 @@ const block = css.slice(at, endAt + end.length) + '\n';
 must(digest(block) === receipt.managedCssSha256, 'Dashboard visual QA managed CSS differs from its reviewed release.');
 must(digest(css.slice(0, at).trimEnd()) === receipt.previousCssSha256, 'Pre-existing Dana/Gear migration CSS was changed.');
 must(receipt.version === 'V70.0.4' && receipt.sharedUiVersion === '0.2.0', 'Dashboard visual QA receipt version mismatch.');
-const pkg = JSON.parse(read('vendor/dana-ui/package/package.json'));
+const pkg = JSON.parse(read('libs/shared/dana-ui/package.json'));
 must(pkg.name === '@dana/ui' && /^0\.(2|3)\.\d+$/.test(pkg.version), 'Dashboard polish requires @dana/ui 0.2.x/0.3.x (reviewed against 0.2.0).');
 for (const app of ['blade-tracking', 'cutter-builder', 'greenshed']) {
   const project = JSON.parse(read(`apps/${app}/project.json`));

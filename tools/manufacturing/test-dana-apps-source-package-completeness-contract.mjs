@@ -30,7 +30,6 @@ for (const file of [
   'libs/manufacturing/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.ts',
   'libs/manufacturing/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.html',
   'libs/shared/dana-ui/src/index.ts',
-  'vendor/dana-ui/package/index.d.ts',
 ]) {
   assert.ok(
     fs.existsSync(contractPath(process.cwd(), path.join(workspaceRoot, file))),
