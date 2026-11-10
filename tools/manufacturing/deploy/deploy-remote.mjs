@@ -17,7 +17,7 @@
 //   --legacy-root <path>    Old release folder to carry .env from (default: /tmp/dana-apps.v0.1)
 //   --upload-env            First deploy only: copy root .env when the host has none
 //   --skip-backup           Do not pg_dump before deploying (not recommended)
-//   --allow-weak-secrets    Deploy even if the host .env has placeholder/short JWT secrets
+//   --allow-weak-secrets    Accepted for older scripts; weak JWT secrets only warn now
 import cp from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -298,13 +298,13 @@ async function main() {
     console.warn('[WARN] GEAR_DB_PASSWORD is shorter than 12 characters. Postgres only reads it when the volume is first created,\n' +
       '       so change it inside Postgres first (ALTER USER ... PASSWORD ...), then in .env, then deploy.');
   }
+  // The owner decides on the host's secrets, so weak ones only warn (the API does the same at
+  // startup). The API itself still refuses secrets under 16 characters.
   if (weak.length) {
-    const msg = `The .env being deployed has weak or placeholder values: ${weak.map((w) => w.slice(5)).join(', ')}.\n` +
-      '  JWT secrets must be 32+ random characters (anyone who knows them can sign an admin login).\n' +
-      '  Generate one with:  node -e "console.log(require(\'crypto\').randomBytes(48).toString(\'base64url\'))"\n' +
-      '  Changing the JWT secrets signs everyone out once; nothing else is affected.';
-    if (!flag('--allow-weak-secrets')) fail(msg + '\n  Fix the .env, or re-run with --allow-weak-secrets.');
-    console.warn('[WARN] ' + msg);
+    console.warn(`[WARN] The .env being deployed has weak or placeholder values: ${weak.map((w) => w.slice(5)).join(', ')}.\n` +
+      '       JWT secrets should be 32+ random characters (anyone who knows them can sign an admin login).\n' +
+      '       Generate one with:  node -e "console.log(require(\'crypto\').randomBytes(48).toString(\'base64url\'))"\n' +
+      '       Changing the JWT secrets signs everyone out once; nothing else is affected. Deploying anyway.');
   }
 
   if (MODE === 'check') {

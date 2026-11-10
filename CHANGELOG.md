@@ -15,6 +15,8 @@
     part used by a gearset; its status can still change.
   - As in the other apps, master data is for administrators only: the Lapper sidebar and dashboard
     show these links to admins.
+- **Deploy.** Weak or placeholder JWT secrets in the host `.env` are now a warning, not a stop,
+  matching the API's own startup warning (it still requires 16+ characters).
 - **Repository layout.** The `manufacturing/` folder is gone (`libs/manufacturing`,
   `tools/manufacturing`, `docs/manufacturing`, `commands/`); manufacturing commands are targets of
   the `manufacturing-tools` Nx project; `npm test` runs through Nx; Dana UI has one copy (the
