@@ -1,6 +1,7 @@
 import { defer, EMPTY, expand, map, Observable, reduce } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { LabelPrinterChoiceService } from '@gearapps/manufacturing/frontend/util-common';
 import { ILocation, IPaginatedResponse, ITray } from '@gearapps/manufacturing/shared/util-types';
 
 export interface CutterBody {
@@ -64,6 +65,20 @@ export interface CutterBuildResult {
   build: CutterBuildCard;
   blade_ids: string[];
   tray_released: boolean;
+}
+
+/** What happened when a cutter card was sent to the card printer. */
+export interface CutterCardPrintResult {
+  build_number: string;
+  language: 'IPL' | 'ZPL';
+  printed: boolean;
+  printer_configured: boolean;
+  printer_name: string | null;
+  failure_reason: string | null;
+  /** The card in the printer's language, for saving when no printer took it. */
+  file_name: string;
+  file_base64: string;
+  card: CutterBuildCard;
 }
 
 export interface CutterTeardownResult {
@@ -194,6 +209,7 @@ export interface CutterTrayValidation {
 @Injectable({ providedIn: 'root' })
 export class CutterBuilderApiService {
   private readonly http = inject(HttpClient);
+  private readonly printerChoice = inject(LabelPrinterChoiceService);
 
 
   startGrinding(trayId: string) {
@@ -343,6 +359,14 @@ export class CutterBuilderApiService {
     );
   }
 
+  /** Sends the card to the card printer chosen on this computer, or the default one. */
+  printCard(buildNumber: string) {
+    return this.http.post<CutterCardPrintResult>(
+      `/api/v1/cutter-builder/builds/${encodeURIComponent(buildNumber.trim())}/card/print`,
+      { printer_id: this.printerChoice.selectedId('CUTTER_CARD') ?? undefined },
+    );
+  }
+
   getCard(buildNumber: string) {
     return this.http.get<CutterBuildCard>(
       `/api/v1/cutter-builder/builds/${encodeURIComponent(buildNumber.trim())}/card`,
@@ -428,8 +452,10 @@ function drawCode128(
     (total, pattern) => total + pattern.split('').reduce((sum, digit) => sum + Number(digit), 0),
     20,
   );
-  const moduleWidth = width / moduleCount;
-  let cursor = x + moduleWidth * 10;
+  // Whole-pixel bars keep the preview scannable; only a number too long for that is scaled to fit.
+  const wholePixels = Math.floor(width / moduleCount);
+  const moduleWidth = wholePixels >= 1 ? wholePixels : width / moduleCount;
+  let cursor = x + Math.floor((width - moduleWidth * moduleCount) / 2) + moduleWidth * 10;
   context.fillStyle = '#000000';
   for (const pattern of patterns) {
     let bar = true;
@@ -456,7 +482,10 @@ function cutterCardPreviewField(
   context.fillStyle = '#0f172a';
   context.font = '700 34px Arial, sans-serif';
   let display = value || '—';
-  while (display.length > 1 && context.measureText(display).width > width) display = display.slice(0, -1);
+  if (context.measureText(display).width > width) {
+    while (display.length > 1 && context.measureText(display + '…').width > width) display = display.slice(0, -1);
+    display += '…';
+  }
   context.fillText(display, x, y + 42);
 }
 
@@ -480,7 +509,12 @@ function cutterCardPng(card: CutterBuildCard): Promise<Blob> {
   context.fillText('CUTTER BUILD CARD', 55, 140);
 
   drawCode128(context, card.build_number, 55, 190, 706, 145);
-  context.font = '900 36px Consolas, monospace';
+  let numberSize = 36;
+  context.font = `900 ${numberSize}px Consolas, monospace`;
+  while (numberSize > 14 && context.measureText(card.build_number).width > 706) {
+    numberSize -= 2;
+    context.font = `900 ${numberSize}px Consolas, monospace`;
+  }
   context.textAlign = 'center';
   context.fillText(card.build_number, canvas.width / 2, 385);
   context.textAlign = 'left';
@@ -509,7 +543,10 @@ function cutterCardPng(card: CutterBuildCard): Promise<Blob> {
   context.font = '700 30px Arial, sans-serif';
   const builtAt = new Date(card.built_at);
   context.fillText(
-    Number.isNaN(builtAt.getTime()) ? card.built_at : builtAt.toLocaleString(),
+    // Plant time, the same as the date on the printed card, whatever this computer's clock zone is.
+    Number.isNaN(builtAt.getTime())
+      ? card.built_at
+      : new Intl.DateTimeFormat('en-US', { timeZone: 'America/Indiana/Indianapolis', dateStyle: 'medium', timeStyle: 'short' }).format(builtAt),
     55,
     1067,
   );
@@ -537,9 +574,15 @@ function cutterCardPng(card: CutterBuildCard): Promise<Blob> {
   });
 }
 
+/**
+ * Saves the card as a printer file plus a PNG preview. `printerFile` is the card in the language
+ * of the printer it was meant for; without it the IPL file is saved.
+ */
 export async function downloadCutterCardArtifacts(
   card: CutterBuildCard,
+  printerFile?: { file_name: string; file_base64: string },
 ): Promise<{ prnFileName: string; pngFileName: string }> {
+  if (printerFile) card = { ...card, prn_base64: printerFile.file_base64, prn_file_name: printerFile.file_name };
   if (!card.prn_base64) {
     throw new Error('The Gear Apps API did not return a native Cutter Card PRN. Restart the API after installing the cutter-card export patch.');
   }

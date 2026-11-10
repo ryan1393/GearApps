@@ -19,6 +19,7 @@ export class AppComponent {
 
   // Gear Apps browser tab identity v24
   private readonly pageTitles: ReadonlyArray<readonly [string, string]> = [
+      ['/cutter-builder/cancel-last', 'Cancel Last Build'],
       ['/cutter-builder/teardown', 'Tear Down Cutter'],
       ['/cutter-builder/lookup', 'Build Lookup'],
       ['/cutter-builder/build', 'Build Cutter'],

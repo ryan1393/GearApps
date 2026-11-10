@@ -8,6 +8,7 @@
   ></header>
 
   <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert">{{ error }}</div>
+  <div *ngIf="selectionsFailed" class="gear-alert gear-alert-warning" role="alert">Could not load every pick list (cutter bodies, ready trays, or Cutter Builder machines). Scanning still works. <button type="button" class="gear-btn gear-btn-secondary" (click)="refreshAvailableSelections()" [disabled]="busy">Retry</button></div>
 
   <div *ngIf="!result" class="gear-workflow-grid">
     <section class="gear-workflow-section">
@@ -86,6 +87,7 @@
           <label class="gear-field">
             Tray serial
             <input
+              [gearScannerFocus]="2"
               [ngModel]="traySerial" (ngModelChange)="trayChanged($event)"
               name="traySerial"
               class="gear-input font-mono"
@@ -163,7 +165,7 @@
           </select>
           <small class="gear-field-help">Only enabled, active Department 45 machines whose Machine Type is Cutter Builder are available.</small>
         </label>
-        <div *ngIf="availableCutterBuilderMachines.length === 0" class="gear-alert gear-alert-warning" role="status">
+        <div *ngIf="selectionState.machines === 'ready' && availableCutterBuilderMachines.length === 0" class="gear-alert gear-alert-warning" role="status">
           No eligible Cutter Builder machines are configured. In Admin → Machines, enable a Department 45 machine and set Machine Type to Cutter Builder.
         </div>
 
@@ -228,7 +230,9 @@
     <div *ngIf="r.build.comments" class="gear-workflow-comments"><strong>Comments:</strong> {{ r.build.comments }}</div>
 
     <div class="gear-workflow-actions gear-print-hide">
-      <button type="button" class="gear-btn gear-btn-secondary" (click)="print()">Print Cutter Card</button>
+      <gear-label-printer-picker labelType="CUTTER_CARD" label="Print cards to" />
+      <button type="button" class="gear-btn gear-btn-secondary" (click)="print()" [disabled]="printing">{{ printing ? 'Printing…' : 'Print Cutter Card' }}</button>
+      <button type="button" class="gear-btn gear-btn-secondary" (click)="browserPrint()">Browser Print</button>
       <button type="button" class="gear-btn gear-btn-primary" (click)="reset()">Build Another</button>
     </div>
   </div>

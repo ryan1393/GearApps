@@ -17,11 +17,15 @@ import {
   UpdatePieceCountDto,
 } from './greenshed.dto';
 import { ServerFeatGreenshedService } from './server-feat-greenshed.service';
+import { DsfCountService } from './dsf-count/dsf-count.service';
 
 @Controller({ path: 'greenshed', version: '1' })
 @ApiTags('Greenshed')
 export class ServerFeatGreenshedController {
-  constructor(private readonly service: ServerFeatGreenshedService) {}
+  constructor(
+    private readonly service: ServerFeatGreenshedService,
+    private readonly dsf: DsfCountService,
+  ) {}
 
   @Get('dashboard')
   @Auth([RoleType.ADMIN, RoleType.USER])
@@ -69,8 +73,12 @@ export class ServerFeatGreenshedController {
   @Post('setup')
   @DepartmentAppEdit('GREENSHED')
   @Auth([RoleType.ADMIN, RoleType.USER])
-  setupCutter(@Body() dto: SetupCutterDto, @ReqUserId() userId: Uuid) {
-    return this.service.setupCutter(dto, userId);
+  async setupCutter(@Body() dto: SetupCutterDto, @ReqUserId() userId: Uuid) {
+    const result = await this.service.setupCutter(dto, userId);
+    // Only after the Gear Apps transaction commits: ask for one early DSF read so the new
+    // cutter starts being credited without waiting a full poll interval. No-op when DSF is off.
+    this.dsf.requestImmediate();
+    return result;
   }
 
   @Post('quality-check')
@@ -94,7 +102,9 @@ export class ServerFeatGreenshedController {
   @Post('pull')
   @DepartmentAppEdit('GREENSHED')
   @Auth([RoleType.ADMIN, RoleType.USER])
-  pullCutter(@Body() dto: PullCutterDto, @ReqUserId() userId: Uuid) {
-    return this.service.pullCutter(dto, userId);
+  async pullCutter(@Body() dto: PullCutterDto, @ReqUserId() userId: Uuid) {
+    const result = await this.service.pullCutter(dto, userId);
+    this.dsf.requestImmediate(); // only after the Gear Apps transaction commits
+    return result;
   }
 }

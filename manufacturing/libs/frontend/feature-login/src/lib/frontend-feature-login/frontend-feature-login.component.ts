@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, isDevMode } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -31,7 +31,10 @@ export class FrontendFeatureLoginComponent {
   private router = inject(Router);
 
   readonly authState$ = this.session.authState$;
+  // Development builds only: a production build served on a host's own localhost (the Docker
+  // host, a kiosk, an SSH port-forward) must not advertise test account names.
   readonly showLocalTestLogin =
+    isDevMode() &&
     typeof window !== 'undefined' &&
     ['localhost', '127.0.0.1'].includes(window.location.hostname);
   readonly localTestEmail = 'test@gearapps.local';

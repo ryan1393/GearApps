@@ -17,7 +17,7 @@ import { apiErrorMessage, GearsetsApi } from '@gearapps/client/core';
 import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
 import { DialogComponent, SegmentedComponent } from '@gearapps/client/ui';
 import { Gearset, Part, Summary } from '@gearapps/shared/domain';
-import { STATUS_OPTIONS } from './shared';
+import { STATUS_OPTIONS, toStatusOption } from './shared';
 
 @Component({
   selector: 'gear-gearset-form-dialog',
@@ -169,7 +169,7 @@ export class GearsetFormDialogComponent {
             pinion_id: g.pinion_id,
             ring_id: g.ring_id,
             summary_id: g.summary_id,
-            status: g.status,
+            status: toStatusOption(g.status),
           });
           ['number', 'pinion_id', 'ring_id', 'summary_id'].forEach((k) =>
             this.form.get(k)?.disable(),

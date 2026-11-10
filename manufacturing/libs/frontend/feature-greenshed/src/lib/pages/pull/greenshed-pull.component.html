@@ -15,7 +15,7 @@
       <div class="gear-workflow-section-header"><span class="gear-workflow-step">1</span><div><h2>Active Cutter</h2><p>Scan the cutter build currently assigned to a machine.</p></div></div>
       <div class="gear-workflow-section-body">
         <form class="gear-workflow-scan-row" (ngSubmit)="scanBuild()">
-          <label class="gear-field">Build number<input [(ngModel)]="buildNumber" (ngModelChange)="onBuildInput()" [disabled]="busy || lockedToRunningMachine" name="build" class="gear-input font-mono" placeholder="Scan cutter build..." /></label>
+          <label class="gear-field">Build number<input gearScannerFocus [(ngModel)]="buildNumber" (ngModelChange)="onBuildInput()" [disabled]="busy || lockedToRunningMachine" name="build" class="gear-input font-mono" placeholder="Scan cutter build..." autocomplete="off" /></label>
           <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy || lockedToRunningMachine">Scan</button>
         </form>
         <div class="gear-workflow-divider">OR</div>
@@ -38,6 +38,7 @@
         <label class="gear-field">
           Reason
           <select [(ngModel)]="reasonCode" [disabled]="busy" (ngModelChange)="onReasonChange()" name="reason" class="gear-select">
+            <option value="" disabled>Choose pull reason...</option>
             <option *ngFor="let x of refs?.pull_reasons" [value]="x.code">{{ x.name }}</option>
           </select>
         </label>
@@ -50,7 +51,7 @@
       <div class="gear-workflow-section-body">
         <p class="gear-workflow-help">Changeover keeps the cutter intact. Scan the part-specific Green Shed shelf: GSR- + Summary for RING or GSP- + Summary for PINION.</p>
         <form class="gear-workflow-scan-row" (ngSubmit)="scanShelf()">
-          <label class="gear-field">Shelf tag<input [(ngModel)]="shelfSerial" (ngModelChange)="onShelfInput()" [disabled]="busy || !contextValid" name="shelf" class="gear-input" placeholder="Scan Greenshed shelf tag..." /></label>
+          <label class="gear-field">Shelf tag<input [gearScannerFocus]="2" [(ngModel)]="shelfSerial" (ngModelChange)="onShelfInput()" [disabled]="busy || !contextValid" name="shelf" class="gear-input" placeholder="Scan Greenshed shelf tag..." autocomplete="off" /></label>
           <button type="submit" class="gear-btn gear-btn-dark">Scan</button>
         </form>
         <div class="gear-workflow-divider">OR</div>
@@ -97,7 +98,7 @@
     </div>
     <div class="gear-workflow-result-body gear-workflow-detail-grid gear-workflow-detail-grid-four">
       <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Build</span><strong class="font-mono">{{ result.build_number }}</strong></div>
-      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Reason</span><strong>{{ result.reason_code }}</strong></div>
+      <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Reason</span><strong>{{ resultReasonName || result.reason_code }}</strong></div>
       <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Final Pieces</span><strong>{{ result.final_piece_count }}</strong></div>
       <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Location</span><strong>{{ result.shelf_location || 'CUTTER BUILDER' }}</strong></div>
     </div>

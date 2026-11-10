@@ -121,7 +121,12 @@ export class GreenshedCheckComponent implements OnInit {
           this.error = 'The selected cutter or machine run has changed. Select the check from Running Machines again.';
         } else {
           this.contextValid = true;
-          this.pieceCount = Math.max(run.current_piece_count, run.next_check_piece_count);
+          // Operator-counted: the check sets the running count, so start at the next check point.
+          // DSF-counted: the running count is already live; record the check at its scheduled
+          // point (or the live count if the check is early) without moving the running count.
+          this.pieceCount = this.dsfCounts
+            ? Math.max(run.last_check_piece_count, Math.min(run.next_check_piece_count, run.current_piece_count))
+            : Math.max(run.current_piece_count, run.next_check_piece_count);
         }
       },
       error: (e: HttpErrorResponse) => {
@@ -130,6 +135,16 @@ export class GreenshedCheckComponent implements OnInit {
         this.error = greenshedApiErrorText(e, 'Build not found.');
       },
     });
+  }
+
+  /** True when DSF credits production to cutters, so the running count moves without a check. */
+  get dsfCounts(): boolean { return this.refs?.dsf_cutter_counts === true; }
+
+  /** Lowest piece count a check may be recorded at. */
+  get minimumPieceCount(): number {
+    const run = this.build?.machine_run;
+    if (!run) return 0;
+    return this.dsfCounts ? run.last_check_piece_count : run.current_piece_count;
   }
 
   save(): void {
@@ -142,9 +157,11 @@ export class GreenshedCheckComponent implements OnInit {
       return;
     }
     const values = this.checkType === 'FC' ? this.frequency : this.cmm;
-    if (this.pieceCount === null || !Number.isSafeInteger(this.pieceCount) || this.pieceCount < run.current_piece_count ||
+    if (this.pieceCount === null || !Number.isSafeInteger(this.pieceCount) || this.pieceCount < this.minimumPieceCount ||
       Object.values(values).some(value => value != null && !Number.isFinite(value))) {
-      this.error = 'Enter a whole piece count at or above the current count and valid measurement numbers.';
+      this.error = this.dsfCounts
+        ? `Enter a whole piece count at or above the previous check count (${run.last_check_piece_count}) and valid measurement numbers.`
+        : 'Enter a whole piece count at or above the current count and valid measurement numbers.';
       return;
     }
     const generation = this.generation;

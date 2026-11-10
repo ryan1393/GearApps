@@ -1,6 +1,6 @@
 import { DepartmentAppEdit, Auth } from '@gearapps/manufacturing/server/util-common';
 import { RoleType } from '@gearapps/manufacturing/shared/util-types';
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
 import { PrintAssetTagDto } from './asset-tag-print.dto';
@@ -17,5 +17,13 @@ export class ServerFeatAssetTagController {
   @ApiOkResponse({ description: 'Sends a native IPL Code 128 tag or returns the .prn payload as a fallback.' })
   async printTag(@Body() dto: PrintAssetTagDto) {
     return this.assetTagService.printTag(dto);
+  }
+
+  @Post('test-print/:printerId')
+  @HttpCode(200)
+  @Auth([RoleType.ADMIN])
+  @ApiOkResponse({ description: 'Prints a tag reading TEST on one printer, to check its language and alignment.' })
+  async printTestTag(@Param('printerId', new ParseUUIDPipe()) printerId: string) {
+    return this.assetTagService.printTestTag(printerId);
   }
 }

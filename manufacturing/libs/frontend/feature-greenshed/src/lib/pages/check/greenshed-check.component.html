@@ -33,6 +33,7 @@
         <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Machine</span><strong>{{ build.machine_run?.machine_number || '—' }}</strong></div>
         <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Current Count</span><strong>{{ build.machine_run?.current_piece_count }}</strong></div>
         <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Next Check</span><strong>{{ build.machine_run?.next_check_piece_count }}</strong></div>
+        <div *ngIf="dsfCounts" class="gear-workflow-detail"><span class="gear-workflow-detail-label">Previous Check</span><strong>{{ build.machine_run?.last_check_piece_count }}</strong></div>
       </div>
     </section>
 
@@ -54,7 +55,9 @@
                 <option *ngFor="let x of refs?.check_results" [value]="x.code">{{ x.name }}</option>
               </select>
             </label>
-            <label class="gear-field">Cutter Piece Count<input type="number" [min]="build.machine_run?.current_piece_count || 0" step="1" required [(ngModel)]="pieceCount" name="pieces" class="gear-input" /></label>
+            <label class="gear-field">{{ dsfCounts ? 'Piece Count At Check' : 'Cutter Piece Count' }}<input type="number" [min]="minimumPieceCount" max="2147483647" step="1" required [(ngModel)]="pieceCount" name="pieces" class="gear-input" />
+              <small *ngIf="dsfCounts" class="gear-workflow-help">DSF is counting this cutter. Enter the count this check was taken at, {{ build.machine_run?.last_check_piece_count }} (previous check) or later. The running count only changes if you enter a higher number.</small>
+            </label>
           </div>
           <h3>{{ checkType === 'FC' ? 'Frequency Measurements' : 'ZEISS / CMM Measurements' }}</h3>
           <div *ngIf="checkType === 'FC'" class="check-measurements">

@@ -209,6 +209,39 @@ export class ServerFeatUserService extends PaginationService<UserOrmEntity> {
     return this.userRepo.findOneOrFail({ where: { id: userId } });
   }
 
+  /**
+   * Admin edit of a user. An administrator cannot disable or demote their own account, and the
+   * last active administrator cannot be disabled or demoted by anyone: either would leave the
+   * system with no way to manage users short of editing the database.
+   */
+  async updateUserAsAdmin(
+    actorId: Uuid,
+    userId: Uuid,
+    data: Partial<IUserEntity>,
+  ) {
+    const deactivating = data.active === false;
+    const demoting = data.role !== undefined && data.role !== RoleType.ADMIN;
+    if (deactivating || demoting) {
+      const target = await this.userRepo.findOne({ where: { id: userId } });
+      if (target?.role === RoleType.ADMIN && target.active) {
+        if (userId === actorId) {
+          throw new ConflictException(
+            'You cannot disable or demote your own administrator account. Ask another administrator.',
+          );
+        }
+        const otherAdmins = await this.userRepo.count({
+          where: { role: RoleType.ADMIN, active: true },
+        });
+        if (otherAdmins <= 1) {
+          throw new ConflictException(
+            'This is the last active administrator. Make another user an administrator first.',
+          );
+        }
+      }
+    }
+    return this.updateUser(userId, data);
+  }
+
   /** Atomic compare-and-swap allows only one winner when refreshes race. */
   async replaceRefreshToken(
     user: UserOrmEntity,

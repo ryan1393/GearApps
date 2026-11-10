@@ -1,0 +1,24 @@
+/* Layout only. Colours, type and controls come from Dana UI. */
+.label-printers { display: grid; gap: 1rem; }
+.label-printers-lead { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.label-printers-lead h2 { margin: 0; }
+.label-printers-lead p { margin: .35rem 0 0; max-width: 60rem; }
+.label-printers-defaults { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin: 0; }
+.label-printers-defaults dt { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; opacity: .7; }
+.label-printers-defaults dd { margin: .15rem 0 0; font-weight: 700; overflow-wrap: anywhere; }
+.label-printers-form { display: grid; gap: .75rem; }
+.label-printers-form h3 { margin: 0; }
+.label-printers-fields { display: grid; grid-template-columns: minmax(12rem, 1.4fr) minmax(10rem, 1fr) 7rem minmax(11rem, 1fr) minmax(14rem, 1.6fr); gap: .75rem; align-items: end; }
+.label-printers-adjust { display: grid; grid-template-columns: 11rem 11rem minmax(0, 1fr); gap: .75rem; align-items: end; }
+.label-printers-checks { display: flex; flex-wrap: wrap; gap: 1.5rem; }
+.label-printers-checks label { display: inline-flex; align-items: center; gap: .5rem; }
+.label-printers-help { margin: 0; max-width: 62rem; font-size: .875rem; opacity: .8; }
+.label-printers-sub { display: block; margin-top: .25rem; max-width: 30rem; font-weight: 600; }
+.label-printers-kind { font-weight: 400; opacity: .75; }
+.label-printers-ok { color: #166534; }
+.label-printers-problem { color: #92400e; }
+.label-printers-actions { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
+.label-printers-actions .gear-btn { white-space: nowrap; }
+.label-printers-editing > td { background: #eef4fb; }
+@media (max-width: 1200px) { .label-printers-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .label-printers-fields, .label-printers-defaults, .label-printers-adjust { grid-template-columns: 1fr; } }

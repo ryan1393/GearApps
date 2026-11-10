@@ -5,3 +5,4 @@ export * from './schema';
 export * from './google.config';
 export * from './mailer.config';
 export * from './weak-secret-warning';
+export * from './dsf.config';

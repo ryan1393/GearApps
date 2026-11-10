@@ -14,7 +14,7 @@ import { apiErrorMessage, SummariesApi } from '@gearapps/client/core';
 import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
 import { DialogComponent, SegmentedComponent } from '@gearapps/client/ui';
 import { Summary } from '@gearapps/shared/domain';
-import { HAND_OPTIONS, STATUS_OPTIONS } from './shared';
+import { HAND_OPTIONS, STATUS_OPTIONS, toStatusOption } from './shared';
 
 @Component({
   selector: 'gear-summary-form-dialog',
@@ -101,7 +101,7 @@ export class SummaryFormDialogComponent {
         this.form.reset({ status: 'Active' });
         this.form.enable();
         if (s) {
-          this.form.patchValue(s);
+          this.form.patchValue({ ...s, status: toStatusOption(s.status) });
           ['number', 'model', 'hos'].forEach((k) => this.form.get(k)?.disable());
         }
       });

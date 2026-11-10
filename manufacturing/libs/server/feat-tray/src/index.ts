@@ -4,3 +4,7 @@ export * from './lib/server-feat-tray.module';
 export * from './lib/asset-tag-print.dto';
 export * from './lib/server-feat-asset-tag.controller';
 export * from './lib/server-feat-asset-tag.service';
+export * from './lib/label-printers/asset-tag-label';
+export * from './lib/label-printers/label-printer.controller';
+export * from './lib/label-printers/label-printer.dto';
+export * from './lib/label-printers/label-printer.service';

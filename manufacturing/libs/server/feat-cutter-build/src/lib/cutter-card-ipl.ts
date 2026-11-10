@@ -25,11 +25,22 @@ function safeIplField(value: string | null | undefined, maxLength = 80): string 
     .slice(0, maxLength);
 }
 
+/**
+ * The card is read on the shop floor, so the build date is printed in plant time. The API host
+ * usually runs in UTC, which would put an evening build on the next day's date.
+ */
+export const CUTTER_CARD_TIME_ZONE = 'America/Indiana/Indianapolis';
+
+const cardDateParts = new Intl.DateTimeFormat('en-US', {
+  timeZone: CUTTER_CARD_TIME_ZONE,
+  year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+});
+
 function formatDate(value: string | Date): string {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return safeIplField(String(value), 30);
-  const pad = (number: number) => String(number).padStart(2, '0');
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  const part = Object.fromEntries(cardDateParts.formatToParts(date).map(({ type, value: text }) => [type, text]));
+  return `${part['year']}-${part['month']}-${part['day']} ${part['hour']}:${part['minute']}`;
 }
 
 export function buildCutterCardIpl(fields: CutterCardIplFields): Buffer {
@@ -51,6 +62,27 @@ export function buildCutterCardIpl(fields: CutterCardIplFields): Buffer {
     throw new Error(`Cutter card IPL still contains unresolved template fields: ${leftovers.join(', ')}`);
   }
   return Buffer.from(source, 'latin1');
+}
+
+/** How far to move the whole card on one printer's stock, in dots (203 per inch). */
+export interface CutterCardAdjustment {
+  right: number;
+  down: number;
+}
+
+/**
+ * Moves every field of an IPL card. The card's fields read across the web with their top at
+ * the larger feed value, so "right" adds to the second origin value and "down" takes from the
+ * first. Field data cannot contain `;` (see safeIplField), so each `;o` is a real origin.
+ */
+export function moveCutterCardIpl(card: Buffer, adjustment: CutterCardAdjustment): Buffer {
+  if (!adjustment.right && !adjustment.down) return card;
+  return Buffer.from(
+    card.toString('latin1').replace(/;o(\d+),(\d+);/g, (_origin, feed: string, across: string) =>
+      `;o${Math.max(0, Number(feed) - adjustment.down)},${Math.max(0, Number(across) + adjustment.right)};`,
+    ),
+    'latin1',
+  );
 }
 
 export function cutterCardBuildDate(value: string | Date): string {

@@ -167,7 +167,7 @@
 
   /* Large-display shell: modestly bigger so navigation matches the body scale. */
   .gear-topbar {
-    grid-template-columns: auto minmax(420px, 720px) 1fr;
+    grid-template-columns: minmax(420px, 720px) 1fr;
     gap: 30px;
     padding: 0 34px;
   }

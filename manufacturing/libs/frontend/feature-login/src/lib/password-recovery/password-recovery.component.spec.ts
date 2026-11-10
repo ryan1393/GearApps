@@ -15,7 +15,7 @@ describe('PasswordRecoveryComponent', () => {
   let data: BehaviorSubject<{ mode: string }>;
   let query: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
   const code = 'a'.repeat(64);
-  function create(mode = 'reset', token = code) {
+  function create(mode = 'reset', token = code, passwordResetEnabled: boolean | undefined = true) {
     data = new BehaviorSubject({ mode });
     query = new BehaviorSubject(convertToParamMap({ code: token }));
     TestBed.configureTestingModule({
@@ -29,6 +29,10 @@ describe('PasswordRecoveryComponent', () => {
     fixture = TestBed.createComponent(PasswordRecoveryComponent);
     component = fixture.componentInstance;
     http = TestBed.inject(HttpTestingController);
+    fixture.detectChanges();
+    http
+      .expectOne('/api/v1/auth/capabilities')
+      .flush({ registrationEnabled: false, ...(passwordResetEnabled === undefined ? {} : { passwordResetEnabled }) });
     fixture.detectChanges();
   }
   function valid(password = 'Valid-Password1!') {
@@ -50,6 +54,17 @@ describe('PasswordRecoveryComponent', () => {
     req.flush(null);
     expect(component.success).toBe(true);
     expect(component.form.controls.email.value).toBe('');
+  });
+  it('replaces the forgot form with guidance when the server cannot send reset email', () => {
+    create('forgot', code, false);
+    expect(component.resetByEmailAvailable).toBe(false);
+    expect(fixture.nativeElement.querySelector('form')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Contact your Gear Apps administrator');
+  });
+  it('keeps the forgot form when an older server does not report reset availability', () => {
+    create('forgot', code, undefined);
+    expect(component.resetByEmailAvailable).toBe(true);
+    expect(fixture.nativeElement.querySelector('form')).not.toBeNull();
   });
   it('does not send an invalid email', () => {
     create('forgot');

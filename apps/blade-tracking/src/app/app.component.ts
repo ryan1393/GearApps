@@ -20,6 +20,7 @@ export class AppComponent {
 
   // Gear Apps browser tab identity v24
   private readonly pageTitles: ReadonlyArray<readonly [string, string]> = [
+      ['/blades/cancel-last', 'Cancel Last Tray Transaction'],
       ['/blades/internal-movement', 'Internal Movement'],
       ['/blades/coater-shipments', 'Coater Shipments'],
       ['/blades/load-container', 'Load Coater Container'],

@@ -15,12 +15,12 @@
 
       <ng-container *ngIf="canEdit(user)">
         <div class="nav-heading">OPERATIONS</div>
-        <a (click)="mobileNav.close()" routerLink="/blades/internal-movement" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-move" aria-hidden="true"></span></span><span>Internal Movement</span></a>
+        <a (click)="mobileNav.close()" routerLink="/blades/intake" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-intake" aria-hidden="true"></span></span><span>Blade Intake</span></a>
+        <a (click)="mobileNav.close()" routerLink="/blades/grinding" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Grinding</span></a>
         <a (click)="mobileNav.close()" routerLink="/blades/load-container" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-container" aria-hidden="true"></span></span><span>Load Coater Container</span></a>
         <a (click)="mobileNav.close()" routerLink="/blades/coater-shipments" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-container" aria-hidden="true"></span></span><span>Coater Shipments</span></a>
         <a (click)="mobileNav.close()" routerLink="/blades/receive-container" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-receive" aria-hidden="true"></span></span><span>Receive From Coater</span></a>
-        <a (click)="mobileNav.close()" routerLink="/blades/intake" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-intake" aria-hidden="true"></span></span><span>Blade Intake</span></a>
-        <a (click)="mobileNav.close()" routerLink="/blades/grinding" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Grinding</span></a>
+        <a (click)="mobileNav.close()" routerLink="/blades/internal-movement" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-move" aria-hidden="true"></span></span><span>Internal Movement</span></a>
 
         <div class="nav-heading">INVENTORY</div>
         <a (click)="mobileNav.close()" routerLink="/blades/body-shelves" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-location" aria-hidden="true"></span></span><span>Empty Body Shelves</span></a>
@@ -41,8 +41,10 @@
       <a (click)="mobileNav.close()" [href]="greenshedUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Greenshed</span></a>
       <a (click)="mobileNav.close()" [href]="lapperUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-lapping" aria-hidden="true"></span></span><span>Lapper</span></a>
 
-      <div class="nav-heading">ADMINISTRATION</div>
-      <a (click)="mobileNav.close()" *ngIf="user.role === 'admin'" routerLink="/admin" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span><span>Admin</span></a>
+      <ng-container *ngIf="user.role === 'admin'">
+        <div class="nav-heading">ADMINISTRATION</div>
+        <a (click)="mobileNav.close()" routerLink="/admin" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span><span>Admin</span></a>
+      </ng-container>
     </nav>
 
     <div class="sidebar-footer">
@@ -58,7 +60,7 @@
 
     <form *ngIf="canEdit(user)" class="global-search" (ngSubmit)="search()">
       <span class="search-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span>
-      <input type="text" name="globalSearch" [(ngModel)]="searchValue" placeholder="Scan tray, container, location, or blade…" aria-label="Scan tray, container, location, or blade" autocomplete="off" />
+      <input type="text" name="globalSearch" [(ngModel)]="searchValue" placeholder="Scan tray, container, or location…" aria-label="Scan tray, container, or location" autocomplete="off" />
       <button type="submit" aria-label="Search"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></button>
     </form>
 

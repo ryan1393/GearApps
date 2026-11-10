@@ -147,14 +147,7 @@ type Tab = 'parts' | 'gearsets';
                           >
                             Edit
                           </button>
-                          <button
-                            type="button"
-                            class="gear-btn gear-btn-danger gear-btn-sm"
-                            (click)="askDelete('part', p)"
-                            [attr.aria-label]="'Delete ' + p.number"
-                          >
-                            Delete
-                          </button>
+                          <!-- Parts are shared GearApps master data: the API refuses to delete them from Lapper. Set one Inactive with Edit. -->
                         </div>
                       }
                     </td>
@@ -326,14 +319,9 @@ export class PartsPageComponent implements OnInit {
     this.reload();
   }
 
-  protected askDelete(kind: 'part' | 'gearset', item: Part | Gearset) {
-    const message =
-      kind === 'part'
-        ? `Delete part ${item.number}? Gearsets that use it keep their reference.`
-        : `Delete gearset ${item.number}? Cycle history that references it will be affected.`;
-    const run = () =>
-      kind === 'part' ? this.partsApi.delete(item.id) : this.gearsetsApi.delete(item.id);
-    this.pending.set({ kind, message, run });
+  protected askDelete(kind: 'gearset', item: Gearset) {
+    const message = `Delete gearset ${item.number}? Cycle history that references it will be affected.`;
+    this.pending.set({ kind, message, run: () => this.gearsetsApi.delete(item.id) });
   }
 
   protected deleteConfirmed() {

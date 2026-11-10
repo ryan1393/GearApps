@@ -1,5 +1,109 @@
 # Changelog
 
+## 70.4.1 (2026-11-10)
+
+Label fixes from the first tags printed on a Zebra.
+
+- **Tag layout.** The barcode is centred and wider (three-dot bars for T and C serials, two for
+  a typical location serial) with the serial centred under it, instead of a small barcode in
+  the top corner. The first prints landed about 2.5 mm high and 2.9 mm left, with the top of
+  the barcode in the gap before the label; ZPL tags are positioned to allow for that, and the
+  layout leaves room for a printer that registers exactly.
+- **Position adjustment per printer.** Admin > Label Printers > Edit has Move right and Move
+  down, in dots, for a printer whose labels do not sit squarely. It applies to tags and cutter
+  cards in both IPL and ZPL. Two columns are added to `gear_label_printers` at startup.
+- Tags fit serials of up to 30 characters (was 32), so a long barcode keeps its quiet zones.
+- `Deploy-To-usftwvmdocker.cmd` in the repository root deploys to the plant Docker host in one
+  step.
+
+## 70.4.0 (2026-11-10)
+
+Label printers with IPL or ZPL, DSF production counts, and a workflow and UI review.
+API changes are additive. New tables are created at startup when missing; no existing table
+or data is changed.
+
+- **Label printers.** Admin has a Label Printers tab: add each network printer with its
+  address, its language (IPL for Intermec, ZPL for Zebra) and what it is loaded with, test the
+  connection, print a test tag, and choose the default for tags and for cutter cards. Print
+  screens show "Print tags to" / "Print cards to", so a workstation can pick its own printer;
+  the choice is remembered on that computer. Tags and cutter cards are generated in the chosen
+  printer's language. Print Cutter Card now sends the card to the card printer instead of only
+  saving files. A failed print says what to check (no answer, refused, name not found). The
+  IPL tag layout was corrected: it was laid along the 0.625 in feed, where it cannot fit.
+  New table `gear_label_printers`, created at startup; `GEAR_LABEL_PRINTER_HOST` remains the
+  fallback tag printer. See docs/printing/LABEL-PRINTERS.md.
+- **Printing.** Creating a tray works again; the API was rejecting the Admin screen's own
+  request, so no new tray could be added or tagged. Every Print Tag button now reports the
+  outcome in a notice that stays visible on long lists, and a tag the printer did not accept
+  is a warning rather than a green "sent" message. A serial too long for the 2.125 in tag is
+  refused instead of printing a barcode that runs off the label. The cutter card prints its
+  build date in plant time instead of the API host's UTC clock, and its PNG preview has a
+  scannable barcode and a build number that fits. Coater packing slips and container labels
+  read "1 tray", not "1 trays".
+- **Dashboards.** KPI tiles on all three dashboards are back in a row (4 across, 3 + 3,
+  3 + 2). A Dana core grid rule had been overriding the Gear tile geometry, so every tile
+  sat on its own line.
+- **Shell.** The drawer button is hidden on desktop, where the sidebar is always docked.
+  The dashboard link only looks selected, and only says ACTIVE, on the dashboard. A closed
+  mobile drawer no longer casts a shadow on the page or takes keyboard focus. Cancel pages
+  have a proper header and browser-tab title. Blade Tracking operations are listed in
+  process order: Intake, Grinding, Load, Ship, Receive, then Internal Movement.
+- **Scanning.** The cursor now returns to the scan field an operator needs next on every
+  scan screen, including after a rejected scan. It was being lost whenever the page was
+  busy, which silently dropped the following scan. Scanned text is selected so the next scan
+  replaces it.
+- **Blade Intake.** After adding blades the cursor returns to the tray scan. It used to sit
+  in Quantity, where scanning the next tray could add blades to the previous one. Enter in
+  Quantity no longer submits. Top-ups default to the missing count, and a rejected quantity
+  says why.
+- **Grinding.** A tray left short after grinding reads "Needs replacement blades" with the
+  next step, instead of READY_FOR_COATING.
+- **Coater Shipments.** One rejected container scan no longer locks the draft.
+- **Machine Setup.** The part list is no longer cut off at 250 parts, and the build list no
+  longer drops older shelf stock. "Setup Another Cutter" after a setup started from the
+  board works. A list that fails to load says so instead of reading as "none configured".
+- **Cutter Pull.** A reason must be chosen; the first reason in the list (a teardown) is no
+  longer preselected. Results and history show the reason name, not its code.
+- **Running Machines.** A FAIL or HOLD check is red, not green. A failed auto-refresh says
+  the board is stale, and a later good refresh clears the message.
+- **Search.** The Greenshed and Cutter Builder top-bar search accepts a machine number, body
+  serial or Summary as well as a build number, and works when Lookup is already open. Find
+  Inventory and Tray Contents follow the Blade Tracking search the same way.
+- **Build / Tear Down.** Pick lists reload after each transaction and a changed upstream
+  choice clears the dependent one.
+- **Admin.** An administrator cannot disable or demote their own account, and the last
+  active administrator cannot be removed (enforced by the API). Editing a record no longer
+  re-enables it. Users without an email can be edited. Part Summary cards show their Model.
+  Saving one Roll Master row keeps unsaved edits in the others.
+- **Sign-in.** The local test-account hint appears in development builds only. Forgot
+  Password says to contact an administrator when the server has no outgoing email
+  (`/auth/capabilities` now reports `passwordResetEnabled`).
+- **Lapper.** A slow scanner image no longer stops the live card updating. Edit dialogs show
+  the current status. Delete is no longer offered for parts and part summaries, which the
+  API never allows from Lapper.
+- **API.** Piece counts above the integer column range return a validation error instead
+  of a database error. "Cancel last tray transaction" accepts a serial in any letter case.
+
+DSF (Digital Shop Floor / Ignition) production counts for cutting Departments 132 and 152,
+restored from the earlier integration. Off by default; see `docs/DSF_COUNTS.md`.
+
+- **Reader** (`DSF_COUNT_ENABLED`). The API pulls RUN production from the DSF PostgreSQL source
+  in a read-only session and Running Machines shows a **DSF Count** column. Nothing is written
+  to DSF, and nothing else changes.
+- **Cutter crediting** (`DSF_CUTTER_WRITE_ENABLED`). DSF production is added to the installed
+  cutter's Part Count through a machine + cutter run + shift ledger, so the 25-piece check comes
+  due without a count being entered. Crediting starts at activation and does not back-fill; it
+  stops for review rather than guess when the source total drops or a count is changed by hand.
+- **Admin > DSF Mappings.** Choose, change or remove the DSF source for each machine, with
+  the reader's status and the reason for its last failed read. Changes are audited.
+- **Changeover.** A cutter returning from a Greenshed shelf continues with the piece count and
+  last-check count of its previous run instead of the typed starting count.
+- With crediting on, a quality check records the count it was taken at and cancelling a check
+  leaves the running count alone. With it off, both behave exactly as before.
+- Four additive tables are created the first time the reader is enabled. Department 45
+  grinder balances are not included: they depend on grinder tracking and loose blade sets that
+  this codebase does not have.
+
 ## 70.3.0 (2026-11-09)
 
 - Fixed clean Linux Docker builds when a native dependency's prebuilt download

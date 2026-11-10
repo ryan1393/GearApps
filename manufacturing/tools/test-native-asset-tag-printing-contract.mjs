@@ -7,6 +7,11 @@ const manifest=JSON.parse(read('tools/api-route-manifest.json'));
 const controller=read('libs/server/feat-tray/src/lib/server-feat-asset-tag.controller.ts');
 const service=read('libs/server/feat-tray/src/lib/server-feat-asset-tag.service.ts');
 const dto=read('libs/server/feat-tray/src/lib/asset-tag-print.dto.ts');
+// The label itself and the printer transport moved out of the service when printers became a list
+// chosen in Admin, each speaking IPL or ZPL.
+const label=read('libs/server/feat-tray/src/lib/label-printers/asset-tag-label.ts');
+const printers=read('libs/server/feat-tray/src/lib/label-printers/label-printer.service.ts');
+const printerSchema=read('libs/server/feat-tray/src/lib/label-printers/label-printer-schema.ts');
 const trayService=read('libs/server/feat-tray/src/lib/server-feat-tray.service.ts');
 const containerService=read('libs/server/feat-container/src/lib/server-feat-container.service.ts');
 const api=read('libs/frontend/data-access-blade-tracking/src/lib/blade-tracking-api.service.ts');
@@ -45,15 +50,25 @@ requireText(service, 'this.getAssetById(kind, dto.record_id)', 'database record 
 requireText(service, 'asset.serial_number.trim().toUpperCase()', 'database-backed printable serial');
 requireText(service, "!/^T[0-9]{4,}$/.test(serialNumber)", 'tray stored serial rule');
 requireText(service, "!/^C[0-9]{4,}$/.test(serialNumber)", 'container stored serial rule');
-requireText(service, 'private readonly labelWidthDots = 431', '2.125 inch label width');
-requireText(service, 'private readonly labelHeightDots = 127', '0.625 inch label height');
-requireText(service, 'W${this.labelWidthDots}', 'IPL print width');
-requireText(service, 'L${this.labelHeightDots}', 'IPL label height');
-requireText(service, 'c6;i0;d3,${serialNumber}', 'IPL Code 128 field');
-requireText(service, 'd3,${serialNumber}', 'IPL human-readable field');
-requireText(service, 'GEAR_LABEL_PRINTER_HOST', 'printer transport');
-requireText(service, "payload.toString('base64')", 'native PRN fallback');
-for(const forbidden of ['TRAY-','CONT-','CONTAINER-']) forbidText(service, forbidden, 'native label generator');
+requireText(label, 'export const ASSET_TAG_WIDTH_DOTS = 431', '2.125 inch label width');
+requireText(label, 'export const ASSET_TAG_HEIGHT_DOTS = 127', '0.625 inch label height');
+requireText(label, 'W${ASSET_TAG_WIDTH_DOTS}', 'IPL print width');
+requireText(label, 'c6;i0;d3,${serial}', 'IPL Code 128 field');
+requireText(label, 'c26;r0;b0;d3,${serial}', 'IPL human-readable field');
+requireText(label, '^PW${ASSET_TAG_WIDTH_DOTS}', 'ZPL print width');
+// The label length is left to the printer's media calibration; the tag is positioned from its measured registration.
+requireText(label, 'const ZPL_REGISTRATION: LabelAdjustment = { right: 23, down: 20 }', 'measured ZPL registration');
+requireText(label, '^BCN,${BARCODE_HEIGHT_DOTS},N,N,N,N^FD${serial}^FS', 'ZPL Code 128 field');
+requireText(service, "buildAssetTag(language, serialNumber, { right: printer?.offset_right ?? 0, down: printer?.offset_down ?? 0 })", 'tag built in the printer language at its adjusted position');
+requireText(service, "this.printers.resolve('ASSET_TAG', printerId)", 'chosen or default tag printer');
+requireText(printers, 'GEAR_LABEL_PRINTER_HOST', 'environment fallback printer');
+requireText(printers, "labelType === 'ASSET_TAG' ? this.environmentPrinter() : null", 'environment printer is the tag fallback only');
+requireText(printerSchema, "language text NOT NULL CHECK (language IN ('IPL','ZPL'))", 'printer language');
+requireText(printerSchema, 'ON public.gear_label_printers (label_type) WHERE is_default', 'one default printer per label');
+requireText(printerSchema, 'ADD COLUMN IF NOT EXISTS offset_right integer NOT NULL DEFAULT 0', 'per-printer position adjustment added to an existing table');
+requireText(printerSchema, 'ADD COLUMN IF NOT EXISTS offset_down integer NOT NULL DEFAULT 0', 'per-printer position adjustment added to an existing table');
+requireText(service, "payload.toString('base64')", 'native tag file fallback');
+for(const forbidden of ['TRAY-','CONT-','CONTAINER-']) { forbidText(service, forbidden, 'native label generator'); forbidText(label, forbidden, 'native label generator'); }
 
 for(const [source, prefix, label] of [
   [trayService, 'T', 'tray'],

@@ -37,7 +37,8 @@ export class CoaterShipmentsComponent implements OnDestroy {
   get canPrint() { return !!this.active && this.active.status!=='CANCELED' && !this.busy && !this.stale && !this.dirty && (this.active.status==='DISPATCHED' || this.active.reviewed); }
   get canSend() { return this.canReview && this.active!.reviewed && this.active!.print_requested; }
   time(value: string) { return new Intl.DateTimeFormat('en-US',{timeZone:'America/Indiana/Indianapolis',dateStyle:'medium',timeStyle:'short'}).format(new Date(value)); }
-  focus() { queueMicrotask(()=>this.scanner?.nativeElement.focus()); }
+  /** After the view has rendered and re-enabled the scan box (a microtask runs too early for either). */
+  focus() { setTimeout(()=>{const el=this.scanner?.nativeElement;if(el&&!el.disabled&&(!document.activeElement||document.activeElement===document.body))el.focus();}); }
   refreshList() {
     const version=++this.listVersion; this.loadingList=true; this.listError='';
     this.api.list(this.tab,this.query,this.page).pipe(takeUntil(this.destroy$)).subscribe({next:r=>{if(version!==this.listVersion)return;this.list=r;this.loadingList=false;},error:e=>{if(version!==this.listVersion)return;this.listError=apiErrorText(e,'Could not load shipments.');this.list={rows:[],total:0,page:this.page,page_size:25};this.loadingList=false;}});
@@ -50,14 +51,27 @@ export class CoaterShipmentsComponent implements OnDestroy {
     this.confirmSend=false;this.checked=false;this.cancelOpen=false;this.cancelReason='';
     if(s.status==='DRAFT') this.refreshAvailable(); else this.availableContainers=[];
   }
-  private act(request: Observable<CoaterShipment>, success: string, done?: ()=>void) {
+  /**
+   * `recoverable`: a rejection of this request (unknown container, already reserved, validation)
+   * leaves the shipment exactly as it was, so the operator can keep working. Without it, or when
+   * the server could not be reached or reports a revision conflict, the draft must be refreshed.
+   */
+  private act(request: Observable<CoaterShipment>, success: string, done?: ()=>void, recoverable?: ()=>void) {
     if(this.busy)return;this.busy=true;this.error='';this.notice='';
-    request.pipe(takeUntil(this.destroy$)).subscribe({next:s=>{this.accept(s);this.busy=false;this.notice=success;done?.();this.refreshList();this.focus();},error:e=>{this.busy=false;this.confirmSend=false;this.checked=false;this.error=apiErrorText(e,'The request could not be confirmed. Refresh the shipment before continuing.');if(this.active)this.stale=true;}});
+    request.pipe(takeUntil(this.destroy$)).subscribe({next:s=>{this.accept(s);this.busy=false;this.notice=success;done?.();this.refreshList();this.focus();},error:e=>{
+      this.busy=false;this.confirmSend=false;this.checked=false;this.error=apiErrorText(e,'The request could not be confirmed. Refresh the shipment before continuing.');
+      const status=Number(e?.status??0);
+      // A 409 is either "this container cannot be added" (shipment untouched) or a real revision
+      // conflict; the server words every conflict that needs a reload with "Refresh".
+      const rejectedUnchanged=!!recoverable && [400,404,409,422].includes(status) && !(status===409 && /refresh/i.test(this.error));
+      if(rejectedUnchanged){recoverable?.();this.focus();}
+      else if(this.active)this.stale=true;
+    }});
   }
   start() { if(this.busy || this.active || !this.destination.trim())return;this.act(this.api.create(this.requestId,this.destination,this.notes),'Shipment started. Scan packed containers.',()=>{this.requestId=createCoaterRequestId();this.undoSerial='';}); }
   open(id: string) { if(this.busy)return;this.undoSerial='';this.act(this.api.get(id),'Shipment loaded.'); }
   refresh() { if(this.active)this.open(this.active.id);else this.refreshList(); }
-  close() { if(this.busy)return;this.active=null;this.error='';this.notice='';this.undoSerial='';this.destination='Coater';this.notes='';this.stale=false;this.confirmSend=false;this.cancelOpen=false;this.refreshList(); }
+  close() { if(this.busy)return;this.active=null;this.error='';this.notice='';this.undoSerial='';this.serial='';this.selectedContainer='';this.availableQuery='';this.destination='Coater';this.notes='';this.stale=false;this.confirmSend=false;this.cancelOpen=false;this.refreshList(); }
   refreshAvailable() {
     const s=this.active;if(!s || s.status!=='DRAFT'){this.availableContainers=[];return;}
     this.availableLoading=true;this.availableError='';
@@ -75,7 +89,7 @@ export class CoaterShipmentsComponent implements OnDestroy {
     const s=this.active, serial=this.serial.trim().toUpperCase();
     if(!s || !this.canEdit || this.dirty || !serial)return;
     if(s.manifest.containers.some(c=>c.serial===serial)){this.notice=`${serial} is already in this shipment.`;this.serial='';this.focus();return;}
-    this.act(this.api.add(s,serial),`${serial} added.`,()=>{this.serial='';this.undoSerial='';});
+    this.act(this.api.add(s,serial),`${serial} added.`,()=>{this.serial='';this.undoSerial='';},()=>{this.serial='';});
   }
   remove(c: CoaterShipmentContainer) { if(this.active && this.canEdit && !this.dirty)this.act(this.api.remove(this.active,c.id),`${c.serial} removed from the shipment; its trays stay packed.`,()=>this.undoSerial=c.serial); }
   undo() { if(this.active && this.canEdit && this.undoSerial && !this.dirty){const serial=this.undoSerial;this.act(this.api.add(this.active,serial),`${serial} restored.`,()=>this.undoSerial='');} }

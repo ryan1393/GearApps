@@ -1,4 +1,4 @@
-# Gear Apps 70.3.0
+# Gear Apps 70.4.1
 
 Gear Apps is the Dana manufacturing workspace for four workflows sharing one API and database:
 **Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root GearApps Nx workspace. All frontends use
@@ -12,6 +12,27 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
 | Green Shed | 4202 | `../apps/greenshed` |
 | Lapper | 4203 | `../apps/lapper-client` |
 | Shared API | 3333 | `../apps/server` (`/api/v1`, health at `/api/v1/health/ready`) |
+
+## What changed in 70.4.1
+
+Label fixes from the first tags printed on a Zebra: a centred, wider barcode; an allowance for
+where that printer lands the tag; and a per-printer Move right / Move down adjustment in
+Admin > Label Printers for tags and cutter cards. See [CHANGELOG.md](CHANGELOG.md).
+
+## What changed in 70.4.0
+
+- **Label printers.** Admin > Label Printers holds the network label printers: address,
+  language (IPL for Intermec, ZPL for Zebra), what each is loaded with, and the default for
+  tags and for cutter cards. Print screens let a workstation choose its own printer. Tags and
+  cutter cards are sent in the chosen printer's language. See
+  [docs/printing/LABEL-PRINTERS.md](docs/printing/LABEL-PRINTERS.md).
+- **DSF production counts** for cutting Departments 132 and 152, read-only from the Digital
+  Shop Floor database and off by default. See [docs/DSF_COUNTS.md](docs/DSF_COUNTS.md).
+- **Workflow and UI review** of every scan screen, dashboard and Admin tab, and a fix for
+  creating trays. Details are in [CHANGELOG.md](CHANGELOG.md).
+
+Two tables are added at API startup when missing: `gear_label_printers`, and the DSF side
+tables when the DSF reader is switched on. No existing table or data is changed.
 
 ## What changed in 70.3.0
 
@@ -68,7 +89,10 @@ Full detail is in `CHANGELOG.md`. In short:
 
 Run deployment from the repository root with
 `node manufacturing/tools/deploy/deploy-remote.mjs` (Windows:
-`manufacturing\Deploy-GearApps.cmd`). The archive contains the single root workspace;
+`manufacturing\Deploy-GearApps.cmd`). To deploy to the plant Docker host in one step, run
+`Deploy-To-usftwvmdocker.cmd` in the repository root: it creates the `usftwvmdocker`
+Docker context for `image@usftwvmdocker` if this PC does not have it, then runs the same
+deployment. The archive contains the single root workspace;
 Docker builds use the root lockfile and pinned Node 24.22.1/npm 11.9.0. Manufacturing
 configuration is the repository root `.env`, shared by every feature.
 The deployer preserves that file and keeps the previous tree for rollback.
@@ -90,7 +114,7 @@ Docker host behind your active **SSH Docker context** (`docker context use <name
    2. copies the source to `~/dana-apps`, keeping the previous release in `~/dana-apps.prev`
       and the host's own `.env`;
    3. runs `docker compose build` and `up -d` (never `down`, never touches volumes);
-   4. waits for every service and checks that the API reports `70.3.0`. Only then does the old
+   4. waits for every service and checks that the API reports `70.4.1`. Only then does the old
       release become `~/dana-apps.prev`. If the deploy fails, the last good release is protected
       (a retry discards the failed one) and `--rollback` brings it back.
 3. **Rollback:** `Deploy-GearApps.cmd --rollback` swaps `~/dana-apps.prev` back in and restarts it.

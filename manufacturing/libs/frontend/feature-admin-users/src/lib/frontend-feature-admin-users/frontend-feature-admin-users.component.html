@@ -17,11 +17,17 @@
     <button type="button" [class.active]="activeTab === 'roll-masters'" (click)="setTab('roll-masters')">Roll Master</button>
     <button type="button" [class.active]="activeTab === 'models'" (click)="setTab('models')">Models</button>
     <button type="button" [class.active]="activeTab === 'machines'" (click)="setTab('machines')">Machines</button>
+    <button type="button" [class.active]="activeTab === 'dsf-mappings'" (click)="setTab('dsf-mappings')">DSF Mappings</button>
+    <button type="button" [class.active]="activeTab === 'label-printers'" (click)="setTab('label-printers')">Label Printers</button>
     <button type="button" [class.active]="activeTab === 'trays'" (click)="setTab('trays')">Trays</button>
     <button type="button" [class.active]="activeTab === 'containers'" (click)="setTab('containers')">Containers</button>
     <button type="button" [class.active]="activeTab === 'locations'" (click)="setTab('locations')">Locations</button>
     <button type="button" [class.active]="activeTab === 'cutter-bodies'" (click)="setTab('cutter-bodies')">Cutter Bodies</button>
   </nav>
+
+  <gear-admin-dsf-machine-mappings *ngIf="activeTab === 'dsf-mappings'" />
+  <gear-admin-label-printers *ngIf="activeTab === 'label-printers'" />
+  <gear-label-printer-picker *ngIf="activeTab === 'trays' || activeTab === 'containers' || activeTab === 'locations'" labelType="ASSET_TAG" label="Print tags to" />
 
   <div class="gear-admin-layout" *ngIf="activeTab === 'users'">
     <form class="gear-panel gear-admin-form" (ngSubmit)="createUser()">
@@ -80,7 +86,7 @@
           <div class="gear-admin-record-meta">
             <div class="gear-admin-record-field gear-admin-record-field-wide">
               <span class="gear-admin-record-label">Email</span>
-              <span class="gear-admin-record-value">{{ user.email }}</span>
+              <span class="gear-admin-record-value">{{ user.email || '—' }}</span>
             </div>
             <div class="gear-admin-record-field gear-admin-record-field-wide">
               <span class="gear-admin-record-label">Department</span>
@@ -89,7 +95,8 @@
           </div>
           <div class="gear-admin-actions gear-admin-record-actions">
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditUser(user)">Edit</button>
-            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleUserEnabled(user)">{{ user.active ? 'Disable' : 'Enable' }}</button>
+            <button *ngIf="!isSelf(user.id)" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleUserEnabled(user)">{{ user.active ? 'Disable' : 'Enable' }}</button>
+            <span *ngIf="isSelf(user.id)" class="gear-badge">You</span>
           </div>
         </div>
       </div>
@@ -150,7 +157,7 @@
             </div>
             <div class="gear-admin-record-field">
               <span class="gear-admin-record-label">Model</span>
-              <span class="gear-admin-record-value">{{ summary.model?.model_number || '—' }}</span>
+              <span class="gear-admin-record-value">{{ summaryModel(summary)?.model_number || '—' }}</span>
             </div>
             <div class="gear-admin-record-field gear-admin-record-field-wide">
               <span class="gear-admin-record-label">HOS</span>

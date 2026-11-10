@@ -42,7 +42,10 @@ export class ServerFeatAuthController {
   @Get('capabilities')
   @SkipAuth()
   capabilities() {
-    return { registrationEnabled: false };
+    return {
+      registrationEnabled: false,
+      passwordResetEnabled: this.authService.passwordResetEmailEnabled,
+    };
   }
 
   @Post('email/login')

@@ -4,6 +4,8 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { DanaPageHeaderComponent } from '@dana/ui';
+import { GearScannerFocusDirective } from './directives/scanner-focus.directive';
 
 interface Operation {
   id: string; identifier: string; action: string; occurred_at: string; recorded_by: string;
@@ -14,7 +16,7 @@ interface CancellationView { latest: Operation | null; history: Operation[]; mes
 
 @Component({
   selector: 'gear-workflow-cancellation', standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule, RouterLink, DanaPageHeaderComponent, GearScannerFocusDirective],
   styles: [`
     :host{display:block}.cancel-content{max-width:64rem;margin:auto}
     .cancel-actions{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
@@ -23,13 +25,14 @@ interface CancellationView { latest: Operation | null; history: Operation[]; mes
   `],
   template: `
     <section class="gear-page gear-workflow-page cancel-content">
-      <header class="gear-page-header"><div><span class="gear-workflow-kicker">{{ appName }}</span><h1>{{ title }}</h1><p>Review the last saved transaction before canceling it.</p></div></header>
-      <a [routerLink]="backRoute" class="gear-btn gear-btn-secondary">Back to {{ appName }}</a>
+      <header class="gear-page-header" danaPageHeader [eyebrow]="appName.toUpperCase() + ' / CANCEL'" [heading]="title" description="Review the last saved transaction before canceling it.">
+        <a danaPageHeaderAction [routerLink]="backRoute" class="gear-btn gear-btn-secondary">Back to {{ appName }}</a>
+      </header>
       <div *ngIf="error" class="gear-feedback" role="alert">{{ error }}</div>
       <div *ngIf="message" class="gear-feedback" role="status">{{ message }}</div>
       <form (ngSubmit)="load()" class="gear-workflow-section">
         <div class="gear-workflow-section-body">
-          <label class="gear-field">{{ identifierLabel }}<input [(ngModel)]="identifier" name="identifier" required class="gear-input font-mono" [disabled]="busy" /></label>
+          <label class="gear-field">{{ identifierLabel }}<input gearScannerFocus [(ngModel)]="identifier" name="identifier" required autocomplete="off" class="gear-input font-mono" [disabled]="busy" /></label>
           <div class="cancel-actions"><button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy || !identifier.trim()">{{ busy ? 'Loading…' : 'Find Last Transaction' }}</button></div>
         </div>
       </form>

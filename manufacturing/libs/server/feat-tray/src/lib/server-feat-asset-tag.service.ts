@@ -1,29 +1,29 @@
-import { Socket } from 'node:net';
-
 import {
   ContainerOrmEntity,
   LocationOrmEntity,
   TrayOrmEntity,
 } from '@gearapps/manufacturing/server/data-access';
-import {
-  BadRequestException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { AssetTagKind, PrintAssetTagDto } from './asset-tag-print.dto';
+import { ASSET_TAG_MAX_SERIAL_LENGTH, assetTagFileName, buildAssetTag } from './label-printers/asset-tag-label';
+import { LabelLanguage } from './label-printers/label-printer.dto';
+import { LabelPrinterService } from './label-printers/label-printer.service';
 
 export interface AssetTagPrintResult {
   kind: AssetTagKind;
   record_id: string;
   serial_number: string;
-  language: 'IPL';
+  language: LabelLanguage;
   symbology: 'CODE128';
   printed: boolean;
   printer_configured: boolean;
+  /** The printer the tag was sent to, or was meant for. Null when none is set up. */
+  printer_name: string | null;
+  /** Why the printer did not take the tag, in words an operator can act on. */
+  failure_reason: string | null;
   file_name: string;
   prn_base64: string;
   message: string;
@@ -33,19 +33,6 @@ type TagAsset = TrayOrmEntity | ContainerOrmEntity | LocationOrmEntity;
 
 @Injectable()
 export class ServerFeatAssetTagService {
-  private readonly logger = new Logger(ServerFeatAssetTagService.name);
-
-  // Existing CutterLabel_FILLED.prn uses the Intermec 203 dpi coordinate family.
-  // Physical stock supplied by the user:
-  //   roll/web width   = 2.25 in  ~= 457 dots
-  //   label width      = 2.125 in ~= 431 dots
-  //   label height     = 0.625 in ~= 127 dots
-  //   physical gap     = 0.125 in above + below the label
-  // The printer's gap sensor/media calibration handles the physical gap. The
-  // printable format itself is kept inside the 431 x 127 dot label face.
-  private readonly labelWidthDots = 431;
-  private readonly labelHeightDots = 127;
-
   constructor(
     @InjectRepository(TrayOrmEntity)
     private readonly trayRepo: Repository<TrayOrmEntity>,
@@ -53,6 +40,7 @@ export class ServerFeatAssetTagService {
     private readonly containerRepo: Repository<ContainerOrmEntity>,
     @InjectRepository(LocationOrmEntity)
     private readonly locationRepo: Repository<LocationOrmEntity>,
+    private readonly printers: LabelPrinterService,
   ) {}
 
   async printTag(dto: PrintAssetTagDto): Promise<AssetTagPrintResult> {
@@ -63,45 +51,42 @@ export class ServerFeatAssetTagService {
     const serialNumber = asset.serial_number.trim().toUpperCase();
     this.assertSerialFormat(kind, serialNumber);
 
-    const payload = this.buildIpl(serialNumber);
-    const printerHost = process.env['GEAR_LABEL_PRINTER_HOST']?.trim() ?? '';
-    const printerPort = this.parsePositiveInteger(
-      process.env['GEAR_LABEL_PRINTER_PORT'],
-      9100,
-    );
-    const timeoutMs = this.parsePositiveInteger(
-      process.env['GEAR_LABEL_PRINTER_TIMEOUT_MS'],
-      5000,
-    );
+    const result = await this.sendTag(serialNumber, dto.printer_id);
+    return { kind, record_id: dto.record_id, serial_number: serialNumber, symbology: 'CODE128', ...result };
+  }
+
+  /** Prints a tag reading TEST so an administrator can check a printer's language and alignment. */
+  async printTestTag(printerId: string) {
+    return { serial_number: 'TEST', ...(await this.sendTag('TEST', printerId)) };
+  }
+
+  private async sendTag(serialNumber: string, printerId?: string) {
+    const printer = await this.printers.resolve('ASSET_TAG', printerId);
+    // With no printer set up the file is still offered, in the language these tags were first built in.
+    const language: LabelLanguage = printer?.language ?? 'IPL';
+    const payload = buildAssetTag(language, serialNumber, { right: printer?.offset_right ?? 0, down: printer?.offset_down ?? 0 });
 
     let printed = false;
-    let message =
-      'Printer host is not configured; the native IPL file is returned for download.';
-
-    if (printerHost) {
-      try {
-        await this.sendRawIpl(printerHost, printerPort, timeoutMs, payload);
+    let failureReason: string | null = null;
+    let message = 'No label printer is set up for Gear Apps; the tag file is returned for download.';
+    if (printer) {
+      const sent = await this.printers.send(printer, payload);
+      if (sent.ok) {
         printed = true;
-        message = `${serialNumber} tag sent to the IPL printer.`;
-      } catch (error) {
-        const reason = error instanceof Error ? error.message : String(error);
-        this.logger.warn(
-          `Could not send ${serialNumber} asset tag to ${printerHost}:${printerPort}: ${reason}`,
-        );
-        message =
-          'Printer is configured but did not accept the tag; the native IPL file is returned for download.';
+        message = `${serialNumber} tag sent to ${printer.name}.`;
+      } else {
+        failureReason = sent.reason;
+        message = `${printer.name} did not accept the tag; the tag file is returned for download.`;
       }
     }
 
     return {
-      kind,
-      record_id: dto.record_id,
-      serial_number: serialNumber,
-      language: 'IPL',
-      symbology: 'CODE128',
+      language,
       printed,
-      printer_configured: Boolean(printerHost),
-      file_name: `${serialNumber}.prn`,
+      printer_configured: Boolean(printer),
+      printer_name: printer?.name ?? null,
+      failure_reason: failureReason,
+      file_name: assetTagFileName(serialNumber, language),
       prn_base64: payload.toString('base64'),
       message,
     };
@@ -126,6 +111,12 @@ export class ServerFeatAssetTagService {
     ) {
       throw new BadRequestException(
         'The stored location serial contains unsupported tag characters.',
+      );
+    }
+
+    if (serialNumber.length > ASSET_TAG_MAX_SERIAL_LENGTH) {
+      throw new BadRequestException(
+        `${serialNumber} is too long for the 2.125 in tag: the barcode would run off the label. Tags fit serials of up to ${ASSET_TAG_MAX_SERIAL_LENGTH} characters.`,
       );
     }
   }
@@ -153,85 +144,5 @@ export class ServerFeatAssetTagService {
       );
     }
     return found;
-  }
-
-  /**
-   * Native Intermec IPL, Code 128 (c6).
-   * Barcode data and human-readable text are the exact same persisted serial.
-   */
-  private buildIpl(serialNumber: string): Buffer {
-    const STX = '\x02';
-    const ETX = '\x03';
-    const ESC = '\x1b';
-    const SI = '\x0f';
-    const CAN = '\x18';
-    const ETB = '\x17';
-    const FF = '\x0c';
-    const formatNumber = 97;
-
-    const barcodeNarrow = serialNumber.length <= 8 ? 2 : 1;
-    const textScale =
-      serialNumber.length <= 6
-        ? { h: 21, w: 20, estimatedWidth: serialNumber.length * 20 }
-        : serialNumber.length <= 14
-          ? { h: 11, w: 10, estimatedWidth: serialNumber.length * 10 }
-          : { h: 11, w: 8, estimatedWidth: serialNumber.length * 8 };
-    const textAcross = Math.max(
-      16,
-      Math.floor((this.labelWidthDots - textScale.estimatedWidth) / 2),
-    );
-
-    const commands = [
-      `${STX}R${ETX}`,
-      `${STX}${ESC}C${SI}W${this.labelWidthDots}${ETX}`,
-      `${STX}${ESC}P${ETX}`,
-      `${STX}E${formatNumber};F${formatNumber};${ETX}`,
-      `${STX}L${this.labelHeightDots};${ETX}`,
-      `${STX}B0,AssetTagBarcode;o10,28;f0;h55;w${barcodeNarrow};c6;i0;d3,${serialNumber};${ETX}`,
-      `${STX}H1,AssetTagText;o78,${textAcross};f0;h${textScale.h};w${textScale.w};c26;r0;b0;d3,${serialNumber};${ETX}`,
-      `${STX}R${ETX}`,
-      `${STX}${ESC}E${formatNumber}${ETX}`,
-      `${STX}${CAN}${ETX}`,
-      `${STX}${ETB}${FF}${ETX}`,
-    ];
-
-    return Buffer.from(commands.join('\r\n'), 'latin1');
-  }
-
-  private sendRawIpl(
-    host: string,
-    port: number,
-    timeoutMs: number,
-    payload: Buffer,
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const socket = new Socket();
-      let settled = false;
-
-      const finish = (error?: Error) => {
-        if (settled) return;
-        settled = true;
-        socket.destroy();
-        if (error) reject(error);
-        else resolve();
-      };
-
-      socket.setTimeout(timeoutMs);
-      socket.once('timeout', () =>
-        finish(new Error(`Printer connection timed out after ${timeoutMs} ms.`)),
-      );
-      socket.once('error', (error) => finish(error));
-      socket.connect(port, host, () => {
-        socket.end(payload, () => finish());
-      });
-    });
-  }
-
-  private parsePositiveInteger(
-    value: string | undefined,
-    fallback: number,
-  ): number {
-    const parsed = Number.parseInt(value ?? '', 10);
-    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
   }
 }

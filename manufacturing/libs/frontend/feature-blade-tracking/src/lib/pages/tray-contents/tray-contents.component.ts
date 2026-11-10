@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, ViewChild, inject, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
 import {
   AssetTagKind,
   BladeHistoryView,
@@ -21,20 +22,23 @@ import {
 @Component({
   selector: 'gear-tray-contents',
   standalone: true,
-  imports: [CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
+  imports: [GearLabelPrinterPickerComponent, CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
   templateUrl: './tray-contents.component.html',
 })
 export class TrayContentsComponent implements OnInit, OnDestroy {
   private readonly destroyed$ = new Subject<void>();
   ngOnDestroy(): void { this.destroyed$.next(); this.destroyed$.complete(); }
   private readonly api = inject(BladeTrackingApiService);
+  private readonly toast = inject(GearToastService);
   private readonly route = inject(ActivatedRoute);
 
   ngOnInit(): void {
     // Card drilldown supplies only a serial; the normal authenticated scan/detail
     // endpoints still resolve the tray. Opening a link never moves inventory.
-    const serial = this.route.snapshot.queryParamMap.get('serial');
-    if (serial?.trim()) this.scan(serial);
+    this.route.queryParamMap.pipe(takeUntil(this.destroyed$)).subscribe((params) => {
+      const serial = params.get('serial');
+      if (serial?.trim()) this.scan(serial);
+    });
   }
 
   @ViewChild('scanner') scanner?: ScanPanelComponent;
@@ -82,12 +86,8 @@ export class TrayContentsComponent implements OnInit, OnDestroy {
         if (!result.printed) {
           this.api.downloadAssetTagPrn(result);
         }
-        this.message = {
-          tone: 'success',
-          text: result.printed
-            ? `${result.serial_number} tag sent to the IPL printer.`
-            : `${result.message} ${result.file_name} downloaded.`,
-        };
+        const notice = announceAssetTagPrint(this.toast, result);
+        this.message = { tone: result.printed ? 'success' : 'info', text: notice.text };
       },
       error: (error: HttpErrorResponse) => {
         this.printingTagSerial = null;
@@ -95,6 +95,7 @@ export class TrayContentsComponent implements OnInit, OnDestroy {
           tone: 'error',
           text: apiErrorText(error, `Could not print ${serialNumber} tag.`),
         };
+        this.toast.error(this.message.text, 'Tag not printed');
       },
     });
   }
@@ -159,10 +160,10 @@ export class TrayContentsComponent implements OnInit, OnDestroy {
     this.api.getBladeHistory(bladeId).pipe(takeUntil(this.destroyed$)).subscribe({
       next: (history) => {
         this.historyByBladeId[bladeId] = history;
-        this.historyLoadingBladeId = null;
+        if (this.historyLoadingBladeId === bladeId) this.historyLoadingBladeId = null;
       },
       error: (error: HttpErrorResponse) => {
-        this.historyLoadingBladeId = null;
+        if (this.historyLoadingBladeId === bladeId) this.historyLoadingBladeId = null;
         this.historyErrorByBladeId[bladeId] = apiErrorText(
           error,
           'Could not load this blade history.',
