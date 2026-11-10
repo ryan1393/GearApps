@@ -2,7 +2,7 @@
 
 | Folder | What it is | Version |
 | --- | --- | --- |
-| `truck-log/` | Truck Log server and web app (Docker). Start with `truck-log/README.md`. | 1.0.5 |
+| `truck-log/` | Truck Log server and web app (Docker). Start with `truck-log/README.md`. | 1.0.6 |
 | `print-agents/` | Windows print PC programs: guard shack print agent and SAP packing-slip watcher. Start with `print-agents/README-FIRST.txt`. | V4R7 / W3 |
 
 DANA UI (the shared styling package) lives in its own repo. Truck Log builds from the pinned copy in `truck-log/vendor/dana-ui/`.
@@ -48,7 +48,7 @@ Run `CHANGE-TRUCK-LOG-PASSWORDS.cmd` without options to list every password it c
 
 A running Windows service can be offline in Truck Log when its saved credential is rejected. On the print PC, run `print-agents\01-Guard-Shack-Agent\REPAIR-PRINT-AGENT-CREDENTIAL.cmd` as administrator. It checks the configured server, agent identity and existing credential first. If a replacement is needed, it displays the command to create a credential on that Truck Log Docker host and accepts the new token in a hidden local prompt.
 
-The repair validates the replacement before changing the installed credential. It preserves the configured printers and print journals and restarts a previously running service. The server application remains version 1.0.5; this repair tool runs on the Windows print PC.
+The repair validates the replacement before changing the installed credential. It preserves the configured printers and print journals and restarts a previously running service. The server application is unchanged by it; this repair tool runs on the Windows print PC.
 
 ## Remove an old print agent before reinstalling
 

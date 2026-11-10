@@ -2,7 +2,7 @@
 # keeps the context to this app plus libs/truck-log/rxo-shared.
 FROM mcr.microsoft.com/playwright:v1.55.1-noble AS runtime
 
-ARG TRUCK_LOG_RELEASE=1.0.5
+ARG TRUCK_LOG_RELEASE=1.0.6
 LABEL com.dana.truck-log.release="${TRUCK_LOG_RELEASE}" \
       org.opencontainers.image.version="${TRUCK_LOG_RELEASE}" \
       com.dana.truck-log.component="rxo-export"

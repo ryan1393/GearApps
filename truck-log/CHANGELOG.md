@@ -1,12 +1,18 @@
 # Changelog
 
+## 1.0.6 — Password changes and print agent setup fixes
+
+- Add `CHANGE-TRUCK-LOG-PASSWORDS` (Windows and Linux) to change the administrator password, database password, Print Agent signing secret and RXO logins after setup. The database option updates PostgreSQL and `.env` together and keeps the HTTPS overlay on restart.
+- Run `SETUP-PRINT-AGENT-CREDENTIAL.cmd` and `SETUP-TRUCK-LOG-ADMIN.cmd` with `docker exec`, so they work on a Windows PC whose Docker CLI has no Compose plugin.
+- Companion print agents: add `REMOVE-OLD-PRINT-AGENT` to uninstall the old guard service before a fresh V4R7 install, and accept an incomplete token paste in the SAP watcher credential setup. The guard service remains V4R7 and the watcher W3.
+- The server, web app and RXO workers are unchanged from 1.0.5. Database migrations remain unchanged through 0005 and DANA UI at 0.3.1.
+
 ## 1.0.5 — Scan Now in both RXO control centers
 
 - Expose **Scan Now** on both standard RXO and RXO Expedite, with administrator authorization and pending/running feedback.
 - Queue Expedite scans through the existing scheduler so scheduled and manual exports share the same browser lock and authentication holds. Keep export completion separate from database import status.
 - Harden Expedite's Freight on the Move navigation: reuse a visible List export, select List once, and verify the data surface independently of page-load events. Report expired sign-in or verification screens while preserving the previous verified batch on failure.
 - Keep the responsive RXO data-panel spacing improvements and consistent gaps between shipment IDs and Details buttons.
-- Add `CHANGE-TRUCK-LOG-PASSWORDS` (Windows and Linux) to change the administrator password, database password, Print Agent signing secret and RXO logins after setup. The database option updates PostgreSQL and `.env` together and keeps the HTTPS overlay on restart.
 - Keep database migrations unchanged through 0005, DANA UI at 0.3.1, and the companion print agents at V4R7/W3.
 
 ## 1.0.4 — Expedite scan reliability and diagnostics
