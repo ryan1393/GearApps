@@ -1,12 +1,14 @@
 import json
+import os
 import socket
+import tempfile
 import threading
 import time
 import unittest
 from decimal import Decimal
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from lapper_read.api import GearAppsApi
+from lapper_read.api import ApiError, GearAppsApi
 from lapper_read.config import ConfigError, from_env
 from lapper_read.scanner import Scanner
 from lapper_read.state import ScannerState
@@ -73,6 +75,7 @@ class ScannerTests(unittest.TestCase):
 class FakeServer(BaseHTTPRequestHandler):
     log = []
     tokens = iter([])
+    revoked: set = set()
 
     def log_message(self, *args):
         pass
@@ -92,6 +95,8 @@ class FakeServer(BaseHTTPRequestHandler):
                                self.headers.get("Idempotency-Key"), body))
         if self.path.endswith("/auth/email/login"):
             return self._reply(200, {"accessToken": next(FakeServer.tokens)})
+        if (self.headers.get("Authorization") or "").removeprefix("Bearer ") in FakeServer.revoked:
+            return self._reply(401, {"message": "revoked"})
         if self.headers.get("Authorization") == "Bearer expired":
             return self._reply(401, {"message": "expired"})
         if self.path.startswith("/api/v1/gearset/number/404"):
@@ -106,6 +111,9 @@ class FakeServer(BaseHTTPRequestHandler):
 class ApiTests(unittest.TestCase):
     def setUp(self):
         FakeServer.log = []
+        FakeServer.revoked = set()
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), FakeServer)
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
         self.api = GearAppsApi(f"http://127.0.0.1:{self.server.server_port}", "svc@plant", "secret", 3)
@@ -143,6 +151,34 @@ class ApiTests(unittest.TestCase):
         api.request("GET", "/api/v1/macro")
         self.assertEqual(FakeServer.log[-1][2], "Bearer glr_abc")
         self.assertFalse(any(e[1].endswith("/auth/email/login") for e in FakeServer.log))
+
+    def test_token_file_is_used_and_reread_after_the_api_rejects_it(self):
+        path = os.path.join(self.tmp.name, "token")
+        api = GearAppsApi(f"http://127.0.0.1:{self.server.server_port}", "", "", 3, token_file=path)
+        with self.assertRaises(ApiError) as missing:
+            api.request("GET", "/api/v1/macro")
+        self.assertIn("Connect Docker collector", str(missing.exception))
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write("glr_first\n")
+        api.request("GET", "/api/v1/macro")
+        self.assertEqual(FakeServer.log[-1][2], "Bearer glr_first")
+        # An admin reconnects: the API revokes the old token and writes a new one.
+        FakeServer.revoked = {"glr_first"}
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write("glr_second")
+        api.request("GET", "/api/v1/macro")
+        self.assertEqual([e[2] for e in FakeServer.log[-2:]], ["Bearer glr_first", "Bearer glr_second"])
+        self.assertFalse(any(e[1].endswith("/auth/email/login") for e in FakeServer.log))
+
+    def test_a_revoked_token_file_token_reports_how_to_reconnect(self):
+        path = os.path.join(self.tmp.name, "token")
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write("glr_first")
+        FakeServer.revoked = {"glr_first"}
+        api = GearAppsApi(f"http://127.0.0.1:{self.server.server_port}", "", "", 3, token_file=path)
+        with self.assertRaises(ApiError) as error:
+            api.request("GET", "/api/v1/macro")
+        self.assertIn("Connect Docker collector", str(error.exception))
 
     def test_a_cycle_without_a_scanner_is_posted_with_a_null_serial(self):
         FakeServer.tokens = iter(["t"])

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { CollectorToken, CreatedCollectorToken } from '@gearapps/shared/domain';
+import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from '@gearapps/shared/domain';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from './api-config';
 
@@ -46,5 +46,14 @@ export class CollectorTokensApi {
 
   revoke(id: string): Observable<void> {
     return this.http.delete<void>(`${this.url}/${id}`);
+  }
+
+  dockerConnection(): Observable<DockerCollectorConnection> {
+    return this.http.get<DockerCollectorConnection>(`${this.url}/docker`);
+  }
+
+  /** Issues the Docker collector a new token on its private volume; the previous one is revoked. */
+  connectDocker(): Observable<DockerCollectorConnection> {
+    return this.http.post<DockerCollectorConnection>(`${this.url}/docker`, {});
   }
 }

@@ -19,7 +19,7 @@ import {
 } from '@dana/ui';
 import { apiErrorMessage, CollectorTokensApi, loadable, ToastService } from '@gearapps/client/core';
 import { DialogComponent, StatusBadgeComponent } from '@gearapps/client/ui';
-import { CollectorToken, CreatedCollectorToken } from '@gearapps/shared/domain';
+import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from '@gearapps/shared/domain';
 
 @Component({
   selector: 'gear-collector-tokens-page',
@@ -79,6 +79,57 @@ import { CollectorToken, CreatedCollectorToken } from '@gearapps/shared/domain';
       <section class="gear-panel data-panel">
         <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
           <div>
+            <h2>Docker collector</h2>
+            @if (docker.loading()) {
+              <p>Checking…</p>
+            } @else if (!docker.value().available) {
+              <p>
+                This API is not running in the Docker stack. For the Docker collector, deploy with
+                <code>compose.yml</code>; for any other collector, create a token below.
+              </p>
+            } @else if (docker.value().token; as t) {
+              <p>
+                Connected with <span class="mono">glr_…{{ t.hint }}</span> since
+                {{ t.created_at | date: 'MMM d, h:mm a' }} · last used
+                {{ t.last_used_at ? (t.last_used_at | date: 'MMM d, h:mm a') : 'not yet' }}.
+                Reconnecting issues a new token and revokes this one; the collector switches over
+                by itself.
+              </p>
+            } @else {
+              <p>
+                Not connected. Connecting hands the Docker collector its own token on a private
+                volume, so nothing goes in <code>.env</code> and the token is never shown.
+              </p>
+            }
+          </div>
+          @if (docker.value().available) {
+            <div class="dana-toolbar">
+              <gear-status-badge
+                [tone]="docker.value().token ? 'success' : 'neutral'"
+                [text]="docker.value().token ? 'Connected' : 'Not connected'"
+              />
+              <button
+                type="button"
+                class="gear-btn gear-btn-primary"
+                (click)="connectDocker()"
+                [disabled]="connecting() || docker.loading()"
+              >
+                {{
+                  connecting()
+                    ? 'Connecting…'
+                    : docker.value().token
+                      ? 'Reconnect (new token)'
+                      : 'Connect Docker collector'
+                }}
+              </button>
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="gear-panel data-panel">
+        <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+          <div>
             <h2>Tokens</h2>
             <p>{{ activeCount() }} active. The token itself is shown once, when it is created.</p>
           </div>
@@ -101,7 +152,12 @@ import { CollectorToken, CreatedCollectorToken } from '@gearapps/shared/domain';
             <tbody>
               @for (t of tokens.value(); track t.id) {
                 <tr>
-                  <td class="strong">{{ t.name }}</td>
+                  <td class="strong">
+                    {{ t.name }}
+                    @if (t.purpose === 'docker') {
+                      <span class="gear-muted">· issued to the Docker collector</span>
+                    }
+                  </td>
                   <td class="mono nowrap">glr_…{{ t.hint }}</td>
                   <td class="nowrap">
                     {{ t.created_at | date: 'MMM d, y' }}
@@ -137,7 +193,7 @@ import { CollectorToken, CreatedCollectorToken } from '@gearapps/shared/domain';
                     {{
                       tokens.loading()
                         ? 'Loading tokens…'
-                        : 'No collector tokens yet. Create one for each Lapper Read installation.'
+                        : 'No collector tokens yet. Connect the Docker collector above, or create one for another Lapper Read installation.'
                     }}
                   </td>
                 </tr>
@@ -208,16 +264,12 @@ import { CollectorToken, CreatedCollectorToken } from '@gearapps/shared/domain';
       </div>
       <ol class="lapper-token-steps">
         <li>
-          Put it in the GearApps <code>.env</code> as
-          <code>LAPPER_READ_API_TOKEN={{ created()?.token }}</code
-          >.
+          Give it to the Lapper Read installation it is for (for example the Windows service's
+          <code>GearAppsApi</code> settings).
         </li>
         <li>
-          Remove <code>LAPPER_READ_API_EMAIL</code> and <code>LAPPER_READ_API_PASSWORD</code> if
-          they are set.
-        </li>
-        <li>
-          Restart the collector: <code>docker compose --profile collectors up -d lapper-read</code>.
+          The Docker collector does not need this: use
+          <strong>Connect Docker collector</strong> instead.
         </li>
       </ol>
       <ng-container dialogActions>
@@ -247,6 +299,8 @@ export class CollectorTokensPageComponent implements OnInit {
   private readonly toast = inject(ToastService);
 
   protected readonly tokens = loadable<CollectorToken[]>([]);
+  protected readonly docker = loadable<DockerCollectorConnection>({ available: false, token: null });
+  protected readonly connecting = signal(false);
   protected readonly activeCount = computed(
     () => this.tokens.value().filter((t) => !t.revoked_at).length,
   );
@@ -264,6 +318,26 @@ export class CollectorTokensPageComponent implements OnInit {
 
   protected reload() {
     this.tokens.load(this.api.list());
+    this.docker.load(this.api.dockerConnection());
+  }
+
+  protected connectDocker() {
+    if (this.connecting()) return;
+    this.connecting.set(true);
+    this.api.connectDocker().subscribe({
+      next: () => {
+        this.connecting.set(false);
+        this.toast.success(
+          'Docker collector connected',
+          'It picks up the new token on its next call; start it with the collectors profile if it is not running.',
+        );
+        this.reload();
+      },
+      error: (err) => {
+        this.connecting.set(false);
+        this.toast.error(err, 'Could not connect the Docker collector');
+      },
+    });
   }
 
   protected openCreate() {

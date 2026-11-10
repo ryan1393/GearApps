@@ -42,7 +42,7 @@ def main(argv: list[str]) -> int:
             return 1
 
     api = GearAppsApi(settings.api_base_url, settings.api_email, settings.api_password, settings.api_timeout_s,
-                      token=settings.api_token)
+                      token=settings.api_token, token_file=settings.api_token_file)
     transport = FocasTransport(settings.focas_library, settings.focas_log, settings.focas_port)
     fanuc = Fanuc(transport, settings.machine_ip, settings.io_timeout_ms, api)
 

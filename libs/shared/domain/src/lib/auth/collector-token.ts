@@ -26,6 +26,16 @@ export interface CollectorToken {
   created_by_email: string | null;
   last_used_at: string | null;
   revoked_at: string | null;
+  /** 'docker': the token the API handed to the Docker Lapper Read collector. */
+  purpose: 'docker' | null;
+}
+
+/** The Docker Lapper Read collector's connection, as Lapper > Collector Tokens shows it. */
+export interface DockerCollectorConnection {
+  /** False when this API has no shared token file (it is not running in the Docker stack). */
+  available: boolean;
+  /** The active token the collector is using, if it is connected. */
+  token: CollectorToken | null;
 }
 
 /** Returned once, when a token is created. */
