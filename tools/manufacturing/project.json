@@ -1,0 +1,834 @@
+{
+  "name": "manufacturing-tools",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "tools/manufacturing",
+  "tags": [
+    "scope:manufacturing",
+    "type:tooling"
+  ],
+  "targets": {
+    "start-gear-apps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/start-gear-apps.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-gear-apps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/run-all-tests.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "import-base-data": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/manufacturing/base-data/validate-cutter-reference-data.mjs && node tools/manufacturing/base-data/import-base-data.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "import-cutter-history": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/cutter-history/import-cutter-history-DYNAMIC-FAST-AUDITED.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "seed-database": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cross-env TS_NODE_PROJECT=libs/manufacturing/server/data-access/tsconfig.lib.json ts-node -r tsconfig-paths/register libs/manufacturing/server/data-access/src/lib/database/seeds/seed-database.ts",
+        "cwd": ".",
+        "env": {
+          "TS_NODE_BASEURL": "."
+        }
+      },
+      "cache": false
+    },
+    "db-check-drift": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cross-env TS_NODE_TRANSPILE_ONLY=1 TS_NODE_PROJECT=apps/server/tsconfig.app.json ts-node -r tsconfig-paths/register tools/manufacturing/database/check-schema-drift.ts",
+        "cwd": ".",
+        "env": {
+          "TS_NODE_BASEURL": "."
+        }
+      },
+      "cache": false
+    },
+    "version-set": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/set-version.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-version": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-version-consistency-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "copy-templates": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node -e \"require('node:fs').cpSync('libs/manufacturing/server/util-mailer/src/templates','apps/server/src/assets/templates',{recursive:true})\"",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-fixtures": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-data/ensure-workflow-test-fixtures.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-blade-data": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/test-data/ensure-blade-tracking-fake-data.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "validate-base-data": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/manufacturing/base-data/validate-cutter-reference-data.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-cutter-dana": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/test-cutter-body-dana-assignment.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "export-base-fresh": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/data-import/export-base-data-FRESH-SAFE.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "export-cutter-history-fresh": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/cutter-history/export-cutter-history-FRESH-SAFE.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "import-cutter-history-snapshot": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/cutter-history/import-cutter-history-DYNAMIC-FAST-AUDITED.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "import-all-fresh": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/data-import/import-all-fresh.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "import-all-fresh-apply": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/data-import/import-all-fresh.ps1 -Apply",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-data-import": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/data-import/test-data-import-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "commands-gear-apps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/show-gear-apps-commands.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-legacy-log-dedupe": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/data-import/test-legacy-log-dedupe.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-legacy-null-mf": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/data-import/test-legacy-null-mf-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-workflow-harness": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-data/test-workflow-harness-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-workflow": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-full-workflow.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-user-ensure": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-data/ensure-automatic-test-user.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-part-machine-compatibility": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-data/test-part-machine-compatibility-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-blade-status-fixture": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-data/test-blade-status-fixture-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-start-grinding-db": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-data/test-start-grinding-db-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-fixture-enums": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-data/test-fixture-enum-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-nx-install": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-nx-install-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-db-lock-queries": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-db-lock-query-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-fk-relation-sync": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-fk-relation-sync-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-error-messages": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-error-message-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-cutter-builder-request": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-cutter-builder-request-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-backend-mutations": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/test-authenticated-backend-mutations.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-backend-mutation-coverage": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-authenticated-mutation-coverage-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-backend-concurrency": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-concurrent-backend-mutation.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-backend-mutation-fixture-schema": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-backend-mutation-fixture-schema-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-backend-mutation-null-response": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-backend-mutation-null-response-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-post-workflow-integrity": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-post-workflow-db-integrity.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-post-workflow-integrity-contract": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-post-workflow-db-integrity-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-ui-consistency": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-ui-consistency-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-ui-deep-scan": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-ui-deep-scan-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-login-swagger-ui": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-login-swagger-ui-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-public-registration-closed": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-public-registration-closed-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-scrap-blade-history": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-scrap-blade-history-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-login-ui-consistency": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-login-ui-consistency-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "ui-wire-shared-styles": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/wire-shared-ui-styles.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-shared-ui-style-source": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-shared-ui-style-source-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-ui-style-duplicates": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-ui-style-integrity-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-ui-body-depth": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-global-professional-ui-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "audit-ui-styles": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/audit-ui-style-duplicates.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-admin-management-ui": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-admin-management-ui-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-admin-backend-consistency": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-admin-backend-consistency-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-department-app-access": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-department-app-access-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "refresh-all-data-reset": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/data-import/reset-and-import-all-fresh.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "refresh-all-data-reset-apply": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/data-import/reset-and-import-all-fresh.ps1 -Apply -YesReallyDeleteOldData",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-full-data-reset-contract": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/data-import/test-full-data-reset-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-blade-locations-management": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-blade-locations-management-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-greenshed-part-shelves": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-greenshed-part-shelf-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-summary-shelf-dashes": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-summary-shelf-dash-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "migrate-greenshed-shelves": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/data-import/migrate-summary-shelf-tags.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "migrate-greenshed-shelves-apply": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/data-import/migrate-summary-shelf-tags.mjs --apply",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "migrate-summary-shelves": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/data-import/migrate-summary-shelf-tags.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "migrate-summary-shelves-apply": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/data-import/migrate-summary-shelf-tags.mjs --apply",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-cuttergrind-part-shelves": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-cuttergrind-part-shelf-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-empty-tray-availability": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-empty-tray-availability-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-ux-responsive-nav": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-ux-responsive-navigation-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-ux-workflow-state": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-ux-workflow-state-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-ux-accessibility-feedback": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-ux-accessibility-feedback-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-angular-template-structure": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-angular-template-structure-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-location-identity-display": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-location-identity-display-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-tray-contents-part-type": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-tray-contents-part-type-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-parent-child-drilldown": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-parent-child-drilldown-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-shop-floor-readability": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-shop-floor-readability-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-large-screen-readability": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-large-screen-readability-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-sidebar-navigation-hierarchy": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-sidebar-navigation-hierarchy-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-dana-diamond-brand": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-dana-diamond-brand-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-shared-icon-assets": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-shared-icon-assets-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-toast-notifications": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-toast-notifications-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-dana-apps-premerge": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-dana-apps-premerge-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-native-asset-tags": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-native-asset-tag-printing-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "configure-label-printer": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/configure-label-printer.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-blade-inventory-control-center": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-blade-inventory-control-center-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-local-debug-login": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-local-debug-login-startup-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-dana-ui-release-hardening": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-dana-ui-release-hardening-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-ui-foundation-cleanup": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-ui-foundation-cleanup-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-inventory-control-center-search": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-inventory-control-center-search-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-shared-table-migration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-shared-table-migration-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-workflow-surface-consolidation": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-workflow-surface-consolidation-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-dana-master-ui": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-dana-master-ui-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-dana-shared-exports": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-dana-shared-export-integrity-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-dana-ui-ownership": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-dana-ui-ownership-adoption-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "docker-config": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose --env-file .env -f compose.yml config",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "docker-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose --env-file .env -f compose.yml build --progress=plain",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "docker-ps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose --env-file .env -f compose.yml ps",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-fresh-db-runtime-deps": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-dana-apps-fresh-db-runtime-deps-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-external-dana-ui": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/test-external-dana-ui-package-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-bootstrap-redeployment": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/manufacturing/test-bootstrap-redeployment.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-release-regressions": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/manufacturing/test-release-regressions.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-contracts": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/manufacturing/run-contract-tests.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-deployment": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --test tools/manufacturing/base-data/bootstrap-policy.test.mjs tools/manufacturing/set-version.test.mjs tools/manufacturing/test-deployment-config.cjs tools/manufacturing/deploy/deploy-layout.test.mjs tools/manufacturing/package-release.test.mjs tools/manufacturing/gear-merge-manifest.test.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    }
+  }
+}

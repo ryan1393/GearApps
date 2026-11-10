@@ -11,7 +11,8 @@ const walk=(dir)=>fs.existsSync(dir)
 
 const pkg=JSON.parse(fs.readFileSync(path.join(root,'package.json'),'utf8'));
 const runAll=fs.readFileSync(path.join(root,'tools','manufacturing','run-all-tests.ps1'),'utf8');
-const scriptText=JSON.stringify(pkg.scripts??{});
+const toolTargets=JSON.parse(fs.readFileSync(path.join(root,'tools','manufacturing','project.json'),'utf8')).targets??{};
+const scriptText=JSON.stringify(pkg.scripts??{})+JSON.stringify(toolTargets);
 
 const testFiles=walk(path.join(root,'tools','manufacturing'))
   .filter(p=>/^test-.*\.mjs$/i.test(path.basename(p)))

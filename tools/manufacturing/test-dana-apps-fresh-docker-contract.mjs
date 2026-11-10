@@ -87,9 +87,10 @@ for (const marker of [
   must(helper.includes(marker), `Fresh Docker helper missing safety marker ${marker}`);
 }
 
-const commands=JSON.parse(fs.readFileSync(contractPath(root,'tools/manufacturing-scripts.json'),'utf8'));
-must(commands['docker:up']?.includes('docker compose') && commands['docker:up']?.includes('up -d --build'), 'docker:up must use modern Compose with a build');
-must(commands['docker:config']?.includes('docker compose') && commands['docker:config']?.includes('config'), 'docker:config must validate Compose');
+const scripts=JSON.parse(fs.readFileSync(contractPath(root,'package.json'),'utf8')).scripts;
+const targets=JSON.parse(fs.readFileSync(contractPath(root,'tools/manufacturing/project.json'),'utf8')).targets;
+must(scripts['docker:up']?.includes('docker compose') && scripts['docker:up']?.includes('up -d --build'), 'docker:up must use modern Compose with a build');
+must(targets['docker-config']?.options?.command?.includes('docker compose') && targets['docker-config'].options.command.includes('config'), 'docker:config must validate Compose');
 
 for (const marker of [
   'Dana Apps — Fresh Docker Host',
