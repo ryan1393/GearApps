@@ -5,11 +5,15 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Max,
   MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+
+/** Piece counts are stored in PostgreSQL integer columns; a larger value (e.g. a barcode scanned into the field) must be a 400, not a database error. */
+const MAX_PIECE_COUNT = 2147483647;
 
 export class SetupCutterDto {
   @ApiProperty()
@@ -34,6 +38,7 @@ export class SetupCutterDto {
   @Type(() => Number)
   @IsInt()
   @Min(0)
+  @Max(MAX_PIECE_COUNT)
   starting_piece_count?: number;
 
   @ApiPropertyOptional()
@@ -117,6 +122,7 @@ export class QualityCheckDto {
   @Type(() => Number)
   @IsInt()
   @Min(0)
+  @Max(MAX_PIECE_COUNT)
   piece_count!: number;
 
   @ApiPropertyOptional()
@@ -143,6 +149,7 @@ export class UpdatePieceCountDto {
   @Type(() => Number)
   @IsInt()
   @Min(0)
+  @Max(MAX_PIECE_COUNT)
   piece_count!: number;
 }
 

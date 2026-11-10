@@ -1,5 +1,53 @@
 # Changelog
 
+## Unreleased
+
+Workflow and UI review. No schema changes; API changes are additive.
+
+- **Dashboards.** KPI tiles on all three dashboards are back in a row (4 across, 3 + 3,
+  3 + 2). A Dana core grid rule had been overriding the Gear tile geometry, so every tile
+  sat on its own line.
+- **Shell.** The drawer button is hidden on desktop, where the sidebar is always docked.
+  The dashboard link only looks selected, and only says ACTIVE, on the dashboard. A closed
+  mobile drawer no longer casts a shadow on the page or takes keyboard focus. Cancel pages
+  have a proper header and browser-tab title. Blade Tracking operations are listed in
+  process order: Intake, Grinding, Load, Ship, Receive, then Internal Movement.
+- **Scanning.** The cursor now returns to the scan field an operator needs next on every
+  scan screen, including after a rejected scan. It was being lost whenever the page was
+  busy, which silently dropped the following scan. Scanned text is selected so the next scan
+  replaces it.
+- **Blade Intake.** After adding blades the cursor returns to the tray scan. It used to sit
+  in Quantity, where scanning the next tray could add blades to the previous one. Enter in
+  Quantity no longer submits. Top-ups default to the missing count, and a rejected quantity
+  says why.
+- **Grinding.** A tray left short after grinding reads "Needs replacement blades" with the
+  next step, instead of READY_FOR_COATING.
+- **Coater Shipments.** One rejected container scan no longer locks the draft.
+- **Machine Setup.** The part list is no longer cut off at 250 parts, and the build list no
+  longer drops older shelf stock. "Setup Another Cutter" after a setup started from the
+  board works. A list that fails to load says so instead of reading as "none configured".
+- **Cutter Pull.** A reason must be chosen; the first reason in the list (a teardown) is no
+  longer preselected. Results and history show the reason name, not its code.
+- **Running Machines.** A FAIL or HOLD check is red, not green. A failed auto-refresh says
+  the board is stale, and a later good refresh clears the message.
+- **Search.** The Greenshed and Cutter Builder top-bar search accepts a machine number, body
+  serial or Summary as well as a build number, and works when Lookup is already open. Find
+  Inventory and Tray Contents follow the Blade Tracking search the same way.
+- **Build / Tear Down.** Pick lists reload after each transaction and a changed upstream
+  choice clears the dependent one.
+- **Admin.** An administrator cannot disable or demote their own account, and the last
+  active administrator cannot be removed (enforced by the API). Editing a record no longer
+  re-enables it. Users without an email can be edited. Part Summary cards show their Model.
+  Saving one Roll Master row keeps unsaved edits in the others.
+- **Sign-in.** The local test-account hint appears in development builds only. Forgot
+  Password says to contact an administrator when the server has no outgoing email
+  (`/auth/capabilities` now reports `passwordResetEnabled`).
+- **Lapper.** A slow scanner image no longer stops the live card updating. Edit dialogs show
+  the current status. Delete is no longer offered for parts and part summaries, which the
+  API never allows from Lapper.
+- **API.** Piece counts above the integer column range return a validation error instead
+  of a database error. "Cancel last tray transaction" accepts a serial in any letter case.
+
 ## 70.3.0 (2026-11-09)
 
 - Fixed clean Linux Docker builds when a native dependency's prebuilt download

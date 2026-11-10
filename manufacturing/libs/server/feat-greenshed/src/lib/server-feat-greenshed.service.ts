@@ -328,8 +328,12 @@ export class ServerFeatGreenshedService {
         ]);
 
       if (machineBusy) {
+        const installed = await buildRepo.findOne({
+          where: { id: machineBusy.cutter_build_id },
+          select: { id: true, build_number: true },
+        });
         throw new ConflictException(
-          `Machine ${machineNumber} already has cutter ${machineBusy.cutter_build_id} installed`,
+          `Machine ${machineNumber} already has cutter ${installed?.build_number ?? 'build'} installed`,
         );
       }
       if (buildAlreadyRunning) {
