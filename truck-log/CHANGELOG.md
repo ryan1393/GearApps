@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.9 — Longer confirmation before an empty Expedite list is published
+
+- Require the second empty scan to come at least 45 minutes after the first (was ten). RXO was observed showing a settled "0 of 0" list for ten to twenty minutes while shipments existed. With the default 30-minute schedule, an empty list is published by the scan one hour after it is first seen.
+- Everything else in 1.0.8 is unchanged.
+
 ## 1.0.8 — Expedite: slow Freight on the Move page and genuinely empty lists
 
 - Wait up to 90 seconds (was 30) for RXO's loading overlay before switching Freight on the Move to List. A slow page no longer fails every scan with `FREIGHT_LIST_CONTROL_TIMEOUT`.

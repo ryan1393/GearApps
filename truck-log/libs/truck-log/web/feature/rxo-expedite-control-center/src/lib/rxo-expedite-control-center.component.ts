@@ -75,7 +75,7 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
       <div class="dana-alert dana-alert-danger" *ngIf="needsReview">
         <b>{{scanRunning ? 'Previous Expedite attempt failed.' : 'Latest Expedite attempt failed.'}}</b> {{status.acquisition.lastError || status.scheduler?.lastErrorCode || 'The latest export needs attention.'}}
         <p>Failure completed: {{latestFailureAt ? displayTime(latestFailureAt) : 'Time not reported'}}. Attempt started: {{displayTime(status.acquisition.lastAttemptAt)}}.</p>
-        <p *ngIf="(status.acquisition.lastError || status.scheduler?.lastErrorCode) === 'EMPTY_LIST_AWAITING_SECOND_SCAN'">RXO showed no expedite freight on the move. Nothing is wrong: Truck Log keeps the previous list until a second scan, at least ten minutes later, also finds none, then shows an empty list.</p>
+        <p *ngIf="(status.acquisition.lastError || status.scheduler?.lastErrorCode) === 'EMPTY_LIST_AWAITING_SECOND_SCAN'">RXO showed no expedite freight on the move. Nothing is wrong: Truck Log keeps the previous list until a later scan, at least 45 minutes after the first, also finds none, then shows an empty list.</p>
         <p>{{latestFailureDetail}}</p>
         <p>The previous verified batch stays available; the last successful export and import below refer to that retained batch.</p>
         <button class="dana-btn dana-btn-sm" type="button" (click)="activeTab='health'; healthTabButton.focus()">Open Exporter Health</button>

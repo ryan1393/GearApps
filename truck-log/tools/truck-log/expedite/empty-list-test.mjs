@@ -1,5 +1,5 @@
 // A genuinely empty Freight on the Move list. Scheduled runs publish it only after it has been
-// seen twice, at least ten minutes apart; RXO's "0 of 0" while loading is never accepted.
+// seen twice, at least 45 minutes apart; RXO's "0 of 0" while loading is never accepted.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -51,9 +51,12 @@ const awaiting = (e) => e instanceof ExpediteError && e.code === 'EMPTY_LIST_AWA
   await assert.rejects(scheduled(s, empty), awaiting); count++;
   check(marker(s).firstObservedAt === seenAt && verifyLatest(s.dataRoot).rowCount === 11, 'an immediate repeat does not count as the second scan');
 
+  backdate(s, 30 * 60000);
+  await assert.rejects(scheduled(s, empty), awaiting); count++;
+  check(verifyLatest(s.dataRoot).rowCount === 11 && EMPTY_CONFIRM_MIN_MS === 45 * 60000, 'a repeat 30 minutes later is still too soon');
   backdate(s, EMPTY_CONFIRM_MIN_MS + 1000);
   const confirmed = await scheduled(s, empty);
-  check(confirmed.rowCount === 0 && verifyLatest(s.dataRoot).sourceBatchId === confirmed.sourceBatchId, 'a second empty scan ten minutes later publishes the empty list');
+  check(confirmed.rowCount === 0 && verifyLatest(s.dataRoot).sourceBatchId === confirmed.sourceBatchId, 'a second empty scan 45 minutes later publishes the empty list');
   check(marker(s)?.state === 'CONFIRMED' && marker(s).sourceBatchId === confirmed.sourceBatchId, 'the published empty batch is recorded as confirmed');
 
   const again = await scheduled(s, empty);

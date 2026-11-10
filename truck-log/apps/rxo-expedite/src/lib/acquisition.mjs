@@ -7,7 +7,7 @@ import { readCredentials, credentialStatus } from './credentials.mjs';
 import { acquireLock, inspectLock, withTimeout } from './process-lock.mjs';
 import { pruneBatchDirectories } from './batch-retention.mjs';
 import { assertFreightSession, excelControls, freightViewCovered, openFreightList } from './list-view.mjs';
-export const VERSION=process.env.TRUCK_LOG_RELEASE||'1.0.8';
+export const VERSION=process.env.TRUCK_LOG_RELEASE||'1.0.9';
 export const LOGIN_URL='https://www.expedite.rxo.com/WebClient/Account/Login';
 export const FREIGHT_URL='https://www.expedite.rxo.com/WebClient/#/freight-on-the-move';
 export const XLSX_NAME='Freight On The Move.xlsx';
@@ -84,7 +84,9 @@ export function pruneExpediteBatches(root,protect=[]){
 // runs only after it has been seen twice: an uncovered, steady "0 of 0" list exports zero rows
 // in one scan, and again in a later scan at least EMPTY_CONFIRM_MIN_MS afterwards with no
 // non-empty result between. The first sighting keeps the previous batch published.
-export const EMPTY_LIST_STABLE_MS=20000,EMPTY_CONFIRM_MIN_MS=10*60000,EMPTY_CONFIRM_MAX_MS=6*60*60000;
+// 45 minutes: RXO has shown a settled, uncovered "0 of 0" for roughly ten to twenty minutes
+// while shipments existed. With the default 30-minute schedule the scan an hour later confirms.
+export const EMPTY_LIST_STABLE_MS=20000,EMPTY_CONFIRM_MIN_MS=45*60000,EMPTY_CONFIRM_MAX_MS=6*60*60000;
 const EMPTY_MARKER='expedite-empty-list.json';
 function readEmptyMarker(root){
  try{const m=JSON.parse(readSmall(path.join(root,EMPTY_MARKER),4096).toString('utf8'));

@@ -1,6 +1,6 @@
 # Versioning
 
-The release is the SemVer string in `VERSION` (currently **1.0.8**). It is used unchanged everywhere:
+The release is the SemVer string in `VERSION` (currently **1.0.9**). It is used unchanged everywhere:
 
 - npm manifests (`package.json`, `package-lock.json`, both RXO apps)
 - Docker image tags, image labels and container release labels (`TRUCK_LOG_RELEASE`, written to `.env` by setup from `VERSION`)

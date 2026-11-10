@@ -1,5 +1,5 @@
 /** Truck Log release. Must equal the VERSION file (checked by tests/new-host/test-release-version.mjs). */
-export const TRUCK_LOG_VERSION = '1.0.8';
+export const TRUCK_LOG_VERSION = '1.0.9';
 
 export const VisitStatuses = {
     DOCK_ASSIGNED: 'DOCK_ASSIGNED',
