@@ -50,6 +50,12 @@ A running Windows service can be offline in Truck Log when its saved credential 
 
 The repair validates the replacement before changing the installed credential. It preserves the configured printers and print journals and restarts a previously running service. The server application remains version 1.0.5; this repair tool runs on the Windows print PC.
 
+## Remove an old print agent before reinstalling
+
+The guard agent installer refuses to replace an installed service. On the print PC, run `print-agents\01-Guard-Shack-Agent\REMOVE-OLD-PRINT-AGENT.cmd` as administrator and type `REMOVE` when asked. It uninstalls the `TruckLogPrintAgent` service and moves the old folder into a locked backup. Guard-gate printing on that PC stays off until the agent is installed again.
+
+Then create a new token on the Truck Log host (`SETUP-PRINT-AGENT-CREDENTIAL --agent-id <agent id> --name "<name>" --rotate`) and run the V4R7 installer on the print PC. When the new agent prints on both gates, `REMOVE-OLD-PRINT-AGENT.cmd -DeleteFiles` deletes the old files. The SAP watcher has its own `REMOVE-WATCHER-SERVICE.cmd`. Details: `print-agents/README-FIRST.txt`.
+
 ## Connect an extracted ZIP to local Git
 
 Install Git for Windows, then run this from the complete package folder:
