@@ -7,7 +7,7 @@ import { readCredentials, credentialStatus } from './credentials.mjs';
 import { acquireLock, inspectLock, withTimeout } from './process-lock.mjs';
 import { pruneBatchDirectories } from './batch-retention.mjs';
 import { assertFreightSession, excelControls, openFreightList } from './list-view.mjs';
-export const VERSION=process.env.TRUCK_LOG_RELEASE||'1.0.6';
+export const VERSION=process.env.TRUCK_LOG_RELEASE||'1.0.7';
 export const LOGIN_URL='https://www.expedite.rxo.com/WebClient/Account/Login';
 export const FREIGHT_URL='https://www.expedite.rxo.com/WebClient/#/freight-on-the-move';
 export const XLSX_NAME='Freight On The Move.xlsx';

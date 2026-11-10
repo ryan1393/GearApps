@@ -35,7 +35,7 @@ let activeChild = null;
 let lastHandledRequestId = '';
 let schedulerState = {
   service: 'rxo-scheduler',
-  version: process.env.TRUCK_LOG_RELEASE || '1.0.6',
+  version: process.env.TRUCK_LOG_RELEASE || '1.0.7',
   status: 'STARTING',
   schedulerStartedAt: new Date().toISOString(),
   schedulerHeartbeatAt: new Date().toISOString(),

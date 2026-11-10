@@ -14,7 +14,7 @@ import { DockScanInput } from './dock-scan-input';
       <div class="dana-dialog-header"><h2 id="dock-scan-title">SAP Delivery Number</h2>
       <p>Load {{visit.loadNumber || visit.visitReference}} · Dock {{visit.dockCode}} · {{visit.driverName}} · Trailer {{visit.trailerId}}</p></div>
       <div class="dana-dialog-body tl-stack">
-      <p class="dana-note">Scan or type the eight-digit Delivery Number. It is saved to this visit even without a PDF.<span *ngIf="closeAfterSave"> The scanner's Enter key saves it and closes this window once the server confirms.</span></p>
+      <p class="dana-note">Scan or type the eight-digit Delivery Number. It is saved to this visit even without a PDF.<span *ngIf="closeAfterSave"> The scanner's Enter key saves it, attaches the uploaded PDF when exactly one matches, and closes this window.</span></p>
       <div class="dana-segmented" role="group" aria-label="Delivery Number entry method">
         <button type="button" [attr.aria-pressed]="entryMode === 'SCAN'" [disabled]="busy" (click)="setEntryMode('SCAN')">Use Scanner</button>
         <button type="button" [attr.aria-pressed]="entryMode === 'MANUAL'" [disabled]="busy" (click)="setEntryMode('MANUAL')">Type It</button>
@@ -186,11 +186,26 @@ export class DockScanComponent implements OnDestroy {
         this.savedReceipt = receipt;
         this.visit.scannedDeliveryNumbers = [...new Set([...(this.visit.scannedDeliveryNumbers || []), receipt.deliveryNumber])];
         if (closeAfterSave) {
-          this.busy = false;
-          this.message = 'Delivery Number saved to this visit.';
           this.saved.emit(receipt);
-          this.close();
-          return; // No PDF request or automatic attachment is part of fast save/close.
+          // One scan does both: the number is already saved; now attach the uploaded PDF when
+          // exactly one validated capture carries it. Any other outcome just closes, as before.
+          this.message = 'Delivery Number saved. Attaching the uploaded PDF if exactly one matches…';
+          const finish = () => { this.busy = false; this.close(); };
+          this.subscriptions.add(this.api.autoAttachScannedPackingSlip(visitId, deliveryNumber).subscribe({
+            next: (result) => {
+              if (this.destroyed || request !== this.request || this.visit.id !== visitId) return;
+              const doc = result?.document;
+              if (result?.visitId === visitId && result.deliveryNumber === deliveryNumber && doc &&
+                  doc.truckVisitId === visitId && doc.extractedDocumentId === deliveryNumber && doc.documentType === 'PACKING_SLIP') {
+                this.busy = false;
+                this.attached.emit(doc);
+                return;
+              }
+              finish();
+            },
+            error: () => { if (!this.destroyed && request === this.request && this.visit.id === visitId) finish(); },
+          }));
+          return;
         }
         this.message = 'Delivery Number saved. Looking for an optional matching PDF…';
         this.subscriptions.add(this.api.scanPackingSlip(visitId, deliveryNumber).subscribe({

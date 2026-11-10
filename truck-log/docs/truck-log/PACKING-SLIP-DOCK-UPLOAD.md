@@ -12,6 +12,13 @@
 8. **Dock Complete remains available whether the PDF is absent, detected, or still needs SAP-ID review.**
 9. The dockworker gives the physical packing slip to the driver at the dock. The guard does **not** print the packing slip at final checkout.
 
+## Scan Document and Find PDF
+
+- **Scan Document** saves the scanned or typed Delivery Number to the visit. It then attaches the PDF the SAP watcher uploaded when exactly one validated capture carries that number, that capture is not attached to any visit, and the visit has no packing slip yet. Nobody previews the PDF in this case; the timeline shows "Packing-slip PDF matched the scanned number and was attached".
+- If no capture or several captures match, or the visit already has a packing slip, Scan Document only saves the number.
+- **Find PDF** saves the number and lists every available capture for it. The dockworker opens the PDF, checks it and confirms the attachment. Use it to choose between several captures or to replace the current slip.
+- A capture reaches Truck Log only from a watcher route with **upload to Truck Log** switched on in Admin > Printing.
+
 ## Current rollout rule
 
 Packing-slip upload is **optional for now**. The feature is available for training and real use, but it is not yet a Dock Complete requirement. A future controlled release may turn on enforcement after the plant confirms the workflow.

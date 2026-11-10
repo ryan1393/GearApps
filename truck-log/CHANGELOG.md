@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.7 — One scan saves the number and attaches the packing slip
+
+- **Scan Document** on the Dock Board now does both steps: it saves the Delivery Number, then attaches the uploaded PDF when exactly one validated Print Agent capture carries that number, the capture belongs to no visit, and the visit has no packing slip yet. The attachment is recorded in the visit timeline and the document history as made without preview.
+- When no capture or more than one matches, or the visit already has a packing slip, the scan only saves the number as before. **Find PDF** still lists the candidates to open, review and confirm.
+- Companion SAP watcher: verified slips are stored under their Delivery Number (`13246286.pdf`).
+- Database migrations remain unchanged through 0005 and DANA UI at 0.3.1.
+
 ## 1.0.6 — Password changes and print agent setup fixes
 
 - Add `CHANGE-TRUCK-LOG-PASSWORDS` (Windows and Linux) to change the administrator password, database password, Print Agent signing secret and RXO logins after setup. The database option updates PostgreSQL and `.env` together and keeps the HTTPS overlay on restart.

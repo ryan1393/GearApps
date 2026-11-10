@@ -1,5 +1,5 @@
 /** Truck Log release. Must equal the VERSION file (checked by tests/new-host/test-release-version.mjs). */
-export const TRUCK_LOG_VERSION = '1.0.6';
+export const TRUCK_LOG_VERSION = '1.0.7';
 
 export const VisitStatuses = {
     DOCK_ASSIGNED: 'DOCK_ASSIGNED',
@@ -543,7 +543,7 @@ export interface RxoControlStatusData {
 }
 export type { TvDockRecord, TvVisitRecord, TvBoardSnapshot } from './tv-display.types';
 
-export type { DockScanCandidate, DockScanLookup } from './dock-packing-scan';
+export type { DockScanCandidate, DockScanLookup, DockScanAutoAttach } from './dock-packing-scan';
 
 export type { DockDeliveryScanReceipt } from './dock-delivery-scan';
 

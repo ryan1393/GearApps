@@ -11,7 +11,7 @@ import { manualScanResponse } from './rxo-expedite-manual-scan';
  * export. Nothing here touches PostgreSQL or HTTP policy.
  */
 
-export const IMAGE = `truck-log-rxo-expedite:${process.env.TRUCK_LOG_RELEASE || '1.0.6'}`;
+export const IMAGE = `truck-log-rxo-expedite:${process.env.TRUCK_LOG_RELEASE || '1.0.7'}`;
 export const DATA_VOLUME = 'truck-log-rxo-expedite-data';
 
 export type DockerNativeRun = (
