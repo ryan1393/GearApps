@@ -37,7 +37,9 @@ API image shared by the bootstrap jobs and the running API. All four nginx clien
 proxy /api to gear-app-server:3333. Keep the existing PostgreSQL volume.
 
 For an existing installation, follow [the unified API upgrade procedure](docs/UNIFIED_API.md).
-The application source ZIP is [GearApps 70.5.0](releases/GearApps-70.5.0.zip).
+Build the application source ZIP with `npm run package:release`; it writes
+`releases/GearApps-<version>.zip` and its `.sha256`. Release archives are not committed:
+attach them to a GitHub release instead. Earlier archives remain in git history.
 
 Docker dependency stages include Python, Make and a C++ compiler, as required by
 [node-gyp](https://github.com/nodejs/node-gyp#on-unix), so native npm
@@ -85,4 +87,3 @@ dotnet test apps/lapper-read/LapperRead.Tests/LapperRead.Tests.csproj -c Release
 ```
 
 The database suites require disposable restores and explicit fixture authorization.
-Historical releases remain in releases/ and source-archives/.

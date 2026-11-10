@@ -1,4 +1,3 @@
-# Historical release archives are not active Nx projects.
-source-archives/**
+# Built release archives and the vendored Dana UI package are not Nx projects.
 releases/**
 vendor/**
