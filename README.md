@@ -7,15 +7,25 @@
 
 DANA UI (the shared styling package) lives in its own repo. Truck Log builds from the pinned copy in `truck-log/vendor/dana-ui/`.
 
-## Update an existing Windows-controlled installation
+## Upload from Windows and run on the Linux server
 
 Extract this complete package into a new folder. In PowerShell, open that folder and run:
 
 ```powershell
-.\UPDATE-TRUCKLOG.cmd
+.\DEPLOY-TRUCKLOG-LINUX.cmd
 ```
 
-Choose the **old working installation's `.env`** when the file picker opens. The helper copies that configuration into `truck-log/`, backs up any different configuration already there, and builds/starts the new app on the selected Docker context. Existing database volumes and administrator accounts are reused. HTTPS configuration keeps both Compose files. You can also provide the old file directly: `.\UPDATE-TRUCKLOG.cmd -OldEnv "C:\path\to\old\truck-log\.env"`.
+The command uses the working `.env` in `truck-log/` when present, or opens a file picker. Choose the **old working installation's `.env`**. You can also pass it explicitly:
+
+```powershell
+.\DEPLOY-TRUCKLOG-LINUX.cmd -OldEnv "C:\path\to\old\truck-log\.env"
+```
+
+It reads the SSH destination from your current Docker context, creates a verified source ZIP, and uses **SCP** to upload the package, the configuration separately, and the Linux deployment helper. It then uses **SSH** to build and start the app directly on that server. Existing database volumes and administrator accounts are reused; HTTPS uses both Compose files.
+
+The server needs Python 3 and access to its local Docker Engine and Docker Compose. Windows needs `ssh` and `scp` available in PowerShell. If the Docker context uses TCP instead of SSH, specify the SSH destination with `-Server user@linux-host` (or `-Server ssh://user@linux-host:2222`). Keep normal SSH host-key verification enabled and complete any sign-in prompt locally.
+
+Uploads are stored in a private `~/truck-log-releases/<unique-id>/` folder on Linux. The uploaded configuration and extracted app `.env` are private. Native build output is redacted before display and is saved on the server as `deploy.log`; a failed build returns the actual failure code. The local source `.env` stays intact, and it is excluded from the source archive. `UPDATE-TRUCKLOG.cmd` is also an alias for this SCP/SSH deployment flow.
 
 For a new installation, use `truck-log\SETUP-TRUCK-LOG.cmd` instead. Detailed instructions are in `truck-log/README.md`.
 
