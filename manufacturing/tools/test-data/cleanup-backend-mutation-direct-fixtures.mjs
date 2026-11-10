@@ -27,7 +27,7 @@ for(const key of ['--containerTrayId','--containerId','--trayId']){
 }
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..','..');
-const env={...loadDotEnv(path.join(root,'.env')),...process.env};
+const env={...loadDotEnv(path.resolve(root, '..', '.env')),...process.env};
 const client=new Client({
   host:env.DATABASE_HOST,port:Number(env.DATABASE_PORT),user:env.DATABASE_USERNAME,
   password:String(env.DATABASE_PASSWORD),database:env.DATABASE_NAME,

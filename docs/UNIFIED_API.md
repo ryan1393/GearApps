@@ -1,7 +1,7 @@
 # One API for every GearApps application
 
 The running backend is the gear-app-server Nx project at
-manufacturing/apps/server. Lapper is a feature module of this API. There is one
+apps/server. Lapper is a feature module of this API. There is one
 Nest application, one listener on port 3333, one TypeORM DataSource and one
 PostgreSQL database. The former lapper-api application and Compose service have
 been removed.
@@ -44,13 +44,13 @@ Duplicate controller routes are checked by acceptance tests.
 
 1. Stop Lapper Read and preserve its checkpoint/state files.
 2. Extract the source ZIP into a new empty folder, or clone the branch containing
-   this change. Copy the host's existing manufacturing/.env into the new checkout.
+   this change. Copy the host's existing .env into the new checkout.
    Keep the PostgreSQL volume and existing data. Do not overlay the ZIP on an old
    source tree: obsolete API project files must not remain in the workspace.
 3. Keep DATABASE_SYNCHRONIZE=false. The API uses the existing JWT_ACCESS_SECRET
-   and JWT_REFRESH_SECRET. LAPPER_JWT_SECRET, LAPPER_API_PORT and the separate
-   root Lapper .env are obsolete. Configure LAPPER_TIME_ZONE and SCANNER_* in
-   manufacturing/.env when needed.
+   and JWT_REFRESH_SECRET from root `.env`. LAPPER_JWT_SECRET and LAPPER_API_PORT
+   are obsolete. Configure LAPPER_TIME_ZONE and SCANNER_* in that same `.env`
+   when needed. There is no `manufacturing/.env` requirement.
 4. From the repository root run:
 
 ```sh
@@ -60,9 +60,12 @@ docker compose ps
 
 The unchanged project name and PostgreSQL service keep the existing volume.
 --remove-orphans retires the former lapper-api container. Do not remove volumes.
-The explicit equivalent is docker compose --env-file manufacturing/.env
--f manufacturing/compose.yml up -d --build --remove-orphans. 5. Verify http://YOUR-HOST:3333/api/v1/health/ready. Sign in again in each web
-application; tokens issued by the former Lapper server use a different contract. 6. Deploy the updated Lapper Read worker, configure these service environment
+The explicit equivalent is `docker compose --env-file .env -f compose.yml up -d --build --remove-orphans`.
+
+5. Verify http://YOUR-HOST:3333/api/v1/health/ready. Sign in again in each web
+application; tokens issued by the former Lapper server use a different contract.
+
+6. Deploy the updated Lapper Read worker, configure these service environment
 variables, and restart it:
 
 ```powershell
@@ -90,7 +93,7 @@ git clone --branch codex/lapper-postgres-70-3-0 --single-branch https://github.c
 ```
 
 Run npm commands at the root. npm run serve:api starts the sole API; all four
-client proxies target localhost:3333. The only API environment is manufacturing/.env.
+client proxies target localhost:3333. The only API environment is .env.
 The shared authentication response and principal contracts live in libs/shared/domain.
 
 CI runs the collector through Nx with .NET SDK 8 and also boots the compiled API

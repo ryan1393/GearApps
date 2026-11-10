@@ -1,6 +1,0 @@
-# One monorepo, one API, one PostgreSQL database.
-# Configure manufacturing/.env, then: docker compose up -d --build
-name: dana-apps
-include:
-  - path: manufacturing/compose.yml
-    env_file: manufacturing/.env

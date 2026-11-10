@@ -1,11 +1,11 @@
 import { contractPath } from '../lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const reset=fs.readFileSync('tools/data-import/reset-and-import-all-fresh.ps1','utf8');
-const truncate=fs.readFileSync('tools/data-import/truncate-target-postgres.mjs','utf8');
-const bootstrap=fs.readFileSync('tools/data-import/bootstrap-system-reference-data.mjs','utf8');
-const seed=fs.readFileSync('tools/data-import/seed-trays-containers-mock-data.mjs','utf8');
-const cmd=fs.readFileSync('commands/RESET-AND-REFRESH-ALL-DATA.cmd','utf8');
+const reset=fs.readFileSync(contractPath(process.cwd(), 'tools/data-import/reset-and-import-all-fresh.ps1'),'utf8');
+const truncate=fs.readFileSync(contractPath(process.cwd(), 'tools/data-import/truncate-target-postgres.mjs'),'utf8');
+const bootstrap=fs.readFileSync(contractPath(process.cwd(), 'tools/data-import/bootstrap-system-reference-data.mjs'),'utf8');
+const seed=fs.readFileSync(contractPath(process.cwd(), 'tools/data-import/seed-trays-containers-mock-data.mjs'),'utf8');
+const cmd=fs.readFileSync(contractPath(process.cwd(), 'commands/RESET-AND-REFRESH-ALL-DATA.cmd'),'utf8');
 const pkg=JSON.parse(fs.readFileSync(contractPath(process.cwd(), 'package.json'),'utf8'));
 
 for(const marker of [

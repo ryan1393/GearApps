@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const script=fs.readFileSync('tools/test-authenticated-backend-mutations.ps1','utf8');
+const script=fs.readFileSync(contractPath(process.cwd(), 'tools/test-authenticated-backend-mutations.ps1'),'utf8');
 
 for(const required of [
   'function Assert-NoRecord',

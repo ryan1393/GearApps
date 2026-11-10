@@ -552,7 +552,7 @@ async function main() {
   const scriptDir = path.dirname(scriptFile);
   const projectRoot = path.resolve(scriptDir, '..', '..');
 
-  const dotEnvPath = path.join(projectRoot, '.env');
+  const dotEnvPath = path.resolve(projectRoot, '..', '.env');
   const fileEnv = loadDotEnv(dotEnvPath);
   const env = {
     ...fileEnv,

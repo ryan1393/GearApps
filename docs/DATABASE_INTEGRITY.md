@@ -48,7 +48,7 @@ cd GearApps
 ```
 
 The complete source ZIP in the private package is the other deployment option.
-Keep the host's existing `manufacturing/.env`; do not replace its credentials.
+Keep the host's existing `.env`; do not replace its credentials.
 The `GearApps-70.3.0-cleaned.dump` is a tested reference restore of the supplied
 snapshot. Use the update script against an existing database to retain records
 added since that snapshot. A reference dump is not an incremental update.

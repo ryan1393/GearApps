@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -22,17 +23,17 @@ for (const file of [
   'apps/lapper-read/LapperRead/Program.cs',
   'apps/lapper-read/LapperReadLibrary/BusinessLogic/Fanuc.cs',
   'apps/lapper-read/LapperRead.Tests/ApiTests.cs',
-  'manufacturing/apps/blade-tracking/project.json',
-  'manufacturing/apps/cutter-builder/project.json',
-  'manufacturing/apps/greenshed/project.json',
-  'manufacturing/apps/server/src/main.ts',
+  'apps/blade-tracking/project.json',
+  'apps/cutter-builder/project.json',
+  'apps/greenshed/project.json',
+  'apps/server/src/main.ts',
   'manufacturing/libs/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.ts',
   'manufacturing/libs/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.html',
   'libs/shared/dana-ui/src/index.ts',
   'vendor/dana-ui/package/index.d.ts',
 ]) {
   assert.ok(
-    fs.existsSync(path.join(workspaceRoot, file)),
+    fs.existsSync(contractPath(process.cwd(), path.join(workspaceRoot, file))),
     `Live release source missing: ${file}`,
   );
   assert.equal(
@@ -42,7 +43,7 @@ for (const file of [
   );
 }
 for (const generated of [
-  'dist/manufacturing/apps/server/main.js',
+  'dist/apps/server/main.js',
   'manufacturing/node_modules/a/index.js',
 ]) {
   assert.equal(

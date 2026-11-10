@@ -39,7 +39,7 @@ function fixture() {
   );
   put('README.md', '# GearApps 1.2.3\n');
   put(
-    'manufacturing/compose.yml',
+    'compose.yml',
     ['gear-app-server', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed']
       .map((name) => `image: dana-apps-${name}:1.2.3`)
       .join('\n') + '\n',
@@ -85,7 +85,7 @@ test('version ownership updates lock and vendor without changing dependencies', 
     assert.deepEqual(
       [
         ...f
-          .text('manufacturing/compose.yml')
+          .text('compose.yml')
           .matchAll(/dana-apps-([a-z-]+):(\S+)/g),
       ].map(([, name, version]) => [name, version]),
       ['gear-app-server', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed'].map(

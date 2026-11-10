@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -9,7 +10,7 @@ const roots=[
 ];
 let failures=[];
 for(const file of roots){
-  const text=fs.readFileSync(file,'utf8');
+  const text=fs.readFileSync(contractPath(process.cwd(), file),'utf8');
   const findOneBlocks=[...text.matchAll(/findOne\s*\(\s*\{[\s\S]{0,1400}?\}\s*\)/g)];
   for(const match of findOneBlocks){
     const block=match[0];

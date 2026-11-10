@@ -26,40 +26,40 @@ function fixture(t) {
   const upload = path.join(dir, 'uploaded.env');
   const source = path.join(dir, 'source');
   write(path.join(source, 'package-lock.json'), '{}');
-  write(path.join(source, 'manufacturing/compose.yml'), 'services: {}\n');
+  write(path.join(source, 'compose.yml'), 'services: {}\n');
   const packed = spawnSync('tar', ['-czf', archive, '-C', source, '.'], { encoding: 'utf8' });
   assert.equal(packed.status, 0, packed.stderr);
   return { root, legacy, archive, upload };
 }
 
-test('deploy migrates the legacy host environment into manufacturing and retains rollback', (t) => {
+test('deploy retains the root environment and rollback release', (t) => {
   const f = fixture(t);
   write(path.join(f.root, 'compose.yml'), 'services: {}\n');
   write(path.join(f.root, '.env'), 'GEAR_DB_PASSWORD=legacy-host-password\n');
   execute(stageScript(f.root, f.legacy, f.archive, f.upload));
-  assert.equal(fs.readFileSync(path.join(f.root, 'manufacturing/.env'), 'utf8'), 'GEAR_DB_PASSWORD=legacy-host-password\n');
-  assert.equal(fs.existsSync(path.join(f.root, '.env')), false);
+  assert.equal(fs.readFileSync(path.join(f.root, '.env'), 'utf8'), 'GEAR_DB_PASSWORD=legacy-host-password\n');
+  assert.equal(fs.existsSync(path.join(f.root, 'manufacturing/.env')), false);
   assert.equal(fs.existsSync(path.join(`${f.root}.pending-prev`, 'compose.yml')), true);
   execute(finalizeScript(f.root));
   assert.equal(fs.existsSync(path.join(`${f.root}.prev`, 'compose.yml')), true);
 });
 
-test('deploy preserves separate manufacturing and Lapper environments', (t) => {
+test('deploy carries the old shared manufacturing environment into the root', (t) => {
   const f = fixture(t);
   write(path.join(f.root, 'manufacturing/compose.yml'), 'services: {}\n');
   write(path.join(f.root, 'manufacturing/.env'), 'APP=manufacturing\n');
   write(path.join(f.root, '.env'), 'APP=lapper\n');
   write(f.upload, 'APP=wrong-upload\n');
   execute(stageScript(f.root, f.legacy, f.archive, f.upload));
-  assert.equal(fs.readFileSync(path.join(f.root, 'manufacturing/.env'), 'utf8'), 'APP=manufacturing\n');
-  assert.equal(fs.readFileSync(path.join(f.root, '.env'), 'utf8'), 'APP=lapper\n');
+  assert.equal(fs.readFileSync(path.join(f.root, '.env'), 'utf8'), 'APP=manufacturing\n');
+  assert.equal(fs.readFileSync(path.join(`${f.root}.pending-prev`, '.env'), 'utf8'), 'APP=lapper\n');
 });
 
 test('first deploy accepts an uploaded environment and normalizes Windows newlines', (t) => {
   const f = fixture(t);
   write(f.upload, 'APP=manufacturing\r\n');
   execute(stageScript(f.root, f.legacy, f.archive, f.upload));
-  assert.equal(fs.readFileSync(path.join(f.root, 'manufacturing/.env'), 'utf8'), 'APP=manufacturing\n');
+  assert.equal(fs.readFileSync(path.join(f.root, '.env'), 'utf8'), 'APP=manufacturing\n');
   assert.equal(fs.existsSync(f.upload), false);
 });
 
@@ -85,7 +85,7 @@ test('rollback to a legacy release carries the current manufacturing environment
   assert.equal(fs.readFileSync(path.join(`${f.root}.prev`, '.env'), 'utf8'), 'APP=lapper\n');
 });
 
-test('rollback between consolidated releases preserves both current environments', (t) => {
+test('rollback to the older split layout preserves its root environment and current shared settings', (t) => {
   const f = fixture(t);
   for (const root of [f.root, `${f.root}.pending-prev`]) {
     write(path.join(root, 'manufacturing/compose.yml'), 'services: {}\n');
@@ -96,6 +96,6 @@ test('rollback between consolidated releases preserves both current environments
   write(path.join(f.root, '.env'), 'APP=current-lapper\n');
   execute(rollbackSwapScript(f.root, f.legacy));
   assert.equal(fs.readFileSync(path.join(f.root, 'manufacturing/.env'), 'utf8'), 'APP=current-manufacturing\n');
-  assert.equal(fs.readFileSync(path.join(f.root, '.env'), 'utf8'), 'APP=current-lapper\n');
+  assert.equal(fs.readFileSync(path.join(f.root, '.env'), 'utf8'), 'APP=outdated-lapper\n');
   assert.equal(fs.existsSync(`${f.root}.pending-prev`), false);
 });

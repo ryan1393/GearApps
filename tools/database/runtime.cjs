@@ -1,7 +1,10 @@
 const path = require('node:path');
+const { existsSync } = require('node:fs');
+const envFile = path.resolve(__dirname, '../../.env');
+if (existsSync(envFile)) process.loadEnvFile(envFile);
 process.env.TS_NODE_PROJECT = path.resolve(
   __dirname,
-  '../../manufacturing/apps/server/tsconfig.app.json',
+  '../../apps/server/tsconfig.app.json',
 );
 process.env.TS_NODE_BASEURL = path.resolve(__dirname, '../..');
 process.env.TS_NODE_TRANSPILE_ONLY = '1';

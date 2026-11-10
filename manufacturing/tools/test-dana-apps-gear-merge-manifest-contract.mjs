@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import { buildGearMergeManifest, stableStringify } from './generate-dana-apps-gear-merge-manifest.mjs';
 
@@ -6,10 +7,10 @@ const must = (ok, msg) => {
 };
 
 const manifestPath = 'DANA_APPS_GEAR_MERGE_MANIFEST.json';
-must(fs.existsSync(manifestPath), 'DANA_APPS_GEAR_MERGE_MANIFEST.json is missing.');
+must(fs.existsSync(contractPath(process.cwd(), manifestPath)), 'DANA_APPS_GEAR_MERGE_MANIFEST.json is missing.');
 
 const expected = buildGearMergeManifest(process.cwd());
-const actual = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+const actual = JSON.parse(fs.readFileSync(contractPath(process.cwd(), manifestPath), 'utf8'));
 
 must(
   stableStringify(actual) === stableStringify(expected),

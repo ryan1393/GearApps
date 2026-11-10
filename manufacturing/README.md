@@ -7,11 +7,11 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
 
 | Service | Port | |
 |---|---|---|
-| Blade Tracking | 4200 | `apps/blade-tracking` |
-| Cutter Builder | 4201 | `apps/cutter-builder` |
-| Green Shed | 4202 | `apps/greenshed` |
+| Blade Tracking | 4200 | `../apps/blade-tracking` |
+| Cutter Builder | 4201 | `../apps/cutter-builder` |
+| Green Shed | 4202 | `../apps/greenshed` |
 | Lapper | 4203 | `../apps/lapper-client` |
-| Shared API | 3333 | `apps/server` (`/api/v1`, health at `/api/v1/health/ready`) |
+| Shared API | 3333 | `../apps/server` (`/api/v1`, health at `/api/v1/health/ready`) |
 
 ## What changed in 70.3.0
 
@@ -33,7 +33,7 @@ npx nx serve blade-tracking
 
 The authentication, recovery, inventory, scanning, and deployment fixes from 70.2.1
 are retained. API routes and PostgreSQL workflow rules remain compatible. All four clients and Lapper Read use gear-app-server on port 3333. The only API
-environment is manufacturing/.env. See [unified API setup](../docs/UNIFIED_API.md).
+environment is .env. See [unified API setup](../docs/UNIFIED_API.md).
 
 Users must sign in again after upgrading. Emailed recovery requires SMTP and the public
 frontend origin (`PUBLIC_WEB_BASE_URL`, or Docker `GEAR_PUBLIC_WEB_BASE_URL`).
@@ -70,9 +70,10 @@ Run deployment from the repository root with
 `node manufacturing/tools/deploy/deploy-remote.mjs` (Windows:
 `manufacturing\Deploy-GearApps.cmd`). The archive contains the single root workspace;
 Docker builds use the root lockfile and pinned Node 24.22.1/npm 11.9.0. Manufacturing
-configuration stays in `manufacturing/.env`, independently of Lapper's root `.env`.
-The deployer carries a legacy root Gear `.env` into the new manufacturing location,
-preserves a consolidated host's Lapper `.env`, and keeps the previous tree for rollback.
+configuration is the repository root `.env`, shared by every feature.
+The deployer preserves that file and keeps the previous tree for rollback.
+When upgrading an older split layout, it carries the former shared
+`manufacturing/.env` into the repository root.
 
 
 `Deploy-GearApps.cmd` (or `node manufacturing/tools/deploy/deploy-remote.mjs`) deploys the shared repository to the Linux
@@ -95,7 +96,7 @@ Docker host behind your active **SSH Docker context** (`docker context use <name
 3. **Rollback:** `Deploy-GearApps.cmd --rollback` swaps `~/dana-apps.prev` back in and restarts it.
    Schema changes in this app are additive, so the previous release runs against the current database.
    To restore data as well, load the backup taken before the deploy:
-   `cd ~/dana-apps && gunzip -c ~/dana-apps-backups/<file>.sql.gz | docker compose --env-file manufacturing/.env -f manufacturing/compose.yml exec -T dana-postgres psql -U <GEAR_DB_USERNAME> -d GearApps`
+   `cd ~/dana-apps && gunzip -c ~/dana-apps-backups/<file>.sql.gz | docker compose --env-file .env -f compose.yml exec -T dana-postgres psql -U <GEAR_DB_USERNAME> -d GearApps`
    (restore into an emptied database).
 
 **First 70.1.0 deploy:** earlier releases lived in `/tmp/dana-apps.v0.1` on the host, and most
@@ -105,7 +106,7 @@ same, so containers are recreated in place and **data carries over**. If the hos
 placeholder JWT secrets the deploy stops and tells you how to generate new ones (everyone is signed
 out once; nothing else changes).
 
-**Brand-new host:** put a filled-in `.env` (from `.env.example`) in this folder and run
+**Brand-new host:** put a filled-in `.env` (from `.env.example`) at the repository root and run
 `Deploy-GearApps.cmd --upload-env`.
 
 ## Verify a database
@@ -182,9 +183,9 @@ Rules for this app:
 - If something needs a new look or a new shared component, it belongs in Dana UI so Truck Log and
   Gear Apps both get it. Change Dana UI, release it, then update the vendored copy here.
 
-Each app loads, in this order (`apps/<app>/project.json`):
+Each app loads, in this order (`../apps/<app>/project.json`):
 
-1. `apps/<app>/src/styles.css`: Tailwind directives only
+1. `../apps/<app>/src/styles.css`: Tailwind directives only
 2. `@dana/ui/styles/gear-compat.css`: Gear's current shell, panels and primitives
 3. `@dana/ui/styles/gear-compat-features.css`: Gear screen styles (dashboards, inventory, Running Machines...)
 4. `@dana/ui/styles/dana-ui.css`: the shared Dana UI look (what Truck Log loads)

@@ -1,8 +1,9 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const dto=fs.readFileSync('libs/server/feat-cutter-build/src/lib/cutter-build.dto.ts','utf8');
-const workflow=fs.readFileSync('tools/test-full-workflow.ps1','utf8');
-const frontend=fs.readFileSync('libs/frontend/data-access-cutter-builder/src/lib/cutter-builder-api.service.ts','utf8');
+const dto=fs.readFileSync(contractPath(process.cwd(), 'libs/server/feat-cutter-build/src/lib/cutter-build.dto.ts'),'utf8');
+const workflow=fs.readFileSync(contractPath(process.cwd(), 'tools/test-full-workflow.ps1'),'utf8');
+const frontend=fs.readFileSync(contractPath(process.cwd(), 'libs/frontend/data-access-cutter-builder/src/lib/cutter-builder-api.service.ts'),'utf8');
 
 if(!/class\s+CreateCutterBuilderBuildDto[\s\S]*?cutter_body_identifier!:\s*string/.test(dto)){
   throw new Error('CreateCutterBuilderBuildDto must require cutter_body_identifier:string.');

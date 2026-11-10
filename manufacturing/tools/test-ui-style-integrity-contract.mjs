@@ -8,9 +8,9 @@ const req=createRequire(contractPath(root,"package.json"));
 const postcss=req("postcss");
 const entry=contractPath(root,"vendor","dana-ui","package","styles","gear-apps.css");
 
-if(!fs.existsSync(entry)) throw new Error("Missing shared Gear Apps CSS entrypoint.");
+if(!fs.existsSync(contractPath(process.cwd(), entry))) throw new Error("Missing shared Gear Apps CSS entrypoint.");
 
-const entryText=fs.readFileSync(entry,"utf8");
+const entryText=fs.readFileSync(contractPath(process.cwd(), entry),"utf8");
 const stripped=entryText
   .replace(/\/\*[\s\S]*?\*\//g,"")
   .replace(/\/\/.*$/gm,"")
@@ -22,13 +22,13 @@ function resolveImport(from,spec){
   if(!spec.startsWith(".")) return null;
   let p=path.resolve(path.dirname(from),spec);
   if(!path.extname(p)) p+=".css";
-  return fs.existsSync(p)?p:null;
+  return fs.existsSync(contractPath(process.cwd(), p))?p:null;
 }
 function graph(file,seen=new Set(),out=[]){
   const abs=path.resolve(file);
   if(seen.has(abs)) return out;
   seen.add(abs);
-  const text=fs.readFileSync(abs,"utf8");
+  const text=fs.readFileSync(contractPath(process.cwd(), abs),"utf8");
   for(const m of text.matchAll(/@import\s+(?:url\()?["']([^"']+)["']\)?[^;]*;/g)){
     const dep=resolveImport(abs,m[1]);
     if(dep) graph(dep,seen,out);
@@ -47,7 +47,7 @@ function ctx(rule){
 
 const modules=graph(entry);
 for(const file of modules){
-  const lines=fs.readFileSync(file,"utf8").split(/\r?\n/).length;
+  const lines=fs.readFileSync(contractPath(process.cwd(), file),"utf8").split(/\r?\n/).length;
   if(lines>520) throw new Error(`${path.relative(root,file)} has ${lines} lines; shared style ceiling is 520.`);
 }
 
@@ -56,7 +56,7 @@ const duplicateSamples=[];
 
 for(const file of modules){
   const rel=path.relative(root,file);
-  const ast=postcss.parse(fs.readFileSync(file,"utf8"),{from:file});
+  const ast=postcss.parse(fs.readFileSync(contractPath(process.cwd(), file),"utf8"),{from:file});
   const localSeen=new Map();
 
   ast.walkRules(rule=>{

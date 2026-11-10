@@ -3,7 +3,7 @@ const sharedTailwindConfig = require('../../../libs/shared/dana-ui/src/tailwind/
 module.exports = function createGearAppTailwindConfig(appRoot) {
   return { presets: [sharedTailwindConfig], content: [
     join(appRoot, 'src/**/!(*.stories|*.spec).{ts,html}'),
-    join(appRoot, '../../libs/frontend/**/!(*.stories|*.spec).{ts,html}'),
-    join(appRoot, '../../../libs/shared/dana-ui/src/**/*.{ts,html}'),
+    join(appRoot, '../../manufacturing/libs/frontend/**/!(*.stories|*.spec).{ts,html}'),
+    join(appRoot, '../../libs/shared/dana-ui/src/**/*.{ts,html}'),
   ] };
 };

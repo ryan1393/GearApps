@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import { readSourceFamily } from './lib/source-family.mjs';
 
@@ -6,11 +7,11 @@ const service=readSourceFamily(
   'libs/server/feat-greenshed/src/lib/server-feat-greenshed.service.ts',
 );
 const api=fs.readFileSync(
-  'libs/frontend/data-access-greenshed/src/lib/greenshed-api.service.ts',
+  contractPath(process.cwd(), 'libs/frontend/data-access-greenshed/src/lib/greenshed-api.service.ts'),
   'utf8',
 );
 const html=fs.readFileSync(
-  'libs/frontend/feature-greenshed/src/lib/pages/dashboard/greenshed-dashboard.component.html',
+  contractPath(process.cwd(), 'libs/frontend/feature-greenshed/src/lib/pages/dashboard/greenshed-dashboard.component.html'),
   'utf8',
 );
 

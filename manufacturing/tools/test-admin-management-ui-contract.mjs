@@ -1,52 +1,53 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import { readGearAppsStyles } from './lib/read-gear-apps-styles.mjs';
 
 const adminTs=fs.readFileSync(
-  'libs/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.ts',
+  contractPath(process.cwd(), 'libs/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.ts'),
   'utf8'
 );
 const adminApi=fs.readFileSync(
-  'libs/frontend/feature-admin-users/src/lib/admin-api.service.ts',
+  contractPath(process.cwd(), 'libs/frontend/feature-admin-users/src/lib/admin-api.service.ts'),
   'utf8'
 );
 const adminHtml=fs.readFileSync(
-  'libs/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.html',
+  contractPath(process.cwd(), 'libs/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.html'),
   'utf8'
 );
 const adminCss=fs.readFileSync(
-  'libs/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.css',
+  contractPath(process.cwd(), 'libs/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.css'),
   'utf8'
 );
 const adminController=fs.readFileSync(
-  'apps/server/src/app/admin-master-data.controller.ts',
+  contractPath(process.cwd(), 'apps/server/src/app/admin-master-data.controller.ts'),
   'utf8'
 );
 const adminService=fs.readFileSync(
-  'apps/server/src/app/admin-master-data.service.ts',
+  contractPath(process.cwd(), 'apps/server/src/app/admin-master-data.service.ts'),
   'utf8'
 );
 const userController=fs.readFileSync(
-  'libs/server/feat-user/src/lib/server-feat-user.controller.ts',
+  contractPath(process.cwd(), 'libs/server/feat-user/src/lib/server-feat-user.controller.ts'),
   'utf8'
 );
 const userService=fs.readFileSync(
-  'libs/server/feat-user/src/lib/server-feat-user.service.ts',
+  contractPath(process.cwd(), 'libs/server/feat-user/src/lib/server-feat-user.service.ts'),
   'utf8'
 );
 const partSummaryController=fs.readFileSync(
-  'libs/server/feat-part-summary/src/lib/server-feat-part-summary.controller.ts',
+  contractPath(process.cwd(), 'libs/server/feat-part-summary/src/lib/server-feat-part-summary.controller.ts'),
   'utf8'
 );
 const cutterController=fs.readFileSync(
-  'libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts',
+  contractPath(process.cwd(), 'libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts'),
   'utf8'
 );
 const partsController=fs.readFileSync(
-  'libs/server/feat-cutter-config/src/lib/server-parts.controller.ts',
+  contractPath(process.cwd(), 'libs/server/feat-cutter-config/src/lib/server-parts.controller.ts'),
   'utf8'
 );
 const locationController=fs.readFileSync(
-  'libs/server/feat-location/src/lib/server-feat-location.controller.ts',
+  contractPath(process.cwd(), 'libs/server/feat-location/src/lib/server-feat-location.controller.ts'),
   'utf8'
 );
 const sharedStyle=readGearAppsStyles();
@@ -217,7 +218,7 @@ for(const nav of [
   'apps/cutter-builder/src/app/layout/cutter-builder-nav/cutter-builder-nav.component.html',
   'apps/greenshed/src/app/layout/greenshed-nav/greenshed-nav.component.html',
 ]){
-  const html=fs.readFileSync(nav,'utf8');
+  const html=fs.readFileSync(contractPath(process.cwd(), nav),'utf8');
   if(!html.includes(`*ngIf="user.role === 'admin'"`) || !html.includes('<span>Admin</span>')){
     throw new Error(`${nav} must show Admin navigation only to admins.`);
   }

@@ -3,7 +3,7 @@
 Lapper, Blade Tracking, Cutter Builder, Greenshed and Lapper Read use the same
 API at /api/v1 on port 3333 and the same GearApps PostgreSQL database. There is
 one server project (gear-app-server), one authentication service and one
-manufacturing/.env configuration. [Upgrade and architecture](UNIFIED_API.md)
+.env configuration. [Upgrade and architecture](UNIFIED_API.md)
 describe the unified deployment.
 
 The four browser ports remain 4200-4203. Lapper's nginx and development proxy

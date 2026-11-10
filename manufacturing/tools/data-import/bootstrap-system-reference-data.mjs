@@ -28,7 +28,7 @@ if (!process.argv.includes('--apply')) {
   process.exit(0);
 }
 
-const env = { ...loadDotEnv(path.join(root, '.env')), ...process.env };
+const env = { ...loadDotEnv(path.resolve(root, '..', '.env')), ...process.env };
 for (const key of [
   'DATABASE_HOST',
   'DATABASE_PORT',

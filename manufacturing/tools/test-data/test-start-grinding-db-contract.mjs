@@ -7,7 +7,7 @@ import pg from 'pg';
 
 const { Client }=pg;
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..','..');
-function envFile(p){const o={}; if(!fs.existsSync(p))return o; for(const raw of fs.readFileSync(p,'utf8').split(/\r?\n/)){const s=raw.trim();if(!s||s.startsWith('#'))continue;const i=s.indexOf('=');if(i<1)continue;let v=s.slice(i+1).trim();if((v.startsWith('"')&&v.endsWith('"'))||(v.startsWith("'")&&v.endsWith("'")))v=v.slice(1,-1);o[s.slice(0,i).trim()]=v;}return o;}
+function envFile(p){const o={}; if(!fs.existsSync(contractPath(process.cwd(), p)))return o; for(const raw of fs.readFileSync(contractPath(process.cwd(), p),'utf8').split(/\r?\n/)){const s=raw.trim();if(!s||s.startsWith('#'))continue;const i=s.indexOf('=');if(i<1)continue;let v=s.slice(i+1).trim();if((v.startsWith('"')&&v.endsWith('"'))||(v.startsWith("'")&&v.endsWith("'")))v=v.slice(1,-1);o[s.slice(0,i).trim()]=v;}return o;}
 const env={...envFile(contractPath(root,'.env')),...process.env};
 for(const k of ['DATABASE_HOST','DATABASE_PORT','DATABASE_USERNAME','DATABASE_PASSWORD','DATABASE_NAME']) if(typeof env[k]!=='string'||!env[k]) throw new Error(`Missing ${k}`);
 const c=new Client({host:env.DATABASE_HOST,port:Number(env.DATABASE_PORT),user:env.DATABASE_USERNAME,password:String(env.DATABASE_PASSWORD),database:env.DATABASE_NAME});

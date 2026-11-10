@@ -34,7 +34,8 @@ const loadDotEnv = (filePath) => {
   return values;
 };
 
-const fileEnv = loadDotEnv(path.join(projectRoot, '.env'));
+const envFile = path.resolve(projectRoot, '..', '.env');
+const fileEnv = loadDotEnv(envFile);
 const env = { ...fileEnv, ...process.env };
 const requiredDatabaseSettings = [
   'DATABASE_HOST',
@@ -48,7 +49,7 @@ const missingDatabaseSettings = requiredDatabaseSettings.filter(
 );
 if (missingDatabaseSettings.length) {
   throw new Error(
-    `Database configuration missing: ${missingDatabaseSettings.join(', ')} in ${path.join(projectRoot, '.env')}`,
+    `Database configuration missing: ${missingDatabaseSettings.join(', ')} in ${envFile}`,
   );
 }
 

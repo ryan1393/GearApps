@@ -1,6 +1,7 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const read = (path) => fs.readFileSync(path, 'utf8');
+const read = (path) => fs.readFileSync(contractPath(process.cwd(), path), 'utf8');
 const dto = read('libs/server/feat-cutter-build/src/lib/cutter-build.dto.ts');
 const backend = read('libs/server/feat-cutter-build/src/lib/server-feat-cutter-build.service.ts');
 const api = read('libs/frontend/data-access-cutter-builder/src/lib/cutter-builder-api.service.ts');

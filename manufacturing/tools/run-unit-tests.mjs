@@ -22,7 +22,6 @@ function visit(directory) {
 }
 visit(path.join(root, 'apps'));
 visit(path.join(root, 'libs'));
-visit(path.join(root, 'manufacturing/apps'));
 visit(path.join(root, 'manufacturing/libs'));
 projects.sort();
 
@@ -31,7 +30,7 @@ projects.sort();
 const backend = projects.filter(
   (file) =>
     file.startsWith(path.join(root, 'manufacturing/libs/server') + path.sep) ||
-    file.startsWith(path.join(root, 'manufacturing/apps/server') + path.sep) ||
+    file.startsWith(path.join(root, 'apps/server') + path.sep) ||
     file.startsWith(path.join(root, 'libs/api') + path.sep),
 );
 const other = projects.filter((file) => !backend.includes(file));

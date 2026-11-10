@@ -55,7 +55,7 @@ Application source
   Clone: git clone --branch codex/lapper-postgres-70-3-0 --single-branch https://github.com/ryan1393/GearApps.git
   The accompanying source ZIP or this GitHub branch contains the
   updated shared API, collector, migration runner, audit command, and regression tests.
-  Keep existing manufacturing/.env credentials and signing keys. Use the same JWT_ACCESS_SECRET / JWT_REFRESH_SECRET and PostgreSQL database
+  Keep existing .env credentials and signing keys. Use the same JWT_ACCESS_SECRET / JWT_REFRESH_SECRET and PostgreSQL database
   for all applications. Lapper uses browser port 4203 and the shared API port 3333.
 
 Backups and recovery

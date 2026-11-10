@@ -1,8 +1,9 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const must=(ok,msg)=>{if(!ok)throw new Error(msg)};
-const compose=fs.readFileSync('compose.yml','utf8').replace(/\r\n/g, '\n');
+const compose=fs.readFileSync(contractPath(process.cwd(), 'compose.yml'),'utf8').replace(/\r\n/g, '\n');
 
 const frontends=[
   ['blade-tracking','apps/blade-tracking/nginx.conf','apps/blade-tracking/Dockerfile'],
@@ -32,13 +33,13 @@ for(const [service,nginxRel,dockerfileRel] of frontends){
   must(block.includes('timeout: 5s'),`${service} healthcheck timeout changed unexpectedly.`);
   must(block.includes('retries: 5'),`${service} healthcheck retry budget changed unexpectedly.`);
 
-  const nginx=fs.readFileSync(nginxRel,'utf8');
+  const nginx=fs.readFileSync(contractPath(process.cwd(), nginxRel),'utf8');
   must(nginx.includes('location = /healthz'),`${nginxRel} must expose /healthz.`);
   must(/return\s+200\s+['"]ok['"];/.test(nginx),`${nginxRel} /healthz must return HTTP 200.`);
 
-  const dockerfile=fs.readFileSync(dockerfileRel,'utf8');
+  const dockerfile=fs.readFileSync(contractPath(process.cwd(), dockerfileRel),'utf8');
   must(dockerfile.includes('FROM nginx:1.27-alpine'),`${dockerfileRel} runtime image changed unexpectedly.`);
-  must(dockerfile.includes(`COPY ${path.posix.normalize('manufacturing/'+nginxRel)} /etc/nginx/conf.d/default.conf`),
+  must(dockerfile.includes(`COPY ${path.posix.normalize(nginxRel.replace(/^\.\.\//, ''))} /etc/nginx/conf.d/default.conf`),
     `${dockerfileRel} must install its maintained nginx.conf.`);
 }
 

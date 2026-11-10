@@ -1,10 +1,11 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
-const swagger=fs.readFileSync('apps/server/src/swagger.ts','utf8');
-const auth=fs.readFileSync('libs/server/feat-auth/src/lib/server-feat-auth.service.ts','utf8');
-const login=fs.readFileSync('libs/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.ts','utf8');
-const loginHtml=fs.readFileSync('libs/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.html','utf8');
-const start=fs.readFileSync('tools/start-gear-apps.ps1','utf8');
+const swagger=fs.readFileSync(contractPath(process.cwd(), 'apps/server/src/swagger.ts'),'utf8');
+const auth=fs.readFileSync(contractPath(process.cwd(), 'libs/server/feat-auth/src/lib/server-feat-auth.service.ts'),'utf8');
+const login=fs.readFileSync(contractPath(process.cwd(), 'libs/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.ts'),'utf8');
+const loginHtml=fs.readFileSync(contractPath(process.cwd(), 'libs/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.html'),'utf8');
+const start=fs.readFileSync(contractPath(process.cwd(), 'tools/start-gear-apps.ps1'),'utf8');
 
 if(!swagger.includes(".addServer('/')")){
   throw new Error('Swagger must use same-origin root server.');

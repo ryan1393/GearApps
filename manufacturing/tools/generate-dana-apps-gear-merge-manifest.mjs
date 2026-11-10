@@ -47,7 +47,6 @@ export function buildGearMergeManifest(root = workspaceRoot) {
   const projectFiles = [
     ...walkProjectFiles(root, 'apps'),
     ...walkProjectFiles(root, 'libs'),
-    ...walkProjectFiles(root, 'manufacturing/apps'),
     ...walkProjectFiles(root, 'manufacturing/libs'),
   ];
 
@@ -68,7 +67,7 @@ export function buildGearMergeManifest(root = workspaceRoot) {
     String(a.name).localeCompare(String(b.name)) || a.root.localeCompare(b.root)
   );
 
-  const composeFiles = ['docker-compose.yml', 'manufacturing/compose.yml']
+  const composeFiles = ['compose.yml']
     .filter((name) => fs.existsSync(contractPath(root, name)))
     .map((name) => ({ path: name, sha256: sha256File(contractPath(root, name)) }));
 

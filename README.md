@@ -6,28 +6,30 @@ port 3333**, one authentication service and the same PostgreSQL database.
 
 | Application    | Project / source                                   | Browser port                             |
 | -------------- | -------------------------------------------------- | ---------------------------------------- |
-| Shared API     | gear-app-server / manufacturing/apps/server        | 3333 (API)                               |
+| Shared API     | gear-app-server / apps/server        | 3333 (API)                               |
 | Lapper         | lapper-client / apps/lapper-client                 | 4203                                     |
-| Blade Tracking | blade-tracking / manufacturing/apps/blade-tracking | 4200                                     |
-| Cutter Builder | cutter-builder / manufacturing/apps/cutter-builder | 4201                                     |
-| Greenshed      | greenshed / manufacturing/apps/greenshed           | 4202                                     |
+| Blade Tracking | blade-tracking / apps/blade-tracking | 4200                                     |
+| Cutter Builder | cutter-builder / apps/cutter-builder | 4201                                     |
+| Greenshed      | greenshed / apps/greenshed           | 4202                                     |
 | Lapper Read    | apps/lapper-read                                   | Windows collector, outbound HTTP to 3333 |
 
 The root package.json and package-lock.json are the dependency authority. Use
 Node 24.22.1, npm 11.9.0 and .NET SDK 8 for the collector. All clients share [Dana UI](libs/shared/dana-ui).
 Application API routes are under /api/v1; health is /api/v1/health/ready.
+Every application and its end-to-end project lives under root `apps/`.
+Manufacturing domain libraries and maintenance tools remain in `manufacturing/`.
 
 ## Run the complete stack
 
-Configure manufacturing/.env from [its template](manufacturing/.env.example),
-using your existing PostgreSQL settings and JWT access/refresh secrets. From
+Keep your existing root `.env` with its PostgreSQL settings and JWT access/refresh
+secrets. For a new installation, use [the template](.env.example). From
 the repository root:
 
 ```sh
 docker compose up -d --build --remove-orphans
 ```
 
-The root Compose entry point includes manufacturing/compose.yml. It builds one
+The root `compose.yml` reads that same `.env`. It builds one
 API image shared by the bootstrap jobs and the running API. All four nginx clients
 proxy /api to gear-app-server:3333. Keep the existing PostgreSQL volume.
 
@@ -47,7 +49,7 @@ npm run serve:cutter-builder
 npm run serve:greenshed
 ```
 
-Use manufacturing/.env for the shared API. Every development proxy targets
+Use .env for the shared API. Every development proxy targets
 localhost:3333. Keep DATABASE_SYNCHRONIZE=false for an existing PostgreSQL
 database. The explicit bootstrap service initializes a new empty database.
 

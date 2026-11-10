@@ -15,7 +15,7 @@
 //   --context <name>        Docker context to use (default: the active one; must be ssh://)
 //   --remote-root <path>    Release folder on the host (default: ~/dana-apps)
 //   --legacy-root <path>    Old release folder to carry .env from (default: /tmp/dana-apps.v0.1)
-//   --upload-env            First deploy only: copy manufacturing/.env when the host has none
+//   --upload-env            First deploy only: copy root .env when the host has none
 //   --skip-backup           Do not pg_dump before deploying (not recommended)
 //   --allow-weak-secrets    Deploy even if the host .env has placeholder/short JWT secrets
 import cp from 'node:child_process';
@@ -93,15 +93,16 @@ function remoteOut(ctx, script) {
 
 // ---------- remote scripts ----------
 const COMPOSE_FN = `
-if [ -f manufacturing/compose.yml ]; then COMPOSE_FILE=manufacturing/compose.yml; ENV_FILE=manufacturing/.env
-else COMPOSE_FILE=compose.yml; ENV_FILE=.env; fi
+if [ -f compose.yml ]; then COMPOSE_FILE=compose.yml; ENV_FILE=.env
+elif [ -f manufacturing/compose.yml ]; then COMPOSE_FILE=manufacturing/compose.yml; ENV_FILE=manufacturing/.env
+else COMPOSE_FILE=docker-compose.yml; ENV_FILE=.env; fi
 if docker compose version >/dev/null 2>&1; then compose(){ docker compose -p ${PROJECT} --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"; }
 elif command -v docker-compose >/dev/null 2>&1; then compose(){ docker-compose -p ${PROJECT} --env-file "$ENV_FILE" -f "$COMPOSE_FILE" "$@"; }
 else echo '[FAIL] Docker Compose is not installed on the host.' >&2; exit 42; fi`;
 
 const envCheckScript = (root) => `set -eu
-ENV=${rq(root)}/manufacturing/.env
-if [ ! -f ${rq(root)}/manufacturing/compose.yml ]; then ENV=${rq(root)}/.env; fi
+ENV=${rq(root)}/.env
+if [ ! -f ${rq(root)}/compose.yml ] && [ -f ${rq(root)}/manufacturing/compose.yml ]; then ENV=${rq(root)}/manufacturing/.env; fi
 [ -f "$ENV" ] || { echo NO_ENV; exit 0; }
 val(){ grep -E "^$1=" "$ENV" | tail -1 | cut -d= -f2- | tr -d '\\r"' ; }
 weak(){ v="$(val "$1")"; if [ "\${#v}" -lt 32 ] || printf '%s' "$v" | grep -qiE 'change|example|placeholder|replace|secret$|^x+$'; then echo "WEAK $1"; fi; }
@@ -134,20 +135,17 @@ BASE=${rq(root)}; NEXT="$BASE.next"; PEND="$BASE.pending-prev"; LEGACY=${rq(lega
 mkdir -p "$(dirname "$BASE")"
 rm -rf "$NEXT"; mkdir -p "$NEXT"
 tar -xzf ${rq(archive)} -C "$NEXT"
-mkdir -p "$NEXT/manufacturing"
 SOURCE_ENV=''
 for TREE in "$BASE" "$PEND" "$LEGACY"; do
-  if [ -f "$TREE/manufacturing/compose.yml" ]; then CANDIDATE="$TREE/manufacturing/.env"
+  if [ ! -f "$TREE/compose.yml" ] && [ -f "$TREE/manufacturing/compose.yml" ]; then CANDIDATE="$TREE/manufacturing/.env"
   else CANDIDATE="$TREE/.env"; fi
   if [ -f "$CANDIDATE" ]; then SOURCE_ENV="$CANDIDATE"; break; fi
 done
-if [ -n "$SOURCE_ENV" ]; then cp -p "$SOURCE_ENV" "$NEXT/manufacturing/.env"
-elif [ -f ${rq(uploadedEnv)} ]; then tr -d '\\r' < ${rq(uploadedEnv)} > "$NEXT/manufacturing/.env"; rm -f ${rq(uploadedEnv)}
-else echo '[FAIL] The host has no manufacturing .env. Re-run with --upload-env for the first install.' >&2; exit 41; fi
-# A consolidated deployment may also hold Lapper's separate root environment.
-if [ -f "$BASE/manufacturing/compose.yml" ] && [ -f "$BASE/.env" ]; then cp -p "$BASE/.env" "$NEXT/.env"; fi
-chmod 600 "$NEXT/manufacturing/.env"
-test -f "$NEXT/manufacturing/compose.yml"
+if [ -n "$SOURCE_ENV" ]; then cp -p "$SOURCE_ENV" "$NEXT/.env"
+elif [ -f ${rq(uploadedEnv)} ]; then tr -d '\\r' < ${rq(uploadedEnv)} > "$NEXT/.env"; rm -f ${rq(uploadedEnv)}
+else echo '[FAIL] The host has no shared .env. Re-run with --upload-env for the first install.' >&2; exit 41; fi
+chmod 600 "$NEXT/.env"
+test -f "$NEXT/compose.yml"
 test -f "$NEXT/package-lock.json"
 if [ -d "$PEND" ]; then
   echo "[RETRY] Discarding the failed release while preserving $PEND as the last good release."
@@ -171,14 +169,15 @@ elif [ -d "$PREV" ]; then TARGET="$PREV"
 elif [ -f "$LEGACY/compose.yml" ] || [ -f "$LEGACY/manufacturing/compose.yml" ]; then TARGET="$LEGACY"
 else echo "[FAIL] No previous release is available." >&2; exit 44; fi
 KEEP="$(mktemp -d)"; trap 'rm -rf "$KEEP"' EXIT
-if [ -f "$BASE/manufacturing/.env" ]; then cp -p "$BASE/manufacturing/.env" "$KEEP/manufacturing.env"
-elif [ ! -f "$BASE/manufacturing/compose.yml" ] && [ -f "$BASE/.env" ]; then cp -p "$BASE/.env" "$KEEP/manufacturing.env"; fi
-if [ -f "$BASE/manufacturing/compose.yml" ] && [ -f "$BASE/.env" ]; then cp -p "$BASE/.env" "$KEEP/lapper.env"; fi
+if [ -f "$BASE/compose.yml" ]; then CURRENT_ENV="$BASE/.env"
+elif [ -f "$BASE/manufacturing/compose.yml" ]; then CURRENT_ENV="$BASE/manufacturing/.env"
+else CURRENT_ENV="$BASE/.env"; fi
+[ ! -f "$CURRENT_ENV" ] || cp -p "$CURRENT_ENV" "$KEEP/active.env"
 rm -rf "$TMP"; mv "$BASE" "$TMP"; mv "$TARGET" "$BASE"; rm -rf "$PREV"; mv "$TMP" "$PREV"
-if [ -f "$BASE/manufacturing/compose.yml" ]; then
-  [ ! -f "$KEEP/manufacturing.env" ] || cp -p "$KEEP/manufacturing.env" "$BASE/manufacturing/.env"
-  [ ! -f "$KEEP/lapper.env" ] || cp -p "$KEEP/lapper.env" "$BASE/.env"
-else [ ! -f "$KEEP/manufacturing.env" ] || cp -p "$KEEP/manufacturing.env" "$BASE/.env"; fi
+if [ -f "$BASE/compose.yml" ]; then TARGET_ENV="$BASE/.env"
+elif [ -f "$BASE/manufacturing/compose.yml" ]; then TARGET_ENV="$BASE/manufacturing/.env"
+else TARGET_ENV="$BASE/.env"; fi
+[ ! -f "$KEEP/active.env" ] || cp -p "$KEEP/active.env" "$TARGET_ENV"
 echo "[PASS] Previous release restored with the current host environment preserved."`;
 
 const upScript = (root) => `set -euo pipefail
@@ -289,10 +288,10 @@ async function main() {
   const uploadEnv = env.includes('NO_ENV') && MODE === 'deploy';
   if (uploadEnv) {
     if (!flag('--upload-env')) fail('The host has no .env yet. For a first install, re-run with --upload-env.');
-    const local = path.join(MANUFACTURING_ROOT, '.env');
-    if (!fs.existsSync(local)) fail('--upload-env was given but manufacturing/.env is missing');
+    const local = path.join(ROOT, '.env');
+    if (!fs.existsSync(local)) fail('--upload-env was given but the root .env is missing');
     env = localEnvCheck(fs.readFileSync(local, 'utf8'));
-    console.log('[INFO] First install: manufacturing/.env will be uploaded.');
+    console.log('[INFO] First install: the root .env will be uploaded.');
   }
   const weak = env.split(/\r?\n/).filter((l) => l.startsWith('WEAK '));
   if (env.includes('TEST_ACCOUNTS_ENABLED')) fail('The .env being deployed sets GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES. Remove it: production must never allow test accounts.');
@@ -338,7 +337,7 @@ async function main() {
       run('scp', [...ctx.scpPort, archive, `${ctx.target}:${remoteArchive}`]);
       if (uploadEnv) {
         remote(ctx, `umask 077; : > ${rq(remoteEnv)}`); // scp into an existing 600 file keeps it private
-        run('scp', [...ctx.scpPort, path.join(MANUFACTURING_ROOT, '.env'), `${ctx.target}:${remoteEnv}`]);
+        run('scp', [...ctx.scpPort, path.join(ROOT, '.env'), `${ctx.target}:${remoteEnv}`]);
       }
       remote(ctx, stageScript(REMOTE_ROOT, LEGACY_ROOT, remoteArchive, remoteEnv));
     } finally {
@@ -361,7 +360,7 @@ async function main() {
     `GEAR APPS ${VERSION} ${MODE.toUpperCase()} - PASS`, '',
     `Docker context: ${ctx.name} (${ctx.target})`, `Release folder: ${REMOTE_ROOT}`, `Previous release: ${REMOTE_ROOT}.prev`,
     `Database backup: ${flag('--skip-backup') ? 'SKIPPED' : BACKUP_DIR}`, '',
-    'compose down: NO', 'volumes deleted: NO', 'host manufacturing .env preserved: YES',
+    'compose down: NO', 'volumes deleted: NO', 'host root .env preserved: YES',
   ]);
   console.log(`\n[PASS] Gear Apps ${MODE} complete. Report: ${report}`);
   console.log(`Blade Tracking: http://${ctx.host}:4200   Cutter Builder: http://${ctx.host}:4201   Greenshed: http://${ctx.host}:4202`);

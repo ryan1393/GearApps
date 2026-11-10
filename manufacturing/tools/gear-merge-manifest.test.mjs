@@ -17,8 +17,7 @@ test('release manifest is identical across Git checkout line endings and detects
     'package-lock.json': '{\n  "lockfileVersion": 3\n}\n',
     'nx.json': '{\n  "defaultBase": "main"\n}\n',
     'tsconfig.base.json': '{\n  "compilerOptions": {}\n}\n',
-    'docker-compose.yml': 'name: suite\nservices: {}\n',
-    'manufacturing/compose.yml': 'name: suite\nservices: {}\n',
+    'compose.yml': 'name: suite\nservices: {}\n',
     'apps/collector/project.json': JSON.stringify({ name: 'lapper-read', targets: { build: {} } }, null, 2) + '\n',
   };
   const write = (lineEnding) => {

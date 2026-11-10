@@ -20,7 +20,7 @@ if (!/^\d+\.\d+\.\d+$/.test(version))
 const lock = JSON.parse(read('package-lock.json'));
 if (lock.version !== version || lock.packages?.['']?.version !== version)
   fail('package-lock release versions do not match package.json');
-const central = fs.readFileSync(path.join(workspaceRoot, 'libs/shared/domain/src/lib/app-version.ts'), 'utf8');
+const central = fs.readFileSync(contractPath(process.cwd(), path.join(workspaceRoot, 'libs/shared/domain/src/lib/app-version.ts')), 'utf8');
 const constant = /GEAR_APPS_VERSION\s*=\s*['"]([^'"]+)['"]/.exec(central)?.[1];
 if (JSON.parse(read('vendor/dana-ui/VENDOR_MANIFEST.json')).danaAppsVersion !== version)
   fail('vendor ownership version does not match package.json');
@@ -28,7 +28,7 @@ if (!read('libs/shared/util-constants/src/lib/app-version.constants.ts').include
   fail('Manufacturing release constant must re-export the shared root version');
 if (
   !fs
-    .readFileSync(path.join(workspaceRoot, 'README.md'), 'utf8')
+    .readFileSync(contractPath(process.cwd(), path.join(workspaceRoot, 'README.md')), 'utf8')
     .includes(`# GearApps ${version}`)
 )
   fail('Root README release differs from root package');
@@ -36,7 +36,7 @@ if (constant !== version)
   fail(`GEAR_APPS_VERSION (${constant}) != package.json (${version})`);
 const collectorRoot = path.join(workspaceRoot, 'apps/lapper-read');
 const collectorProperties = fs.readFileSync(
-  path.join(collectorRoot, 'Directory.Build.props'),
+  contractPath(process.cwd(), path.join(collectorRoot, 'Directory.Build.props')),
   'utf8',
 );
 if (
@@ -46,7 +46,7 @@ if (
   fail('Lapper Read collector release version differs from root');
 for (const project of ['LapperRead', 'LapperReadLibrary', 'LapperRead.Tests']) {
   const metadata = fs.readFileSync(
-    path.join(collectorRoot, project, project + '.csproj'),
+    contractPath(process.cwd(), path.join(collectorRoot, project, project + '.csproj')),
     'utf8',
   );
   if (

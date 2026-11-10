@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -33,7 +34,7 @@ for (const file of [
   );
 }
 const canonical = fs.readFileSync(
-  path.join(workspaceRoot, 'tools/package-release.mjs'),
+  contractPath(process.cwd(), path.join(workspaceRoot, 'tools/package-release.mjs')),
   'utf8',
 );
 assert.ok(

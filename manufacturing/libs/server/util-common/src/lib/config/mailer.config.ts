@@ -37,8 +37,8 @@ export interface IMailerConfig {
 // configured absolute/custom paths and adapt the former workspace-relative path.
 const templateDirectory = (configured: string | undefined, suffix = '') =>
   configured
-    ? configured.replace(/^apps[\\/]server[\\/]/, 'manufacturing/apps/server/')
-    : `manufacturing/apps/server/src/assets/templates${suffix}`;
+    ? configured.replace(/^(?:manufacturing[\\/])?apps[\\/]server[\\/]/, 'apps/server/')
+    : `apps/server/src/assets/templates${suffix}`;
 
 export const mailerConfig = registerAs(CONFIG_NAMESPACE_MAILER, () => ({
   enabled: process.env[ENV_EMAIL_ENABLED] === 'true',

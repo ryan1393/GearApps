@@ -5,7 +5,7 @@ import path from 'node:path';
 const root=process.cwd();
 
 function walk(dir,out=[]){
-  for(const e of fs.readdirSync(dir,{withFileTypes:true})){
+  for(const e of fs.readdirSync(contractPath(process.cwd(), dir),{withFileTypes:true})){
     const p=path.join(dir,e.name);
     if(e.isDirectory()) walk(p,out);
     else if(e.isFile() && e.name.endsWith('.orm-entity.ts')) out.push(p);
@@ -15,7 +15,7 @@ function walk(dir,out=[]){
 
 const entityTables=new Set();
 for(const file of walk(contractPath(root,'libs','server','data-access','src','lib','database','entities'))){
-  const text=fs.readFileSync(file,'utf8');
+  const text=fs.readFileSync(contractPath(process.cwd(), file),'utf8');
   const m=text.match(/@Entity\(\{\s*name:\s*['"]([^'"]+)['"]/);
   if(m) entityTables.add(m[1]);
 }
@@ -27,7 +27,7 @@ const fixtureFiles=[
 
 const rawTables=new Set();
 for(const file of fixtureFiles){
-  const text=fs.readFileSync(file,'utf8');
+  const text=fs.readFileSync(contractPath(process.cwd(), file),'utf8');
   const re=/\b(?:from|join|insert\s+into|update|delete\s+from)\s+([a-zA-Z_][a-zA-Z0-9_]*)/gi;
   for(const m of text.matchAll(re)){
     const table=m[1].toLowerCase();

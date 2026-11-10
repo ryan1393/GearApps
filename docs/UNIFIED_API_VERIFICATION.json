@@ -10,7 +10,7 @@
     "runningApiServices": 1,
     "apiDataSources": 1,
     "authentication": "Shared email login, access/refresh token format, default access guard, account roles, department checks and authVersion revocation",
-    "apiEnvironment": "manufacturing/.env",
+    "apiEnvironment": ".env",
     "clients": [
       "Lapper",
       "Blade Tracking",
@@ -24,7 +24,9 @@
       "Separate Lapper database configuration",
       "Obsolete legacy ORM registration modules"
     ],
-    "nxApplicationAndLibraryProjects": 57
+    "nxApplicationAndLibraryProjects": 57,
+    "applicationSourceRoot": "apps/",
+    "composeFile": "compose.yml"
   },
   "database": {
     "postgresVersion": "16.15",
@@ -61,8 +63,8 @@
       "failed": 0
     },
     "workspaceLintAndBuild": {
-      "projects": 56,
-      "tasks": 62,
+      "projects": 57,
+      "tasks": 63,
       "status": "passed"
     },
     "collectorNxBuild": "passed",
@@ -86,9 +88,32 @@
       "greenshed": "passed"
     },
     "freshDatabaseSequence": "Empty DB bootstrap, master-data bootstrap, combined API readiness HTTP 200, and read-only audit passed",
-    "compose": "Root include and explicit manufacturing entry points use the same project, named PostgreSQL volume and one API service",
+    "compose": "One root compose.yml and root .env; unchanged dana-apps project, named PostgreSQL volume and one API service",
     "ciConfiguration": "Collector build/test via Nx and a dedicated fresh PostgreSQL API/bootstrap/audit job; equivalent fresh sequence verified locally",
-    "releaseManifestPortability": "CRLF and LF checkouts produce identical fingerprints; real configuration changes remain detectable"
+    "releaseManifestPortability": "CRLF and LF checkouts produce identical fingerprints; real configuration changes remain detectable",
+    "rootLayoutFollowUp": {
+      "applicationAndEndToEndRoot": "apps/",
+      "configuration": "Existing root .env and one root compose.yml",
+      "unitTests": 176,
+      "sourceContracts": 82,
+      "linuxDeploymentTests": 29,
+      "lintAndBuildTasks": 63,
+      "apiBootstrapAndRelatedTasks": 4,
+      "collectorAndSharedUiTasks": 3,
+      "legacyMailerEnvironmentRegressionTests": 3,
+      "freshCompiledApiReadiness": 200,
+      "freshProductionBrowserSignIns": [
+        "Lapper",
+        "Blade Tracking",
+        "Cutter Builder",
+        "Greenshed"
+      ],
+      "freshDatabaseAudit": "passed",
+      "dockerProject": "dana-apps",
+      "postgresVolume": "dana-apps-gear-postgres",
+      "privateDumpRetest": "Not repeated for this layout-only follow-up. Automatic approval review rejected restoring the private dump into the Docker test context; fresh disposable database validation was used instead. The earlier 8 restored-database HTTP tests and 8 data-preservation tests are recorded above.",
+      "disposableContainerAndCredentialsRemoved": true
+    }
   },
   "deployment": {
     "instructions": "docs/UNIFIED_API.md",

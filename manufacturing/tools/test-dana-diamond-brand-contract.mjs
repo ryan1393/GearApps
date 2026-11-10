@@ -11,10 +11,10 @@ const navs = [
 
 const sharedLogo = 'assets/brand/dana-logo.svg';
 const sharedLogoPath = contractPath(root, sharedLogo);
-if (!fs.existsSync(sharedLogoPath)) {
+if (!fs.existsSync(contractPath(process.cwd(), sharedLogoPath))) {
   throw new Error(`Shared Dana brand asset is missing: ${sharedLogo}`);
 }
-const logo = fs.readFileSync(sharedLogoPath, 'utf8');
+const logo = fs.readFileSync(contractPath(process.cwd(), sharedLogoPath), 'utf8');
 if (!logo.includes('<svg') || !/DANA/i.test(logo)) {
   throw new Error('Shared Dana brand asset is not a valid Dana SVG.');
 }
@@ -57,7 +57,7 @@ for (const app of ['blade-tracking', 'cutter-builder', 'greenshed']) {
 }
 
 const oldLocalLogo = contractPath(root, 'apps/greenshed/src/assets/dana-logo.svg');
-if (fs.existsSync(oldLocalLogo)) {
+if (fs.existsSync(contractPath(process.cwd(), oldLocalLogo))) {
   throw new Error('Greenshed still has an app-local Dana logo copy; use assets/brand/dana-logo.svg only.');
 }
 

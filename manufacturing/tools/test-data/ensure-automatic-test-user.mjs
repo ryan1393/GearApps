@@ -33,7 +33,7 @@ function loadDotEnv(filePath) {
 
 const scriptFile=fileURLToPath(import.meta.url);
 const projectRoot=path.resolve(path.dirname(scriptFile),'..','..');
-const env={...loadDotEnv(path.join(projectRoot,'.env')),...process.env};
+const env={...loadDotEnv(path.resolve(projectRoot, '..', '.env')),...process.env};
 for (const key of ['DATABASE_HOST','DATABASE_PORT','DATABASE_USERNAME','DATABASE_PASSWORD','DATABASE_NAME']) {
   if (typeof env[key] !== 'string' || !env[key].length) {
     throw new Error(`Missing ${key} for automatic test-user provisioning.`);

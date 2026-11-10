@@ -2,13 +2,13 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-process.env.TS_NODE_PROJECT = path.resolve(__dirname, '../apps/server/tsconfig.app.json');
+process.env.TS_NODE_PROJECT = path.resolve(__dirname, '../../apps/server/tsconfig.app.json');
 // The server's path aliases belong to the single repository workspace.
 process.env.TS_NODE_BASEURL = path.resolve(__dirname, '../..');
 process.env.TS_NODE_TRANSPILE_ONLY = '1';
 require('ts-node/register');require('tsconfig-paths/register');
 const { validationSchema } = require('../libs/server/util-common/src/lib/config/schema.ts');
-const example = Object.fromEntries(fs.readFileSync(path.join(__dirname, '../.env.example'), 'utf8').split(/\r?\n/).filter(line => line && !line.startsWith('#') && line.includes('=')).map(line => { const i=line.indexOf('=');return [line.slice(0,i),line.slice(i+1).replace(/^["']|["']$/g,'')]; }));
+const example = Object.fromEntries(fs.readFileSync(path.join(__dirname, '../../.env.example'), 'utf8').split(/\r?\n/).filter(line => line && !line.startsWith('#') && line.includes('=')).map(line => { const i=line.indexOf('=');return [line.slice(0,i),line.slice(i+1).replace(/^["']|["']$/g,'')]; }));
 const validate = values => validationSchema.validate(values, { allowUnknown: true, abortEarly: false });
 test('documented example allows optional Sentry to be disabled',()=>{assert.equal(example.SENTRY_DSN,'');assert.equal(validate(example).error,undefined)});
 test('Sentry may be omitted or configured',()=>{const omitted={...example};delete omitted.SENTRY_DSN;assert.equal(validate(omitted).error,undefined);assert.equal(validate({...example,SENTRY_DSN:'https://example.test/sentry'}).error,undefined)});

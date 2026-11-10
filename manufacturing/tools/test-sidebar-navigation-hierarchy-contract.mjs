@@ -1,3 +1,4 @@
+import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
 const navs = [
@@ -7,7 +8,7 @@ const navs = [
 ];
 
 for (const nav of navs) {
-  const html = fs.readFileSync(nav.file, 'utf8');
+  const html = fs.readFileSync(contractPath(process.cwd(), nav.file), 'utf8');
   if (!html.includes(`<strong>${nav.brand}</strong>`)) throw new Error(`${nav.file} brand must retain ${nav.brand}.`);
   if (!html.includes(`<span>${nav.label}</span><span class="nav-current">ACTIVE</span>`)) {
     throw new Error(`${nav.file} must expose a single Truck-Log-style combined dashboard row: ${nav.label}.`);

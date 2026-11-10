@@ -44,7 +44,7 @@ export function setReleaseVersion(root, next) {
     (_all, prefix) => prefix + next,
   );
   edit(
-    'manufacturing/compose.yml',
+    'compose.yml',
     /(image: dana-apps-[a-z-]+:)\d+\.\d+\.\d+/g,
     (_all, prefix) => prefix + next,
   );

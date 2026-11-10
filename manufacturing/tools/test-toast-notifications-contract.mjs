@@ -65,7 +65,7 @@ for (const rel of actionFiles) {
 }
 
 const legacyPath = contractPath(root, 'libs/frontend/util-common/src/lib/directives/upsert-dialog-directive/upsert-dialog.directive.ts');
-if (fs.existsSync(legacyPath)) {
+if (fs.existsSync(contractPath(process.cwd(), legacyPath))) {
 const legacyDirective = read('libs/frontend/util-common/src/lib/directives/upsert-dialog-directive/upsert-dialog.directive.ts');
 const upsertActionType = read('libs/frontend/util-common/src/lib/directives/upsert-dialog-directive/upsert-dialog-data.interface.ts');
 assert(!legacyDirective.includes('HotToastService'), 'Legacy upsert flow must not bypass the Dana/Gear toast system.');

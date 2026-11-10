@@ -75,12 +75,12 @@ jobs:
       - run: npm ci
       - run: npx nx build gear-app-server --configuration=production
       - run: npx nx run gear-app-server:build-fresh-db-bootstrap --configuration=production
-      - run: node dist/manufacturing/apps/server-bootstrap/main.js
+      - run: node dist/apps/server-bootstrap/main.js
       - run: node manufacturing/tools/base-data/import-base-data.mjs --bootstrap-only
       - name: Verify shared API on a fresh database
         shell: bash
         run: |
-          node dist/manufacturing/apps/server/main.js > api-startup.log 2>&1 &
+          node dist/apps/server/main.js > api-startup.log 2>&1 &
           api_pid=$!
           trap 'kill "$api_pid" 2>/dev/null || true' EXIT
           ready=false

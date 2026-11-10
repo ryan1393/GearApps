@@ -52,7 +52,7 @@ if (!process.argv.includes('--apply')) {
 }
 
 const env = {
-  ...loadDotEnv(path.join(projectRoot, '.env')),
+  ...loadDotEnv(path.resolve(projectRoot, '..', '.env')),
   ...process.env,
 };
 

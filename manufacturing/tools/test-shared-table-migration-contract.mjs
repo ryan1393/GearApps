@@ -9,7 +9,7 @@ const frontendRoot = contractPath(root, 'libs/frontend');
 const htmlFiles = [];
 
 function walk(dir) {
-  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+  for (const entry of fs.readdirSync(contractPath(process.cwd(), dir), { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(full);
     else if (entry.isFile() && entry.name.endsWith('.html')) htmlFiles.push(full);
@@ -19,7 +19,7 @@ walk(frontendRoot);
 
 const tables = [];
 for (const file of htmlFiles) {
-  const html = fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, '');
+  const html = fs.readFileSync(contractPath(process.cwd(), file), 'utf8').replace(/^\uFEFF/, '');
   for (const match of html.matchAll(/<table\b[^>]*>/gi)) {
     tables.push({ file, tag: match[0] });
   }
@@ -52,8 +52,8 @@ const tableFiles = [...new Set(tables.filter(({ tag }) => /\bdanaTable\b/.test(t
 for (const htmlFile of tableFiles) {
   const relative = path.relative(root, htmlFile).replaceAll('\\', '/');
   const tsFile = htmlFile.replace(/\.html$/, '.ts');
-  if (!fs.existsSync(tsFile)) throw new Error(`${relative}: matching standalone component TS file is missing.`);
-  const ts = fs.readFileSync(tsFile, 'utf8');
+  if (!fs.existsSync(contractPath(process.cwd(), tsFile))) throw new Error(`${relative}: matching standalone component TS file is missing.`);
+  const ts = fs.readFileSync(contractPath(process.cwd(), tsFile), 'utf8');
   if (!ts.includes('DanaTableDirective')) throw new Error(`${relative}: component does not import DanaTableDirective.`);
   if (!ts.includes('DanaTableShellDirective')) throw new Error(`${relative}: component does not import DanaTableShellDirective.`);
 }

@@ -23,7 +23,7 @@ Object.assign(process.env, {
   SOCIAL_GOOGLE_ENABLED: 'false',
   ENVIRONMENT: 'test',
   SWAGGER_ENABLED: 'false',
-  TS_NODE_PROJECT: path.resolve(__dirname, '../manufacturing/apps/server/tsconfig.app.json'),
+  TS_NODE_PROJECT: path.resolve(__dirname, '../apps/server/tsconfig.app.json'),
   TS_NODE_BASEURL: path.resolve(__dirname, '..'),
   TS_NODE_TRANSPILE_ONLY: '1',
 });
@@ -34,8 +34,8 @@ const { NestFactory } = require('@nestjs/core');
 const { JwtService } = require('@nestjs/jwt');
 const { DataSource } = require('typeorm');
 const bcrypt = require('bcrypt');
-const { AppModule } = require('../manufacturing/apps/server/src/app/app.module');
-const { configureApi } = require('../manufacturing/apps/server/src/configure-api');
+const { AppModule } = require('../apps/server/src/app/app.module');
+const { configureApi } = require('../apps/server/src/configure-api');
 const { migrateLapperPostgres } = require('../libs/api/postgres/src/lib/schema');
 
 test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 }, async (t) => {
