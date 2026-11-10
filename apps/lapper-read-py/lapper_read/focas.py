@@ -12,7 +12,7 @@ from __future__ import annotations
 import ctypes
 import os
 import threading
-from ctypes import POINTER, Structure, Union, byref, c_char, c_char_p, c_double, c_float, c_int32, c_short, c_ushort
+from ctypes import POINTER, Structure, Union, byref, c_char_p, c_double, c_float, c_int32, c_short, c_ubyte, c_ushort
 from decimal import Decimal
 
 EW_OK = 0
@@ -37,7 +37,9 @@ class ODBPM(Structure):
 
 class _PmcData(Union):
     _fields_ = [
-        ("cdata", c_char * 5),
+        # Unsigned bytes, not c_char: ctypes turns a c_char array field into a bytes string cut
+        # off at the first zero byte, so an all-off PMC byte would read as empty.
+        ("cdata", c_ubyte * 5),
         ("idata", c_short * 5),
         ("ldata", FOCAS_LONG * 5),
         ("fdata", c_float * 5),
@@ -55,6 +57,11 @@ class IODBPMC(Structure):
         ("datano_e", c_ushort),
         ("u", _PmcData),
     ]
+
+
+def pmc_bit(data: IODBPMC, bit: int) -> bool:
+    """Bit `bit` of the first byte a one-byte pmc_rdpmcrng read returned."""
+    return bool(data.u.cdata[0] >> bit & 1)
 
 
 def scale(mcr_val: int, dec_val: int) -> Decimal:
@@ -152,4 +159,4 @@ class FocasTransport:
             code = self._lib.pmc_rdpmcrng(handle, address_type, PMC_BYTE, byte, byte, length, byref(data))
         if code != EW_OK:
             raise FocasError("read PMC", code)
-        return bool(data.u.cdata[0][0] >> bit & 1)
+        return pmc_bit(data, bit)

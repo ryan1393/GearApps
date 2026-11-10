@@ -3,7 +3,7 @@ import unittest
 from decimal import Decimal
 
 from lapper_read.fanuc import Fanuc
-from lapper_read.focas import FOCAS_LONG, IODBPMC, ODBPM, scale
+from lapper_read.focas import FOCAS_LONG, IODBPMC, ODBPM, pmc_bit, scale
 from tests.fakes import FakeApi, FakeTransport
 
 CYCLE = {"id": "cycle-1", "machine_id": "machine-1", "gearset_id": "gs-373"}
@@ -26,6 +26,15 @@ class FocasBindingTests(unittest.TestCase):
         ctypes.memmove(ctypes.addressof(raw) + 8, (373).to_bytes(4, "little"), 4)
         ctypes.memmove(ctypes.addressof(raw) + 12, (0).to_bytes(2, "little"), 2)
         self.assertEqual((data.datano, scale(data.mcr_val, data.dec_val)), (10020, Decimal(373)))
+
+    def test_pmc_bits_are_read_from_the_first_data_byte(self):
+        # pmc_rdpmcrng puts the byte at offset 8. Reading it as c_char failed on real hardware
+        # ("'int' object is not subscriptable") and would drop an all-zero byte entirely.
+        for value, bits in ((0b1000_0100, {2: True, 7: True, 0: False}), (0, {2: False, 7: False})):
+            data = IODBPMC()
+            ctypes.memmove(ctypes.addressof(data) + 8, bytes([value]), 1)
+            for bit, expected in bits.items():
+                self.assertIs(pmc_bit(data, bit), expected, (value, bit))
 
     def test_macro_scaling_matches_the_csharp_worker(self):
         self.assertEqual(scale(18005, 1), Decimal("1800.5"))
