@@ -10,7 +10,7 @@ import { browserSession, closeProductionBrowser, dashboardReady, goToRxo, launch
 async function bootstrapInteractiveSession() {
   if (HEADLESS) throw new Error('--login-only requires the interactive rxo-browser profile. Use BOOTSTRAP-RXO-BROWSER.cmd.');
   const statusFile = path.join(path.dirname(PROFILE_DIR), 'browser-bootstrap.json');
-  const status = patch => writeJson(statusFile, { version: process.env.TRUCK_LOG_RELEASE || '1.0.7', session: process.env.RXO_BOOTSTRAP_SESSION || 'manual', updatedAt: new Date().toISOString(), ...patch });
+  const status = patch => writeJson(statusFile, { version: process.env.TRUCK_LOG_RELEASE || '1.0.8', session: process.env.RXO_BOOTSTRAP_SESSION || 'manual', updatedAt: new Date().toISOString(), ...patch });
   // Same profile and lock as the exporter: never sign in while an export runs.
   let exportLock;
   try {

@@ -16,7 +16,7 @@ function latestShipments(root='/app/data'){
 }
 function readSchedulerStatus(root='/app/data'){
  const p=path.join(root,'expedite-scheduler-status.json');
- if(!fs.existsSync(p))return {contractVersion:1,source:'RXO_EXPEDITE',version:process.env.TRUCK_LOG_RELEASE||'1.0.7',schedulerState:'NOT_STARTED',intervalMinutes:Number(process.env.RXO_EXPEDITE_SYNC_INTERVAL_MINUTES??30),syncOnStart:String(process.env.RXO_EXPEDITE_SYNC_ON_START??'true').toLowerCase()!=='false',schedulerStartedAt:null,schedulerHeartbeatAt:null,currentStartedAt:null,nextRunAt:null,lastCompletedAt:null,lastSuccessAt:null,lastFailureAt:null,lastErrorCode:null,lastDurationSeconds:null,lastSourceBatchId:null};
+ if(!fs.existsSync(p))return {contractVersion:1,source:'RXO_EXPEDITE',version:process.env.TRUCK_LOG_RELEASE||'1.0.8',schedulerState:'NOT_STARTED',intervalMinutes:Number(process.env.RXO_EXPEDITE_SYNC_INTERVAL_MINUTES??30),syncOnStart:String(process.env.RXO_EXPEDITE_SYNC_ON_START??'true').toLowerCase()!=='false',schedulerStartedAt:null,schedulerHeartbeatAt:null,currentStartedAt:null,nextRunAt:null,lastCompletedAt:null,lastSuccessAt:null,lastFailureAt:null,lastErrorCode:null,lastDurationSeconds:null,lastSourceBatchId:null};
  const st=fs.lstatSync(p);if(!st.isFile()||st.isSymbolicLink()||st.size>32768)throw new ExpediteError('SCHEDULER_STATUS_REVIEW');
  let v;try{v=JSON.parse(fs.readFileSync(p,'utf8'));}catch{throw new ExpediteError('SCHEDULER_STATUS_REVIEW');}
  if(!v||v.contractVersion!==1||v.source!=='RXO_EXPEDITE'||typeof v.schedulerState!=='string'||!Number.isInteger(v.intervalMinutes)||v.intervalMinutes<1||v.intervalMinutes>1440)throw new ExpediteError('SCHEDULER_STATUS_REVIEW');

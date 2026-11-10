@@ -46,7 +46,7 @@ async function nativeFixture(kind){
  const sandbox={
   console:{log(){}},Date:{now:()=>now+=1000},ExpediteError,RxoAuthError,
   authenticateExpedite:async()=>({passwordSubmissions:0}),
-  assertFreightSession,excelControls,openFreightList,
+  assertFreightSession,excelControls,openFreightList,freightViewCovered:async()=>false,EMPTY_LIST_STABLE_MS:20000,
   must:(condition,code)=>{if(!condition)throw new ExpediteError(code);},
   context:{pages:()=>[page]},save:async value=>{assert.equal(value,download);saves++;},
   options:{auth:{},onStage:value=>stages.push(value)}

@@ -1,4 +1,4 @@
-# Truck Log 1.0.7
+# Truck Log 1.0.8
 
 Truck Log runs the guard shack and dock workflow at Dana Fort Wayne: truck check-in, dock assignment and the dock board, packing slips and driver paperwork, final checkout, TV boards, and the RXO and RXO Expedite load feeds. It runs as a set of Docker containers on one Linux Docker host. Guard PCs, dock PCs and TVs use it through a web browser.
 
@@ -67,7 +67,7 @@ The changed `.env` is the one in the folder where you ran the command. Keep usin
 
 ## Replacing an older test install
 
-1.0.7 does not upgrade a 0.1 database: the schema was rebuilt as one baseline, and the 0.1 builds were test installs. Setup and start check for an older install first. If they find containers or volumes with Truck Log's names that belong to another Docker Compose project (for example `truck-log-v02` or `truck-log-nxdev`), they stop and list them instead of failing halfway through.
+1.0.8 does not upgrade a 0.1 database: the schema was rebuilt as one baseline, and the 0.1 builds were test installs. Setup and start check for an older install first. If they find containers or volumes with Truck Log's names that belong to another Docker Compose project (for example `truck-log-v02` or `truck-log-nxdev`), they stop and list them instead of failing halfway through.
 
 If that install holds only test data, remove it, then run setup again. **This deletes that install's data.** The script lists what it will remove and asks you to type `REMOVE`.
 
@@ -121,7 +121,7 @@ Back up the `truck-log-postgres-data` and `truck-log-documents` volumes, extract
 
 ## Version
 
-The release is in [`VERSION`](VERSION) (`1.0.7`). Every other copy must match it, and `tests/new-host/test-release-version.mjs` fails if one drifts. To release a new version, edit `VERSION`, update the copies that test lists, and run `node tools/truck-log/refresh-manifests.mjs`.
+The release is in [`VERSION`](VERSION) (`1.0.8`). Every other copy must match it, and `tests/new-host/test-release-version.mjs` fails if one drifts. To release a new version, edit `VERSION`, update the copies that test lists, and run `node tools/truck-log/refresh-manifests.mjs`.
 
 ## Checks
 

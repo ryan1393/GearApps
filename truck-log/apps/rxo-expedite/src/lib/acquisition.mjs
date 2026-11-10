@@ -6,8 +6,8 @@ import { SOURCE, ExpediteError, validateWorkbook, sha256 } from './workbook.mjs'
 import { readCredentials, credentialStatus } from './credentials.mjs';
 import { acquireLock, inspectLock, withTimeout } from './process-lock.mjs';
 import { pruneBatchDirectories } from './batch-retention.mjs';
-import { assertFreightSession, excelControls, openFreightList } from './list-view.mjs';
-export const VERSION=process.env.TRUCK_LOG_RELEASE||'1.0.7';
+import { assertFreightSession, excelControls, freightViewCovered, openFreightList } from './list-view.mjs';
+export const VERSION=process.env.TRUCK_LOG_RELEASE||'1.0.8';
 export const LOGIN_URL='https://www.expedite.rxo.com/WebClient/Account/Login';
 export const FREIGHT_URL='https://www.expedite.rxo.com/WebClient/#/freight-on-the-move';
 export const XLSX_NAME='Freight On The Move.xlsx';
@@ -80,6 +80,22 @@ export function pruneExpediteBatches(root,protect=[]){
   protect:[...protect,latest&&path.basename(latest),baseline?.sourceBatchId],validName:validId,
   isSuccessful:(name,dir)=>fs.lstatSync(path.join(dir,BOUNDARY_NAME)).isFile(),log:m=>console.log('[RXO EXPEDITE] '+m)});
 }
+// A genuinely empty Freight on the Move list (no expedite freight) is accepted by scheduled
+// runs only after it has been seen twice: an uncovered, steady "0 of 0" list exports zero rows
+// in one scan, and again in a later scan at least EMPTY_CONFIRM_MIN_MS afterwards with no
+// non-empty result between. The first sighting keeps the previous batch published.
+export const EMPTY_LIST_STABLE_MS=20000,EMPTY_CONFIRM_MIN_MS=10*60000,EMPTY_CONFIRM_MAX_MS=6*60*60000;
+const EMPTY_MARKER='expedite-empty-list.json';
+function readEmptyMarker(root){
+ try{const m=JSON.parse(readSmall(path.join(root,EMPTY_MARKER),4096).toString('utf8'));
+  if(m?.contractVersion!==1||m.source!==SOURCE)return null;
+  if(m.state==='OBSERVED'&&Number.isFinite(Date.parse(m.firstObservedAt)))return {state:'OBSERVED',firstObservedAt:m.firstObservedAt};
+  if(m.state==='CONFIRMED'&&validId(m.sourceBatchId))return {state:'CONFIRMED',sourceBatchId:m.sourceBatchId};
+ }catch{}
+ return null;
+}
+const writeEmptyMarker=(root,value)=>json(path.join(root,EMPTY_MARKER),{contractVersion:1,source:SOURCE,...value});
+function clearEmptyMarker(root){try{fs.unlinkSync(path.join(root,EMPTY_MARKER));}catch(e){if(e.code!=='ENOENT')throw e;}}
 export function shouldRejectZeroRegression(protectZeroRegression,rowCount,baselineRowCount){return protectZeroRegression===true&&rowCount===0&&Number.isSafeInteger(baselineRowCount)&&baselineRowCount>0;}
 export function verifyLatest(root='/app/data'){
  realDir(root);const dir=latestDirectory(root);return dir?verifyBatch(dir):null;
@@ -118,6 +134,12 @@ export async function acquireOnce({chromium,secretRoot='/run/secrets',dataRoot='
   // weaken future zero-row protection.
   let currentVerified=null,zeroRowBaseline=null;
   if(present(path.join(dataRoot,'latest'))){currentVerified=verifyLatest(dataRoot);if(protectZeroRegression)zeroRowBaseline=latestNonEmptyBaseline(dataRoot);}
+  // A confirmed empty list that is still the published batch stays published: do not restore
+  // the older non-empty batch, and accept further empty scans without a new confirmation.
+  const emptyMarker=protectZeroRegression?readEmptyMarker(dataRoot):null;
+  const emptyAccepted=emptyMarker?.state==='CONFIRMED'&&currentVerified?.rowCount===0&&emptyMarker.sourceBatchId===currentVerified.sourceBatchId;
+  if(emptyAccepted)zeroRowBaseline=null;
+  let emptyConfirmed=false;
   if(protectZeroRegression&&currentVerified?.rowCount===0&&zeroRowBaseline?.rowCount>0&&currentVerified.sourceBatchId!==zeroRowBaseline.sourceBatchId){
    const pointer=path.join(dataRoot,'.latest-recover-'+randomUUID());try{fs.symlinkSync('batches/'+zeroRowBaseline.sourceBatchId,pointer,'dir');latestDirectory(dataRoot);fs.renameSync(pointer,path.join(dataRoot,'latest'));}finally{if(present(pointer))fs.unlinkSync(pointer);}
    currentVerified=zeroRowBaseline;
@@ -137,7 +159,15 @@ export async function acquireOnce({chromium,secretRoot='/run/secrets',dataRoot='
   await Promise.race([pending,new Promise((_,reject)=>{timer=setTimeout(()=>reject(new ExpediteError('EXPEDITE_EXPORT_TIMEOUT')),EXPORT_TIMEOUT_MS);})]);
   onStage('WORKBOOK_VALIDATION');
   const bytes=readSmall(path.join(batch,XLSX_NAME),20*1024*1024),parsed=validateWorkbook(bytes);
-  if(shouldRejectZeroRegression(protectZeroRegression,parsed.rowCount,zeroRowBaseline?.rowCount??0))throw new ExpediteError('ZERO_ROW_REGRESSION_REVIEW');
+  if(shouldRejectZeroRegression(protectZeroRegression,parsed.rowCount,zeroRowBaseline?.rowCount??0)){
+   const now=Date.now(),first=emptyMarker?.state==='OBSERVED'?Date.parse(emptyMarker.firstObservedAt):NaN,age=now-first;
+   if(!(age>=EMPTY_CONFIRM_MIN_MS&&age<=EMPTY_CONFIRM_MAX_MS)){
+    // First sighting, or a stale one: start the confirmation window. A repeat that arrives too soon keeps the original time.
+    if(!(age>=0&&age<EMPTY_CONFIRM_MIN_MS))writeEmptyMarker(dataRoot,{state:'OBSERVED',firstObservedAt:new Date(now).toISOString()});
+    throw new ExpediteError('EMPTY_LIST_AWAITING_SECOND_SCAN');
+   }
+   emptyConfirmed=true;
+  }
   onStage('PUBLICATION');
   const raw=Buffer.from(JSON.stringify(parsed,null,2)+'\n');fs.writeFileSync(path.join(batch,'rxo-expedite-raw.json'),raw,{flag:'wx',mode:0o600});
   const completedAt=new Date().toISOString(),boundary={contractVersion:1,source:SOURCE,sourceBatchId:batchId,completedAt,dataset:'FREIGHT_ON_THE_MOVE',xlsxPath:XLSX_NAME,xlsxSHA256:parsed.xlsxSHA256,xlsxBytes:bytes.length,rawPath:'rxo-expedite-raw.json',rawSHA256:sha256(raw),rowCount:parsed.rowCount,observedHeaders:parsed.observedHeaders,sheetName:parsed.sheetName,dateSystem:parsed.dateSystem,etaTimezone:null,scope:'Native Freight On The Move export; live filter/completeness verification required',ingestion:'NOT_IMPLEMENTED'};
@@ -148,6 +178,10 @@ export async function acquireOnce({chromium,secretRoot='/run/secrets',dataRoot='
   try{fs.symlinkSync('batches/'+batchId,pointer,'dir');
    const current=path.join(dataRoot,'latest');if(present(current))latestDirectory(dataRoot);fs.renameSync(pointer,current);
   }finally{if(present(pointer))fs.unlinkSync(pointer);}
+  if(protectZeroRegression){
+   if(parsed.rowCount===0&&(emptyConfirmed||emptyAccepted))writeEmptyMarker(dataRoot,{state:'CONFIRMED',sourceBatchId:batchId});
+   else clearEmptyMarker(dataRoot);
+  }
   state('SUCCESS');return verified;
  }catch(error){const code=safeError(error),diagnostic=failureDiagnostic(error,stage);
   console.error('[RXO EXPEDITE] '+code+'; stage='+diagnostic.stage+'; cause='+diagnostic.cause);
@@ -174,7 +208,7 @@ export async function downloadNative(context,credentials,save,{preferNonEmpty=fa
  // browser's visible rendered text first, then a stable visible-row fallback when no summary text
  // is exposed. The native workbook validation + zero-row publication guard remain authoritative.
  onStage('LIST_DATA');
- let stableReadiness='',stableSince=0,listReady=false;const readyDeadline=Date.now()+90000;
+ let stableReadiness='',stableSince=0,listReady=false,steadyMs=3000;const readyDeadline=Date.now()+90000;
  while(Date.now()<readyDeadline){
   await assertFreightSession(page);
   const summary=await page.evaluate(()=>{
@@ -187,12 +221,16 @@ export async function downloadNative(context,credentials,save,{preferNonEmpty=fa
   let acceptable=false,key='';
   if(m){
    const shown=Number(m[1]),total=Number(m[2]);must(Number.isSafeInteger(shown)&&Number.isSafeInteger(total)&&shown>=0&&total>=0&&shown<=total,'FREIGHT_LIST_DATA_REVIEW');
-   acceptable=shown===total&&(!preferNonEmpty||total>0);key=`summary:${shown}/${total}`;
+   if(preferNonEmpty&&total===0){
+    // RXO shows "0 of 0" while it is still loading. Believe an empty list only once its
+    // loading overlay is gone and the count has stayed at zero for a sustained period.
+    acceptable=!(await freightViewCovered(page));key='empty:0/0';steadyMs=EMPTY_LIST_STABLE_MS;
+   }else{acceptable=shown===total;key=`summary:${shown}/${total}`;steadyMs=3000;}
   }else{
-   acceptable=visibleRows>0;key=`rows:${visibleRows}`;
+   acceptable=visibleRows>0;key=`rows:${visibleRows}`;steadyMs=3000;
   }
   if(!acceptable){stableReadiness='';stableSince=0;}
-  else if(key===stableReadiness){if(Date.now()-stableSince>=3000){listReady=true;break;}}
+  else if(key===stableReadiness){if(Date.now()-stableSince>=steadyMs){listReady=true;break;}}
   else{stableReadiness=key;stableSince=Date.now();}
   await page.waitForTimeout(500);
  }

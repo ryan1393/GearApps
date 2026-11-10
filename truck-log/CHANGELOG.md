@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.8 — Expedite: slow Freight on the Move page and genuinely empty lists
+
+- Wait up to 90 seconds (was 30) for RXO's loading overlay before switching Freight on the Move to List. A slow page no longer fails every scan with `FREIGHT_LIST_CONTROL_TIMEOUT`.
+- Accept a genuinely empty Freight on the Move list. The scheduler publishes it only when the list shows "0 of 0" with RXO's loading overlay gone and the count steady for 20 seconds, and a second scan at least ten minutes later (within six hours, with no shipments seen between) finds the same. The first sighting reports `EMPTY_LIST_AWAITING_SECOND_SCAN` and keeps the previous batch.
+- Once an empty list is published it stays published on later empty scans; the older shipments are no longer restored. The next scan that finds shipments publishes them and resets the rule.
+- A "0 of 0" list that is still loading, or a partially shown list, is refused as before. Database migrations remain unchanged through 0005.
+
 ## 1.0.7 — One scan saves the number and attaches the packing slip
 
 - **Scan Document** on the Dock Board now does both steps: it saves the Delivery Number, then attaches the uploaded PDF when exactly one validated Print Agent capture carries that number, the capture belongs to no visit, and the visit has no packing slip yet. The attachment is recorded in the visit timeline and the document history as made without preview.

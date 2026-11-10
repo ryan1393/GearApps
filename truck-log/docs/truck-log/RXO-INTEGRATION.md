@@ -118,3 +118,14 @@ IMPORT-RXO-LATEST.cmd
 ## Database ownership
 
 The standard RXO tables are part of `database/truck-log/migrations/0001_baseline.sql`, applied automatically at server start (see `DATABASE-MIGRATIONS.md`).
+
+## RXO Expedite: empty Freight on the Move list
+
+RXO shows "0 of 0 Shipments" while Freight on the Move is still loading, so a scheduled Expedite scan does not trust an empty list at first sight when an earlier batch held shipments.
+
+- The scan waits for RXO's loading overlay to clear and for the count to stay at zero for 20 seconds before exporting.
+- The first empty export is recorded and reported as `EMPTY_LIST_AWAITING_SECOND_SCAN`; the previous batch stays published.
+- A second empty export at least ten minutes later, and within six hours, publishes the empty list. Any scan that finds shipments in between cancels the first sighting.
+- While the empty list remains the published batch, later empty scans publish normally. Shipments returning reset the rule.
+
+The manual one-off Expedite run (`rxo-expedite-manual` profile) publishes whatever it exports, as before.
