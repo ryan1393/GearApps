@@ -4,8 +4,9 @@ import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { StaleDataNoticeComponent, ToastService } from '@truck-log/web/ui';
-import { TruckLogApi, rxoRecoveryErrorMessage } from '@truck-log/web/data-access';
+import { TruckLogApi, rxoRecoveryErrorMessage, rxoRecoveryWaitFeedback } from '@truck-log/web/data-access';
 import { Subscription } from 'rxjs';
+import { expediteFailureDetail, expediteFailureTime } from './rxo-expedite/expedite-failure-display';
 import { RxoExpediteComponent } from './rxo-expedite/rxo-expedite.component';
 import { RxoExpediteStore, type ExpediteShipmentsResponse, type ExpediteStatus } from './rxo-expedite/rxo-expedite.store';
 
@@ -44,7 +45,7 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
       <div class="dana-panel-body tl-stack">
         <p>{{connectionRecoveryDetail}}</p>
         <p class="dana-alert dana-alert-warning" *ngIf="recoveryLoginRequired">Open Settings &amp; Login to check the saved Expedite login. If RXO requests MFA, approval or an interactive sign-in, complete it with your administrator before recovering again.</p>
-        <p class="dana-alert dana-alert-warning" *ngIf="recoveryCooldownActive">A recovery was requested recently. Wait for the current attempt and refresh status before requesting another.</p>
+        <p class="dana-alert dana-alert-warning" *ngIf="recoveryWait as wait"><b>{{wait.title}}</b> {{wait.detail}} <time [attr.datetime]="wait.until">{{wait.resumeLabel}}</time> <span aria-live="off">({{wait.remaining}} remaining)</span>.</p>
         <p class="dana-alert dana-alert-danger" role="alert" *ngIf="recoveryError">{{recoveryError}}</p>
         <p class="dana-alert dana-alert-success" role="status" *ngIf="recoveryMessage">{{recoveryMessage}}</p>
         <div class="dana-actions" *ngIf="adminAuth.canWrite(); else recoveryAdminSignIn">
@@ -65,8 +66,11 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
         <b>Status stale.</b> The countdown is paused until a fresh Expedite scheduler heartbeat and API response arrive.
       </div>
       <div class="dana-alert dana-alert-danger" *ngIf="needsReview">
-        <b>Expedite needs review.</b> {{status.acquisition.lastError || status.scheduler?.lastErrorCode || 'The latest export needs attention.'}}
-        The previous verified batch stays available.
+        <b>{{scanRunning ? 'Previous Expedite attempt failed.' : 'Latest Expedite attempt failed.'}}</b> {{status.acquisition.lastError || status.scheduler?.lastErrorCode || 'The latest export needs attention.'}}
+        <p>Failure completed: {{latestFailureAt ? displayTime(latestFailureAt) : 'Time not reported'}}. Attempt started: {{displayTime(status.acquisition.lastAttemptAt)}}.</p>
+        <p>{{latestFailureDetail}}</p>
+        <p>The previous verified batch stays available; the last successful export and import below refer to that retained batch.</p>
+        <button class="dana-btn dana-btn-sm" type="button" (click)="activeTab='health'; healthTabButton.focus()">Open Exporter Health</button>
       </div>
       <div class="dana-alert dana-alert-danger" *ngIf="databaseNeedsReview">
         <b>Expedite import needs review.</b> {{status.database?.errorMessage || 'The latest database mirror did not complete.'}}
@@ -78,7 +82,7 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
     </section>
 
     <section class="dana-kpi-grid" aria-label="RXO Expedite scan and import summary">
-      <div class="dana-kpi-card" [attr.data-tone]="needsReview ? 'danger' : (timerStatusStale ? 'warning' : null)">
+      <div class="dana-kpi-card" [attr.data-tone]="needsReview && !waitingForNextScan ? 'danger' : (needsReview || timerStatusStale ? 'warning' : null)">
         <div class="dana-kpi-label">{{timerTitle}}</div>
         <div class="dana-kpi-value" aria-live="off">{{timerLabel}}</div>
         <div class="dana-kpi-note">{{schedulerStateLabel}} · scheduled</div>
@@ -199,20 +203,24 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
 
   get connectionRecoveryNeeded() {
     const reason = this.status?.recovery?.reason;
-    return !!this.status && ((!!reason && reason !== 'READY') || this.recoveryLoginRequired || this.recoveryCooldownActive || this.needsReview
-      || /AUTH|STOPPED|NEEDS_REVIEW/.test(this.schedulerState));
+    return !!this.status && ((!!reason && reason !== 'READY') || this.recoveryLoginRequired || this.recoveryCooldownActive || this.authenticationNeedsReview
+      || /STOPPED|STOPPING/.test(this.schedulerState));
   }
   get recoveryLoginRequired() {
     const info = this.status?.recovery;
     return !!(info?.requiresCredentials || info?.requiresInteractiveLogin)
       || (this.recoveryLoginBlocked && this.status === this.recoveryBlockedStatus);
   }
+  get recoveryWait() { return rxoRecoveryWaitFeedback(this.status?.recovery, this.clockNow); }
   get recoveryCooldownActive() { return Date.parse(this.status?.recovery?.cooldownUntil || '') > this.clockNow; }
   get recoveryAvailable() {
     return !!this.status && this.status.recovery?.available !== false
       && !this.recoveryCooldownActive && !this.recoveryLoginRequired;
   }
   get connectionRecoveryDetail() {
+    if (this.needsReview && !this.authenticationNeedsReview && this.waitingForNextScan) {
+      return 'The latest acquisition attempt failed. Open Exporter Health for its recorded stage and cause. The scheduler is still waiting for the next scan; a connection reset is not a general export retry.';
+    }
     return this.status?.recovery?.message || 'A controlled recovery reopens Expedite with its saved login and requests a fresh scan. The previous verified batch stays available.';
   }
   openRecoverySettings() {
@@ -291,6 +299,19 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
     );
   }
 
+  get waitingForNextScan(): boolean {
+    return this.status?.schedulingEnabled === true && !this.recoveryLoginRequired && this.schedulerState === 'WAITING'
+      && Number.isFinite(Date.parse(this.status.scheduler?.nextRunAt || ''));
+  }
+  get authenticationNeedsReview(): boolean {
+    return this.recoveryLoginRequired || (!this.waitingForNextScan
+      && /RXO_AUTH_/.test([this.status?.acquisition.lastError, this.status?.scheduler?.lastErrorCode].join(' ')));
+  }
+  get latestFailureAt(): string | null {
+    return expediteFailureTime(this.status?.acquisition.lastError ? this.status.acquisition.completedAt : null, this.status?.scheduler?.lastFailureAt);
+  }
+  get latestFailureDetail(): string { return expediteFailureDetail(this.status?.acquisition.diagnostic); }
+
   get databaseNeedsReview(): boolean {
     return String(this.status?.database?.state ?? '').toUpperCase() === 'FAILED'
       || Boolean(this.status?.database?.errorMessage);
@@ -315,31 +336,17 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
   }
 
   get effectiveNextRunAt(): number | null {
-    const direct = Date.parse(this.status?.scheduler?.nextRunAt ?? '');
-    if (Number.isFinite(direct)) return direct;
-    if (this.scanRunning) return null;
-
-    const intervalMs = Math.max(1, Number(this.status?.scheduler?.intervalMinutes ?? 30)) * 60000;
-    const anchor = Date.parse(
-      this.status?.scheduler?.lastCompletedAt
-      ?? this.status?.scheduler?.lastSuccessAt
-      ?? '',
-    );
-    if (Number.isFinite(anchor)) {
-      let next = anchor + intervalMs;
-      while (next <= this.clockNow) next += intervalMs;
-      return next;
-    }
-
-    return this.statusReceivedAt ? this.statusReceivedAt + intervalMs : null;
+    // Do not invent a countdown for an auth hold, disabled schedule, or stopped worker.
+    return this.waitingForNextScan ? Date.parse(this.status?.scheduler?.nextRunAt || '') : null;
   }
 
   get timerTitle(): string {
     if (!this.status && !this.pageError) return 'Checking Expedite status';
     if (this.timerStatusStale) return 'Timer status';
     if (this.activeExportVerified) return 'Scan elapsed';
-    if (this.needsReview) return 'Scan needs review';
-    return this.scanRunning ? 'Scan elapsed' : 'Next scan in';
+    if (this.scanRunning) return 'Scan elapsed';
+    if (this.waitingForNextScan) return 'Next scan in';
+    return this.authenticationNeedsReview ? 'Sign-in paused' : 'Scan schedule';
   }
 
   get timerLabel(): string {
@@ -351,8 +358,6 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
         Number.isFinite(started) ? Math.max(0, this.clockNow - started) : 0,
       );
     }
-    if (this.needsReview) return 'STOPPED';
-
     if (this.scanRunning) {
       const started = Date.parse(this.status?.scheduler?.currentStartedAt ?? '');
       return this.formatClockDuration(
@@ -361,7 +366,7 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
     }
 
     const next = this.effectiveNextRunAt;
-    if (!next) return '--:--';
+    if (!next) return ['STOPPED', 'STOPPING', 'NOT_STARTED'].includes(this.schedulerState) ? 'STOPPED' : 'PAUSED';
     return this.formatClockDuration(Math.max(0, next - this.clockNow));
   }
 
@@ -373,11 +378,6 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
     if (this.activeExportVerified) {
       return 'Scheduled Expedite export is running. The previous verified PostgreSQL batch remains available.';
     }
-    if (this.needsReview) {
-      return this.status?.acquisition?.lastError
-        || this.status?.scheduler?.lastErrorCode
-        || 'The latest Expedite export needs review.';
-    }
     if (this.scanRunning) {
       return 'Expedite reports an active export but its current health needs verification.';
     }
@@ -386,7 +386,7 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
     if (next) {
       return `Next automatic Expedite scan ${this.displayTime(new Date(next).toISOString())}`;
     }
-    return `Automatic interval: every ${this.status?.scheduler?.intervalMinutes ?? 30} minute(s)`;
+    return this.authenticationNeedsReview ? 'Automatic scans are paused for sign-in review.' : 'No next scan is currently reported. Check Exporter Health.';
   }
 
   get schedulerStateLabel(): string {
@@ -441,7 +441,10 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
         : 'Truck Log is refreshing RXO Expedite data. The previous verified PostgreSQL batch remains available while the export runs.';
     }
     if (this.needsReview) {
-      return 'The previous verified Expedite batch remains available. Use Recover connection for a controlled retry, or Settings & Login when credentials or approval need attention.';
+      if (this.authenticationNeedsReview) return 'Sign-in needs review. The previous verified batch remains available. Use Recover connection or Settings & Login as indicated above.';
+      return this.waitingForNextScan
+        ? 'The latest attempt failed; the previous verified batch remains available. Open Exporter Health for the failure time, stage and cause. The scheduler is waiting for the next scan.'
+        : 'The latest attempt failed; the previous verified batch remains available. Open Exporter Health for the failure details and scheduler status.';
     }
     if (this.databaseNeedsReview) {
       return 'The previous complete PostgreSQL mirror remains available while the latest import needs attention.';

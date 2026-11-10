@@ -345,17 +345,21 @@ export function buildRxoControlView(input: RxoControlInputs) {
     return schedulerHeartbeatAgeMs > 30_000;
   })();
 
+  const scheduledWaiting = control?.exporterRunning === true && !control.recovery?.requiresCredentials
+    && !control.recovery?.requiresInteractiveLogin && String(scheduler?.status ?? '').toUpperCase() === 'WAITING'
+    && Number.isFinite(Date.parse(scheduler?.nextRunAt || ''));
   const schedulerPhase = String(scheduler?.currentPhase ?? '').toUpperCase();
   const recoveryState = String(scheduler?.recoveryState ?? '').toUpperCase();
-  const scanRecoveryActive = ['STALLED', 'RECOVERING', 'RETRYING'].includes(schedulerPhase)
-    || ['TERMINATING', 'FORCE_TERMINATING', 'COOLDOWN', 'RETRYING'].includes(recoveryState);
-  const scanNeedsReview = schedulerPhase === 'NEEDS_REVIEW' || recoveryState === 'NEEDS_REVIEW';
+  const scanRecoveryActive = !scheduledWaiting && (['STALLED', 'RECOVERING', 'RETRYING'].includes(schedulerPhase)
+    || ['TERMINATING', 'FORCE_TERMINATING', 'COOLDOWN', 'RETRYING'].includes(recoveryState));
+  const scanNeedsReview = !scheduledWaiting && (schedulerPhase === 'NEEDS_REVIEW' || recoveryState === 'NEEDS_REVIEW');
 
   const activeTimerPhase = (() => {
     if (scanNeedsReview) return 'NEEDS_REVIEW';
     if (scanRecoveryActive) return schedulerPhase || 'RECOVERING';
     const manual = control?.manualRun?.status ?? 'IDLE';
     if (['QUEUED', 'EXPORTING', 'SYNCING', 'IMPORTING'].includes(manual)) return manual;
+    if (scheduledWaiting) return 'IDLE';
     if (ACTIVE_TIMER_PHASES.includes(schedulerPhase)) return schedulerPhase;
     if (String(control?.exporterHealth?.status ?? '').toLowerCase() === 'running') return 'EXPORTING';
     return 'IDLE';

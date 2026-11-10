@@ -1,6 +1,6 @@
 import { DestroyRef, Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import type { RxoConnectionRecoveryInfo } from '@truck-log/shared/contracts';
+import type { ExpediteAcquisitionDiagnostic, RxoConnectionRecoveryInfo } from '@truck-log/shared/contracts';
 import { Observable, Subject, catchError, forkJoin, map, of, timeout } from 'rxjs';
 import { Poller, createPoller } from '@truck-log/web/data-access';
 
@@ -11,7 +11,7 @@ export interface ExpediteStatus {
   credentials: { username: string; usernameConfigured: boolean; passwordConfigured: boolean; configured: boolean };
   scheduler?: { state: string; intervalMinutes: number; syncOnStart: boolean; schedulerStartedAt: string | null; schedulerHeartbeatAt: string | null; currentStartedAt: string | null; nextRunAt: string | null; lastCompletedAt: string | null; lastSuccessAt: string | null; lastFailureAt: string | null; lastErrorCode: string | null; lastDurationSeconds: number | null; lastSourceBatchId: string | null };
   settings?: { intervalMinutes: number; syncOnStart: boolean };
-  acquisition: { state: string; lastError: string | null; lastAttemptAt: string | null; lastSuccessfulExport: string | null; shipmentCount: number | null; sourceBatchId: string | null };
+  acquisition: { completedAt?: string | null; diagnostic?: ExpediteAcquisitionDiagnostic; state: string; lastError: string | null; lastAttemptAt: string | null; lastSuccessfulExport: string | null; shipmentCount: number | null; sourceBatchId: string | null };
   database?: { enabled: boolean; state: string; latestVerifiedBatch: string | null; lastImportedBatch: string | null; importedAt: string | null; sourceCompletedAt: string | null; rowCount: number | null; linkedOrders: number | null; pendingBatch: string | null; errorMessage: string | null };
 }
 

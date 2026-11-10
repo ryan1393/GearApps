@@ -8,7 +8,7 @@ import type {
   RxoImportStatusData,
 } from '@truck-log/shared/contracts';
 import { forkJoin, Subscription } from 'rxjs';
-import { Poller, TruckLogApi, createPoller, rxoRecoveryErrorMessage } from '@truck-log/web/data-access';
+import { Poller, TruckLogApi, createPoller, rxoRecoveryErrorMessage, rxoRecoveryWaitFeedback } from '@truck-log/web/data-access';
 import { StaleDataNoticeComponent, ToastService } from '@truck-log/web/ui';
 import { buildRxoControlView, type RxoControlView } from './rxo-control-center.presenter';
 import { RxoDataStore } from './rxo-data.store';
@@ -247,6 +247,7 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
     return !!(info?.requiresCredentials || info?.requiresInteractiveLogin)
       || (this.recoveryLoginBlocked && this.control === this.recoveryBlockedStatus);
   }
+  get recoveryWait() { return rxoRecoveryWaitFeedback(this.control?.recovery, this.clockNow); }
   get recoveryCooldownActive() { return Date.parse(this.control?.recovery?.cooldownUntil || '') > this.clockNow; }
   get recoveryAvailable() {
     return !!this.control?.controlAvailable && this.control.recovery?.available !== false

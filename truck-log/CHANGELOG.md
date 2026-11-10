@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.4 — Expedite scan reliability and diagnostics
+
+- Observe the export click and download waiter together so a failed click cannot leave an unhandled download rejection or trigger a duplicate export.
+- Record an allowlisted acquisition stage and cause for failed attempts while retaining the previous verified export and completed import.
+- Show the actual next-scan countdown for a healthy waiting scheduler, even when its last attempt failed. Distinguish paused authentication and a stopped process.
+- Separate the one-minute recovery cooldown from the hourly retry limit, including its expiry and remaining wait.
+- Show the latest failed attempt's time and safe diagnostic details, and direct generic export failures to Exporter Health.
+- Include a read-only Expedite diagnostic helper for current container, scheduler, authentication-hold and recovery-limit state. Existing authentication safeguards and database migrations are unchanged.
+
 ## 1.0.3 — RXO connection recovery
 
 - Add an administrator **Recover connection** action to both RXO control centers, with pending feedback, cooldowns, and a Settings & Login path when credentials or interactive approval are required.

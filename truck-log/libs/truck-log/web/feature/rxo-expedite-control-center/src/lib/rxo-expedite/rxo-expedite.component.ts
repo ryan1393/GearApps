@@ -6,6 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Subscription, timeout } from 'rxjs';
 import { UploadIdempotency, newUploadIdempotencyKey, pdfUploadValidationError } from '@truck-log/web/data-access';
+import { expediteFailureDetail, expediteFailureTime } from './expedite-failure-display';
 import { formatExpediteEta } from './rxo-expedite-eta-format';
 import { RxoExpediteStore, type ExpediteShipment, type ExpediteShipmentsResponse, type ExpediteStatus } from './rxo-expedite.store';
 const EXPEDITE_DOCUMENT_SITE_KEY = 'fort-wayne-expedite';
@@ -59,13 +60,15 @@ const EXPEDITE_DOCUMENT_SITE_KEY = 'fort-wayne-expedite';
                   <div class="dana-detail"><span class="dana-detail-label">Exporter version</span><span class="dana-detail-value">{{s.version || '—'}}</span></div>
                   <div class="dana-detail"><span class="dana-detail-label">Runtime isolation</span><span class="dana-detail-value">Separate image</span><span class="dana-cell-sub">Dedicated RXO Expedite image</span></div>
                   <div class="dana-detail"><span class="dana-detail-label">Last successful scan</span><span class="dana-detail-value">{{displayExportTime(s.acquisition.lastSuccessfulExport)}}</span></div>
+                  <div class="dana-detail"><span class="dana-detail-label">Last attempt started</span><span class="dana-detail-value">{{s.acquisition.lastAttemptAt ? displayExportTime(s.acquisition.lastAttemptAt) : 'Time not reported'}}</span></div>
+                  <div class="dana-detail" *ngIf="expediteNeedsReview"><span class="dana-detail-label">Failure completed</span><span class="dana-detail-value">{{latestFailureAt ? displayExportTime(latestFailureAt) : 'Time not reported'}}</span></div>
                   <div class="dana-detail"><span class="dana-detail-label">Last duration</span><span class="dana-detail-value">{{expediteDurationLabel}}</span></div>
                   <div class="dana-detail"><span class="dana-detail-label">Next scan</span><span class="dana-detail-value">{{displayExportTime(s.scheduler?.nextRunAt ?? null)}}</span></div>
                   <div class="dana-detail"><span class="dana-detail-label">Last batch</span><span class="dana-detail-value">{{s.acquisition.sourceBatchId || s.scheduler?.lastSourceBatchId || '-'}}</span></div>
                   <div class="dana-detail"><span class="dana-detail-label">Window</span><span class="dana-detail-value">Freight on the move</span><span class="dana-cell-sub">Native Expedite list export</span></div>
                   <div class="dana-detail"><span class="dana-detail-label">Scan interval</span><span class="dana-detail-value">Every {{s.scheduler?.intervalMinutes ?? 30}} minutes</span></div>
                 </div>
-                <div class="dana-alert dana-alert-danger" *ngIf="s.acquisition.lastError || s.scheduler?.lastErrorCode"><b>Last Expedite error.</b> {{s.acquisition.lastError || s.scheduler?.lastErrorCode}} The previous verified batch is kept; standard RXO is unaffected.</div>
+                <div class="dana-alert dana-alert-danger" *ngIf="s.acquisition.lastError || s.scheduler?.lastErrorCode"><b>Last Expedite error.</b> {{s.acquisition.lastError || s.scheduler?.lastErrorCode}} <p>{{latestFailureDetail}}</p>The previous verified batch is kept; standard RXO is unaffected.</div>
               </div>
             </section>
 
@@ -405,8 +408,12 @@ export class RxoExpediteComponent implements OnInit, OnDestroy {
   get expediteHeartbeatAgeLabel(): string { return this.formatAge(this.expediteHeartbeatAgeMs); }
   get expediteApiAgeLabel(): string { return this.formatAge(this.expediteApiAgeMs); }
   get expediteTimerStale(): boolean { return !this.status || this.expediteApiAgeMs>15000 || this.expediteHeartbeatAgeMs>30000; }
+  get latestFailureAt(): string | null {
+    return expediteFailureTime(this.status?.acquisition.lastError ? this.status.acquisition.completedAt : null, this.status?.scheduler?.lastFailureAt);
+  }
+  get latestFailureDetail(): string { return expediteFailureDetail(this.status?.acquisition.diagnostic); }
   get expediteNeedsReview(): boolean { return !!(this.status?.acquisition.lastError || this.status?.scheduler?.lastErrorCode); }
-  get expediteTimerState(): string { if(this.expediteTimerStale)return 'STATUS STALE'; if(this.expediteNeedsReview)return 'NEEDS REVIEW'; return this.status?.scheduler?.state==='EXPORTING' ? 'LIVE - RUNNING' : 'LIVE - WAITING'; }
+  get expediteTimerState(): string { if(this.expediteTimerStale)return 'STATUS STALE'; if(this.status?.scheduler?.state==='EXPORTING')return 'LIVE - RUNNING'; if(this.status?.scheduler?.state==='WAITING' && this.status.scheduler.nextRunAt)return this.expediteNeedsReview ? 'LIVE - WAITING; LAST ATTEMPT FAILED' : 'LIVE - WAITING'; return 'PAUSED'; }
   get expediteDurationLabel(): string { const v=this.status?.scheduler?.lastDurationSeconds; if(!Number.isFinite(v))return '-'; const n=Math.max(0,Number(v)); return n<60 ? `${n.toFixed(1)}s` : `${Math.floor(n/60)}m ${Math.round(n%60)}s`; }
   get expediteBrowserTimeLabel(): string { return new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(new Date(this.clockNow)); }
   get expediteSchedulerProcessLabel(): string { const state=this.status?.scheduler?.state; return state && !['NOT_STARTED','STOPPED'].includes(state) ? 'ACTIVE' : (state || 'NOT_STARTED'); }

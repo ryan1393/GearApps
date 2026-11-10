@@ -1,5 +1,5 @@
 {
-  "release": "1.0.3",
+  "release": "1.0.4",
   "product": "Truck Log",
   "deployment": {
     "model": "docker-compose",
@@ -14,8 +14,8 @@
   "docker": {
     "project": "truck-log",
     "network": "truck-log",
-    "imageTag": "1.0.3",
-    "containerReleaseLabel": "1.0.3",
+    "imageTag": "1.0.4",
+    "containerReleaseLabel": "1.0.4",
     "imagePrefix": "truck-log",
     "networkKey": "truck-log",
     "resources": "compose-managed (creates missing, reuses existing named volumes)"
@@ -50,7 +50,7 @@
   "runtimeDataIncluded": false,
   "historicalPatchBackupsIncluded": false,
   "historicalPromotionRecordsIncluded": false,
-  "releaseId": "truck-log-1.0.3",
+  "releaseId": "truck-log-1.0.4",
   "workspace": {
     "tool": "Nx",
     "nxVersion": "23.3.1",

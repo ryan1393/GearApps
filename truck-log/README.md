@@ -1,4 +1,4 @@
-# Truck Log 1.0.3
+# Truck Log 1.0.4
 
 Truck Log runs the guard shack and dock workflow at Dana Fort Wayne: truck check-in, dock assignment and the dock board, packing slips and driver paperwork, final checkout, TV boards, and the RXO and RXO Expedite load feeds. It runs as a set of Docker containers on one Linux Docker host. Guard PCs, dock PCs and TVs use it through a web browser.
 
@@ -23,7 +23,7 @@ For a remote Linux host over SSH, follow [docs/truck-log/WINDOWS-REMOTE-DOCKER-I
 **Linux host**
 
 ```sh
-unzip Truck-Log-1.0.3.zip && cd Truck-Log-1.0.3
+unzip Truck-Log-1.0.4.zip && cd Truck-Log-1.0.4
 ./SETUP-TRUCK-LOG.sh
 ```
 
@@ -44,7 +44,7 @@ Then open `http://<docker-host>:4300`. For production TLS, use the supported [HT
 
 ## Replacing an older test install
 
-1.0.3 does not upgrade a 0.1 database: the schema was rebuilt as one baseline, and the 0.1 builds were test installs. Setup and start check for an older install first. If they find containers or volumes with Truck Log's names that belong to another Docker Compose project (for example `truck-log-v02` or `truck-log-nxdev`), they stop and list them instead of failing halfway through.
+1.0.4 does not upgrade a 0.1 database: the schema was rebuilt as one baseline, and the 0.1 builds were test installs. Setup and start check for an older install first. If they find containers or volumes with Truck Log's names that belong to another Docker Compose project (for example `truck-log-v02` or `truck-log-nxdev`), they stop and list them instead of failing halfway through.
 
 If that install holds only test data, remove it, then run setup again. **This deletes that install's data.** The script lists what it will remove and asks you to type `REMOVE`.
 
@@ -98,7 +98,7 @@ Back up the `truck-log-postgres-data` and `truck-log-documents` volumes, extract
 
 ## Version
 
-The release is in [`VERSION`](VERSION) (`1.0.3`). Every other copy must match it, and `tests/new-host/test-release-version.mjs` fails if one drifts. To release a new version, edit `VERSION`, update the copies that test lists, and run `node tools/truck-log/refresh-manifests.mjs`.
+The release is in [`VERSION`](VERSION) (`1.0.4`). Every other copy must match it, and `tests/new-host/test-release-version.mjs` fails if one drifts. To release a new version, edit `VERSION`, update the copies that test lists, and run `node tools/truck-log/refresh-manifests.mjs`.
 
 ## Checks
 

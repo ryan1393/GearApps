@@ -17,6 +17,7 @@ import type { CredentialInput, ExpediteSettingsInput } from './rxo-expedite.type
 import { RxoExpediteDockerHelpers, runDockerNative } from './rxo-expedite-docker';
 import { RxoExpediteDatabaseMirror } from './rxo-expedite-mirror';
 import { expediteDirection } from './rxo-expedite-identity';
+import { publicAcquisitionDiagnostic } from './rxo-expedite-status-diagnostics';
 
 const SAFE_STATE = new Set(['NOT_RUN', 'RUNNING', 'SUCCESS', 'REVIEW', 'FAILED']);
 
@@ -169,11 +170,11 @@ export class RxoExpediteService implements OnModuleInit, OnModuleDestroy {
       try { await this.syncLatestVerifiedToDatabase(verifiedBatchId); } catch { /* database status reports the failure */ }
     }
     const database = await this.mirror.databaseStatus(verifiedBatchId);
-    return { source: 'RXO_EXPEDITE', recovery, version: process.env.TRUCK_LOG_RELEASE || '1.0.3', schedulingEnabled: raw.schedulingEnabled === true, databaseIngestionEnabled: database.enabled,
+    return { source: 'RXO_EXPEDITE', recovery, version: process.env.TRUCK_LOG_RELEASE || '1.0.4', schedulingEnabled: raw.schedulingEnabled === true, databaseIngestionEnabled: database.enabled,
       database,
       ...this.controlPolicy(), credentials: this.publicCredentials(raw.credentials), settings: { intervalMinutes, syncOnStart },
       scheduler: { state: schedulerState, intervalMinutes: schedulerIntervalMinutes, syncOnStart: s?.syncOnStart !== false, schedulerStartedAt: date(s?.schedulerStartedAt), schedulerHeartbeatAt: date(s?.schedulerHeartbeatAt), currentStartedAt: date(s?.currentStartedAt), nextRunAt: date(s?.nextRunAt), lastCompletedAt: date(s?.lastCompletedAt), lastSuccessAt: date(s?.lastSuccessAt), lastFailureAt: date(s?.lastFailureAt), lastErrorCode: typeof s?.lastErrorCode === 'string' && /^[A-Z0-9_]{1,80}$/.test(s.lastErrorCode) ? s.lastErrorCode : null, lastDurationSeconds: Number.isFinite(s?.lastDurationSeconds) && s.lastDurationSeconds >= 0 ? s.lastDurationSeconds as number : null, lastSourceBatchId: typeof s?.lastSourceBatchId === 'string' && /^[0-9TZ-]+[a-f0-9-]{36}$/.test(s.lastSourceBatchId) ? s.lastSourceBatchId as string : null },
-      acquisition: { state: a.state as string, lastError: typeof a.lastError === 'string' && /^[A-Z0-9_]{1,80}$/.test(a.lastError) ? a.lastError : null,
+      acquisition: { state: a.state as string, diagnostic: publicAcquisitionDiagnostic(a.diagnostic), completedAt: date(a.completedAt), lastError: typeof a.lastError === 'string' && /^[A-Z0-9_]{1,80}$/.test(a.lastError) ? a.lastError : null,
         lastAttemptAt: date(a.lastAttemptAt), lastSuccessfulExport: last?.verified === true ? date(last.completedAt) : null,
         shipmentCount: last?.verified === true && Number.isSafeInteger(last.rowCount) && last.rowCount >= 0 ? last.rowCount as number : null,
         sourceBatchId: verifiedBatchId } };

@@ -1,5 +1,5 @@
 /** Truck Log release. Must equal the VERSION file (checked by tests/new-host/test-release-version.mjs). */
-export const TRUCK_LOG_VERSION = '1.0.3';
+export const TRUCK_LOG_VERSION = '1.0.4';
 
 export const VisitStatuses = {
     DOCK_ASSIGNED: 'DOCK_ASSIGNED',
@@ -461,6 +461,15 @@ export interface RxoConnectionRecoveryResult {
     message: string;
     requestedAt?: string;
 }
+export type ExpediteAcquisitionStage =
+    'PREPARATION' | 'BROWSER_LAUNCH' | 'AUTHENTICATION' | 'LIST_CONTROL' | 'LIST_DATA' |
+    'EXPORT_CONTROL' | 'EXPORT_DOWNLOAD' | 'DOWNLOAD_SAVE' | 'WORKBOOK_VALIDATION' | 'PUBLICATION';
+export type ExpediteAcquisitionCause =
+    'TIMEOUT' | 'PROFILE_BUSY' | 'BROWSER_CLOSED' | 'BROWSER_EXECUTABLE_MISSING' | 'NETWORK_ERROR' |
+    'DISK_FULL' | 'PERMISSION_DENIED' | 'FILESYSTEM_ERROR' | 'DOWNLOAD_FAILED' | 'VALIDATION_FAILED' |
+    'AUTHENTICATION_FAILED' | 'UNEXPECTED';
+export interface ExpediteAcquisitionDiagnostic { stage: ExpediteAcquisitionStage; cause: ExpediteAcquisitionCause; }
+
 export interface RxoConnectionRecoveryInfo {
     available: boolean;
     reason: string | null;
