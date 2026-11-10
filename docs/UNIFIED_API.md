@@ -86,10 +86,10 @@ ratio recalculation is required.
 
 ## Development and verification
 
-The source branch can be cloned explicitly:
+Clone the main branch:
 
 ```sh
-git clone --branch codex/lapper-postgres-70-3-0 --single-branch https://github.com/ryan1393/GearApps.git
+git clone --branch main https://github.com/ryan1393/GearApps.git
 ```
 
 Run npm commands at the root. npm run serve:api starts the sole API; all four
