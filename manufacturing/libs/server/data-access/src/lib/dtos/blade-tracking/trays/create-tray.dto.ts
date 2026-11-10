@@ -18,9 +18,4 @@ export class CreateTrayDto implements ICreateTray {
   @IsOptional()
   @IsBoolean()
   enabled?: boolean;
-
-  summary_id?: null;
-  part_type_id?: null;
-  grinding_completed_at?: null;
-  required_blade_count?: null;
 }

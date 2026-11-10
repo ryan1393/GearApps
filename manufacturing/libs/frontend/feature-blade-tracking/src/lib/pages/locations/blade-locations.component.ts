@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
 
 import {
   AssetTagKind,
@@ -28,11 +29,13 @@ import {
 })
 export class BladeLocationsComponent implements OnInit {
   private readonly api = inject(BladeTrackingApiService);
+  private readonly toast = inject(GearToastService);
 
   rows: InventoryLocationRow[] = [];
   loading = true;
   error = '';
   printMessage = '';
+  printTone: 'success' | 'warning' | 'info' = 'success';
   printingTagSerial: string | null = null;
   searchValue = '';
   expandedLocationId: string | null = null;
@@ -119,13 +122,14 @@ export class BladeLocationsComponent implements OnInit {
         if (!result.printed) {
           this.api.downloadAssetTagPrn(result);
         }
-        this.printMessage = result.printed
-          ? `${result.serial_number} tag sent to the IPL printer.`
-          : `${result.message} ${result.file_name} downloaded.`;
+        const notice = announceAssetTagPrint(this.toast, result);
+        this.printMessage = notice.text;
+        this.printTone = notice.tone;
       },
       error: (error: HttpErrorResponse) => {
         this.printingTagSerial = null;
         this.error = apiErrorText(error, `Could not print ${serialNumber} tag.`);
+        this.toast.error(this.error, 'Tag not printed');
       },
     });
   }

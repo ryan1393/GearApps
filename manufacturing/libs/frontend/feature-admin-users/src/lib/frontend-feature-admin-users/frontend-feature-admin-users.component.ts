@@ -8,7 +8,7 @@ import {
   OnInit,
   } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
 import { Observable } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
@@ -699,9 +699,9 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
         if (!result.printed) {
           this.api.downloadAssetTagPrn(result);
         }
-        this.message = result.printed
-          ? `${result.serial_number} tag sent to the IPL printer.`
-          : `${result.message} ${result.file_name} downloaded.`;
+        // The page banners read "Saved." and "Unable to continue.", which fit neither a sent tag nor
+        // a downloaded one, so the outcome is announced on its own.
+        announceAssetTagPrint(this.toast, result);
         this.cdr.markForCheck();
       },
       error: (error: HttpErrorResponse) => {
@@ -710,6 +710,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
         if (!this.error) {
           this.error = `Could not print ${serialNumber} tag.`;
         }
+        this.toast.error(this.error, 'Tag not printed');
         this.cdr.markForCheck();
       },
     });

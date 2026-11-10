@@ -248,8 +248,12 @@ export class BladeTrackingApiService {
     const anchor = document.createElement('a');
     anchor.href = url;
     anchor.download = result.file_name;
+    anchor.style.display = 'none';
+    document.body.appendChild(anchor);
     anchor.click();
-    URL.revokeObjectURL(url);
+    anchor.remove();
+    // Releasing the file straight away can cancel the save in some browsers.
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   getDashboard() {

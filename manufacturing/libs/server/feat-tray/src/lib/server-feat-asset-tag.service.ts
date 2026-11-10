@@ -45,6 +45,10 @@ export class ServerFeatAssetTagService {
   // printable format itself is kept inside the 431 x 127 dot label face.
   private readonly labelWidthDots = 431;
   private readonly labelHeightDots = 127;
+  // Code 128 needs 11 modules per character plus start, check and stop (35 modules). At one dot
+  // per module, starting 28 dots in and keeping a 10-module quiet zone, 32 characters is the most
+  // that stays on the 431-dot label face.
+  private readonly maxSerialLength = 32;
 
   constructor(
     @InjectRepository(TrayOrmEntity)
@@ -76,20 +80,20 @@ export class ServerFeatAssetTagService {
 
     let printed = false;
     let message =
-      'Printer host is not configured; the native IPL file is returned for download.';
+      'No label printer is set up for Gear Apps; the tag file is returned for download.';
 
     if (printerHost) {
       try {
         await this.sendRawIpl(printerHost, printerPort, timeoutMs, payload);
         printed = true;
-        message = `${serialNumber} tag sent to the IPL printer.`;
+        message = `${serialNumber} tag sent to the label printer.`;
       } catch (error) {
         const reason = error instanceof Error ? error.message : String(error);
         this.logger.warn(
           `Could not send ${serialNumber} asset tag to ${printerHost}:${printerPort}: ${reason}`,
         );
         message =
-          'Printer is configured but did not accept the tag; the native IPL file is returned for download.';
+          'The label printer did not accept the tag; the tag file is returned for download.';
       }
     }
 
@@ -126,6 +130,12 @@ export class ServerFeatAssetTagService {
     ) {
       throw new BadRequestException(
         'The stored location serial contains unsupported tag characters.',
+      );
+    }
+
+    if (serialNumber.length > this.maxSerialLength) {
+      throw new BadRequestException(
+        `${serialNumber} is too long for the 2.125 in tag: the barcode would run off the label. Tags fit serials of up to ${this.maxSerialLength} characters.`,
       );
     }
   }

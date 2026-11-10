@@ -59,11 +59,21 @@ When `GEAR_LABEL_PRINTER_HOST` is blank, Gear Apps still generates the native `.
 
 If the host is configured but the printer cannot be reached, the API returns the same `.prn` payload as a fallback.
 
+Every **Print Tag** button reports one of three outcomes in a notice that stays on screen wherever the list is scrolled:
+
+- **Tag sent to printer** — the printer accepted the tag.
+- **Label printer did not respond** (warning) — the tag was not printed; the `.prn` file is downloaded as a backup.
+- **Tag file downloaded** — no printer is set up, so the `.prn` file is downloaded.
+
+A failed or downloaded tag is never reported as printed.
+
 ## Barcode
 
 The IPL format uses `c6`, matching the Cutter Build label reference and producing Code 128.
 
 The current asset-tag format uses reserved IPL format number `97`. It does not erase all printer formats.
+
+Serials of up to 8 characters print with a two-dot narrow bar; longer serials use a one-dot narrow bar. A serial longer than 32 characters cannot fit on the 2.125 in label, so the print request is refused with a message instead of printing a barcode that runs off the label.
 
 ## Admin printing
 

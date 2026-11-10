@@ -25,5 +25,6 @@ const ts=read('libs/frontend/feature-blade-tracking/src/lib/pages/locations/blad
 const html=read('libs/frontend/feature-blade-tracking/src/lib/pages/locations/blade-locations.component.html');
 must(ts.includes('DanaButtonDirective')&&ts.includes('DanaAlertDirective'),'Blade Locations shared primitive imports missing');
 must(html.includes('danaButton="secondary"'),'Blade Locations refresh action is not using DanaButton');
-must(html.includes('danaAlert="danger"')&&html.includes('danaAlert="success"'),'Blade Locations feedback is not using DanaAlert');
+// The print notice binds its tone (sent, printer did not respond, file downloaded), so it is no longer a fixed "success".
+must(html.includes('danaAlert="danger"')&&html.includes('[danaAlert]="printTone"'),'Blade Locations feedback is not using DanaAlert');
 console.log('[PASS] Dana UI ownership/adoption contract: 6 Gear workflow styles are Gear-owned, 3 apps layer them after Dana shared UI, and Blade Locations adopts Dana button/alert primitives.');

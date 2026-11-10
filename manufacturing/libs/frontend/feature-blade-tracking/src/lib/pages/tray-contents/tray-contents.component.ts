@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, ViewChild, inject, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
 import {
   AssetTagKind,
   BladeHistoryView,
@@ -28,6 +29,7 @@ export class TrayContentsComponent implements OnInit, OnDestroy {
   private readonly destroyed$ = new Subject<void>();
   ngOnDestroy(): void { this.destroyed$.next(); this.destroyed$.complete(); }
   private readonly api = inject(BladeTrackingApiService);
+  private readonly toast = inject(GearToastService);
   private readonly route = inject(ActivatedRoute);
 
   ngOnInit(): void {
@@ -84,12 +86,8 @@ export class TrayContentsComponent implements OnInit, OnDestroy {
         if (!result.printed) {
           this.api.downloadAssetTagPrn(result);
         }
-        this.message = {
-          tone: 'success',
-          text: result.printed
-            ? `${result.serial_number} tag sent to the IPL printer.`
-            : `${result.message} ${result.file_name} downloaded.`,
-        };
+        const notice = announceAssetTagPrint(this.toast, result);
+        this.message = { tone: result.printed ? 'success' : 'info', text: notice.text };
       },
       error: (error: HttpErrorResponse) => {
         this.printingTagSerial = null;
@@ -97,6 +95,7 @@ export class TrayContentsComponent implements OnInit, OnDestroy {
           tone: 'error',
           text: apiErrorText(error, `Could not print ${serialNumber} tag.`),
         };
+        this.toast.error(this.message.text, 'Tag not printed');
       },
     });
   }

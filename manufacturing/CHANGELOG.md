@@ -4,6 +4,14 @@
 
 Workflow and UI review. No schema changes; API changes are additive.
 
+- **Printing.** Creating a tray works again; the API was rejecting the Admin screen's own
+  request, so no new tray could be added or tagged. Every Print Tag button now reports the
+  outcome in a notice that stays visible on long lists, and a tag the printer did not accept
+  is a warning rather than a green "sent" message. A serial too long for the 2.125 in tag is
+  refused instead of printing a barcode that runs off the label. The cutter card prints its
+  build date in plant time instead of the API host's UTC clock, and its PNG preview has a
+  scannable barcode and a build number that fits. Coater packing slips and container labels
+  read "1 tray", not "1 trays".
 - **Dashboards.** KPI tiles on all three dashboards are back in a row (4 across, 3 + 3,
   3 + 2). A Dana core grid rule had been overriding the Gear tile geometry, so every tile
   sat on its own line.
