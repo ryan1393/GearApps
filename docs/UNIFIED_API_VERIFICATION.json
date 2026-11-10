@@ -1,7 +1,7 @@
 {
   "version": "70.3.0",
   "verifiedDate": "2026-11-09",
-  "deploymentBranch": "codex/lapper-postgres-70-3-0",
+  "deploymentBranch": "codex/docker-native-build",
   "targetStage": "non-production",
   "architecture": {
     "monorepo": "Root Nx workspace with one JS dependency manifest/lock and an Nx project for the .NET collector",
@@ -113,6 +113,32 @@
       "postgresVolume": "dana-apps-gear-postgres",
       "privateDumpRetest": "Not repeated for this layout-only follow-up. Automatic approval review rejected restoring the private dump into the Docker test context; fresh disposable database validation was used instead. The earlier 8 restored-database HTTP tests and 8 data-preservation tests are recorded above.",
       "disposableContainerAndCredentialsRemoved": true
+    },
+    "dockerNativeBuildFix": {
+      "cause": "A prebuilt better-sqlite3 download reset exposed the missing native compiler toolchain in clean Linux dependency stages.",
+      "imagesBuilt": [
+        "server",
+        "blade-tracking",
+        "cutter-builder",
+        "greenshed",
+        "lapper-client"
+      ],
+      "forcedNativeCompilation": [
+        "server build dependencies",
+        "server production dependencies",
+        "blade-tracking",
+        "cutter-builder",
+        "greenshed"
+      ],
+      "runtimeNativeBindings": "better-sqlite3 SELECT and bcrypt hash/compare passed; pg loaded",
+      "runtimeCompilerToolsAbsent": true,
+      "finalApiImageFreshPostgresBootstrapAndReadiness": "passed",
+      "ci": "Build all five images, force native compilation, and run the final API image against disposable PostgreSQL",
+      "localApiImagePullPolicy": "never",
+      "sourceContracts": 82,
+      "deploymentTests": 29,
+      "databaseSchemaOrExistingSecretsChanged": false,
+      "disposableContainersNetworkAndCredentialsRemoved": true
     }
   },
   "deployment": {

@@ -2,6 +2,12 @@
 
 ## 70.3.0 (2026-11-09)
 
+- Fixed clean Linux Docker builds when a native dependency's prebuilt download
+  fails: dependency stages now include the Python/Make/C++ toolchain, and CI
+  builds every application image with a forced native-compilation check.
+- The bootstrap services use the locally built API image without attempting to
+  pull its unpublished tag from Docker Hub.
+
 All four applications now belong to one root Nx workspace and use one dependency
 manifest and lockfile. Application releases share the root version constant.
 
