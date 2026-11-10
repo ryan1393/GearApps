@@ -23,6 +23,9 @@ WHAT IT DOES:
   Tesseract OCR. OCR is also tried when a text layer exists but has no
   labelled Delivery Number. A text layer with two different numbers is
   rejected and OCR cannot override that.
+- A verified PDF is named after its Delivery Number (13246286.pdf; a second
+  capture of the same number becomes 13246286-2.pdf). Unverified PDFs keep
+  their capture name (route8-<time>-<id>.pdf).
 - Verified PDFs go to Ready; unverified, malformed and uncertain outputs go to
   NeedsReview and are never printed or uploaded. Do not delete them blindly.
 - Runs as the Windows service TruckLogPackingSlipWatcher (LocalSystem), so it

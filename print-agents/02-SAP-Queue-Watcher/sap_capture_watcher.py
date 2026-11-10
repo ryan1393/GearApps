@@ -1603,9 +1603,17 @@ class Watcher:
             if proc.returncode != 0:
                 raise WatcherError(f"SumatraPDF submission exit={proc.returncode}")
 
-    def _place(self, src: Path, folder: Path) -> Path:
+    def _place(self, src: Path, folder: Path, delivery_number: str = "") -> Path:
+        """Move a PDF into a route folder. A verified slip is named after its Delivery Number
+        (13246286.pdf, then 13246286-2.pdf ...) so it can be found by the number on the paper."""
         folder.mkdir(parents=True, exist_ok=True)
         dest = folder / src.name
+        if re.fullmatch(r"\d{8}", delivery_number or ""):
+            dest = folder / f"{delivery_number}.pdf"
+            copy = 2
+            while dest.exists() and copy <= 9999:
+                dest = folder / f"{delivery_number}-{copy}.pdf"
+                copy += 1
         if dest.exists():
             raise WatcherError(f"Destination already exists, refused overwrite: {dest}")
         src.rename(dest)
@@ -1736,7 +1744,7 @@ class Watcher:
                         raise
                     print_status = "PRINTED"  # spooler submission accepted; paper not verified
                     record["status"] = "PRINT_SUBMITTED_PAPER_UNVERIFIED"
-            dest = self._place(incoming, target)
+            dest = self._place(incoming, target, detail)
             record["stored_file"] = str(dest)
             record["completed_at"] = iso_utc()
             self._queue_upload(r, record, verification, print_status, output_printer, print_error, review_reason)
@@ -1744,7 +1752,7 @@ class Watcher:
             to_review = recovered or bool(record.get("stale_reason"))
             self.log("PASS" if not recovered else "RECOVERED",
                      f"route{r.number}: delivery {detail} ({verification.method}) -> "
-                     f"{'NeedsReview' if to_review else 'Ready'}; {record['status']}"
+                     f"{'NeedsReview' if to_review else 'Ready'} as {dest.name}; {record['status']}"
                      f"{'; upload queued' if record.get('upload') == 'QUEUED' else ''}")
         except Exception as e:
             if record["status"] == "PRINT_SUBMISSION_PENDING_DO_NOT_RETRY_AUTOMATICALLY":

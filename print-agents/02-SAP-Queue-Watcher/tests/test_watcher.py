@@ -121,6 +121,30 @@ class WatcherUnitTests(Base):
         self.assertEqual(len(list((self.base / 'state' / 'journal').glob('*.json'))), 1)
         self.assertEqual(list((self.base / 'state' / 'snapshots').glob('*')), [])  # snapshot cleaned up
 
+    def test_verified_slip_is_named_after_its_delivery_number(self):
+        w, _ = self.make_watcher()
+        w.prepare_dirs()
+        for expected in ('12345678.pdf', '12345678-2.pdf'):
+            self.make_capture()
+            capture_and_process(w)
+            time.sleep(.55)
+            self.assertEqual(capture_and_process(w), 1)
+            self.assertTrue((self.route.ready / expected).is_file(), expected)
+        self.assertEqual(sorted(p.name for p in self.route.ready.glob('*.pdf')), ['12345678-2.pdf', '12345678.pdf'])
+        stored = sorted(json.loads(p.read_text())['stored_file'] for p in (self.base / 'state' / 'journal').glob('*.json'))
+        self.assertEqual([Path(x).name for x in stored], ['12345678-2.pdf', '12345678.pdf'])
+
+    def test_unverified_slip_keeps_its_capture_name(self):
+        self.make_capture()
+        w, _ = self.make_watcher(text='Invoice Delivery Number: 12345678')
+        w.prepare_dirs()
+        capture_and_process(w)
+        time.sleep(.55)
+        capture_and_process(w)
+        names = [p.name for p in self.route.needs_review.glob('*.pdf')]
+        self.assertEqual(len(names), 1)
+        self.assertTrue(names[0].startswith('route8-'), names)
+
     def test_nonpacking_goes_to_review_no_print(self):
         self.make_capture()
         w, calls = self.make_watcher(text='Purchase order only')
