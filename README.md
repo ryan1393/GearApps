@@ -36,6 +36,12 @@ proxy /api to gear-app-server:3333. Keep the existing PostgreSQL volume.
 For an existing installation, follow [the unified API upgrade procedure](docs/UNIFIED_API.md).
 The application source ZIP is [GearApps 70.3.0](releases/GearApps-70.3.0.zip).
 
+Docker dependency stages include Python, Make and a C++ compiler, as required by
+[node-gyp](https://github.com/nodejs/node-gyp#on-unix), so native npm
+dependencies can build when a prebuilt-binary download fails. These tools are
+excluded from the final runtime images. CI forces native compilation and builds
+the API and all four web images.
+
 ## Develop from the repository root
 
 ```sh

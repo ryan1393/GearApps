@@ -2,6 +2,7 @@ name: dana-apps
 
 x-gear-server-image: &gear-server-image
   image: dana-apps-gear-app-server:70.3.0
+  pull_policy: never
 
 x-gear-db-environment: &gear-db-environment
   ENVIRONMENT: docker
