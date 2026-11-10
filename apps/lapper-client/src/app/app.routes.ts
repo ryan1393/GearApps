@@ -52,6 +52,12 @@ export const appRoutes: Route[] = [
     ],
   },
   {
+    path: 'collector-tokens',
+    canActivate: [authGuard, adminRoleGuard],
+    loadChildren: () =>
+      import('@gearapps/client/feature-config').then((m) => m.collectorTokensRoutes),
+  },
+  {
     path: 'admin',
     canActivate: [authGuard, adminRoleGuard],
     loadChildren: () =>

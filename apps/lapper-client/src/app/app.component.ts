@@ -22,6 +22,7 @@ export class AppComponent {
     ['/scanners', 'Scanners'],
     ['/macros', 'Macros'],
     ['/fanuc-variables', 'Fanuc Variables'],
+    ['/collector-tokens', 'Collector Tokens'],
     ['/dashboard/cell', 'Cell Live View'],
     ['/admin', 'Admin'],
     ['/login', 'Sign In'],

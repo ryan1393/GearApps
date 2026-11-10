@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { CollectorToken, CreatedCollectorToken } from '@gearapps/shared/domain';
 import { Observable } from 'rxjs';
+import { API_BASE_URL } from './api-config';
 
 /** One machine as reported by the Lapper Read supervisor (no IPs or raw errors). */
 export interface CollectorMachine {
@@ -25,5 +27,24 @@ export class CollectorApi {
 
   status(): Observable<CollectorStatus> {
     return this.http.get<CollectorStatus>('/collector/machines');
+  }
+}
+
+/** Admin management of the tokens collectors sign in with. */
+@Injectable({ providedIn: 'root' })
+export class CollectorTokensApi {
+  private readonly http = inject(HttpClient);
+  private readonly url = `${inject(API_BASE_URL)}/collector-token`;
+
+  list(): Observable<CollectorToken[]> {
+    return this.http.get<CollectorToken[]>(this.url);
+  }
+
+  create(name: string): Observable<CreatedCollectorToken> {
+    return this.http.post<CreatedCollectorToken>(this.url, { name });
+  }
+
+  revoke(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.url}/${id}`);
   }
 }

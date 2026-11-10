@@ -41,7 +41,8 @@ def main(argv: list[str]) -> int:
         except OSError:
             return 1
 
-    api = GearAppsApi(settings.api_base_url, settings.api_email, settings.api_password, settings.api_timeout_s)
+    api = GearAppsApi(settings.api_base_url, settings.api_email, settings.api_password, settings.api_timeout_s,
+                      token=settings.api_token)
     transport = FocasTransport(settings.focas_library, settings.focas_log, settings.focas_port)
     fanuc = Fanuc(transport, settings.machine_ip, settings.io_timeout_ms, api)
 

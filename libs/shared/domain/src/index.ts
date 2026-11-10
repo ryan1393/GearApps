@@ -3,6 +3,7 @@ export * from './lib/common/entity';
 export * from './lib/common/status';
 export * from './lib/auth/auth';
 export * from './lib/auth/user';
+export * from './lib/auth/collector-token';
 export * from './lib/gear/department';
 export * from './lib/gear/type-of-check';
 export * from './lib/gear/summary';

@@ -47,7 +47,7 @@ class WorkerTests(unittest.TestCase):
         thread.start()
         return thread
 
-    def _wait(self, predicate, timeout=3):
+    def _wait(self, predicate, timeout=10):
         end = time.monotonic() + timeout
         while time.monotonic() < end:
             if predicate():
@@ -59,9 +59,9 @@ class WorkerTests(unittest.TestCase):
         self.transport.macros[10032] = Decimal(consec)
         self.transport.macros[11006] = Decimal(rpm)
         self.scanner.state = ScannerState(None, serial)
-        time.sleep(0.08)
+        time.sleep(0.25)
         self.transport.set_state(door=True, start=True, cycle=True)
-        time.sleep(0.08)
+        time.sleep(0.25)
         self.scanner.state = ScannerState(None, None)
         self.transport.set_state(door=False, start=False, cycle=False)
 

@@ -97,6 +97,17 @@
           ><span class="gear-glyph gear-glyph-quality-check" aria-hidden="true"></span></span
         ><span>Fanuc Variables</span></a
       >
+      @if (user.role === 'admin') {
+        <a
+          (click)="mobileNav.close()"
+          routerLink="/collector-tokens"
+          routerLinkActive="active-sub"
+          class="side-link"
+          ><span class="nav-icon"
+            ><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span
+          ><span>Collector Tokens</span></a
+        >
+      }
 
       <div class="nav-heading">SHARED APPS</div>
       <a (click)="mobileNav.close()" [href]="bladeTrackingUrl" class="side-link"

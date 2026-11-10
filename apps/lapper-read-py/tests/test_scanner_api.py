@@ -138,6 +138,12 @@ class ApiTests(unittest.TestCase):
         self.assertEqual(values, [1800, 0.125])
         self.assertIsInstance(values[0], int)
 
+    def test_collector_token_is_sent_without_signing_in(self):
+        api = GearAppsApi(f"http://127.0.0.1:{self.server.server_port}", "", "", 3, token="glr_abc")
+        api.request("GET", "/api/v1/macro")
+        self.assertEqual(FakeServer.log[-1][2], "Bearer glr_abc")
+        self.assertFalse(any(e[1].endswith("/auth/email/login") for e in FakeServer.log))
+
     def test_blank_serial_cannot_be_posted(self):
         with self.assertRaises(ValueError):
             self.api.post_cycle(" ", 1, "m", "g", "2026-11-10T03:00:00Z", "k")
@@ -162,6 +168,12 @@ class ConfigTests(unittest.TestCase):
             from_env({**self.BASE, "GEARAPPS_API_PASSWORD": ""})
         with self.assertRaises(ConfigError):
             from_env({**self.BASE, "LAPPER_MACHINE_IP": "lapper-1"})
+
+    def test_a_collector_token_replaces_email_and_password(self):
+        s = from_env({"GEARAPPS_API_TOKEN": "glr_abc"}, mode="supervise")
+        self.assertEqual(s.api_token, "glr_abc")
+        with self.assertRaises(ConfigError):
+            from_env({"GEARAPPS_API_TOKEN": "eyJhbGciOi.jwt"}, mode="supervise")
 
     def test_supervise_only_needs_api_credentials(self):
         s = from_env({"GEARAPPS_API_EMAIL": "svc@plant", "GEARAPPS_API_PASSWORD": "x"}, mode="supervise")

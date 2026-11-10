@@ -27,10 +27,12 @@ def _number(value: Decimal) -> int | float:
 
 
 class GearAppsApi:
-    def __init__(self, base_url: str, email: str, password: str, timeout_s: float = 10.0):
+    def __init__(self, base_url: str, email: str, password: str, timeout_s: float = 10.0, token: str = ""):
         self.base_url = base_url.rstrip("/")
         self._email, self._password, self._timeout = email, password, timeout_s
-        self._token: str | None = None
+        # A collector token never expires, so there is nothing to sign in or refresh.
+        self._collector_token = token or None
+        self._token: str | None = self._collector_token
         self._auth_lock = threading.Lock()
 
     # -- transport -------------------------------------------------------
@@ -54,6 +56,8 @@ class GearAppsApi:
             return error.code, text
 
     def _login(self) -> str:
+        if self._collector_token:
+            return self._collector_token
         status, body = self._raw("POST", "/api/v1/auth/email/login", {"email": self._email, "password": self._password})
         if status != 200 or not isinstance(body, dict) or not body.get("accessToken"):
             raise ApiError("POST", "/api/v1/auth/email/login", status)
@@ -68,6 +72,8 @@ class GearAppsApi:
                 allow_404: bool = False) -> Any:
         used = self._access_token()
         status, payload = self._raw(method, path, body, used, idempotency_key)
+        if status == 401 and self._collector_token:
+            raise ApiError(method, path, status, "collector token is invalid or revoked; create a new one in Lapper")
         if status == 401:
             # Refresh once; never overwrite a newer token another thread already obtained.
             with self._auth_lock:

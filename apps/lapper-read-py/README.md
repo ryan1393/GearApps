@@ -43,12 +43,15 @@ Unsent runs stay in `/data` and are retried after network or API outages and res
   `apps/lapper-read-py/fanuc/`. It is mounted read-only into the container and is never
   committed or baked into the image. See `fanuc/README.md`.
 - Each lapper saved in Lapper as described above.
-- An active GearApps account for the collector. It does not need admin rights.
+- A **collector token**: in Lapper, an admin opens Configuration → Collector Tokens and
+  creates one. It never expires, can only send machine data, and is revoked from the same
+  page. An active GearApps account (email and password) also works.
 - Network access from the Docker host to the controller (8193) and scanner (9004).
 
 ## Run
 
-Set `LAPPER_READ_API_EMAIL` and `LAPPER_READ_API_PASSWORD` in `.env` (see `.env.example`), then:
+Set `LAPPER_READ_API_TOKEN` in `.env` (or `LAPPER_READ_API_EMAIL` and
+`LAPPER_READ_API_PASSWORD`; see `.env.example`), then:
 
     docker compose --profile collectors up -d --build lapper-read
     docker compose logs -f lapper-read
@@ -79,7 +82,8 @@ single worker without the supervisor.
 | `LAPPER_IO_TIMEOUT_MS` | 3000 | Controller/scanner timeout |
 | `LAPPER_STATE_DIR` | /data | Checkpoint, heartbeat and FOCAS log |
 | `GEARAPPS_API_BASE_URL` | http://gear-app-server:3333 | Shared GearApps API |
-| `GEARAPPS_API_EMAIL` / `GEARAPPS_API_PASSWORD` | required | Collector account |
+| `GEARAPPS_API_TOKEN` | | Collector token (`glr_…`); replaces email and password |
+| `GEARAPPS_API_EMAIL` / `GEARAPPS_API_PASSWORD` | | Collector account, when no token is set |
 
 The container is healthy while the supervisor keeps reading the machine list.
 

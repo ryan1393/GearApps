@@ -21,3 +21,11 @@ export const fanucVariablesRoutes: Routes = [
       import('./fanuc-variables-page.component').then((m) => m.FanucVariablesPageComponent),
   },
 ];
+
+export const collectorTokensRoutes: Routes = [
+  {
+    path: '',
+    loadComponent: () =>
+      import('./collector-tokens-page.component').then((m) => m.CollectorTokensPageComponent),
+  },
+];

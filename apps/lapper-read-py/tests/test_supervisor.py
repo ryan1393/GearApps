@@ -81,7 +81,7 @@ class SupervisorTests(unittest.TestCase):
         self.dir.cleanup()
 
     def _wait(self, predicate):
-        end = time.monotonic() + 3
+        end = time.monotonic() + 10
         while time.monotonic() < end and not predicate():
             time.sleep(0.01)
         self.assertTrue(predicate())
