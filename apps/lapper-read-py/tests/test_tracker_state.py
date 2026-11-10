@@ -34,6 +34,13 @@ class TrackerTests(unittest.TestCase):
         t.observe(machine(), ScannerState(None, None), "m", capture, NOW)
         self.assertEqual(t.state.pending_cycles, [])
 
+    def test_without_a_scanner_every_completed_cycle_is_kept_without_a_serial(self):
+        t = CycleTracker(CycleState(was_in_cycle=False), require_serial=False)
+        t.observe(machine(door=True, start=True, cycle=True, consec=7), ScannerState(None, None), "m", capture, NOW)
+        t.observe(machine(consec=7), ScannerState(None, None), "m", capture, NOW)
+        self.assertEqual([(c.serial, c.consec) for c in t.state.pending_cycles], [(None, 7)])
+        self.assertEqual(t.state.pending_cycles[0].macros, {"m-rpm": "1800.5"})
+
     def test_starting_during_a_cycle_does_not_consume_the_next_serial(self):
         t = CycleTracker(CycleState())  # unknown previous state, e.g. first poll after start-up
         t.observe(machine(door=True, start=True, cycle=True), ScannerState(None, "D000000009"), "m", capture, NOW)

@@ -9,13 +9,15 @@ uses the same API endpoints, so the Lapper screens work unchanged.
 One container runs a **supervisor**. Every 30 seconds it reads Lapper's machines and keeps
 exactly one worker running for each machine that is:
 
-- **Active**,
-- has a **FANUC controller IP** (Machines → controller IP), and
-- has an **Active scanner assigned** (Configuration → Scanners).
+- **Active**, and
+- has a **FANUC controller IP** (Admin → Lapping Machines).
 
-Saving a new machine like that starts its worker. Changing its controller IP, asset number
-or scanner restarts the worker with the new settings. Making it Inactive, clearing the IP or
-scanner, or deleting it stops the worker. Each worker keeps its unsent runs under the
+A machine with an **Active scanner assigned** (Configuration → Scanners) records each run
+under its scanned serial. A machine without one still records every completed run (gearset,
+consec, time and changed macros) with **no serial**; assign a scanner later and new runs get
+serials. Saving a new machine starts its worker. Changing its controller IP, asset number or
+scanner restarts the worker with the new settings. Making it Inactive, clearing the IP, or
+deleting it stops the worker. Each worker keeps its unsent runs under the
 machine's GearApps id, so they survive IP changes and restarts. A worker that fails is
 rebuilt after a pause without touching the others.
 
@@ -34,7 +36,8 @@ Full detail, including IPs and errors, is at `http://<docker-host>:8090/status`.
    gearset on that machine are posted, so each run records what changed.
 5. **Live view**: keeps the scanner serials and Fanuc I/O on the Lapper live view current.
 
-A run without a confirmed scanned serial is never recorded under a substitute serial.
+On a machine with a scanner, a run without a confirmed scanned serial is never recorded
+under a substitute serial. Machines without a scanner record runs with no serial.
 Unsent runs stay in `/data` and are retried after network or API outages and restarts.
 
 ## Requirements

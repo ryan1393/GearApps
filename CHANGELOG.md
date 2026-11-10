@@ -15,6 +15,12 @@
     part used by a gearset; its status can still change.
   - As in the other apps, master data is for administrators only: the Lapper sidebar and dashboard
     show these links to admins.
+- **Lapper Read (Python) without a scanner.** Every Active machine with a FANUC IP now gets a
+  worker. Without an Active scanner its completed cycles are recorded with no serial (gearset,
+  consec, time and changed macros); with one, the strict scanned-serial rule is unchanged.
+- **Lapper Read (Python) on real FANUC controls.** FOCAS longs are read as 32-bit (the 64-bit
+  Linux library stores them that way) and PMC signal bytes as unsigned bytes; the image makes
+  its code readable by the collector user.
 - **Deploy.** Weak or placeholder JWT secrets in the host `.env` are now a warning, not a stop,
   matching the API's own startup warning (it still requires 16+ characters).
 - **Repository layout.** The `manufacturing/` folder is gone (`libs/manufacturing`,

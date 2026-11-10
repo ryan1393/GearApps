@@ -58,11 +58,13 @@ class WorkerTests(unittest.TestCase):
     def _run_one_cycle(self, serial="D000000001", consec=1, rpm="1800"):
         self.transport.macros[10032] = Decimal(consec)
         self.transport.macros[11006] = Decimal(rpm)
-        self.scanner.state = ScannerState(None, serial)
+        if self.scanner:
+            self.scanner.state = ScannerState(None, serial)
         time.sleep(0.25)
         self.transport.set_state(door=True, start=True, cycle=True)
         time.sleep(0.25)
-        self.scanner.state = ScannerState(None, None)
+        if self.scanner:
+            self.scanner.state = ScannerState(None, None)
         self.transport.set_state(door=False, start=False, cycle=False)
 
     def test_a_cycle_is_published_with_its_serial_and_changed_macros(self):
@@ -76,6 +78,20 @@ class WorkerTests(unittest.TestCase):
         self.assertEqual(cycles[0][1:3], ("D000000001", 1))
         self.assertEqual({v[1] for v in self.api.macro_logs.values()}, {"m-consec", "m-rpm"})
         self.assertTrue(os.path.exists(self.settings.heartbeat_file))
+
+    def test_a_machine_without_a_scanner_publishes_cycles_without_a_serial(self):
+        self.scanner = None
+        worker = self.worker = self._worker()
+        thread = self._start(worker)
+        self._run_one_cycle(serial=None, consec=5)
+        self._wait(lambda: self.api.macro_logs)
+        self._wait(lambda: any(c[0] == "io" for c in self.api.calls))
+        worker.stop()
+        thread.join(3)
+        cycles = [c for c in self.api.calls if c[0] == "cycle"]
+        self.assertEqual(cycles[0][1:3], (None, 5))
+        self.assertFalse(any(c[0] == "serials" for c in self.api.calls))
+        self.assertEqual(worker.status()["serials"], "none (no scanner)")
 
     def test_cycle_post_failure_is_retried_without_losing_the_serial(self):
         self.api.fail_cycle = 2

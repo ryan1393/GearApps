@@ -64,7 +64,8 @@ def main(argv: list[str]) -> int:
         return 0
 
     logging.info("Starting Lapper Read %s for %s", __version__, settings.machine_ip)
-    scanner = Scanner(settings.scanner_ip, settings.scanner_input1_port, settings.io_timeout_ms / 1000)
+    scanner = (Scanner(settings.scanner_ip, settings.scanner_input1_port, settings.io_timeout_ms / 1000)
+               if settings.scanner_ip else None)
     worker = Worker(settings, api, fanuc, scanner, CycleStateStore(settings.state_file))
     signal.signal(signal.SIGTERM, worker.stop)
     signal.signal(signal.SIGINT, worker.stop)
