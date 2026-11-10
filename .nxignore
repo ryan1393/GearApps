@@ -1,4 +1,2 @@
-# Historical release archives are not active Nx projects.
-source-archives/**
+# Built release archives are not Nx projects.
 releases/**
-vendor/**

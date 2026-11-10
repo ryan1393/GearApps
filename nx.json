@@ -41,7 +41,8 @@
       "plugin": "@nx/eslint/plugin",
       "options": {
         "targetName": "lint"
-      }
+      },
+      "exclude": ["tools/manufacturing/**"]
     },
     {
       "plugin": "@nx/jest/plugin",

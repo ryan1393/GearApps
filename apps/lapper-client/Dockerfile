@@ -3,7 +3,6 @@ FROM node:24.22.1-alpine AS build
 WORKDIR /app
 ENV HUSKY=0 CYPRESS_INSTALL_BINARY=0 NX_DAEMON=false NX_ISOLATE_PLUGINS=false NX_NO_CLOUD=true
 COPY package.json package-lock.json ./
-COPY vendor ./vendor
 RUN npm install -g npm@11.9.0
 RUN npm ci --ignore-scripts
 COPY . .

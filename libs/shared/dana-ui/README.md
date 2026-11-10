@@ -12,7 +12,7 @@ npx nx run dana-ui:test-browser
 npx nx run dana-ui:pack
 ```
 
-The root TypeScript alias resolves `@dana/ui` to `src/index.ts` in this project, so applications and tests compile the same source with the same Angular version. Nx builds the library before its consumers. The build produces `dist/libs/shared/dana-ui` and synchronizes the root `vendor/dana-ui/package`, which is the sole directory dependency used for the packaged UI and stylesheet exports. Edit this source and rebuild; do not edit generated vendor files by hand.
+The root TypeScript alias resolves `@dana/ui` to `src/index.ts` in this project, so applications and tests compile the same source with the same Angular version. Nx builds the library before its consumers. The build produces the publishable package in `dist/libs/shared/dana-ui` (used by `pack` and the consumer/browser checks). This source is the only copy: applications import `@dana/ui` through the path alias and load the stylesheets from `src/styles`, so nothing is vendored or installed.
 
 The canonical stylesheet is `libs/shared/dana-ui/src/styles/dana-ui.css`. The original manufacturing compatibility layers remain alongside it as `gear-compat.css`, `gear-compat-features.css`, and `gear-compat-overrides.css`; only the manufacturing applications load those layers. All four applications use this same UI version.
 

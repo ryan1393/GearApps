@@ -1,0 +1,847 @@
+<section class="gear-page gear-admin-page" [class.gear-roll-master-page]="activeTab === 'roll-masters'">
+  <header class="gear-page-header" danaPageHeader eyebrow="ADMIN / MASTER DATA" heading="Gear Apps Administration" description="Create the reference records that drive Blade Tracking, Cutter Builder, Greenshed, and Lapping. Changes here are shared across every Gear Apps frontend."></header>
+
+  <div *ngIf="error" class="gear-alert gear-alert-danger mb-4">
+    <strong>Unable to continue.</strong>
+    <span>{{ error }}</span>
+  </div>
+  <div *ngIf="message" class="gear-alert gear-alert-success mb-4">
+    <strong>Saved.</strong>
+    <span>{{ message }}</span>
+  </div>
+
+  <nav class="gear-admin-tabs" aria-label="Administration sections">
+    <button type="button" [class.active]="activeTab === 'users'" (click)="setTab('users')">Users</button>
+    <button type="button" [class.active]="activeTab === 'part-summaries'" (click)="setTab('part-summaries')">Part Summaries</button>
+    <button type="button" [class.active]="activeTab === 'parts'" (click)="setTab('parts')">Parts</button>
+    <button type="button" [class.active]="activeTab === 'gearsets'" (click)="setTab('gearsets')">Gearsets</button>
+    <button type="button" [class.active]="activeTab === 'roll-masters'" (click)="setTab('roll-masters')">Roll Master</button>
+    <button type="button" [class.active]="activeTab === 'models'" (click)="setTab('models')">Models</button>
+    <button type="button" [class.active]="activeTab === 'machines'" (click)="setTab('machines')">Machines</button>
+    <button type="button" [class.active]="activeTab === 'lapping-machines'" (click)="setTab('lapping-machines')">Lapping Machines</button>
+    <button type="button" [class.active]="activeTab === 'dsf-mappings'" (click)="setTab('dsf-mappings')">DSF Mappings</button>
+    <button type="button" [class.active]="activeTab === 'label-printers'" (click)="setTab('label-printers')">Label Printers</button>
+    <button type="button" [class.active]="activeTab === 'trays'" (click)="setTab('trays')">Trays</button>
+    <button type="button" [class.active]="activeTab === 'containers'" (click)="setTab('containers')">Containers</button>
+    <button type="button" [class.active]="activeTab === 'locations'" (click)="setTab('locations')">Locations</button>
+    <button type="button" [class.active]="activeTab === 'cutter-bodies'" (click)="setTab('cutter-bodies')">Cutter Bodies</button>
+  </nav>
+
+  <gear-admin-lapping-gearsets *ngIf="activeTab === 'gearsets'" />
+  <gear-admin-lapping-machines *ngIf="activeTab === 'lapping-machines'" [sharedMachines]="machines" />
+  <gear-admin-dsf-machine-mappings *ngIf="activeTab === 'dsf-mappings'" />
+  <gear-admin-label-printers *ngIf="activeTab === 'label-printers'" />
+  <gear-label-printer-picker *ngIf="activeTab === 'trays' || activeTab === 'containers' || activeTab === 'locations'" labelType="ASSET_TAG" label="Print tags to" />
+
+  <div class="gear-admin-layout" *ngIf="activeTab === 'users'">
+    <form class="gear-panel gear-admin-form" (ngSubmit)="createUser()">
+      <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingUserId ? 'Edit User' : 'Create User' }}</span></div>
+      <label class="gear-field">Email<input class="gear-input" type="email" [(ngModel)]="userForm.email" name="userEmail" autocomplete="off" /></label>
+      <label *ngIf="!editingUserId" class="gear-field">Temporary Password<input class="gear-input" type="password" [(ngModel)]="userForm.password" name="userPassword" autocomplete="new-password" /></label>
+      <div class="gear-form-grid">
+        <label class="gear-field">First Name<input class="gear-input" [(ngModel)]="userForm.firstName" name="userFirstName" /></label>
+        <label class="gear-field">Last Name<input class="gear-input" [(ngModel)]="userForm.lastName" name="userLastName" /></label>
+      </div>
+      <label class="gear-field">Department
+        <select class="gear-select" [(ngModel)]="userForm.departmentId" name="userDepartment">
+          <option value="">Select department...</option>
+          <option *ngFor="let department of departments" [value]="department.id">
+            {{ department.code }} — {{ department.description }}
+          </option>
+        </select>
+        <small class="gear-field-help">
+          Cutter Grind edits Blade Tracking + Cutter Builder. Gear Quality edits Greenshed.
+          Other departments are dashboard-only unless the account is an Admin.
+        </small>
+      </label>
+      <label class="gear-field">Role
+        <select class="gear-select" [(ngModel)]="userForm.role" name="userRole">
+          <option value="user">User</option>
+          <option value="admin">Admin</option>
+        </select>
+      </label>
+      <div class="gear-admin-form-actions">
+        <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">{{ editingUserId ? 'Save User' : 'Create User' }}</button>
+        <button *ngIf="editingUserId" class="gear-btn gear-btn-secondary" type="button" [disabled]="busy" (click)="cancelUserEdit()">Cancel Edit</button>
+      </div>
+    </form>
+
+    <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+            <div class="gear-admin-list-header gear-admin-search-header">
+        <div>
+          <h2>Existing Users</h2>
+          <small>{{ filteredUsers.length }} shown · {{ users.length }} total</small>
+        </div>
+        <input
+          class="gear-input gear-admin-search-input"
+          type="search"
+          [(ngModel)]="userSearch"
+          name="adminUserSearch"
+          placeholder="Search name, email, department, role..."
+          autocomplete="off"
+        />
+      </div>
+      <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="user-v20" *ngFor="let user of filteredUsers">
+        <div class="gear-admin-record-card-body">
+          <div class="gear-admin-record-heading">
+            <strong class="gear-admin-record-title">{{ user.fullName || user.email }}</strong>
+            <span class="gear-badge">{{ user.active ? 'Active' : 'Inactive' }} · {{ user.role }}</span>
+          </div>
+          <div class="gear-admin-record-meta">
+            <div class="gear-admin-record-field gear-admin-record-field-wide">
+              <span class="gear-admin-record-label">Email</span>
+              <span class="gear-admin-record-value">{{ user.email || '—' }}</span>
+            </div>
+            <div class="gear-admin-record-field gear-admin-record-field-wide">
+              <span class="gear-admin-record-label">Department</span>
+              <span class="gear-admin-record-value">{{ departmentName(user.departmentId) }}</span>
+            </div>
+          </div>
+          <div class="gear-admin-actions gear-admin-record-actions">
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditUser(user)">Edit</button>
+            <button *ngIf="!isSelf(user.id)" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleUserEnabled(user)">{{ user.active ? 'Disable' : 'Enable' }}</button>
+            <span *ngIf="isSelf(user.id)" class="gear-badge">You</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gear-admin-layout" *ngIf="activeTab === 'part-summaries'">
+    <form class="gear-panel gear-admin-form" (ngSubmit)="createPartSummary()">
+      <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingPartSummaryId ? 'Edit Part Summary' : 'Create Part Summary' }}</span></div>
+      <div class="gear-form-grid">
+        <label class="gear-field">Summary Number<input class="gear-input" [(ngModel)]="summaryForm.number" name="summaryNumber" placeholder="1.955FC" /></label>
+        <label class="gear-field">Revision<input class="gear-input" [(ngModel)]="summaryForm.revision" name="summaryRevision" /></label>
+      </div>
+      <label class="gear-field">Model
+        <select class="gear-select" [(ngModel)]="summaryForm.model_id" name="summaryModel">
+          <option value="">No model</option>
+          <option *ngFor="let model of models" [value]="model.id">
+            {{ model.model_number ?? '—' }} {{ model.model_type || '' }}
+          </option>
+        </select>
+      </label>
+      <label class="gear-field">HOS<select [(ngModel)]="summaryForm.hos" name="summaryHos" class="gear-select">
+            <option value="">Select hand...</option>
+            <option value="LH">Left Hand</option>
+            <option value="RH">Right Hand</option>
+          </select></label>
+      <div class="gear-admin-form-actions">
+        <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">{{ editingPartSummaryId ? 'Save Part Summary' : 'Create Part Summary' }}</button>
+        <button *ngIf="editingPartSummaryId" class="gear-btn gear-btn-secondary" type="button" [disabled]="busy" (click)="cancelPartSummaryEdit()">Cancel Edit</button>
+      </div>
+    </form>
+
+    <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+            <div class="gear-admin-list-header gear-admin-search-header">
+        <div>
+          <h2>Existing Part Summaries</h2>
+          <small>{{ filteredPartSummaries.length }} shown · {{ partSummaries.length }} total</small>
+        </div>
+        <input
+          class="gear-input gear-admin-search-input"
+          type="search"
+          [(ngModel)]="partSummarySearch"
+          name="adminPartSummarySearch"
+          placeholder="Search Summary, revision, model, HOS..."
+          autocomplete="off"
+        />
+      </div>
+      <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="summary-v20" *ngFor="let summary of filteredPartSummaries">
+        <div class="gear-admin-record-card-body">
+          <div class="gear-admin-record-heading">
+            <strong class="gear-admin-record-title">{{ summary.number }}</strong>
+            <span class="gear-badge">{{ summary.enabled && summary.active ? 'Active' : 'Inactive' }}</span>
+          </div>
+          <div class="gear-admin-record-meta">
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Revision</span>
+              <span class="gear-admin-record-value">{{ summary.revision || '—' }}</span>
+            </div>
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Model</span>
+              <span class="gear-admin-record-value">{{ summaryModel(summary)?.model_number || '—' }}</span>
+            </div>
+            <div class="gear-admin-record-field gear-admin-record-field-wide">
+              <span class="gear-admin-record-label">HOS</span>
+              <span class="gear-admin-record-value">{{ summary.hos || '—' }}</span>
+            </div>
+          </div>
+          <div class="gear-admin-actions gear-admin-record-actions">
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditPartSummary(summary)">Edit</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="togglePartSummaryEnabled(summary)">{{ summary.enabled ? 'Disable' : 'Enable' }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gear-admin-layout" *ngIf="activeTab === 'parts'">
+    <form class="gear-panel gear-admin-form" (ngSubmit)="createPart()">
+      <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingPartId ? 'Edit Part' : 'Create Part' }}</span></div>
+
+      <label class="gear-field">
+        Part Number
+        <input
+          class="gear-input"
+          [(ngModel)]="partForm.part_number"
+          name="partNumber"
+          placeholder="Enter production part number"
+        />
+      </label>
+
+      <label class="gear-field">
+        Part Summary
+        <select class="gear-select" [(ngModel)]="partForm.summary_id" name="partSummary">
+          <option value="">Select Part Summary...</option>
+          <option *ngFor="let summary of partSummaries" [value]="summary.id">
+            {{ summary.number }}{{ summary.revision ? ' / ' + summary.revision : '' }}
+          </option>
+        </select>
+      </label>
+
+      <label class="gear-field">
+        Part Type
+        <select class="gear-select" [(ngModel)]="partForm.part_type_id" name="partType">
+          <option value="">Select Part Type...</option>
+          <option *ngFor="let partType of partTypeChoices" [value]="partType.id">
+            {{ partType.code }} — {{ partType.name }}
+          </option>
+        </select>
+      </label>
+
+      <label class="gear-field">
+        Teeth
+        <input
+          class="gear-input"
+          type="number"
+          min="0"
+          [(ngModel)]="partForm.teeth"
+          name="partTeeth"
+          placeholder="Optional"
+        />
+      </label>
+
+      <small class="gear-field-help">Gearset parts are created with their assembly in the Gearsets tab. A part used in a gearset keeps its number, type, Summary and teeth.</small>
+
+      <div class="gear-admin-actions">
+        <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">{{ editingPartId ? 'Save Part' : 'Create Part' }}</button>
+        <button *ngIf="editingPartId" class="gear-btn gear-btn-secondary" type="button" [disabled]="busy" (click)="cancelPartEdit()">Cancel Edit</button>
+      </div>
+    </form>
+
+    <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+      <div class="gear-admin-list-header gear-admin-search-header">
+        <div>
+          <h2>Existing Parts</h2>
+          <small>{{ filteredParts.length }} shown · {{ parts.length }} total</small>
+        </div>
+        <input
+          class="gear-input gear-admin-search-input"
+          type="search"
+          [(ngModel)]="partSearch"
+          name="adminPartSearch"
+          placeholder="Search part number, Summary, type, teeth..."
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="part-v20" *ngFor="let part of filteredParts">
+        <div class="gear-admin-record-card-body">
+          <div class="gear-admin-record-heading">
+            <strong class="gear-admin-record-title mono">{{ part.part_number }}</strong>
+            <span class="gear-badge">{{ part.enabled && part.active ? 'Active' : 'Inactive' }}</span>
+          </div>
+          <div class="gear-admin-record-meta">
+            <div class="gear-admin-record-field gear-admin-record-field-wide">
+              <span class="gear-admin-record-label">Summary</span>
+              <span class="gear-admin-record-value">
+                {{ part.summary?.number || 'No summary' }}{{ part.summary?.revision ? ' / ' + part.summary?.revision : '' }}
+              </span>
+            </div>
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Part Type</span>
+              <span class="gear-admin-record-value">{{ part.part_type?.code || 'No type' }}</span>
+            </div>
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Teeth</span>
+              <span class="gear-admin-record-value">{{ part.teeth ?? '—' }}</span>
+            </div>
+          </div>
+          <div class="gear-admin-actions gear-admin-record-actions">
+            <button *ngIf="!isGearsetPart(part)" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditPart(part)">Edit</button>
+            <button *ngIf="isGearsetPart(part)" type="button" class="gear-btn gear-btn-secondary" (click)="setTab('gearsets')">Open in Gearsets</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="togglePartEnabled(part)">{{ part.enabled ? 'Disable' : 'Enable' }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gear-admin-layout gear-admin-layout-full gear-admin-roll-master-layout" *ngIf="activeTab === 'roll-masters'">
+    <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+      <div class="gear-admin-list-header gear-admin-search-header">
+        <div>
+          <h2>Roll Master Quantity by Part</h2>
+          <small>Current quantity and minimum warning level are stored for each individual part.</small>
+        </div>
+        <input class="gear-input gear-admin-search-input" type="search" [(ngModel)]="rollMasterSearch" name="adminRollMasterSearch" placeholder="Search part, Summary, type, quantity..." autocomplete="off" />
+      </div>
+      <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="roll-master-v1" *ngFor="let part of filteredRollMasterParts">
+        <div class="gear-admin-record-card-body">
+          <div class="gear-admin-record-heading">
+            <strong class="gear-admin-record-title mono">{{ part.part_number }}</strong>
+            <span class="gear-badge">{{ rollMasterRecord(part) && !rollMasterRecord(part)?.enabled ? 'Disabled' : (rollMasterLow(part) ? 'LOW' : 'OK') }}</span>
+          </div>
+          <div class="gear-admin-record-meta">
+            <div class="gear-admin-record-field"><span class="gear-admin-record-label">Summary</span><span class="gear-admin-record-value">{{ part.summary?.number || '—' }}</span></div>
+            <div class="gear-admin-record-field"><span class="gear-admin-record-label">Part Type</span><span class="gear-admin-record-value">{{ part.part_type?.code || '—' }}</span></div>
+          </div>
+          <div class="gear-form-grid mt-3">
+            <label class="gear-field">Current Quantity<input class="gear-input" type="number" min="0" step="1" [(ngModel)]="rollMasterEdit(part).current_quantity" [name]="'roll-current-' + part.id" /></label>
+            <label class="gear-field">Minimum Quantity<input class="gear-input" type="number" min="0" step="1" [(ngModel)]="rollMasterEdit(part).minimum_quantity" [name]="'roll-min-' + part.id" /></label>
+          </div>
+          <div *ngIf="rollMasterLow(part)" class="gear-alert gear-alert-danger mt-3"><strong>Low Roll Master quantity.</strong><span>Current quantity is at or below this part's minimum.</span></div>
+          <div class="gear-admin-actions gear-admin-record-actions">
+            <button type="button" class="gear-btn gear-btn-primary" [disabled]="busy" (click)="saveRollMaster(part)">Save Quantity</button>
+            <button *ngIf="rollMasterRecord(part) as rollMaster" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleRollMasterEnabled(part)">{{ rollMaster.enabled ? 'Disable' : 'Enable' }}</button>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="!filteredRollMasterParts.length" class="gear-empty-state gear-admin-empty">No parts match this search.</div>
+    </div>
+  </div>
+
+  <div class="gear-admin-layout" *ngIf="activeTab === 'models'">
+    <form class="gear-panel gear-admin-form" (ngSubmit)="createModel()">
+      <div class="gear-step-title"><span class="gear-step-number">1</span><span>Create Model</span></div>
+      <label class="gear-field">Model Number<input class="gear-input" type="number" [(ngModel)]="modelForm.model_number" name="modelNumber" /></label>
+      <label class="gear-field">Model Type<input class="gear-input" [(ngModel)]="modelForm.model_type" name="modelType" placeholder="Optional type / family" /></label>
+      <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">Create Model</button>
+    </form>
+
+    <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+            <div class="gear-admin-list-header gear-admin-search-header">
+        <div>
+          <h2>Existing Models</h2>
+          <small>{{ filteredModels.length }} shown · {{ models.length }} total</small>
+        </div>
+        <input
+          class="gear-input gear-admin-search-input"
+          type="search"
+          [(ngModel)]="modelSearch"
+          name="adminModelSearch"
+          placeholder="Search model number or type..."
+          autocomplete="off"
+        />
+      </div>
+      <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="model-v20" *ngFor="let model of filteredModels">
+        <div class="gear-admin-record-card-body">
+          <div class="gear-admin-record-heading">
+            <strong class="gear-admin-record-title">{{ model.model_number ?? '—' }}</strong>
+            <span class="gear-badge">{{ model.enabled && model.active ? 'Active' : 'Inactive' }}</span>
+          </div>
+          <div class="gear-admin-record-meta">
+            <div class="gear-admin-record-field gear-admin-record-field-wide">
+              <span class="gear-admin-record-label">Model Type</span>
+              <span class="gear-admin-record-value">{{ model.model_type || 'No model type' }}</span>
+            </div>
+          </div>
+          <div class="gear-admin-actions gear-admin-record-actions">
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleModelEnabled(model)">{{ model.enabled ? 'Disable' : 'Enable' }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gear-admin-layout" *ngIf="activeTab === 'machines'">
+    <form class="gear-panel gear-admin-form" (ngSubmit)="createMachine()">
+      <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingMachineId ? 'Edit Machine' : 'Create Machine' }}</span></div>
+      <label class="gear-field">Machine Number<input class="gear-input" [(ngModel)]="machineForm.machine_number" name="machineNumber" placeholder="520G" /></label>
+      <label class="gear-field">Department
+        <select class="gear-select" [(ngModel)]="machineForm.department_id" name="machineDepartment">
+          <option value="">Select department...</option>
+          <option *ngFor="let department of departments" [value]="department.id">
+            {{ department.code }} — {{ department.description }}
+          </option>
+        </select>
+      </label>
+      <label class="gear-field">Machine Type
+        <select class="gear-select" [(ngModel)]="machineForm.machine_type" name="machineType">
+          <option value="PRODUCTION">Production</option>
+          <option value="CUTTER_BUILDER">Cutter Builder</option>
+        </select>
+        <small class="gear-field-help">Cutter Builder build selection only offers enabled Department 45 machines with Machine Type = Cutter Builder.</small>
+      </label>
+      <div class="gear-form-grid">
+        <label class="gear-field">Cell<input class="gear-input" type="number" [(ngModel)]="machineForm.cell" name="machineCell" /></label>
+        <label class="gear-field">Description<input class="gear-input" [(ngModel)]="machineForm.description" name="machineDescription" /></label>
+      </div>
+      <div class="gear-admin-form-actions">
+        <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">{{ editingMachineId ? 'Save Machine' : 'Create Machine' }}</button>
+        <button *ngIf="editingMachineId" class="gear-btn gear-btn-secondary" type="button" [disabled]="busy" (click)="cancelMachineEdit()">Cancel Edit</button>
+      </div>
+    </form>
+
+    <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+            <div class="gear-admin-list-header gear-admin-search-header">
+        <div>
+          <h2>Existing Machines</h2>
+          <small>{{ filteredMachines.length }} shown · {{ machines.length }} total</small>
+        </div>
+        <input
+          class="gear-input gear-admin-search-input"
+          type="search"
+          [(ngModel)]="machineSearch"
+          name="adminMachineSearch"
+          placeholder="Search machine, department, cell, description..."
+          autocomplete="off"
+        />
+      </div>
+      <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="machine-v20" *ngFor="let machine of filteredMachines">
+        <div class="gear-admin-record-card-body">
+          <div class="gear-admin-record-heading">
+            <strong class="gear-admin-record-title mono">{{ machine.machine_number }}</strong>
+            <span class="gear-badge">{{ machine.enabled && machine.active ? 'Active' : 'Inactive' }}</span>
+          </div>
+          <div class="gear-admin-record-meta">
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Department</span>
+              <span class="gear-admin-record-value">{{ machine.department?.code || '—' }}</span>
+            </div>
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Cell</span>
+              <span class="gear-admin-record-value">{{ machine.cell ?? '—' }}</span>
+            </div>
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Machine Type</span>
+              <span class="gear-admin-record-value">{{ machine.machine_type === 'CUTTER_BUILDER' ? 'Cutter Builder' : 'Production' }}</span>
+            </div>
+            <div class="gear-admin-record-field gear-admin-record-field-wide">
+              <span class="gear-admin-record-label">Description</span>
+              <span class="gear-admin-record-value">{{ machine.description || 'No description' }}</span>
+            </div>
+          </div>
+          <div class="gear-admin-actions gear-admin-record-actions">
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditMachine(machine)">Edit</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleMachineEnabled(machine)">{{ machine.enabled ? 'Disable' : 'Enable' }}</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gear-admin-layout" data-gear-admin-style="standard-v18" *ngIf="activeTab === 'trays'">
+    <form class="gear-panel gear-admin-form" data-gear-admin-create="tray-v15" (ngSubmit)="createTray()">
+      <div class="gear-step-title"><span class="gear-step-number">1</span><span>Create Tray</span></div>
+      <label class="gear-field">
+        Tray Serial Number
+        <input
+          class="gear-input mono"
+          [(ngModel)]="trayForm.serial_number"
+          name="adminCreateTraySerial"
+          placeholder="T0301 or 301"
+          autocomplete="off"
+        />
+        <small class="gear-field-help">Enter the sequence with or without T. It is saved as T plus at least four digits. A new tray starts EMPTY with 0 blades.</small>
+      </label>
+      <label class="gear-field" *ngIf="trayForm.serial_number.trim()">
+        Saved Serial Preview
+        <input
+          class="gear-input mono gear-admin-create-preview-input"
+          [value]="traySerialPreview || 'Invalid serial'"
+          readonly
+          aria-live="polite"
+        />
+        <small class="gear-field-help">The backend remains authoritative and stores the canonical T-prefixed serial.</small>
+      </label>
+      <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy || !traySerialPreview">Create Tray</button>
+    </form>
+
+    <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+      <div class="gear-admin-list-header gear-admin-search-header">
+        <div>
+          <h2>Tray Records</h2>
+          <small>{{ filteredTrays.length }} shown · {{ trays.length }} total</small>
+        </div>
+        <input
+          class="gear-input gear-admin-search-input"
+          type="search"
+          [(ngModel)]="traySearch"
+          name="adminTraySearch"
+          placeholder="Search tray serial, stage, location, container..."
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="tray-v20" *ngFor="let tray of filteredTrays">
+        <div class="gear-admin-record-card-body">
+          <div class="gear-admin-record-heading">
+            <strong class="gear-admin-record-title mono">{{ tray.serial_number }}</strong>
+            <span class="gear-badge">{{ tray.enabled ? 'Active' : 'Inactive' }}</span>
+          </div>
+          <div class="gear-admin-record-meta">
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Blades</span>
+              <span class="gear-admin-record-value gear-admin-record-value-strong">{{ tray.blade_count }}</span>
+            </div>
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Stage</span>
+              <span class="gear-admin-record-value">{{ tray.current_stage?.name || tray.current_stage?.code || 'No stage' }}</span>
+            </div>
+            <div class="gear-admin-record-field gear-admin-record-field-wide gear-admin-record-placement">
+              <ng-container *ngIf="tray.current_location?.serial_number; else trayContainerPlacementV20">
+                <span class="gear-admin-record-label">Location</span>
+                <span class="gear-admin-record-value mono">{{ tray.current_location?.serial_number }}</span>
+              </ng-container>
+              <ng-template #trayContainerPlacementV20>
+                <ng-container *ngIf="tray.current_container?.serial_number; else trayUnassignedPlacementV20">
+                  <span class="gear-admin-record-label">Container</span>
+                  <span class="gear-admin-record-value mono">{{ tray.current_container?.serial_number }}</span>
+                </ng-container>
+              </ng-template>
+              <ng-template #trayUnassignedPlacementV20>
+                <span class="gear-admin-record-label">Placement</span>
+                <span class="gear-admin-record-value">Unassigned</span>
+              </ng-template>
+            </div>
+          </div>
+          <div class="gear-admin-actions gear-admin-record-actions">
+            <button
+              type="button"
+              class="gear-btn gear-btn-secondary"
+              [disabled]="busy || !tray.enabled || printingTagId === tray.id"
+              (click)="printTag('TRAY', tray.id, tray.serial_number)"
+            >
+              {{ printingTagId === tray.id ? 'Printing…' : 'Print Tag' }}
+            </button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleTrayEnabled(tray)">{{ tray.enabled ? 'Disable' : 'Enable' }}</button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!filteredTrays.length" class="gear-empty-state gear-admin-empty">No trays match this search.</div>
+    </div>
+  </div>
+
+  <div class="gear-admin-layout" data-gear-admin-style="standard-v18" *ngIf="activeTab === 'containers'">
+    <form class="gear-panel gear-admin-form" data-gear-admin-create="container-v15" (ngSubmit)="createContainer()">
+      <div class="gear-step-title"><span class="gear-step-number">1</span><span>Create Container</span></div>
+      <label class="gear-field">
+        Container Serial Number
+        <input
+          class="gear-input mono"
+          [(ngModel)]="containerForm.serial_number"
+          name="adminCreateContainerSerial"
+          placeholder="C0101 or 101"
+          autocomplete="off"
+        />
+        <small class="gear-field-help">Enter the sequence with or without C. It is saved as C plus at least four digits. New containers are active and empty.</small>
+      </label>
+      <label class="gear-field" *ngIf="containerForm.serial_number.trim()">
+        Saved Serial Preview
+        <input
+          class="gear-input mono gear-admin-create-preview-input"
+          [value]="containerSerialPreview || 'Invalid serial'"
+          readonly
+          aria-live="polite"
+        />
+        <small class="gear-field-help">The backend remains authoritative and stores the canonical C-prefixed serial.</small>
+      </label>
+      <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy || !containerSerialPreview">Create Container</button>
+    </form>
+
+    <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+      <div class="gear-admin-list-header gear-admin-search-header">
+        <div>
+          <h2>Container Records</h2>
+          <small>{{ filteredContainers.length }} shown · {{ containers.length }} total</small>
+        </div>
+        <input
+          class="gear-input gear-admin-search-input"
+          type="search"
+          [(ngModel)]="containerSearch"
+          name="adminContainerSearch"
+          placeholder="Search container serial or counts..."
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="container-v20" *ngFor="let container of filteredContainers">
+        <div class="gear-admin-record-card-body">
+          <div class="gear-admin-record-heading">
+            <strong class="gear-admin-record-title mono">{{ container.serial_number }}</strong>
+            <span class="gear-badge">{{ container.enabled ? 'Active' : 'Inactive' }}</span>
+          </div>
+          <div class="gear-admin-record-meta">
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Trays</span>
+              <span class="gear-admin-record-value gear-admin-record-value-strong">{{ container.tray_count }}</span>
+            </div>
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Blades</span>
+              <span class="gear-admin-record-value gear-admin-record-value-strong">{{ container.blade_count }}</span>
+            </div>
+          </div>
+          <div class="gear-admin-actions gear-admin-record-actions">
+            <button
+              type="button"
+              class="gear-btn gear-btn-secondary"
+              [disabled]="busy || !container.enabled || printingTagId === container.id"
+              (click)="printTag('CONTAINER', container.id, container.serial_number)"
+            >
+              {{ printingTagId === container.id ? 'Printing…' : 'Print Tag' }}
+            </button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleContainerEnabled(container)">{{ container.enabled ? 'Disable' : 'Enable' }}</button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!filteredContainers.length" class="gear-empty-state gear-admin-empty">No containers match this search.</div>
+    </div>
+  </div>
+
+  <div class="gear-admin-layout" *ngIf="activeTab === 'locations'">
+    <form class="gear-panel gear-admin-form" (ngSubmit)="saveLocation()">
+      <div class="gear-step-title">
+        <span class="gear-step-number">1</span>
+        <span>{{ editingLocationId ? 'Edit Location' : 'Create Location' }}</span>
+      </div>
+
+      <label class="gear-field">
+        Location Barcode / Serial
+        <input
+          class="gear-input"
+          [(ngModel)]="locationForm.serial_number"
+          name="locationSerial"
+          placeholder="Example: CGRR-001, CGRP-001, CGDR-001, CGFP-001, or GSR-31706"
+          autocomplete="off"
+        />
+        <small class="gear-field-help">This is the value scanned on the physical location tag.</small>
+      </label>
+
+      <div *ngIf="locationShelfPreview as shelf" class="gear-admin-location-rule">
+        <strong>Shelf routing detected</strong>
+        <span>{{ shelf.kind }}<ng-container *ngIf="shelf.partTypeCode"> · {{ shelf.partTypeCode }}</ng-container> · {{ locationShelfDisplay(shelf) }}</span>
+        <small>Department, location number, and SHELF type are derived automatically. Numbered Cuttergrind shelves use shelf type + physical number; Green Shed Summary shelves keep Summary validation.</small>
+      </div>
+
+      <div class="gear-form-grid">
+        <label class="gear-field">
+          Location Number
+          <input
+            class="gear-input"
+            [(ngModel)]="locationForm.number"
+            name="locationNumber"
+            [disabled]="!!locationShelfPreview"
+            placeholder="A1"
+          />
+        </label>
+
+        <label class="gear-field">
+          Location Type
+          <input
+            class="gear-input"
+            [(ngModel)]="locationForm.location_type"
+            name="locationType"
+            [disabled]="!!locationShelfPreview"
+            placeholder="INTERNAL / SHELF / WORKCENTER"
+          />
+        </label>
+      </div>
+
+      <label class="gear-field">
+        Department / Area
+        <input
+          class="gear-input"
+          [(ngModel)]="locationForm.department"
+          name="locationDepartment"
+          [disabled]="!!locationShelfPreview"
+          placeholder="CUTTERGRIND"
+        />
+      </label>
+
+      <label class="gear-field">
+        Description
+        <input
+          class="gear-input"
+          [(ngModel)]="locationForm.description"
+          name="locationDescription"
+          placeholder="Physical location description"
+        />
+      </label>
+
+      <label class="gear-field gear-admin-check-field">
+        <input type="checkbox" [(ngModel)]="locationForm.enabled" name="locationEnabled" />
+        <span>Location is active</span>
+      </label>
+
+      <div class="gear-admin-form-actions">
+        <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">
+          {{ editingLocationId ? 'Save Location' : 'Create Location' }}
+        </button>
+        <button
+          *ngIf="editingLocationId"
+          class="gear-btn gear-btn-secondary"
+          type="button"
+          [disabled]="busy"
+          (click)="cancelLocationEdit()"
+        >
+          Cancel Edit
+        </button>
+      </div>
+
+      <small class="gear-field-help">
+        Location identity/routing fields cannot be changed, and a location cannot be disabled, while trays or cutters are actively assigned there.
+      </small>
+    </form>
+
+    <div class="gear-panel gear-admin-list gear-admin-location-list gear-admin-record-grid gear-admin-record-grid-professional">
+      <div class="gear-admin-list-header gear-admin-search-header gear-admin-location-header">
+        <div>
+          <h2>Existing Locations</h2>
+          <small>{{ filteredLocations.length }} shown · {{ locations.length }} total</small>
+        </div>
+        <input
+          class="gear-input gear-admin-search-input"
+          type="search"
+          [(ngModel)]="locationSearch"
+          name="adminLocationSearch"
+          placeholder="Search locations..."
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="gear-admin-row gear-admin-record-card gear-admin-location-row" data-gear-admin-record-card="location-v20" *ngFor="let location of filteredLocations">
+        <div class="gear-admin-record-card-body">
+          <div class="gear-admin-record-heading">
+            <strong class="gear-admin-record-title mono">{{ location.serial_number }}</strong>
+            <span class="gear-badge">{{ location.enabled ? 'Active' : 'Inactive' }}</span>
+          </div>
+          <div class="gear-admin-record-meta">
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Location #</span>
+              <span class="gear-admin-record-value">{{ location.number || '—' }}</span>
+            </div>
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Type</span>
+              <span class="gear-admin-record-value">{{ location.location_type || '—' }}</span>
+            </div>
+            <div class="gear-admin-record-field gear-admin-record-field-wide">
+              <span class="gear-admin-record-label">Department / Area</span>
+              <span class="gear-admin-record-value">{{ location.department || 'Shared / Internal' }}</span>
+            </div>
+            <div class="gear-admin-record-field gear-admin-record-field-wide">
+              <span class="gear-admin-record-label">Description</span>
+              <span class="gear-admin-record-value">{{ location.description || 'No description' }}</span>
+            </div>
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Trays</span>
+              <span class="gear-admin-record-value gear-admin-record-value-strong">{{ location.tray_count }}</span>
+            </div>
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Blades</span>
+              <span class="gear-admin-record-value gear-admin-record-value-strong">{{ location.blade_count }}</span>
+            </div>
+          </div>
+          <div class="gear-admin-actions gear-admin-record-actions">
+            <button
+              type="button"
+              class="gear-btn gear-btn-secondary"
+              [disabled]="busy || !location.enabled || printingTagId === location.id"
+              (click)="printTag('LOCATION', location.id, location.serial_number)"
+            >
+              {{ printingTagId === location.id ? 'Printing…' : 'Print Tag' }}
+            </button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditLocation(location)">Edit</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleLocationEnabled(location)">
+              {{ location.enabled ? 'Disable' : 'Enable' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="!filteredLocations.length" class="gear-empty-state gear-admin-empty">No locations match this search.</div>
+    </div>
+  </div>
+
+  <div class="gear-admin-layout" *ngIf="activeTab === 'cutter-bodies'">
+    <form class="gear-panel gear-admin-form" (ngSubmit)="createCutterBody()">
+      <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingCutterBodyId ? 'Edit Cutter Body' : 'Create Cutter Body' }}</span></div>
+      <label class="gear-field">MF / Manufacturer Serial<input class="gear-input" [(ngModel)]="cutterBodyForm.mf_serial_number" name="cutterMfSerial" /></label>
+      <label class="gear-field">Dana Serial (if already etched)<input class="gear-input" [(ngModel)]="cutterBodyForm.dana_serial_number" name="cutterDanaSerial" /></label>
+      <label class="gear-field">Description<textarea class="gear-textarea" [(ngModel)]="cutterBodyForm.description" name="cutterDescription"></textarea></label>
+      <div class="gear-admin-form-actions">
+        <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">{{ editingCutterBodyId ? 'Save Cutter Body' : 'Create Cutter Body' }}</button>
+        <button *ngIf="editingCutterBodyId" class="gear-btn gear-btn-secondary" type="button" [disabled]="busy" (click)="cancelCutterBodyEdit()">Cancel Edit</button>
+      </div>
+    </form>
+
+    <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+            <div class="gear-admin-list-header gear-admin-search-header">
+        <div>
+          <h2>Existing Cutter Bodies</h2>
+          <small>{{ filteredCutterBodies.length }} shown · {{ cutterBodies.length }} total</small>
+        </div>
+        <input
+          class="gear-input gear-admin-search-input"
+          type="search"
+          [(ngModel)]="cutterBodySearch"
+          name="adminCutterBodySearch"
+          placeholder="Search Dana serial, MF serial, description..."
+          autocomplete="off"
+        />
+      </div>
+      <div class="gear-admin-row gear-admin-record-card gear-admin-cutter-row" data-gear-admin-record-card="cutter-body-v20" *ngFor="let body of filteredCutterBodies">
+        <div class="gear-admin-record-card-body">
+          <div class="gear-admin-record-heading">
+            <strong class="gear-admin-record-title mono">{{ body.dana_serial_number || body.mf_serial_number }}</strong>
+            <span class="gear-badge">{{ body.enabled ? 'Enabled' : 'Disabled' }}</span>
+          </div>
+          <div class="gear-admin-record-meta">
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Dana Serial</span>
+              <span class="gear-admin-record-value mono">{{ body.dana_serial_number || 'Not etched' }}</span>
+            </div>
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">MF Serial</span>
+              <span class="gear-admin-record-value mono">{{ body.mf_serial_number || '—' }}</span>
+            </div>
+            <div class="gear-admin-record-field gear-admin-record-field-wide">
+              <span class="gear-admin-record-label">Description</span>
+              <span class="gear-admin-record-value">{{ body.description || 'No description' }}</span>
+            </div>
+          </div>
+
+          <div class="gear-admin-actions gear-admin-record-actions">
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditCutterBody(body)">Edit</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleCutterBodyEnabled(body)">{{ body.enabled ? 'Disable' : 'Enable' }}</button>
+          </div>
+
+          <div *ngIf="!body.dana_serial_number" class="gear-admin-inline-edit gear-admin-record-inline-action">
+            <span class="gear-admin-record-label">Assign etched Dana serial</span>
+            <div class="gear-admin-inline-edit-controls">
+              <input
+                class="gear-input"
+                [(ngModel)]="danaAssignments[body.id]"
+                [name]="'dana-' + body.id"
+                placeholder="Enter etched Dana S/N"
+                [disabled]="busy"
+              />
+              <button
+                type="button"
+                class="gear-btn gear-btn-secondary"
+                [disabled]="busy || !(danaAssignments[body.id] || '').trim()"
+                (click)="assignDanaSerial(body)"
+              >
+                Assign Dana S/N
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

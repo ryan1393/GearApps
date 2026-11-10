@@ -58,7 +58,7 @@ services:
     environment:
       <<: *gear-db-environment
       DATABASE_SYNCHRONIZE: "false"
-    command: ["node", "manufacturing/tools/base-data/import-base-data.mjs", "--bootstrap-only"]
+    command: ["node", "tools/manufacturing/base-data/import-base-data.mjs", "--bootstrap-only"]
     depends_on:
       gear-db-bootstrap:
         condition: service_completed_successfully

@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 make g+
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json package-lock.json ./
-COPY vendor ./vendor
 ENV HUSKY=0 CYPRESS_INSTALL_BINARY=0 NX_DAEMON=false NX_ISOLATE_PLUGINS=false NX_NO_CLOUD=true
 ARG BUILD_NATIVE_MODULES_FROM_SOURCE=false
 RUN npm install -g npm@11.9.0
@@ -21,7 +20,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends python3 make g+
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json package-lock.json ./
-COPY vendor ./vendor
 ENV NODE_ENV=production HUSKY=0
 ARG BUILD_NATIVE_MODULES_FROM_SOURCE=false
 RUN npm install -g npm@11.9.0
@@ -34,6 +32,6 @@ COPY --from=production-deps /usr/local/lib/node_modules/npm /usr/local/lib/node_
 COPY --from=production-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist/apps/server ./dist/apps/server
 COPY --from=build /app/dist/apps/server-bootstrap ./dist/apps/server-bootstrap
-COPY --from=build /app/manufacturing/tools/base-data ./manufacturing/tools/base-data
+COPY --from=build /app/tools/manufacturing/base-data ./tools/manufacturing/base-data
 EXPOSE 3333
 CMD ["node", "dist/apps/server/main.js"]

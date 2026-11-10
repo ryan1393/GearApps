@@ -27,7 +27,7 @@
           "apps/cutter-builder/src/assets",
           {
             "glob": "**/*",
-            "input": "manufacturing/assets",
+            "input": "libs/manufacturing/assets",
             "output": "assets"
           }
         ],

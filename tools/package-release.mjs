@@ -41,7 +41,7 @@ export function packageFileAllowed(relativePath) {
   )
     return false;
   if (parts.some((part) => excludedDirectories.has(part.toLowerCase()))) return false;
-  if (relative.startsWith('manufacturing/tools/data-import/work/')) return false;
+  if (relative.startsWith('tools/manufacturing/data-import/work/')) return false;
   if (/^tools\/database\/(?:cleanup|legacy-import)\.sql$/i.test(relative)) return false;
   if (
     relative.startsWith('apps/lapper-read/') &&

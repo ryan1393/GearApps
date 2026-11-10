@@ -18,7 +18,9 @@ The root package.json and package-lock.json are the dependency authority. Use
 Node 24.22.1, npm 11.9.0 and .NET SDK 8 for the collector. All clients share [Dana UI](libs/shared/dana-ui).
 Application API routes are under /api/v1; health is /api/v1/health/ready.
 Every application and its end-to-end project lives under root `apps/`.
-Manufacturing domain libraries and maintenance tools remain in `manufacturing/`.
+Manufacturing libraries are in `libs/manufacturing/`, their maintenance tools in
+`tools/manufacturing/`, their documentation in [docs/manufacturing](docs/manufacturing/README.md),
+and the Windows/Linux launchers in `commands/`.
 
 ## Run the complete stack
 
@@ -35,7 +37,9 @@ API image shared by the bootstrap jobs and the running API. All four nginx clien
 proxy /api to gear-app-server:3333. Keep the existing PostgreSQL volume.
 
 For an existing installation, follow [the unified API upgrade procedure](docs/UNIFIED_API.md).
-The application source ZIP is [GearApps 70.5.0](releases/GearApps-70.5.0.zip).
+Build the application source ZIP with `npm run package:release`; it writes
+`releases/GearApps-<version>.zip` and its `.sha256`. Release archives are not committed:
+attach them to a GitHub release instead. Earlier archives remain in git history.
 
 Docker dependency stages include Python, Make and a C++ compiler, as required by
 [node-gyp](https://github.com/nodejs/node-gyp#on-unix), so native npm
@@ -69,7 +73,8 @@ GearAppsApi settings.
 ## Database and validation
 
 Public users, departments, machines, parts, summaries and gearsets are shared
-masters. Lapper profiles, scanner/FANUC snapshots and production history live in
+masters, edited by administrators in the shared Admin screen (`/admin` in every app,
+including Lapping's Gearsets and Lapping Machines tabs). Lapper profiles, scanner/FANUC snapshots and production history live in
 the linked lapper schema. [Database integrity](docs/DATABASE_INTEGRITY.md) explains
 the preserved history, migrations, backup-first tools and outstanding review items.
 
@@ -79,9 +84,6 @@ npm test
 npm run test:contracts
 npm run lint
 npm run build
-dotnet test apps/lapper-read/LapperRead.Tests/LapperRead.Tests.csproj -c Release
 ```
 
 The database suites require disposable restores and explicit fixture authorization.
-See [unified API verification](docs/UNIFIED_API_VERIFICATION.json).
-Historical releases remain in releases/ and source-archives/.

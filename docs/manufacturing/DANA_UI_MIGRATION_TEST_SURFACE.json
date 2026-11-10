@@ -1,0 +1,940 @@
+{
+  "schemaVersion": 2,
+  "danaAppsRelease": "V70.0.2R9",
+  "totalTests": 84,
+  "authoritativeTests": 82,
+  "migrationSensitiveTests": 47,
+  "staticMigrationSensitiveTests": [
+    "tools/manufacturing/data-import/test-data-import-contract.mjs",
+    "tools/manufacturing/data-import/test-full-data-reset-contract.mjs",
+    "tools/manufacturing/test-admin-management-ui-contract.mjs",
+    "tools/manufacturing/test-blade-inventory-control-center-contract.mjs",
+    "tools/manufacturing/test-blade-locations-management-contract.mjs",
+    "tools/manufacturing/test-dana-apps-fresh-db-runtime-deps-contract.mjs",
+    "tools/manufacturing/test-dana-apps-fresh-docker-contract.mjs",
+    "tools/manufacturing/test-dana-apps-gear-handoff-package-contract.mjs",
+    "tools/manufacturing/test-dana-apps-gear-merge-manifest-contract.mjs",
+    "tools/manufacturing/test-dana-apps-gear-premerge-readiness-contract.mjs",
+    "tools/manufacturing/test-dana-apps-premerge-contract.mjs",
+    "tools/manufacturing/test-dana-apps-source-package-completeness-contract.mjs",
+    "tools/manufacturing/test-dana-apps-source-package-hygiene-contract.mjs",
+    "tools/manufacturing/test-dana-component-consolidation-contract.mjs",
+    "tools/manufacturing/test-dana-diamond-brand-contract.mjs",
+    "tools/manufacturing/test-dana-master-ui-contract.mjs",
+    "tools/manufacturing/test-dana-master-ui-freeze-contract.mjs",
+    "tools/manufacturing/test-dana-responsive-data-surface-contract.mjs",
+    "tools/manufacturing/test-dana-responsive-page-layout-contract.mjs",
+    "tools/manufacturing/test-dana-shared-export-integrity-contract.mjs",
+    "tools/manufacturing/test-dana-summary-card-contract.mjs",
+    "tools/manufacturing/test-dana-ui-ownership-adoption-contract.mjs",
+    "tools/manufacturing/test-dana-ui-release-hardening-contract.mjs",
+    "tools/manufacturing/test-external-dana-ui-package-contract.mjs",
+    "tools/manufacturing/test-global-professional-ui-contract.mjs",
+    "tools/manufacturing/test-inventory-control-center-search-contract.mjs",
+    "tools/manufacturing/test-large-screen-readability-contract.mjs",
+    "tools/manufacturing/test-nx-install-contract.mjs",
+    "tools/manufacturing/test-parent-child-drilldown-contract.mjs",
+    "tools/manufacturing/test-scrap-blade-history-contract.mjs",
+    "tools/manufacturing/test-shared-icon-assets-contract.mjs",
+    "tools/manufacturing/test-shared-ui-style-source-contract.mjs",
+    "tools/manufacturing/test-shop-floor-readability-contract.mjs",
+    "tools/manufacturing/test-sidebar-navigation-hierarchy-contract.mjs",
+    "tools/manufacturing/test-toast-notifications-contract.mjs",
+    "tools/manufacturing/test-ui-consistency-contract.mjs",
+    "tools/manufacturing/test-ui-deep-scan-contract.mjs",
+    "tools/manufacturing/test-ui-foundation-cleanup-contract.mjs",
+    "tools/manufacturing/test-ui-style-integrity-contract.mjs",
+    "tools/manufacturing/test-ux-accessibility-feedback-contract.mjs",
+    "tools/manufacturing/test-ux-responsive-navigation-contract.mjs",
+    "tools/manufacturing/test-workflow-surface-consolidation-contract.mjs"
+  ],
+  "dbDeferredMigrationSensitiveTests": [
+    "tools/manufacturing/test-data/test-workflow-harness-contract.mjs",
+    "tools/manufacturing/test-department-app-access-contract.mjs",
+    "tools/manufacturing/test-greenshed-part-shelf-contract.mjs"
+  ],
+  "orphanedMigrationSensitiveTests": [
+    "tools/manufacturing/test-dashboard-visual-qa-contract.mjs",
+    "tools/manufacturing/test-dependency-trim-contract.mjs"
+  ],
+  "exactClassSensitiveTests": [
+    "tools/manufacturing/test-dana-component-consolidation-contract.mjs",
+    "tools/manufacturing/test-dana-diamond-brand-contract.mjs",
+    "tools/manufacturing/test-dana-master-ui-freeze-contract.mjs",
+    "tools/manufacturing/test-global-professional-ui-contract.mjs",
+    "tools/manufacturing/test-inventory-control-center-search-contract.mjs",
+    "tools/manufacturing/test-parent-child-drilldown-contract.mjs",
+    "tools/manufacturing/test-shared-icon-assets-contract.mjs",
+    "tools/manufacturing/test-sidebar-navigation-hierarchy-contract.mjs",
+    "tools/manufacturing/test-ui-consistency-contract.mjs",
+    "tools/manufacturing/test-ui-deep-scan-contract.mjs",
+    "tools/manufacturing/test-ui-foundation-cleanup-contract.mjs",
+    "tools/manufacturing/test-ux-responsive-navigation-contract.mjs"
+  ],
+  "rows": [
+    {
+      "file": "tools/manufacturing/data-import/test-data-import-contract.mjs",
+      "migrationMarkers": [
+        "package.json"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/data-import/test-full-data-reset-contract.mjs",
+      "migrationMarkers": [
+        "package.json"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/data-import/test-legacy-log-dedupe.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/data-import/test-legacy-null-mf-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-admin-backend-consistency-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-admin-management-ui-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html",
+        "cutter-builder-nav.component.html",
+        "greenshed-nav.component.html"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-angular-template-structure-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-authenticated-mutation-coverage-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-backend-mutation-fixture-schema-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": true
+    },
+    {
+      "file": "tools/manufacturing/test-backend-mutation-null-response-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-blade-dashboard-live-data-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-blade-inventory-control-center-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-blade-locations-management-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-concurrent-backend-mutation.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-cutter-builder-request-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-cuttergrind-part-shelf-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-apps-fresh-db-runtime-deps-contract.mjs",
+      "migrationMarkers": [
+        "package.json",
+        "run-all-tests.ps1"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-apps-fresh-docker-contract.mjs",
+      "migrationMarkers": [
+        "project.json",
+        "package.json"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-apps-gear-handoff-package-contract.mjs",
+      "migrationMarkers": [
+        "run-all-tests.ps1"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-apps-gear-merge-manifest-contract.mjs",
+      "migrationMarkers": [
+        "package-lock.json"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-apps-gear-premerge-readiness-contract.mjs",
+      "migrationMarkers": [
+        "gear-apps.css",
+        "project.json",
+        "package.json",
+        "run-all-tests.ps1",
+        "ui-tailwind/src/index.ts"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-apps-premerge-contract.mjs",
+      "migrationMarkers": [
+        "project.json",
+        "package.json",
+        "package-lock.json"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-apps-source-package-completeness-contract.mjs",
+      "migrationMarkers": [
+        "run-all-tests.ps1"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-apps-source-package-hygiene-contract.mjs",
+      "migrationMarkers": [
+        "run-all-tests.ps1"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-component-consolidation-contract.mjs",
+      "migrationMarkers": [
+        "ui-tailwind/src/index.ts",
+        "gear-page"
+      ],
+      "exactClassChecks": 2,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-diamond-brand-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html",
+        "cutter-builder-nav.component.html",
+        "greenshed-nav.component.html",
+        "project.json",
+        "brand-mark"
+      ],
+      "exactClassChecks": 5,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-kpi-balance-icon-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-master-ui-contract.mjs",
+      "migrationMarkers": [
+        "ui-tailwind/src/index.ts",
+        "gear-page"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-master-ui-freeze-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html",
+        "cutter-builder-nav.component.html",
+        "greenshed-nav.component.html",
+        "gear-apps.css",
+        "project.json",
+        "run-all-tests.ps1",
+        "ui-tailwind/src/index.ts"
+      ],
+      "exactClassChecks": 1,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-responsive-data-surface-contract.mjs",
+      "migrationMarkers": [
+        "run-all-tests.ps1",
+        "gear-page"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-responsive-page-layout-contract.mjs",
+      "migrationMarkers": [
+        "run-all-tests.ps1",
+        "gear-page"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-shared-export-integrity-contract.mjs",
+      "migrationMarkers": [
+        "ui-tailwind/src/index.ts"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-summary-card-contract.mjs",
+      "migrationMarkers": [
+        "ui-tailwind/src/index.ts"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-ui-ownership-adoption-contract.mjs",
+      "migrationMarkers": [
+        "gear-apps.css",
+        "project.json"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dana-ui-release-hardening-contract.mjs",
+      "migrationMarkers": [
+        "gear-apps.css",
+        "gear-page"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-dashboard-visual-qa-contract.mjs",
+      "migrationMarkers": [
+        "project.json",
+        "package.json",
+        "run-all-tests.ps1"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": false,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-data/test-blade-status-fixture-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": true
+    },
+    {
+      "file": "tools/manufacturing/test-data/test-fixture-enum-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": true
+    },
+    {
+      "file": "tools/manufacturing/test-data/test-part-machine-compatibility-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": true
+    },
+    {
+      "file": "tools/manufacturing/test-data/test-start-grinding-db-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": true
+    },
+    {
+      "file": "tools/manufacturing/test-data/test-workflow-harness-contract.mjs",
+      "migrationMarkers": [
+        "run-all-tests.ps1"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": true
+    },
+    {
+      "file": "tools/manufacturing/test-db-lock-query-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-department-app-access-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html",
+        "cutter-builder-nav.component.html",
+        "greenshed-nav.component.html",
+        "run-all-tests.ps1"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": true
+    },
+    {
+      "file": "tools/manufacturing/test-dependency-trim-contract.mjs",
+      "migrationMarkers": [
+        "package.json",
+        "package-lock.json"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": false,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-empty-tray-availability-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-error-message-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-external-dana-ui-package-contract.mjs",
+      "migrationMarkers": [
+        "gear-apps.css",
+        "project.json",
+        "package.json",
+        "package-lock.json",
+        "run-all-tests.ps1",
+        "ui-tailwind/src/index.ts",
+        "brand-mark",
+        "side-link",
+        "gear-page",
+        "gear-panel",
+        "gear-btn",
+        "gear-table",
+        "gear-sidebar",
+        "gear-topbar"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-fk-relation-sync-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-frontend-docker-health-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-global-professional-ui-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html",
+        "cutter-builder-nav.component.html",
+        "greenshed-nav.component.html",
+        "side-link",
+        "nav-heading",
+        "gear-sidebar"
+      ],
+      "exactClassChecks": 7,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-greenshed-available-cutters-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-greenshed-part-shelf-contract.mjs",
+      "migrationMarkers": [
+        "run-all-tests.ps1"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": true
+    },
+    {
+      "file": "tools/manufacturing/test-inventory-control-center-search-contract.mjs",
+      "migrationMarkers": [
+        "gear-panel"
+      ],
+      "exactClassChecks": 1,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-inventory-lookup-ui-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-large-screen-readability-contract.mjs",
+      "migrationMarkers": [
+        "side-link",
+        "gear-table",
+        "gear-sidebar",
+        "gear-topbar"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-local-debug-login-startup-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-location-identity-display-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-login-swagger-ui-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": true
+    },
+    {
+      "file": "tools/manufacturing/test-login-ui-consistency-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-native-asset-tag-printing-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-no-raw-debug-ui-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-nx-install-contract.mjs",
+      "migrationMarkers": [
+        "run-all-tests.ps1"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-parent-child-drilldown-contract.mjs",
+      "migrationMarkers": [
+        "gear-panel"
+      ],
+      "exactClassChecks": 10,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-post-workflow-db-integrity-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-post-workflow-db-integrity.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": true
+    },
+    {
+      "file": "tools/manufacturing/test-public-registration-closed-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-read-only-api-smoke-source-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-scrap-blade-history-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-shared-icon-assets-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html",
+        "cutter-builder-nav.component.html",
+        "greenshed-nav.component.html",
+        "gear-apps.css",
+        "project.json"
+      ],
+      "exactClassChecks": 2,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-shared-table-migration-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-shared-ui-style-source-contract.mjs",
+      "migrationMarkers": [
+        "project.json",
+        "gear-page",
+        "gear-panel",
+        "gear-btn",
+        "gear-table",
+        "gear-sidebar",
+        "gear-topbar"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-shop-floor-readability-contract.mjs",
+      "migrationMarkers": [
+        "gear-btn",
+        "gear-table",
+        "gear-sidebar"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-sidebar-navigation-hierarchy-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html",
+        "cutter-builder-nav.component.html",
+        "greenshed-nav.component.html",
+        "side-link",
+        "nav-heading"
+      ],
+      "exactClassChecks": 5,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-summary-shelf-dash-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": true
+    },
+    {
+      "file": "tools/manufacturing/test-toast-notifications-contract.mjs",
+      "migrationMarkers": [
+        "gear-apps.css",
+        "ui-tailwind/src/index.ts"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-tray-contents-part-type-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-ui-consistency-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html",
+        "cutter-builder-nav.component.html",
+        "greenshed-nav.component.html",
+        "side-link",
+        "nav-heading",
+        "gear-page",
+        "gear-panel",
+        "gear-sidebar",
+        "gear-topbar"
+      ],
+      "exactClassChecks": 2,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-ui-deep-scan-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html",
+        "cutter-builder-nav.component.html",
+        "greenshed-nav.component.html",
+        "gear-page",
+        "gear-sidebar",
+        "gear-topbar"
+      ],
+      "exactClassChecks": 1,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-ui-foundation-cleanup-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html",
+        "cutter-builder-nav.component.html",
+        "greenshed-nav.component.html",
+        "gear-apps.css",
+        "gear-panel",
+        "gear-table"
+      ],
+      "exactClassChecks": 2,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-ui-style-integrity-contract.mjs",
+      "migrationMarkers": [
+        "gear-apps.css",
+        "package.json"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-ux-accessibility-feedback-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html",
+        "cutter-builder-nav.component.html",
+        "greenshed-nav.component.html"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-ux-responsive-navigation-contract.mjs",
+      "migrationMarkers": [
+        "app-nav.component.html",
+        "cutter-builder-nav.component.html",
+        "greenshed-nav.component.html",
+        "ui-tailwind/src/index.ts",
+        "gear-sidebar",
+        "gear-topbar"
+      ],
+      "exactClassChecks": 1,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-ux-workflow-state-contract.mjs",
+      "migrationMarkers": [],
+      "exactClassChecks": 0,
+      "migrationSensitive": false,
+      "authoritative": true,
+      "dbRisk": false
+    },
+    {
+      "file": "tools/manufacturing/test-workflow-surface-consolidation-contract.mjs",
+      "migrationMarkers": [
+        "gear-apps.css",
+        "gear-panel",
+        "gear-btn"
+      ],
+      "exactClassChecks": 0,
+      "migrationSensitive": true,
+      "authoritative": true,
+      "dbRisk": false
+    }
+  ]
+}

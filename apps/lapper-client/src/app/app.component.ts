@@ -16,9 +16,6 @@ export class AppComponent {
   /** Browser tab identity, matching the other Gear Apps: "<Page> | Lapper". */
   private readonly pageTitles: ReadonlyArray<readonly [string, string]> = [
     ['/lapping-summaries', 'Lapping Summaries'],
-    ['/machines', 'Machines'],
-    ['/parts', 'Parts & Gearsets'],
-    ['/part-summaries', 'Part Summaries'],
     ['/scanners', 'Scanners'],
     ['/macros', 'Macros'],
     ['/fanuc-variables', 'Fanuc Variables'],

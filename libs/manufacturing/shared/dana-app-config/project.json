@@ -1,0 +1,21 @@
+{
+  "name": "shared-dana-app-config",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/manufacturing/shared/dana-app-config/src",
+  "projectType": "library",
+  "tags": [
+    "type:util",
+    "scope:shared",
+    "domain:shared"
+  ],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "libs/manufacturing/shared/dana-app-config"
+      },
+      "cache": true
+    }
+  }
+}

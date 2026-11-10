@@ -6,8 +6,9 @@
 package-lock.json
 .angular
 # Retain existing manufacturing source formatting during dependency migration.
-/manufacturing
-/source-archives
+/libs/manufacturing
+/tools/manufacturing
+/docs/manufacturing
+/commands
 
-/vendor
 /releases

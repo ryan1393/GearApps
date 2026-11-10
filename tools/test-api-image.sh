@@ -62,7 +62,7 @@ done
 if [[ "$ready" != true ]]; then docker logs "$TASK-postgres"; exit 1; fi
 
 docker run --rm --network "$TASK" --env-file "$WORK_DIR/api.env" "$IMAGE" node dist/apps/server-bootstrap/main.js
-docker run --rm --network "$TASK" --env-file "$WORK_DIR/api.env" "$IMAGE" node manufacturing/tools/base-data/import-base-data.mjs --bootstrap-only
+docker run --rm --network "$TASK" --env-file "$WORK_DIR/api.env" "$IMAGE" node tools/manufacturing/base-data/import-base-data.mjs --bootstrap-only
 docker run -d --name "$TASK-api" --label codex.task=gearapps-image-test \
   --network "$TASK" --env-file "$WORK_DIR/api.env" "$IMAGE" >/dev/null
 CONTAINERS+=("$TASK-api")
