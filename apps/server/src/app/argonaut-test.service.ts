@@ -105,7 +105,7 @@ export class ArgonautTestService {
     const values: Record<string, number> = { ...input.values };
     // A real cycle reads the gearset number from #10020; default it to the chosen gearset.
     if (values['10020'] === undefined && /^\d+$/.test(partNumber)) values['10020'] = Number(partNumber);
-    const payload = buildArgonautPayload(input.serial_number.trim(), partNumber, input.sequence, values, this.transactionType());
+    const payload = buildArgonautPayload(input.serial_number.trim(), partNumber, input.sequence, values, this.transactionType(), input.cycle_time_s);
     return { url, payload };
   }
 

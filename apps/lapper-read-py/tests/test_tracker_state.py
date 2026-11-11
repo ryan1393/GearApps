@@ -48,6 +48,36 @@ class TrackerTests(unittest.TestCase):
         self.assertEqual(t.state.queued_serial, "D000000009")
 
 
+class CycleTimeTests(unittest.TestCase):
+    START, END, DOOR = "2026-11-10T03:00:00.000Z", "2026-11-10T03:02:04.250Z", "2026-11-10T03:02:30.000Z"
+
+    def argonaut(self):
+        return {"10039": "1"}
+
+    def test_cycle_time_runs_from_going_into_cycle_to_coming_out_of_it(self):
+        t = CycleTracker(CycleState(was_in_cycle=False))
+        t.observe(machine(door=True, start=True, cycle=True), ScannerState(None, "SN-1"), "m", capture, self.START,
+                  self.argonaut)
+        t.observe(machine(door=True), ScannerState(None, None), "m", capture, self.END, self.argonaut)
+        self.assertEqual(t.state.argonaut_pending, [])  # the door is still closed
+        t.observe(machine(), ScannerState(None, None), "m", capture, self.DOOR, self.argonaut)
+        self.assertEqual(t.state.pending_cycles[0].cycle_time_s(), 124.25)
+        self.assertEqual(t.state.argonaut_pending[0].cycle_time_s, 124.25)
+
+    def test_coming_out_of_cycle_and_opening_the_door_together_ends_the_cycle_there(self):
+        t = CycleTracker(CycleState(was_in_cycle=False))
+        t.observe(machine(door=True, start=True, cycle=True), ScannerState(None, "SN-1"), "m", capture, self.START,
+                  self.argonaut)
+        t.observe(machine(), ScannerState(None, None), "m", capture, self.END, self.argonaut)
+        self.assertEqual(t.state.argonaut_pending[0].cycle_time_s, 124.25)
+
+    def test_a_cycle_already_running_at_start_up_has_no_cycle_time(self):
+        t = CycleTracker(CycleState())
+        t.observe(machine(door=True, cycle=True), ScannerState(None, None), "m", capture, self.START, self.argonaut)
+        t.observe(machine(), ScannerState(None, None), "m", capture, self.END, self.argonaut)
+        self.assertIsNone(t.state.argonaut_pending[0].cycle_time_s)
+
+
 class StoreTests(unittest.TestCase):
     def setUp(self):
         self.dir = tempfile.TemporaryDirectory()
@@ -67,6 +97,28 @@ class StoreTests(unittest.TestCase):
         self.assertEqual(restored.pending_cycles[0].serial, "D000000001")
         self.assertEqual(restored.pending_cycles[0].saved_cycle["id"], "c1")
         self.assertEqual(restored.pending_cycles[0].macro_values(), {"m-rpm": Decimal("1800.5")})
+
+    def test_cycle_times_survive_a_restart_and_older_checkpoints_still_load(self):
+        t = CycleTracker(CycleState(was_in_cycle=False))
+        t.observe(machine(door=True, start=True, cycle=True), ScannerState(None, "SN-1"), "m", capture,
+                  "2026-11-10T03:00:00.000Z", lambda: {"10039": "1"})
+        t.observe(machine(), ScannerState(None, None), "m", capture, "2026-11-10T03:01:30.500Z", lambda: {"10039": "1"})
+        store = CycleStateStore(self.path)
+        store.save(t.state)
+        restored = store.load()
+        self.assertEqual(restored.pending_cycles[0].cycle_time_s(), 90.5)
+        self.assertEqual(restored.argonaut_pending[0].cycle_time_s, 90.5)
+
+        raw = json.loads(open(self.path).read())
+        for cycle in raw["pending_cycles"]:
+            del cycle["cycle_started_at"], cycle["cycle_ended_at"]
+        for post in raw["argonaut_pending"]:
+            del post["cycle_time_s"]
+        with open(self.path, "w") as handle:
+            json.dump(raw, handle)
+        older = store.load()
+        self.assertIsNone(older.pending_cycles[0].cycle_time_s())
+        self.assertIsNone(older.argonaut_pending[0].cycle_time_s)
 
     def test_corrupt_checkpoint_fails_instead_of_discarding_records(self):
         with open(self.path, "w") as handle:

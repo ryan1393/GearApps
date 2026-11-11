@@ -38,9 +38,34 @@ class PendingCycle:
     completed_at: str | None = None
     macros: dict[str, str] = field(default_factory=dict)  # macro id -> decimal text
     saved_cycle: dict[str, Any] | None = None
+    #: When the machine was seen going into cycle (Y3.2 on). None when the collector started (or
+    #: was upgraded) part-way through the cycle, so its start, and its cycle time, are unknown.
+    cycle_started_at: str | None = None
+    #: When the machine last came out of cycle (Y3.2 off) before the door opened.
+    cycle_ended_at: str | None = None
 
     def macro_values(self) -> dict[str, Decimal]:
         return {key: Decimal(value) for key, value in self.macros.items()}
+
+    def cycle_time_s(self) -> float | None:
+        """Seconds the machine was in cycle, from going into cycle to coming out of it, or None
+        when either edge was not seen."""
+        return cycle_seconds(self.cycle_started_at, self.cycle_ended_at)
+
+
+def cycle_seconds(started_at: str | None, ended_at: str | None) -> float | None:
+    if not started_at or not ended_at:
+        return None
+    try:
+        seconds = (_instant(ended_at) - _instant(started_at)).total_seconds()
+    except ValueError:
+        return None
+    return round(seconds, 3) if seconds >= 0 else None
+
+
+def _instant(text: str) -> datetime:
+    # utc_now() writes a trailing Z, which datetime.fromisoformat only accepts from Python 3.11.
+    return datetime.fromisoformat(text[:-1] + "+00:00" if text.endswith("Z") else text)
 
 
 @dataclass
@@ -55,6 +80,8 @@ class ArgonautPost:
     completed_at: str
     values: dict[str, str | None] = field(default_factory=dict)  # macro number -> decimal text
     attempts: int = 0
+    #: Seconds in cycle, sent as floatData[0]; None (sent as 0) when it could not be measured.
+    cycle_time_s: float | None = None
 
 
 @dataclass
@@ -85,9 +112,10 @@ class InvalidCheckpoint(ValueError):
 def _cycle(raw: dict[str, Any]) -> PendingCycle:
     try:
         cycle = PendingCycle(**raw)
-        datetime.fromisoformat(cycle.started_at)
-        if cycle.completed_at:
-            datetime.fromisoformat(cycle.completed_at)
+        _instant(cycle.started_at)
+        for moment in (cycle.completed_at, cycle.cycle_started_at, cycle.cycle_ended_at):
+            if moment:
+                _instant(moment)
         for value in cycle.macros.values():
             Decimal(value)
         return cycle
@@ -98,6 +126,8 @@ def _cycle(raw: dict[str, Any]) -> PendingCycle:
 def _argonaut(raw: dict[str, Any]) -> ArgonautPost:
     try:
         post = ArgonautPost(**raw)
+        if post.cycle_time_s is not None:
+            post.cycle_time_s = float(post.cycle_time_s)
         for value in post.values.values():
             if value is not None:
                 Decimal(value)

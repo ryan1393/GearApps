@@ -29,6 +29,14 @@
           <gear-option-picker [placeholder]="'Choose empty ' + shelfPrefix + ' shelf…'" [headers]="['Shelf', 'Description']" [options]="shelfOptions"
             [emptyText]="'No empty ' + shelfPrefix + ' shelves are available. Free one up, or ask a supervisor.'" [disabled]="busy" (picked)="chooseShelf($event)" />
         </gear-scan-panel>
+        @if (autoShelf.shelf; as shelf) {
+          <div class="op-primary" data-testid="receive-auto-shelf">
+            <button type="button" class="gear-btn gear-btn-primary" [disabled]="busy" (click)="scanShelf(shelf.serial_number)">Receive onto {{ shelf.serial_number }}</button>
+            <p class="op-blocked" role="status">Selected automatically: the only empty {{ shelfPrefix }} shelf for Summary {{ receivingSummary }} {{ receivingPartType }}.</p>
+          </div>
+        } @else if (autoShelf.matches.length > 1) {
+          <p class="mt-2 text-sm" role="status">{{ autoShelf.matches.length }} empty shelves hold Summary {{ receivingSummary }} {{ receivingPartType }}: scan or choose one.</p>
+        }
       </div>
     }
 

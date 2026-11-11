@@ -4,7 +4,7 @@
  * the same builder to send a test transaction, so both must keep the same macros in the same order.
  */
 
-/** floatData, in the order Argonaut expects (the payload starts with a literal 0 before these). */
+/** floatData, in the order Argonaut expects. floatData[0], before these, is the cycle time in seconds. */
 export const ARGONAUT_FLOAT_MACROS: readonly number[] = [
   10039, 10040, 10042, 10043, 10045, 10046, 10047, 10049, 10050, 10051, 10053, 10054, 10055,
   10063, 10209,
@@ -40,13 +40,27 @@ export interface ArgonautPayload {
 
 const finite = (value: unknown): number => (typeof value === 'number' && Number.isFinite(value) ? value : 0);
 
-/** `values` maps macro number (as text) to its value; a missing value is sent as 0, as the collector does. */
+/**
+ * floatData[0]: seconds the lapper was in cycle (Y3.2 on), to the millisecond. 0 when it is
+ * unknown, e.g. the collector started part-way through the cycle.
+ */
+export function argonautCycleTime(cycleTimeS: number | null | undefined): number {
+  return typeof cycleTimeS === 'number' && Number.isFinite(cycleTimeS) && cycleTimeS > 0
+    ? Math.round(cycleTimeS * 1000) / 1000
+    : 0;
+}
+
+/**
+ * `values` maps macro number (as text) to its value; a missing value is sent as 0, as the collector does.
+ * `cycleTimeS` is sent as floatData[0] (0 when unknown).
+ */
 export function buildArgonautPayload(
   serial: string,
   partNumber: string | number,
   sequence: number,
   values: Record<string, number | null | undefined>,
   transactionTypeId = ARGONAUT_DEFAULT_TRANSACTION_TYPE_ID,
+  cycleTimeS?: number | null,
 ): ArgonautPayload {
   return {
     request: {
@@ -54,7 +68,7 @@ export function buildArgonautPayload(
       transactionTypeId: Math.trunc(transactionTypeId),
       serialNumber: serial,
       dintData: [],
-      floatData: [0, ...ARGONAUT_FLOAT_MACROS.map((n) => finite(values[String(n)]))],
+      floatData: [argonautCycleTime(cycleTimeS), ...ARGONAUT_FLOAT_MACROS.map((n) => finite(values[String(n)]))],
       stringData: ARGONAUT_STRING_MACROS.map((n) => String(Math.trunc(finite(values[String(n)])))),
       partNumber: String(partNumber),
       partNumberCode: 0,
@@ -98,6 +112,8 @@ export interface ArgonautTestInput {
   serial_number: string;
   /** Sent as the request's `sequence` (a real cycle sends its consec). */
   sequence: number;
+  /** Sent as floatData[0] (a real cycle sends its measured cycle time); empty sends 0. */
+  cycle_time_s?: number;
   values: Record<string, number>;
   /** Overrides the machine's saved Argonaut address for this test. */
   url?: string;

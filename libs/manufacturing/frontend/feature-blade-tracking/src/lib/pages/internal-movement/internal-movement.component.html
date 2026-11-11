@@ -39,7 +39,7 @@
       <div class="gear-panel p-5">
         <div class="grid gap-4 sm:grid-cols-2">
           <div><span class="op-card-eyebrow">From</span><div class="op-card-title">{{ current?.location?.serial_number || 'Unassigned' }}</div><div *ngIf="current?.location?.description" class="text-sm text-slate-500">{{ current?.location?.description }}</div></div>
-          <div><span class="op-card-eyebrow">To</span>@if (destination) {<div class="op-card-title">{{ destination.serial_number }}</div><div *ngIf="destination.description" class="text-sm text-slate-500">{{ destination.description }}</div>} @else {<div class="op-card-title">—</div>}</div>
+          <div><span class="op-card-eyebrow">To</span>@if (destination) {<div class="op-card-title">{{ destination.serial_number }}</div><div *ngIf="destination.description" class="text-sm text-slate-500">{{ destination.description }}</div>@if (autoSelected) {<div class="text-sm text-slate-500" data-testid="internal-movement-auto-shelf">Selected automatically: the only shelf for this Summary and Part Type.</div>}} @else {<div class="op-card-title">—</div>}</div>
         </div>
       </div>
       <div class="gear-panel p-5">

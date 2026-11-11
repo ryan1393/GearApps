@@ -15,7 +15,7 @@ import urllib.parse
 import urllib.request
 from decimal import Decimal, InvalidOperation
 
-#: floatData, in the order Argonaut expects (the payload starts with a literal 0 before these).
+#: floatData, in the order Argonaut expects. floatData[0], before these, is the cycle time in seconds.
 FLOAT_MACROS: tuple[int, ...] = (
     10039, 10040, 10042, 10043, 10045, 10046, 10047, 10049, 10050, 10051, 10053, 10054, 10055,
     10063, 10209,
@@ -51,11 +51,18 @@ def _float(value: Decimal) -> int | float:
     return int(value) if value == value.to_integral_value() else float(value)
 
 
+def cycle_time_value(cycle_time_s: float | None) -> int | float:
+    """floatData[0]: the cycle time in seconds (to the millisecond), or 0 when it is unknown."""
+    if cycle_time_s is None or cycle_time_s != cycle_time_s or cycle_time_s < 0:
+        return 0
+    return _float(Decimal(str(round(float(cycle_time_s), 3))))
+
+
 def build_payload(serial: str, part_number: int | str, consec: int, values: dict[str, str | None],
-                  transaction_type_id: int = 100) -> dict:
+                  transaction_type_id: int = 100, cycle_time_s: float | None = None) -> dict:
     """`values` maps macro number (as text) to its captured value; a missing value is sent as 0,
-    as the original collector did."""
-    floats = [0] + [_float(_decimal(values.get(str(n)))) for n in FLOAT_MACROS]
+    as the original collector did. `cycle_time_s` is sent as floatData[0] (0 when unknown)."""
+    floats = [cycle_time_value(cycle_time_s)] + [_float(_decimal(values.get(str(n)))) for n in FLOAT_MACROS]
     strings = [str(int(_decimal(values.get(str(n))))) for n in STRING_MACROS]
     return {
         "request": {

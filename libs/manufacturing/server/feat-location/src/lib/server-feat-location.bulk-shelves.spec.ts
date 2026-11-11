@@ -1,7 +1,7 @@
 import { UnprocessableEntityException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 
-import { BulkCreateShelfLocationsDto, LocationOrmEntity, PartSummaryOrmEntity } from '@meshforge/manufacturing/server/data-access';
+import { BulkCreateShelfLocationsDto, CutterPartTypeOrmEntity, LocationOrmEntity, PartSummaryOrmEntity } from '@meshforge/manufacturing/server/data-access';
 import { Uuid } from '@meshforge/manufacturing/shared/util-types';
 
 import { ServerFeatLocationService } from './server-feat-location.service';
@@ -30,9 +30,13 @@ function fakeLocations(existing: Row[] = []) {
       return chain;
     },
   };
-  interface FakeManager { getRepository(): typeof repo; transaction<T>(work: (m: FakeManager) => Promise<T>): Promise<T> }
+  const partTypes = [{ id: 'ring-id', code: 'RING', enabled: true }, { id: 'pinion-id', code: 'PINION', enabled: true }];
+  const partTypeRepo = {
+    findOne: jest.fn(async ({ where }) => partTypes.find((type) => type.code === where.code && type.enabled === where.enabled) ?? null),
+  };
+  interface FakeManager { getRepository(entity: unknown): unknown; transaction<T>(work: (m: FakeManager) => Promise<T>): Promise<T> }
   const manager: FakeManager = {
-    getRepository: () => repo,
+    getRepository: (entity) => (entity === CutterPartTypeOrmEntity ? partTypeRepo : repo),
     transaction: async (work) => work(manager),
   };
   return { table, service: new ServerFeatLocationService(
@@ -56,6 +60,16 @@ describe('ServerFeatLocationService.bulkCreateShelfLocations', () => {
       number: 'A2B', department: 'CUTTERGRIND', location_type: 'SHELF', enabled: true, createdBy: user,
       description: 'Cuttergrind finished pinion shelf, shelf A, layer 2, bin B',
     });
+  });
+
+  it('gives every bin the part type its barcode names: R is RING, P is PINION', async () => {
+    const pinion = fakeLocations();
+    await pinion.service.bulkCreateShelfLocations(dto({ prefix: 'CGFP' }), user);
+    expect([...pinion.table.values()].map(({ part_type_id }) => part_type_id)).toEqual(['pinion-id', 'pinion-id', 'pinion-id']);
+
+    const ring = fakeLocations();
+    await ring.service.bulkCreateShelfLocations(dto({ prefix: 'CGRR' }), user);
+    expect([...ring.table.values()].map(({ part_type_id }) => part_type_id)).toEqual(['ring-id', 'ring-id', 'ring-id']);
   });
 
   it('leaves barcodes that already exist as they are', async () => {

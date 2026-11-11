@@ -97,6 +97,41 @@ describe('location Summary and part type', () => {
     expect(saved[0]).toMatchObject({ serial_number: 'GSP-1.955FC', summary_id: SUMMARY.id, part_type_id: PINION.id });
   });
 
+  it('takes the part type from the R or P in a Cuttergrind shelf barcode, whatever was chosen', async () => {
+    const dull = setup();
+    await dull.service.createLocation(
+      { serial_number: 'cgdp-a1a', number: '', description: null, department: null, location_type: 'SHELF', enabled: true, summary_id: SUMMARY.id, part_type_id: RING.id },
+      USER,
+    );
+    expect(dull.saved[0]).toMatchObject({ serial_number: 'CGDP-A1A', summary_id: SUMMARY.id, part_type_id: PINION.id });
+
+    const finished = setup();
+    await finished.service.createLocation(
+      { serial_number: 'CGFR-B2C', number: '', description: null, department: null, location_type: 'SHELF', enabled: true, summary_id: SUMMARY.id },
+      USER,
+    );
+    expect(finished.saved[0]).toMatchObject({ summary_id: SUMMARY.id, part_type_id: RING.id });
+
+    const rough = setup();
+    await rough.service.createLocation(
+      { serial_number: 'CGRP-A1A', number: '', description: null, department: null, location_type: 'SHELF', enabled: true, part_type_id: null },
+      USER,
+    );
+    expect(rough.saved[0]).toMatchObject({ part_type_id: PINION.id });
+  });
+
+  it('corrects a shelf\'s part type to its barcode on any edit, and refuses to clear it', async () => {
+    const existing = { id: 'location', serial_number: 'CGDR-A1A', number: 'A1A', department: 'CUTTERGRIND', location_type: 'SHELF', enabled: true, summary_id: SUMMARY.id, part_type_id: PINION.id };
+
+    const edited = setup(existing);
+    await edited.service.updateLocation('location' as never, { description: 'Top shelf' }, USER as never);
+    expect(edited.saved[0]['part_type_id']).toBe(RING.id);
+
+    const cleared = setup(existing);
+    await cleared.service.updateLocation('location' as never, { part_type_id: null, summary_id: OLD_SUMMARY.id }, USER as never);
+    expect(cleared.saved[0]).toMatchObject({ summary_id: OLD_SUMMARY.id, part_type_id: RING.id });
+  });
+
   it('changes, clears or keeps them on an existing location', async () => {
     const existing = { id: 'location', serial_number: 'RACK-A-03', number: 'A-03', department: null, location_type: 'SHELF', enabled: true, summary_id: OLD_SUMMARY.id, part_type_id: RING.id };
 

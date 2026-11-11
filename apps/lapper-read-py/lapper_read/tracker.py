@@ -37,9 +37,16 @@ class CycleTracker:
                 consec=machine.consec,
                 started_at=timestamp,
                 serial=serial,
+                # Only a cycle seen going from out of cycle into cycle has a known start (and so a
+                # cycle time); after a collector start it may already have been running a while.
+                cycle_started_at=timestamp if state.was_in_cycle is False else None,
             )
             if serial:
                 queued = None  # the queued part is now the one in process
+        if state.active_cycle is not None and state.was_in_cycle is True and not machine.in_cycle:
+            # Out of cycle: the cycle time runs to here, not to the door opening. A cycle that goes
+            # back into cycle before the door opens (e.g. a restart) runs to its last end.
+            state.active_cycle.cycle_ended_at = timestamp
         if not machine.in_cycle and not machine.door_closed and state.active_cycle is not None:
             active = state.active_cycle
             # Macro values are captured once, at completion, and never re-read on retry. Both reads
@@ -53,6 +60,7 @@ class CycleTracker:
                 state.argonaut_pending.append(ArgonautPost(
                     cycle_id=active.id, serial=active.serial, part_number=active.part_number,
                     consec=active.consec, completed_at=timestamp, values=argonaut,
+                    cycle_time_s=active.cycle_time_s(),
                 ))
             state.active_cycle = None
         state.scanner_serial = scanner.serial

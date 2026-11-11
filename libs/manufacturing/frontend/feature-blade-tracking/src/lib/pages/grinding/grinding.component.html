@@ -71,6 +71,9 @@
                     (picked)="selectRoughShelf($event)" />
                   <button type="button" class="gear-btn gear-btn-secondary mt-2" [disabled]="busy || shelvesLoading" (click)="refreshShelves()">Refresh shelves</button>
                 </gear-scan-panel>
+                @if (roughShelfAutoSelected && hasSelectedRoughShelf) {
+                  <p class="mt-2 text-sm" data-testid="grinding-auto-shelf">Selected automatically: the only rough shelf for this Summary and Part Type. Tap Change to pick another.</p>
+                }
                 <button type="button" class="gear-btn gear-btn-secondary mt-2" [disabled]="busy" (click)="setUseRoughShelf(false)">Back to {{ stagingSerial }}</button>
               }
             </div>
