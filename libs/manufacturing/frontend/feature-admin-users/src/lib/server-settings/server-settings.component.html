@@ -20,12 +20,16 @@
     </div>
 
     <form class="server-settings-form" (ngSubmit)="save()" aria-label="Server settings">
-      <div class="gear-panel p-5">
+      <div class="gear-panel p-5 gear-form-grid">
         <label class="gear-field server-settings-search">Find a setting
           <input class="gear-input" name="settingSearch" type="search" [(ngModel)]="search" placeholder="Name or key, for example email or SCANNER" autocomplete="off" />
         </label>
       </div>
 
+      <div class="gear-panel p-5 gear-form-grid">
+        <label class="gear-field">Category<select class="gear-select" name="settingsGroup" [(ngModel)]="selectedGroup"><option value="">All categories</option><option *ngFor="let group of current.groups" [value]="group.id">{{ group.title }}</option></select></label>
+        <label class="gear-field"><span>Review changes</span><span><input type="checkbox" name="pendingOnly" [(ngModel)]="pendingOnly" /> Only unsaved or pending changes</span></label>
+      </div>
       <p *ngIf="!visibleGroups.length" class="gear-panel p-5">No setting matches “{{ search }}”.</p>
 
       <fieldset *ngFor="let group of visibleGroups; trackBy: trackGroup" class="gear-panel p-5 server-settings-group" [disabled]="saving || restarting">

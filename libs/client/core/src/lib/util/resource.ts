@@ -40,7 +40,7 @@ export function loadable<T>(initial: T): Loadable<T> {
         },
       });
     },
-    set: (v) => value.set(v),
+    set: (v) => { sub?.unsubscribe(); sub = null; loading.set(false); error.set(null); value.set(v); },
     update: (fn) => value.update(fn),
   };
 }

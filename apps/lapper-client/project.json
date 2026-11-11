@@ -73,7 +73,7 @@
           "buildTarget": "lapper-client:build:development"
         }
       },
-      "dependsOn": ["lapper-api:serve"],
+      "dependsOn": ["meshforge-server:serve"],
       "options": {
         "proxyConfig": "apps/lapper-client/proxy.conf.json",
         "port": 4203

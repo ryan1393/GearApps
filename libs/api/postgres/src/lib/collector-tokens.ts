@@ -9,7 +9,7 @@ import {
 } from '@meshforge/shared/domain';
 import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
-import { mkdir, rename, rm, writeFile } from 'node:fs/promises';
+import { chmod, mkdir, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { EntityManager } from 'typeorm';
 import { PostgresLapperCatalog } from './catalog';
@@ -199,6 +199,8 @@ async function writeTokenFile(file: string, token: string): Promise<void> {
   const temporary = `${file}.${randomUUID()}.tmp`;
   try {
     await writeFile(temporary, token + '\n', { mode: 0o644 });
+    // The collector runs under a separate container UID; umask must not remove read access.
+    await chmod(temporary, 0o644);
     await rename(temporary, file);
   } catch (error) {
     await rm(temporary, { force: true });

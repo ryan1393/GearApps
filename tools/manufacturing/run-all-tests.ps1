@@ -8,6 +8,7 @@ param(
 
     # Full workflow test inputs. If omitted, the runner prompts for them.
     [string]$TraySerialNumber,
+    [string]$GrindingMachineId,
     [string]$SummaryId,
     [string]$PartTypeId,
     [string]$ContainerSerialNumber,
@@ -223,7 +224,7 @@ function Assert-TestHarness {
         @{
             Path = (Join-Path $PSScriptRoot 'test-full-workflow.ps1')
             Parameters = @(
-                'BaseUrl','Email','Password','TraySerialNumber','SummaryId',
+                'BaseUrl','Email','Password','TraySerialNumber','GrindingMachineId','SummaryId',
                 'PartTypeId','ContainerSerialNumber','CutterBodySerialNumber',
                 'MachineNumber','PartNumber','WrongTypePartNumber','WrongTypeMachineNumber','ChangeoverReasonCode','PullReasonCode',
                 'TeardownTraySerialNumber','GrindingScrapCount','StartingPieceCount',
@@ -1106,6 +1107,7 @@ try {
             $SummaryId = [string]$fixture.summary_id
             $PartTypeId = [string]$fixture.part_type_id
             $TraySerialNumber = [string]$fixture.source_tray_serial_number
+            $GrindingMachineId = [string]$fixture.grinding_machine_id
             $TeardownTraySerialNumber = [string]$fixture.teardown_tray_serial_number
             $ContainerSerialNumber = [string]$fixture.blade_tracking.container_serial_number
             $CutterBodySerialNumber = [string]$fixture.cutter_body_serial_number
@@ -1163,6 +1165,7 @@ try {
             Email                    = $Email
             Password                 = $Password
             TraySerialNumber         = $TraySerialNumber
+            GrindingMachineId        = $GrindingMachineId
             SummaryId                = $SummaryId
             PartTypeId               = $PartTypeId
             ContainerSerialNumber    = $ContainerSerialNumber

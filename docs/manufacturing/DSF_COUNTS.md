@@ -1,8 +1,6 @@
 # DSF production counts (Digital Shop Floor / Ignition)
 
-MeshForge can read piece counts for the cutting machines in Departments 132 (Pinion) and 152
-(Ring) from the DSF PostgreSQL database and, optionally, credit them to the cutter installed on
-each machine. It is off by default.
+MeshForge reads current-shift DSF piece counts for machines across all departments, including individual grinders, lappers and cutter builders. Machine DSF Counts is available in all four apps, with counts beside selected machines and in Admin. Optional cutter crediting applies only to production cutting machines in Departments 132/152. The integration is off by default.
 
 The API **pulls** from DSF on a timer. Nothing pushes to MeshForge, and MeshForge never writes
 to DSF: the DSF session is a read-only transaction running fixed `SELECT`s, and it is closed
@@ -22,7 +20,7 @@ on the second.
 
 All in the root `.env` (template in `.env.example`): `DSF_DB_HOST`, `DSF_DB_PORT`, `DSF_DB_NAME`,
 `DSF_DB_USER`, `DSF_DB_PASSWORD` or `DSF_DB_PASSWORD_FILE`, `DSF_DB_SSL_MODE` (`verify-full` or
-`disable`), optional `DSF_DB_SSL_CA_FILE` / `DSF_DB_SSL_CA_PEM`, and `DSF_COUNT_MACHINES`.
+`disable`), optional `DSF_DB_SSL_CA_FILE` / `DSF_DB_SSL_CA_PEM`, and optional `DSF_COUNT_MACHINES` (archived reference mappings only; leave empty when using Admin mappings).
 
 - The reader stays off, with a warning in the API start-up log, if a setting is missing or
   invalid. It also refuses to point at the MeshForge database itself.
@@ -45,7 +43,7 @@ DSF migrations, so a database that already has them keeps its mappings and ledge
 
 ## Machine mapping
 
-Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operation + line).
+Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operation + line). Admin mappings allow every numeric DSF department and its approved operation, including grinding and lapping. Source discovery works before the first mapping is configured. The machine and source departments must match.
 
 - **Reference list.** The archived identities in `dsf-mappings.ts`. A reference mapping is used
   only for machine numbers listed in `DSF_COUNT_MACHINES`, and never when it is marked blocked.
@@ -89,11 +87,10 @@ is a new run.
 - Reads are bounded: more than 10,000 events for one machine in a read is refused rather than
   published truncated.
 
-## Not included: Department 45 grinders
+## Legacy loose-blade balances
 
-The earlier DSF integration also credited the five CutGrind grinders and debited tray and
-container loads. That depends on features this codebase does not have: ANCA grinder machines
-recorded on each grinding pass (`tray_grinding_runs.grinding_machine_id`), loose coater blade
-sets (`dana_coater_blade_sets_v147`) with their packing trigger, and the Grinders Station page.
-The grinder event importer is present and only runs when the grinder ledger tables already
-exist; it has no screen here.
+The earlier DSF integration also credited a fixed set of five CutGrind grinders and debited loose coater loads. That separate stock ledger is only used when its legacy tables already exist. Individual grinder tracking and current-shift counts work without that ledger and are not limited to five grinders.
+
+## Individual grinders
+
+Create each physical grinder under Admin > Machines with type Grinder and its actual machine number. Select its DSF source in Admin > DSF Mappings. On the Grinding Station, scan or select that machine once, then scan trays. The workstation remembers the selection and displays its current-shift DSF count; unavailable counts appear as a dash with status. Pass history records the grinder ID, number at completion, tray, operator and blade disposition. Earlier passes without a grinder remain unassigned.

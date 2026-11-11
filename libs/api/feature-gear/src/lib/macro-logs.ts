@@ -27,6 +27,7 @@ export abstract class MacroLogsService extends CrudService<MacroLog> {
     machineId: string,
     gearsetId: string,
     form?: string,
+    cycleId?: string,
   ): Promise<LappingSummaryRow[]>;
 }
 @UseInterceptors(LapperWritePolicy)
@@ -53,8 +54,9 @@ export class MacroLogsController extends crudController<MacroLog>({
     gearsetId: string,
     @Query('form')
     form?: string,
+    @Query('cycleId', new ParseUUIDPipe({ optional: true })) cycleId?: string,
   ): Promise<LappingSummaryRow[]> {
-    return this.service.lappingSummary(machineId, gearsetId, form);
+    return this.service.lappingSummary(machineId, gearsetId, form, cycleId);
   }
   /** Legacy routes kept for compatibility with the original client/collectors. */
   @Get(':machineId/:gearsetId/:form')

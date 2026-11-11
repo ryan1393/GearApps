@@ -4,15 +4,15 @@ import { Body, Controller, Delete, Get, Header, Param, ParseUUIDPipe, Put } from
 import { ApiTags } from '@nestjs/swagger';
 import { DsfCountService } from './dsf-count.service';
 
-@Controller({ path: 'greenshed/dsf-counts', version: '1' })
+@Controller({ path: ['greenshed/dsf-counts', 'dsf-counts'], version: '1' })
 @ApiTags('Greenshed')
 export class DsfCountController {
   constructor(private readonly counts: DsfCountService) {}
-  // DSFCOUNT1. A browser request reads memory only. No source connection or refresh here.
+  // DSFCOUNT1. Cached source counts plus the local machine catalog; never connects to DSF.
   @Get()
   @Header('Cache-Control', 'no-store')
   @Auth([RoleType.ADMIN, RoleType.USER])
-  getCounts() { return this.counts.snapshot(); }
+  getCounts() { return this.counts.currentSnapshot(); }
 
   @Get('admin-mappings')
   @Header('Cache-Control', 'no-store')

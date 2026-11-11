@@ -2,6 +2,7 @@ import { ConflictException } from '@nestjs/common';
 import {
   CutterMachineRunOrmEntity,
   MachineOrmEntity,
+  TrayOrmEntity,
 } from '@meshforge/manufacturing/server/data-access';
 import { DataSource } from 'typeorm';
 import { AdminMasterDataService } from './admin-master-data.service';
@@ -15,7 +16,7 @@ describe('AdminMasterDataService running-machine protection', () => {
     enabled: true,
     active: true,
   };
-  function setup(running: boolean) {
+  function setup(running: boolean, grinding = false) {
     const repo = {
       findOne: jest.fn().mockResolvedValue({ ...machine }),
       findOneOrFail: jest.fn().mockResolvedValue(machine),
@@ -28,7 +29,7 @@ describe('AdminMasterDataService running-machine protection', () => {
           ? repo
           : entity === CutterMachineRunOrmEntity
             ? runs
-            : {},
+            : entity === TrayOrmEntity ? { count: jest.fn().mockResolvedValue(grinding ? 1 : 0) } : {},
     };
     const dataSource = {
       transaction: (fn: (m: unknown) => unknown) => fn(manager),
@@ -65,6 +66,12 @@ describe('AdminMasterDataService running-machine protection', () => {
       expect.objectContaining({ description: 'Updated description', cell: 5 }),
     );
     expect(runs.count).not.toHaveBeenCalled();
+  });
+
+  it('protects a grinder with an active tray pass', async () => {
+    const { service, repo } = setup(false, true);
+    await expect(service.disableMachine('machine', 'admin')).rejects.toThrow('Complete the active grinding pass');
+    expect(repo.save).not.toHaveBeenCalled();
   });
 
   it('allows disabling an idle machine', async () => {

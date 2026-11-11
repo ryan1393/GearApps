@@ -1,7 +1,9 @@
+import { MachineCountsComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { Route } from '@angular/router';
 import { adminRoleGuard, authGuard } from '@meshforge/manufacturing/frontend/data-access-common';
 
 export const appRoutes: Route[] = [
+  { path: 'machine-counts', canActivate: [authGuard], component: MachineCountsComponent },
   { path: '', pathMatch: 'full', redirectTo: 'cutter-builder' },
   {
     path: 'cutter-builder',

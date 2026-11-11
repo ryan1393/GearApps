@@ -1,3 +1,4 @@
+import { MachineCountsComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { inject } from '@angular/core';
 import { Route, Router } from '@angular/router';
 import { adminRoleGuard, authGuard } from '@meshforge/manufacturing/frontend/data-access-common';
@@ -7,6 +8,7 @@ const adminTab = (tab: string) => () =>
   inject(Router).createUrlTree(['/admin'], { queryParams: { tab } });
 
 export const appRoutes: Route[] = [
+  { path: 'machine-counts', canActivate: [authGuard], component: MachineCountsComponent },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   {
     path: '',
@@ -22,19 +24,9 @@ export const appRoutes: Route[] = [
         loadChildren: () =>
           import('@meshforge/client/feature-lapping-summary').then((m) => m.lappingSummaryRoutes),
       },
-      {
-        path: 'scanners',
-        loadChildren: () => import('@meshforge/client/feature-config').then((m) => m.scannersRoutes),
-      },
-      {
-        path: 'macros',
-        loadChildren: () => import('@meshforge/client/feature-config').then((m) => m.macrosRoutes),
-      },
-      {
-        path: 'fanuc-variables',
-        loadChildren: () =>
-          import('@meshforge/client/feature-config').then((m) => m.fanucVariablesRoutes),
-      },
+      { path: 'scanners', redirectTo: adminTab('scanners') },
+      { path: 'macros', redirectTo: adminTab('macros') },
+      { path: 'fanuc-variables', redirectTo: adminTab('fanuc-variables') },
       // Bookmarks from the original Lapper app
       { path: 'cell-dashboard', redirectTo: 'dashboard' },
       // Machines, parts, gearsets and summaries are shared master data edited in Admin.
@@ -48,12 +40,7 @@ export const appRoutes: Route[] = [
       { path: 'register', redirectTo: 'login' },
     ],
   },
-  {
-    path: 'collector-tokens',
-    canActivate: [authGuard, adminRoleGuard],
-    loadChildren: () =>
-      import('@meshforge/client/feature-config').then((m) => m.collectorTokensRoutes),
-  },
+  { path: 'collector-tokens', redirectTo: adminTab('collector-tokens') },
   {
     path: 'admin',
     canActivate: [authGuard, adminRoleGuard],

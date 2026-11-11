@@ -1,6 +1,6 @@
 import { readInventoryAvailability, listEmptyBodyShelves, recordEmptyBodyShelf } from './inventory-availability';
 import { cuttergrindRoughShelfForPartType, parseCuttergrindRoughShelfTag, isPendingGrindingStatus, trayWorkflowEligibility } from '@meshforge/manufacturing/shared/util-constants';
-import { FindOptionsWhere, Not, Repository } from 'typeorm';
+import { EntityManager, FindOptionsWhere, Not, Repository } from 'typeorm';
 
 import { beginWorkflowJournal } from '@meshforge/manufacturing/server/data-access';
 import { BladeHistoryOrmEntity, BladeOrmEntity, BladeTrayOrmEntity, CreateTrayDto, ContainerTrayOrmEntity, LocationOrmEntity, LocationTrayOrmEntity, CutterBladeRequirementOrmEntity, CutterBuildTrayOrmEntity, CutterPartTypeOrmEntity, InventoryListQueryDto, PaginationService, PartSummaryOrmEntity, TrayOrmEntity, TrayStageOrmEntity, TrayGrindingRunOrmEntity } from '@meshforge/manufacturing/server/data-access';
@@ -32,6 +32,30 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
     private readonly partTypeRepo: Repository<CutterPartTypeOrmEntity>,
   ) {
     super(TrayOrmEntity.prototype, trayRepo);
+  }
+
+  async getGrindingMachines() {
+    return this.trayRepo.manager.query(`SELECT m.id, m.machine_number, d.code AS department
+      FROM public.machines m JOIN public.departments d ON d.id=m.department_id
+      WHERE m.machine_type='GRINDER' AND m.active AND m.enabled AND m."deletedAt" IS NULL
+        AND d.active AND d.enabled AND d."deletedAt" IS NULL ORDER BY m.machine_number`);
+  }
+
+  async getMachineGrindingRuns(machineId: Uuid) {
+    return this.trayRepo.manager.getRepository(TrayGrindingRunOrmEntity).find({
+      where: { grinding_machine_id: machineId }, relations: { tray: true, summary: true, part_type: true },
+      order: { completed_at: 'DESC' }, take: 100,
+    });
+  }
+
+  private async requireGrinder(manager: EntityManager, grinderId?: string) {
+    if (!grinderId) throw new UnprocessableEntityException('Select the individual grinder before recording grinding');
+    const rows = await manager.query(`SELECT m.id, m.machine_number FROM public.machines m
+      JOIN public.departments d ON d.id=m.department_id
+      WHERE m.id=$1 AND m.machine_type='GRINDER' AND m.active AND m.enabled AND m."deletedAt" IS NULL
+        AND d.active AND d.enabled AND d."deletedAt" IS NULL FOR SHARE OF m,d`, [grinderId]);
+    if (!rows.length) throw new UnprocessableEntityException('Selected grinder is unavailable. Configure an active Grinder in Admin > Machines.');
+    return rows[0] as { id: string; machine_number: string };
   }
 
   async findTray(find: FindOptionsWhere<TrayOrmEntity>): Promise<TrayOrmEntity | null> {
@@ -149,6 +173,7 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
     scrappedBladeCount: number,
     userId: Uuid,
     roughShelfInput?: string | null,
+    grinderId?: string,
   ) {
     return this.trayRepo.manager.transaction(async (manager) => {
       const trayRepo = manager.getRepository(TrayOrmEntity);
@@ -299,6 +324,11 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
         throw new UnprocessableEntityException('A short tray needs replacement blades and cannot be placed on a ready-for-coating shelf');
       }
 
+      const grinder = await this.requireGrinder(manager, grinderId);
+      if (tray.current_grinding_machine_id && tray.current_grinding_machine_id !== grinder.id) {
+        throw new ConflictException('Complete this tray on the grinder where its pass was started');
+      }
+
       // Operators do not scan individual blades during grinding disposition.
       // We preserve count accuracy by deterministically dispositioning the last
       // N internal blade records as scrap; the physical workflow is count-based.
@@ -361,6 +391,7 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
       tray.summary_id = summaryId;
       tray.part_type_id = partTypeId;
       tray.grinding_completed_at = completedAt;
+      tray.current_grinding_machine_id = null;
       tray.required_blade_count = requiredBladeCount;
       tray.current_stage_id = readyForCoatingStage.id;
       tray.current_stage = readyForCoatingStage;
@@ -391,6 +422,8 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
           tray_id: tray.id,
           summary_id: summaryId,
           part_type_id: partTypeId,
+          grinding_machine_id: grinder.id,
+          grinding_machine_number: grinder.machine_number,
           starting_blade_count: startingBladeCount,
           returned_blade_count: returnedBladeCount,
           scrapped_blade_count: scrappedBladeCount,
@@ -423,7 +456,7 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
   }
 
 
-  async startGrinding(trayId: Uuid, userId: Uuid) {
+  async startGrinding(trayId: Uuid, userId: Uuid, grinderId?: string) {
     return this.trayRepo.manager.transaction(async (manager) => {
       const trayRepo = manager.getRepository(TrayOrmEntity);
       const bladeTrayRepo = manager.getRepository(BladeTrayOrmEntity);
@@ -460,6 +493,7 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
         );
       }
 
+      const grinder = await this.requireGrinder(manager, grinderId);
       const grindingStage = await stageRepo.findOne({
         where: { code: 'GRINDING', enabled: true },
       });
@@ -508,6 +542,7 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
       );
 
       tray.grinding_completed_at = null;
+      tray.current_grinding_machine_id = grinder.id;
       tray.required_blade_count = null;
       tray.current_stage_id = grindingStage.id;
       tray.current_stage = grindingStage;

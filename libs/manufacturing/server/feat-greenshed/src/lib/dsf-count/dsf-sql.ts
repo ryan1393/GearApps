@@ -1,9 +1,8 @@
 /* DSFCOUNT1. Fixed SELECT statements; all data values are bound parameters. */
 export const DANA_MACHINES_SQL = `SELECT m.id::text AS machine_id, btrim(m.machine_number) AS machine_number,
- d.code AS department, (m.active AND m.enabled AND d.active AND d.enabled) AS active
+ d.code AS department, m.machine_type, (m.active AND m.enabled AND d.active AND d.enabled) AS active
  FROM public.machines m JOIN public.departments d ON d.id=m.department_id
- WHERE m."deletedAt" IS NULL AND d."deletedAt" IS NULL AND d.code IN ('132','152')
- AND m.machine_type='PRODUCTION' ORDER BY m.machine_number,m.id`;
+ WHERE m."deletedAt" IS NULL AND d."deletedAt" IS NULL ORDER BY m.machine_number,m.id`;
 export const SOURCE_IDENTITY_SQL = `SELECT
  to_regclass('public.tbl_whiteboard_cycles_master') IS NOT NULL AS is_source,
  to_regclass('public.cutter_machine_runs') IS NULL AS not_meshforge,

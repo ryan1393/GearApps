@@ -110,7 +110,7 @@ export interface MachineRow {
   department?: DepartmentRow;
   cell: number | null;
   description?: string | null;
-  machine_type: 'PRODUCTION' | 'CUTTER_BUILDER' | string;
+  machine_type: 'PRODUCTION' | 'CUTTER_BUILDER' | 'GRINDER' | string;
   active: boolean;
   enabled: boolean;
 }
@@ -273,7 +273,7 @@ export class AdminApiService {
     department_id: string;
     cell: number | null;
     description: string | null;
-    machine_type: 'PRODUCTION' | 'CUTTER_BUILDER';
+    machine_type: 'PRODUCTION' | 'CUTTER_BUILDER' | 'GRINDER';
     active: boolean;
   }) {
     return this.http.post<MachineRow>(
@@ -288,7 +288,7 @@ export class AdminApiService {
     department_id: string;
     cell: number | null;
     description: string | null;
-    machine_type: 'PRODUCTION' | 'CUTTER_BUILDER';
+    machine_type: 'PRODUCTION' | 'CUTTER_BUILDER' | 'GRINDER';
     active: boolean;
     enabled: boolean;
   }>) {

@@ -24,6 +24,7 @@
       </button>
     </div>
   </section>
+  @if (machineId(); as selectedMachine) { <gear-machine-dsf-count [machineId]="selectedMachine" /> }
 
   <section class="gear-workflow-section lapper-picker">
     <div class="gear-workflow-section-header">
@@ -253,6 +254,31 @@
                 </div>
               </article>
             }
+          </div>
+        }
+      </div>
+    </section>
+  }
+  @if (ready()) {
+    <section class="gear-workflow-section">
+      <div class="gear-workflow-section-header"><h2>Cycle history</h2><p>Most recent 200 cycles for this machine and gearset. Select a cycle to inspect its recorded values.</p></div>
+      <div class="gear-workflow-section-body">
+        <label class="gear-field">Filter serial number<input class="gear-input" [ngModel]="serialSearch()" (ngModelChange)="serialSearch.set($event)" /></label>
+        @if (history.error()) { <p class="gear-alert gear-alert-danger" role="alert">Could not load cycle history. Refresh to retry.</p> }
+        @for (c of visibleHistory(); track c.id) {
+          <button type="button" class="gear-btn gear-btn-secondary cycle-history-row" [attr.aria-pressed]="cycle()?.id === c.id" (click)="selectCycle(c)">
+            <strong>{{ c.serial_number || 'No serial' }}</strong><span>{{ c.timestamp | date:'medium' }}</span><span>Cycle {{ c.consec }}</span>
+          </button>
+        } @empty { <p>{{ history.loading() ? 'Loading history…' : 'No matching cycles.' }}</p> }
+      </div>
+    </section>
+    <section class="gear-workflow-section">
+      <div class="gear-workflow-section-header"><h2>Configured macro values</h2><p>All recorded variables, including macros added in Admin. Selecting a historical cycle shows only values from that cycle.</p></div>
+      <div class="gear-workflow-section-body">
+        @for (group of configuredGroups(); track group[0]) {
+          <h3>{{ group[0] || 'Other variables' }}</h3>
+          <div class="gear-form-grid">
+            @for (row of group[1]; track row.id) { <gear-value-field [label]="'#' + row.number + ' · ' + row.name" [value]="row.value" /> }
           </div>
         }
       </div>

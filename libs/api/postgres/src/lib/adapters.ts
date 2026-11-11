@@ -8,6 +8,7 @@ import {
   BaseEntity,
   Gearset,
   LappingSummaryRow,
+  LapperProduction,
   Machine,
   MachineCycle,
   MachineFanucVariable,
@@ -91,6 +92,12 @@ export class PostgresCycles extends PostgresCrudAdapter<MachineCycle> {
   findByGearset(id: string): Promise<MachineCycle[]> {
     return project(this.store.catalog.cycles({ gearsetId: id }));
   }
+  async production(): Promise<LapperProduction> {
+    return this.store.catalog.production();
+  }
+  history(machineId: string, gearsetId: string): Promise<MachineCycle[]> {
+    return project(this.store.catalog.cycles({ machineId, gearsetId, limit: 200 }));
+  }
   async findLatest(machineId: string, gearsetId: string): Promise<MachineCycle> {
     const rows = await this.store.catalog.cycles({ machineId, gearsetId, latest: true });
     if (!rows.length) throw new NotFoundException('No cycles recorded for that machine/gearset');
@@ -102,8 +109,8 @@ export class PostgresLogs extends PostgresCrudAdapter<MacroLog> {
   constructor(store: PostgresLapperStore) {
     super(store, 'macro-log');
   }
-  lappingSummary(machine: string, gearset: string, form?: string): Promise<LappingSummaryRow[]> {
-    return project(this.store.catalog.summary(machine, gearset, form));
+  lappingSummary(machine: string, gearset: string, form?: string, cycleId?: string): Promise<LappingSummaryRow[]> {
+    return project(this.store.catalog.summary(machine, gearset, form, cycleId));
   }
 }
 @Injectable()

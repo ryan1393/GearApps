@@ -36,8 +36,8 @@ interface DsfMappingBoard {
 }
 
 /**
- * Admin view of which DSF (Digital Shop Floor) source feeds each cutting machine in
- * Departments 132 and 152. Saving changes MeshForge only; nothing is ever written to DSF.
+ * Admin view of the DSF source for each physical machine across departments.
+ * Saving changes MeshForge only; nothing is ever written to DSF.
  */
 @Component({
   selector: 'gear-admin-dsf-machine-mappings',
@@ -73,6 +73,7 @@ export class DsfMachineMappingsComponent implements OnInit {
     });
   }
 
+  get departments(): string[] { return [...new Set(this.rows.map(row => row.department))].sort((a,b) => a.localeCompare(b, undefined, {numeric:true})); }
   get rows(): AdminMappingRow[] { return this.board?.rows || []; }
   get visibleRows(): AdminMappingRow[] {
     const text = this.search.trim().toUpperCase();

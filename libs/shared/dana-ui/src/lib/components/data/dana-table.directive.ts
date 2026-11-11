@@ -99,6 +99,18 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
     const table = this.host.nativeElement;
     const headerRow = table.tHead?.rows.item(table.tHead.rows.length - 1);
     if (!headerRow) return;
+    const labels = Array.from(headerRow.cells).map(cell => {
+      const clone = cell.cloneNode(true) as HTMLElement;
+      clone.querySelector('.dana-table-header-tools')?.remove();
+      return (clone.textContent ?? '').replace(/\s+/g, ' ').trim();
+    });
+    for (const body of Array.from(table.tBodies)) {
+      for (const row of Array.from(body.rows)) {
+        Array.from(row.cells).forEach((cell, index) => {
+          this.renderer.setAttribute(cell, 'data-dana-label', cell.colSpan > 1 ? '' : labels[index] || 'Actions');
+        });
+      }
+    }
 
     Array.from(headerRow.cells).forEach((cell, columnIndex) => {
       if (cell.querySelector('.dana-table-header-tools') || cell.hasAttribute('data-dana-table-static')) return;

@@ -2,7 +2,7 @@
   <div class="gear-panel p-5 dsf-map-lead">
     <div>
       <h2 id="dsf-map-title" class="text-xl font-black">DSF Machine Mappings</h2>
-      <p class="text-sm text-slate-600">Which Digital Shop Floor source feeds each cutting machine in Departments 132 and 152. Saving changes MeshForge only; nothing is ever written to DSF.</p>
+      <p class="text-sm text-slate-600">Which Digital Shop Floor source feeds each machine, including grinders and lappers. Saving changes MeshForge only; nothing is ever written to DSF.</p>
     </div>
     <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || saving" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : '↻ Refresh Status' }}</button>
   </div>
@@ -18,7 +18,7 @@
     </div>
 
     <section danaSummaryGrid aria-label="DSF mapping summary">
-      <article danaSummaryCard class="gear-metric-card"><span>ACTIVE MACHINES</span><strong>{{ activeCount }}</strong><small>Departments 132 and 152</small></article>
+      <article danaSummaryCard class="gear-metric-card"><span>ACTIVE MACHINES</span><strong>{{ activeCount }}</strong><small>All departments</small></article>
       <article danaSummaryCard class="gear-metric-card"><span>COUNTING</span><strong>{{ mappedCount }}</strong><small>source verified and being read</small></article>
       <article danaSummaryCard class="gear-metric-card"><span>MAPPING REVIEW</span><strong>{{ reviewCount }}</strong><small>no source, or source changed</small></article>
       <article danaSummaryCard class="gear-metric-card"><span>CREDITING REVIEW</span><strong>{{ writerReviewCount }}</strong><small>cutter counts held for review</small></article>
@@ -26,7 +26,7 @@
 
     <div #editor class="gear-panel p-5 dsf-map-detail" *ngIf="selected as machine" tabindex="-1" aria-label="Edit DSF source">
       <div class="dsf-map-lead">
-        <h3 class="text-lg font-black">Machine {{ machine.machine_number }} · {{ machine.department === '132' ? '132 Pinion' : '152 Ring' }}</h3>
+        <h3 class="text-lg font-black">Machine {{ machine.machine_number }} · {{ 'Department ' + machine.department }}</h3>
         <button type="button" class="gear-btn gear-btn-secondary" (click)="close()" [disabled]="saving">Close</button>
       </div>
       <p>Choose the exact DSF source. Sources already assigned to another machine are not listed.</p>
@@ -65,7 +65,7 @@
         <div><h3 class="text-lg font-black">Machine source assignments</h3><small>{{ visibleRows.length }} shown · {{ rows.length }} machines</small></div>
         <label class="gear-field">Search<input class="gear-input" [(ngModel)]="search" name="dsfMappingSearch" type="search" placeholder="Machine, source, status…" autocomplete="off" /></label>
         <label class="gear-field">Department
-          <select class="gear-select" [(ngModel)]="department" name="dsfDept"><option value="all">All</option><option value="132">132 · Pinion</option><option value="152">152 · Ring</option></select>
+          <select class="gear-select" [(ngModel)]="department" name="dsfDept"><option value="all">All</option><option *ngFor="let code of departments" [value]="code">{{ code }}</option></select>
         </label>
         <label class="gear-field">Status
           <select class="gear-select" [(ngModel)]="statusFilter" name="dsfStatus"><option value="active">Active machines</option><option value="review">Review required</option><option value="mapped">Counting</option><option value="inactive">Inactive machines</option><option value="all">All</option></select>
@@ -77,7 +77,7 @@
           <tbody>
             <tr *ngFor="let row of visibleRows" [class.dsf-map-selected]="row.machine_id === selectedMachineId">
               <td><strong>{{ row.machine_number }}</strong></td>
-              <td>{{ row.department === '132' ? '132 · Pinion' : '152 · Ring' }}</td>
+              <td>{{ row.department }}</td>
               <td>{{ row.mapping?.whiteboard_name || 'No source selected' }}<small class="dsf-map-sub" *ngIf="row.mapping">{{ row.mapping_origin === 'ADMIN' ? 'Admin selected' : 'Reference mapping' }}</small><small class="dsf-map-sub" *ngIf="!row.mapping || classification(row) === 'review'">{{ row.note }}</small></td>
               <td><span class="gear-badge" [class.dsf-map-review]="classification(row) === 'review'">{{ badgeText(row) }}</span></td>
               <td>{{ row.count === null ? '—' : (row.count | number:'1.0-0') }}</td>

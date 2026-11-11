@@ -27,7 +27,7 @@
 .login-mobile-mark{width:42px;height:28px;padding:0;background:transparent;border:0;border-radius:0}
 
 /* Font and box sizing for the sign-in page. */
-.login-page{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.login-page{font-family:var(--dana-font-sans)}
 .login-page *, .login-page *::before, .login-page *::after{box-sizing:border-box}
 .login-notice{font-size:13px;color:#475569;margin:0 0 16px}.login-http-note{font-size:11px;color:#6b5a35;margin:0 0 16px;line-height:1.5}
 .login-submit:disabled{opacity:.65;cursor:wait}.login-operator-link{text-align:center;font-size:12px;margin:20px 0 0}.login-operator-link a{color:#225ca8}

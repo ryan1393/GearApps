@@ -10,6 +10,7 @@ export interface ITrayEntity extends IBaseEntity {
   summary?: IPartSummaryEntity | null;
   part_type_id?: Uuid | null;
   part_type?: IPartTypeEntity | null;
+  current_grinding_machine_id?: Uuid | null;
   grinding_completed_at?: Date | null;
   required_blade_count?: number | null;
   current_stage_id?: Uuid | null;

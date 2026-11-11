@@ -9,6 +9,7 @@ import {
   Department,
   Gearset,
   LappingSummaryRow,
+  LapperProduction,
   Machine,
   MachineCycle,
   MachineFanucVariable,
@@ -87,6 +88,12 @@ export class MachineCyclesApi extends CrudApi<MachineCycle, CreateMachineCycle> 
   constructor() {
     super('machine-cycle');
   }
+  production(): Observable<LapperProduction> {
+    return this.http.get<LapperProduction>(`${this.url}/production`);
+  }
+  history(machineId: string, gearsetId: string): Observable<MachineCycle[]> {
+    return this.http.get<MachineCycle[]>(`${this.url}/history/${machineId}/${gearsetId}`);
+  }
   latest(machineId: string, gearsetId: string): Observable<MachineCycle> {
     return this.http.get<MachineCycle>(`${this.url}/latest/${machineId}/${gearsetId}`);
   }
@@ -119,9 +126,10 @@ export class MacroLogsApi extends CrudApi<MacroLog> {
     machineId: string,
     gearsetId: string,
     form?: MacroForm,
+    cycleId?: string,
   ): Observable<LappingSummaryRow[]> {
     return this.http.get<LappingSummaryRow[]>(`${this.url}/summary/${machineId}/${gearsetId}`, {
-      params: form ? { form } : {},
+      params: { ...(form ? { form } : {}), ...(cycleId ? { cycleId } : {}) },
     });
   }
 }

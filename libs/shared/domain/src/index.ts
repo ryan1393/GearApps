@@ -22,3 +22,5 @@ export * from './lib/cutter-tracking/check-frequency';
 export * from './lib/cutter-tracking/retired-cutter';
 
 export * from './lib/app-version';
+
+export * from './lib/gear/cycle-test';

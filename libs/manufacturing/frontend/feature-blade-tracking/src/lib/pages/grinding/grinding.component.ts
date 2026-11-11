@@ -4,11 +4,12 @@ import { isPendingGrindingStatus, parseCuttergrindRoughShelfTag, cuttergrindRoug
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GearToastService } from '@meshforge/manufacturing/frontend/util-common';
+import { MachineDsfCountComponent, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 import { BladeStatus } from '@meshforge/manufacturing/shared/util-types';
 import {
   BladeTrackingApiService,
   TrayGrindingRunView,
+  GrindingMachine,
   InventoryTrayRow,
   InventoryLocationRow,
   apiErrorText,
@@ -19,7 +20,7 @@ import { DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective } 
 @Component({
   selector: 'gear-blade-grinding',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
+  imports: [MachineDsfCountComponent, CommonModule, FormsModule, RouterLink, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
   templateUrl: './grinding.component.html',
 })
 export class GrindingComponent implements OnInit, OnDestroy {
@@ -29,6 +30,52 @@ export class GrindingComponent implements OnInit, OnDestroy {
   private selectionVersion = 0;
   private shelfRequestVersion = 0;
   @ViewChild('trayScanner') trayScanner?: ScanPanelComponent;
+  grinders: GrindingMachine[] = [];
+  grinderId = '';
+  grinderLoading = false;
+  grinderError = '';
+  changingGrinder = false;
+  machineHistory: TrayGrindingRunView[] = [];
+  machineHistoryError = '';
+  machineHistoryLoading = false;
+  private machineHistoryVersion = 0;
+  get grinder() { return this.grinders.find(machine => machine.id === this.grinderId); }
+  get assignedGrinderNumber(): string { return this.grinders.find(machine => machine.id === this.tray?.current_grinding_machine_id)?.machine_number || 'its assigned grinder'; }
+  get grinderMatchesTray(): boolean {
+    return !this.tray?.current_grinding_machine_id || this.tray.current_grinding_machine_id === this.grinderId;
+  }
+  refreshGrinders(): void {
+    this.grinderLoading = true; this.grinderError = '';
+    this.api.getGrindingMachines().pipe(takeUntil(this.destroyed$)).subscribe({
+      next: rows => {
+        this.grinders = rows; this.grinderLoading = false;
+        let saved = this.grinderId;
+        try { saved ||= localStorage.getItem('gear.grinding.machine') || ''; } catch { /* browser storage may be disabled */ }
+        this.grinderId = rows.some(machine => machine.id === saved) ? saved : '';
+      },
+      error: error => { this.grinderLoading = false; this.grinders = []; this.grinderError = apiErrorText(error, 'Could not load grinders.'); },
+    });
+  }
+  selectGrinder(id: string): void {
+    if (this.busy || !this.grinders.some(machine => machine.id === id)) return;
+    this.grinderId = id; this.changingGrinder = false; this.machineHistory = []; this.machineHistoryVersion++; this.loadMachineHistory();
+    try { localStorage.setItem('gear.grinding.machine', id); } catch { /* selection still works without storage */ }
+    this.trayScanner?.clearAndFocus();
+  }
+  scanGrinder(number: string): void {
+    const machine = this.grinders.find(machine => machine.machine_number.toUpperCase() === number.trim().toUpperCase());
+    if (machine) this.selectGrinder(machine.id);
+    else this.toast.error('No active grinder matches that machine number. Configure it in Admin → Machines.', 'Grinder not found');
+  }
+  loadMachineHistory(): void {
+    if (!this.grinder) return;
+    const version = ++this.machineHistoryVersion;
+    this.machineHistoryLoading = true; this.machineHistoryError = '';
+    this.api.getMachineGrindingRuns(this.grinderId).pipe(takeUntil(this.destroyed$)).subscribe({
+      next: rows => { if (version !== this.machineHistoryVersion) return; this.machineHistory = rows; this.machineHistoryLoading = false; },
+      error: error => { if (version !== this.machineHistoryVersion) return; this.machineHistoryLoading = false; this.machineHistoryError = apiErrorText(error, 'Could not load grinder history.'); },
+    });
+  }
   tray: InventoryTrayRow | null = null;
   availableTrays: InventoryTrayRow[] = [];
   selectedTraySerial = '';
@@ -48,7 +95,7 @@ export class GrindingComponent implements OnInit, OnDestroy {
   requirementLoading = false;
   requirementError = '';
 
-  ngOnInit(): void { this.refreshPickers(); this.refreshShelves(); }
+  ngOnInit(): void { this.refreshGrinders(); this.refreshPickers(); this.refreshShelves(); }
   ngOnDestroy(): void { this.selectionVersion++; this.shelfRequestVersion++; this.destroyed$.next(); this.destroyed$.complete(); }
   get filteredTrays() { const q=this.traySearch.trim().toLowerCase(); return this.availableTrays.filter(t=>!q||t.serial_number.toLowerCase().includes(q)); }
   get pendingGrindingCount(): number { return this.tray?.blades.filter(b => isPendingGrindingStatus(b.status)).length ?? 0; }
@@ -72,7 +119,7 @@ export class GrindingComponent implements OnInit, OnDestroy {
   }
   get hasSelectedRoughShelf(): boolean { return this.matchingRoughShelves.some(shelf => shelf.serial_number === this.roughShelfSerial); }
   get canRecordGrinding(): boolean {
-    return Boolean(!this.busy && this.tray?.workflow_eligibility?.grinding && (this.waitingToStart ||
+    return Boolean(this.grinder && this.grinderMatchesTray && !this.busy && this.tray?.workflow_eligibility?.grinding && (this.waitingToStart ||
       (this.tray.current_stage?.code === 'GRINDING' && this.pendingGrindingCount > 0 && this.grindingScrapValid && !this.requirementLoading &&
        this.requiredBlades !== null && this.previouslyReadyCount + this.returnedAfterGrinding <= this.requiredBlades && (!this.fullAfterGrinding || (!this.shelvesLoading && this.hasSelectedRoughShelf)))));
   }
@@ -128,7 +175,7 @@ export class GrindingComponent implements OnInit, OnDestroy {
     });
   }
   chooseTray(serial: string): void { this.scanTray(serial); }
-  scanTray(serial: string): void { if(this.busy||!serial.trim()) return; this.loadTray(serial.trim().toUpperCase(),true); }
+  scanTray(serial: string): void { if(this.busy||!this.grinder||!serial.trim()) return; this.loadTray(serial.trim().toUpperCase(),true); }
   retryTray(): void { if(!this.selectedTraySerial||this.busy) return; this.loadTray(this.selectedTraySerial,false); }
   private loadTray(serial:string,checkEligibility:boolean):void {
     const version=++this.selectionVersion; this.selectedTraySerial=serial; this.roughShelfSerial=''; this.resolvedRequiredBlades=null; this.requirementError=''; this.requirementLoading=false; this.busy=true; this.tray=null; this.grindingRuns=[]; this.historyLoading=true; this.historyError='';
@@ -136,10 +183,10 @@ export class GrindingComponent implements OnInit, OnDestroy {
       next: tray => {
         if(version!==this.selectionVersion) return;
         if(!tray.workflow_eligibility?.grinding && checkEligibility){ this.tray=null; this.busy=false; this.historyLoading=false; this.toast.error(`Tray ${serial} is not currently available for grinding.`,'Grinding unavailable'); return; }
-        this.tray=tray; this.scrappedBladeCount=0; this.loadRequirement(tray,version);
+        this.tray=tray; this.busy=false; this.scrappedBladeCount=0; this.loadRequirement(tray,version);
         this.api.getTrayGrindingRuns(tray.id).pipe(takeUntil(this.destroyed$)).subscribe({
-          next:runs=>{ if(version!==this.selectionVersion) return; this.grindingRuns=runs; this.historyLoading=false; this.busy=false; },
-          error:e=>{ if(version!==this.selectionVersion) return; this.historyLoading=false; this.busy=false; this.historyError=apiErrorText(e,'Could not load grinding history.'); },
+          next:runs=>{ if(version!==this.selectionVersion) return; this.grindingRuns=runs; this.historyLoading=false; },
+          error:e=>{ if(version!==this.selectionVersion) return; this.historyLoading=false; this.historyError=apiErrorText(e,'Could not load grinding history.'); },
         });
       },
       error:e=>{ if(version!==this.selectionVersion) return; this.busy=false; this.historyLoading=false; this.toast.error(apiErrorText(e,'Could not load tray.'),'Tray lookup failed'); },
@@ -169,18 +216,19 @@ export class GrindingComponent implements OnInit, OnDestroy {
   recordGrinding(): void {
     const tray=this.tray; if(!tray||!this.canRecordGrinding) return; const serial=tray.serial_number; this.busy=true;
     if(this.waitingToStart){
-      this.api.startTrayGrinding(tray.id).pipe(takeUntil(this.destroyed$)).subscribe({
+      this.api.startTrayGrinding(tray.id, this.grinderId).pipe(takeUntil(this.destroyed$)).subscribe({
         next:()=>{ this.toast.success(`Grinding started for ${serial}.`,'Grinding started'); this.refreshPickers(); this.loadTray(serial,false); },
         error:e=>{ this.busy=false; this.toast.error(apiErrorText(e,'Could not start grinding.'),'Grinding not started'); },
       }); return;
     }
     const summaryId=tray.summary_id??tray.summary?.id??''; const partTypeId=tray.part_type_id??tray.part_type?.id??'';
     if(!summaryId||!partTypeId){ this.busy=false; this.toast.error('Tray Summary / Part Type is missing.','Grinding not recorded'); return; }
-    this.api.completeTrayGrinding(tray.id,summaryId,partTypeId,this.scrappedBladeCount,this.fullAfterGrinding ? this.roughShelfSerial : undefined).pipe(takeUntil(this.destroyed$)).subscribe({
+    this.api.completeTrayGrinding(tray.id,summaryId,partTypeId,this.scrappedBladeCount,this.fullAfterGrinding ? this.roughShelfSerial : undefined, this.grinderId).pipe(takeUntil(this.destroyed$)).subscribe({
       next:result=>{
         const base=`${result.scrapped_blade_count} scrapped; ${result.returned_blade_count} returned. Tray ${result.active_blade_count}/${result.required_blade_count}.`;
         if(result.complete) this.toast.success(`${base} Staged on ${result.rough_shelf_serial_number}.`,'Grinding complete');
         else this.toast.info(`${base} Add ${result.blades_needed} replacement blade(s) in Blade Intake.`,'Tray needs replacements');
+        this.loadMachineHistory();
         this.trayScanner?.clearAndFocus();
         this.refreshPickers(); this.refreshShelves(); this.loadTray(serial,false);
       },

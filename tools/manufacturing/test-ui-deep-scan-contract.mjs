@@ -46,7 +46,9 @@ for(const [name,cfg] of Object.entries(apps)){
     }
   }
 
-  const valid=new Set([cfg.base,'/admin','/login','/']);
+  const appRoutes=read(`${cfg.app}/src/app/app.routes.ts`);
+  if(!appRoutes.includes("path: 'machine-counts'")) throw new Error(`${name}: missing shared DSF route`);
+  const valid=new Set([cfg.base,'/admin','/login','/','/machine-counts']);
   for(const r of cfg.routes) if(r) valid.add(`${cfg.base}/${r}`);
 
   const htmlFiles=[...walk(cfg.app,'.html'),...walk(cfg.feature,'.html')];

@@ -66,6 +66,8 @@ export class ServerSettingsComponent implements OnInit {
   loading = false; saving = false; restarting = false; error = '';
   board: ServerSettingsBoard | null = null;
   search = '';
+  selectedGroup = '';
+  pendingOnly = false;
   /** What is typed for each setting. */
   draft: Record<string, string> = {};
   /** Secrets whose replacement box is open. */
@@ -92,13 +94,11 @@ export class ServerSettingsComponent implements OnInit {
   get visibleGroups(): ServerSettingGroup[] {
     const term = this.search.trim().toLowerCase();
     if (!this.board) return [];
-    if (!term) return this.board.groups;
     return this.board.groups
+      .filter(group => !this.selectedGroup || group.id === this.selectedGroup)
       .map((group) => ({
         ...group,
-        settings: group.title.toLowerCase().includes(term)
-          ? group.settings
-          : group.settings.filter((setting) => `${setting.label} ${setting.key} ${setting.help ?? ''}`.toLowerCase().includes(term)),
+        settings: group.settings.filter(setting => (!this.pendingOnly || setting.pending || this.isChanged(setting)) && (!term || group.title.toLowerCase().includes(term) || `${setting.label} ${setting.key} ${setting.help ?? ''}`.toLowerCase().includes(term))),
       }))
       .filter((group) => group.settings.length);
   }

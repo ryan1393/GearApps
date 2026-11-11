@@ -23,7 +23,8 @@ describe('DSF connection settings', () => {
   it('stays off for incomplete or unsafe settings instead of guessing', () => {
     const invalid = (changes: NodeJS.ProcessEnv) => readDsfConfig({ ...base, ...changes }).valid;
     expect(invalid({ DSF_DB_PASSWORD: '' })).toBe(false);
-    expect(invalid({ DSF_COUNT_MACHINES: '' })).toBe(false);
+    // Admin-approved sources do not need an archived reference allowlist.
+    expect(invalid({ DSF_COUNT_MACHINES: '' })).toBe(true);
     expect(invalid({ DSF_COUNT_MACHINES: '516,516' })).toBe(false);
     expect(invalid({ DSF_DB_PORT: 'abc' })).toBe(false);
     expect(invalid({ DSF_DB_SSL_MODE: 'prefer' })).toBe(false);

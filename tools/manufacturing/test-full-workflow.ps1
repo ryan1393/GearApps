@@ -4,6 +4,7 @@ param(
     [string]$Password,
 
     [Parameter(Mandatory=$true)] [string]$TraySerialNumber,
+    [Parameter(Mandatory=$true)] [string]$GrindingMachineId,
     [Parameter(Mandatory=$true)] [string]$SummaryId,
     [Parameter(Mandatory=$true)] [string]$PartTypeId,
     [Parameter(Mandatory=$true)] [string]$ContainerSerialNumber,
@@ -299,12 +300,13 @@ if (-not $Execute) {
 # --------------------------
 Write-Host ''
 Write-Host '---- BLADE TRACKING: GRINDING ----'
-$start = Invoke-Api POST "/trays/$trayId/start-grinding" @{} 'Start grinding'
+$start = Invoke-Api POST "/trays/$trayId/start-grinding" @{ grinding_machine_id = $GrindingMachineId } 'Start grinding'
 Assert-Equal $start.stage 'GRINDING' 'Grinding stage' 'stage'
 
 $grind = Invoke-Api POST "/trays/$trayId/complete-grinding" @{
     summary_id = $SummaryId
     part_type_id = $PartTypeId
+    grinding_machine_id = $GrindingMachineId
     scrapped_blade_count = $GrindingScrapCount
 } 'Complete grinding'
 Assert-True ([bool]$grind.complete) 'Grinding complete quantity' 'Tray contains required post-grind blade quantity'

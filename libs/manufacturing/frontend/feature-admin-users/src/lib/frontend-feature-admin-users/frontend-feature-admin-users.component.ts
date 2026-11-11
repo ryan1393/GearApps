@@ -1,12 +1,15 @@
+import { MachineDsfCountComponent } from '@meshforge/manufacturing/frontend/util-common';
 import {
   CommonModule } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
+  DestroyRef,
   Component,
   inject,
   OnInit,
   } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@meshforge/manufacturing/frontend/util-common';
 import { Observable } from 'rxjs';
@@ -47,20 +50,23 @@ import {
   DanaPageHeaderComponent,
 } from '@dana/ui';
 
-type AdminTab = 'users' | 'part-summaries' | 'parts' | 'gearsets' | 'roll-masters' | 'models' | 'machines' | 'lapping-machines' | 'dsf-mappings' | 'label-printers' | 'server-settings' | 'trays' | 'containers' | 'locations' | 'cutter-bodies';
+import { CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent } from '@meshforge/client/feature-config';
+
+type AdminTab = 'cycle-tests' | 'scanners' | 'macros' | 'fanuc-variables' | 'collector-tokens' | 'users' | 'part-summaries' | 'parts' | 'gearsets' | 'roll-masters' | 'models' | 'machines' | 'lapping-machines' | 'dsf-mappings' | 'label-printers' | 'server-settings' | 'trays' | 'containers' | 'locations' | 'cutter-bodies';
 // Every tab, for ?tab= deep links; `satisfies` keeps it in step with AdminTab.
-const ADMIN_TABS = ['users', 'part-summaries', 'parts', 'gearsets', 'roll-masters', 'models', 'machines', 'lapping-machines', 'dsf-mappings', 'label-printers', 'server-settings', 'trays', 'containers', 'locations', 'cutter-bodies'] as const satisfies readonly AdminTab[];
+const ADMIN_TABS = ['cycle-tests', 'scanners', 'macros', 'fanuc-variables', 'collector-tokens', 'users', 'part-summaries', 'parts', 'gearsets', 'roll-masters', 'models', 'machines', 'lapping-machines', 'dsf-mappings', 'label-printers', 'server-settings', 'trays', 'containers', 'locations', 'cutter-bodies'] as const satisfies readonly AdminTab[];
 const isAdminTab = (value: unknown): value is AdminTab => ADMIN_TABS.includes(value as AdminTab);
 
 @Component({
   selector: 'gear-admin-users-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, ServerSettingsComponent, GearLabelPrinterPickerComponent, LappingGearsetsComponent, LappingMachinesComponent],
+  imports: [MachineDsfCountComponent,CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent, CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, ServerSettingsComponent, GearLabelPrinterPickerComponent, LappingGearsetsComponent, LappingMachinesComponent],
   templateUrl: './frontend-feature-admin-users.component.html',
   styleUrls: ['./frontend-feature-admin-users.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FrontendFeatureAdminUsersComponent implements OnInit {
+  private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(AdminApiService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly toast = inject(GearToastService);
@@ -147,7 +153,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     department_id: string;
     cell: number | null;
     description: string;
-    machine_type: 'PRODUCTION' | 'CUTTER_BUILDER';
+    machine_type: 'PRODUCTION' | 'CUTTER_BUILDER' | 'GRINDER';
   } = {
     machine_number: '',
     department_id: '',
@@ -183,6 +189,10 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     // ?tab= deep links, e.g. the old Lapping master-data pages redirect to /admin?tab=gearsets.
     const requested = this.route?.snapshot.queryParamMap.get('tab');
     if (isAdminTab(requested)) this.activeTab = requested;
+    this.route?.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      const tab = params.get('tab');
+      if (isAdminTab(tab)) { this.activeTab = tab; this.cdr.markForCheck(); }
+    });
     this.refreshAll();
   }
 
@@ -384,7 +394,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     this.editingMachineId = machine.id;
     this.machineForm = {
       machine_number: machine.machine_number, department_id: machine.department_id, cell: machine.cell,
-      description: machine.description || '', machine_type: machine.machine_type === 'CUTTER_BUILDER' ? 'CUTTER_BUILDER' : 'PRODUCTION',
+      description: machine.description || '', machine_type: machine.machine_type === 'GRINDER' ? 'GRINDER' : machine.machine_type === 'CUTTER_BUILDER' ? 'CUTTER_BUILDER' : 'PRODUCTION',
     };
     this.clearNotice(); this.cdr.markForCheck();
   }

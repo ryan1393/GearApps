@@ -48,9 +48,9 @@ export class CreateAdminMachineDto {
   @IsOptional() @IsString() @MaxLength(500)
   description?: string | null;
 
-  @ApiPropertyOptional({ enum: ['PRODUCTION', 'CUTTER_BUILDER'], default: 'PRODUCTION' })
-  @IsOptional() @IsIn(['PRODUCTION', 'CUTTER_BUILDER'])
-  machine_type?: 'PRODUCTION' | 'CUTTER_BUILDER' = 'PRODUCTION';
+  @ApiPropertyOptional({ enum: ['PRODUCTION', 'CUTTER_BUILDER', 'GRINDER'], default: 'PRODUCTION' })
+  @IsOptional() @IsIn(['PRODUCTION', 'CUTTER_BUILDER', 'GRINDER'])
+  machine_type?: 'PRODUCTION' | 'CUTTER_BUILDER' | 'GRINDER' = 'PRODUCTION';
 
   @ApiPropertyOptional({ default: true })
   @IsOptional() @IsBoolean()
@@ -62,7 +62,7 @@ export class UpdateAdminMachineDto {
   @IsOptional() @IsUUID() department_id?: string;
   @IsOptional() @Type(() => Number) @IsInt() cell?: number | null;
   @IsOptional() @IsString() @MaxLength(500) description?: string | null;
-  @IsOptional() @IsIn(['PRODUCTION', 'CUTTER_BUILDER']) machine_type?: 'PRODUCTION' | 'CUTTER_BUILDER';
+  @IsOptional() @IsIn(['PRODUCTION', 'CUTTER_BUILDER', 'GRINDER']) machine_type?: 'PRODUCTION' | 'CUTTER_BUILDER' | 'GRINDER';
   @IsOptional() @IsBoolean() active?: boolean;
   @IsOptional() @IsBoolean() enabled?: boolean;
 }

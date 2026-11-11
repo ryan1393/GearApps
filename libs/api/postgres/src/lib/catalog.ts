@@ -297,6 +297,16 @@ export class PostgresLapperCatalog {
       .addOrderBy('c.id', 'DESC');
   }
 
+  async production() {
+    const [row] = await this.db.query(`SELECT
+      COUNT(*) FILTER (WHERE occurred_at >= now() - interval '24 hours')::integer AS cycles_24h,
+      COUNT(DISTINCT machine_id) FILTER (WHERE occurred_at >= now() - interval '24 hours')::integer AS machines_reporting_24h,
+      COUNT(*) FILTER (WHERE occurred_at >= now() - interval '24 hours' AND NULLIF(BTRIM(serial_number), '') IS NULL)::integer AS missing_serial_24h,
+      MAX(occurred_at) AS last_cycle_at
+      FROM (SELECT machine_id, serial_number, COALESCE(recorded_at, timestamp AT TIME ZONE $1) AS occurred_at FROM lapper.machine_cycles) cycles`, [this.timeZone]);
+    return row;
+  }
+
   async cycles(
     filter: {
       id?: string;
@@ -304,12 +314,14 @@ export class PostgresLapperCatalog {
       gearsetId?: string;
       ids?: string[];
       latest?: boolean;
+      limit?: number;
     } = {},
     manager = this.db.manager,
   ): Promise<Row[]> {
     if (filter.ids && !filter.ids.length) return [];
     const query = this.cycleQuery(manager, filter);
     if (filter.latest) query.limit(1);
+    else if (filter.limit) query.limit(filter.limit);
     const [rows, machines, gearsets] = await readBatch(
       () => query.getRawMany<Row>(),
       () => this.machines(manager),
@@ -352,7 +364,7 @@ export class PostgresLapperCatalog {
     }));
   }
 
-  async summary(machineId: string, gearsetId: string, form?: string): Promise<Row[]> {
+  async summary(machineId: string, gearsetId: string, form?: string, cycleId?: string): Promise<Row[]> {
     const ranked = this.db
       .createQueryBuilder()
       .select('l.id', 'id')
@@ -380,6 +392,7 @@ export class PostgresLapperCatalog {
       .andWhere('(g.id=:gearsetId OR ' + resolvedGearset + '=:gearsetId)', { gearsetId })
       .setParameter('zone', this.timeZone);
     if (form) ranked.andWhere('m.used_form=:form', { form });
+    if (cycleId) ranked.andWhere('c.id=:cycleId', { cycleId });
     const rows = await this.db
       .createQueryBuilder()
       .select('*')

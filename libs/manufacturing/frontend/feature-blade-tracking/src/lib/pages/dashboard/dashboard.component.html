@@ -128,7 +128,7 @@
           </label>
           <p role="status">Showing {{trayRangeStart}}–{{trayRangeEnd}} of {{filteredStageTrays.length}}<span *ngIf="traySearch.trim()"> matching search ({{selectedTrayStage?.tray_count}} in this stage)</span></p>
         </div>
-        <table class="availability-tray-table">
+        <table danaTable class="availability-tray-table">
           <caption class="availability-visually-hidden">Matching trays for {{selectedTrayStageName}} and the selected Summary and Part Type</caption>
           <thead><tr><th scope="col">Tray</th><th scope="col">Part Type</th><th scope="col">Blades</th><th scope="col">Required*</th><th scope="col">Current placement</th><th scope="col">Details</th></tr></thead>
           <tbody>

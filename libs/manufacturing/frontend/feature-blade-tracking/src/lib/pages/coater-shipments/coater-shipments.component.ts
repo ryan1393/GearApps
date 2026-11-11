@@ -5,13 +5,13 @@ import { RouterLink } from '@angular/router';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { CoaterAvailableContainer, CoaterShipment, CoaterShipmentContainer, CoaterShipmentList } from '@meshforge/manufacturing/shared/util-types';
 import { CoaterShipmentsApiService, apiErrorText } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
-import { DanaPageHeaderComponent } from '@dana/ui';
+import { DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
 import { coaterPackingSlipHtml, coaterContainerLabelsHtml } from './coater-packing-slip';
 import { createCoaterRequestId } from './coater-request-id';
 
 @Component({
   selector: 'gear-coater-shipments', standalone: true,
-  imports: [CommonModule,FormsModule,RouterLink,DanaPageHeaderComponent],
+  imports: [CommonModule,FormsModule,RouterLink,DanaPageHeaderComponent,DanaTableDirective,DanaTableShellDirective],
   templateUrl: './coater-shipments.component.html', styleUrls: ['./coater-shipments.component.css'],
 })
 export class CoaterShipmentsComponent implements OnDestroy {

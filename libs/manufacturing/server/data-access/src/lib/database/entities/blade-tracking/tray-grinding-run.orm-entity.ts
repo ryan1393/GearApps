@@ -1,5 +1,6 @@
+import { MachineOrmEntity } from '../base/machine.orm-entity';
 import { instanceToPlain } from 'class-transformer';
-import { Check, Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Check, Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
 import { AbstractOrmEntity } from '@meshforge/manufacturing/server/util-common';
 import { ITrayGrindingRun } from '@meshforge/manufacturing/shared/util-types';
@@ -9,6 +10,7 @@ import { UserOrmEntity } from '../user.orm-entity';
 import { TrayOrmEntity } from './tray.orm-entity';
 
 @Entity({ name: 'tray_grinding_runs' })
+@Index('ix_tray_grinding_runs_machine', ['grinding_machine_id', 'completed_at'])
 @Check('"starting_blade_count" >= 0')
 @Check('"returned_blade_count" >= 0')
 @Check('"scrapped_blade_count" >= 0')
@@ -24,6 +26,9 @@ export class TrayGrindingRunOrmEntity extends AbstractOrmEntity {
   @Column({ type: String })
   part_type_id!: string;
 
+  @Column({ type: String, nullable: true })
+  grinding_machine_number!: string | null;
+
   @Column({ type: Number })
   starting_blade_count!: number;
 
@@ -35,6 +40,13 @@ export class TrayGrindingRunOrmEntity extends AbstractOrmEntity {
 
   @Column({ type: Number })
   required_blade_count!: number;
+
+  @Column({ type: String, nullable: true })
+  grinding_machine_id!: string | null;
+
+  @ManyToOne(() => MachineOrmEntity, { nullable: true })
+  @JoinColumn({ name: 'grinding_machine_id' })
+  grinding_machine!: MachineOrmEntity | null;
 
   @Column({ type: String, nullable: true })
   completed_by_user_id!: string | null;

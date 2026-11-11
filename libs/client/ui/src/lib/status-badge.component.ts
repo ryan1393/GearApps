@@ -21,7 +21,7 @@ export class StatusBadgeComponent {
   });
   readonly resolvedTone = computed<Tone>(() => {
     if (this.tone()) return this.tone() as Tone;
-    const s = (this.status() ?? '').toLowerCase();
+    const s = (this.status() ?? '').trim().toLowerCase();
     if (['active', 'running', 'ok', 'pass', 'on', 'true'].includes(s)) return 'success';
     if (['inactive', 'stopped', 'fail', 'error', 'off'].includes(s)) return 'danger';
     if (['idle', 'warning', 'pending'].includes(s)) return 'warning';

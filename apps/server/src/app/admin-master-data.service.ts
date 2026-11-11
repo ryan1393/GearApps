@@ -2,6 +2,7 @@ import {
   DepartmentOrmEntity,
   CutterMachineRunOrmEntity,
   MachineOrmEntity,
+  TrayOrmEntity,
   ModelOrmEntity,
 } from '@meshforge/manufacturing/server/data-access';
 import { Uuid } from '@meshforge/manufacturing/shared/util-types';
@@ -160,6 +161,9 @@ export class AdminMasterDataService {
         throw new ConflictException(
           'Pull the running cutter before changing or disabling this machine',
         );
+      }
+      if (changesRunningConfiguration && await manager.getRepository(TrayOrmEntity).count({ where: { current_grinding_machine_id: id, enabled: true } })) {
+        throw new ConflictException('Complete the active grinding pass before changing or disabling this grinder');
       }
       if (dto.machine_number !== undefined) {
         const machineNumber = dto.machine_number.trim().toUpperCase();

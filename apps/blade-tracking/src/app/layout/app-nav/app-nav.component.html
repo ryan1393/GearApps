@@ -36,6 +36,7 @@
         <span>{{ user.departmentDescription || 'Your department' }} can view this dashboard, but cannot perform transactions in this app.</span>
       </div>
 
+      <a (click)="mobileNav.close()" routerLink="/machine-counts" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Machine DSF Counts</span></a>
       <div class="nav-heading">SHARED APPS</div>
       <a (click)="mobileNav.close()" [href]="cutterBuilderUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Cutter Builder</span></a>
       <a (click)="mobileNav.close()" [href]="greenshedUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Greenshed</span></a>

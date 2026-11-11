@@ -1,3 +1,4 @@
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
@@ -13,14 +14,15 @@ import {
   DanaTableEmptyDirective,
   DanaTableShellDirective,
 } from '@dana/ui';
-import { apiErrorMessage, LapperAccess, loadable, MachinesApi } from '@meshforge/client/core';
+import { apiErrorMessage, LapperAccess, loadable, MachinesApi, MachineCyclesApi } from '@meshforge/client/core';
 import { StatusBadgeComponent } from '@meshforge/client/ui';
-import { Machine } from '@meshforge/shared/domain';
+import { LapperProduction, Machine } from '@meshforge/shared/domain';
 import { groupByCell } from './cells';
 
 @Component({
   selector: 'gear-cells-overview-page',
   imports: [
+    DatePipe,
     RouterLink,
     DanaCountBadgeDirective,
     DanaDashboardPanelComponent,
@@ -43,7 +45,7 @@ import { groupByCell } from './cells';
         danaPageHeader
         eyebrow="LAPPER"
         heading="Dashboard"
-        description="Welcome back. Here’s what’s happening across the lapping cells."
+        description="Production over the past 24 hours. Open a cell for live machine status or inspect cycle history."
         [dashboard]="true"
       >
         <button
@@ -67,9 +69,9 @@ import { groupByCell } from './cells';
             <span class="gear-glyph gear-glyph-lapping" aria-hidden="true"></span>
           </div>
           <div>
-            <strong>{{ cells().length }}</strong>
-            <h3>Lapping Cells</h3>
-            <p>Cells with machines assigned</p>
+            <strong>{{ production.value()?.cycles_24h ?? '—' }}</strong>
+            <h3>Cycles · 24 hours</h3>
+            <p>Recorded production cycles</p>
           </div>
         </article>
         <article danaKpiCard class="kpi-card">
@@ -77,9 +79,9 @@ import { groupByCell } from './cells';
             <span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span>
           </div>
           <div>
-            <strong>{{ machines.value().length }}</strong>
-            <h3>Machines</h3>
-            <p>Lappers configured</p>
+            <strong>{{ production.value()?.machines_reporting_24h ?? '—' }}</strong>
+            <h3>Reporting machines</h3>
+            <p>Produced in the past 24 hours</p>
           </div>
         </article>
         <article danaKpiCard class="kpi-card">
@@ -97,9 +99,9 @@ import { groupByCell } from './cells';
             <span class="gear-glyph gear-glyph-scanner" aria-hidden="true"></span>
           </div>
           <div>
-            <strong>{{ scannerCount() }}</strong>
-            <h3>Scanners</h3>
-            <p>Attached to machines</p>
+            <strong>{{ production.value()?.missing_serial_24h ?? '—' }}</strong>
+            <h3>Missing serials</h3>
+            <p>Cycles needing traceability review</p>
           </div>
         </article>
       </section>
@@ -155,40 +157,10 @@ import { groupByCell } from './cells';
         </div>
       </section>
 
-      <section class="gear-panel operations-panel" danaDashboardPanel>
-        <div class="gear-panel-heading panel-heading">
-          <h2>Configuration</h2>
-          <p>Scanners, macro variables and machine I/O the lappers report.</p>
-        </div>
-        <div danaOperationGrid class="operation-grid">
-          <a
-            routerLink="/scanners"
-            danaOperationCard
-            icon="scanner"
-            tone="teal"
-            heading="Scanners"
-            description="Scanner addresses, assigned machines and last serial numbers."
-            aria-label="Scanners"
-          ></a>
-          <a
-            routerLink="/macros"
-            danaOperationCard
-            icon="setup"
-            tone="purple"
-            heading="Macros"
-            description="Every Fanuc macro and the summary field that shows it."
-            aria-label="Macros"
-          ></a>
-          <a
-            routerLink="/fanuc-variables"
-            danaOperationCard
-            icon="quality-check"
-            tone="gray"
-            heading="Fanuc Variables"
-            description="Front door, cycle start and in-cycle signals per machine."
-            aria-label="Fanuc Variables"
-          ></a>
-        </div>
+      <section class="gear-panel p-5" aria-live="polite">
+        @if (production.error()) { <p role="alert">Production totals are unavailable. Refresh to retry.</p> }
+        @else { <p>Last recorded cycle: {{ production.value()?.last_cycle_at ? (production.value()?.last_cycle_at | date:'medium') : 'No production recorded' }}</p> }
+        @if (access.canEditSetup()) { <a class="gear-btn gear-btn-secondary" routerLink="/admin" [queryParams]="{ tab: 'cycle-tests' }">Cycle Test Lab</a> }
       </section>
 
       <section class="gear-panel data-panel" danaDashboardPanel>
@@ -270,6 +242,8 @@ import { groupByCell } from './cells';
 })
 export class CellsOverviewPageComponent implements OnInit {
   private readonly api = inject(MachinesApi);
+  private readonly cyclesApi = inject(MachineCyclesApi);
+  protected readonly production = loadable<LapperProduction | null>(null);
   protected readonly access = inject(LapperAccess);
   protected readonly machines = loadable<Machine[]>([]);
   protected readonly cells = computed(() => groupByCell(this.machines.value()));
@@ -288,6 +262,7 @@ export class CellsOverviewPageComponent implements OnInit {
 
   protected reload() {
     this.machines.load(this.api.list());
+    this.production.load(this.cyclesApi.production());
   }
 
   protected scannersIn(machines: Machine[]): number {

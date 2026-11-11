@@ -22,13 +22,23 @@ import {
 import { ApiCreatedResponse, ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { ServerFeatTrayService } from './server-feat-tray.service';
-import { CompleteTrayGrindingDto, PlaceEmptyBodyDto, RemoveEmptyBodyDto, InventoryAvailabilityQueryDto } from './tray-workflow.dto';
+import { StartTrayGrindingDto, CompleteTrayGrindingDto, PlaceEmptyBodyDto, RemoveEmptyBodyDto, InventoryAvailabilityQueryDto } from './tray-workflow.dto';
 
 @Controller({ path: 'trays', version: '1' })
 @ApiTags('Trays')
 export class ServerFeatTrayController {
   private readonly logger = new Logger(ServerFeatTrayController.name);
   constructor(private trayService: ServerFeatTrayService) { }
+
+  @Get('grinding-machines')
+  @Auth([RoleType.ADMIN, RoleType.USER])
+  getGrindingMachines() { return this.trayService.getGrindingMachines(); }
+
+  @Get('grinding-machines/:machineId/runs')
+  @Auth([RoleType.ADMIN, RoleType.USER])
+  getMachineGrindingRuns(@Param('machineId', new ParseUUIDPipe()) machineId: Uuid) {
+    return this.trayService.getMachineGrindingRuns(machineId);
+  }
 
   @Post('')
   @DepartmentAppEdit('BLADE_TRACKING')
@@ -110,10 +120,11 @@ export class ServerFeatTrayController {
   @DepartmentAppEdit('BLADE_TRACKING')
   @Auth([RoleType.ADMIN, RoleType.USER])
   async startGrinding(
+    @Body() dto: StartTrayGrindingDto,
     @Param('id', new ParseUUIDPipe()) id: Uuid,
     @ReqUserId() userId: Uuid,
   ) {
-    return this.trayService.startGrinding(id, userId);
+    return this.trayService.startGrinding(id, userId, dto.grinding_machine_id);
   }
 
   @Post(':id/complete-grinding')
@@ -131,6 +142,7 @@ export class ServerFeatTrayController {
       dto.scrapped_blade_count,
       userId,
       dto.rough_shelf_serial_number,
+      dto.grinding_machine_id,
     );
   }
 

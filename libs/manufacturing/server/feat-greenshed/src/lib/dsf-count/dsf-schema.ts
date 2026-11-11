@@ -53,7 +53,7 @@ export const DSF_CUTTER_SCHEMA_SQL = [
      approved_at timestamptz NOT NULL DEFAULT clock_timestamp(),
      updated_at timestamptz NOT NULL DEFAULT clock_timestamp(),
      CONSTRAINT dana_dsf_machine_mapping_v1_revision_ck CHECK (revision > 0),
-     CONSTRAINT dana_dsf_machine_mapping_v1_department_ck CHECK (source_department IS NULL OR source_department IN ('132','152')),
+     CONSTRAINT dana_dsf_machine_mapping_v1_department_ck CHECK (source_department IS NULL OR source_department ~ '^[0-9]+$'),
      CONSTRAINT dana_dsf_machine_mapping_v1_state_ck CHECK (
        (enabled AND mapping_id IS NOT NULL AND whiteboard_id IS NOT NULL AND op_id IS NOT NULL AND line_id IS NOT NULL
          AND department_id IS NOT NULL AND source_department IS NOT NULL AND line_name IS NOT NULL AND btrim(line_name) <> ''
@@ -63,6 +63,8 @@ export const DSF_CUTTER_SCHEMA_SQL = [
          AND department_id IS NULL AND source_department IS NULL AND line_name IS NULL AND whiteboard_name IS NULL)
      )
    )`,
+  `ALTER TABLE public.dana_dsf_machine_mapping_v1 DROP CONSTRAINT IF EXISTS dana_dsf_machine_mapping_v1_department_ck`,
+  `ALTER TABLE public.dana_dsf_machine_mapping_v1 ADD CONSTRAINT dana_dsf_machine_mapping_v1_department_ck CHECK (source_department IS NULL OR source_department ~ '^[0-9]+$')`,
   `CREATE UNIQUE INDEX IF NOT EXISTS dana_dsf_machine_mapping_v1_mapping_uq
      ON public.dana_dsf_machine_mapping_v1(mapping_id) WHERE mapping_id IS NOT NULL`,
   `CREATE TABLE IF NOT EXISTS public.dana_dsf_machine_mapping_audit_v1 (

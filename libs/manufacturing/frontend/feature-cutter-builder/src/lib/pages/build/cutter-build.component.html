@@ -165,6 +165,7 @@
           </select>
           <small class="gear-field-help">Only enabled, active Department 45 machines whose Machine Type is Cutter Builder are available.</small>
         </label>
+        <gear-machine-dsf-count *ngIf="selectedCutterBuilderMachineId" [machineId]="selectedCutterBuilderMachineId" />
         <div *ngIf="selectionState.machines === 'ready' && availableCutterBuilderMachines.length === 0" class="gear-alert gear-alert-warning" role="status">
           No eligible Cutter Builder machines are configured. In Admin → Machines, enable a Department 45 machine and set Machine Type to Cutter Builder.
         </div>

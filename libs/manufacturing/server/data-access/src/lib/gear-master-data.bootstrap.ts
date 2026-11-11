@@ -36,6 +36,12 @@ export class GearMasterDataBootstrap implements OnModuleInit {
         CREATE INDEX IF NOT EXISTS ix_machines_cutter_builder_eligibility
           ON public.machines (department_id, machine_type, enabled, active);
 
+        ALTER TABLE public.trays ADD COLUMN IF NOT EXISTS current_grinding_machine_id uuid REFERENCES public.machines(id);
+        ALTER TABLE public.tray_grinding_runs
+          ADD COLUMN IF NOT EXISTS grinding_machine_id uuid REFERENCES public.machines(id),
+          ADD COLUMN IF NOT EXISTS grinding_machine_number text;
+        CREATE INDEX IF NOT EXISTS ix_tray_grinding_runs_machine ON public.tray_grinding_runs(grinding_machine_id, completed_at DESC);
+
         ALTER TABLE public.roll_masters
           ADD COLUMN IF NOT EXISTS current_quantity integer NOT NULL DEFAULT 0,
           ADD COLUMN IF NOT EXISTS minimum_quantity integer NOT NULL DEFAULT 0;

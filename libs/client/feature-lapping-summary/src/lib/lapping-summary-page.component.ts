@@ -1,3 +1,4 @@
+import { MachineDsfCountComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -53,7 +54,7 @@ import { SummaryGroupComponent } from './summary-group.component';
 
 @Component({
   selector: 'gear-lapping-summary-page',
-  imports: [
+  imports: [MachineDsfCountComponent,
     FormsModule,
     DatePipe,
     DecimalPipe,
@@ -100,6 +101,12 @@ export class LappingSummaryPageComponent implements OnInit {
 
   // Data
   protected readonly rows = loadable<LappingSummaryRow[]>([]);
+  protected readonly history = loadable<MachineCycle[]>([]);
+  protected readonly serialSearch = signal('');
+  protected readonly visibleHistory = computed(() => this.history.value().filter(c =>
+    !this.serialSearch().trim() || (c.serial_number ?? '').toLowerCase().includes(this.serialSearch().trim().toLowerCase())));
+  protected readonly configuredGroups = computed(() => Array.from(this.byForm().entries()));
+  private requestVersion = 0;
   protected readonly cycle = signal<MachineCycle | null>(null);
   private readonly byForm = computed(() => groupByForm(this.rows.value()));
   protected readonly gearData = computed(() => this.byForm().get('gear_data') ?? []);
@@ -136,6 +143,8 @@ export class LappingSummaryPageComponent implements OnInit {
       untracked(() => {
         if (m && g) this.load(m, g);
         else {
+          this.requestVersion++;
+          this.history.set([]);
           this.rows.set([]);
           this.cycle.set(null);
         }
@@ -234,11 +243,20 @@ export class LappingSummaryPageComponent implements OnInit {
   protected readonly machineText = (m: Machine) =>
     `${m.number ?? m.ip}${m.cell ? ` · Cell ${m.cell}` : ''}`;
 
+  protected selectCycle(cycle: MachineCycle) {
+    this.requestVersion++;
+    this.cycle.set(cycle);
+    this.rows.load(this.macroLogsApi.lappingSummary(cycle.machine_id, cycle.gearset_id, undefined, cycle.id));
+  }
+
   private load(machineId: string, gearsetId: string) {
+    const version = ++this.requestVersion;
+    this.cycle.set(null);
+    this.history.load(this.cyclesApi.history(machineId, gearsetId));
     this.rows.load(this.macroLogsApi.lappingSummary(machineId, gearsetId));
     this.cyclesApi
       .latest(machineId, gearsetId)
-      .pipe(catchError(() => of(null)))
-      .subscribe((c) => this.cycle.set(c));
+      .pipe(catchError(() => of(null)), takeUntilDestroyed(this.destroyRef))
+      .subscribe((c) => { if (version === this.requestVersion) this.cycle.set(c); });
   }
 }

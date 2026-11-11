@@ -211,7 +211,12 @@ export interface EmptyBodyShelfView {
   placed_at: string; blade_capacity: number | null; state: string;
 }
 
+export interface GrindingMachine { id: string; machine_number: string; department: string; }
+
 export interface TrayGrindingRunView {
+  grinding_machine_id?: string | null;
+  grinding_machine_number?: string | null;
+  tray?: { serial_number: string };
   id: string;
   tray_id: string;
   summary_id: string;
@@ -325,9 +330,12 @@ export class BladeTrackingApiService {
     }));
   }
 
-  startTrayGrinding(trayId: string) {
+  getGrindingMachines() { return this.http.get<GrindingMachine[]>('/api/v1/trays/grinding-machines'); }
+  getMachineGrindingRuns(machineId: string) { return this.http.get<TrayGrindingRunView[]>(`/api/v1/trays/grinding-machines/${encodeURIComponent(machineId)}/runs`); }
+
+  startTrayGrinding(trayId: string, grinderId: string) {
     return this.http.post<{ tray_id: string; stage: string }>(
-      `/api/v1/trays/${encodeURIComponent(trayId)}/start-grinding`, {},
+      `/api/v1/trays/${encodeURIComponent(trayId)}/start-grinding`, { grinding_machine_id: grinderId },
     );
   }
 
@@ -439,6 +447,7 @@ export class BladeTrackingApiService {
     partTypeId: string,
     scrappedBladeCount: number,
     roughShelfSerialNumber?: string,
+    grinderId?: string,
   ) {
     return this.http.post<{
       grinding_run_id: string;
@@ -455,6 +464,7 @@ export class BladeTrackingApiService {
       part_type_id: partTypeId,
       scrapped_blade_count: scrappedBladeCount,
       rough_shelf_serial_number: roughShelfSerialNumber,
+      grinding_machine_id: grinderId,
     });
   }
 

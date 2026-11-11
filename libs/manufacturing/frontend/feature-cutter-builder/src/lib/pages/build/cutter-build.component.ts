@@ -13,14 +13,14 @@ import {
   CutterTrayValidation,
   cutterApiErrorText,
 } from '@meshforge/manufacturing/frontend/data-access-cutter-builder';
-import { GearLabelPrinterPickerComponent, GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
+import { MachineDsfCountComponent, GearLabelPrinterPickerComponent, GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 import { DanaPageHeaderComponent } from '@dana/ui';
 import { ITray } from '@meshforge/manufacturing/shared/util-types';
 
 @Component({
   selector: 'gear-cutter-build',
   standalone: true,
-  imports: [CommonModule, GearScannerFocusDirective, GearLabelPrinterPickerComponent, FormsModule, DanaPageHeaderComponent],
+  imports: [MachineDsfCountComponent, CommonModule, GearScannerFocusDirective, GearLabelPrinterPickerComponent, FormsModule, DanaPageHeaderComponent],
   templateUrl: './cutter-build.component.html',
 })
 export class CutterBuildComponent implements OnDestroy {

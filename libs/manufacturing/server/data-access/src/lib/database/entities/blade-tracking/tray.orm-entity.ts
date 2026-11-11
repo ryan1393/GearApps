@@ -1,3 +1,4 @@
+import { MachineOrmEntity } from '../base/machine.orm-entity';
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
@@ -42,6 +43,13 @@ export class TrayOrmEntity
    */
   @Column({ type: Number, nullable: true })
   required_blade_count!: number | null;
+
+  @Column({ type: String, nullable: true })
+  current_grinding_machine_id!: string | null;
+
+  @ManyToOne(() => MachineOrmEntity, { nullable: true })
+  @JoinColumn({ name: 'current_grinding_machine_id' })
+  grinding_machine!: MachineOrmEntity | null;
 
   @Column({ type: String, nullable: true })
   current_stage_id!: string | null;

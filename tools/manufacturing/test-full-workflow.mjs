@@ -30,8 +30,16 @@ async function api(method, path, body, label, expect = [200, 201]) {
 const s = fx.shelves, bt = fx.blade_tracking;
 const tray = await api('GET', `/trays/scan/${enc(fx.source_tray_serial_number)}`, null, 'scan source tray');
 const container = await api('GET', `/containers/scan/${enc(bt.container_serial_number)}`, null, 'scan container');
-await api('POST', `/trays/${tray.id}/start-grinding`, {}, 'start grinding');
-await api('POST', `/trays/${tray.id}/complete-grinding`, { summary_id: fx.summary_id, part_type_id: fx.part_type_id, scrapped_blade_count: 0, rough_shelf_serial_number: s.rough }, 'complete grinding');
+await api('POST', `/trays/${tray.id}/start-grinding`, {}, 'reject missing grinder', [422]);
+await api('POST', `/trays/${tray.id}/start-grinding`, { grinding_machine_id: fx.cutter_builder_machine_id }, 'reject non-grinder machine', [422]);
+await api('POST', `/trays/${tray.id}/start-grinding`, { grinding_machine_id: fx.grinding_machine_id }, 'start grinding');
+await api('PATCH', `/admin/master-data/machines/${fx.grinding_machine_id}`, { enabled: false }, 'protect active grinder from disabling', [409]);
+await api('POST', `/trays/${tray.id}/complete-grinding`, { grinding_machine_id: fx.alternate_grinding_machine_id, summary_id: fx.summary_id, part_type_id: fx.part_type_id, scrapped_blade_count: 0, rough_shelf_serial_number: s.rough }, 'reject completion on a different grinder', [409]);
+await api('POST', `/trays/${tray.id}/complete-grinding`, { grinding_machine_id: fx.grinding_machine_id, summary_id: fx.summary_id, part_type_id: fx.part_type_id, scrapped_blade_count: 0, rough_shelf_serial_number: s.rough }, 'complete grinding');
+const passes = await api('GET', `/trays/${tray.id}/grinding-runs`, null, 'read tray grinder history');
+if (passes[0]?.grinding_machine_id !== fx.grinding_machine_id || passes[0]?.grinding_machine_number !== 'E2E-GRINDER') throw new Error('Completed pass lost grinder identity');
+const grinderPasses = await api('GET', `/trays/grinding-machines/${fx.grinding_machine_id}/runs`, null, 'read individual grinder history');
+if (!grinderPasses.some(pass => pass.id === passes[0].id && pass.tray.serial_number === tray.serial_number)) throw new Error('Individual grinder history is missing its tray');
 await api('POST', '/containerTrays', { tray_id: tray.id, container_id: container.id, enabled: true }, 'load tray into coater container');
 let sh = await api('POST', '/coater-shipments', { request_id: crypto.randomUUID(), destination: 'E2E Coater', notes: 'node-workflow' }, 'create coater shipment');
 const rev = x => x.revision ?? x.shipment?.revision;

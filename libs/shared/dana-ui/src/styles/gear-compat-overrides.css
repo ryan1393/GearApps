@@ -1679,3 +1679,37 @@ html body .gear-page [data-icon='delete']:not(:disabled) { color: var(--gear-dan
   html body :is(.gear-btn, .date-chip, .signout-button, .global-search, .dana-table-header-tools) { transition: none !important; }
 }
 /* END MESHFORGE POLISH PASS */
+
+/* Shared UI settings: all apps, including sign-in, inherit these tokens. */
+html body, html body .login-page { font-family: var(--dana-font-sans); }
+html body :is(input, select, textarea, button) { font-family: inherit; }
+html body :is(.gear-badge, .status-pill, .dana-status-badge)[data-tone='info'] {
+  color: var(--dana-info) !important; background: var(--dana-info-soft) !important;
+}
+html body :is(.gear-badge, .status-pill, .dana-status-badge)[data-tone='neutral'] {
+  color: var(--dana-muted) !important; background: var(--dana-neutral-soft) !important;
+}
+/* Keep wide data readable without horizontal scrolling. Tables become labelled records. */
+html body .gear-page :is(.table-wrap, .gear-table-wrap, .dana-table-shell, [danaTableShell]) { min-width: 0; max-width: 100%; }
+html body .gear-page table[danaTable] { width: 100%; min-width: 0 !important; table-layout: fixed; }
+html body .gear-page table[danaTable] :is(th, td) { white-space: normal !important; overflow-wrap: anywhere; min-width: 0; }
+html body .gear-page table[danaTable] :is(.gear-actions, .gear-admin-actions) { flex-wrap: wrap; }
+@media screen and (max-width: 900px) {
+  html body .gear-page table[danaTable] { display: block; }
+  html body .gear-page table[danaTable] thead { display: block; }
+  html body .gear-page table[danaTable] thead tr { display: flex; flex-wrap: wrap; }
+  html body .gear-page table[danaTable] thead th { flex: 1 1 8rem; }
+  html body .gear-page table[danaTable] tbody { display: grid; gap: var(--dana-record-gap, 1rem); }
+  html body .gear-page table[danaTable] tbody tr { display: grid; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-md); padding: .5rem; }
+  html body .gear-page table[danaTable] tbody tr[hidden] { display: none; }
+  html body .gear-page table[danaTable] tbody td { display: flex; flex-wrap: wrap; gap: .5rem; width: auto !important; max-width: 100%; }
+  html body .gear-page table[danaTable] tbody td::before { content: attr(data-dana-label); flex: 0 0 40%; font-weight: 700; color: var(--dana-muted); }
+  html body .gear-page table[danaTable] tbody td[colspan]::before { display: none; }
+}
+
+html body :is(.gear-sidebar, .gear-topbar, .gear-page, .app-content-shell, .login-page), html body .gear-page .gear-page-title, html body .dashboard-page .dashboard-heading h1 { font-family: var(--dana-font-sans) !important; }
+
+.gear-admin-sections { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: .75rem; margin-bottom: 1rem; }
+.gear-admin-section { padding: 1rem; border: 1px solid var(--dana-border); background: var(--dana-surface); border-radius: var(--dana-radius-md); min-width: 0; }
+.gear-admin-section h2 { margin: 0 0 .5rem; font-size: .875rem; color: var(--dana-muted); }
+.gear-admin-section .gear-admin-tabs { display: flex; flex-wrap: wrap; overflow: visible; margin: 0; }

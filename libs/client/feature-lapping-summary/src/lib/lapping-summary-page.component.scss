@@ -49,3 +49,6 @@
     grid-template-columns: 1fr;
   }
 }
+
+.cycle-history-row { display:flex; flex-wrap:wrap; justify-content:space-between; gap:.75rem; width:100%; margin-top:.5rem; text-align:left; }
+.cycle-history-row[aria-pressed="true"] { border-color:var(--dana-primary); background:var(--dana-neutral-soft); }

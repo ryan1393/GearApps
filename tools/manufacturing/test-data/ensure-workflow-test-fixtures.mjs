@@ -443,6 +443,27 @@ async function ensureE2ECutterBuilderMachine(client) {
   return { id, machine_number: machineNumber, created: true };
 }
 
+async function ensureE2EGrinder(client, machineNumber = 'E2E-GRINDER') {
+  const department = await one(client, `select id from departments where code='45' and enabled=true limit 1`);
+  if (!department) throw new Error('Department 45 is required for the E2E Grinder machine.');
+  const existing = await one(client, `select id, machine_number from machines where machine_number=$1 limit 1`, [machineNumber]);
+  if (existing) {
+    await client.query(
+      `update machines set enabled=true, active=true, machine_type='GRINDER', department_id=$2, "updatedAt"=now() where id=$1`,
+      [existing.id, department.id],
+    );
+    return { id: existing.id, machine_number: machineNumber, created: false };
+  }
+  const id = crypto.randomUUID();
+  await client.query(
+    `insert into machines
+      (id, "createdAt", "updatedAt", machine_number, department_id, cell, active, description, machine_type, enabled)
+     values ($1, now(), now(), $2, $3, null, true, 'Dedicated automated MeshForge Grinder test machine', 'GRINDER', true)`,
+    [id, machineNumber, department.id],
+  );
+  return { id, machine_number: machineNumber, created: true };
+}
+
 async function ensureE2ECutterBody(client, count) {
   const size = new Map([[11, '064'], [13, '076'], [17, '088'], [19, '105']]).get(count);
   if (!size) throw new Error(`Workflow fixture requires a supported cutter capacity, got ${count}`);
@@ -795,6 +816,8 @@ async function main() {
     const automaticTestUserId = await ensureAutomaticTestUser(client);
     const workflowMachine = await ensureE2EMachine(client, requirement.part_type_code);
     const cutterBuilderMachine = await ensureE2ECutterBuilderMachine(client);
+    const grinder = await ensureE2EGrinder(client);
+    const alternateGrinder = await ensureE2EGrinder(client, 'E2E-GRINDER-2');
     const oppositeMachine = await ensureE2EMachine(
       client,
       requirement.part_type_code === 'PINION' ? 'RING' : 'PINION',
@@ -859,6 +882,8 @@ async function main() {
         test_email: AUTO_TEST_EMAIL,
         test_password: AUTO_TEST_PASSWORD,
         test_user_id: automaticTestUserId,
+        grinding_machine_id: grinder.id,
+        alternate_grinding_machine_id: alternateGrinder.id,
         cutter_builder_machine_id: cutterBuilderMachine.id,
         cutter_builder_machine_number: cutterBuilderMachine.machine_number,
         machine_number: workflowMachine.machine_number,

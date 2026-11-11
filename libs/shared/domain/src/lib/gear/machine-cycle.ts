@@ -17,3 +17,10 @@ export type CreateMachineCycle = Pick<
   'machine_id' | 'gearset_id' | 'serial_number' | 'consec' | 'timestamp'
 >;
 export type UpdateMachineCycle = Partial<Omit<MachineCycle, 'id' | 'machine' | 'gearset'>>;
+
+export interface LapperProduction {
+  cycles_24h: number;
+  machines_reporting_24h: number;
+  missing_serial_24h: number;
+  last_cycle_at: string | null;
+}

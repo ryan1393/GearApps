@@ -96,6 +96,15 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
       await manager.query(LAPPER_POSTGRES_DDL);
       await manager.query('INSERT INTO lapper.api_migrations(version) VALUES ($1)', [version]);
     }
+    await runDatabaseMigration(manager, '20261111-lapper-cycle-tests-v1', `
+      CREATE TABLE IF NOT EXISTS lapper.cycle_tests (
+        id uuid PRIMARY KEY, machine_id uuid NOT NULL, gearset_id uuid NOT NULL,
+        serial_number varchar(160) NOT NULL, values jsonb NOT NULL, result jsonb NOT NULL,
+        created_by uuid NOT NULL, created_at timestamptz NOT NULL DEFAULT clock_timestamp(),
+        kind text NOT NULL DEFAULT 'SIMULATION' CHECK (kind = 'SIMULATION')
+      );
+      CREATE INDEX IF NOT EXISTS ix_cycle_tests_created ON lapper.cycle_tests(created_at DESC);
+    `);
     await applySharedDatabaseIntegrity(manager);
     await runDatabaseMigration(
       manager,

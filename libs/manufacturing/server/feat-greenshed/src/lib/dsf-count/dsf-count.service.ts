@@ -1,4 +1,4 @@
-/* DSF (Digital Shop Floor) count reader for cutting Departments 132 / 152.
+/* DSF (Digital Shop Floor) count reader for all configured physical machines.
  *
  * The API PULLS from the DSF PostgreSQL source on a serialized poll; nothing pushes to us.
  * The source session is read-only (transaction, role policy and fixed SELECTs), and it is
@@ -18,7 +18,7 @@ import { DANA_MACHINES_SQL, SOURCE_IDENTITY_SQL, ROLE_CHECK_SQL, MAPPING_SQL, SH
 import { grinderStateRows, collectGrinderBatches, commitGrinderBatches, GrinderBatch, GrinderStateRow } from './dsf-grinder-balance';
 import { ensureDsfCutterSchema } from './dsf-schema';
 
-type Machine = {machine_id:string;machine_number:string;department:string;active:boolean};
+type Machine = {machine_id:string;machine_number:string;department:string;machine_type:string;active:boolean};
 type SourceClient = { connect():Promise<void>;query(text:string,values?:unknown[]):Promise<{rows:any[]}>;end():Promise<void>;on(event:string,fn:(e:unknown)=>void):void; };
 interface Config { enabled:boolean; valid:boolean; interval:number; machines:Set<string>; client:Record<string,unknown>; privilegedAccountAcknowledged?:boolean; }
 
@@ -42,7 +42,7 @@ const MAPPING_OVERRIDE_SQL = `SELECT machine_id::text,mapping_id::text,whiteboar
  FROM public.dana_dsf_machine_mapping_v1`;
 const SOURCE_OPTIONS_SQL = `SELECT wm.id::text AS mapping_id,wm.whiteboard_id::text,wm.op_id::text,wm.line_id::text,
  l.department_id::text AS department_id,
- CASE WHEN d.name ~ '^Dept\\.\\s*132$' THEN '132' WHEN d.name ~ '^Dept\\.\\s*152$' THEN '152' ELSE NULL END AS department,
+ substring(d.name from '^Dept\\.\\s*([0-9]+)$') AS department,
  btrim(l.name) AS line_name,btrim(w.name) AS whiteboard_name,wm.active AS mapping_active,w.active AS whiteboard_active,
  (o.line_id=wm.line_id) AS operation_line_matches,
  (SELECT count(*)::int FROM public.tbl_whiteboard_machines x WHERE x.op_id=wm.op_id AND x.active) AS active_mappings,
@@ -50,8 +50,8 @@ const SOURCE_OPTIONS_SQL = `SELECT wm.id::text AS mapping_id,wm.whiteboard_id::t
  FROM public.tbl_whiteboard_machines wm JOIN public.tbl_whiteboard w ON w.id=wm.whiteboard_id
  JOIN public.tbl_op o ON o.id=wm.op_id JOIN public.tbl_line l ON l.id=wm.line_id
  LEFT JOIN public.tbl_department d ON d.id=l.department_id
- WHERE o.name='OP10' AND d.name ~ '^Dept\\.\\s*(132|152)$'
- ORDER BY department,whiteboard_name,mapping_id LIMIT 500`;
+ WHERE d.name ~ '^Dept\\.\\s*[0-9]+$'
+ ORDER BY department,whiteboard_name,mapping_id LIMIT 5001`;
 
 // DSFCONNECT2: a user-approved exception, NOT removal of source/readonly/mapping guards.
 export const DSF_PRIVILEGED_ACK = 'TEMPORARY_APP_READ_ONLY_ACCEPTED';
@@ -89,8 +89,8 @@ export function readDsfConfig(env:NodeJS.ProcessEnv): Config {
   const privilegedAccountAcknowledged=acknowledgment===DSF_PRIVILEGED_ACK;
   if(acknowledgment && (!privilegedAccountAcknowledged || !dsfAckSource(host,database,user)))return off;
   const machineValues=(env['DSF_COUNT_MACHINES']||'').split(',').map(x=>x.trim()).filter(Boolean);
-  if(!host||!database||!user||!Number.isFinite(port)||!Number.isFinite(interval)||!machineValues.length||
-    machineValues.length>200||machineValues.some(x=>!/^[A-Za-z0-9-]{1,20}$/.test(x))||new Set(machineValues).size!==machineValues.length) return off;
+  if(!host||!database||!user||!Number.isFinite(port)||!Number.isFinite(interval)||
+    machineValues.length>1000||machineValues.some(x=>!/^[A-Za-z0-9-]{1,20}$/.test(x))||new Set(machineValues).size!==machineValues.length) return off;
   // Never inherit PG* defaults or fall back to the Dana Apps database credentials.
   if(host===env['DATABASE_HOST']&&database===env['DATABASE_NAME'])return off;
   let password=env['DSF_DB_PASSWORD'];
@@ -142,6 +142,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
   private readonly logger=new Logger('DsfCount');
   private lastFailure:{reason:string;code:string|null;at:string}|null=null;
   async onModuleInit():Promise<void> {
+    if (this.db.options.type === 'postgres') this.machines = await this.db.query(DANA_MACHINES_SQL);
     if(!this.config.enabled)return;
     if(!this.config.valid) {
       // Enabled but unusable settings must be visible, not a silent "not configured".
@@ -180,7 +181,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
   snapshot() {
     const now=new Date().toISOString();
     const rows:DsfCountRow[]=this.machines.map(m=>{
-      const state=this.states.get(m.machine_id)||{status:'WAITING' as DsfState,note:'Waiting for first DSF read'};
+      const state=(!m.active ? {status:'INACTIVE' as DsfState,note:'Machine inactive in MeshForge'} : this.states.get(m.machine_id))||{status:(this.config.enabled ? 'WAITING' : 'NOT_CONFIGURED') as DsfState,note:this.config.enabled ? 'Waiting for first DSF read' : 'DSF is not enabled'};
       return safeCountRow(m,this.caches.get(m.machine_id),state.status,state.note,now,this.config.interval*2+30);
     });
     return {format:'DSFCOUNT1',scope:'PHYSICAL_MACHINE_CURRENT_SHIFT',status:this.readerState,
@@ -194,7 +195,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
   private uuid(value:unknown):value is string { return typeof value==='string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value); }
   private effectiveFor(machine:Machine,override:MappingOverride|undefined):EffectiveMapping|null {
     if(override) {
-      if(!override.enabled || !override.mapping_id) return null;
+      if(!override.enabled || !override.mapping_id || override.source_department !== machine.department) return null;
       if(!this.uuid(override.mapping_id)||!this.uuid(override.whiteboard_id)||!this.uuid(override.op_id)||
          !this.uuid(override.line_id)||!this.uuid(override.department_id)||!override.source_department||
          !override.line_name||!override.whiteboard_name) return null;
@@ -209,7 +210,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
   }
   private async loadOverrides(runner:{query(text:string,values?:unknown[]):Promise<any[]>}):Promise<Map<string,MappingOverride>> {
     const rows=await runner.query(MAPPING_OVERRIDE_SQL) as MappingOverride[];
-    if(rows.length>200)throw new DsfRefusal('MAPPING_OVERRIDE_LIMIT');
+    if(rows.length>1000)throw new DsfRefusal('MAPPING_OVERRIDE_LIMIT');
     const out=new Map<string,MappingOverride>();
     for(const row of rows) {
       if(!this.uuid(row.machine_id)||out.has(row.machine_id))throw new DsfRefusal('MAPPING_OVERRIDE_INVALID');
@@ -223,7 +224,17 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
     this.writerResults.delete(machineId);this.mappingKeys.delete(machineId);this.effectiveMappings.delete(machineId);
     this.requestImmediate(true);
   }
-  adminSnapshot() {
+  private catalogReadAt = 0;
+  async currentSnapshot() {
+    if (this.db.options.type === 'postgres' && Date.now() - this.catalogReadAt > 30000) {
+      this.machines = await this.db.query(DANA_MACHINES_SQL);
+      this.catalogReadAt = Date.now();
+    }
+    return this.snapshot();
+  }
+
+  async adminSnapshot() {
+    if (this.db.options.type === 'postgres') this.machines = await this.db.query(DANA_MACHINES_SQL);
     const live=this.snapshot();
     const assigned=new Map<string,string>();
     for(const machine of this.machines) {
@@ -261,9 +272,9 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       await manager.query("SELECT pg_advisory_xact_lock(hashtext('dana-dsf-mapping-admin-v1'))");
       const machineRows=await manager.query(`SELECT m.id::text AS machine_id,btrim(m.machine_number) AS machine_number,d.code AS department,
         (m.active AND m.enabled AND d.active AND d.enabled) AS active FROM public.machines m JOIN public.departments d ON d.id=m.department_id
-        WHERE m.id=$1::uuid AND m."deletedAt" IS NULL AND d."deletedAt" IS NULL AND d.code IN ('132','152') AND m.machine_type='PRODUCTION'
+        WHERE m.id=$1::uuid AND m."deletedAt" IS NULL AND d."deletedAt" IS NULL
         FOR UPDATE OF m`,[machineId]) as Machine[];
-      if(machineRows.length!==1)throw new NotFoundException('Machine was not found in Departments 132/152.');
+      if(machineRows.length!==1)throw new NotFoundException('Machine was not found.');
       const machine=machineRows[0];
       if(option.department!==machine.department)throw new BadRequestException('Selected DSF source belongs to a different department.');
       const allMachines=await manager.query(DANA_MACHINES_SQL) as Machine[];
@@ -322,9 +333,9 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       await manager.query("SELECT pg_advisory_xact_lock(hashtext('dana-dsf-mapping-admin-v1'))");
       const machineRows=await manager.query(`SELECT m.id::text AS machine_id,btrim(m.machine_number) AS machine_number,d.code AS department,
         (m.active AND m.enabled AND d.active AND d.enabled) AS active FROM public.machines m JOIN public.departments d ON d.id=m.department_id
-        WHERE m.id=$1::uuid AND m."deletedAt" IS NULL AND d."deletedAt" IS NULL AND d.code IN ('132','152') AND m.machine_type='PRODUCTION'
+        WHERE m.id=$1::uuid AND m."deletedAt" IS NULL AND d."deletedAt" IS NULL
         FOR UPDATE OF m`,[machineId]) as Machine[];
-      if(machineRows.length!==1)throw new NotFoundException('Machine was not found in Departments 132/152.');
+      if(machineRows.length!==1)throw new NotFoundException('Machine was not found.');
       const machine=machineRows[0];const existing=(await manager.query(MAPPING_OVERRIDE_SQL) as MappingOverride[]).find(x=>x.machine_id===machineId);
       const prior=this.effectiveFor(machine,existing);
       const rows=await manager.query(`INSERT INTO public.dana_dsf_machine_mapping_v1
@@ -357,7 +368,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       held=locks[0]?.held===true;
       if(!held)throw new DsfRefusal('READER_BUSY');
       const machines:Machine[]=await lease.query(DANA_MACHINES_SQL);
-      if(machines.length>200)throw new DsfRefusal('MACHINE_LIMIT');
+      if(machines.length>1000)throw new DsfRefusal('MACHINE_LIMIT');
       this.machines=machines;this.mappingOverrides=await this.loadOverrides(lease);
       const nextCaches=new Map(this.caches),nextStates=new Map<string,{status:DsfState;note:string}>();
       const nextMappingKeys=new Map<string,string>();
@@ -368,7 +379,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
         if(mapping)effective.set(m.machine_id,mapping);
         if(!m.active)nextStates.set(m.machine_id,{status:'INACTIVE',note:'Machine inactive in MeshForge'});
         else if(override && (!override.enabled||!override.mapping_id)) {nextStates.set(m.machine_id,{status:'MAPPING_REVIEW',note:'No DSF source selected in Admin'});nextCaches.delete(m.machine_id);}
-        else if(!mapping||(!mapping.manual&&mapping.blocked)||machines.filter(x=>x.machine_number===m.machine_number).length!==1) {
+        else if(!mapping||(!mapping.manual&&mapping.blocked)||machines.filter(x=>x.machine_number===m.machine_number && x.department===m.department).length!==1) {
           nextStates.set(m.machine_id,{status:'MAPPING_REVIEW',note:mapping?.blocked||'Physical machine mapping not approved'});nextCaches.delete(m.machine_id);
         } else if(!mapping.manual&&!this.config.machines.has(m.machine_number))nextStates.set(m.machine_id,{status:'NOT_CONFIGURED',note:'Not enabled for DSF comparison'});
         else {
@@ -390,7 +401,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
         if(installed[0]?.installed===true)grinderStates=await grinderStateRows(lease);
       } catch {grinderStates=[];}
       const hasActiveGrinders=grinderStates.length===5;
-      if(!candidates.length && !hasActiveGrinders){this.readerState='NOT_CONFIGURED';this.failures=0;return;}
+      // Load source options even before the first mapping is saved in Admin.
       client=this.makeClient();this.source=client;
       client.on('error',()=>{this.readerState='UNAVAILABLE';});
       const deadline=Date.now()+90000;
@@ -413,9 +424,9 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       this.accountPolicy=dsfAccountPolicy(this.config,account,rights);
       try {
         const options=(await client.query(SOURCE_OPTIONS_SQL)).rows as SourceOption[];
-        if(options.length>500)throw new DsfRefusal('SOURCE_OPTION_LIMIT');
+        if(options.length>5000)throw new DsfRefusal('SOURCE_OPTION_LIMIT');
         const valid=options.filter(x=>this.uuid(x.mapping_id)&&this.uuid(x.whiteboard_id)&&this.uuid(x.op_id)&&this.uuid(x.line_id)&&
-          this.uuid(x.department_id)&&(x.department==='132'||x.department==='152')&&typeof x.line_name==='string'&&x.line_name.trim().length>0&&typeof x.whiteboard_name==='string'&&x.whiteboard_name.trim().length>0);
+          this.uuid(x.department_id)&&/^[0-9]+$/.test(x.department)&&typeof x.line_name==='string'&&x.line_name.trim().length>0&&typeof x.whiteboard_name==='string'&&x.whiteboard_name.trim().length>0);
         this.sourceOptions=valid;this.sourceOptionsRefreshedAt=at;
       } catch { this.sourceOptions=[];this.sourceOptionsRefreshedAt=null; }
       // The five grinders share this *same* validated, read-only DSF connection.
@@ -435,7 +446,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
           actual.whiteboard_id===mapping.whiteboard_id&&actual.op_id===mapping.op_id&&
           actual.line_id===mapping.line_id&&actual.department_id===mapping.department_id&&
           actual.line_name===mapping.line_name&&actual.whiteboard_name===mapping.whiteboard_name&&
-          actual.op_name==='OP10'&&actual.operation_line_matches===true&&actual.mapping_active===true&&
+          (mapping.manual || actual.op_name==='OP10')&&actual.operation_line_matches===true&&actual.mapping_active===true&&
           actual.whiteboard_active===true&&actual.running_reasons>0&&
           (mapping.manual || (actual.active_mappings===1&&JSON.stringify(actual.known_mapping_ids)===JSON.stringify(mapping.known_mapping_ids)))&&
           new RegExp('^Dept\\.\\s*'+mapping.department+'$').test(actual.department_name||'');
@@ -473,7 +484,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
         catch { /* Local balance remains stale, not silently adjusted. */ }
       }
       if(this.writerEnabled) {
-        const fresh=candidates.filter(item=>nextStates.get(item.machine.machine_id)?.status==='OK')
+        const fresh=candidates.filter(item=>item.machine.machine_type==='PRODUCTION' && ['132','152'].includes(item.machine.department) && nextStates.get(item.machine.machine_id)?.status==='OK')
           .map(item=>({machine_id:item.machine.machine_id,machine_number:item.machine.machine_number,
             department:item.machine.department,cache:nextCaches.get(item.machine.machine_id)!}));
         try { this.writerResults=await applyDsfCutterCounts(this.db,fresh); }

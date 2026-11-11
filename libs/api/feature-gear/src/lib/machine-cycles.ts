@@ -4,13 +4,15 @@ import {
   MachineCycleDto,
   UpdateMachineCycleDto,
 } from '@meshforge/api/data-access';
-import { MachineCycle } from '@meshforge/shared/domain';
+import { LapperProduction, MachineCycle } from '@meshforge/shared/domain';
 import { UseInterceptors, Controller, Get, Injectable, Param, ParseUUIDPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 @Injectable()
 export abstract class MachineCyclesService extends CrudService<MachineCycle> {
   abstract findByGearset(gearsetId: string): Promise<MachineCycle[]>;
   abstract findByMachine(machineId: string): Promise<MachineCycle[]>;
+  abstract production(): Promise<LapperProduction>;
+  abstract history(machineId: string, gearsetId: string): Promise<MachineCycle[]>;
   abstract findLatest(machineId: string, gearsetId: string): Promise<MachineCycle>;
 }
 @UseInterceptors(LapperWritePolicy)
@@ -26,6 +28,9 @@ export class MachineCyclesController extends crudController<MachineCycle>({
   constructor(override readonly service: MachineCyclesService) {
     super();
   }
+  @Get('production')
+  @ApiOperation({ summary: 'Production totals over the past 24 hours, excluding simulations' })
+  production(): Promise<LapperProduction> { return this.service.production(); }
   @Get('gearset/:gearsetId')
   @ApiOperation({ summary: 'Cycles for a gearset (newest first)' })
   @ApiOkResponse({ type: MachineCycleDto, isArray: true })
@@ -43,6 +48,13 @@ export class MachineCyclesController extends crudController<MachineCycle>({
     machineId: string,
   ): Promise<MachineCycle[]> {
     return this.service.findByMachine(machineId);
+  }
+  @Get('history/:machineId/:gearsetId')
+  @ApiOperation({ summary: 'Most recent 200 cycles for a machine and gearset' })
+  @ApiOkResponse({ type: MachineCycleDto, isArray: true })
+  history(@Param('machineId', ParseUUIDPipe) machineId: string,
+    @Param('gearsetId', ParseUUIDPipe) gearsetId: string): Promise<MachineCycle[]> {
+    return this.service.history(machineId, gearsetId);
   }
   @Get('latest/:machineId/:gearsetId')
   @ApiOperation({ summary: 'Most recent cycle for a machine + gearset' })

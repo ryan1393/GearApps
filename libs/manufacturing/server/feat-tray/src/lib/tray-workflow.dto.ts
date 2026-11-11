@@ -1,7 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsUUID, Min, IsString, Length, Matches, IsOptional } from 'class-validator';
 
-export class CompleteTrayGrindingDto {
+export class StartTrayGrindingDto {
+  @ApiProperty({ type: String, format: 'uuid' })
+  @IsUUID()
+  grinding_machine_id!: string;
+}
+
+export class CompleteTrayGrindingDto extends StartTrayGrindingDto {
   @ApiProperty({ type: String, format: 'uuid' })
   @IsUUID()
   summary_id!: string;

@@ -1,6 +1,8 @@
 import { AdminMasterDataController } from './admin-master-data.controller';
 import { AdminMasterDataService } from './admin-master-data.service';
 import { EnvironmentSettingsController } from './environment-settings.controller';
+import { CycleTestsController } from './cycle-tests.controller';
+import { CycleTestsService } from './cycle-tests.service';
 import { EnvironmentSettingsService } from './environment-settings.service';
 import { ServerFeatGreenshedModule } from '@meshforge/manufacturing/server/feat-greenshed';
 import { ServerFeatCutterBuildModule } from '@meshforge/manufacturing/server/feat-cutter-build';
@@ -53,7 +55,7 @@ const featureModules = [
 ];
 
 @Module({
-  controllers: [AdminMasterDataController, EnvironmentSettingsController],
+  controllers: [CycleTestsController, AdminMasterDataController, EnvironmentSettingsController],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
@@ -68,6 +70,7 @@ const featureModules = [
     PostgresLapperModule,
   ],
   providers: [
+    CycleTestsService,
     AdminMasterDataService,
     EnvironmentSettingsService,
     { provide: APP_GUARD, useClass: JwtAccessTokenGuard },
