@@ -9,11 +9,11 @@ from .state import CycleState, MachineState, PendingCycle, ScannerState
 
 
 class CycleTracker:
-    def __init__(self, state: CycleState, require_serial: bool = True):
-        """require_serial=False is for a machine with no scanner: every completed cycle is kept,
-        with no serial. With a scanner, a cycle without a confirmed scan is never recorded."""
+    def __init__(self, state: CycleState):
+        """Every completed cycle is recorded: with the confirmed scanned serial when there is one,
+        otherwise with no serial (no scanner, scanner offline, or nothing scanned). A cycle is never
+        given a substitute serial."""
         self.state = state
-        self.require_serial = require_serial
 
     def observe(
         self,
@@ -40,11 +40,10 @@ class CycleTracker:
                 queued = None  # the queued part is now the one in process
         if not machine.in_cycle and not machine.door_closed and state.active_cycle is not None:
             active = state.active_cycle
-            if active.serial or not self.require_serial:
-                # Macro values are captured once, at completion, and never re-read on retry.
-                active.macros = {key: str(value) for key, value in capture_macros().items()}
-                active.completed_at = timestamp
-                state.pending_cycles.append(active)
+            # Macro values are captured once, at completion, and never re-read on retry.
+            active.macros = {key: str(value) for key, value in capture_macros().items()}
+            active.completed_at = timestamp
+            state.pending_cycles.append(active)
             state.active_cycle = None
         state.scanner_serial = scanner.serial
         state.queued_serial = queued

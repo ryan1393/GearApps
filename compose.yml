@@ -169,8 +169,8 @@ services:
       retries: 5
 
   # FANUC + scanner collector. One container runs a worker for every Active machine saved in
-  # Lapper with a FANUC controller IP (with an Active scanner its cycles get the scanned serial;
-  # without one, no serial); saving, changing or deactivating a machine starts, restarts or stops
+  # Lapper with a FANUC controller IP and records every cycle (with the scanned serial while an
+  # assigned scanner is online, otherwise without one); saving, changing or deactivating a machine starts, restarts or stops
   # its worker. It signs in with the token an admin issues in Lapper > Collector Tokens > Connect
   # Docker collector (no .env entry needed). Not started by default:
   #   docker compose --profile collectors up -d --build lapper-read
@@ -193,6 +193,9 @@ services:
       LAPPER_POLL_INTERVAL_MS: ${LAPPER_READ_POLL_INTERVAL_MS:-250}
       LAPPER_DISCOVER_INTERVAL_S: ${LAPPER_READ_DISCOVER_INTERVAL_S:-30}
       TZ: ${LAPPER_TIME_ZONE:-America/Indianapolis}
+    # Lets the collector ping scanners as its unprivileged user (no root, no ping binary).
+    sysctls:
+      net.ipv4.ping_group_range: "0 2147483647"
     ports:
       - "${LAPPER_READ_STATUS_PORT:-8090}:8080"
     volumes:

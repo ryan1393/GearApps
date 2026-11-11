@@ -2,9 +2,11 @@
 
 Every `discover_interval_s` the supervisor reads Lapper's machines and scanners:
 
-- an Active machine with a FANUC controller IP gets a worker;
-- with an Active scanner assigned, its cycles are recorded under the scanned serial; without
-  one, every completed cycle is recorded without a serial (gearset, consec, time, macros);
+- an Active machine with a FANUC controller IP gets a worker, and every completed cycle is
+  recorded (gearset, consec, time, macros);
+- a cycle gets the scanned serial when an Active scanner is assigned and online; with no scanner,
+  an offline scanner or nothing scanned it is recorded without a serial. An offline scanner is
+  pinged and retried in the background and its serials resume when it answers;
 - changing its controller IP, asset number or scanner restarts that worker;
 - making it Inactive, removing its IP, or deleting it stops the worker.
 
@@ -220,6 +222,10 @@ class Supervisor:
                 "phase": status.get("phase"),
                 "last_sample_at": status.get("last_sample_at"),
                 "pending_runs": status.get("pending_runs", 0),
+                # online / offline / none, the ICMP ping result and when it last answered.
+                "scanner": status.get("scanner"),
+                "scanner_ping": status.get("scanner_ping"),
+                "scanner_last_seen": status.get("scanner_last_seen"),
             }
             for slot in self._slots.values()
             for status in [slot.status()]
