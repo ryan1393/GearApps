@@ -44,6 +44,7 @@ import {
 import { DsfMachineMappingsComponent } from '../dsf-machine-mappings/dsf-machine-mappings.component';
 import { LabelPrintersComponent } from '../label-printers/label-printers.component';
 import { ServerSettingsComponent } from '../server-settings/server-settings.component';
+import { CoaterRpaSetupComponent } from '../coater-rpa/coater-rpa-setup.component';
 import { LappingGearsetsComponent } from '../lapping/lapping-gearsets.component';
 import { LappingMachinesComponent } from '../lapping/lapping-machines.component';
 import {
@@ -53,15 +54,15 @@ import {
 
 import { CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent } from '@meshforge/client/feature-config';
 
-type AdminTab = 'cycle-tests' | 'scanners' | 'macros' | 'fanuc-variables' | 'collector-tokens' | 'users' | 'part-summaries' | 'parts' | 'gearsets' | 'roll-masters' | 'models' | 'machines' | 'lapping-machines' | 'dsf-mappings' | 'label-printers' | 'server-settings' | 'trays' | 'containers' | 'locations' | 'cutter-bodies';
+type AdminTab = 'cycle-tests' | 'scanners' | 'macros' | 'fanuc-variables' | 'collector-tokens' | 'users' | 'part-summaries' | 'parts' | 'gearsets' | 'roll-masters' | 'models' | 'machines' | 'lapping-machines' | 'dsf-mappings' | 'label-printers' | 'coater-rpa' | 'server-settings' | 'trays' | 'containers' | 'locations' | 'cutter-bodies';
 // Every tab, for ?tab= deep links; `satisfies` keeps it in step with AdminTab.
-const ADMIN_TABS = ['cycle-tests', 'scanners', 'macros', 'fanuc-variables', 'collector-tokens', 'users', 'part-summaries', 'parts', 'gearsets', 'roll-masters', 'models', 'machines', 'lapping-machines', 'dsf-mappings', 'label-printers', 'server-settings', 'trays', 'containers', 'locations', 'cutter-bodies'] as const satisfies readonly AdminTab[];
+const ADMIN_TABS = ['cycle-tests', 'scanners', 'macros', 'fanuc-variables', 'collector-tokens', 'users', 'part-summaries', 'parts', 'gearsets', 'roll-masters', 'models', 'machines', 'lapping-machines', 'dsf-mappings', 'label-printers', 'coater-rpa', 'server-settings', 'trays', 'containers', 'locations', 'cutter-bodies'] as const satisfies readonly AdminTab[];
 const isAdminTab = (value: unknown): value is AdminTab => ADMIN_TABS.includes(value as AdminTab);
 
 @Component({
   selector: 'gear-admin-users-page',
   standalone: true,
-  imports: [DanaToneDirective, MachineDsfCountComponent,CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent, CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, ServerSettingsComponent, GearLabelPrinterPickerComponent, LappingGearsetsComponent, LappingMachinesComponent],
+  imports: [CoaterRpaSetupComponent, DanaToneDirective, MachineDsfCountComponent,CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent, CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, ServerSettingsComponent, GearLabelPrinterPickerComponent, LappingGearsetsComponent, LappingMachinesComponent],
   templateUrl: './frontend-feature-admin-users.component.html',
   styleUrls: ['./frontend-feature-admin-users.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,

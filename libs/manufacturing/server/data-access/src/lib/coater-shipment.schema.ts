@@ -61,6 +61,13 @@ CREATE TABLE IF NOT EXISTS public.dana_rpa_requests_v1 (
   created_by text NOT NULL, email_started_at timestamptz, email_attempts integer NOT NULL DEFAULT 0,
   UNIQUE (shipment_id,revision)
 );
+-- The Excel form uploaded in Admin > Coater RPA. When present it is used in place of the
+-- workbook saved with the earliest imported request.
+CREATE TABLE IF NOT EXISTS public.dana_rpa_template_v1 (
+  id integer PRIMARY KEY CHECK (id = 1),
+  document bytea NOT NULL, file_name text NOT NULL,
+  uploaded_at timestamptz NOT NULL DEFAULT clock_timestamp(), uploaded_by text NOT NULL
+);
 `;
 
 /** Keep short coater transactions consistent with legacy inventory/admin/undo

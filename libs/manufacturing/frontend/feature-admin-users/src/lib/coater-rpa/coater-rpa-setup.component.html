@@ -1,0 +1,143 @@
+<section class="coater-rpa" aria-labelledby="coater-rpa-title">
+  <div class="gear-panel coater-rpa-panel coater-rpa-lead">
+    <div>
+      <h2 id="coater-rpa-title">Coater RPA</h2>
+      <p class="gear-muted">The Excel request form sent to the coater, who receives it, the PO and prices, and which form part numbers each Summary uses. Operators prepare a request in Blade Tracking > Coater Shipments.</p>
+    </div>
+    <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || busy" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : '↻ Refresh' }}</button>
+  </div>
+
+  <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert"><strong>Unable to continue.</strong><span>{{ error }}</span></div>
+
+  <ng-container *ngIf="setup as current">
+    <dl class="gear-panel coater-rpa-panel coater-rpa-status" aria-label="Setup status">
+      <div><dt>Requests</dt><dd><span class="gear-badge" [danaTone]="current.ready ? 'ready' : 'pending'">{{ current.ready ? 'Ready to prepare' : 'Setup not finished' }}</span></dd></div>
+      <div><dt>Excel form</dt><dd><span class="gear-badge" [danaTone]="current.form?.found ? 'ok' : 'pending'">{{ current.form?.found ? 'Loaded' : current.form ? 'Needs replacing' : 'Not uploaded' }}</span></dd></div>
+      <div><dt>Settings</dt><dd><span class="gear-badge" [danaTone]="current.settings ? 'ok' : 'pending'">{{ current.settings ? 'Saved' : 'Not saved' }}</span></dd></div>
+      <div><dt>Part mappings</dt><dd><span class="gear-badge" [danaTone]="current.part_map.length ? 'ok' : 'pending'">{{ current.part_map.length || 'None' }}</span></dd></div>
+      <div><dt>Email</dt><dd><span class="gear-badge" [danaTone]="current.email_enabled ? 'on' : 'not set'">{{ current.email_enabled ? 'On' : 'Off: download only' }}</span></dd></div>
+    </dl>
+
+    <!-- 1. The form -->
+    <div class="gear-panel coater-rpa-panel">
+      <div class="gear-step-title"><span class="gear-step-number">1</span><span>Excel form</span></div>
+      <ng-container *ngIf="current.form as form; else noForm">
+        <p><strong>{{ form.file_name }}</strong> · {{ sizeText(form.size) }} ·
+          <ng-container *ngIf="form.source === 'UPLOADED'; else savedRequest">uploaded {{ form.uploaded_at | date: 'medium' }}</ng-container>
+          <ng-template #savedRequest>taken from the earliest imported request</ng-template>
+        </p>
+        <div *ngIf="form.problem" class="gear-alert gear-alert-danger" role="alert"><strong>This form cannot be used.</strong><span>{{ form.problem }} Upload the form again.</span></div>
+        <p *ngIf="form.found as found" class="gear-muted">Part numbers on the form: {{ found.parts.join(', ') }}.</p>
+      </ng-container>
+      <ng-template #noForm><p class="gear-muted">No form yet. Upload the RPA request workbook (.xlsx, up to 2 MB). It is checked before it is saved.</p></ng-template>
+      <input #fileInput type="file" class="coater-rpa-file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="upload($event)" aria-label="RPA Excel form" />
+      <div class="gear-admin-form-actions">
+        <button type="button" class="gear-btn gear-btn-primary" (click)="chooseFile()" [disabled]="busy">{{ current.form ? 'Replace Form' : 'Upload Form' }}</button>
+        <button *ngIf="current.form" type="button" class="gear-btn gear-btn-secondary" (click)="download()" [disabled]="busy">Download Current Form</button>
+      </div>
+      <p class="gear-field-help">Replacing the form does not change requests that were already prepared.</p>
+    </div>
+
+    <!-- 2. Settings -->
+    <form class="gear-panel coater-rpa-panel" (ngSubmit)="saveSettings()" aria-label="RPA settings">
+      <div class="gear-step-title"><span class="gear-step-number">2</span><span>Request settings</span></div>
+      <div *ngIf="settingsSuggested" class="gear-alert gear-alert-warning" role="status"><strong>Not saved yet.</strong><span>These values were read from the form. Check them, add the recipients, then save.</span></div>
+      <div class="gear-form-grid">
+        <label class="gear-field">Coater name
+          <input class="gear-input" name="rpaCoater" [(ngModel)]="settings.coater_display_name" maxlength="160" autocomplete="off" />
+        </label>
+        <label class="gear-field">Next RPA number
+          <input class="gear-input mono" name="rpaNumber" type="number" min="1" step="1" [(ngModel)]="settings.next_number" />
+          <small class="gear-field-help">{{ current.last_number ? 'Last issued: ' + current.last_number + '.' : 'No request has been issued from here yet.' }}</small>
+        </label>
+        <label class="gear-field">Unit price
+          <input class="gear-input mono" name="rpaUnitPrice" type="number" min="0" step="0.01" [(ngModel)]="settings.unit_price" />
+        </label>
+        <label class="gear-field">Insurance value per piece
+          <input class="gear-input mono" name="rpaInsurance" type="number" min="0" step="0.01" [(ngModel)]="settings.insurance_unit" />
+        </label>
+        <label class="gear-field">Email to
+          <textarea class="gear-textarea" name="rpaTo" rows="2" [(ngModel)]="settings.recipients_to" placeholder="name@coater.example, second@coater.example"></textarea>
+          <small class="gear-field-help">Separate addresses with a comma. With none, a request can only be downloaded.</small>
+        </label>
+        <label class="gear-field">Copy to (CC)
+          <textarea class="gear-textarea" name="rpaCc" rows="2" [(ngModel)]="settings.recipients_cc"></textarea>
+        </label>
+        <label class="gear-field">Default PO
+          <input class="gear-input mono" name="rpaPo" [(ngModel)]="settings.default_po" maxlength="80" autocomplete="off" />
+        </label>
+        <label class="gear-field">Default PO expires on
+          <input class="gear-input" name="rpaPoExpires" type="date" [(ngModel)]="settings.default_po_expires_on" />
+        </label>
+        <label class="gear-field coater-rpa-check"><span><input type="checkbox" name="rpaPoEnabled" [(ngModel)]="settings.default_po_enabled" /> Use the default PO until it expires</span>
+          <small class="gear-field-help">When off or expired, the operator enters the PO for each request.</small>
+        </label>
+      </div>
+      <div class="gear-admin-form-actions">
+        <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy">{{ busy ? 'Saving…' : 'Save Settings' }}</button>
+      </div>
+    </form>
+
+    <!-- 3. Part mappings -->
+    <div class="gear-panel coater-rpa-panel">
+      <div class="gear-step-title"><span class="gear-step-number">3</span><span>Part mappings</span></div>
+      <p class="gear-muted">Each Summary and part type sent to the coater needs the outer and inner blade part number it uses on the form.</p>
+
+      <div *ngIf="suggestions.length" class="gear-alert gear-alert-warning coater-rpa-suggest" role="status">
+        <div><strong>{{ suggestions.length }} mapping{{ suggestions.length === 1 ? '' : 's' }} found in the form.</strong><span> The form's own order lines can be saved as mappings.</span></div>
+        <button type="button" class="gear-btn gear-btn-secondary" (click)="addSuggestions()" [disabled]="busy">Add From Form</button>
+      </div>
+
+      <form class="gear-form-grid" (ngSubmit)="saveMapping()" aria-label="Part mapping">
+        <label class="gear-field">Summary
+          <input class="gear-input mono" name="mapSummary" [(ngModel)]="mapping.summary" maxlength="80" autocomplete="off" [disabled]="!!editingKey" placeholder="31241" />
+        </label>
+        <label class="gear-field">Part type
+          <select class="gear-select" name="mapType" [(ngModel)]="mapping.part_type" [disabled]="!!editingKey">
+            <option value="RING">Ring</option>
+            <option value="PINION">Pinion</option>
+          </select>
+        </label>
+        <label class="gear-field" for="rpaMapOuter">Outer part
+          <select *ngIf="parts.length" id="rpaMapOuter" class="gear-select" name="mapOuter" [(ngModel)]="mapping.outer_part">
+            <option value="">Choose…</option>
+            <option *ngFor="let part of parts" [value]="part">{{ part }}</option>
+          </select>
+          <input *ngIf="!parts.length" id="rpaMapOuter" class="gear-input mono" name="mapOuter" [(ngModel)]="mapping.outer_part" maxlength="80" />
+        </label>
+        <label class="gear-field" for="rpaMapInner">Inner part
+          <select *ngIf="parts.length" id="rpaMapInner" class="gear-select" name="mapInner" [(ngModel)]="mapping.inner_part">
+            <option value="">Choose…</option>
+            <option *ngFor="let part of parts" [value]="part">{{ part }}</option>
+          </select>
+          <input *ngIf="!parts.length" id="rpaMapInner" class="gear-input mono" name="mapInner" [(ngModel)]="mapping.inner_part" maxlength="80" />
+        </label>
+        <div class="gear-admin-form-actions coater-rpa-map-actions">
+          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy">{{ editingKey ? 'Save Mapping' : 'Add Mapping' }}</button>
+          <button *ngIf="editingKey" type="button" class="gear-btn gear-btn-secondary" (click)="cancelMapping()" [disabled]="busy">Cancel Edit</button>
+        </div>
+      </form>
+
+      <div danaTableShell class="table-wrap">
+        <table danaTable class="gear-table">
+          <thead><tr><th>Summary</th><th>Part type</th><th>Outer part</th><th>Inner part</th><th data-dana-table-static aria-label="Actions"></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let row of current.part_map; trackBy: trackMapping">
+              <td class="mono">{{ row.summary }}</td>
+              <td>{{ row.part_type === 'RING' ? 'Ring' : 'Pinion' }}</td>
+              <td class="mono">{{ row.outer_part }}</td>
+              <td class="mono">{{ row.inner_part }}</td>
+              <td>
+                <div class="gear-actions">
+                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="editMapping(row)" [disabled]="busy" data-icon="edit" title="Edit">Edit</button>
+                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="removeMapping(row)" [disabled]="busy" data-icon="delete" title="Remove">Remove</button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="!current.part_map.length"><td danaTableEmpty colspan="5" class="empty-row">No part mappings yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </ng-container>
+</section>
