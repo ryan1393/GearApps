@@ -48,6 +48,23 @@ describe('FrontendFeatureAdminUsersComponent', () => {
       expect(payload).not.toHaveProperty('part_type_id');
     });
 
+    it('takes the part type from the R or P in a shelf barcode and sends only the Summary', () => {
+      const create = jest.spyOn(TestBed.inject(AdminApiService), 'createLocation').mockReturnValue(of({} as AdminLocationRow));
+      fill('cgdp-a1a');
+      expect(component.locationContentsFromBarcode).toBe(false);
+      expect(component.locationBarcodePartType).toBe('PINION');
+      component.saveLocation();
+
+      const payload = create.mock.calls[0][0];
+      expect(payload).toMatchObject({ serial_number: 'CGDP-A1A', summary_id: 'summary-1' });
+      expect(payload).not.toHaveProperty('part_type_id');
+
+      fill('CGFR-B2C');
+      expect(component.locationBarcodePartType).toBe('RING');
+      fill('RACK-A-03');
+      expect(component.locationBarcodePartType).toBeNull();
+    });
+
     it('lists each Summary number once, without revisions', () => {
       const row = (id: string, number: string, revision: string, active = true, enabled = true) =>
         ({ id, number, revision, active, enabled, model_id: null, hos: null });

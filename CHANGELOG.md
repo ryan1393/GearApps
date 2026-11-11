@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **Lapper Read: cycle time to Argonaut.** Each finished lapping cycle is timed from going into
+  cycle to coming out of it (Y3.2), and the seconds are sent to Argonaut as `floatData[0]`, which
+  was always 0. A cycle whose start or end was missed (collector down or restarting, controller
+  not answering) sends 0 rather than a wrong time. The Cycle Test Lab's
+  Send to Argonaut has a matching optional Cycle time field (`cycle_time_s`).
+- **Location part type comes from the barcode.** A shelf barcode's R or P now sets its part type:
+  GSR/GSP, CGRR/CGRP, CGDR/CGDP and CGFR/CGFP are RING or PINION whatever is chosen, on create,
+  edit and bulk shelf creation, so summary tags print the right part type. Admin shows the part
+  type read-only for these barcodes. On startup, existing locations whose part type disagrees with
+  their barcode are corrected once (logged); other locations keep the part type chosen for them.
+- **Trays go to their shelf automatically.** When exactly one shelf the tray may go to holds its
+  Summary and part type, it is selected for the operator: the destination in Move Tray, the bin
+  when Grinding uses a rough shelf, and an empty finished shelf in Receive Container (one tap,
+  Receive onto …). With two or more such shelves nothing is selected and the operator scans or
+  chooses one, as before. Nothing is moved until the operator confirms.
 - **Cutter-body blade rules corrected.** Cutter body capacity now comes only from the Dana S/N by
   position (characters 5–7 body size, 8th character `8` on a 105 = 105 Special). Previously the
   check searched the whole serial for `064/076/088/105`, removed punctuation (shifting positions)
@@ -21,7 +36,6 @@
     requirement rows no longer create Summaries, and a configured rule is never overwritten.
   - `npm run audit:cutter-blade-rules` (read-only) and the opt-in
     `npm run apply:proposed-special-105`. See `docs/manufacturing/CUTTER_BODY_BLADE_RULES.md`.
-
 - **Lapper Read: paste the Argonaut API per machine.** Admin > Lapping machines now has one
   **Argonaut API** field: paste the full address including `?locationId=…` and that machine's
   cycles are sent there as pasted. The separate location ID field is gone, and a `locationId` in

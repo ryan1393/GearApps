@@ -30,6 +30,22 @@ export function normalizeSummaryShelfPartType(
   return code === 'RING' || code === 'PINION' ? code : null;
 }
 
+/**
+ * Shelf barcodes carry their part type in the letter before the dash: R is RING, P is PINION.
+ * GSR-/GSP- (Green Shed), CGRR/CGRP (rough), CGDR/CGDP (dull) and CGFR/CGFP (finished), including
+ * legacy rough tags such as CGRR or CGRR-001.
+ */
+export const LOCATION_PART_TYPE_PATTERN = /^(?:GS|CG[RDF])([RP])(?:-|$)/;
+
+/**
+ * The part type a location holds, read from its barcode: CGDR-A1A is RING, GSP-1.955FC is PINION.
+ * Null for a barcode that does not name one (the part type is then chosen by hand).
+ */
+export function locationPartTypeFromSerial(serialNumber: string | null | undefined): SummaryShelfPartType | null {
+  const match = LOCATION_PART_TYPE_PATTERN.exec((serialNumber ?? '').trim().toUpperCase());
+  return match ? (match[1] === 'R' ? 'RING' : 'PINION') : null;
+}
+
 export function isShelfSummaryNumber(summaryNumber: string): boolean {
   const summary = normalizeSummaryNumber(summaryNumber);
   return /^(?=.*\d)[A-Z0-9.-]+$/.test(summary);

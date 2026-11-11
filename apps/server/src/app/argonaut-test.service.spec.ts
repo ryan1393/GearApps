@@ -17,6 +17,14 @@ describe('Argonaut test transaction', () => {
     expect(body.stringData).toEqual(['373', '12', '7', '4', '0']);
   });
 
+  it('sends the cycle time as floatData[0], like Lapper Read, and 0 when it is unknown', () => {
+    expect(buildArgonautPayload('SN-1', 373, 1, {}, 100, 184.25).request.floatData[0]).toBe(184.25);
+    expect(buildArgonautPayload('SN-1', 373, 1, {}, 100, 12.34567).request.floatData[0]).toBe(12.346);
+    for (const unknown of [undefined, null, -1, Number.NaN]) {
+      expect(buildArgonautPayload('SN-1', 373, 1, {}, 100, unknown).request.floatData[0]).toBe(0);
+    }
+  });
+
   it('adds the location ID only when the address has none', () => {
     expect(argonautAddress('https://argo:3003/api/mes/trigger-transaction', 'LOC 1')).toBe('https://argo:3003/api/mes/trigger-transaction?locationId=LOC+1');
     expect(argonautAddress('https://argo/t?LocationId=A', 'B')).toBe('https://argo/t?LocationId=A');

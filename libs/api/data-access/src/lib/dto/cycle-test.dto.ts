@@ -1,4 +1,4 @@
-import { IsInt, IsObject, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min } from 'class-validator';
+import { IsInt, IsNumber, IsObject, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { ArgonautTestInput, CycleTestInput } from '@meshforge/shared/domain';
 export class CreateCycleTestDto implements CycleTestInput {
@@ -16,6 +16,8 @@ export class SendArgonautTestDto implements ArgonautTestInput {
   @ApiProperty({ maxLength: 160 }) @IsString() @Matches(/\S/) @MaxLength(160) serial_number!: string;
   @ApiProperty({ description: "Sent as Argonaut's sequence (a real cycle sends its consec)", minimum: 0 })
   @IsInt() @Min(0) @Max(2147483647) sequence!: number;
+  @ApiPropertyOptional({ description: 'Cycle time in seconds, sent as floatData[0] (a real cycle sends its measured cycle time); empty sends 0', minimum: 0 })
+  @IsOptional() @IsNumber({ allowNaN: false, allowInfinity: false }) @Min(0) @Max(86400) cycle_time_s?: number;
   @ApiProperty({ type: 'object', additionalProperties: { type: 'number' }, description: 'Macro number to value; missing macros are sent as 0' })
   @IsObject() values!: Record<string, number>;
   @ApiPropertyOptional({ description: "Argonaut trigger-transaction URL; empty uses the machine's saved address" })

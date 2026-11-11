@@ -9,6 +9,9 @@ import { CutterPullReasonOrmEntity } from '../entities/cutter-tracking/cutter-pu
 import { CutterCheckResultOrmEntity } from '../entities/cutter-tracking/cutter-check-result.orm-entity';
 import { TrayStageOrmEntity } from '../entities/blade-tracking/tray-stage.orm-entity';
 
+/** PostgreSQL form of LOCATION_PART_TYPE_PATTERN in util-constants: captures the R or P. */
+export const LOCATION_PART_TYPE_SQL_PATTERN = '^(?:GS|CG[RDF])([RP])(?:-|$)';
+
 @Injectable()
 export class CutterReferenceBootstrapService implements OnApplicationBootstrap {
   private readonly logger = new Logger(CutterReferenceBootstrapService.name);
@@ -37,8 +40,34 @@ export class CutterReferenceBootstrapService implements OnApplicationBootstrap {
       this.upsertPullReasons(),
       this.upsertCheckResults(),
     ]);
+    await this.alignLocationPartTypes();
 
     this.logger.log('Cutter reference data verified');
+  }
+
+  /**
+   * A shelf's part type is the R or P in its barcode (GSR/GSP, CGRR/CGRP, CGDR/CGDP, CGFR/CGFP;
+   * see locationPartTypeFromSerial). Locations saved before that rule, or with a hand-picked part
+   * type that disagrees, are corrected once here; locations whose barcode names none are untouched.
+   */
+  private async alignLocationPartTypes(): Promise<void> {
+    const rows = (await this.partTypeRepo.manager.query(
+      `WITH aligned AS (
+         UPDATE locations AS location
+            SET part_type_id = part_type.id
+           FROM part_types AS part_type
+          WHERE part_type.enabled = true
+            AND part_type.code = CASE substring(upper(btrim(location.serial_number)) FROM $1)
+                                   WHEN 'R' THEN $2 WHEN 'P' THEN $3 END
+            AND location.part_type_id IS DISTINCT FROM part_type.id
+        RETURNING location.serial_number
+       )
+       SELECT serial_number FROM aligned ORDER BY serial_number`,
+      [LOCATION_PART_TYPE_SQL_PATTERN, 'RING', 'PINION'],
+    )) as Array<{ serial_number: string }>;
+    if (rows.length) {
+      this.logger.log(`Set the part type of ${rows.length} location(s) from their barcode: ${rows.map((row) => row.serial_number).join(', ')}`);
+    }
   }
 
   private async upsertEventTypes(): Promise<void> {

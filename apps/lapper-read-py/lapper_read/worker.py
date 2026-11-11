@@ -15,7 +15,7 @@ from .fanuc import Fanuc, NoGearsetLoaded
 from .scanner import Scanner
 from .scanner_monitor import ScannerMonitor
 from .state import ArgonautPost, CycleState, CycleStateStore, MachineState, ScannerState
-from .tracker import CycleTracker
+from .tracker import DEFAULT_MAX_SAMPLE_GAP_S, CycleTracker
 
 log = logging.getLogger("lapper_read")
 
@@ -99,9 +99,10 @@ class Worker:
             **argonaut,
         }
 
-    @staticmethod
-    def _new_tracker(state: CycleState) -> CycleTracker:
-        return CycleTracker(state)
+    def _new_tracker(self, state: CycleState) -> CycleTracker:
+        # A cycle's start or end is timed only when the previous sample was a few polls before it.
+        poll_s = getattr(self.settings, "poll_interval_ms", 250) / 1000
+        return CycleTracker(state, max_sample_gap_s=max(DEFAULT_MAX_SAMPLE_GAP_S, 4 * poll_s))
 
     # -- lifecycle ----------------------------------------------------------
     def run(self) -> None:
@@ -338,7 +339,7 @@ class Worker:
         missing = [n for n, v in post.values.items() if v is None]
         try:
             self.argonaut.post(argo.build_payload(post.serial, post.part_number, post.consec, post.values,
-                                                  self.settings.argonaut_transaction_type_id))
+                                                  self.settings.argonaut_transaction_type_id, post.cycle_time_s))
         except Exception as error:  # noqa: BLE001 - Argonaut must never stop MeshForge publishing
             if not isinstance(error, argo.ArgonautError):
                 error = argo.ArgonautError(str(error))
@@ -357,8 +358,10 @@ class Worker:
                       label, post.consec, post.attempts, delay, error)
             return
         self.argonaut_last_sent_at, self.argonaut_last_error = utc_now(), None
-        log.info("[%s] Sent cycle %s for serial %s (gearset %s) to Argonaut%s", label, post.consec, post.serial,
-                 post.part_number, f"; {len(missing)} macros unavailable, sent as 0" if missing else "")
+        cycle_time = f"{post.cycle_time_s:.1f}s" if post.cycle_time_s is not None else "unknown, sent as 0"
+        log.info("[%s] Sent cycle %s for serial %s (gearset %s) to Argonaut, cycle time %s%s", label, post.consec,
+                 post.serial, post.part_number, cycle_time,
+                 f"; {len(missing)} macros unavailable, sent as 0" if missing else "")
         self._finish_argonaut(post)
 
     def _finish_argonaut(self, post: ArgonautPost) -> None:

@@ -27,6 +27,9 @@ function fixture(t) {
   const source = path.join(dir, 'source');
   write(path.join(source, 'package-lock.json'), '{}');
   write(path.join(source, 'compose.yml'), 'services: {}\n');
+  // Packed without execute bits, as Windows tar does.
+  write(path.join(source, 'commands/CLEAR-OPERATIONAL-DATA.sh'), '#!/usr/bin/env bash\necho ok\n');
+  fs.chmodSync(path.join(source, 'commands/CLEAR-OPERATIONAL-DATA.sh'), 0o644);
   const packed = spawnSync('tar', ['-czf', archive, '-C', source, '.'], { encoding: 'utf8' });
   assert.equal(packed.status, 0, packed.stderr);
   return { root, legacy, archive, upload };
@@ -42,6 +45,15 @@ test('deploy retains the root environment and rollback release', (t) => {
   assert.equal(fs.existsSync(path.join(`${f.root}.pending-prev`, 'compose.yml')), true);
   execute(finalizeScript(f.root));
   assert.equal(fs.existsSync(path.join(`${f.root}.prev`, 'compose.yml')), true);
+});
+
+test('deploy makes the shipped shell scripts executable', (t) => {
+  const f = fixture(t);
+  write(f.upload, 'APP=manufacturing\n');
+  execute(stageScript(f.root, f.legacy, f.archive, f.upload));
+  const script = path.join(f.root, 'commands/CLEAR-OPERATIONAL-DATA.sh');
+  assert.equal(fs.statSync(script).mode & 0o100, 0o100);
+  assert.equal(execute(`cd ${JSON.stringify(f.root)} && ./commands/CLEAR-OPERATIONAL-DATA.sh`), 'ok\n');
 });
 
 test('deploy carries the old shared manufacturing environment into the root', (t) => {

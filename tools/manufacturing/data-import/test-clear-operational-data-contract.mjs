@@ -3,7 +3,8 @@
 import fs from 'node:fs';
 import { contractPath } from '../lib/contract-paths.mjs';
 import {
-  CONFIRM_FLAG, EMPTY, KEEP, KEPT_LOCATION_SERIALS, KEPT_SHELF_LOCATION_PATTERN, LOCATIONS_TABLE,
+  CONFIRM_FLAG, DEFAULT_LOCATION_MODE, EMPTY, KEEP, KEPT_LOCATION_SERIALS, KEPT_SHELF_LOCATION_PATTERN,
+  LOCATION_MODES, LOCATIONS_TABLE, parseLocationMode,
 } from './clear-operational-data.mjs';
 
 const read = (relative) => fs.readFileSync(contractPath(process.cwd(), relative), 'utf8');
@@ -58,9 +59,37 @@ for (const sample of samples) {
 }
 if (!kept.test('CGDR-A1A') || kept.test('CGDR-001') || kept.test('GSR-1010')) fail('Kept-location pattern is wrong');
 if (!KEPT_LOCATION_SERIALS.includes('COATER-STAGING')) fail('COATER-STAGING must be kept');
-if (!/DELETE FROM public\.locations WHERE NOT \(\$\{KEPT_LOCATION_WHERE\}\)`, keptLocationParams\)/.test(script) ||
+if (!script.includes('await client.query(`DELETE FROM public.locations WHERE NOT (${kept.where})`, kept.params);') ||
     !script.includes("upper(serial_number) ~ $1 OR upper(serial_number) = ANY($2::text[])")) {
   fail('Locations must be deleted with bound parameters, keeping the shelf/layer/bin pattern');
+}
+
+// --locations= chooses keep-shelves (default) or delete-all; anything else is refused.
+if (DEFAULT_LOCATION_MODE !== 'keep-shelves' || Object.keys(LOCATION_MODES).join() !== 'keep-shelves,delete-all') {
+  fail('Location modes must be keep-shelves (default) and delete-all');
+}
+if (parseLocationMode([]) !== 'keep-shelves' || parseLocationMode(['--locations=delete-all']) !== 'delete-all') {
+  fail('parseLocationMode reads --locations=');
+}
+let unknownRefused = false;
+try { parseLocationMode(['--locations=everything']); } catch { unknownRefused = true; }
+if (!unknownRefused) fail('An unknown --locations= value must be refused');
+
+// Tables a database has beyond the lists (left by older releases) that point at an emptied
+// table, directly or through another, are found from the database's own foreign keys and
+// emptied too; a kept or non-public one stops the run, as do rows still pointing at a
+// location that would be deleted. Both are checked before anything is deleted.
+for (const marker of [
+  'WITH RECURSIVE deps(rel)', 'SELECT con.conrelid FROM pg_constraint con JOIN deps d ON con.confrelid = d.rel',
+  "dep.schema !== 'public' || KEEP.includes(dep.table) || dep.table === LOCATIONS_TABLE",
+  'const targets = [...empty, ...alsoEmpty];',
+  'TRUNCATE TABLE ${targets.map(', 'await locationBlockers(client, locationMode, targets)',
+  "throw new Error('The clear cannot run on this database as it is. Nothing was deleted.')",
+]) {
+  if (!script.includes(marker)) fail(`Clear command missing ${marker}`);
+}
+if (script.indexOf("throw new Error('The clear cannot run on this database") > script.indexOf("if (!apply) {")) {
+  fail('Refused tables and location blockers must stop the preview, before anything is deleted');
 }
 
 // Every public table the API creates must be on one of the lists. A table left off both
@@ -91,7 +120,7 @@ if (unlisted.length) fail(`Add these tables to EMPTY or KEEP in clear-operationa
 // No CASCADE: a kept table that still references an emptied one must stop the run, not lose rows.
 if (/CASCADE/.test(script.replace(/\/\/.*$/gm, ''))) fail('The clear command must not truncate with CASCADE');
 // Only public tables are touched; the Lapper schema keeps its history.
-if (!script.includes("WHERE schemaname='public'") || !script.includes('TRUNCATE TABLE ${empty.map((table) => `public.${quoteIdent(table)}`)')) {
+if (!script.includes("WHERE schemaname='public'") || !script.includes('TRUNCATE TABLE ${targets.map((table) => `public.${quoteIdent(table)}`)')) {
   fail('The clear command must only truncate tables in the public schema');
 }
 for (const marker of ["process.argv.includes('--apply')", 'CONFIRM_FLAG', "SET LOCAL lock_timeout", 'ROLLBACK', 'Kept tables changed', 'pre-clear-operational-data-manifest.json']) {
@@ -100,7 +129,21 @@ for (const marker of ["process.argv.includes('--apply')", 'CONFIRM_FLAG', "SET L
 if (!cmd.includes('Type CLEAR DATA to continue') || !cmd.includes(CONFIRM_FLAG)) {
   fail('The launcher must require the CLEAR DATA phrase before applying');
 }
-if (cmd.indexOf('clear-operational-data.mjs\r\n') > cmd.indexOf('Type CLEAR DATA')) fail('The launcher must preview before asking');
+const cmdAt = (marker) => {
+  const index = cmd.indexOf(marker);
+  if (index < 0) fail(`CLEAR-OPERATIONAL-DATA.cmd missing ${marker}`);
+  return index;
+};
+const cmdOrder = [
+  'set /p LOCCHOICE=Choose 1 or 2 [1]: ',
+  'clear-operational-data.mjs --locations=%LOCATIONS%\r\n',
+  'Type CLEAR DATA to continue',
+  `clear-operational-data.mjs --locations=%LOCATIONS% --apply ${CONFIRM_FLAG}`,
+].map(cmdAt);
+if (cmdOrder.some((index, i) => i > 0 && index < cmdOrder[i - 1])) {
+  fail('CLEAR-OPERATIONAL-DATA.cmd must ask about locations, preview, then confirm before applying');
+}
+for (const marker of ['if "%LOCCHOICE%"=="1" set LOCATIONS=keep-shelves', 'if "%LOCCHOICE%"=="2" set LOCATIONS=delete-all', 'if not defined LOCATIONS (']) cmdAt(marker);
 // Linux Docker host launcher: preview, typed phrase, verified backup, then apply with the API stopped.
 const shAt = (marker) => {
   const index = sh.indexOf(marker);
@@ -108,6 +151,7 @@ const shAt = (marker) => {
   return index;
 };
 const shOrder = [
+  'read -r -p "Choose 1 or 2 [1]: " CHOICE',
   'run_clear || fail "Preview failed',
   'read -r -p "Type CLEAR DATA to continue: "',
   '[[ "$CONFIRM" != "CLEAR DATA" ]]',
@@ -123,8 +167,11 @@ if (shOrder.some((index, i) => i > 0 && index < shOrder[i - 1])) {
 if (!sh.includes(`CONFIRM_FLAG="${CONFIRM_FLAG}"`)) fail('CLEAR-OPERATIONAL-DATA.sh must pass the confirm flag');
 for (const marker of [
   'set -euo pipefail', 'umask 077', 'compose run --rm --no-deps -T', 'PROJECT="dana-apps"',
+  '--locations=keep-shelves|--locations=delete-all) LOCATIONS="${arg#--locations=}" ;;',
+  '1) LOCATIONS="keep-shelves" ;;', '2) LOCATIONS="delete-all" ;;',
+  'node "$SCRIPT" "--locations=$LOCATIONS" "$@" </dev/null',
   'BACKUP_DIR="${MESHFORGE_BACKUP_DIR:-$HOME/dana-apps-backups}"',
-  '-v "$ROOT/$SCRIPT_DIR:/app/$SCRIPT_DIR"', 'node "$SCRIPT" "$@" </dev/null',
+  '-v "$ROOT/$SCRIPT_DIR:/app/$SCRIPT_DIR"',
   'trap restart_api EXIT', 'SCRIPT="$SCRIPT_DIR/clear-operational-data.mjs"',
   'SCRIPT_DIR="tools/manufacturing/data-import"',
 ]) shAt(marker);

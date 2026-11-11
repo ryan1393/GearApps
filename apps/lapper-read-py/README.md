@@ -107,9 +107,17 @@ In Docker these are set from the `LAPPER_READ_ARGONAUT_*` entries in `.env`.
 Ported from the original C# Lapper Read. With `ARGONAUT_ENABLED=true`, when a cycle finishes
 (machine out of cycle and front door open) the worker reads Argonaut's FANUC macros once and
 posts them to `ARGONAUT_URL`: the scanned serial, gearset (`#10020`) as the part number, the
-cycle's consec as the sequence, 63 macros as `floatData` (after a leading 0) and `#10020`,
+cycle's consec as the sequence, the cycle time and 63 macros as `floatData`, and `#10020`,
 `#10021`, `#10023`, `#10400`, `#10480` as `stringData`. A macro the controller does not answer
 is sent as 0, as before. The macro list is in `lapper_read/argonaut.py`.
+
+- **Cycle time (`floatData[0]`):** the seconds the lapper was in cycle (Y3.2 on), measured from
+  going into cycle to coming out of it, to the millisecond (within one poll,
+  `LAPPER_POLL_INTERVAL_MS`). The door opening afterwards is not counted. A start or end is only
+  timed when the collector read the machine just before it (within 2 seconds, or 4 polls if
+  longer). A cycle whose start or end fell while the collector was down or restarting, or while
+  the controller did not answer, sends 0, as the original collector always did, rather than a
+  wrong time. It is kept with the queued post, so a retry sends the same value.
 
 - **Per machine:** in Admin > Lapping machines, paste each machine's full **Argonaut API**
   address, including `?locationId=…`. A machine with an address sends to it exactly as pasted,

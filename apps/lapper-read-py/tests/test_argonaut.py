@@ -47,6 +47,14 @@ class PayloadTests(unittest.TestCase):
         self.assertEqual(body["stringData"], ["373", "12", "7", "4", "0"])
         json.dumps(body)  # serializable
 
+    def test_cycle_time_is_sent_as_float_zero(self):
+        body = argo.build_payload("SN-1", 373, 1, {}, cycle_time_s=184.25)["request"]
+        self.assertEqual(body["floatData"][0], 184.25)
+        self.assertEqual(argo.build_payload("SN-1", 373, 1, {}, cycle_time_s=90.0)["request"]["floatData"][0], 90)
+        self.assertEqual(argo.build_payload("SN-1", 373, 1, {}, cycle_time_s=12.34567)["request"]["floatData"][0], 12.346)
+        for unknown in (None, -1.0, float("nan")):
+            self.assertEqual(argo.build_payload("SN-1", 373, 1, {}, cycle_time_s=unknown)["request"]["floatData"][0], 0)
+
     def test_macro_lists_match_the_original_order(self):
         self.assertEqual(len(argo.FLOAT_MACROS), 63)
         self.assertEqual(argo.FLOAT_MACROS[:3], (10039, 10040, 10042))
@@ -210,6 +218,9 @@ class WorkerArgonautTests(unittest.TestCase):
         body = self.argonaut.posts[0]["request"]
         self.assertEqual((body["serialNumber"], body["sequence"], body["partNumber"]), ("DM2A4C80ZS", 7, "373"))
         self.assertEqual(body["floatData"][1], 2.25)
+        # The cycle ran for about 0.2s between going into and out of cycle.
+        self.assertGreater(body["floatData"][0], 0.1)
+        self.assertLess(body["floatData"][0], 5)
         self.assertEqual(body["stringData"][0], "373")
         self.assertEqual(self.worker.status()["argonaut"], "on")
         self.assertEqual(self.worker.status()["argonaut_pending"], 0)
