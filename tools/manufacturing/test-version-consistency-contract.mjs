@@ -31,29 +31,6 @@ if (
   fail('Root README release differs from root package');
 if (constant !== version)
   fail(`MESHFORGE_VERSION (${constant}) != package.json (${version})`);
-const collectorRoot = path.join(workspaceRoot, 'apps/lapper-read');
-const collectorProperties = fs.readFileSync(
-  contractPath(process.cwd(), path.join(collectorRoot, 'Directory.Build.props')),
-  'utf8',
-);
-if (
-  /<Version>\s*([^<]+?)\s*<\/Version>/.exec(collectorProperties)?.[1] !==
-  version
-)
-  fail('Lapper Read collector release version differs from root');
-for (const project of ['LapperRead', 'LapperReadLibrary', 'LapperRead.Tests']) {
-  const metadata = fs.readFileSync(
-    contractPath(process.cwd(), path.join(collectorRoot, project, project + '.csproj')),
-    'utf8',
-  );
-  if (
-    /<(?:Version|VersionPrefix|AssemblyVersion|FileVersion|InformationalVersion)>/.test(
-      metadata,
-    )
-  )
-    fail(`${project} must inherit the shared collector release version`);
-}
-
 const pythonCollector = fs.readFileSync(
   contractPath(process.cwd(), path.join(workspaceRoot, 'apps/lapper-read-py/lapper_read/__init__.py')),
   'utf8',

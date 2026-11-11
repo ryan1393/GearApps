@@ -16,10 +16,8 @@ test('release keeps all applications, root dependency authority and shared UI', 
     'nx.json',
     'tsconfig.base.json',
     'apps/lapper-client/src/main.ts',
-    'apps/lapper-read/Directory.Build.props',
-    'apps/lapper-read/project.json',
-    'apps/lapper-read/LapperRead/LapperRead.csproj',
-    'apps/lapper-read/LapperReadLibrary/LapperReadLibrary.csproj',
+    'apps/lapper-read-py/project.json',
+    'apps/lapper-read-py/lapper_read/worker.py',
     'apps/blade-tracking/project.json',
     'apps/cutter-builder/project.json',
     'apps/greenshed/project.json',
@@ -131,24 +129,5 @@ test('archive entries cannot be absolute or traverse outside the workspace', () 
     'a//file.ts',
     'a\\..\\file.ts',
     'C:\\package.json',
-  ]);
-});
-
-test('collector source is preserved while .NET outputs and local state are excluded', () => {
-  allowed([
-    'apps/lapper-read/Directory.Build.props',
-    'apps/lapper-read/LapperRead/Program.cs',
-    'apps/lapper-read/LapperRead.Tests/ApiTests.cs',
-    'apps/lapper-read/LapperReadLibrary/BusinessLogic/Fanuc.cs',
-  ]);
-  blocked([
-    'apps/lapper-read/LapperRead/bin/Release/net8.0/LapperRead.dll',
-    'apps/lapper-read/LapperRead/obj/project.assets.json',
-    'apps/lapper-read/LapperRead.Tests/TestResults/results.trx',
-    'apps/lapper-read/.tools/dotnet/dotnet.exe',
-    'apps/lapper-read/.vs/metadata',
-    'apps/lapper-read/.nuget/packages/package.dll',
-    'apps/lapper-read/state/collector.json',
-    'apps/lapper-read/LapperRead/state/checkpoints.json',
   ]);
 });

@@ -50,19 +50,20 @@
       "hasTestTarget": false
     },
     {
-      "name": "lapper-read",
-      "root": "apps/lapper-read",
+      "name": "lapper-read-py",
+      "root": "apps/lapper-read-py",
       "projectType": "application",
       "tags": [
-        "language:dotnet",
+        "language:python",
         "platform:server",
         "scope:lapper"
       ],
       "targets": [
-        "build",
+        "docker-build",
+        "lint",
         "test"
       ],
-      "hasBuildTarget": true,
+      "hasBuildTarget": false,
       "hasServeTarget": false,
       "hasTestTarget": true
     },
@@ -572,23 +573,6 @@
       "hasBuildTarget": true,
       "hasServeTarget": true,
       "hasTestTarget": false
-    },
-    {
-      "name": "lapper-read",
-      "root": "apps/lapper-read",
-      "projectType": "application",
-      "tags": [
-        "language:dotnet",
-        "platform:server",
-        "scope:lapper"
-      ],
-      "targets": [
-        "build",
-        "test"
-      ],
-      "hasBuildTarget": true,
-      "hasServeTarget": false,
-      "hasTestTarget": true
     },
     {
       "name": "lapper-read-py",

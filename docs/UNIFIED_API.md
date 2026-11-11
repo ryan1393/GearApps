@@ -65,18 +65,16 @@ The explicit equivalent is `docker compose --env-file .env -f compose.yml up -d 
 5. Verify http://YOUR-HOST:3333/api/v1/health/ready. Sign in again in each web
 application; tokens issued by the former Lapper server use a different contract.
 
-6. Deploy the updated Lapper Read worker, configure these service environment
-variables, and restart it:
+6. Start the Lapper Read collector container and connect it in Lapper >
+Configuration > Collector Tokens:
 
-```powershell
-$env:MeshForgeApi__BaseAddress = 'http://YOUR-HOST:3333'
-$env:MeshForgeApi__Email = 'YOUR-MESHFORGE-EMAIL'
-$env:MeshForgeApi__Password = 'YOUR-MESHFORGE-PASSWORD'
+```sh
+docker compose --profile collectors up -d --build lapper-read
 ```
 
-The configuration section is now MeshForgeApi. Machine/scanner configuration
-and collector checkpoints stay in place. See the collector SETUP.txt for
-Windows publishing and licensed FANUC requirements.
+Collector checkpoints stay in place. See the
+[collector README](../apps/lapper-read-py/README.md) for its settings and the
+licensed FANUC library it needs.
 
 The database cleanup already applied by the owner remains valid. Its five
 integrity migrations keep their original checksums. One additional migration
@@ -96,7 +94,7 @@ Run npm commands at the root. npm run serve:api starts the sole API; all four
 client proxies target localhost:3333. The only API environment is .env.
 The shared authentication response and principal contracts live in libs/shared/domain.
 
-CI runs the collector through Nx with .NET SDK 8 and also boots the compiled API
+CI runs the collector's tests through Nx and also boots the compiled API
 against a fresh PostgreSQL service, including both initialization jobs and a
 read-only integrity audit.
 

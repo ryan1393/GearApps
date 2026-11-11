@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- **The Windows Lapper Read collector is removed.** The .NET service in `apps/lapper-read`, its
+  CI workflow and its version checks are gone. The Docker collector (`apps/lapper-read-py`) is
+  the only collector; the API it posts to is unchanged.
 - **Server settings are in Admin.** The new **Server Settings** tab of the shared Admin screen
   (`/admin?tab=server-settings`) lists every API setting from the server environment file and
   lets an administrator change it without editing `.env`.
@@ -39,8 +42,7 @@
       built-in `@gearapps.local` account addresses become `@meshforge.local`. Nothing else in
       the data changes. Close other connections to the database first (pgAdmin, psql), or the
       database itself cannot be renamed.
-    - Lapper Read collectors: the settings section is `MeshForgeApi` (.NET) and the variables are
-      `MESHFORGE_API_...` (Python).
+    - Lapper Read collector: its variables are `MESHFORGE_API_...`.
   - Not recoloured: informational blue, success, danger, the Greenshed running-machines state
     colours, and colours set in TypeScript or with Tailwind utility classes.
 - **Lapping master data is in Admin.** The shared Admin screen (every app's `/admin`) now edits

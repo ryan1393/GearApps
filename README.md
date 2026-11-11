@@ -11,11 +11,10 @@ port 3333**, one authentication service and the same PostgreSQL database.
 | Blade Tracking | blade-tracking / apps/blade-tracking | 4200                                     |
 | Cutter Builder | cutter-builder / apps/cutter-builder | 4201                                     |
 | Greenshed      | greenshed / apps/greenshed           | 4202                                     |
-| Lapper Read    | apps/lapper-read                                   | Windows collector, outbound HTTP to 3333 |
 | Lapper Read (Docker) | lapper-read-py / apps/lapper-read-py         | Python collector container, see its README |
 
 The root package.json and package-lock.json are the dependency authority. Use
-Node 24.22.1, npm 11.9.0 and .NET SDK 8 for the collector. All clients share [Dana UI](libs/shared/dana-ui).
+Node 24.22.1 and npm 11.9.0. All clients share [Dana UI](libs/shared/dana-ui).
 Application API routes are under /api/v1; health is /api/v1/health/ready.
 Every application and its end-to-end project lives under root `apps/`.
 Manufacturing libraries are in `libs/manufacturing/`, their maintenance tools in
@@ -67,8 +66,8 @@ database. The explicit bootstrap service initializes a new empty database.
 All applications sign in through POST /api/v1/auth/email/login and use the same
 accessToken/refreshToken response. Account management, password recovery,
 department access and token revocation belong to the shared API. Lapper Read uses
-the same flow; [collector configuration](apps/lapper-read/SETUP.txt) describes its
-MeshForgeApi settings.
+the same flow; the [collector README](apps/lapper-read-py/README.md) describes its
+`MESHFORGE_API_...` settings.
 
 ## Database and validation
 

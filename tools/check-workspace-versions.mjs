@@ -11,12 +11,6 @@ assert.equal(pkg.packageManager, 'npm@11.9.0');
 assert.equal(pkg.overrides.typescript, pkg.devDependencies.typescript);
 assert.equal(readFileSync(resolve(root, '.nvmrc'), 'utf8').trim(), pkg.engines.node);
 assert.equal(lock.version, pkg.version);
-assert.equal(
-  readFileSync(resolve(root, 'apps/lapper-read/Directory.Build.props'), 'utf8').match(
-    /<Version>([^<]+)<\/Version>/,
-  )?.[1],
-  pkg.version,
-);
 for (const section of ['dependencies', 'devDependencies']) {
   assert.deepEqual(
     lock.packages[''][section],

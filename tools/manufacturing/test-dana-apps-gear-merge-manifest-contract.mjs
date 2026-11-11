@@ -41,7 +41,7 @@ must(
 );
 
 const names = new Set(actual.projects.map((p) => p.name).filter(Boolean));
-for (const name of ['lapper-client', 'lapper-read', 'blade-tracking', 'cutter-builder', 'greenshed', 'meshforge-server']) {
+for (const name of ['lapper-client', 'lapper-read-py', 'blade-tracking', 'cutter-builder', 'greenshed', 'meshforge-server']) {
   must(names.has(name), `Gear merge manifest is missing runtime project ${name}`);
 }
 must(

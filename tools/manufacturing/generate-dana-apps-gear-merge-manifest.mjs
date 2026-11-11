@@ -80,7 +80,7 @@ export function buildGearMergeManifest(root = workspaceRoot) {
     if (fs.existsSync(contractPath(root, name))) rootHashes[name] = sha256File(contractPath(root, name));
   }
 
-  const runtimeNames = ['lapper-client', 'lapper-read', 'blade-tracking', 'cutter-builder', 'greenshed', 'meshforge-server'];
+  const runtimeNames = ['lapper-client', 'lapper-read-py', 'blade-tracking', 'cutter-builder', 'greenshed', 'meshforge-server'];
   const runtimeProjects = runtimeNames.map((name) => {
     const project = projects.find((p) => p.name === name);
     return project ?? { name, missing: true };

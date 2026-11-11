@@ -271,8 +271,8 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
       </div>
       <ol class="lapper-token-steps">
         <li>
-          Give it to the Lapper Read installation it is for (for example the Windows service's
-          <code>MeshForgeApi</code> settings).
+          Give it to the Lapper Read collector it is for, as its
+          <code>MESHFORGE_API_TOKEN</code> setting.
         </li>
         <li>
           The Docker collector does not need this: use
