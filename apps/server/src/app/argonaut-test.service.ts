@@ -80,7 +80,7 @@ export class ArgonautTestService {
       [input.machine_id],
     );
     const [gearset] = await this.db.query(
-      `SELECT p.number FROM public.gearsets g JOIN public.parts p ON p.id=g.gearset_part_id WHERE g.id=$1
+      `SELECT p.part_number AS number FROM public.gearsets g JOIN public.parts p ON p.id=g.gearset_part_id WHERE g.id=$1
        UNION ALL SELECT number FROM lapper.gearsets WHERE id=$1 OR public_gearset_id=$1 LIMIT 1`,
       [input.gearset_id],
     );
