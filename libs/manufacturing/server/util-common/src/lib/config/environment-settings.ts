@@ -86,7 +86,7 @@ export const ENVIRONMENT_SETTING_GROUPS: readonly EnvironmentSettingGroup[] = [
   {
     id: 'database',
     title: 'Database',
-    description: 'The Gear Apps database connection.',
+    description: 'The MeshForge database connection.',
     settings: [
       choice('DATABASE_TYPE', 'Database type', ['postgres', 'better-sqlite3'], undefined, { locked: STARTUP }),
       text('DATABASE_HOST', 'Host', undefined, { locked: STARTUP }),

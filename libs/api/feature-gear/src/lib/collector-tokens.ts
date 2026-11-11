@@ -78,5 +78,5 @@ export class CollectorTokensController {
 function requireAdmin(user: RequestUser | undefined): void {
   // Collector tokens act as non-admin users, so a token can never mint or revoke tokens.
   if (user?.role !== 'admin' || 'collectorTokenId' in (user ?? {}))
-    throw new ForbiddenException('Only GearApps administrators can manage collector tokens');
+    throw new ForbiddenException('Only MeshForge administrators can manage collector tokens');
 }

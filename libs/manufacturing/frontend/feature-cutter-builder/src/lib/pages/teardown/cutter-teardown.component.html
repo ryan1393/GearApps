@@ -22,7 +22,7 @@
             Build number
             <input gearScannerFocus [ngModel]="buildNumber" (ngModelChange)="buildChanged($event)" [disabled]="busy" name="buildNumber" class="gear-input font-mono" placeholder="Scan build number..." />
           </label>
-          <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy">Scan</button>
+          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy">Scan</button>
         </form>
         <div class="gear-workflow-divider">OR</div>
         <label class="gear-field">Select Pulled Cutter Build
@@ -56,7 +56,7 @@
             Tray serial
             <input [gearScannerFocus]="2" [ngModel]="traySerial" (ngModelChange)="trayChanged($event)" [disabled]="busy || !build" name="traySerial" class="gear-input" placeholder="Scan empty tray..." autocomplete="off" />
           </label>
-          <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy">Scan</button>
+          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy">Scan</button>
         </form>
         <div class="gear-workflow-divider">OR</div>
         <label class="gear-field">Select Empty Teardown Tray
@@ -125,7 +125,7 @@
               Dull shelf tag
               <input [gearScannerFocus]="3" [ngModel]="shelfLocationSerial" (ngModelChange)="shelfChanged($event)" [disabled]="busy" name="shelfLocationSerial" class="gear-input" placeholder="Scan CGDR-/CGDP- shelf tag..." autocomplete="off" />
             </label>
-            <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy">Scan</button>
+            <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy">Scan</button>
           </form>
           <div class="gear-workflow-divider">OR</div>
           <label class="gear-field">Select Compatible Dull Shelf

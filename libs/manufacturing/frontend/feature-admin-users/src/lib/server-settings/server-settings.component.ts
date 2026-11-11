@@ -162,7 +162,7 @@ export class ServerSettingsComponent implements OnInit {
 
   restart(): void {
     if (this.restarting || !this.board?.can_restart) return;
-    if (!globalThis.confirm('Restart the API now? Every Gear Apps screen and collector is disconnected for about a minute while it starts again.')) return;
+    if (!globalThis.confirm('Restart the API now? Every MeshForge screen and collector is disconnected for about a minute while it starts again.')) return;
     this.restarting = true; this.error = ''; this.cdr.markForCheck();
     this.http.post(`${API}/restart`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => this.waitForRestart(RESTART_CHECKS),

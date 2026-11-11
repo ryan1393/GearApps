@@ -42,7 +42,7 @@ export class LapperWritePolicy implements NestInterceptor {
       (/\/serial-numbers(?:\?|$)/.test(request.originalUrl) ||
         /\/serial-number\//.test(request.originalUrl));
     if (!ingestion && !snapshot && !serials && request.user?.role !== 'admin') {
-      throw new ForbiddenException('Only GearApps administrators can change setup data');
+      throw new ForbiddenException('Only MeshForge administrators can change setup data');
     }
     if (request.user && ['gearset', 'part', 'part-summary'].includes(resource))
       body.user_id = request.user.id;

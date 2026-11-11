@@ -80,7 +80,7 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
     );
     if (!master.users || !master.machines || !master.gearsets || !master.parts) {
       throw new Error(
-        'Lapper requires the existing GearApps PostgreSQL database. Run the GearApps database bootstrap first.',
+        'Lapper requires the existing MeshForge PostgreSQL database. Run the MeshForge database bootstrap first.',
       );
     }
     await manager.query('CREATE SCHEMA IF NOT EXISTS lapper');

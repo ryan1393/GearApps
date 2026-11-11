@@ -68,7 +68,7 @@ export class ServerFeatAssetTagService {
 
     let printed = false;
     let failureReason: string | null = null;
-    let message = 'No label printer is set up for Gear Apps; the tag file is returned for download.';
+    let message = 'No label printer is set up for MeshForge; the tag file is returned for download.';
     if (printer) {
       const sent = await this.printers.send(printer, payload);
       if (sent.ok) {

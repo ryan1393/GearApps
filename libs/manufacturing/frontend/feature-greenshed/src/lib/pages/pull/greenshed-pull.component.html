@@ -16,7 +16,7 @@
       <div class="gear-workflow-section-body">
         <form class="gear-workflow-scan-row" (ngSubmit)="scanBuild()">
           <label class="gear-field">Build number<input gearScannerFocus [(ngModel)]="buildNumber" (ngModelChange)="onBuildInput()" [disabled]="busy || lockedToRunningMachine" name="build" class="gear-input font-mono" placeholder="Scan cutter build..." autocomplete="off" /></label>
-          <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy || lockedToRunningMachine">Scan</button>
+          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy || lockedToRunningMachine">Scan</button>
         </form>
         <div class="gear-workflow-divider">OR</div>
         <label class="gear-field">Select Active Cutter
@@ -52,7 +52,7 @@
         <p class="gear-workflow-help">Changeover keeps the cutter intact. Scan the part-specific Green Shed shelf: GSR- + Summary for RING or GSP- + Summary for PINION.</p>
         <form class="gear-workflow-scan-row" (ngSubmit)="scanShelf()">
           <label class="gear-field">Shelf tag<input [gearScannerFocus]="2" [(ngModel)]="shelfSerial" (ngModelChange)="onShelfInput()" [disabled]="busy || !contextValid" name="shelf" class="gear-input" placeholder="Scan Greenshed shelf tag..." autocomplete="off" /></label>
-          <button type="submit" class="gear-btn gear-btn-dark">Scan</button>
+          <button type="submit" class="gear-btn gear-btn-primary">Scan</button>
         </form>
         <div class="gear-workflow-divider">OR</div>
         <label class="gear-field">Compatible Greenshed Shelf

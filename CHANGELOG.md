@@ -26,6 +26,8 @@
     shared Dana core is unchanged; its colours are overridden from the Gear layer
     (`gear-compat-overrides.css`). Every colour keeps its previous contrast against its background. Warning amber moved to a yellower
     gold so it stays distinct from the orange actions.
+  - On-screen wording, API messages and the printed cutter card and packing slip say MeshForge
+    instead of Gear Apps. Scan buttons use the orange action style.
   - Not recoloured: informational blue, success, danger, the Greenshed running-machines state
     colours, and colours set in TypeScript or with Tailwind utility classes.
 - **Lapping master data is in Admin.** The shared Admin screen (every app's `/admin`) now edits

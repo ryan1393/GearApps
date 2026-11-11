@@ -44,7 +44,7 @@ export class AppComponent {
     const cleanPath = url.split('?')[0].split('#')[0].replace(/\/$/, '') || '/';
     const exact = this.pageTitles.find(([route]) => route === cleanPath);
     const prefix = exact ?? this.pageTitles.find(([route]) => route !== '/' && cleanPath.startsWith(`${route}/`));
-    const page = prefix?.[1] ?? 'Gear Apps';
+    const page = prefix?.[1] ?? 'MeshForge';
     this.browserTitle.setTitle(`${page} | Greenshed`);
   }
 
