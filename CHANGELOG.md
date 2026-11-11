@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 70.6.0 (2026-11-11)
+
+MeshForge branding and Server Settings in Admin, Launch Setup and Coater RPA for going live,
+Lapper Read sending each cycle (with its cycle time) to Argonaut, and shelves that set their part
+type from the barcode and are picked for the tray automatically.
+
 - **Lapper Read: cycle time to Argonaut.** Each finished lapping cycle is timed from going into
   cycle to coming out of it (Y3.2), and the seconds are sent to Argonaut as `floatData[0]`, which
   was always 0. A cycle whose start or end was missed (collector down or restarting, controller

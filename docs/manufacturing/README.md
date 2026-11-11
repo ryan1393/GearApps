@@ -1,4 +1,4 @@
-# MeshForge 70.5.0
+# MeshForge 70.6.0
 
 MeshForge is the Dana manufacturing workspace for four workflows sharing one API and database:
 **Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root MeshForge Nx workspace. All frontends use
@@ -13,18 +13,31 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
 | Lapper | 4203 | `../apps/lapper-client` |
 | Shared API | 3333 | `../apps/server` (`/api/v1`, health at `/api/v1/health/ready`) |
 
+## What changed in 70.6.0
+
+- **Going live.** MeshForge branding, Server Settings in Admin, a Launch Setup tab (checklist,
+  bulk tags and opening inventory) and an Admin > Coater RPA tab.
+- **Lapper Read to Argonaut.** Each finished lapping cycle can be sent to Argonaut, per machine,
+  with its cycle time (seconds in cycle, Y3.2) as `floatData[0]`; a cycle whose start or end was
+  missed sends 0.
+- **Shelves.** A shelf barcode's R or P sets its part type (existing locations are corrected on
+  startup), and when exactly one shelf holds a tray's Summary and part type, Move Tray, Grinding
+  (rough shelf) and Receive Container select it for the operator.
+
+See [CHANGELOG.md](../../CHANGELOG.md).
+
 ## What changed in 70.5.0
 
 Lapper now shares the MeshForge shell, sign-in and Admin with the other apps, and gains
 Scanners, Macros, Fanuc Variables and Collector Tokens pages. A Python Lapper Read collector
 runs in Docker (`docker compose --profile collectors up -d --build lapper-read`) with one
-worker per saved machine. See [CHANGELOG.md](CHANGELOG.md).
+worker per saved machine. See [CHANGELOG.md](../../CHANGELOG.md).
 
 ## What changed in 70.4.1
 
 Label fixes from the first tags printed on a Zebra: a centred, wider barcode; an allowance for
 where that printer lands the tag; and a per-printer Move right / Move down adjustment in
-Admin > Label Printers for tags and cutter cards. See [CHANGELOG.md](CHANGELOG.md).
+Admin > Label Printers for tags and cutter cards. See [CHANGELOG.md](../../CHANGELOG.md).
 
 ## What changed in 70.4.0
 
@@ -124,7 +137,7 @@ Docker host behind your active **SSH Docker context** (`docker context use <name
    3. runs `docker compose build` and `up -d` (never `down`, never touches volumes); when the
       Lapper Read collector (`--profile collectors`) already has a container on the host, it is
       rebuilt and restarted with the release too (a host that never started it is left alone);
-   4. waits for every service and checks that the API reports `70.5.0`. Only then does the old
+   4. waits for every service and checks that the API reports `70.6.0`. Only then does the old
       release become `~/dana-apps.prev`. If the deploy fails, the last good release is protected
       (a retry discards the failed one) and `--rollback` brings it back.
 3. **Rollback:** `Deploy-MeshForge.cmd --rollback` swaps `~/dana-apps.prev` back in and restarts it.
