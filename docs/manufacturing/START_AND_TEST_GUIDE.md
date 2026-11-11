@@ -483,7 +483,7 @@ After the refresh completes, start the apps normally with `commands\START-MESHFO
 
 To start the floor over without reloading from SQL Server, close the running MeshForge API/server windows and run `commands\CLEAR-OPERATIONAL-DATA.cmd` from the project root. It first lists what will be emptied and kept, then requires the exact phrase `CLEAR DATA`.
 
-- **Emptied:** blades, trays, containers, **every location**, cutter builds with their events, checks, teardowns and machine runs, coater shipments and RPA requests, Greenshed shift counts, DSF run state and the Cancel Last journal.
+- **Emptied:** blades, trays, containers and the ground blade sets packed in them, **every location** (the `COATER-STAGING` location is recreated when the API next starts), cutter builds with their events, checks, teardowns and machine runs, coater shipments and RPA requests, Greenshed shift counts, DSF run state and the Cancel Last journal.
 - **Kept:** users, departments, models, parts, part summaries, blade requirements, cutter body definitions, cutter bodies, roll masters, gearsets, machines, lookup lists (part types, tray stages, statuses, event types, pull reasons, check results), server settings, label printers, Coater RPA setup, DSF machine mappings and all Lapper data.
 
 Only the listed tables are truncated, in one transaction and without `CASCADE`: if a kept table still pointed at an emptied one, PostgreSQL refuses and nothing is deleted. The command also stops, deleting nothing, if the API still has the tables in use. Row counts from just before the clear are written to `tools/manufacturing/data-import/work/pre-clear-operational-data-manifest.json` (counts only, not a backup).

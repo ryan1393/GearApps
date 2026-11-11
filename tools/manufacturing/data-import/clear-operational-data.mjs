@@ -1,9 +1,10 @@
 // Clears operational data from the MeshForge PostgreSQL database in .env and keeps
 // users and base data. Runs as a preview unless --apply is given.
 //
-// Emptied: blades, trays, containers, every location, cutter builds and their events,
-// checks, teardowns and machine runs, coater shipments, Greenshed/DSF counts and the
-// Cancel Last journal.
+// Emptied: blades, trays, containers and the blade sets packed in them, every location,
+// cutter builds and their events, checks, teardowns and machine runs, coater shipments,
+// Greenshed/DSF counts and the Cancel Last journal. The COATER-STAGING location is
+// recreated by the API the next time it starts.
 // Kept: users, departments, models, parts, part summaries, blade requirements, cutter
 // body definitions, cutter bodies, roll masters, gearsets, machines, lookup lists,
 // server settings, label printers, Coater RPA setup, DSF machine mappings and all Lapper data.
@@ -24,6 +25,9 @@ export const EMPTY = [
   'blades', 'blade_history', 'blade_tray',
   'trays', 'tray_grinding_runs', 'location_tray',
   'containers', 'container_tray',
+  // Ground blade sets packed into coater containers (they point at containers, blades,
+  // trays and locations, so they must be emptied with them)
+  'container_sets', 'container_set_blades',
   'locations', 'cutter_body_shelf_placements',
   // Cutter builds and everything that happened to them
   'cutter_builds', 'cutter_build_blades', 'cutter_build_trays', 'cutter_build_locations',

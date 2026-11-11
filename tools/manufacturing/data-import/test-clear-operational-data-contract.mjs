@@ -22,6 +22,33 @@ for (const table of ['locations', 'trays', 'containers', 'blades', 'cutter_build
 }
 const overlap = EMPTY.filter((table) => KEEP.includes(table));
 if (overlap.length) fail(`Tables on both lists: ${overlap.join(', ')}`);
+for (const table of ['container_sets', 'container_set_blades']) {
+  if (!EMPTY.includes(table)) fail(`${table} must be emptied with containers and blades`);
+}
+
+// Every public table the API creates must be on one of the lists. A table left off both
+// stays full; if it points at an emptied table, the TRUNCATE (no CASCADE) refuses and the
+// whole clear fails.
+function sourceFiles(dir) {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) return entry.name === 'node_modules' ? [] : sourceFiles(full);
+    return /\.ts$/.test(entry.name) && !/\.spec\.ts$/.test(entry.name) ? [full] : [];
+  });
+}
+const created = new Set();
+for (const file of ['libs', 'apps'].flatMap((dir) => sourceFiles(contractPath(process.cwd(), dir)))) {
+  const source = fs.readFileSync(file, 'utf8');
+  for (const [, name] of source.matchAll(/@Entity\(\s*(?:\{\s*name:\s*)?'([a-z0-9_]+)'/g)) created.add(name);
+  for (const [, schema, name] of source.matchAll(/CREATE TABLE (?:IF NOT EXISTS )?(?:"?([a-z0-9_]+)"?\.)?"?([a-z0-9_]+)"?\s*\(/gi)) {
+    if (!schema || schema === 'public') created.add(name);
+  }
+}
+for (const table of ['container_sets', 'locations', 'users']) {
+  if (!created.has(table)) fail(`Table scan did not find ${table}; the scan patterns are out of date`);
+}
+const unlisted = [...created].filter((table) => !EMPTY.includes(table) && !KEEP.includes(table)).sort();
+if (unlisted.length) fail(`Add these tables to EMPTY or KEEP in clear-operational-data.mjs: ${unlisted.join(', ')}`);
 
 // No CASCADE: a kept table that still references an emptied one must stop the run, not lose rows.
 if (/CASCADE/.test(script.replace(/\/\/.*$/gm, ''))) fail('The clear command must not truncate with CASCADE');
