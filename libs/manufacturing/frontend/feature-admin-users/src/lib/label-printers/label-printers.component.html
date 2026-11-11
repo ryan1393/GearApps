@@ -75,8 +75,8 @@
               </td>
               <td class="mono">{{ printer.host }}:{{ printer.port }}</td>
               <td>
-                <span class="gear-badge" *ngIf="printer.is_default">Default</span>
-                <span class="gear-badge" *ngIf="!printer.enabled">Off</span>
+                <span class="gear-badge" data-tone="info" *ngIf="printer.is_default">Default</span>
+                <span class="gear-badge" data-tone="danger" *ngIf="!printer.enabled">Off</span>
                 <span *ngIf="printer.enabled && !printer.is_default">Available</span>
               </td>
               <td><div class="label-printers-actions">

@@ -97,7 +97,7 @@
           <div class="gear-admin-actions gear-admin-record-actions">
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditUser(user)" data-icon="edit" title="Edit">Edit</button>
             <button *ngIf="!isSelf(user.id)" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleUserEnabled(user)">{{ user.active ? 'Disable' : 'Enable' }}</button>
-            <span *ngIf="isSelf(user.id)" class="gear-badge">You</span>
+            <span *ngIf="isSelf(user.id)" class="gear-badge" data-tone="info">You</span>
           </div>
         </div>
       </div>
@@ -149,7 +149,7 @@
         <div class="gear-admin-record-card-body">
           <div class="gear-admin-record-heading">
             <strong class="gear-admin-record-title">{{ summary.number }}</strong>
-            <span class="gear-badge">{{ summary.enabled && summary.active ? 'Active' : 'Inactive' }}</span>
+            <span class="gear-badge" [danaTone]="summary.enabled && summary.active ? 'Active' : 'Inactive'">{{ summary.enabled && summary.active ? 'Active' : 'Inactive' }}</span>
           </div>
           <div class="gear-admin-record-meta">
             <div class="gear-admin-record-field">
@@ -248,7 +248,7 @@
         <div class="gear-admin-record-card-body">
           <div class="gear-admin-record-heading">
             <strong class="gear-admin-record-title mono">{{ part.part_number }}</strong>
-            <span class="gear-badge">{{ part.enabled && part.active ? 'Active' : 'Inactive' }}</span>
+            <span class="gear-badge" [danaTone]="part.enabled && part.active ? 'Active' : 'Inactive'">{{ part.enabled && part.active ? 'Active' : 'Inactive' }}</span>
           </div>
           <div class="gear-admin-record-meta">
             <div class="gear-admin-record-field gear-admin-record-field-wide">
@@ -289,7 +289,7 @@
         <div class="gear-admin-record-card-body">
           <div class="gear-admin-record-heading">
             <strong class="gear-admin-record-title mono">{{ part.part_number }}</strong>
-            <span class="gear-badge">{{ rollMasterRecord(part) && !rollMasterRecord(part)?.enabled ? 'Disabled' : (rollMasterLow(part) ? 'LOW' : 'OK') }}</span>
+            <span class="gear-badge" [danaTone]="rollMasterRecord(part) && !rollMasterRecord(part)?.enabled ? 'Disabled' : (rollMasterLow(part) ? 'LOW' : 'OK')">{{ rollMasterRecord(part) && !rollMasterRecord(part)?.enabled ? 'Disabled' : (rollMasterLow(part) ? 'LOW' : 'OK') }}</span>
           </div>
           <div class="gear-admin-record-meta">
             <div class="gear-admin-record-field"><span class="gear-admin-record-label">Summary</span><span class="gear-admin-record-value">{{ part.summary?.number || '—' }}</span></div>
@@ -336,7 +336,7 @@
         <div class="gear-admin-record-card-body">
           <div class="gear-admin-record-heading">
             <strong class="gear-admin-record-title">{{ model.model_number ?? '—' }}</strong>
-            <span class="gear-badge">{{ model.enabled && model.active ? 'Active' : 'Inactive' }}</span>
+            <span class="gear-badge" [danaTone]="model.enabled && model.active ? 'Active' : 'Inactive'">{{ model.enabled && model.active ? 'Active' : 'Inactive' }}</span>
           </div>
           <div class="gear-admin-record-meta">
             <div class="gear-admin-record-field gear-admin-record-field-wide">
@@ -400,7 +400,7 @@
         <div class="gear-admin-record-card-body">
           <div class="gear-admin-record-heading">
             <strong class="gear-admin-record-title mono">{{ machine.machine_number }}</strong>
-            <span class="gear-badge">{{ machine.enabled && machine.active ? 'Active' : 'Inactive' }}</span>
+            <span class="gear-badge" [danaTone]="machine.enabled && machine.active ? 'Active' : 'Inactive'">{{ machine.enabled && machine.active ? 'Active' : 'Inactive' }}</span>
           </div>
           <div class="gear-admin-record-meta">
             <div class="gear-admin-record-field">
@@ -476,7 +476,7 @@
         <div class="gear-admin-record-card-body">
           <div class="gear-admin-record-heading">
             <strong class="gear-admin-record-title mono">{{ tray.serial_number }}</strong>
-            <span class="gear-badge">{{ tray.enabled ? 'Active' : 'Inactive' }}</span>
+            <span class="gear-badge" [danaTone]="tray.enabled ? 'Active' : 'Inactive'">{{ tray.enabled ? 'Active' : 'Inactive' }}</span>
           </div>
           <div class="gear-admin-record-meta">
             <div class="gear-admin-record-field">
@@ -569,7 +569,7 @@
         <div class="gear-admin-record-card-body">
           <div class="gear-admin-record-heading">
             <strong class="gear-admin-record-title mono">{{ container.serial_number }}</strong>
-            <span class="gear-badge">{{ container.enabled ? 'Active' : 'Inactive' }}</span>
+            <span class="gear-badge" [danaTone]="container.enabled ? 'Active' : 'Inactive'">{{ container.enabled ? 'Active' : 'Inactive' }}</span>
           </div>
           <div class="gear-admin-record-meta">
             <div class="gear-admin-record-field">
@@ -714,7 +714,7 @@
         <div class="gear-admin-record-card-body">
           <div class="gear-admin-record-heading">
             <strong class="gear-admin-record-title mono">{{ location.serial_number }}</strong>
-            <span class="gear-badge">{{ location.enabled ? 'Active' : 'Inactive' }}</span>
+            <span class="gear-badge" [danaTone]="location.enabled ? 'Active' : 'Inactive'">{{ location.enabled ? 'Active' : 'Inactive' }}</span>
           </div>
           <div class="gear-admin-record-meta">
             <div class="gear-admin-record-field">
@@ -794,7 +794,7 @@
         <div class="gear-admin-record-card-body">
           <div class="gear-admin-record-heading">
             <strong class="gear-admin-record-title mono">{{ body.dana_serial_number || body.mf_serial_number }}</strong>
-            <span class="gear-badge">{{ body.enabled ? 'Enabled' : 'Disabled' }}</span>
+            <span class="gear-badge" [danaTone]="body.enabled ? 'Enabled' : 'Disabled'">{{ body.enabled ? 'Enabled' : 'Disabled' }}</span>
           </div>
           <div class="gear-admin-record-meta">
             <div class="gear-admin-record-field">

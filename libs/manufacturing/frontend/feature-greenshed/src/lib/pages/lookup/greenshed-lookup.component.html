@@ -50,7 +50,7 @@
             <td>{{ r.cutter_body_serial_number }}</td>
             <td>{{ r.summary_number }}</td>
             <td>{{ r.part_type_code }}</td>
-            <td><span class="status-pill">{{ r.status_code }}</span></td>
+            <td><span class="status-pill" [danaTone]="r.status_code">{{ r.status_code }}</span></td>
             <td><button type="button" (click)="open(r.build_number)" class="gear-btn gear-btn-secondary gear-btn-sm" data-icon="view" title="View">View</button></td>
           </tr>
           <tr *ngIf="!busy && !rows.length"><td danaTableEmpty colspan="6" class="empty-row">No cutter builds match this search.</td></tr>
@@ -63,7 +63,7 @@
     <section class="gear-workflow-section">
       <div class="gear-workflow-section-header gear-workflow-status-row">
         <div><span class="gear-workflow-kicker">Build</span><h2 class="font-mono">{{ b.build_number }}</h2></div>
-        <span class="status-pill">{{ b.status_code }}</span>
+        <span class="status-pill" [danaTone]="b.status_code">{{ b.status_code }}</span>
       </div>
       <div class="gear-workflow-section-body">
         <div class="gear-workflow-detail-grid gear-workflow-detail-grid-four">

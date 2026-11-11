@@ -273,12 +273,19 @@
       </div>
     </section>
     <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header"><h2>Configured macro values</h2><p>All recorded variables, including macros added in Admin. Selecting a historical cycle shows only values from that cycle.</p></div>
+      <div class="gear-workflow-section-header gear-workflow-status-row">
+        <div><h2>Configured macro values</h2><p>All recorded variables, including macros added in Admin. Selecting a historical cycle shows only values from that cycle.</p></div>
+        @if (outOfLimit().length) {
+          <span class="dana-status-badge" data-tone="danger">{{ outOfLimit().length }} outside limits</span>
+        } @else if (limitedCount()) {
+          <span class="dana-status-badge" data-tone="success">All {{ limitedCount() }} limited values in range</span>
+        }
+      </div>
       <div class="gear-workflow-section-body">
         @for (group of configuredGroups(); track group[0]) {
           <h3>{{ group[0] || 'Other variables' }}</h3>
           <div class="gear-form-grid">
-            @for (row of group[1]; track row.id) { <gear-value-field [label]="'#' + row.number + ' · ' + row.name" [value]="row.value" /> }
+            @for (row of group[1]; track row.id) { <gear-value-field [label]="'#' + row.number + ' · ' + row.name" [value]="row.value" [unit]="row.unit ?? undefined" [alert]="limitAlert(row)" /> }
           </div>
         }
       </div>

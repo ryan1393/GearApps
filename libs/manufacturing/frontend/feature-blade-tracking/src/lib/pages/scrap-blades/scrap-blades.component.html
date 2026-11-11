@@ -70,7 +70,7 @@
             <tr [attr.data-dana-table-group]="'blade-' + blade.id">
               <td>
                 <strong class="mono">{{ blade.serial_number }}</strong>
-                <small><span class="scrap-status-pill">SCRAPPED</span></small>
+                <small><span class="status-pill" data-tone="danger">SCRAPPED</span></small>
               </td>
               <td>
                 <strong>{{ blade.summary?.number || '—' }}</strong>

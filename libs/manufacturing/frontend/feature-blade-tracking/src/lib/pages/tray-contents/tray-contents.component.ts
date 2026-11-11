@@ -17,12 +17,13 @@ import {
   DanaPageHeaderComponent,
   DanaTableDirective,
   DanaTableShellDirective,
+  DanaToneDirective,
 } from '@dana/ui';
 
 @Component({
   selector: 'gear-tray-contents',
   standalone: true,
-  imports: [GearLabelPrinterPickerComponent, CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
+  imports: [DanaToneDirective, GearLabelPrinterPickerComponent, CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
   templateUrl: './tray-contents.component.html',
 })
 export class TrayContentsComponent implements OnInit, OnDestroy {

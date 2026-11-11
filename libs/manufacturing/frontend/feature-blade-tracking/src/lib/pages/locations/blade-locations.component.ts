@@ -19,12 +19,13 @@ import {
   DanaTableDirective,
   DanaTableEmptyDirective,
   DanaTableShellDirective,
+  DanaToneDirective,
 } from '@dana/ui';
 
 @Component({
   selector: 'gear-blade-locations',
   standalone: true,
-  imports: [GearLabelPrinterPickerComponent, CommonModule, FormsModule, DanaSummaryGridDirective, DanaSummaryCardDirective, DanaPageHeaderComponent, DanaButtonDirective, DanaAlertDirective, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
+  imports: [DanaToneDirective, GearLabelPrinterPickerComponent, CommonModule, FormsModule, DanaSummaryGridDirective, DanaSummaryCardDirective, DanaPageHeaderComponent, DanaButtonDirective, DanaAlertDirective, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
   templateUrl: './blade-locations.component.html',
 })
 export class BladeLocationsComponent implements OnInit {

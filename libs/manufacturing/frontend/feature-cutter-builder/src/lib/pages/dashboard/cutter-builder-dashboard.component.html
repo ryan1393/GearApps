@@ -70,7 +70,7 @@
           <col class="cutter-col-date" />
         </colgroup>
         <thead><tr><th>Build</th><th>Body</th><th>Summary</th><th>Status</th><th>Built</th></tr></thead><tbody>
-        <tr *ngFor="let row of d.recent_builds"><td><a routerLink="/cutter-builder/lookup" [queryParams]="{ build: row.build_number }" class="build-link mono">{{ row.build_number }}</a></td><td>{{ row.cutter_body_serial_number }}</td><td>{{ row.summary_number }}</td><td><span danaStatusBadge class="status-pill">{{ row.status_code }}</span></td><td>{{ row.built_at | date:'MMM d, y' }}</td></tr>
+        <tr *ngFor="let row of d.recent_builds"><td><a routerLink="/cutter-builder/lookup" [queryParams]="{ build: row.build_number }" class="build-link mono">{{ row.build_number }}</a></td><td>{{ row.cutter_body_serial_number }}</td><td>{{ row.summary_number }}</td><td><span danaStatusBadge class="status-pill" [danaTone]="row.status_code">{{ row.status_code }}</span></td><td>{{ row.built_at | date:'MMM d, y' }}</td></tr>
         <tr *ngIf="d.recent_builds.length === 0"><td danaTableEmpty colspan="5" class="empty-row">No cutter builds yet.</td></tr>
       </tbody></table></div>
     </article>

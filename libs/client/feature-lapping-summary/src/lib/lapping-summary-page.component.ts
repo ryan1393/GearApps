@@ -36,7 +36,14 @@ import {
   StatusBadgeComponent,
   ValueFieldComponent,
 } from '@meshforge/client/ui';
-import { Gearset, LappingSummaryRow, Machine, MachineCycle } from '@meshforge/shared/domain';
+import {
+  Gearset,
+  LappingSummaryRow,
+  Machine,
+  MachineCycle,
+  macroLimitState,
+  macroLimitText,
+} from '@meshforge/shared/domain';
 import { catchError, forkJoin, map, of, shareReplay, switchMap } from 'rxjs';
 import {
   fieldValue,
@@ -106,6 +113,17 @@ export class LappingSummaryPageComponent implements OnInit {
   protected readonly visibleHistory = computed(() => this.history.value().filter(c =>
     !this.serialSearch().trim() || (c.serial_number ?? '').toLowerCase().includes(this.serialSearch().trim().toLowerCase())));
   protected readonly configuredGroups = computed(() => Array.from(this.byForm().entries()));
+  /** Recorded values checked against the limits set for their macro in Admin > Macros. */
+  protected readonly limitedCount = computed(
+    () => this.rows.value().filter((row) => macroLimitText(row) !== null).length,
+  );
+  protected readonly outOfLimit = computed(() =>
+    this.rows.value().filter((row) => macroLimitState(row.value, row) !== 'ok'),
+  );
+  protected limitAlert(row: LappingSummaryRow): string | null {
+    const state = macroLimitState(row.value, row);
+    return state === 'ok' ? null : `${state === 'low' ? 'Below' : 'Above'} limit of ${macroLimitText(row)}`;
+  }
   private requestVersion = 0;
   protected readonly cycle = signal<MachineCycle | null>(null);
   private readonly byForm = computed(() => groupByForm(this.rows.value()));

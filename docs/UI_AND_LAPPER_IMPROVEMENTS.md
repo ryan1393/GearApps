@@ -14,6 +14,18 @@ The Grinding Station keeps the scan box and current action prominent. Scrap defa
 
 The collector token handoff now explicitly applies its documented file permissions before atomic replacement, so restrictive host umasks do not prevent the separate collector container from reading the token. The Lapper development target now depends on the unified API's actual project name.
 
+## Follow-up fixes
+
+Status pills take their colour from one shared rule (`danaToneFor` in Dana UI), so Active and Inactive look the same on every screen, including the Admin record cards and Blade Tracking inventory. Feature screens no longer hard-code colours: component styles use the Dana tokens and the Tailwind colour classes are mapped to the same tokens (see [Frontend Architecture](manufacturing/FRONTEND.md)).
+
+A button or field inside a table cell now shrinks with its column, which removes the last sideways scroll (Inventory Control Center at tablet width). The Grinding Station numbers its scans 1, 2, 3.
+
+Lapper macros can carry a minimum, a maximum and a unit (Admin > Macros). Lapping Summaries flags recorded values outside their limits. The Cycle Test Lab checks test values against the same limits, shows each limit beside its field, and its history names the machine and gearset. The dashboard has a Production by Machine table (last hour, 24 hours, missing serials, last cycle, last gearset) with a link to that machine's cycle history.
+
+`GREENSHED_CHECK_INTERVAL` (default 25) is a server setting editable in Admin > Server Settings. `.env.example` is grouped into required values, API settings and Docker host settings; the unused `DANA_POSTGRES_USERNAME` and `DANA_POSTGRES_PASSWORD` are gone.
+
+A fresh installation now has the Lapping department (181), and the Lapper time zone is sent to PostgreSQL under its canonical name, so `America/Indianapolis` works on hosts whose PostgreSQL does not install the old alias names.
+
 ## Verification
 
 - Full `npm run build`: all current targets passed; the separate fresh-database bootstrap target also passed. Both an existing database upgrade and a newly bootstrapped PostgreSQL database contain the grinder attribution columns.

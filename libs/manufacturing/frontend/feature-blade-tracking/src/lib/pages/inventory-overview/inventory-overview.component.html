@@ -134,7 +134,7 @@
                 <small>{{ tray.part_type?.code || 'No Part Type' }}</small>
               </td>
               <td>
-                <span class="status-pill">{{ tray.current_stage?.name || tray.current_stage?.code || 'No Stage' }}</span>
+                <span class="status-pill" [danaTone]="tray.current_stage?.name || tray.current_stage?.code || 'No Stage'">{{ tray.current_stage?.name || tray.current_stage?.code || 'No Stage' }}</span>
               </td>
               <td>
                 <strong>{{ tray.blade_count }}</strong>
@@ -248,7 +248,7 @@
               <td class="mono strong">{{ container.serial_number }}</td>
               <td><strong>{{ container.tray_count }}</strong></td>
               <td><strong>{{ container.blade_count }}</strong></td>
-              <td><span class="gear-badge">{{ container.enabled ? 'Enabled' : 'Disabled' }}</span></td>
+              <td><span class="gear-badge" [danaTone]="container.enabled ? 'Enabled' : 'Disabled'">{{ container.enabled ? 'Enabled' : 'Disabled' }}</span></td>
               <td>
                 <button
                   type="button"
@@ -293,7 +293,7 @@
                           <strong class="mono">{{ tray.serial_number }}</strong>
                           <small>{{ tray.summary_number || 'No Summary' }} · {{ tray.part_type_code || 'No Part Type' }}</small>
                         </div>
-                        <span class="status-pill">{{ tray.stage_name || tray.stage_code || 'No Stage' }}</span>
+                        <span class="status-pill" [danaTone]="tray.stage_name || tray.stage_code || 'No Stage'">{{ tray.stage_name || tray.stage_code || 'No Stage' }}</span>
                       </div>
                       <div class="inventory-child-stats">
                         <span><strong>{{ tray.blade_count }}</strong> tracked count</span>
@@ -371,7 +371,7 @@
               </td>
               <td>{{ location.number }}</td>
               <td>{{ location.department || 'Shared / Internal' }}</td>
-              <td><span class="status-pill">{{ location.location_type }}</span></td>
+              <td><span class="status-pill" data-tone="neutral">{{ location.location_type }}</span></td>
               <td><strong>{{ location.tray_count }}</strong></td>
               <td><strong>{{ location.blade_count }}</strong></td>
               <td>
@@ -418,7 +418,7 @@
                           <strong class="mono">{{ tray.serial_number }}</strong>
                           <small>{{ tray.summary_number || 'No Summary' }} · {{ tray.part_type_code || 'No Part Type' }}</small>
                         </div>
-                        <span class="status-pill">{{ tray.stage_name || tray.stage_code || 'No Stage' }}</span>
+                        <span class="status-pill" [danaTone]="tray.stage_name || tray.stage_code || 'No Stage'">{{ tray.stage_name || tray.stage_code || 'No Stage' }}</span>
                       </div>
                       <div class="inventory-child-stats">
                         <span><strong>{{ tray.blade_count }}</strong> tracked count</span>
@@ -494,7 +494,7 @@
               <small *ngIf="blade.summary?.revision">Rev {{ blade.summary?.revision }}</small>
             </td>
             <td>{{ blade.part_type?.code || '—' }}</td>
-            <td><span class="status-pill">{{ blade.status }}</span></td>
+            <td><span class="status-pill" [danaTone]="blade.status">{{ blade.status }}</span></td>
             <td class="mono strong">{{ blade.current_tray?.serial_number || 'Not in tray' }}</td>
             <td>{{ blade.current_tray?.stage_name || blade.current_tray?.stage_code || '—' }}</td>
             <td>{{ blade.service_cycle }}</td>

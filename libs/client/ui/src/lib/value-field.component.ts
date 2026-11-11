@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
   imports: [DecimalPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="dana-detail" [class.is-compact]="compact()">
+    <div class="dana-detail" [class.is-compact]="compact()" [class.is-alert]="!!alert()">
       <span class="dana-detail-label">{{ label() }}</span>
       @switch (kind()) {
         @case ('flag') {
@@ -32,6 +32,9 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
           <span class="dana-detail-value" [class.gear-muted]="isEmpty()">{{ display() }}</span>
         }
       }
+      @if (alert()) {
+        <span class="dana-status-badge value-alert" data-tone="danger" role="status">{{ alert() }}</span>
+      }
     </div>
   `,
   styles: `
@@ -44,6 +47,13 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
     .dana-detail-value {
       font-variant-numeric: tabular-nums;
       overflow-wrap: anywhere;
+    }
+    .dana-detail.is-alert {
+      border-color: var(--dana-danger);
+      background: var(--dana-danger-soft);
+    }
+    .value-alert {
+      margin-top: 4px;
     }
     .dana-detail-value small {
       margin-left: 3px;
@@ -59,6 +69,8 @@ export class ValueFieldComponent {
   readonly unit = input<string>();
   readonly digits = input('1.0-3');
   readonly compact = input(false);
+  /** A short warning shown with the value, for example "Above limit of 2 to 5 mm". */
+  readonly alert = input<string | null>();
 
   readonly numeric = computed(() =>
     typeof this.value() === 'number' ? (this.value() as number) : null,

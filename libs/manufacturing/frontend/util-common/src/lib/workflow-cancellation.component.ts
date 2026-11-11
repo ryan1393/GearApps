@@ -20,7 +20,7 @@ interface CancellationView { latest: Operation | null; history: Operation[]; mes
   styles: [`
     :host{display:block}.cancel-content{max-width:64rem;margin:auto}
     .cancel-actions{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
-    .cancel-entry{padding:1rem 0;border-bottom:1px solid #cbd5e1;overflow-wrap:anywhere}
+    .cancel-entry{padding:1rem 0;border-bottom:1px solid var(--dana-control-border);overflow-wrap:anywhere}
     .cancel-entry p{margin:.35rem 0}.cancel-entry:last-child{border:0}
   `],
   template: `

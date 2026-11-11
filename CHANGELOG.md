@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- **Status pills are coloured the same everywhere.** Active and Enabled are green, Inactive and
+  Disabled red, waiting and review states amber, in-process states blue. Before, most Admin record
+  cards and the Blade Tracking inventory pills were plain grey. One rule in Dana UI (`danaTone`)
+  decides the colour.
+- **Lapper macro limits.** Admin > Macros has Minimum value, Maximum value and Unit for each macro
+  (migration `20261111-lapper-macro-limits-v1` adds the columns; all optional). Lapping Summaries
+  flags recorded values outside their limits. The Cycle Test Lab fails a test value outside them
+  and names the limit; its history shows machine and gearset numbers instead of IDs.
+- **Lapper dashboard: Production by Machine.** Cycles in the last hour and 24 hours, missing
+  serials, last cycle and last gearset for every lapper, with a link to its cycle history.
+  `GET /api/v1/machine-cycle/production` returns the new `machines` list; its other fields are
+  unchanged.
+- **Greenshed check interval is a setting.** `GREENSHED_CHECK_INTERVAL` (default 25, so nothing
+  changes until it is edited) in Admin > Server Settings > Greenshed quality checks.
+- **`.env.example` is reorganised** into required values, API settings and Docker host settings.
+  `DANA_POSTGRES_USERNAME` and `DANA_POSTGRES_PASSWORD` were never read and are removed; no other
+  key or default changed.
+- **No sideways scroll in Inventory Control Center** at tablet width, and the Grinding Station
+  numbers its scan steps 1, 2, 3.
+- **UI colours come from the Dana tokens.** Feature styles and the Tailwind colour classes now
+  resolve to `--dana-*` tokens instead of fixed colours.
+- **Fresh installs.** The base-data import adds the Lapping department (181) when it is missing.
+  The Lapper time zone is sent to PostgreSQL under its canonical name, so the default
+  `America/Indianapolis` also works where PostgreSQL has no alias zone names installed.
 - **The Windows Lapper Read collector is removed.** The .NET service in `apps/lapper-read`, its
   CI workflow and its version checks are gone. The Docker collector (`apps/lapper-read-py`) is
   the only collector; the API it posts to is unchanged.

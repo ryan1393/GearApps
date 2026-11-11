@@ -19,7 +19,7 @@
   <section *ngIf="tray as t" class="gear-panel inventory-result-card">
     <div class="inventory-result-header">
       <div>
-        <span class="gear-badge">TRAY</span>
+        <span class="gear-badge" data-tone="info">TRAY</span>
         <h3>{{ t.serial_number }}</h3>
         <p>{{ t.current_stage?.name || t.current_stage?.code || 'No stage assigned' }}</p>
       </div>
@@ -72,12 +72,12 @@
   <section *ngIf="container as c" class="gear-panel inventory-result-card">
     <div class="inventory-result-header">
       <div>
-        <span class="gear-badge">CONTAINER</span>
+        <span class="gear-badge" data-tone="info">CONTAINER</span>
         <h3>{{ c.serial_number }}</h3>
         <p>Reusable coating container</p>
       </div>
       <div class="inventory-count">
-        <span class="gear-badge">{{ c.enabled ? 'Enabled' : 'Disabled' }}</span>
+        <span class="gear-badge" [danaTone]="c.enabled ? 'Enabled' : 'Disabled'">{{ c.enabled ? 'Enabled' : 'Disabled' }}</span>
         <button type="button" class="gear-btn gear-btn-secondary" [disabled]="printingTagSerial === c.serial_number" (click)="printTag('CONTAINER', c.id, c.serial_number)" data-icon="print" title="Print tag">
           {{ printingTagSerial === c.serial_number ? 'Printing…' : 'Print Tag' }}
         </button>
@@ -110,7 +110,7 @@
               <tr *ngFor="let b of t.blades">
                 <td class="font-mono font-bold">{{ b.serial_number }}</td>
                 <td>{{ b.summary_number || '—' }} · {{ b.part_type_code || '—' }}</td>
-                <td><span class="status-pill">{{ b.status }}</span></td>
+                <td><span class="status-pill" [danaTone]="b.status">{{ b.status }}</span></td>
                 <td>{{ b.service_cycle }}</td>
               </tr>
             </tbody>
@@ -125,12 +125,12 @@
   <section *ngIf="location as l" class="gear-panel inventory-result-card">
     <div class="inventory-result-header">
       <div>
-        <span class="gear-badge">LOCATION</span>
+        <span class="gear-badge" data-tone="info">LOCATION</span>
         <h3>{{ l.serial_number }}</h3>
         <p>{{ l.description || 'Inventory location' }}</p>
       </div>
       <div class="inventory-count">
-        <span class="gear-badge">{{ l.location_type }}</span>
+        <span class="gear-badge" data-tone="neutral">{{ l.location_type }}</span>
         <button type="button" class="gear-btn gear-btn-secondary" [disabled]="printingTagSerial === l.serial_number" (click)="printTag('LOCATION', l.id, l.serial_number)" data-icon="print" title="Print tag">
           {{ printingTagSerial === l.serial_number ? 'Printing…' : 'Print Tag' }}
         </button>

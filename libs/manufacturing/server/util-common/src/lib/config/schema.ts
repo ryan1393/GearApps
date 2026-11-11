@@ -183,6 +183,9 @@ export const validationSchema = Joi.object({
   SEED_ADMIN_PASSWORD: Joi.string().min(12).optional(),
   SEED_USER_PASSWORD: Joi.string().min(12).optional(),
 
+  // Pieces a Greenshed machine cuts between required quality checks.
+  GREENSHED_CHECK_INTERVAL: Joi.number().integer().min(1).max(10000).default(25),
+
   // Lapper and scanner configuration belongs to this same API environment.
   LAPPER_TIME_ZONE: Joi.string().default('America/Indianapolis').custom((value, helpers) => {
     try { new Intl.DateTimeFormat('en', { timeZone: value }).format(); return value; }

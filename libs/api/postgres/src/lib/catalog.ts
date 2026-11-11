@@ -17,6 +17,16 @@ export type Resource =
   | 'toc'
   | 'gearset-marriage';
 export const text = (value: unknown): string => (value == null ? '' : String(value));
+/**
+ * PostgreSQL only knows the old alias zone names when its host installs them (Ubuntu 24.04
+ * and later do not), and then every cycle insert fails. The canonical name works everywhere.
+ */
+const ZONE_ALIASES: Record<string, string> = {
+  'America/Indianapolis': 'America/Indiana/Indianapolis',
+  'America/Fort_Wayne': 'America/Indiana/Indianapolis',
+  'US/East-Indiana': 'America/Indiana/Indianapolis',
+};
+export const canonicalTimeZone = (zone: string): string => ZONE_ALIASES[zone] ?? zone;
 export const numberOrNull = (value: unknown): number | null =>
   value == null ? null : Number(value);
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -41,7 +51,9 @@ export class PostgresLapperCatalog {
     readonly db: DataSource,
     config: ConfigService,
   ) {
-    this.timeZone = config.get<string>('db.lapperTimeZone') ?? 'America/Indianapolis';
+    this.timeZone = canonicalTimeZone(
+      config.get<string>('db.lapperTimeZone') ?? 'America/Indianapolis',
+    );
   }
 
   async departments(manager = this.db.manager): Promise<Row[]> {
@@ -256,12 +268,18 @@ export class PostgresLapperCatalog {
   }
 
   async macros(manager = this.db.manager): Promise<Row[]> {
-    return manager
+    const rows = await manager
       .createQueryBuilder()
       .select('m.*')
       .from('lapper.macros', 'm')
       .orderBy('m.number')
       .getRawMany<Row>();
+    // PostgreSQL returns numeric columns as text.
+    return rows.map((m) => ({
+      ...m,
+      min_value: numberOrNull(m.min_value),
+      max_value: numberOrNull(m.max_value),
+    }));
   }
 
   private cycleQuery(
@@ -304,7 +322,30 @@ export class PostgresLapperCatalog {
       COUNT(*) FILTER (WHERE occurred_at >= now() - interval '24 hours' AND NULLIF(BTRIM(serial_number), '') IS NULL)::integer AS missing_serial_24h,
       MAX(occurred_at) AS last_cycle_at
       FROM (SELECT machine_id, serial_number, COALESCE(recorded_at, timestamp AT TIME ZONE $1) AS occurred_at FROM lapper.machine_cycles) cycles`, [this.timeZone]);
-    return row;
+    // Every lapper, busiest first, so an idle or untraceable machine stands out.
+    const machines = await this.db.query(`SELECT
+      lm.public_machine_id AS machine_id,
+      COALESCE(NULLIF(BTRIM(pm.machine_number), ''), NULLIF(BTRIM(lm.number), ''), lm.machine_ip) AS number,
+      lm.cell, lm.status,
+      COALESCE(p.cycles_1h, 0)::integer AS cycles_1h,
+      COALESCE(p.cycles_24h, 0)::integer AS cycles_24h,
+      COALESCE(p.missing_serial_24h, 0)::integer AS missing_serial_24h,
+      p.last_cycle_at, p.last_gearset_id, p.last_gearset, p.last_serial_number
+      FROM lapper.machines lm
+      JOIN public.machines pm ON pm.id = lm.public_machine_id
+      LEFT JOIN (SELECT c.machine_id,
+        COUNT(*) FILTER (WHERE c.occurred_at >= now() - interval '1 hour') AS cycles_1h,
+        COUNT(*) FILTER (WHERE c.occurred_at >= now() - interval '24 hours') AS cycles_24h,
+        COUNT(*) FILTER (WHERE c.occurred_at >= now() - interval '24 hours' AND NULLIF(BTRIM(c.serial_number), '') IS NULL) AS missing_serial_24h,
+        MAX(c.occurred_at) AS last_cycle_at,
+        (ARRAY_AGG(COALESCE(g.public_gearset_id, g.id) ORDER BY c.occurred_at DESC, c.id DESC) FILTER (WHERE c.occurred_at >= now() - interval '24 hours'))[1] AS last_gearset_id,
+        (ARRAY_AGG(g.number ORDER BY c.occurred_at DESC, c.id DESC) FILTER (WHERE c.occurred_at >= now() - interval '24 hours'))[1] AS last_gearset,
+        (ARRAY_AGG(c.serial_number ORDER BY c.occurred_at DESC, c.id DESC) FILTER (WHERE c.occurred_at >= now() - interval '24 hours'))[1] AS last_serial_number
+        FROM (SELECT id, machine_id, gearset_id, serial_number, COALESCE(recorded_at, timestamp AT TIME ZONE $1) AS occurred_at FROM lapper.machine_cycles) c
+        JOIN lapper.gearsets g ON g.id = c.gearset_id
+        GROUP BY c.machine_id) p ON p.machine_id = lm.id
+      ORDER BY COALESCE(p.cycles_24h, 0) DESC, 2`, [this.timeZone]);
+    return { ...row, machines };
   }
 
   async cycles(
@@ -378,6 +419,9 @@ export class PostgresLapperCatalog {
       .addSelect('m.used_form', 'used_form')
       .addSelect('m.l60_table', 'l60_table')
       .addSelect('m.extra', 'extra')
+      .addSelect('m.min_value', 'min_value')
+      .addSelect('m.max_value', 'max_value')
+      .addSelect('m.unit', 'unit')
       .addSelect('l.value', 'value')
       .addSelect(
         'ROW_NUMBER() OVER (PARTITION BY m.id ORDER BY COALESCE(c.recorded_at,c.timestamp AT TIME ZONE :zone) DESC,c.id DESC,l.id DESC)',
@@ -403,7 +447,12 @@ export class PostgresLapperCatalog {
       .setParameters(ranked.getParameters())
       .getRawMany<Row>();
     return rows.map((row) => {
-      const result: Row = { ...row, value: Number(row.value) };
+      const result: Row = {
+        ...row,
+        value: Number(row.value),
+        min_value: numberOrNull(row.min_value),
+        max_value: numberOrNull(row.max_value),
+      };
       delete result.rn;
       return result;
     });

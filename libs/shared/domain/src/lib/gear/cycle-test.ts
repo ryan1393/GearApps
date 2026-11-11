@@ -9,5 +9,14 @@ export interface CycleTestRun extends CycleTestInput {
   created_at: string;
   created_by: string;
   kind: 'SIMULATION';
-  result: { passed: boolean; issues: string[]; macros: { number: number; name: string; type: string; value: number | null }[] };
+  result: { passed: boolean; issues: string[]; macros: {
+      number: number;
+      name: string;
+      type: string;
+      value: number | null;
+      min_value?: number | null;
+      max_value?: number | null;
+      unit?: string | null;
+    }[];
+  };
 }

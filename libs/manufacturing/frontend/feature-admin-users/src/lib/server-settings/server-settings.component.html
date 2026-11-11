@@ -53,7 +53,7 @@
             <ng-container *ngIf="setting.editable">
               <ng-container *ngIf="setting.secret; else plainControl">
                 <div *ngIf="!isReplacing(setting)" class="server-settings-inline">
-                  <span class="gear-badge">{{ setting.is_set ? 'Set' : 'Not set' }}</span>
+                  <span class="gear-badge" [danaTone]="setting.is_set ? 'Set' : 'Not set'">{{ setting.is_set ? 'Set' : 'Not set' }}</span>
                   <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" [id]="'setting-' + setting.key" (click)="startReplacing(setting)" [disabled]="isResetting(setting) || !current.available">{{ setting.is_set ? 'Replace' : 'Set' }}</button>
                 </div>
                 <div *ngIf="isReplacing(setting)" class="server-settings-inline">
@@ -83,15 +83,15 @@
 
           <div class="server-settings-state">
             <ng-container *ngIf="setting.editable">
-              <span class="gear-badge">{{ setting.source === 'ADMIN' ? 'Saved here' : 'Server value' }}</span>
-              <span *ngIf="setting.pending" class="gear-badge server-settings-waiting">Restart needed</span>
+              <span class="gear-badge" [attr.data-tone]="setting.source === 'ADMIN' ? 'info' : 'neutral'">{{ setting.source === 'ADMIN' ? 'Saved here' : 'Server value' }}</span>
+              <span *ngIf="setting.pending" class="gear-badge" data-tone="warning">Restart needed</span>
               <span *ngIf="setting.unreadable" class="server-settings-problem">The saved value can no longer be read. Enter it again.</span>
               <ng-container *ngIf="setting.source === 'ADMIN'">
                 <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="toggleReset(setting)" [disabled]="!current.available">{{ isResetting(setting) ? 'Keep Saved Value' : 'Use Server Value' }}</button>
                 <span class="server-settings-help">{{ isResetting(setting) ? 'Will go back to' : 'Server value' }}: {{ environmentText(setting) }}</span>
               </ng-container>
             </ng-container>
-            <span *ngIf="!setting.editable" class="gear-badge">Locked</span>
+            <span *ngIf="!setting.editable" class="gear-badge" data-tone="neutral">Locked</span>
           </div>
         </div>
       </fieldset>

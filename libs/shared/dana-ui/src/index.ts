@@ -16,6 +16,8 @@ export { DanaTableShellDirective } from './lib/components/data/dana-table-shell.
 export { DanaTableDirective } from './lib/components/data/dana-table.directive';
 export { DanaCountBadgeDirective } from './lib/components/data/dana-count-badge.directive';
 export { DanaStatusBadgeDirective } from './lib/components/data/dana-status-badge.directive';
+export { DanaToneDirective, danaToneFor } from './lib/components/data/dana-tone.directive';
+export type { DanaTone } from './lib/components/data/dana-tone.directive';
 export { DanaLoadingStateDirective } from './lib/components/feedback/dana-loading-state.directive';
 export { DanaEmptyStateDirective } from './lib/components/feedback/dana-empty-state.directive';
 export { DanaTableEmptyDirective } from './lib/components/feedback/dana-table-empty.directive';

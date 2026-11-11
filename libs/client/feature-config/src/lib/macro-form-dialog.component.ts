@@ -75,6 +75,27 @@ import { MACRO_FORM_OPTIONS, MACRO_STATUS_OPTIONS, MACRO_TYPES } from './options
           L60 table
           <input class="gear-input" formControlName="l60_table" placeholder="L60" />
         </label>
+        <label class="gear-field">
+          Minimum value
+          <input class="gear-input" type="number" step="any" formControlName="min_value" placeholder="No lower limit" />
+        </label>
+        <label class="gear-field">
+          Maximum value
+          <input class="gear-input" type="number" step="any" formControlName="max_value" placeholder="No upper limit" />
+        </label>
+        <label class="gear-field dana-field-full">
+          Unit
+          <input class="gear-input" formControlName="unit" maxlength="24" placeholder="mm, rpm, s…" />
+          <small class="gear-field-help"
+            >Limits are optional. A recorded or test value outside them is flagged on the lapping
+            summary and fails in the Cycle Test Lab.</small
+          >
+          @if (rangeInvalid()) {
+            <small class="gear-field-help" role="alert"
+              >The minimum cannot be greater than the maximum.</small
+            >
+          }
+        </label>
         <label class="gear-field dana-field-full">
           Extra
           <input
@@ -99,7 +120,7 @@ import { MACRO_FORM_OPTIONS, MACRO_STATUS_OPTIONS, MACRO_TYPES } from './options
           type="submit"
           form="macroForm"
           class="gear-btn gear-btn-primary"
-          [disabled]="form.invalid || busy()"
+          [disabled]="form.invalid || rangeInvalid() || busy()"
         >
           {{ busy() ? 'Saving…' : macro() ? 'Save changes' : 'Add macro' }}
         </button>
@@ -134,6 +155,9 @@ export class MacroFormDialogComponent {
     type: new FormControl('real', { nonNullable: true, validators: [Validators.required] }),
     l60_table: new FormControl('L60', { nonNullable: true, validators: [Validators.required] }),
     extra: new FormControl<string | null>(null),
+    min_value: new FormControl<number | null>(null),
+    max_value: new FormControl<number | null>(null),
+    unit: new FormControl<string | null>(null),
     status: new FormControl<number>(1, { nonNullable: true }),
   });
 
@@ -162,9 +186,19 @@ export class MacroFormDialogComponent {
     return c.invalid && (c.touched || c.dirty);
   }
 
+  private static limit(value: unknown): number | null {
+    return value === null || value === undefined || value === '' ? null : Number(value);
+  }
+
+  protected rangeInvalid(): boolean {
+    const min = MacroFormDialogComponent.limit(this.form.controls.min_value.value);
+    const max = MacroFormDialogComponent.limit(this.form.controls.max_value.value);
+    return min !== null && max !== null && min > max;
+  }
+
   protected save() {
     if (this.busy()) return;
-    if (this.form.invalid) {
+    if (this.form.invalid || this.rangeInvalid()) {
       this.form.markAllAsTouched();
       return;
     }
@@ -178,6 +212,9 @@ export class MacroFormDialogComponent {
       tab_index:
         v.tab_index === null || (v.tab_index as unknown) === '' ? null : Number(v.tab_index),
       extra: v.extra?.trim() ? v.extra.trim() : null,
+      min_value: MacroFormDialogComponent.limit(v.min_value),
+      max_value: MacroFormDialogComponent.limit(v.max_value),
+      unit: v.unit?.trim() ? v.unit.trim() : null,
     };
     const existing = this.macro();
     const req = existing ? this.api.update(existing.id, body) : this.api.create(body);

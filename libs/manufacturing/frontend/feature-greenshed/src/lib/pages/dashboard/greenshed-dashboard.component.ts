@@ -19,11 +19,12 @@ import {
   DanaStatusBadgeDirective,
   DanaTableDirective,
   DanaTableEmptyDirective,
-  DanaTableShellDirective
+  DanaTableShellDirective,
+  DanaToneDirective,
 } from '@dana/ui';
 @Component({
   selector:'gear-greenshed-dashboard', standalone:true,
-  imports: [
+  imports: [DanaToneDirective, 
     CommonModule,
     RouterLink,
     DanaKpiGridDirective,

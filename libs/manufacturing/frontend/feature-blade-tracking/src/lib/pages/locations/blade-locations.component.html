@@ -91,7 +91,7 @@
                 <small>{{ readable(location.location_type) }}</small>
               </td>
               <td>
-                <span class="status-pill" [class.status-pill-muted]="!location.enabled">
+                <span class="status-pill" [danaTone]="location.enabled">
                   {{ location.enabled ? 'ACTIVE' : 'INACTIVE' }}
                 </span>
                 <small *ngIf="isGreenshedCutterShelf(location)" class="blade-location-cutter-note">
@@ -144,7 +144,7 @@
                           <strong class="mono">{{ tray.serial_number }}</strong>
                           <small>{{ tray.summary_number || 'No Summary' }} · {{ tray.part_type_code || 'No Part Type' }}</small>
                         </div>
-                        <span class="status-pill">{{ readable(tray.stage_name || tray.stage_code) }}</span>
+                        <span class="status-pill" [danaTone]="readable(tray.stage_name || tray.stage_code)">{{ readable(tray.stage_name || tray.stage_code) }}</span>
                       </div>
 
                       <div class="blade-location-tray-stats">

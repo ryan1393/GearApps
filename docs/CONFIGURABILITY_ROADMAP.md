@@ -1,6 +1,17 @@
 # Configuration across all four apps
 
-Status: recommended scope, not implemented by this PR. Existing machine, Lapper macro, scanner, DSF mapping and server settings remain editable in Admin. A shared engine for custom workflow steps, calculated variables and business rules still needs implementation.
+Status: partly implemented. Existing machine, Lapper macro, scanner, DSF mapping and server settings are editable in Admin. A shared engine for custom workflow steps, calculated variables and business rules still needs implementation.
+
+## Configurable today
+
+| What | Where an administrator changes it | Effect |
+|---|---|---|
+| Lapper macros | Admin > Macros | A macro added here is read by the collector, shown on Lapping Summaries and offered in the Cycle Test Lab. No code change. |
+| Macro limits and units | Admin > Macros (Minimum value, Maximum value, Unit) | A recorded value outside its limits is flagged on Lapping Summaries. A test value outside them fails in the Cycle Test Lab, with the limit named. |
+| Greenshed check interval | Admin > Server Settings > Greenshed quality checks (`GREENSHED_CHECK_INTERVAL`, default 25) | The API, dashboard and workstation use the one value after the API restarts. It is one interval for every machine, not yet one per machine. |
+| Machines, grinders, scanners, DSF mappings, printers, server settings | Their Admin tabs | As before. |
+
+The rest of this page is still planned work.
 
 ## Recommended controls
 

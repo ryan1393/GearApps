@@ -1694,6 +1694,8 @@ html body .gear-page :is(.table-wrap, .gear-table-wrap, .dana-table-shell, [dana
 html body .gear-page table[danaTable] { width: 100%; min-width: 0 !important; table-layout: fixed; }
 html body .gear-page table[danaTable] :is(th, td) { white-space: normal !important; overflow-wrap: anywhere; min-width: 0; }
 html body .gear-page table[danaTable] :is(.gear-actions, .gear-admin-actions) { flex-wrap: wrap; }
+/* A button or field in a cell shrinks with its column instead of pushing the table sideways. */
+html body .gear-page table[danaTable] td :is(button, .gear-btn, input, select) { min-width: 0; max-width: 100%; white-space: normal; }
 @media screen and (max-width: 900px) {
   html body .gear-page table[danaTable] { display: block; }
   html body .gear-page table[danaTable] thead { display: block; }
@@ -1709,7 +1711,12 @@ html body .gear-page table[danaTable] :is(.gear-actions, .gear-admin-actions) { 
 
 html body :is(.gear-sidebar, .gear-topbar, .gear-page, .app-content-shell, .login-page), html body .gear-page .gear-page-title, html body .dashboard-page .dashboard-heading h1 { font-family: var(--dana-font-sans) !important; }
 
-.gear-admin-sections { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: .75rem; margin-bottom: 1rem; }
-.gear-admin-section { padding: 1rem; border: 1px solid var(--dana-border); background: var(--dana-surface); border-radius: var(--dana-radius-md); min-width: 0; }
-.gear-admin-section h2 { margin: 0 0 .5rem; font-size: .875rem; color: var(--dana-muted); }
-.gear-admin-section .gear-admin-tabs { display: flex; flex-wrap: wrap; overflow: visible; margin: 0; }
+.gear-admin-sections { display: grid; margin-bottom: 1rem; padding: .25rem 1rem; border: 1px solid var(--dana-border); background: var(--dana-surface); border-radius: var(--dana-radius-md); }
+.gear-admin-section { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); align-items: center; gap: .75rem; padding: .4rem 0; border-bottom: 1px solid var(--dana-border); min-width: 0; }
+.gear-admin-section:last-child { border-bottom: 0; }
+.gear-admin-section h2 { margin: 0; font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--dana-muted); }
+@media screen and (max-width: 600px) {
+  .gear-admin-section { grid-template-columns: minmax(0, 1fr); gap: .25rem; }
+}
+/* Inside a section row the tabs are a plain wrapped list: no strip border or background. */
+html body .gear-page.gear-admin-page .gear-admin-section .gear-admin-tabs { display: flex; flex-wrap: wrap; gap: .25rem; overflow: visible; margin: 0 !important; padding: 0 !important; border: 0; background: none; box-shadow: none; }

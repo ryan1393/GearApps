@@ -17,12 +17,13 @@ import {
   DanaTableDirective,
   DanaTableEmptyDirective,
   DanaTableShellDirective,
+  DanaToneDirective,
 } from '@dana/ui';
 
 @Component({
   selector: 'gear-cutter-lookup',
   standalone: true,
-  imports: [CommonModule, GearScannerFocusDirective, GearLabelPrinterPickerComponent, FormsModule, DanaPageHeaderComponent, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
+  imports: [DanaToneDirective, CommonModule, GearScannerFocusDirective, GearLabelPrinterPickerComponent, FormsModule, DanaPageHeaderComponent, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
   templateUrl: './cutter-lookup.component.html',
 })
 export class CutterLookupComponent implements OnInit, OnDestroy {
