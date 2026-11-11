@@ -48,9 +48,9 @@ Every screen with a Print Tag or Print Cutter Card button shows **Print tags to*
 
 ## Label languages
 
-Tags and cards are generated in the language of the printer they are sent to. The cutter card in IPL is the supplied `CutterLabel_FILLED.prn` template; the ZPL card is the same card rebuilt element for element. Tag layout is described in [ASSET-TAG-IPL.md](ASSET-TAG-IPL.md).
+Tags and cards are generated in the language of the printer they are sent to. The cutter card has one layout for both languages (`cutter-card-layout.ts`), the same card as the PNG preview: the build ID barcode and number, then Cutter Body, Summary, Part Type, Blade Qty, Source Tray, Status, Built By, Machine, Honed, Coated, the build time and comments. The IPL card keeps the printer setup of the supplied `CutterLabel_FILLED.prn`; its old hand-filled DATE / MACHINE / PIECES table is no longer printed. Tag layout is described in [ASSET-TAG-IPL.md](ASSET-TAG-IPL.md).
 
-What has been confirmed on a real printer: a Zebra printed the ZPL tag at the right scale with a readable barcode and text, which is what the current position allowance was measured from. Not yet confirmed on a printer: the re-centred ZPL tag layout, the ZPL cutter card, and the corrected IPL tag layout. Check the first label of each kind.
+What has been confirmed on a real printer: a Zebra printed the ZPL tag at the right scale with a readable barcode and text, which is what the current position allowance was measured from. Not yet confirmed on a printer: the re-centred ZPL tag layout, the cutter card layout in either language, and the corrected IPL tag layout. Check the first label of each kind.
 
 ## Storage
 

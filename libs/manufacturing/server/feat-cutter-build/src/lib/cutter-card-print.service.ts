@@ -30,6 +30,12 @@ export class CutterCardPrintService {
               machine: card.machine_number,
               coated: card.coated,
               honed: card.honed,
+              summary: card.summary_number,
+              partType: card.part_type_code,
+              bladeCount: card.blade_count,
+              sourceTray: card.source_tray_serial_number,
+              status: card.status_code,
+              comments: card.comments,
             },
             adjustment,
           )
