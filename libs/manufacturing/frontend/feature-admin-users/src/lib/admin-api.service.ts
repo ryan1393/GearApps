@@ -60,7 +60,7 @@ export interface AdminUser {
 
 export interface ModelRow {
   id: string;
-  model_number: number | null;
+  model_number: string | null;
   model_type: string | null;
   active: boolean;
   enabled: boolean;
@@ -265,14 +265,14 @@ export class AdminApiService {
   }
 
   createModel(input: {
-    model_number: number | null;
+    model_number: string | null;
     model_type: string | null;
     active: boolean;
   }) {
     return this.http.post<ModelRow>('/api/v1/admin/master-data/models', input);
   }
 
-  updateModel(id: string, input: Partial<{ model_number: number | null; model_type: string | null; active: boolean; enabled: boolean }>) {
+  updateModel(id: string, input: Partial<{ model_number: string | null; model_type: string | null; active: boolean; enabled: boolean }>) {
     return this.http.patch<ModelRow>(`/api/v1/admin/master-data/models/${encodeURIComponent(id)}`, input);
   }
 

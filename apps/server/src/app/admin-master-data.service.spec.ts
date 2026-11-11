@@ -88,11 +88,10 @@ describe('AdminMasterDataService running-machine protection', () => {
 });
 
 describe('AdminMasterDataService duplicate models', () => {
-  function setup(existing: Array<{ id: string; model_number: number | null; model_type: string | null }>) {
+  function setup(existing: Array<{ id: string; model_number: string | null; model_type: string | null }>) {
     const saved: unknown[] = [];
     const repo = {
-      find: jest.fn(async ({ where }: { where: { model_number: unknown } }) =>
-        existing.filter((model) => (typeof where.model_number === 'number' ? model.model_number === where.model_number : model.model_number === null))),
+      find: jest.fn(async () => existing),
       findOne: jest.fn(async ({ where }: { where: { id: string } }) => existing.find((model) => model.id === where.id) ?? null),
       create: (value: unknown) => value,
       save: jest.fn(async (value: unknown) => { saved.push(value); return value; }),
@@ -103,19 +102,37 @@ describe('AdminMasterDataService duplicate models', () => {
   const user = 'user-id' as never;
 
   it('treats the same number and type as one model whatever the case or spacing', async () => {
-    const { service, saved } = setup([{ id: 'a', model_number: 174, model_type: '2G' }, { id: 'b', model_number: 999, model_type: null }]);
-    await expect(service.createModel({ model_number: 174, model_type: ' 2g ' } as never, user)).rejects.toThrow(ConflictException);
-    await expect(service.createModel({ model_number: 999 } as never, user)).rejects.toThrow('Model 999 already exists');
+    const { service, saved } = setup([{ id: 'a', model_number: '174', model_type: '2G' }, { id: 'b', model_number: '999', model_type: null }]);
+    await expect(service.createModel({ model_number: '174', model_type: ' 2g ' } as never, user)).rejects.toThrow(ConflictException);
+    await expect(service.createModel({ model_number: '999' } as never, user)).rejects.toThrow('Model 999 already exists');
     expect(saved).toHaveLength(0);
-    await service.createModel({ model_number: 174, model_type: '3G' } as never, user);
+    await service.createModel({ model_number: '174', model_type: '3G' } as never, user);
     expect(saved).toHaveLength(1);
   });
 
+  it('stores text model numbers trimmed and compares them without case', async () => {
+    const { service, saved } = setup([{ id: 'a', model_number: 'S-110', model_type: null }]);
+    await expect(service.createModel({ model_number: ' s-110 ' } as never, user)).rejects.toThrow(ConflictException);
+    await service.createModel({ model_number: ' S-130 ' } as never, user);
+    expect(saved).toEqual([expect.objectContaining({ model_number: 'S-130', model_type: null })]);
+  });
+
   it('does not let an edit turn one model into a copy of another', async () => {
-    const { service, saved } = setup([{ id: 'a', model_number: 174, model_type: '2G' }, { id: 'b', model_number: 174, model_type: '3G' }]);
+    const { service, saved } = setup([{ id: 'a', model_number: '174', model_type: '2G' }, { id: 'b', model_number: '174', model_type: '3G' }]);
     await expect(service.updateModel('b' as never, { model_type: '2g' } as never, user)).rejects.toThrow(ConflictException);
     await service.updateModel('b' as never, { model_type: '3G' } as never, user); // unchanged is not a duplicate of itself
     expect(saved).toHaveLength(1);
   });
-});
 
+  it('lists model numbers in natural order with blank numbers last', async () => {
+    const { service } = setup([
+      { id: '1', model_number: '1000', model_type: null },
+      { id: '2', model_number: null, model_type: '9¼' },
+      { id: '3', model_number: 'S-110', model_type: null },
+      { id: '4', model_number: '110', model_type: null },
+      { id: '5', model_number: '9', model_type: null },
+    ]);
+    const models = await service.listModels();
+    expect(models.map((model) => model.model_number ?? model.model_type)).toEqual(['9', '110', '1000', 'S-110', '9¼']);
+  });
+});

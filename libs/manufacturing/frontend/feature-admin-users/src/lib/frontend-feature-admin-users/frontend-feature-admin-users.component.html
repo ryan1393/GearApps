@@ -160,7 +160,7 @@
             </div>
             <div class="gear-admin-record-field">
               <span class="gear-admin-record-label">Model</span>
-              <span class="gear-admin-record-value">{{ summaryModel(summary)?.model_number || '—' }}</span>
+              <span class="gear-admin-record-value">{{ modelLabel(summaryModel(summary)) }}</span>
             </div>
             <div class="gear-admin-record-field gear-admin-record-field-wide">
               <span class="gear-admin-record-label">HOS</span>
@@ -334,7 +334,7 @@
   <div class="gear-admin-layout" *ngIf="activeTab === 'models'">
     <form class="gear-panel gear-admin-form" (ngSubmit)="createModel()">
       <div class="gear-step-title"><span class="gear-step-number">1</span><span>Create Model</span></div>
-      <label class="gear-field">Model Number<input class="gear-input" type="number" [(ngModel)]="modelForm.model_number" name="modelNumber" /></label>
+      <label class="gear-field">Model Number<input class="gear-input" [(ngModel)]="modelForm.model_number" name="modelNumber" maxlength="100" placeholder="e.g. 174 or S-110" /></label>
       <label class="gear-field">Model Type<input class="gear-input" [(ngModel)]="modelForm.model_type" name="modelType" placeholder="Optional type / family" /></label>
       <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">Create Model</button>
     </form>
@@ -357,7 +357,7 @@
       <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="model-v20" *ngFor="let model of filteredModels">
         <div class="gear-admin-record-card-body">
           <div class="gear-admin-record-heading">
-            <strong class="gear-admin-record-title">{{ model.model_number ?? '—' }}</strong>
+            <strong class="gear-admin-record-title">{{ modelLabel(model) }}</strong>
             <span class="gear-badge" [danaTone]="model.enabled && model.active ? 'Active' : 'Inactive'">{{ model.enabled && model.active ? 'Active' : 'Inactive' }}</span>
           </div>
           <div class="gear-admin-record-meta">

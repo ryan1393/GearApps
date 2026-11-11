@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Model numbers can be text.** A model can now be numbered `S-110` or `9¼` as well as `174`.
+  `models.model_number` changes from an integer to text on startup (migration
+  `20261111-shared-model-number-text-v1`); existing numbers keep their digits. Numbers that
+  differ only in case or spacing are the same model. Admin > Models takes any text, shows a
+  model with no number by its type, and lists numbers in natural order (9, 110, 1000, S-110).
+  The models API still accepts a numeric `model_number` from older clients and returns it as
+  text. **Back up the database before deploying.**
+
 ## 70.6.0 (2026-11-11)
 
 MeshForge branding and Server Settings in Admin, Launch Setup and Coater RPA for going live,

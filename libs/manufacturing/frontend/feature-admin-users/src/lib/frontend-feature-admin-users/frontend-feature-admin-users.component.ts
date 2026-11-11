@@ -155,10 +155,10 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   };
 
   modelForm: {
-    model_number: number | null;
+    model_number: string;
     model_type: string;
   } = {
-    model_number: null,
+    model_number: '',
     model_type: '',
   };
 
@@ -213,9 +213,15 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   }
 
   /** Two enabled models with one number are usually the same model entered with and without a type. */
-  modelSharesNumber(model: { id: string; model_number?: number | null; enabled?: boolean }): boolean {
-    return model.model_number != null && model.enabled !== false
-      && this.models.some(other => other.id !== model.id && other.enabled !== false && other.model_number === model.model_number);
+  modelSharesNumber(model: { id: string; model_number?: string | null; enabled?: boolean }): boolean {
+    const key = (value?: string | null) => (value ?? '').trim().toUpperCase();
+    return !!key(model.model_number) && model.enabled !== false
+      && this.models.some(other => other.id !== model.id && other.enabled !== false && key(other.model_number) === key(model.model_number));
+  }
+
+  /** A model's name: its number, or its type when it has no number. */
+  modelLabel(model?: { model_number?: string | null; model_type?: string | null } | null): string {
+    return model?.model_number?.trim() || model?.model_type?.trim() || '—';
   }
 
   /** A tab asked for by name from another Admin page; unknown names are ignored. */
@@ -430,20 +436,20 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   }
 
   createModel(): void {
-    if (this.modelForm.model_number == null && !this.modelForm.model_type.trim()) {
+    if (!this.modelForm.model_number.trim() && !this.modelForm.model_type.trim()) {
       this.error = 'Model number or model type is required.';
       return;
     }
 
     this.runCreate(
       this.api.createModel({
-        model_number: this.modelForm.model_number,
+        model_number: this.modelForm.model_number.trim() || null,
         model_type: this.modelForm.model_type.trim() || null,
         active: true,
       }),
       'Model created.',
       () => {
-        this.modelForm = { model_number: null, model_type: '' };
+        this.modelForm = { model_number: '', model_type: '' };
         this.loadModels();
       },
     );
