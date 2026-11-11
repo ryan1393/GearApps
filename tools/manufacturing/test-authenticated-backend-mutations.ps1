@@ -307,6 +307,15 @@ Invoke-ExpectFailure POST '/locations' $locationBody $script:AdminHeaders @(409)
 Invoke-ExpectFailure PATCH '/locations/00000000-0000-4000-8000-000000000001' @{description='missing'} $script:AdminHeaders @(404) 'Missing record mutation rejected with message'|Out-Null
 Invoke-ExpectFailure PATCH '/locations/not-a-uuid' @{description='bad uuid'} $script:AdminHeaders @(400) 'Invalid UUID mutation rejected with message'|Out-Null
 
+# Bulk shelf bins: a second identical request creates nothing new.
+$bulkShelf=@{prefix='CGFP';shelf='Z';layers=@(9);bins=2}
+$bulk=Invoke-Api POST '/locations/bulk-shelves' $bulkShelf $script:AdminHeaders 'Bulk create shelf bins'
+Assert-Equal (@($bulk.locations | ForEach-Object { $_.serial_number }) -join ',') 'CGFP-Z9A,CGFP-Z9B' 'Verify bulk shelf bins' 'serial_number'
+$bulkAgain=Invoke-Api POST '/locations/bulk-shelves' $bulkShelf $script:AdminHeaders 'Repeat bulk shelf bins'
+Assert-Equal $bulkAgain.created 0 'Verify repeated bulk shelf bins' 'created'
+Invoke-ExpectFailure POST '/locations/bulk-shelves' @{prefix='CGFP';shelf='Z';layers=@(10);bins=2} $script:AdminHeaders @(422) 'Invalid bulk shelf layer rejected with message'|Out-Null
+foreach($bin in @($bulk.locations)){ if($bin.state -eq 'created'){ Invoke-Api DELETE "/locations/$($bin.id)" $null $script:AdminHeaders 'Disable bulk shelf bin'|Out-Null } }
+
 # Tray + blade + blade-tray CRUD and rollback check.
 $tray=Invoke-Api POST '/trays' @{serial_number=(New-AssetSerial 'T');blade_count=0;enabled=$true} $script:AdminHeaders 'Create tray'
 $renamedTray=New-AssetSerial 'T'

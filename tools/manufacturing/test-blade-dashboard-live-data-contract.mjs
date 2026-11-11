@@ -99,8 +99,8 @@ if(!dashboardRoute){
   throw new Error('Route manifest is missing GET /api/v1/trays/dashboard.');
 }
 
-if(manifest.length!==113){
-  throw new Error(`Expected 113 API routes after public registration closure; found ${manifest.length}.`);
+if(manifest.length!==114){
+  throw new Error(`Expected 114 API routes after public registration closure; found ${manifest.length}.`);
 }
 
 console.log(

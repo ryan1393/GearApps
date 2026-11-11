@@ -56,7 +56,7 @@ The master test runner performs the harness checks, builds/tests, API route cove
 .\tools\manufacturing\run-all-tests.ps1 -HarnessOnly
 ```
 
-This parses the PowerShell test scripts, validates their named parameter contracts, verifies required test files, and confirms the **113-route API manifest** without running the applications.
+This parses the PowerShell test scripts, validates their named parameter contracts, verifies required test files, and confirms the **114-route API manifest** without running the applications.
 
 ## Blade Tracking fake/test data
 
@@ -478,6 +478,19 @@ Destructive CLI form after reviewing the preflight:
 
 After the refresh completes, start the apps normally with `commands\START-MESHFORGE.cmd` and sign in again.
 
+
+### Clear operational data, keep users and base data
+
+To start the floor over without reloading from SQL Server, close the running MeshForge API/server windows and run `commands\CLEAR-OPERATIONAL-DATA.cmd` from the project root. It first lists what will be emptied and kept, then requires the exact phrase `CLEAR DATA`.
+
+- **Emptied:** blades, trays, containers, **every location**, cutter builds with their events, checks, teardowns and machine runs, coater shipments and RPA requests, Greenshed shift counts, DSF run state and the Cancel Last journal.
+- **Kept:** users, departments, models, parts, part summaries, blade requirements, cutter body definitions, cutter bodies, roll masters, gearsets, machines, lookup lists (part types, tray stages, statuses, event types, pull reasons, check results), server settings, label printers, Coater RPA setup, DSF machine mappings and all Lapper data.
+
+Only the listed tables are truncated, in one transaction and without `CASCADE`: if a kept table still pointed at an emptied one, PostgreSQL refuses and nothing is deleted. The command also stops, deleting nothing, if the API still has the tables in use. Row counts from just before the clear are written to `tools/manufacturing/data-import/work/pre-clear-operational-data-manifest.json` (counts only, not a backup).
+
+Preview only: `npm run clear:operational-data`. Apply: `npm run clear:operational-data:apply`.
+
+Afterwards make the shelves again in **Admin > Locations > Bulk shelf locations**, and trays and containers in **Admin > Launch Setup**.
 
 ## Configure the IPL label printer
 

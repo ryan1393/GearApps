@@ -1,6 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { LabelPrinterChoiceService } from '@meshforge/manufacturing/frontend/util-common';
+import { IBulkCreateShelfLocations, IBulkShelfLocationsResult } from '@meshforge/manufacturing/shared/util-types';
 import { Observable } from 'rxjs';
 
 export interface PagedResponse<T> {
@@ -381,6 +382,11 @@ export class AdminApiService {
     part_type_id?: string | null;
   }) {
     return this.http.post<AdminLocationRow>('/api/v1/locations', input);
+  }
+
+  /** Every bin of one Cuttergrind shelf; barcodes that already exist are left as they are. */
+  bulkCreateShelfLocations(input: IBulkCreateShelfLocations) {
+    return this.http.post<IBulkShelfLocationsResult>('/api/v1/locations/bulk-shelves', input);
   }
 
   updateLocation(

@@ -5,7 +5,7 @@ This file tracks only remaining work. Completed setup/test/fake-data behavior is
 ## Before production use
 
 - [ ] Re-run `npm run test:meshforge` on the target development laptop after the Blade Tracking strict-null build fix and confirm all four projects build.
-- [ ] Confirm the 113-route non-mutating API probe passes against the target database.
+- [ ] Confirm the 114-route non-mutating API probe passes against the target database.
 - [ ] Run the full workflow **preflight** with dedicated test records.
 - [ ] Run the mutating end-to-end workflow only after preflight passes and confirm the complete Blade Tracking → Cutter Builder → Green Shed lifecycle.
 

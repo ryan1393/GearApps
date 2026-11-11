@@ -285,6 +285,8 @@ The cross-app automatic E2E workflow intentionally runs as the dedicated Admin a
 
 For a clean replacement of old PostgreSQL application data, use `commands\RESET-AND-REFRESH-ALL-DATA.cmd`. Unlike the normal fresh importer, this workflow intentionally deletes existing target application rows after a fresh SQL Server/Excel source snapshot has successfully exported and validated. The PostgreSQL schema is preserved; SQL Server remains read-only. The workflow then imports fresh base/reference data, fresh cutter history, and recreates the local development accounts.
 
+To empty only the operational data (blades, trays, containers, locations, cutter builds and history) while keeping users, base data and cutter bodies, use `commands\CLEAR-OPERATIONAL-DATA.cmd` instead; see "Clear operational data, keep users and base data" in `START_AND_TEST_GUIDE.md`.
+
 ### Full-reset system reference bootstrap
 
 A full target reset also deletes database-backed system reference rows such as `RING` / `PINION` part types, tray stages, cutter statuses, event types, pull reasons, and check results. The reset workflow therefore restores those required system references immediately after the PostgreSQL truncate and before importing fresh base/reference data. This makes the reset independent of whether the Nest API is already running.

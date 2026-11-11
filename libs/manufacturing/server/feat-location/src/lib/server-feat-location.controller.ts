@@ -1,5 +1,7 @@
 import {
   ApiPageOkResponse,
+  BulkCreateShelfLocationsDto,
+  BulkShelfLocationsResultDto,
   CreateLocationDto,
   LocationDto,
   InventoryListQueryDto,
@@ -40,6 +42,18 @@ export class ServerFeatLocationController {
     @ReqUserId() userId: Uuid,
   ) {
     return this.locationService.createLocation(dto, userId);
+  }
+
+  /** Every bin of one Cuttergrind shelf in one go: CGDR, shelf A, layers 1-4, 6 bins. */
+  @Post('bulk-shelves')
+  @DepartmentAppEdit('BLADE_TRACKING')
+  @ApiCreatedResponse({ type: BulkShelfLocationsResultDto })
+  @Auth([RoleType.ADMIN])
+  async bulkCreateShelfLocations(
+    @Body() dto: BulkCreateShelfLocationsDto,
+    @ReqUserId() userId: Uuid,
+  ) {
+    return this.locationService.bulkCreateShelfLocations(dto, userId);
   }
 
   @Get('')

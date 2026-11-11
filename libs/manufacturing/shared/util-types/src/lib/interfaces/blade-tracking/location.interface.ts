@@ -31,3 +31,29 @@ export type ICreateLocation = Omit<
 >;
 
 export type IUpdateLocation = Partial<ICreateLocation>;
+
+/** Make every bin of one Cuttergrind shelf in one go: CGDR, shelf A, layers 1 and 2, 4 bins. */
+export interface IBulkCreateShelfLocations {
+  /** CGDR, CGDP, CGFR, CGFP, CGRR or CGRP. */
+  prefix: string;
+  /** Shelf letter, A to Z. */
+  shelf: string;
+  /** Layer numbers, 1 to 9. */
+  layers: number[];
+  /** Bins per layer, 1 to 26: bins A onward. */
+  bins: number;
+}
+
+export interface IBulkShelfLocationResult {
+  id: Uuid;
+  serial_number: string;
+  /** created: made now. existing: the barcode was already there and was left as it is. */
+  state: 'created' | 'existing';
+  enabled: boolean;
+}
+
+export interface IBulkShelfLocationsResult {
+  created: number;
+  existing: number;
+  locations: IBulkShelfLocationResult[];
+}

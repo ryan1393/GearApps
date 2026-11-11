@@ -602,6 +602,7 @@
     </div>
   </div>
 
+  <gear-admin-bulk-locations *ngIf="activeTab === 'locations'" (created)="reloadLocations()" />
   <div class="gear-admin-layout" *ngIf="activeTab === 'locations'">
     <form class="gear-panel gear-admin-form" (ngSubmit)="saveLocation()">
       <div class="gear-step-title">
