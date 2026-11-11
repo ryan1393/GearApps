@@ -5,22 +5,16 @@
 import { LapperWritePolicy, CrudService, crudController } from '@meshforge/api/core';
 import {
   CreateDepartmentDto,
-  CreateGearsetMarriageDto,
   CreatePartDto,
   CreateSummaryDto,
-  CreateTypeOfCheckDto,
   DepartmentDto,
-  GearsetMarriageDto,
   PartDto,
   SummaryDto,
-  TypeOfCheckDto,
   UpdateDepartmentDto,
-  UpdateGearsetMarriageDto,
   UpdatePartDto,
   UpdateSummaryDto,
-  UpdateTypeOfCheckDto,
 } from '@meshforge/api/data-access';
-import { Department, GearsetMarriage, Part, Summary, TypeOfCheck } from '@meshforge/shared/domain';
+import { Department, Part, Summary } from '@meshforge/shared/domain';
 import { UseInterceptors, Controller, Injectable } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 // ---------- Departments ----------
@@ -37,23 +31,6 @@ export class DepartmentsController extends crudController<Department>({
   name: 'department',
 }) {
   constructor(override readonly service: DepartmentsService) {
-    super();
-  }
-}
-// ---------- Type of checks ----------
-@Injectable()
-export abstract class TypeOfChecksService extends CrudService<TypeOfCheck> {}
-@UseInterceptors(LapperWritePolicy)
-@Controller({ path: 'toc', version: '1' })
-@ApiTags('Gear · Type of checks')
-@ApiBearerAuth()
-export class TypeOfChecksController extends crudController<TypeOfCheck>({
-  entity: TypeOfCheckDto,
-  create: CreateTypeOfCheckDto,
-  update: UpdateTypeOfCheckDto,
-  name: 'type of check',
-}) {
-  constructor(override readonly service: TypeOfChecksService) {
     super();
   }
 }
@@ -88,23 +65,6 @@ export class PartsController extends crudController<Part>({
   name: 'part',
 }) {
   constructor(override readonly service: PartsService) {
-    super();
-  }
-}
-// ---------- Gearset marriages ----------
-@Injectable()
-export abstract class GearsetMarriagesService extends CrudService<GearsetMarriage> {}
-@UseInterceptors(LapperWritePolicy)
-@Controller({ path: 'gearset-marriage', version: '1' })
-@ApiTags('Gear · Gearset marriages')
-@ApiBearerAuth()
-export class GearsetMarriagesController extends crudController<GearsetMarriage>({
-  entity: GearsetMarriageDto,
-  create: CreateGearsetMarriageDto,
-  update: UpdateGearsetMarriageDto,
-  name: 'gearset marriage',
-}) {
-  constructor(override readonly service: GearsetMarriagesService) {
     super();
   }
 }

@@ -22,18 +22,3 @@ export type CreateGearset = Pick<
   'number' | 'rev' | 'summary_id' | 'pinion_id' | 'ring_id' | 'ratio' | 'status' | 'user_id'
 >;
 export type UpdateGearset = Partial<Pick<Gearset, 'rev' | 'status' | 'user_id'>>;
-
-export interface GearsetMarriage extends BaseEntity {
-  rev: string | null;
-  gearset_id: string | null;
-  gearset?: Part;
-  pinion_id: string | null;
-  pinion?: Part;
-  ring_id: string | null;
-  ring?: Part;
-}
-export type CreateGearsetMarriage = Pick<
-  GearsetMarriage,
-  'rev' | 'gearset_id' | 'pinion_id' | 'ring_id'
->;
-export type UpdateGearsetMarriage = Partial<Pick<GearsetMarriage, 'rev'>>;

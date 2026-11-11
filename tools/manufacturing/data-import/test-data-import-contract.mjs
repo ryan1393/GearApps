@@ -70,9 +70,10 @@ assert(
   'History importer must preserve builds with missing cutter-body IDs using synthetic MF identities instead of skipping them',
 );
 assert(
-  history.includes('cutter_legacy_orphan_records') &&
-    history.includes('archiveLegacyOrphan'),
-  'Unmappable legacy detail rows must be archived in PostgreSQL rather than silently discarded',
+  history.includes('cutter-history-legacy-orphans.json') &&
+    history.includes('archiveLegacyOrphan') &&
+    !history.includes('cutter_legacy_orphan_records'),
+  'Unmappable legacy detail rows must be archived to a file beside the import report rather than silently discarded',
 );
 
 assert(
