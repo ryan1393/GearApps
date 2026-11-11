@@ -7,14 +7,14 @@ import { GearToastService } from '@meshforge/manufacturing/frontend/util-common'
 import { ILocation, ILocationTray, ITray } from '@meshforge/manufacturing/shared/util-types';
 import { BladeTrackingApiService, InventoryLocationRow, InventoryTrayRow, apiErrorText } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
 import { ScanMessage } from '../../models/scan-message';
+import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/option-picker.component';
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
-import {
-  DanaPageHeaderComponent,
-  DanaDetailGridDirective, DanaDetailItemComponent,
-} from '@dana/ui';
+import { StationStatusComponent } from '../../shared/station-status/station-status.component';
+import { StationOperation } from '../operations-station/operations-station.operations';
+import { DanaDetailGridDirective, DanaDetailItemComponent } from '@dana/ui';
 
-@Component({ selector: 'gear-internal-movement', standalone: true, imports: [CommonModule, FormsModule, ScanPanelComponent, DanaPageHeaderComponent, DanaDetailGridDirective, DanaDetailItemComponent], templateUrl: './internal-movement.component.html' })
-export class InternalMovementComponent implements OnDestroy {
+@Component({ selector: 'gear-internal-movement', standalone: true, imports: [CommonModule, FormsModule, ScanPanelComponent, StationStatusComponent, OptionPickerComponent, DanaDetailGridDirective, DanaDetailItemComponent], templateUrl: './internal-movement.component.html' })
+export class InternalMovementComponent implements OnDestroy, StationOperation {
   private readonly destroyed$ = new Subject<void>();
   ngOnDestroy(): void { this.destroyed$.next(); this.destroyed$.complete(); }
   private readonly api = inject(BladeTrackingApiService);
@@ -45,6 +45,30 @@ export class InternalMovementComponent implements OnDestroy {
   busy = false;
   message: ScanMessage | null = null;
 
+  get inProgress(): boolean { return Boolean(this.tray); }
+  stationActivated(): void { if (!this.busy) this.refreshPickers(); }
+  get trayOptions(): PickerOption[] {
+    return this.filteredTrays.map((item) => ({ value: item.serial_number, cells: [item.serial_number, this.trayLocationLabels[item.id] || 'Unassigned', item.blade_count ?? 0] }));
+  }
+  get destinationOptions(): PickerOption[] {
+    return this.eligibleLocations.map((location) => ({ value: location.serial_number, cells: [location.serial_number, location.description || location.location_type || 'Location'] }));
+  }
+  /** What the operator should do next, shown when there is no message. */
+  get prompt(): string {
+    if (this.busy) return 'Working…';
+    if (!this.tray) return 'Scan the tray to move, or choose it from the list.';
+    if (!this.destination) return `Scan the location tray ${this.tray.serial_number} is moving to.`;
+    return `Check From and To, then tap Move Tray.`;
+  }
+  get moveBlockedReason(): string {
+    return this.tray && !this.destination && !this.busy ? 'Scan or choose the destination first.' : '';
+  }
+  /** Start over with another tray. */
+  clearTray(): void {
+    if (this.busy) return;
+    this.tray = null; this.current = null; this.destination = null; this.message = null;
+  }
+
   scanTray(serial: string) {
     if (this.busy || !serial.trim()) return;
     serial = serial.trim().toUpperCase();
@@ -53,7 +77,7 @@ export class InternalMovementComponent implements OnDestroy {
     this.api.scanTray(serial).pipe(takeUntil(this.destroyed$)).subscribe({
       next: (tray) => {
         if (!tray.workflow_eligibility?.internal_movement) {
-          this.busy = false; this.message = { tone: 'error', text: 'Only an in-house, unassigned tray with blades may be moved.' }; return;
+          this.busy = false; this.message = { tone: 'error', text: `Tray ${tray.serial_number} cannot be moved here. Only an in-house, unassigned tray with blades can be moved.` }; this.trayScanner?.select(); return;
         }
         this.tray = tray;
         this.api.getCurrentTrayLocation(tray.id).pipe(takeUntil(this.destroyed$)).subscribe({
@@ -95,18 +119,14 @@ export class InternalMovementComponent implements OnDestroy {
         this.busy = false;
         this.refreshPickers();
         const text = `Tray ${tray.serial_number} moved from ${from} to ${destination.serial_number}.`;
-        this.message = null;
+        this.message = { tone: 'success', text };
         this.toast.success(text, 'Tray moved');
         this.tray = null;
         this.current = null;
         this.destination = null;
         this.trayScanner?.clearAndFocus();
       },
-      error: (err: HttpErrorResponse) => {
-        const text = apiErrorText(err, 'Could not move tray.');
-        this.toast.error(text, 'Move failed');
-        this.fail(err, 'Could not move tray.');
-      },
+      error: (err: HttpErrorResponse) => this.fail(err, 'The tray was not moved. Try again, or scan the tray again.'),
     });
   }
   private finishTray(current: ILocationTray | null) { this.current = current; this.busy = false; this.trayScanner?.clearAndFocus(); this.locationScanner?.focus(); this.message = { tone: 'success', text: current?.location ? `Tray ${this.tray?.serial_number} found at ${current.location.serial_number}.` : `Tray ${this.tray?.serial_number} has no current internal location.` }; }

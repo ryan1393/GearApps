@@ -5,16 +5,18 @@ import { RouterLink } from '@angular/router';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { CoaterAvailableContainer, CoaterShipment, CoaterShipmentContainer, CoaterShipmentList } from '@meshforge/manufacturing/shared/util-types';
 import { CoaterShipmentsApiService, apiErrorText } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
-import { DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
+import { DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
+import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/option-picker.component';
+import { StationOperation } from '../operations-station/operations-station.operations';
 import { coaterPackingSlipHtml, coaterContainerLabelsHtml } from './coater-packing-slip';
 import { createCoaterRequestId } from './coater-request-id';
 
 @Component({
   selector: 'gear-coater-shipments', standalone: true,
-  imports: [CommonModule,FormsModule,RouterLink,DanaPageHeaderComponent,DanaTableDirective,DanaTableShellDirective],
+  imports: [CommonModule,FormsModule,RouterLink,OptionPickerComponent,DanaTableDirective,DanaTableShellDirective],
   templateUrl: './coater-shipments.component.html', styleUrls: ['./coater-shipments.component.css'],
 })
-export class CoaterShipmentsComponent implements OnDestroy {
+export class CoaterShipmentsComponent implements OnDestroy, StationOperation {
   private readonly api = inject(CoaterShipmentsApiService);
   private readonly destroy$ = new Subject<void>();
   @ViewChild('scanner') scanner?: ElementRef<HTMLInputElement>;
@@ -33,6 +35,14 @@ export class CoaterShipmentsComponent implements OnDestroy {
   private listVersion = 0;
   constructor() { this.refreshList(); }
   ngOnDestroy() { this.destroy$.next(); this.destroy$.complete(); }
+  get inProgress() { return this.active?.status==='DRAFT'; }
+  /** Back on this tab: refresh what may have changed meanwhile, without touching an open shipment's edits. */
+  stationActivated() { if(this.busy)return; if(this.active) { if(this.active.status==='DRAFT' && !this.dirty) this.refreshAvailable(); } else this.refreshList(); }
+  get availableOptions(): PickerOption[] {
+    return this.availableContainers.map(c => ({ value: c.serial, cells: [c.serial, `${c.trays} trays / ${c.blades} blades`, c.summary.map(x=>`${x.summary} ${x.part_type}`).slice(0,3).join(', ') || '—'] }));
+  }
+  /** Add a container chosen from the list; the same server validation as a scan. */
+  addAvailable(serial: string) { this.selectedContainer=serial; this.chooseAvailable(); }
   get dirty() { return !!this.active && (this.destination.trim()!==this.active.destination || this.notes.trim()!==this.active.notes); }
   get canEdit() { return this.active?.status==='DRAFT' && !this.busy && !this.stale; }
   get canReview() { return this.canEdit && !this.dirty && !!this.active?.manifest.totals.containers && !this.active.manifest.issues.length; }
@@ -84,10 +94,6 @@ export class CoaterShipmentsComponent implements OnDestroy {
   chooseAvailable() {
     if(!this.selectedContainer || !this.active || !this.canEdit || this.dirty)return;
     this.serial=this.selectedContainer;this.scan();
-  }
-  availableLabel(c: CoaterAvailableContainer) {
-    const mix=c.summary.map(x=>`${x.summary} ${x.part_type}`).slice(0,3).join(', ');
-    return `${c.serial} — ${c.trays} trays / ${c.blades} blades${mix ? ' — '+mix : ''}`;
   }
   scan() {
     const s=this.active, serial=this.serial.trim().toUpperCase();

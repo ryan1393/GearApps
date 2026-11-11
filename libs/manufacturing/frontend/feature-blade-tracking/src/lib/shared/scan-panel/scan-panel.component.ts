@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './scan-panel.component.html',
+  host: { '[attr.data-state]': 'state' },
 })
 export class ScanPanelComponent implements AfterViewInit, OnChanges {
   @Input() step = 1;
@@ -16,7 +17,12 @@ export class ScanPanelComponent implements AfterViewInit, OnChanges {
   @Input() buttonText = 'Scan';
   @Input() disabled = false;
   @Input() autoFocus = true;
+  /** The value this step has locked in. While set, the step shows it with a Change button instead of the scan box. */
+  @Input() doneValue: string | null = null;
+  @Input() changeText = 'Change';
   @Output() scanned = new EventEmitter<string>();
+  /** The operator tapped Change on a completed step. */
+  @Output() reopen = new EventEmitter<void>();
   @ViewChild('input') input?: ElementRef<HTMLInputElement>;
 
   private static nextId = 1;
@@ -28,21 +34,36 @@ export class ScanPanelComponent implements AfterViewInit, OnChanges {
     this.claimFocus();
   }
 
-  /** A panel is disabled while its page is busy. When it becomes usable again it is the next expected scan. */
+  /** done: value locked in · disabled: not usable yet · ready: waiting for a scan. Styled by the operations station. */
+  get state(): 'done' | 'disabled' | 'ready' {
+    return this.doneValue ? 'done' : this.disabled ? 'disabled' : 'ready';
+  }
+
+  /**
+   * A panel is disabled while its page is busy. When it becomes usable again it is the next expected scan.
+   * A step reopened with Change is where the operator is about to scan, so it takes the cursor.
+   */
   ngOnChanges(changes: SimpleChanges): void {
     const disabled = changes['disabled'];
+    const done = changes['doneValue'];
+    if (done && !done.firstChange && done.previousValue && !this.doneValue) {
+      this.value = '';
+      this.focus();
+      return;
+    }
     if (disabled && !disabled.firstChange && !this.disabled) this.claimFocus();
   }
 
   /**
    * Take the cursor when nothing else has it, or when it is still sitting in an earlier
-   * scan step. Never take it from a field or button the operator chose.
+   * scan step. Never take it from a field or button the operator chose (except a yielding one).
    */
   private claimFocus(): void {
-    if (!this.autoFocus || this.disabled) return;
+    if (!this.autoFocus || this.disabled || this.doneValue) return;
     this.whenInputReady((input) => {
       const active = document.activeElement as HTMLElement | null;
-      const idle = !active || active === document.body;
+      // Controls marked data-gear-yield-focus (the station's operation tabs) never keep a scan.
+      const idle = !active || active === document.body || Boolean(active.closest('[data-gear-yield-focus]'));
       const earlierStep = Number(active?.dataset?.['gearScanStep']);
       if (idle || (Number.isFinite(earlierStep) && earlierStep < this.step)) {
         input.focus();
@@ -69,6 +90,14 @@ export class ScanPanelComponent implements AfterViewInit, OnChanges {
     // Leave the scanned value visible but selected, so the next scan replaces it instead of appending to it.
     this.input?.nativeElement.select();
     this.scanned.emit(value);
+  }
+
+  /** A tap into the box selects what is there, so the next scan replaces an old value instead of appending to it. */
+  selectOnFocus() {
+    setTimeout(() => {
+      const input = this.input?.nativeElement;
+      if (input && document.activeElement === input) input.select();
+    });
   }
 
   clearAndFocus() {

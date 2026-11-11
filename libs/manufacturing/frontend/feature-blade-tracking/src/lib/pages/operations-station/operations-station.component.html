@@ -1,22 +1,58 @@
 <section class="gear-page ops-station" aria-label="Blade operations">
-  <nav danaTabs class="ops-station-tabs" aria-label="Operation">
-    @for (operation of operations; track operation.key) {
-      <button danaTab type="button" class="ops-station-tab" [active]="active() === operation.key"
-        [attr.aria-controls]="'ops-station-panel'" [attr.data-operation]="operation.key" (click)="select(operation.key)">
-        <span class="gear-glyph gear-glyph-{{ operation.icon }}" aria-hidden="true"></span>
-        <span>{{ operation.label }}</span>
+  <nav danaTabs class="ops-station-tabs" aria-label="Operation" [style.--ops-tab-count]="shownOperations().length">
+    @for (operation of shownOperations(); track operation.key) {
+      <button danaTab type="button" class="ops-station-tab" [class.is-side]="!operation.flowStep" [active]="active() === operation.key"
+        data-gear-yield-focus aria-controls="ops-station-panel" [attr.data-operation]="operation.key" (click)="select(operation.key)">
+        @if (operation.flowStep) {
+          <span class="ops-station-tab-step" aria-hidden="true">{{ operation.flowStep }}</span>
+        } @else {
+          <span class="gear-glyph gear-glyph-{{ operation.icon }}" aria-hidden="true"></span>
+        }
+        <span class="ops-station-tab-label">{{ operation.label }}</span>
+        @if (inProgress(operation.key)) {
+          <span class="ops-station-tab-busy" title="Work in progress"><span class="sr-only">(work in progress)</span></span>
+        }
       </button>
     }
   </nav>
 
+  <div class="ops-station-bar">
+    <p class="ops-station-instruction"><span class="gear-glyph gear-glyph-{{ activeOperation().icon }}" aria-hidden="true"></span>{{ activeOperation().instruction }}</p>
+    <a routerLink="/blades/cancel-last" class="gear-btn gear-btn-secondary">Undo last transaction</a>
+    <button type="button" class="gear-btn gear-btn-secondary" [attr.aria-expanded]="settingsOpen" aria-controls="ops-station-settings"
+      (click)="settingsOpen = !settingsOpen">Station tabs</button>
+  </div>
+
+  @if (settingsOpen) {
+    <fieldset id="ops-station-settings" class="gear-panel ops-station-settings">
+      <legend>Tabs shown on this workstation</legend>
+      @for (operation of operations; track operation.key) {
+        <label><input type="checkbox" [checked]="!hidden().has(operation.key)" [disabled]="isOnlyShownTab(operation.key)"
+          (change)="toggleTab(operation.key)" /> {{ operation.label }}</label>
+      }
+      <p>Saved on this workstation only. The tab you are using always stays visible.</p>
+      <button type="button" class="gear-btn gear-btn-primary" (click)="settingsOpen = false">Done</button>
+    </fieldset>
+  }
+
   <div id="ops-station-panel" class="ops-station-work" role="tabpanel" [attr.data-operation]="active()">
-    @switch (active()) {
-      @case ('intake') { <gear-blade-intake /> }
-      @case ('grinding') { <gear-blade-grinding /> }
-      @case ('load-container') { <gear-load-container /> }
-      @case ('coater-shipments') { <gear-coater-shipments /> }
-      @case ('receive-container') { <gear-receive-container /> }
-      @case ('internal-movement') { <gear-internal-movement /> }
+    @if (visited().has('intake')) {
+      <div class="ops-station-op" data-operation-panel="intake" [hidden]="active() !== 'intake'"><gear-blade-intake /></div>
+    }
+    @if (visited().has('grinding')) {
+      <div class="ops-station-op" data-operation-panel="grinding" [hidden]="active() !== 'grinding'"><gear-blade-grinding /></div>
+    }
+    @if (visited().has('load-container')) {
+      <div class="ops-station-op" data-operation-panel="load-container" [hidden]="active() !== 'load-container'"><gear-load-container /></div>
+    }
+    @if (visited().has('coater-shipments')) {
+      <div class="ops-station-op" data-operation-panel="coater-shipments" [hidden]="active() !== 'coater-shipments'"><gear-coater-shipments /></div>
+    }
+    @if (visited().has('receive-container')) {
+      <div class="ops-station-op" data-operation-panel="receive-container" [hidden]="active() !== 'receive-container'"><gear-receive-container /></div>
+    }
+    @if (visited().has('internal-movement')) {
+      <div class="ops-station-op" data-operation-panel="internal-movement" [hidden]="active() !== 'internal-movement'"><gear-internal-movement /></div>
     }
   </div>
 </section>

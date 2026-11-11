@@ -46,6 +46,18 @@ describe('scan workstation', () => {
     component.recordGrinding();
     expect(api.startTrayGrinding).toHaveBeenCalledTimes(1);
   });
+  it('keeps a scan error on screen instead of only in a pop-up', () => {
+    api.scanTray.mockReturnValueOnce(of({ id:'tray',serial_number:'T0002',blades:[],blade_count:10,current_stage:{code:'AT_COATER'},workflow_eligibility:{grinding:false} }));
+    component.scanTray('T0002');
+    expect(component.message?.tone).toBe('error');
+    expect(component.message?.text).toContain('T0002 is not available for grinding');
+    component.scanTray('T0001');
+    expect(component.message).toBeNull();
+  });
+  it('explains an unknown grinder in operator terms', () => {
+    component.scanGrinder('G99');
+    expect(component.message).toEqual({ tone: 'error', text: 'No active grinder matches “G99”. Check the number, or ask a supervisor to add it.' });
+  });
   it('keeps the scanned tray usable if optional history fails', () => {
     component.scanTray('T0001'); history.error(new Error('history unavailable'));
     expect(component.historyError).toBeTruthy();
