@@ -38,6 +38,7 @@
 .gear-glyph-machine { --gear-glyph-url: url("/assets/icons/machine.svg"); }
 .gear-glyph-quality-check { --gear-glyph-url: url("/assets/icons/quality-check.svg"); }
 .gear-glyph-pull { --gear-glyph-url: url("/assets/icons/pull.svg"); }
+.gear-glyph-ship { --gear-glyph-url: url("/assets/icons/ship.svg"); }
 .gear-glyph-shelf { --gear-glyph-url: url("/assets/icons/shelf.svg"); }
 .gear-glyph-grinding { --gear-glyph-url: url("/assets/icons/grinding.svg"); }
 .gear-glyph-available { --gear-glyph-url: url("/assets/icons/available.svg"); }

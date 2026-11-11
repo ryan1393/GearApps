@@ -48,6 +48,24 @@ describe('blade operations station', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
+  it('lets a workstation hide tabs it does not use, but never the open one or the last one', () => {
+    const station = create('intake');
+    station.toggleTab('coater-shipments');
+    station.toggleTab('intake');
+    expect(station.shownOperations().map((op) => op.key)).not.toContain('coater-shipments');
+    expect(station.shownOperations().map((op) => op.key)).toContain('intake');
+    expect(localStorage.getItem('meshforge.blade-tracking.operations-station.hidden-tabs')).toBe('coater-shipments,intake');
+    for (const { key } of BLADE_OPERATIONS) if (!station.hidden().has(key)) station.toggleTab(key);
+    expect(BLADE_OPERATIONS.length - station.hidden().size).toBe(1);
+    const lastShown = BLADE_OPERATIONS.find(({ key }) => !station.hidden().has(key));
+    expect(lastShown && station.isOnlyShownTab(lastShown.key)).toBe(true);
+  });
+
+  it('numbers the main tray flow and leaves Internal Movement outside it', () => {
+    expect(BLADE_OPERATIONS.map((op) => op.flowStep)).toEqual([1, 2, 3, 4, 5, null]);
+    expect(new Set(BLADE_OPERATIONS.map((op) => op.icon)).size).toBe(BLADE_OPERATIONS.length);
+  });
+
   it('redirects every former operation page to its station tab', () => {
     const children = frontendFeatureBladeTrackingRoutes[0].children ?? [];
     for (const { key } of BLADE_OPERATIONS) {

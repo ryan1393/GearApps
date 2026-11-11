@@ -1,5 +1,5 @@
-<section class="gear-page shipments-page">
-  <header danaPageHeader eyebrow="COATER SHIPPING" heading="Coater Shipments" description="Scan packed containers, print one packing slip, then send the shipment."></header>
+<section class="gear-page shipments-page op-page op-wide">
+  <header class="gear-page-header" danaPageHeader eyebrow="COATER SHIPPING" heading="Coater Shipments" description="Scan packed containers, print one packing slip, then send the shipment."></header>
   <div *ngIf="error" class="shipment-alert error" role="alert">{{error}} <button *ngIf="stale" type="button" (click)="refresh()" [disabled]="busy" data-icon="refresh" title="Refresh shipment">Refresh shipment</button></div>
   <div *ngIf="notice" class="shipment-alert" role="status" aria-live="polite">{{notice}}</div>
   <ng-container *ngIf="active as s; else shipmentList">
@@ -16,7 +16,7 @@
     <p *ngIf="dirty" class="shipment-alert">Save the changed details before scanning, reviewing or printing.</p>
     <section *ngIf="s.status==='DRAFT'" class="gear-panel container-picker">
       <form class="scan-row" (ngSubmit)="scan()">
-        <label for="shipment-container">Scan container</label><input #scanner id="shipment-container" name="serial" [(ngModel)]="serial" placeholder="C0001" autocomplete="off" maxlength="80" [disabled]="!canEdit || dirty" />
+        <label for="shipment-container">Scan container</label><input #scanner id="shipment-container" data-gear-scan-step="1" name="serial" [(ngModel)]="serial" placeholder="C0001" autocomplete="off" maxlength="80" [disabled]="!canEdit || dirty" />
         <button class="primary" type="submit" [disabled]="!canEdit || dirty || !serial.trim()">{{busy ? 'Working…' : 'Add container'}}</button>
       </form>
       <div class="picker-divider"><span>OR SELECT AN AVAILABLE CONTAINER</span></div>
@@ -24,17 +24,10 @@
         <input [(ngModel)]="availableQuery" (keyup.enter)="refreshAvailable()" placeholder="Search available containers" aria-label="Search available containers" maxlength="80" [disabled]="!canEdit || dirty" />
         <button type="button" (click)="refreshAvailable()" [disabled]="!canEdit || dirty || availableLoading" data-icon="refresh" title="Refresh">{{availableLoading ? 'Loading…' : 'Refresh available'}}</button>
       </div>
-      <div class="available-select-row">
-        <label for="available-container">Available containers
-          <select id="available-container" [(ngModel)]="selectedContainer" [disabled]="!canEdit || dirty || availableLoading || !availableContainers.length">
-            <option value="">{{availableLoading ? 'Loading available containers…' : availableContainers.length ? 'Select a packed container' : 'No packed containers available'}}</option>
-            <option *ngFor="let c of availableContainers" [value]="c.serial">{{availableLabel(c)}}</option>
-          </select>
-        </label>
-        <button class="primary" type="button" (click)="chooseAvailable()" [disabled]="!canEdit || dirty || !selectedContainer">Add selected</button>
-      </div>
-      <p *ngIf="availableError" class="shipment-alert error">{{availableError}}</p>
-      <p class="picker-help">Only packed containers eligible for this shipment are listed. Scanning and selecting use the same server validation. <a routerLink="/blades/load-container">Load a container</a></p>
+      <gear-option-picker [divider]="false" placeholder="Choose a packed container to add…" [headers]="['Container', 'Contents', 'Summary / part']"
+        [options]="availableOptions" [loading]="availableLoading" [error]="availableError" emptyText="No packed containers are available for this shipment."
+        [disabled]="!canEdit || dirty" (picked)="addAvailable($event)" />
+      <p class="picker-help">Only packed containers eligible for this shipment are listed. Scanning and selecting use the same server validation. <a routerLink="/blades/operations" [queryParams]="{ op: 'load-container' }">Load a container</a></p>
     </section>
     <div *ngIf="undoSerial && s.status==='DRAFT'" class="shipment-alert">{{undoSerial}} removed. <button type="button" (click)="undo()" [disabled]="!canEdit || dirty">Undo removal</button></div>
     <div *ngIf="s.changed" class="shipment-alert error" role="alert">Inventory changed since this revision. Review again to save the current contents, then print a new slip.</div>
@@ -53,7 +46,7 @@
     </div>
     <section *ngIf="confirmSend" class="gear-panel send-confirm" role="region" aria-label="Confirm shipment dispatch"><h3>Send {{s.number}} to Coater?</h3><p>{{s.manifest.totals.containers}} containers · {{s.manifest.totals.trays}} trays · {{s.manifest.totals.blades}} blades · {{s.destination}}</p><p>This records departure and locks the shipment. It cannot be undone with Cancel Last Transaction.</p><label class="check"><input type="checkbox" [(ngModel)]="checked" [disabled]="busy" /> I printed revision {{s.revision}} and checked it against the physical containers.</label><div class="actions"><button type="button" (click)="confirmSend=false" [disabled]="busy">Back</button><button class="primary" type="button" (click)="send()" [disabled]="!checked || !canSend">Confirm Send to Coater</button></div></section>
     <section *ngIf="cancelOpen" class="gear-panel cancel-panel"><label>Reason for canceling this draft<textarea [(ngModel)]="cancelReason" maxlength="1000" [disabled]="busy"></textarea></label><p>Containers stay packed. Canceling the draft releases them for another shipment.</p><button type="button" (click)="cancel()" [disabled]="!canEdit || !cancelReason.trim()">Confirm cancel draft</button></section>
-    <section *ngIf="s.status==='DISPATCHED'" class="gear-panel dispatched"><h3>Shipment dispatched</h3><p>{{time(s.dispatched_at!)}} ET · {{s.dispatched_by}}. Contents are preserved as sent.</p><div class="actions"><button type="button" (click)="print()" [disabled]="!canPrint">Reprint packing slip</button><button type="button" (click)="print(true)" [disabled]="!canPrint">Reprint container labels</button><a routerLink="/blades/receive-container">Receive returned trays</a></div></section>
+    <section *ngIf="s.status==='DISPATCHED'" class="gear-panel dispatched"><h3>Shipment dispatched</h3><p>{{time(s.dispatched_at!)}} ET · {{s.dispatched_by}}. Contents are preserved as sent.</p><div class="actions"><button type="button" (click)="print()" [disabled]="!canPrint">Reprint packing slip</button><button type="button" (click)="print(true)" [disabled]="!canPrint">Reprint container labels</button><a routerLink="/blades/operations" [queryParams]="{ op: 'receive-container' }">Receive returned trays</a></div></section>
     <ng-container *ngIf="s.rpa as rpa">
       <section *ngIf="rpa.request || (rpa.configured && s.status !== 'CANCELED')" class="gear-panel details-panel" aria-label="Coater RPA">
         <h3>RPA{{rpa.coater_name ? ' · ' + rpa.coater_name : ''}}</h3>

@@ -19,6 +19,9 @@ import {
 } from '@meshforge/manufacturing/shared/util-types';
 
 
+/** Shown to operators when the server cannot list workflow rows (its version is older than this app's). */
+export const WORKFLOW_LIST_OUTDATED = 'The list could not be loaded because the server needs an update. Scanning still works; please tell your supervisor.';
+
 /** LOCATION_SUMMARY: a location's summary tag, whose barcode is its Summary and part type. */
 export type AssetTagKind = 'TRAY' | 'CONTAINER' | 'LOCATION' | 'LOCATION_SUMMARY';
 
@@ -317,16 +320,18 @@ export class BladeTrackingApiService {
     });
   }
 
+  // The server is older than this app and does not say which rows each workflow may use. Operators
+  // cannot fix that, so the message tells them what to do; the cause is for whoever deploys the server.
   getWorkflowTrays(kind: keyof TrayWorkflowEligibility) {
     return this.allPages(page => this.getTrays(page, 50)).pipe(map(rows => {
-      if (rows.some(t => !t.workflow_eligibility)) throw new Error('Deploy the matching Blade Tracking server before using workflow pickers.');
+      if (rows.some(t => !t.workflow_eligibility)) throw new Error(WORKFLOW_LIST_OUTDATED);
       return rows.filter(t => t.workflow_eligibility?.[kind]);
     }));
   }
 
   getWorkflowContainers(kind: keyof ContainerWorkflowEligibility) {
     return this.allPages(page => this.getContainers(page, 50)).pipe(map(rows => {
-      if (rows.some(c => !c.workflow_eligibility)) throw new Error('Deploy the matching Blade Tracking server before using workflow pickers.');
+      if (rows.some(c => !c.workflow_eligibility)) throw new Error(WORKFLOW_LIST_OUTDATED);
       return rows.filter(c => c.workflow_eligibility?.[kind]);
     }));
   }

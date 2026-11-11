@@ -1,93 +1,96 @@
-<section class="gear-page space-y-5">
+<section class="gear-page op-page">
   <header class="gear-page-header" danaPageHeader eyebrow="COATER RECEIVING" heading="Receive Container" description="Scan the returned container, scan each tray out, then scan its part-specific Cuttergrind Finished shelf: CGFR-A1A for RING or CGFP-A1A for PINION (shelf letter, layer number, bin letter)."></header>
-  <div *ngIf="pickerError" class="gear-panel px-4 py-3 text-sm" role="alert">{{ pickerError }} <button type="button" (click)="refreshPickers()" [disabled]="busy">Retry available inventory</button></div>
+  <div class="op-steps">
+    <gear-station-status [message]="message" [prompt]="prompt" (dismiss)="message = null" />
 
-  <div *ngIf="message" class="rounded-xl border px-4 py-3 text-sm font-semibold" [class.border-emerald-200]="message.tone === 'success'" [class.bg-emerald-50]="message.tone === 'success'" [class.text-emerald-800]="message.tone === 'success'" [class.border-red-200]="message.tone === 'error'" [class.bg-red-50]="message.tone === 'error'" [class.text-red-800]="message.tone === 'error'" [class.border-blue-200]="message.tone === 'info'" [class.bg-blue-50]="message.tone === 'info'" [class.text-blue-800]="message.tone === 'info'" [attr.role]="message.tone === 'error' ? 'alert' : 'status'" [attr.aria-live]="message.tone === 'error' ? 'assertive' : 'polite'">{{ message.text }}</div>
-
-  <div class="gear-panel w-full p-5 [&_.gear-panel]:!border-0 [&_.gear-panel]:!bg-transparent [&_.gear-panel]:!p-0 [&_.gear-panel]:!shadow-none [&_.gear-workflow-card]:!border-0 [&_.gear-workflow-card]:!bg-transparent [&_.gear-workflow-card]:!p-0 [&_.gear-workflow-card]:!shadow-none" data-r27="RECEIVE-1"><gear-scan-panel class="block w-full"
-    #containerScanner
-    [step]="1"
-    label="Scan Returned Container"
-    buttonText="Select"
-    [disabled]="busy || !!container"
-    (scanned)="scanContainer($event)"
-  /><div class="mt-4 border-t border-slate-200 pt-4"><div class="mb-2 text-center text-xs font-black uppercase tracking-wider text-slate-400">OR</div><details #r29ReceiveContainer class="relative w-full" data-r29="r29ReceiveContainer">
-<summary class="gear-input flex w-full cursor-pointer list-none items-center justify-between">Choose container...<span aria-hidden="true">&#8964;</span></summary>
-<div class="absolute z-50 mt-1 max-h-80 w-full overflow-auto rounded-xl border border-slate-200 bg-white shadow-xl">
-<div class="sticky top-0 grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_90px] gap-3 border-b bg-slate-50 px-4 py-2 text-xs font-black uppercase tracking-wide text-slate-500"><span>Container #</span><span>Blades</span><span class="text-right">Trays</span></div>
-<button *ngFor="let item of filteredContainers" type="button" class="grid w-full grid-cols-[minmax(0,2fr)_minmax(0,1fr)_90px] gap-3 border-b border-slate-100 px-4 py-2 text-left hover:bg-slate-50" [disabled]="busy || !!container" (click)="chooseContainer(item.serial_number); r29ReceiveContainer.removeAttribute('open')"><span class="font-semibold">{{item.serial_number}}</span><span>{{$any(item).blade_count ?? '-'}}</span><span class="text-right">{{$any(item).tray_count ?? $any(item).trayCount ?? '-'}}</span></button>
-</div></details></div></div>
-
-  <div class="gear-panel w-full p-5 [&_.gear-panel]:!border-0 [&_.gear-panel]:!bg-transparent [&_.gear-panel]:!p-0 [&_.gear-panel]:!shadow-none [&_.gear-workflow-card]:!border-0 [&_.gear-workflow-card]:!bg-transparent [&_.gear-workflow-card]:!p-0 [&_.gear-workflow-card]:!shadow-none" data-r27="RECEIVE-2" *ngIf="container && expected.length && !pendingTray"><gear-scan-panel class="block w-full"
-    #trayScanner
-   
-    [step]="2"
-    label="Scan Tray Out"
-    [disabled]="busy"
-    (scanned)="scanTray($event)"
-  /><div class="mt-4 border-t border-slate-200 pt-4"><div class="mb-2 text-center text-xs font-black uppercase tracking-wider text-slate-400">OR</div><details #r29ReceiveTray class="relative w-full" data-r29="r29ReceiveTray">
-<summary class="gear-input flex w-full cursor-pointer list-none items-center justify-between">Choose tray...<span aria-hidden="true">&#8964;</span></summary>
-<div class="absolute z-50 mt-1 max-h-80 w-full overflow-auto rounded-xl border border-slate-200 bg-white shadow-xl">
-<div class="sticky top-0 grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_90px] gap-3 border-b bg-slate-50 px-4 py-2 text-xs font-black uppercase tracking-wide text-slate-500"><span>Tray #</span><span>Location</span><span class="text-right">Blades</span></div>
-<button *ngFor="let x of filteredExpected" type="button" class="grid w-full grid-cols-[minmax(0,2fr)_minmax(0,1fr)_90px] gap-3 border-b border-slate-100 px-4 py-2 text-left hover:bg-slate-50" [disabled]="busy" (click)="chooseTray(x.tray.serial_number); r29ReceiveTray.removeAttribute('open')"><span class="font-semibold">{{x.tray.serial_number}}</span><span>{{container?.serial_number || 'At coater'}}</span><span class="text-right">{{x.tray.blade_count ?? 0}}</span></button>
-</div></details></div></div>
-
-  <div *ngIf="pendingTray" class="rounded-2xl border border-blue-200 bg-blue-50 p-4">
-    <div class="text-xs font-bold uppercase text-blue-700">Selected Tray</div>
-    <div class="mt-1 text-xl font-bold">{{ pendingTray.serial_number }}</div>
-    <div class="mt-1 text-sm text-slate-600">
-      After coating this tray is READY FOR CUTTER. Scan its shelf-location tag to complete receiving.
-    </div>
-  </div>
-
-  <gear-scan-panel class="block w-full"
-    #shelfScanner
-    *ngIf="pendingTray"
-    [step]="3"
-    label="Scan Cuttergrind Finished Shelf"
-    [disabled]="busy"
-    (scanned)="scanShelf($event)"
-  />
-  <div *ngIf="pendingTray" class="gear-panel p-5">
-    <div class="mb-2 text-center text-xs font-black uppercase tracking-wider text-slate-400">OR</div>
-    <label class="text-sm font-semibold">Eligible Finished Shelf
-      <select class="mt-1 w-full rounded-xl border px-4 py-3" [disabled]="busy" (change)="chooseShelf($any($event.target).value); $any($event.target).value=''">
-        <option value="">Choose available {{pendingTray.part_type?.code}} finished shelf...</option>
-        <option *ngFor="let location of eligibleFinishedShelves" [value]="location.serial_number">{{location.serial_number}} · {{location.description || 'Available shelf'}}</option>
-      </select>
-    </label>
-    <p *ngIf="!eligibleFinishedShelves.length" class="mt-2 text-sm text-amber-700">No empty compatible finished shelves are currently available.</p>
-  </div>
-
-  <button
-    *ngIf="pendingTray"
-    type="button"
-    (click)="cancelPendingTray()"
-    [disabled]="busy"
-    class="w-full rounded-xl border bg-white px-5 py-3 font-bold text-slate-700"
-  >
-    Cancel Tray Selection
-  </button>
-
-  <div *ngIf="container" class="grid gap-4 lg:grid-cols-2">
-    <div class="rounded-2xl border bg-white">
-      <div class="border-b p-4 font-bold">Expected ({{ expected.length }})</div>
-      <div *ngFor="let x of filteredExpected" class="border-b p-4">{{ x.tray.serial_number }}</div>
-      <div *ngIf="!expected.length" class="p-5 text-emerald-700">All expected trays received.</div>
+    <div class="gear-panel op-step">
+      <gear-scan-panel #containerScanner [step]="1" label="Scan Returned Container" buttonText="Select" changeText="Stop / change container"
+        [doneValue]="container?.serial_number ?? null" [disabled]="busy" (scanned)="scanContainer($event)" (reopen)="stopReceiving()">
+        <gear-option-picker placeholder="Choose container…" [headers]="['Container', 'Blades', 'Trays']" [options]="containerOptions"
+          emptyText="No containers are waiting to come back from the coater." [disabled]="busy" (picked)="chooseContainer($event)" />
+      </gear-scan-panel>
     </div>
 
-    <div class="rounded-2xl border bg-white">
-      <div class="border-b p-4 font-bold">Received To Shelf ({{ received.length }})</div>
-      <div *ngFor="let tray of received" class="border-b p-4">{{ tray.serial_number }}</div>
-    </div>
+    @if (container && (expected.length || pendingTray)) {
+      <div class="gear-panel op-step">
+        <gear-scan-panel #trayScanner [step]="2" label="Scan Tray Out" changeText="Choose another tray"
+          [doneValue]="pendingTray?.serial_number ?? null" [disabled]="busy" (scanned)="scanTray($event)" (reopen)="cancelPendingTray()">
+          <gear-option-picker placeholder="Choose tray…" [headers]="['Tray', 'Part', 'Blades']" [options]="trayOptions"
+            emptyText="Every expected tray is received." [disabled]="busy" (picked)="chooseTray($event)" />
+        </gear-scan-panel>
+      </div>
+    }
+
+    @if (pendingTray) {
+      <div class="gear-panel op-step">
+        <gear-scan-panel #shelfScanner [step]="3" [label]="'Scan ' + shelfPrefix + ' Finished Shelf'"
+          [help]="'Tray ' + pendingTray.serial_number + ' (' + (pendingTray.part_type?.code || 'no part type') + ') is ready for cutter. Put it on an empty ' + shelfPrefix + ' shelf bin, such as ' + shelfPrefix + '-A1A (shelf, layer, bin).'"
+          [disabled]="busy" (scanned)="scanShelf($event)">
+          <gear-option-picker [placeholder]="'Choose empty ' + shelfPrefix + ' shelf…'" [headers]="['Shelf', 'Description']" [options]="shelfOptions"
+            [emptyText]="'No empty ' + shelfPrefix + ' shelves are available. Free one up, or ask a supervisor.'" [disabled]="busy" (picked)="chooseShelf($event)" />
+        </gear-scan-panel>
+      </div>
+    }
+
+    @if (container) {
+      <div class="op-primary">
+        <button type="button" class="gear-btn gear-btn-primary" (click)="finish()" [disabled]="busy || expected.length > 0 || !!pendingTray">Finish Receiving {{ container.serial_number }}</button>
+        @if (finishBlockedReason) { <p class="op-blocked" role="status">{{ finishBlockedReason }}</p> }
+      </div>
+    }
   </div>
 
-  <button
-    *ngIf="container"
-    (click)="finish()"
-    [disabled]="busy || expected.length > 0 || !!pendingTray"
-    class="w-full rounded-xl bg-emerald-600 px-5 py-4 font-bold text-white disabled:opacity-40"
-  >
-    Finish Receiving Container
-  </button>
+  <div class="op-context">
+    @if (pickerError) {
+      <div class="gear-panel op-card" role="alert">
+        <span class="op-card-eyebrow">Lists unavailable</span>
+        <p>{{ pickerError }}</p>
+        <button type="button" class="gear-btn gear-btn-secondary" (click)="refreshPickers()" [disabled]="busy">Retry</button>
+      </div>
+    }
+
+    @if (container) {
+      <div class="gear-panel op-card">
+        <span class="op-card-eyebrow">Receiving</span>
+        <span class="op-card-title">{{ container.serial_number }}</span>
+        <span class="text-lg font-bold">{{ received.length }} of {{ totalTrays }} trays received</span>
+        <div class="op-progress" aria-hidden="true"><span [style.width.%]="totalTrays ? (received.length / totalTrays) * 100 : 0"></span></div>
+      </div>
+
+      <div class="gear-panel overflow-hidden">
+        <div class="op-card"><span class="op-card-eyebrow">Expected ({{ expected.length }})</span></div>
+        <ul class="op-list" aria-label="Trays still expected">
+          @for (x of expected; track x.tray_id) {
+            <li>
+              @if (!pendingTray) {
+                <button type="button" [disabled]="busy" (click)="chooseTray(x.tray.serial_number)" [attr.aria-label]="'Receive tray ' + x.tray.serial_number">
+                  <strong>{{ x.tray.serial_number }}</strong><span>{{ x.tray.part_type?.code || '—' }} · {{ x.tray.blade_count }} blades</span>
+                </button>
+              } @else {
+                <strong>{{ x.tray.serial_number }}</strong><span>{{ x.tray.part_type?.code || '—' }} · {{ x.tray.blade_count }} blades</span>
+              }
+            </li>
+          } @empty {
+            <li class="font-bold text-emerald-700">All expected trays received.</li>
+          }
+        </ul>
+      </div>
+
+      <div class="gear-panel overflow-hidden">
+        <div class="op-card"><span class="op-card-eyebrow">Received to shelf ({{ received.length }})</span></div>
+        <ul class="op-list" aria-label="Trays received">
+          @for (tray of received; track tray.id) {
+            <li><strong>{{ tray.serial_number }}</strong><span>→ {{ receivedShelves[tray.id] || 'Shelved' }}</span></li>
+          } @empty {
+            <li class="text-slate-500">None yet in this session.</li>
+          }
+        </ul>
+      </div>
+    } @else {
+      <div class="gear-panel op-card">
+        <span class="op-card-eyebrow">Shelf rule</span>
+        <p>Coated RING trays go to an empty <strong>CGFR</strong> shelf bin such as <strong>CGFR-A1A</strong> (shelf, layer, bin); PINION trays to an empty <strong>CGFP</strong> bin.</p>
+      </div>
+    }
+  </div>
 </section>
