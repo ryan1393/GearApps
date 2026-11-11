@@ -121,7 +121,9 @@ Docker host behind your active **SSH Docker context** (`docker context use <name
       newest 20 kept); a failed backup stops the deploy;
    2. copies the source to `~/dana-apps`, keeping the previous release in `~/dana-apps.prev`
       and the host's own `.env`;
-   3. runs `docker compose build` and `up -d` (never `down`, never touches volumes);
+   3. runs `docker compose build` and `up -d` (never `down`, never touches volumes); when the
+      Lapper Read collector (`--profile collectors`) already has a container on the host, it is
+      rebuilt and restarted with the release too (a host that never started it is left alone);
    4. waits for every service and checks that the API reports `70.5.0`. Only then does the old
       release become `~/dana-apps.prev`. If the deploy fails, the last good release is protected
       (a retry discards the failed one) and `--rollback` brings it back.

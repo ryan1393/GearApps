@@ -31,6 +31,9 @@
     part used by a gearset; its status can still change.
   - As in the other apps, master data is for administrators only: the Lapper sidebar and dashboard
     show these links to admins.
+- **Deploy keeps the collector current.** When the Lapper Read collector already runs on the host,
+  the deploy rebuilds its image and restarts it with the release; before, it kept running the old
+  image until it was rebuilt by hand. A host that never started the collector is left alone.
 - **Connect the Docker collector from Lapper.** Configuration → Collector Tokens has a
   **Connect Docker collector** button: the API issues the collector its own token on a private
   volume shared only with the `lapper-read` container (new `lapper_read_credentials` volume),
