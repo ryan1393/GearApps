@@ -44,6 +44,16 @@ class ScannerMonitorTests(unittest.TestCase):
         accept.start()
         try:
             self.assertTrue(port_open("127.0.0.1", port, 1))
+            accept.join(1)
         finally:
             server.close()
-        self.assertFalse(port_open("127.0.0.1", port, 0.5))
+
+    def test_port_check_against_a_closed_port(self):
+        # Bound but not listening: the port stays reserved for this test, so
+        # nothing else can take it, and every connect is refused.
+        reserved = socket.socket()
+        reserved.bind(("127.0.0.1", 0))
+        try:
+            self.assertFalse(port_open("127.0.0.1", reserved.getsockname()[1], 0.5))
+        finally:
+            reserved.close()
