@@ -10,7 +10,7 @@ const apps={
     app:'apps/blade-tracking',
     feature:'libs/manufacturing/frontend/feature-blade-tracking',
     base:'/blades',
-    routes:['','internal-movement','load-container','coater-shipments','receive-container','tray-contents','intake','inventory','all-inventory','locations','scrap-blades','cancel-last','grinding','body-shelves'],
+    routes:['','operations','internal-movement','load-container','coater-shipments','receive-container','tray-contents','intake','inventory','all-inventory','locations','scrap-blades','cancel-last','grinding','body-shelves'],
   },
   cutter:{
     app:'apps/cutter-builder',

@@ -1,0 +1,22 @@
+<section class="gear-page ops-station" aria-label="Blade operations">
+  <nav danaTabs class="ops-station-tabs" aria-label="Operation">
+    @for (operation of operations; track operation.key) {
+      <button danaTab type="button" class="ops-station-tab" [active]="active() === operation.key"
+        [attr.aria-controls]="'ops-station-panel'" [attr.data-operation]="operation.key" (click)="select(operation.key)">
+        <span class="gear-glyph gear-glyph-{{ operation.icon }}" aria-hidden="true"></span>
+        <span>{{ operation.label }}</span>
+      </button>
+    }
+  </nav>
+
+  <div id="ops-station-panel" class="ops-station-work" role="tabpanel" [attr.data-operation]="active()">
+    @switch (active()) {
+      @case ('intake') { <gear-blade-intake /> }
+      @case ('grinding') { <gear-blade-grinding /> }
+      @case ('load-container') { <gear-load-container /> }
+      @case ('coater-shipments') { <gear-coater-shipments /> }
+      @case ('receive-container') { <gear-receive-container /> }
+      @case ('internal-movement') { <gear-internal-movement /> }
+    }
+  </div>
+</section>

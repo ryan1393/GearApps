@@ -1,6 +1,7 @@
 import { WorkflowCancellationComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { Route } from '@angular/router';
 import { departmentEditorGuard } from '@meshforge/manufacturing/frontend/data-access-common';
+import { BLADE_OPERATIONS } from './pages/operations-station/operations-station.operations';
 import { BladeTrackingShellComponent } from './shell/blade-tracking-shell.component';
 
 export const frontendFeatureBladeTrackingRoutes: Route[] = [
@@ -10,14 +11,11 @@ export const frontendFeatureBladeTrackingRoutes: Route[] = [
     children: [
       { path: 'cancel-last', canActivate: [departmentEditorGuard('BLADE_TRACKING')], component: WorkflowCancellationComponent, data: { cancellationApp: 'blade-tracking' } },
       { path: '', pathMatch: 'full', loadComponent: () => import('./pages/dashboard/dashboard.component').then((m) => m.DashboardComponent) },
-      { path: 'internal-movement', canActivate: [departmentEditorGuard('BLADE_TRACKING')], loadComponent: () => import('./pages/internal-movement/internal-movement.component').then((m) => m.InternalMovementComponent) },
-      { path: 'coater-shipments', canActivate: [departmentEditorGuard('BLADE_TRACKING')], loadComponent: () => import('./pages/coater-shipments/coater-shipments.component').then(m => m.CoaterShipmentsComponent) },
-      { path: 'load-container', canActivate: [departmentEditorGuard('BLADE_TRACKING')], loadComponent: () => import('./pages/load-container/load-container.component').then((m) => m.LoadContainerComponent) },
-      { path: 'receive-container', canActivate: [departmentEditorGuard('BLADE_TRACKING')], loadComponent: () => import('./pages/receive-container/receive-container.component').then((m) => m.ReceiveContainerComponent) },
+      { path: 'operations', canActivate: [departmentEditorGuard('BLADE_TRACKING')], loadComponent: () => import('./pages/operations-station/operations-station.component').then((m) => m.OperationsStationComponent) },
+      // The separate operation pages are now tabs of the operations station; keep their old URLs working.
+      ...BLADE_OPERATIONS.map(({ key }): Route => ({ path: key, pathMatch: 'full', redirectTo: `/blades/operations?op=${key}` })),
       { path: 'tray-contents', canActivate: [departmentEditorGuard('BLADE_TRACKING')], loadComponent: () => import('./pages/tray-contents/tray-contents.component').then((m) => m.TrayContentsComponent) },
-      { path: 'intake', canActivate: [departmentEditorGuard('BLADE_TRACKING')], loadComponent: () => import('./pages/intake/intake.component').then((m) => m.IntakeComponent) },
       { path: 'body-shelves', canActivate: [departmentEditorGuard('BLADE_TRACKING')], loadComponent: () => import('./pages/body-shelves/body-shelves.component').then((m) => m.BodyShelvesComponent) },
-      { path: 'grinding', canActivate: [departmentEditorGuard('BLADE_TRACKING')], loadComponent: () => import('./pages/grinding/grinding.component').then((m) => m.GrindingComponent) },
       { path: 'inventory', canActivate: [departmentEditorGuard('BLADE_TRACKING')], loadComponent: () => import('./pages/inventory-lookup/inventory-lookup.component').then((m) => m.InventoryLookupComponent) },
       { path: 'all-inventory', canActivate: [departmentEditorGuard('BLADE_TRACKING')], loadComponent: () => import('./pages/inventory-overview/inventory-overview.component').then((m) => m.InventoryOverviewComponent) },
       { path: 'locations', canActivate: [departmentEditorGuard('BLADE_TRACKING')], loadComponent: () => import('./pages/locations/blade-locations.component').then((m) => m.BladeLocationsComponent) },

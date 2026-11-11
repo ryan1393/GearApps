@@ -81,7 +81,7 @@ for(const [file,app] of controllerRules){
 }
 
 const routeRules=[
-  ['libs/manufacturing/frontend/feature-blade-tracking/src/lib/lib.routes.ts','BLADE_TRACKING',["internal-movement","load-container","receive-container","tray-contents","intake","inventory","all-inventory","locations"]],
+  ['libs/manufacturing/frontend/feature-blade-tracking/src/lib/lib.routes.ts','BLADE_TRACKING',["operations","tray-contents","inventory","all-inventory","locations"]],
   ['libs/manufacturing/frontend/feature-cutter-builder/src/lib/cutter-builder.routes.ts','CUTTER_BUILDER',["build","teardown","lookup"]],
   ['libs/manufacturing/frontend/feature-greenshed/src/lib/greenshed.routes.ts','GREENSHED',["machines","setup","check","pull","lookup"]],
 ];
