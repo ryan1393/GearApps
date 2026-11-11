@@ -41,18 +41,79 @@ trimmed and upper-cased exactly as it is stored; no character is removed, so pos
 | 5–7 | Body size (`064`, `076`, `088`, `105`, leading zeros kept) |
 | 8 | Special rule (`8` on a 105 body = 105 Special) |
 
-A body is **unresolved** (no capacity, cannot be built) when it has no Dana S/N, the Dana S/N is
-shorter than 8 characters, contains anything other than letters and digits, has an unsupported size,
-or conflicts with its linked body definition (size, hand, blade family, supplier or head).
-Admin > Cutter Bodies shows the decoded fields, the body rule and Required Blades read-only on each card.
+A body is **unresolved** (no capacity, cannot be built) when its Dana S/N is shorter than 8
+characters, contains anything other than letters and digits, has an unsupported size, or conflicts
+with its linked body definition (size, hand, blade family, supplier or head). A malformed Dana S/N
+never falls back to the definition, and Admin refuses to save one (create, edit or Dana assignment).
+Admin > Cutter Bodies shows the decoded fields, the definition, the body rule and Required Blades
+read-only on each card.
+
+### Unetched bodies (MF S/N only)
+
+A legitimate unetched body has no Dana S/N. It is looked up and built by its MF S/N and takes its
+rule from its **explicitly linked body definition** (Admin > Cutter Bodies > Body Definition):
+
+- `CG?T064`, `CG?T076`, `CG?T088` definitions → 064 / 076 / 088 Standard.
+- `CG?T105` definitions → **unresolved**: 105 Standard (38) or 105 Special (26) is known only from the
+  8th Dana S/N character, so it is never guessed. Assign the Dana S/N first.
+- No Dana S/N and no definition → unresolved. The MF serial is never decoded.
+
+Assigning the Dana S/N later updates the same `cutter_bodies` row, so the body keeps its identity,
+builds and history; the Dana S/N must agree with the linked definition.
+
+## Which body types a Summary + Part Type may use
+
+For each Summary + Part Type requirement the permitted cutter-body definitions are **every enabled
+definition of the Summary's effective Body Size Rule size**:
+
+| Effective rule | Permitted definitions (current base data) | Per-body condition |
+|---|---|---|
+| 064 Standard | none configured — no 064 definition exists yet | — |
+| 076 Standard | CGLT076, CGRT076 | — |
+| 088 Standard | CGLT088, CGRT088 | — |
+| 105 Standard | CGLT105, CGRT105 | 8th Dana S/N character is not `8` |
+| 105 Special | CGLT105, CGRT105 | 8th Dana S/N character is `8` |
+| Unresolved / conflicting | none | set or fix the Body Size Rule |
+
+- **Not restrictions:** body hand (R/L), supplier and Tri-ac/Pent-ac family. No approved rule ties them
+  to a Summary, Part Type or HOS; they are only cross-checked between a body's own Dana S/N and its
+  own definition. Body hand is not HOS and is not inferred from RING/PINION.
+- **Kept legacy check:** a definition whose blade family is literally named `RING` or `PINION` takes only
+  that Part Type (no current definition is named that way).
+- **Disabled definition:** a body linked to a disabled definition is not a permitted type.
+- A body without a definition link is judged by its Dana S/N rule alone.
+- Bodies are not dedicated to a Summary: any free body of a permitted type can be used for any
+  eligible Summary, whatever it built before.
+
+Type compatibility is separate from availability. A permitted body can still be unavailable (open
+build, on a machine, disabled, no current shelf observation); availability and the build check say so
+separately.
+
+One evaluation (`evaluateCutterBodyCompatibility`, with the body's definition) is used by:
+Cutter Builder build submission (server), `POST /api/v1/cutter-config/validate-tray` with
+`cutter_body_identifier` (server; returns `body_compatible`/`body_available` separately), the Cutter
+Builder body pick list and compatible-tray list (the pick list now carries each body's definition, as
+the scan does), and inventory availability. The matrix itself:
+
+```bash
+GET /api/v1/cutter-config/body-compatibility[?summary_id=…]   # live, per Summary + Part Type
+npm run audit:cutter-blade-rules -- --matrix                   # live database, read-only
+npm run report:cutter-body-matrix                              # packaged base data only
+```
+
+[CUTTER_BODY_COMPATIBILITY_MATRIX.md](CUTTER_BODY_COMPATIBILITY_MATRIX.md) holds the base-data matrix
+(a fresh import, no Body Size Rules configured).
 
 ## Summary Body Size Rule
 
 Required blade quantity belongs to the Summary: its RING and PINION rows always carry the same
 quantity, and changing one moves the other. Part Type rows stay separate; handedness and blade labels
 are not inferred from Part Type (for example 30538 and 30588 PINION use LH IB + RH IB, HOS LH).
+This repository stores HOS once per Summary (`part_summaries.hos`); it has no per-Part-Type HOS and
+no Inner/Outer blade-label fields, so those are not part of any compatibility check.
 
-Admin > Part Summaries shows each Summary's Body Size Rule and its Required Blades (read-only):
+Admin > Part Summaries shows each Summary's Body Size Rule, its Required Blades (read-only) and
+its permitted cutter-body types:
 
 - **Configured** — set in Admin (table `cutter_summary_body_rules`). The rule controls the quantity
   for every existing Part Type row; a quantity edit that disagrees is refused. Missing Part Type

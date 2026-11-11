@@ -12,6 +12,32 @@
   `cycle_time_s` (0 to 86400, up to 3 decimals), so collectors that do not send it are unaffected;
   `history-page` returns each cycle's time and `cycle_time.average_s`. An upgraded collector
   talking to an API that is not upgraded yet sends the cycle again without the time.
+- **Cutter-body compatibility: which body types a Summary + Part Type may use.** One shared check
+  now answers "which cutter-body definitions can these blades be loaded into?" and the API enforces it
+  everywhere. See `docs/manufacturing/CUTTER_BODY_BLADE_RULES.md`.
+  - **Unetched bodies work again.** 70.6.0 made every body without a Dana S/N unbuildable. An MF-only
+    body now takes its 064/076/088 rule from its explicitly linked body definition; an unetched 105
+    stays unresolved because only the 8th Dana S/N character tells 105 Standard from 105 Special.
+    Assigning the Dana S/N later keeps the same body row and history.
+  - **One answer on screen and on the server.** The Cutter Builder body pick list did not load each
+    body's definition, so it could show a body as usable that the build then refused (the scan and
+    the build check did load it). It now does, and tray validation accepts the body
+    (`cutter_body_identifier`) and returns the API's type compatibility (`body_compatible`) and
+    availability (`body_available`) separately; the screen follows that answer. Unresolved bodies are
+    shown but cannot be picked.
+  - **Disabled body definitions** are no longer accepted as a permitted type (build, tray validation,
+    availability).
+  - **Bad Dana S/Ns are refused when entered** (create, edit, Dana assignment) instead of being saved
+    and silently making the body unbuildable; a Dana S/N must also agree with the linked definition.
+    Unchanged legacy values are left alone.
+  - **Admin.** Cutter Bodies has a Body Definition picker and shows the definition and where the rule
+    came from; Part Summaries lists each Summary's permitted cutter-body types.
+  - **Matrix.** New `GET /api/v1/cutter-config/body-compatibility` and
+    `GET /api/v1/cutter-builder/cutter-body-definitions` (119 routes); `npm run audit:cutter-blade-rules --
+    --matrix` prints it from the live database (read-only) and `npm run report:cutter-body-matrix` from
+    the packaged base data (`docs/manufacturing/CUTTER_BODY_COMPATIBILITY_MATRIX.md`).
+  - Hand, supplier and Tri-ac/Pent-ac family are still not restrictions (no approved rule ties them to
+    a Summary, Part Type or HOS). No schema change, no data migration, no quantity changes.
 
 ## 70.6.0 (2026-11-11)
 

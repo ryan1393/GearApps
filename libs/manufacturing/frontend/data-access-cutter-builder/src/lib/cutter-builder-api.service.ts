@@ -10,12 +10,20 @@ export interface CutterBody {
   mf_serial_number: string | null;
   description: string | null;
   definition_id: string | null;
+  /** The body type. The shared rule check reads its codes and enabled flag, as the API does. */
   definition?: {
+    id?: string;
     definition_code: string;
+    cutter_head_code?: string | null;
+    supplier_code?: string | null;
     supplier_name: string;
+    hand_code?: string | null;
     hand_name: string;
+    blade_family_code?: string | null;
     blade_family_name: string;
+    size_code?: string | null;
     size_description: string | null;
+    enabled?: boolean;
   } | null;
   enabled: boolean;
 }
@@ -208,6 +216,13 @@ export interface CutterTrayValidation {
   already_assigned_to_build: boolean;
   still_in_container: boolean;
   tray_stage_ready: boolean;
+  /** Present when the body was sent: the API's own type-compatibility and availability answer. */
+  cutter_body_id?: string | null;
+  body_compatible?: boolean;
+  body_rule?: string | null;
+  body_reason?: string | null;
+  body_available?: boolean;
+  body_availability_reason?: string | null;
   reason?: string;
 }
 
@@ -251,7 +266,8 @@ export class CutterBuilderApiService {
     });
   }
 
-  validateTray(tray: ITray) {
+  /** With a body serial, the API also checks that body against the tray's Summary + Part Type. */
+  validateTray(tray: ITray, cutterBodyIdentifier?: string | null) {
     if (!tray.summary_id || !tray.part_type_id) {
       throw new Error('Tray is missing Summary or Part Type.');
     }
@@ -262,6 +278,7 @@ export class CutterBuilderApiService {
         summary_id: tray.summary_id,
         part_type_id: tray.part_type_id,
         tray_serial_number: tray.serial_number,
+        ...(cutterBodyIdentifier ? { cutter_body_identifier: cutterBodyIdentifier } : {}),
       },
     );
   }
