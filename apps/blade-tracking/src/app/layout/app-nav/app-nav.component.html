@@ -54,7 +54,7 @@
   <header class="gear-topbar">
     <button class="menu-button" type="button" aria-label="Open navigation" [attr.aria-expanded]="mobileNav.open" (click)="mobileNav.toggle()">☰</button>
 
-    <form *ngIf="canEdit(user)" class="global-search" (ngSubmit)="search()">
+    <form *ngIf="canEdit(user) && !onOperationsStation()" class="global-search" (ngSubmit)="search()">
       <span class="search-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span>
       <input type="text" name="globalSearch" [(ngModel)]="searchValue" placeholder="Scan tray, container, or location…" aria-label="Scan tray, container, or location" autocomplete="off" />
       <button type="submit" aria-label="Search"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></button>

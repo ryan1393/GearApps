@@ -15,18 +15,19 @@ import {
   apiErrorText,
 } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
 import { ScanMessage } from '../../models/scan-message';
+import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/option-picker.component';
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
-import {
-  DanaPageHeaderComponent,
-} from '@dana/ui';
+import { StationStatusComponent } from '../../shared/station-status/station-status.component';
+import { StationOperation } from '../operations-station/operations-station.operations';
+import { DanaPageHeaderComponent } from '@dana/ui';
 
 @Component({
   selector: 'gear-receive-container',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScanPanelComponent, DanaPageHeaderComponent],
+  imports: [DanaPageHeaderComponent, CommonModule, FormsModule, ScanPanelComponent, StationStatusComponent, OptionPickerComponent],
   templateUrl: './receive-container.component.html',
 })
-export class ReceiveContainerComponent implements OnDestroy {
+export class ReceiveContainerComponent implements OnDestroy, StationOperation {
   private readonly destroyed$ = new Subject<void>();
   ngOnDestroy(): void { this.destroyed$.next(); this.destroyed$.complete(); }
   private readonly api = inject(BladeTrackingApiService);
@@ -41,6 +42,59 @@ export class ReceiveContainerComponent implements OnDestroy {
   received: ITray[] = [];
   pendingTray: ITray | null = null;
   pendingShelf: ILocation | null = null;
+  /** Where each tray received in this session was put, by tray id. */
+  receivedShelves: Record<string, string> = {};
+
+  get inProgress(): boolean { return Boolean(this.container); }
+  stationActivated(): void { if (!this.busy) this.refreshPickers(); }
+  /** The finished shelf series for the selected tray: CGFR for RING, CGFP for PINION. */
+  get shelfPrefix(): string { return this.pendingTray?.part_type?.code?.trim().toUpperCase() === 'RING' ? 'CGFR' : 'CGFP'; }
+  get totalTrays(): number { return this.expected.length + this.received.length; }
+  get containerOptions(): PickerOption[] {
+    return this.filteredContainers.map((item) => ({ value: item.serial_number, cells: [item.serial_number, item.blade_count ?? '-', item.tray_count ?? '-'] }));
+  }
+  get trayOptions(): PickerOption[] {
+    return this.filteredExpected.map((x) => ({ value: x.tray.serial_number, cells: [x.tray.serial_number, x.tray.part_type?.code || '—', x.tray.blade_count ?? 0] }));
+  }
+  get shelfOptions(): PickerOption[] {
+    return this.eligibleFinishedShelves.map((location) => ({ value: location.serial_number, cells: [location.serial_number, location.description || 'Empty shelf'] }));
+  }
+  /** What the operator should do next, shown when there is no message. */
+  get prompt(): string {
+    if (this.busy) return 'Working…';
+    if (!this.container) return 'Scan the returned container, or choose it from the list.';
+    if (this.pendingTray) return `Put tray ${this.pendingTray.serial_number} on an empty ${this.shelfPrefix} shelf and scan the shelf tag.`;
+    if (this.expected.length) return `Scan the next tray out of ${this.container.serial_number}: ${this.expected.length} still expected.`;
+    return `Every tray is received. Tap Finish Receiving ${this.container.serial_number}.`;
+  }
+  get finishBlockedReason(): string {
+    if (!this.container || this.busy) return '';
+    if (this.pendingTray) return `Finish shelving tray ${this.pendingTray.serial_number} first.`;
+    if (this.expected.length) return `${this.expected.length} tray${this.expected.length === 1 ? ' is' : 's are'} still expected. If one is missing, tap Stop to come back later.`;
+    return '';
+  }
+
+  /**
+   * Leave this container without finishing it, e.g. when a tray is missing. Every tray already
+   * shelved is saved; scanning the container again picks up the trays still expected.
+   */
+  stopReceiving(): void {
+    if (this.busy || !this.container) return;
+    const serial = this.container.serial_number;
+    const left = this.expected.length;
+    const done = this.received.length;
+    this.container = null;
+    this.expected = [];
+    this.received = [];
+    this.receivedShelves = {};
+    this.pendingTray = null;
+    this.pendingShelf = null;
+    this.refreshPickers();
+    this.message = {
+      tone: 'info',
+      text: `Stopped receiving ${serial}: ${done} received, ${left} still expected. Scan it again to continue.`,
+    };
+  }
   availableContainers:InventoryContainerRow[]=[]; availableLocations:ILocation[]=[]; selectedContainerSerial=''; selectedTraySerial=''; containerSearch=''; traySearch='';
   get eligibleFinishedShelves():ILocation[]{
     const type=this.pendingTray?.part_type?.code?.trim().toUpperCase();
@@ -78,7 +132,7 @@ export class ReceiveContainerComponent implements OnDestroy {
     this.api.scanContainer(serial).pipe(takeUntil(this.destroyed$)).subscribe({
       next: (container) => {
         if (!container.workflow_eligibility?.receive) {
-          this.busy = false; this.message = { tone: 'error', text: 'Only an enabled container with trays awaiting coater return can be received.' }; return;
+          this.busy = false; this.message = { tone: 'error', text: `${container.serial_number} has no trays waiting to come back from the coater. Check the container number.` }; this.containerScanner?.select(); return;
         }
         this.container = container;
         this.api.getActiveContainerTrays(container.id).pipe(takeUntil(this.destroyed$)).subscribe({
@@ -115,7 +169,7 @@ export class ReceiveContainerComponent implements OnDestroy {
           this.busy = false;
           this.message = {
             tone: 'error',
-            text: `Tray ${tray.serial_number} is not expected in ${this.container?.serial_number}.`,
+            text: `Tray ${tray.serial_number} is not on the expected list for ${this.container?.serial_number}. Check the tray, or choose one from the list.`,
           };
           this.trayScanner?.clearAndFocus();
           return;
@@ -200,10 +254,11 @@ export class ReceiveContainerComponent implements OnDestroy {
               this.refreshPickers();
               this.expected = this.expected.filter((x) => x.tray_id !== tray.id);
               this.received = [tray, ...this.received];
+              this.receivedShelves = { ...this.receivedShelves, [tray.id]: location.serial_number };
               this.pendingTray = null;
               this.pendingShelf = null;
               this.busy = false;
-              this.message = null;
+              this.message = { tone: 'success', text: `Tray ${tray.serial_number} received onto ${location.serial_number}.` };
               this.toast.success(
                 `Tray ${tray.serial_number} received and stored at ${location.serial_number}.`,
                 'Tray received',
@@ -234,8 +289,9 @@ export class ReceiveContainerComponent implements OnDestroy {
     this.container = null;
     this.refreshPickers();
     this.received = [];
+    this.receivedShelves = {};
     this.expected = [];
-    this.message = null;
+    this.message = { tone: 'success', text: `${serial} received: ${count} tray${count === 1 ? '' : 's'} shelved. Scan the next container.` };
     this.toast.success(
       `${serial} receiving complete. ${count} trays unloaded to tagged shelf locations.`,
       'Container received',

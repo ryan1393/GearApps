@@ -1,46 +1,60 @@
-<section class="gear-page space-y-5">
+<section class="gear-page op-page">
   <header class="gear-page-header" danaPageHeader eyebrow="INTERNAL MOVEMENT" heading="Move Tray" description="Scan the tray, then the destination location serial."></header>
-  <div *ngIf="pickerError" class="gear-panel px-4 py-3 text-sm" role="alert">{{ pickerError }} <button type="button" (click)="refreshPickers()" [disabled]="busy">Retry available inventory</button></div>
+  <div class="op-steps">
+    <gear-station-status [message]="message" [prompt]="prompt" (dismiss)="message = null" />
 
-  <div *ngIf="message" class="rounded-xl border px-4 py-3 text-sm" [class.border-emerald-200]="message.tone === 'success'" [class.bg-emerald-50]="message.tone === 'success'" [class.text-emerald-800]="message.tone === 'success'" [class.border-red-200]="message.tone === 'error'" [class.bg-red-50]="message.tone === 'error'" [class.text-red-800]="message.tone === 'error'" [class.border-blue-200]="message.tone === 'info'" [class.bg-blue-50]="message.tone === 'info'" [class.text-blue-800]="message.tone === 'info'" [attr.role]="message.tone === 'error' ? 'alert' : 'status'" [attr.aria-live]="message.tone === 'error' ? 'assertive' : 'polite'">{{ message.text }}</div>
-
-  <div class="gear-panel w-full p-5 [&_.gear-panel]:!border-0 [&_.gear-panel]:!bg-transparent [&_.gear-panel]:!p-0 [&_.gear-panel]:!shadow-none [&_.gear-workflow-card]:!border-0 [&_.gear-workflow-card]:!bg-transparent [&_.gear-workflow-card]:!p-0 [&_.gear-workflow-card]:!shadow-none" data-r27="INTERNAL-STEP-1">
-    <gear-scan-panel #trayScanner class="block w-full" [step]="1" label="Scan Tray" help="The current location will be loaded automatically." buttonText="Select" [disabled]="busy" (scanned)="scanTray($event)" />
-    <div class="mt-4 border-t border-slate-200 pt-4">
-      <div class="mb-2 text-center text-xs font-black uppercase tracking-wider text-slate-400">OR</div>
-      <details #r29InternalTray class="relative w-full" data-r29="r29InternalTray">
-<summary class="gear-input flex w-full cursor-pointer list-none items-center justify-between">Choose tray...<span aria-hidden="true">&#8964;</span></summary>
-<div class="absolute z-50 mt-1 max-h-80 w-full overflow-auto rounded-xl border border-slate-200 bg-white shadow-xl">
-<div class="sticky top-0 grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)_90px] gap-3 border-b bg-slate-50 px-4 py-2 text-xs font-black uppercase tracking-wide text-slate-500"><span>Tray #</span><span>Location</span><span class="text-right">Blades</span></div>
-<button *ngFor="let item of availableTrays" type="button" class="grid w-full grid-cols-[minmax(0,2fr)_minmax(0,1fr)_90px] gap-3 border-b border-slate-100 px-4 py-2 text-left hover:bg-slate-50" [disabled]="busy" (click)="chooseTray(item.serial_number); r29InternalTray.removeAttribute('open')"><span class="font-semibold">{{item.serial_number}}</span><span>{{trayLocationLabels[item.id] || 'Unassigned'}}</span><span class="text-right">{{item.blade_count ?? 0}}</span></button>
-</div></details>
+    <div class="gear-panel op-step">
+      <gear-scan-panel #trayScanner [step]="1" label="Scan Tray" help="Its current location loads automatically." buttonText="Select" changeText="Choose another tray"
+        [doneValue]="tray?.serial_number ?? null" [disabled]="busy" (scanned)="scanTray($event)" (reopen)="clearTray()">
+        <gear-option-picker placeholder="Choose tray…" [headers]="['Tray', 'Location', 'Blades']" [options]="trayOptions"
+          emptyText="No trays can be moved right now." [disabled]="busy" (picked)="chooseTray($event)" />
+      </gear-scan-panel>
     </div>
+
+    @if (tray) {
+      <div class="gear-panel op-step">
+        <gear-scan-panel #locationScanner [step]="2" label="Scan Destination Location" help="Scan the location tag where the tray now sits." buttonText="Select"
+          [doneValue]="destination?.serial_number ?? null" [disabled]="busy" (scanned)="scanLocation($event)" (reopen)="destination = null">
+          <gear-option-picker placeholder="Choose destination…" [headers]="['Location', 'Description']" [options]="destinationOptions"
+            emptyText="No other enabled locations are available." [disabled]="busy" (picked)="chooseLocation($event)" />
+        </gear-scan-panel>
+      </div>
+      <div class="op-primary">
+        <button type="button" class="gear-btn gear-btn-primary" [disabled]="busy || !destination" (click)="r27Move()">{{ busy ? 'Moving…' : 'Move Tray' }}</button>
+        @if (moveBlockedReason) { <p class="op-blocked" role="status">{{ moveBlockedReason }}</p> }
+      </div>
+    }
   </div>
 
-  <div *ngIf="tray" class="gear-panel w-full p-5 [&_.gear-panel]:!border-0 [&_.gear-panel]:!bg-transparent [&_.gear-panel]:!p-0 [&_.gear-panel]:!shadow-none [&_.gear-workflow-card]:!border-0 [&_.gear-workflow-card]:!bg-transparent [&_.gear-workflow-card]:!p-0 [&_.gear-workflow-card]:!shadow-none" data-r27="INTERNAL-STEP-2">
-    <gear-scan-panel #locationScanner class="block w-full" [step]="2" label="Scan Destination Location" help="Location serial numbers are scannable." buttonText="Select" [disabled]="busy" (scanned)="scanLocation($event)" />
-    <div class="mt-4 border-t border-slate-200 pt-4">
-      <div class="mb-2 text-center text-xs font-black uppercase tracking-wider text-slate-400">OR</div>
-      <label class="text-sm font-semibold">Eligible Destination
-        <select class="mt-1 w-full rounded-xl border px-4 py-3" [disabled]="busy" (change)="chooseLocation($any($event.target).value); $any($event.target).value=''">
-          <option value="">Choose destination...</option>
-          <option *ngFor="let location of eligibleLocations" [value]="location.serial_number">{{location.serial_number}} · {{location.description || location.location_type || 'Location'}}</option>
-        </select>
-      </label>
-    </div>
-  </div>
+  <div class="op-context">
+    @if (pickerError) {
+      <div class="gear-panel op-card" role="alert">
+        <span class="op-card-eyebrow">Lists unavailable</span>
+        <p>{{ pickerError }}</p>
+        <button type="button" class="gear-btn gear-btn-secondary" (click)="refreshPickers()" [disabled]="busy">Retry</button>
+      </div>
+    }
 
-  <div *ngIf="tray && destination" class="gear-panel p-5">
-    <div danaDetailGrid class="mb-4" data-testid="internal-movement-tray-contents">
-      <dana-detail-item label="Tray">{{ tray.serial_number }}</dana-detail-item>
-      <dana-detail-item label="Summary">{{ tray.summary?.number || 'Unassigned' }}</dana-detail-item>
-      <dana-detail-item label="Part Type">{{ tray.part_type?.code || '—' }}</dana-detail-item>
-      <dana-detail-item label="Blades">{{ tray.blade_count }}</dana-detail-item>
-    </div>
-    <div class="grid gap-4 sm:grid-cols-2">
-      <div><span class="text-xs font-bold text-slate-500">FROM</span><div class="font-mono text-xl font-black">{{ current?.location?.serial_number || 'Unassigned' }}</div><div *ngIf="current?.location?.description" class="text-sm text-slate-500">{{ current?.location?.description }}</div></div>
-      <div><span class="text-xs font-bold text-slate-500">TO</span><div class="font-mono text-xl font-black">{{ destination.serial_number }}</div><div *ngIf="destination.description" class="text-sm text-slate-500">{{ destination.description }}</div></div>
-    </div>
-    <button type="button" class="mt-5 w-full rounded-xl bg-emerald-600 px-5 py-4 font-bold text-white disabled:opacity-40" [disabled]="busy" (click)="r27Move()">{{ busy ? 'Moving...' : 'Move Tray' }}</button>
+    @if (tray) {
+      <div class="gear-panel p-5">
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div><span class="op-card-eyebrow">From</span><div class="op-card-title">{{ current?.location?.serial_number || 'Unassigned' }}</div><div *ngIf="current?.location?.description" class="text-sm text-slate-500">{{ current?.location?.description }}</div></div>
+          <div><span class="op-card-eyebrow">To</span>@if (destination) {<div class="op-card-title">{{ destination.serial_number }}</div><div *ngIf="destination.description" class="text-sm text-slate-500">{{ destination.description }}</div>} @else {<div class="op-card-title">—</div>}</div>
+        </div>
+      </div>
+      <div class="gear-panel p-5">
+        <div danaDetailGrid data-testid="internal-movement-tray-contents">
+          <dana-detail-item label="Tray">{{ tray.serial_number }}</dana-detail-item>
+          <dana-detail-item label="Summary">{{ tray.summary?.number || 'Unassigned' }}</dana-detail-item>
+          <dana-detail-item label="Part Type">{{ tray.part_type?.code || '—' }}</dana-detail-item>
+          <dana-detail-item label="Blades">{{ tray.blade_count }}</dana-detail-item>
+        </div>
+      </div>
+    } @else {
+      <div class="gear-panel op-card">
+        <span class="op-card-eyebrow">No tray selected</span>
+        <p>The tray's current location and contents appear here once it is scanned.</p>
+      </div>
+    }
   </div>
 </section>

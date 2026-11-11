@@ -1,0 +1,249 @@
+/*
+ * Layout of the operation pages inside the operations station. Each page has two areas:
+ *   .op-steps   the status line, the numbered scan steps and the main action (left)
+ *   .op-context what the operator is working on: the tray or container, lists and history (right)
+ * Coater Shipments (.op-wide) is a review screen and uses the full width.
+ * Unencapsulated; every rule is scoped under .ops-station.
+ */
+.ops-station .ops-station-op[hidden] {
+  display: none !important;
+}
+
+/* Each operation keeps its page header for screen readers; the tab and instruction line show it on screen. */
+.ops-station .op-page > header {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ops-station .ops-station-work .gear-page {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.ops-station .op-page:not(.op-wide) {
+  display: grid;
+  gap: 12px;
+}
+
+.ops-station :is(.op-steps, .op-context) {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.ops-station :is(.op-steps, .op-context) > * {
+  margin: 0;
+}
+
+.ops-station .op-step {
+  padding: 16px 20px;
+}
+
+/* A completed step only needs its value and Change button. */
+.ops-station .op-step:has(> gear-scan-panel[data-state='done']) {
+  padding-block: 6px;
+}
+
+/* Steps: the one waiting for a scan stands out, a completed one turns green, one not usable yet fades. */
+.ops-station .op-step:focus-within {
+  border-color: var(--dana-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dana-primary) 22%, transparent);
+}
+
+.ops-station gear-scan-panel[data-state='ready']:focus-within .gear-workflow-step-number {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--dana-primary) 25%, transparent);
+}
+
+.ops-station gear-scan-panel[data-state='done'] .gear-workflow-step-number {
+  background: var(--dana-success) !important;
+}
+
+.ops-station gear-scan-panel[data-state='disabled'] {
+  opacity: .55;
+}
+
+/* Scan steps already sit in a panel; drop the scan panel's own padding. */
+.ops-station .op-step gear-scan-panel > div {
+  padding: 4px 0;
+}
+
+/* The main action of the operation, with the reason when it is not available. */
+.ops-station .op-primary {
+  display: grid;
+  gap: 6px;
+}
+
+.ops-station .ops-station-work .op-primary > button {
+  min-height: 64px !important;
+  width: 100%;
+  font-size: 1.15rem !important;
+  font-weight: 800;
+}
+
+.ops-station .op-blocked {
+  margin: 0;
+  font-weight: 700;
+  color: var(--dana-muted);
+}
+
+/* Context cards: what is selected right now. */
+.ops-station .op-card {
+  display: grid;
+  gap: 4px;
+  padding: 16px 20px;
+}
+
+.ops-station .op-card-eyebrow {
+  font-size: .75rem;
+  font-weight: 900;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--dana-muted);
+}
+
+.ops-station .op-card-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+
+.ops-station .op-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ops-station .op-list > li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--dana-border);
+}
+
+.ops-station .op-list > li > button {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  margin: -6px -8px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ops-station .op-list > li > button:hover {
+  background: var(--dana-neutral-soft);
+}
+
+.ops-station .op-progress {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--dana-neutral-soft);
+}
+
+.ops-station .op-progress > span {
+  display: block;
+  height: 100%;
+  background: var(--dana-success);
+}
+
+/* Touch-sized controls. !important beats the compact `html body .gear-btn` sizing in @dana/ui. */
+.ops-station .ops-station-work :is(.gear-input, .gear-select, select, input:not([type='checkbox']):not([type='radio']), textarea) {
+  min-height: 52px;
+  font-size: 1.05rem;
+}
+
+.ops-station .ops-station-work :is(button, .gear-btn, summary) {
+  min-height: 48px !important;
+  touch-action: manipulation;
+}
+
+.ops-station .ops-station-work .gear-btn {
+  font-size: 1rem !important;
+}
+
+/*
+ * Desktop/touch workstation: the station fills the screen below the top bar and the page does not
+ * scroll. Each area scrolls on its own, and the main action stays at the bottom of the steps.
+ */
+@media (min-width: 1024px) {
+  .gear-page.ops-station {
+    height: calc(100dvh - var(--dana-topbar-height, var(--gear-topbar-height)));
+    overflow: hidden;
+  }
+
+  .ops-station .ops-station-work {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .ops-station .ops-station-op {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .ops-station .op-page:not(.op-wide) {
+    grid-template-columns: minmax(380px, 5fr) minmax(320px, 4fr);
+    gap: 16px;
+    height: 100%;
+  }
+
+  .ops-station :is(.op-steps, .op-context) {
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: 2px 4px 0 2px;
+  }
+
+  /*
+   * The status line stays pinned at the top of the steps and the main action at the bottom; a focused
+   * scan box scrolls clear of both instead of sitting under them.
+   */
+  .ops-station .op-steps {
+    scroll-padding: 84px 0 220px;
+  }
+
+  .ops-station .op-steps > gear-station-status {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    padding-bottom: 4px;
+    background: var(--dana-page);
+  }
+
+  .ops-station .op-primary {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    margin-top: auto;
+    padding: 8px 0 4px;
+    background: var(--dana-page);
+  }
+
+  .ops-station .op-page.op-wide {
+    height: 100%;
+    overflow: auto;
+    overscroll-behavior: contain;
+    align-content: start;
+  }
+}

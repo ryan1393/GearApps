@@ -17,6 +17,18 @@ describe('Blade inventory selection safety', () => {
     component.container = { id: 'old', serial_number: 'OLD' } as IContainer;
     component.scanContainer('MISSING'); expect(component.container).toBeNull(); expect(component.trays).toEqual([]);
   });
+  it('can change container mid-load; trays already loaded stay saved', () => {
+    const api = { getWorkflowContainers: () => of([]), getWorkflowTrays: () => of([]) };
+    TestBed.configureTestingModule({ providers: [{ provide: BladeTrackingApiService, useValue: api }, { provide: GearToastService, useValue: {} }] });
+    const component = TestBed.runInInjectionContext(() => new LoadContainerComponent());
+    component.container = { id: 'c1', serial_number: 'C0012' } as IContainer;
+    component.trays = [{ id: 't1', serial_number: 'T-1', blade_count: 24 }];
+    expect(component.inProgress).toBe(true);
+    component.changeContainer();
+    expect(component.container).toBeNull();
+    expect(component.trays).toEqual([]);
+    expect(component.message?.text).toBe('Stopped loading C0012. 1 tray is saved in it. Scan a container to continue.');
+  });
   it('does not replace a newer lookup result with a late response', () => {
     const first = new Subject<InventoryLookupResult>(); const second = new Subject<InventoryLookupResult>();
     const api = { lookup: jest.fn().mockReturnValueOnce(first).mockReturnValueOnce(second) };
