@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 70.6.0 (2026-11-11)
+
+MeshForge branding and Server Settings in Admin, Launch Setup and Coater RPA for going live,
+Lapper Read sending each cycle (with its cycle time) to Argonaut, shelves that set their part type
+from the barcode and are picked for the tray automatically, cutter-body blade rules read from the
+Dana S/N with a per-Summary Body Size Rule, and one copy of machine data. **Back up the database
+before deploying**: this release drops three unused tables (see below).
+
 - **Database: one copy of machine data, three unused tables removed.** `lapper.machines` no
   longer keeps its own copy of a machine's number, department, cell and description; Lapper reads
   them from `public.machines`, so a change in Admin shows everywhere (the Lapper production
