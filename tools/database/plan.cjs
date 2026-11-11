@@ -4,6 +4,8 @@ const {
   GEARSET_INTEGRITY_SQL,
   GEAR_DATABASE_SCHEMA_LOCK,
   migrationChecksum,
+  legacyMigrationChecksum,
+  LEGACY_NAME_ADOPTION_SQL,
   GEARSET_COMPONENT_INTEGRITY_SQL,
   GEARSET_SCHEMA_SQL,
 } = require('@meshforge/shared/database');
@@ -15,12 +17,18 @@ const { LAPPER_ARCHIVE_GUARD_SQL } = require('../../libs/api/postgres/src/lib/ar
 const literal = (value) => "'" + value.replaceAll("'", "''") + "'";
 function migration(version, sql, condition = 'true') {
   const checksum = migrationChecksum(sql);
+  const legacy = legacyMigrationChecksum(sql);
   if (sql.includes('$meshforge_migration$')) throw new Error('SQL delimiter collision');
   return `DO $meshforge_migration$
 DECLARE installed text;
 BEGIN
   IF ${condition} THEN
     SELECT checksum INTO installed FROM meshforge_meta.schema_migrations WHERE version=${literal(version)};
+    IF installed=${literal(legacy)} AND ${literal(legacy)}<>${literal(checksum)} THEN
+      -- Applied before the rename to MeshForge: same migration, old checksum.
+      UPDATE meshforge_meta.schema_migrations SET checksum=${literal(checksum)} WHERE version=${literal(version)};
+      installed := ${literal(checksum)};
+    END IF;
     IF installed IS NOT NULL AND installed<>${literal(checksum)} THEN
       RAISE EXCEPTION 'Installed migration checksum differs: %',${literal(version)};
     END IF;
@@ -39,6 +47,7 @@ BEGIN;
 SET LOCAL lock_timeout='5s';
 SET LOCAL statement_timeout='120s';
 ${GEAR_DATABASE_SCHEMA_LOCK};
+${LEGACY_NAME_ADOPTION_SQL}
 CREATE SCHEMA IF NOT EXISTS meshforge_meta;
 CREATE TABLE IF NOT EXISTS meshforge_meta.schema_migrations (
   version text PRIMARY KEY,checksum char(64) NOT NULL,

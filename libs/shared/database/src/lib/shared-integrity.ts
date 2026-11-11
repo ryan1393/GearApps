@@ -10,11 +10,50 @@ export const GEAR_DATABASE_SCHEMA_LOCK =
 export const migrationChecksum = (sql: string): string =>
   createHash('sha256').update(sql.replace(/\r\n/g, '\n')).digest('hex');
 
+/**
+ * Before the rename to MeshForge the bookkeeping schema was `gearapps_meta` and the built-in
+ * local accounts used `@gearapps.local` addresses. A database created by that version is adopted
+ * in place: the schema is renamed (its tables, view, function and triggers move with it) and the
+ * local addresses are rewritten. Safe to run every start; it does nothing once adopted.
+ */
+export const LEGACY_NAME_ADOPTION_SQL = `
+DO $meshforge_adoption$
+DECLARE other_objects integer; recorded bigint := 0;
+BEGIN
+  IF to_regnamespace('gearapps_meta') IS NOT NULL THEN
+    IF to_regnamespace('meshforge_meta') IS NOT NULL THEN
+      SELECT (SELECT count(*) FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
+               WHERE n.nspname='meshforge_meta' AND c.relname NOT IN ('schema_migrations','schema_migrations_pkey'))
+           + (SELECT count(*) FROM pg_proc f JOIN pg_namespace n ON n.oid=f.pronamespace WHERE n.nspname='meshforge_meta')
+        INTO other_objects;
+      IF to_regclass('meshforge_meta.schema_migrations') IS NOT NULL THEN
+        EXECUTE 'SELECT count(*) FROM meshforge_meta.schema_migrations' INTO recorded;
+      END IF;
+      IF other_objects>0 OR recorded>0 THEN
+        RAISE EXCEPTION 'Both gearapps_meta and meshforge_meta are in use; keep one and drop the other before starting MeshForge.';
+      END IF;
+      DROP SCHEMA meshforge_meta CASCADE;
+    END IF;
+    ALTER SCHEMA gearapps_meta RENAME TO meshforge_meta;
+  END IF;
+  IF to_regclass('public.users') IS NOT NULL THEN
+    UPDATE public.users u SET email=replace(u.email,'@gearapps.local','@meshforge.local')
+     WHERE u.email LIKE '%@gearapps.local'
+       AND NOT EXISTS (SELECT 1 FROM public.users x
+                        WHERE lower(x.email)=lower(replace(u.email,'@gearapps.local','@meshforge.local')));
+  END IF;
+END $meshforge_adoption$;`;
+
+/** The checksum a migration had when its SQL still named the `gearapps_meta` schema. */
+export const legacyMigrationChecksum = (sql: string): string =>
+  migrationChecksum(sql.replaceAll('meshforge_meta', 'gearapps_meta'));
+
 export async function runDatabaseMigration(
   manager: EntityManager,
   version: string,
   sql: string,
 ): Promise<void> {
+  await manager.query(LEGACY_NAME_ADOPTION_SQL);
   await manager.query('CREATE SCHEMA IF NOT EXISTS meshforge_meta');
   await manager.query(`CREATE TABLE IF NOT EXISTS meshforge_meta.schema_migrations (
     version text PRIMARY KEY, checksum char(64) NOT NULL,
@@ -26,9 +65,16 @@ export async function runDatabaseMigration(
     [version],
   );
   if (installed) {
-    if (installed.checksum !== checksum)
-      throw new Error('Installed database migration checksum differs: ' + version);
-    return;
+    if (installed.checksum === checksum) return;
+    // Applied before the rename: the same migration, recorded under its old checksum.
+    if (installed.checksum === legacyMigrationChecksum(sql)) {
+      await manager.query(
+        'UPDATE meshforge_meta.schema_migrations SET checksum=$2 WHERE version=$1',
+        [version, checksum],
+      );
+      return;
+    }
+    throw new Error('Installed database migration checksum differs: ' + version);
   }
   await manager.query(sql);
   await manager.query(

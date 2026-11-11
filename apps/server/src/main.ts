@@ -11,9 +11,12 @@ import { NestFactory } from '@nestjs/core';
 import { setupSwagger } from './swagger';
 import * as Sentry from '@sentry/node';
 import { configureApi } from './configure-api';
+import { adoptLegacyDatabaseName } from './adopt-legacy-database';
 import { applySavedEnvironmentSettings } from './load-saved-settings';
 
 async function bootstrap() {
+  // A database from before the rename to MeshForge is renamed in place before anything connects.
+  await adoptLegacyDatabaseName();
   // Settings saved in Admin > Server Settings join the environment first. The application
   // module validates and reads the environment as it is imported, so it is loaded afterwards.
   await applySavedEnvironmentSettings();

@@ -30,13 +30,15 @@
     instead of MeshForge. Scan buttons use the orange action style.
   - **Everything is named MeshForge, including the system's own names.** There is no byline. The
     import prefix is `@meshforge/`, the API project is `meshforge-server`, launchers are
-    `START-MESHFORGE.cmd` and so on. Existing installs must be updated by hand, because the old
-    names are no longer read:
+    `START-MESHFORGE.cmd` and so on. On an existing install:
     - `.env`: `GEAR_APPS_...` settings are now `MESHFORGE_...`; the default database name is
       `MeshForge`.
-    - Database: the bookkeeping schema is `meshforge_meta` (was `gearapps_meta`). Recreate the
-      database, or rename the database and that schema, before starting this version.
-    - Built-in accounts use `@meshforge.local` addresses.
+    - Database: renamed automatically on first start. If the API is configured for `MeshForge`,
+      that database does not exist and `GearApps` does, the API renames it. The bookkeeping
+      schema `gearapps_meta` becomes `meshforge_meta` with its migration history intact, and
+      built-in `@gearapps.local` account addresses become `@meshforge.local`. Nothing else in
+      the data changes. Close other connections to the database first (pgAdmin, psql), or the
+      database itself cannot be renamed.
     - Lapper Read collectors: the settings section is `MeshForgeApi` (.NET) and the variables are
       `MESHFORGE_API_...` (Python).
   - Not recoloured: informational blue, success, danger, the Greenshed running-machines state

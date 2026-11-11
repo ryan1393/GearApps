@@ -6,6 +6,8 @@ import {
 import { DataSource } from 'typeorm';
 import { withValidatedEmptyBootstrap } from '@meshforge/manufacturing/server/util-common';
 
+import { adoptLegacyDatabaseName } from './adopt-legacy-database';
+
 const required = (name: string): string => {
   const value = process.env[name]?.trim();
   if (!value) throw new Error(`Missing required environment variable: ${name}`);
@@ -43,6 +45,8 @@ async function bootstrap(): Promise<void> {
     throw new Error('DANA_FRESH_DB_BOOTSTRAP=YES is required for the one-shot bootstrap service.');
   }
 
+  // A database from before the rename to MeshForge is renamed in place, so it is not mistaken for a new server.
+  await adoptLegacyDatabaseName();
   const tables = await inspectPublicTables();
   const tableSet = new Set(tables);
   const expectedExisting = ['users', 'departments', 'trays', 'cutter_builds'];
