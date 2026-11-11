@@ -184,11 +184,23 @@ cd ${rq(root)}
 ${COMPOSE_FN}
 export COMPOSE_PARALLEL_LIMIT=1
 compose config --quiet
+# The Lapper Read collector (compose profile "collectors") is only started by hand. When it already
+# has a container here, rebuild and restart it with this release so it never keeps an old image.
+COLLECTOR=''
+if compose --profile collectors config --services 2>/dev/null | grep -qx lapper-read \
+  && [ -n "$(compose --profile collectors ps -a -q lapper-read 2>/dev/null)" ]; then COLLECTOR=lapper-read; fi
 compose build
+if [ -n "$COLLECTOR" ]; then compose --profile collectors build lapper-read; fi
 if ! compose up -d --no-build; then
   echo '----- setup step logs -----' >&2
   compose logs --no-color --tail 40 gear-db-bootstrap gear-base-data-bootstrap >&2 || true
   exit 1
+fi
+if [ -n "$COLLECTOR" ]; then
+  compose --profile collectors up -d --no-build --no-deps --force-recreate lapper-read
+  echo '[PASS] Lapper Read collector rebuilt and restarted with this release.'
+else
+  echo '[INFO] Lapper Read collector is not running here. Start it once with: docker compose --profile collectors up -d lapper-read'
 fi
 compose ps -a`;
 
@@ -368,7 +380,7 @@ async function main() {
   console.log(`Blade Tracking: http://${ctx.host}:4200   Cutter Builder: http://${ctx.host}:4201   Greenshed: http://${ctx.host}:4202`);
 }
 
-export { envCheckScript, stageScript, finalizeScript, rollbackSwapScript, containerState, verifyVersion };
+export { envCheckScript, stageScript, finalizeScript, rollbackSwapScript, upScript, containerState, verifyVersion };
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   main().catch((e) => {
