@@ -1,5 +1,6 @@
 import { CoaterShipmentsController } from './coater-shipments.controller';
 import { CoaterShipmentsService } from './coater-shipments.service';
+import { CoaterRpaService } from './coater-rpa.service';
 import { ServerDataAccessModule } from '@meshforge/manufacturing/server/data-access';
 import { Module } from '@nestjs/common';
 
@@ -8,7 +9,7 @@ import { ServerFeatContainerTrayService } from './server-feat-container-tray.ser
 @Module({
   imports: [ServerDataAccessModule],
   controllers: [ServerFeatContainerTrayController, CoaterShipmentsController],
-  providers: [ServerFeatContainerTrayService, CoaterShipmentsService],
+  providers: [ServerFeatContainerTrayService, CoaterShipmentsService, CoaterRpaService],
   exports: [ServerFeatContainerTrayService],
 })
 export class ServerFeatContainerTrayModule {}
