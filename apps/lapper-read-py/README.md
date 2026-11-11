@@ -113,9 +113,11 @@ is sent as 0, as before. The macro list is in `lapper_read/argonaut.py`.
 
 - **Cycle time (`floatData[0]`):** the seconds the lapper was in cycle (Y3.2 on), measured from
   going into cycle to coming out of it, to the millisecond (within one poll,
-  `LAPPER_POLL_INTERVAL_MS`). The door opening afterwards is not counted. A cycle that was already
-  running when the collector started has no known start and sends 0, as the original collector
-  always did. It is kept with the queued post, so a retry sends the same value.
+  `LAPPER_POLL_INTERVAL_MS`). The door opening afterwards is not counted. A start or end is only
+  timed when the collector read the machine just before it (within 2 seconds, or 4 polls if
+  longer). A cycle whose start or end fell while the collector was down or restarting, or while
+  the controller did not answer, sends 0, as the original collector always did, rather than a
+  wrong time. It is kept with the queued post, so a retry sends the same value.
 
 - **Per machine:** in Admin > Lapping machines, paste each machine's full **Argonaut API**
   address, including `?locationId=…`. A machine with an address sends to it exactly as pasted,

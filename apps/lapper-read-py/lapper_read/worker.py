@@ -15,7 +15,7 @@ from .fanuc import Fanuc, NoGearsetLoaded
 from .scanner import Scanner
 from .scanner_monitor import ScannerMonitor
 from .state import ArgonautPost, CycleState, CycleStateStore, MachineState, ScannerState
-from .tracker import CycleTracker
+from .tracker import DEFAULT_MAX_SAMPLE_GAP_S, CycleTracker
 
 log = logging.getLogger("lapper_read")
 
@@ -99,9 +99,10 @@ class Worker:
             **argonaut,
         }
 
-    @staticmethod
-    def _new_tracker(state: CycleState) -> CycleTracker:
-        return CycleTracker(state)
+    def _new_tracker(self, state: CycleState) -> CycleTracker:
+        # A cycle's start or end is timed only when the previous sample was a few polls before it.
+        poll_s = getattr(self.settings, "poll_interval_ms", 250) / 1000
+        return CycleTracker(state, max_sample_gap_s=max(DEFAULT_MAX_SAMPLE_GAP_S, 4 * poll_s))
 
     # -- lifecycle ----------------------------------------------------------
     def run(self) -> None:
