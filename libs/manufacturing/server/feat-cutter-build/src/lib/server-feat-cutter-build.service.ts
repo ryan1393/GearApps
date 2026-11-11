@@ -1139,6 +1139,12 @@ export class ServerFeatCutterBuildService {
       machine: latestRun?.machine_number ?? '',
       coated: build.coated,
       honed: build.honed,
+      summary: build.summary.number,
+      partType: build.part_type.code,
+      bladeCount,
+      sourceTray: trayHistory?.tray.serial_number ?? '',
+      status: build.status.code,
+      comments: build.comments,
     });
     const artifactStem = build.build_number.replace(/[^A-Za-z0-9._-]/g, '_');
 
