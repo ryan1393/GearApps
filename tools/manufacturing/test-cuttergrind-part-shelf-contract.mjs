@@ -7,8 +7,8 @@ const locationTray=read('libs/manufacturing/server/feat-location-tray/src/lib/se
 const receive=read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/receive-container/receive-container.component.ts');
 const teardown=read('libs/manufacturing/frontend/feature-cutter-builder/src/lib/pages/teardown/cutter-teardown.component.ts');
 const admin=read('libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.ts');
-for(const marker of ['parseCuttergrindNumberedShelfTag','CGDR|CGDP|CGFR|CGFP','\\d{3}']) if(!shelf.includes(marker)) throw new Error(`Numbered shelf constants missing ${marker}`);
-if(!locationService.includes('three-digit physical shelf number')) throw new Error('Location backend does not enforce numbered Cuttergrind shelves.');
+for(const marker of ['parseCuttergrindNumberedShelfTag','(CGDR|CGDP|CGFR|CGFP)-([A-Z])([1-9])([A-Z])']) if(!shelf.includes(marker)) throw new Error(`Numbered shelf constants missing ${marker}`);
+if(!locationService.includes('shelf letter, layer number and bin letter')) throw new Error('Location backend does not enforce numbered Cuttergrind shelves.');
 for(const marker of ['cuttergrindShelf.partTypeCode','WAITING_FOR_GRINDING','READY_FOR_CUTTER']) if(!locationTray.includes(marker)) throw new Error(`Location-tray backend missing ${marker}`);
 if(receive.includes("buildSummaryShelfTag('CUTTERGRIND_FINISHED'")) throw new Error('Receive still derives Cuttergrind shelf from Summary.');
 if(teardown.includes("buildSummaryShelfTag('CUTTERGRIND_DULL'")) throw new Error('Teardown still derives Cuttergrind shelf from Summary.');

@@ -1,7 +1,13 @@
 # Summary Shelf Locations
 
-> **Current rule (70.1.0):** Cuttergrind shelves are numbered physical shelves configured in Admin:
-> rough `CGRR-###`/`CGRP-###`, dull `CGDR-###`/`CGDP-###`, finished `CGFR-###`/`CGFP-###` (RING/PINION).
+> **Current rule:** Cuttergrind shelves are physical shelves configured in Admin:
+> rough `CGRR-A1A`/`CGRP-A1A`, dull `CGDR-A1A`/`CGDP-A1A`, finished `CGFR-A1A`/`CGFP-A1A` (RING/PINION).
+>
+> Every Cuttergrind shelf tag is a shelf letter, a layer number and a bin letter. `CGDR-A1A` is
+> RING dull, shelf **A**, layer **1**, bin **A**; `CGFP-B3C` is PINION finished, shelf B, layer 3,
+> bin C. Layers run 1–9 and shelves and bins A–Z. Older numbered `CGRR-###`/`CGDR-###`/`CGFR-###`
+> (and pinion) tags are no longer accepted for placements; relabel those shelves (Admin > Launch Setup makes a
+> whole shelf of bin tags at once).
 > The `CGD?-<summary>` / `CGF?-<summary>` tags described below are legacy and are rejected for new
 > placements. Green Shed shelves remain `GSR-<summary>` / `GSP-<summary>`.
 

@@ -25,11 +25,11 @@ export class CompleteTrayGrindingDto extends StartTrayGrindingDto {
   @Min(0)
   scrapped_blade_count!: number;
 
-  @ApiProperty({ required: false, example: 'CGRR-001', description: 'Actual numbered rough shelf; required for a complete tray, omitted for a short tray.' })
+  @ApiProperty({ required: false, example: 'CGRR-A1A', description: 'Actual rough shelf bin (shelf letter, layer number, bin letter); required for a complete tray, omitted for a short tray.' })
   @IsOptional()
   @IsString()
   @Length(8, 8)
-  @Matches(/^(CGRR|CGRP)-\d{3}$/i)
+  @Matches(/^(CGRR|CGRP)-[A-Z][1-9][A-Z]$/i)
   rough_shelf_serial_number?: string;
 }
 

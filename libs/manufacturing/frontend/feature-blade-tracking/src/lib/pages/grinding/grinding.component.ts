@@ -211,7 +211,7 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
     this.roughShelfSerial = '';
     if (!serial) return;
     if (!this.matchingRoughShelves.some(shelf => shelf.serial_number === serial)) {
-      this.message = { tone: 'error', text: `${serial} is not an enabled ${this.expectedShelfPrefix} shelf for this tray. Scan a numbered ${this.expectedShelfPrefix}-### shelf.` };
+      this.message = { tone: 'error', text: `${serial} is not an enabled ${this.expectedShelfPrefix} shelf for this tray. Scan a ${this.expectedShelfPrefix} shelf bin, such as ${this.expectedShelfPrefix}-A1A (shelf, layer, bin).` };
       return;
     }
     this.message = null;

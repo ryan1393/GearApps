@@ -66,8 +66,8 @@ export class GearMasterDataBootstrap implements OnModuleInit {
       await manager.query(`INSERT INTO tray_stages(id,code,name,description,sort_order,enabled)
         VALUES($1,'PACKED_FOR_COATER','Packed for Coater','Loaded in a container; awaiting shipment dispatch',35,true)
         ON CONFLICT(code) DO NOTHING`, [randomUUID()]);
-      // Numbered CGRR-### / CGRP-### shelves are configured through Admin, just
-      // like the other physical numbered locations. Do not invent a shelf count,
+      // CGRR-A1A / CGRP-A1A shelf bins are configured through Admin, just
+      // like the other physical shelf bins. Do not invent a shelf count,
       // rename CGRR/CGRP to an assumed slot, or move historical/current placements.
       await applySharedDatabaseIntegrity(manager);
     });

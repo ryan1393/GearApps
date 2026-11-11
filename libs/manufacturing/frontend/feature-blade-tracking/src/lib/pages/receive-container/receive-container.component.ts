@@ -181,7 +181,7 @@ export class ReceiveContainerComponent implements OnDestroy, StationOperation {
           tone: 'info',
           text: tray.summary?.number
             ? tray.part_type?.code
-              ? `Tray ${tray.serial_number} selected. Scan any available ${tray.part_type.code === 'RING' ? 'CGFR' : 'CGFP'} numbered finished shelf.`
+              ? `Tray ${tray.serial_number} selected. Scan any available ${tray.part_type.code === 'RING' ? 'CGFR' : 'CGFP'} finished shelf, such as ${tray.part_type.code === 'RING' ? 'CGFR' : 'CGFP'}-A1A.`
               : `Tray ${tray.serial_number} selected, but it has no Part Type assigned.`
             : `Tray ${tray.serial_number} selected, but it has no summary assigned.`,
         };
@@ -236,7 +236,7 @@ export class ReceiveContainerComponent implements OnDestroy, StationOperation {
           this.busy = false;
           this.message = {
             tone: 'error',
-            text: `${partTypeCode} finished blades must go to an available ${expectedPartType === 'RING' ? 'CGFR' : 'CGFP'} numbered shelf.`,
+            text: `${partTypeCode} finished blades must go to an available ${expectedPartType === 'RING' ? 'CGFR' : 'CGFP'} finished shelf, such as ${expectedPartType === 'RING' ? 'CGFR' : 'CGFP'}-A1A (shelf, layer, bin).`,
           };
           this.shelfScanner?.clearAndFocus();
           return;

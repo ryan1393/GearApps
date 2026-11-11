@@ -844,7 +844,7 @@ export class ServerFeatCutterBuildService {
         if (returnedBladeCount > 0) {
           if (!shelfLocationSerial) {
             throw new UnprocessableEntityException(
-              `Teardown returned ${returnedBladeCount} blade(s). Scan required dull shelf ${expectedDullShelfPrefix}-NNN.`,
+              `Teardown returned ${returnedBladeCount} blade(s). Scan the required dull shelf ${expectedDullShelfPrefix}-<shelf><layer><bin>, such as ${expectedDullShelfPrefix}-A1A.`,
             );
           }
           shelfLocation = await locationRepo.findOne({
@@ -861,7 +861,7 @@ export class ServerFeatCutterBuildService {
             shelfLocation.department !== DEPARTMENT_CUTTERGRIND
           ) {
             throw new UnprocessableEntityException(
-              `Teardown ${build.part_type.code} blades for Summary ${build.summary.number} must be returned to ${expectedDullShelfPrefix}-NNN`,
+              `Teardown ${build.part_type.code} blades for Summary ${build.summary.number} must be returned to a ${expectedDullShelfPrefix} dull shelf such as ${expectedDullShelfPrefix}-A1A (shelf, layer, bin)`,
             );
           }
         }

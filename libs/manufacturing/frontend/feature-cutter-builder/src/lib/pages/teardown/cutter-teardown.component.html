@@ -123,7 +123,7 @@
           <form class="gear-workflow-scan-row" (ngSubmit)="scanShelf()">
             <label class="gear-field">
               Dull shelf tag
-              <input [gearScannerFocus]="3" [ngModel]="shelfLocationSerial" (ngModelChange)="shelfChanged($event)" [disabled]="busy" name="shelfLocationSerial" class="gear-input" placeholder="Scan CGDR-/CGDP- shelf tag..." autocomplete="off" />
+              <input [gearScannerFocus]="3" [ngModel]="shelfLocationSerial" (ngModelChange)="shelfChanged($event)" [disabled]="busy" name="shelfLocationSerial" class="gear-input" placeholder="Scan CGDR-/CGDP- shelf tag, e.g. CGDR-A1A" autocomplete="off" />
             </label>
             <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy">Scan</button>
           </form>
