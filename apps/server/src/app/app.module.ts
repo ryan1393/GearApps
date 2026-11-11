@@ -3,6 +3,7 @@ import { AdminMasterDataService } from './admin-master-data.service';
 import { EnvironmentSettingsController } from './environment-settings.controller';
 import { CycleTestsController } from './cycle-tests.controller';
 import { CycleTestsService } from './cycle-tests.service';
+import { ArgonautTestService } from './argonaut-test.service';
 import { EnvironmentSettingsService } from './environment-settings.service';
 import { ServerFeatGreenshedModule } from '@meshforge/manufacturing/server/feat-greenshed';
 import { ServerFeatCutterBuildModule } from '@meshforge/manufacturing/server/feat-cutter-build';
@@ -71,6 +72,7 @@ const featureModules = [
   ],
   providers: [
     CycleTestsService,
+    ArgonautTestService,
     AdminMasterDataService,
     EnvironmentSettingsService,
     { provide: APP_GUARD, useClass: JwtAccessTokenGuard },
