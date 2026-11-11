@@ -5,6 +5,7 @@ import { mockRepoFactory } from '@meshforge/manufacturing/server/util-testing';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ServerFeatBladeTrayService } from './server-feat-blade-tray.service';
+import { OpeningInventoryService } from './opening-inventory.service';
 import { ServerFeatBladeTrayController } from './server-feat-blade-tray.controller';
 import { BladeTrayOrmEntity } from '@meshforge/manufacturing/server/data-access';
 
@@ -14,6 +15,7 @@ describe('ServerFeatBladeTrayController', () => {
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       providers: [
+        { provide: OpeningInventoryService, useValue: { record: jest.fn() } },
         ServerFeatBladeTrayService,
         {
           provide: getRepositoryToken(BladeTrayOrmEntity),

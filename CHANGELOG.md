@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- **Launch Setup.** A new Admin tab for going live: a checklist of what still has to be set up,
+  barcode tags in bulk for trays, containers and numbered shelves, and recording trays that are
+  already ground or already coated on the shelf where they sit (see
+  `docs/manufacturing/LAUNCH_SETUP.md`). An opening-inventory tray is left in the same state the
+  normal workflow produces and can be undone with Cancel Last. New admin-only endpoints
+  `POST /api/v1/bladeTrays/opening-inventory` and `GET /api/v1/admin/master-data/launch-status`.
+- **Lapping Summaries fits the screen.** Cycles are on the left in a paged table with a serial
+  search across the whole history; the right side has tabs for Changes, Summary, Lapping paths and
+  All values. Changes shows what each cycle changed (old value, new value, difference), newest
+  first, or only the selected cycle's changes. Selecting a cycle shows the values as they stood
+  when it finished. New endpoints `GET machine-cycle/history-page/:machine/:gearset` and
+  `GET macro-log/changes/:machine/:gearset`; `macro-log/summary` accepts `upTo=<cycle id>`.
+- **Lapper Read: workers no longer stay "Restarting".** After the collector restarted, a machine
+  with a pending cycle that had no serial (no scanner) was rejected by its own saved cycle file
+  and restarted forever. Such a cycle is valid and is now sent. A machine with no gearset loaded
+  shows **Collecting** (with "No gearset loaded" beside it), and a restarting worker shows why.
+- **Duplicate models.** Models that differ only in the case or spacing of the type, or that both
+  have no type, are merged on startup (migration `20261111-shared-model-duplicates-v1`); Part
+  Summaries that pointed at a duplicate follow the kept model. Admin refuses a new duplicate and
+  flags models that share a number. `npm run db:audit` also reports duplicate tray, container and
+  location barcodes, Lapper gearset numbers and scanner addresses.
 - **Admin > Coater RPA.** A new Admin tab sets up RPA requests without a database dump: upload the
   Excel request form (checked before it is saved), edit the coater name, next number, prices,
   recipients and default PO, and map each Summary to the form's part numbers. The first time, the

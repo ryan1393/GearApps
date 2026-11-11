@@ -1,0 +1,11 @@
+:host { display: block; }
+.launch { display: grid; gap: 1rem; }
+.launch-panel { padding: 1.25rem; min-width: 0; }
+.launch-lead { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: .75rem; }
+.launch-lead h2 { margin: 0 0 .25rem; font-size: 1.25rem; font-weight: 800; }
+.launch-lead p { margin: 0; max-width: 70ch; }
+.launch-panel .gear-step-title { margin-bottom: .75rem; }
+.launch-panel .gear-admin-form-actions { margin-top: 1rem; }
+.launch-panel .table-wrap { margin-top: 1rem; }
+.launch-preview { margin: .75rem 0 0; }
+.launch-cutters { margin: 1rem 0 0; }

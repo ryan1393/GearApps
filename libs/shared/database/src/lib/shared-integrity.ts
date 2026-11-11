@@ -200,6 +200,39 @@ WHERE abs(g.ratio_value-r.teeth::numeric/nullif(p.teeth,0))>0.005 OR
   lower(btrim(s.number)) IS DISTINCT FROM lower(btrim(ps.number));
 `;
 
+/**
+ * A model is its number and type. Rows that differ only in the case or spacing of the type, or
+ * that both have no type (the old unique index treats two blanks as different), are the same
+ * model entered twice. They are merged into the oldest usable row, everything that pointed at
+ * a duplicate is repointed to it, and a normalized unique index stops it happening again.
+ * Models with the same number and a different type are different models and are left alone.
+ */
+export const MODEL_DUPLICATES_SQL = `
+DO $models$
+DECLARE reference record;
+BEGIN
+  IF to_regclass('public.models') IS NULL THEN RETURN; END IF;
+  CREATE TEMP TABLE meshforge_model_merge ON COMMIT DROP AS
+    SELECT id, first_value(id) OVER (
+      PARTITION BY model_number, upper(btrim(coalesce(model_type,'')))
+      ORDER BY (enabled AND active AND "deletedAt" IS NULL) DESC, "createdAt", id) AS keeper
+    FROM public.models;
+  DELETE FROM meshforge_model_merge WHERE id=keeper;
+  FOR reference IN
+    SELECT c.conrelid::regclass AS source, a.attname AS source_column
+      FROM pg_constraint c JOIN pg_attribute a ON a.attrelid=c.conrelid AND a.attnum=c.conkey[1]
+     WHERE c.contype='f' AND c.confrelid='public.models'::regclass AND array_length(c.conkey,1)=1
+  LOOP
+    EXECUTE format('UPDATE %s r SET %I=m.keeper FROM meshforge_model_merge m WHERE r.%I=m.id',
+      reference.source, reference.source_column, reference.source_column);
+  END LOOP;
+  DELETE FROM public.models d USING meshforge_model_merge m WHERE d.id=m.id;
+  UPDATE public.models SET model_type=nullif(btrim(model_type),'')
+   WHERE model_type IS DISTINCT FROM nullif(btrim(model_type),'');
+  CREATE UNIQUE INDEX IF NOT EXISTS uq_models_number_type_normalized
+    ON public.models(coalesce(model_number,-1), upper(btrim(coalesce(model_type,''))));
+END $models$;`;
+
 export async function applySharedDatabaseIntegrity(manager: EntityManager): Promise<void> {
   await manager.query(GEAR_DATABASE_SCHEMA_LOCK);
   await runDatabaseMigration(manager, '20261109-shared-gearset-schema-v1', GEARSET_SCHEMA_SQL);
@@ -208,6 +241,7 @@ export async function applySharedDatabaseIntegrity(manager: EntityManager): Prom
     '20261109-shared-core-integrity-v1',
     SHARED_CORE_INTEGRITY_SQL,
   );
+  await runDatabaseMigration(manager, '20261111-shared-model-duplicates-v1', MODEL_DUPLICATES_SQL);
   const [gearsets] = await manager.query<Array<{ present: string | null }>>(
     "SELECT to_regclass('public.gearsets') AS present",
   );

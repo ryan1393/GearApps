@@ -1,0 +1,144 @@
+<section class="launch" aria-labelledby="launch-title">
+  <div class="gear-panel launch-panel launch-lead">
+    <div>
+      <h2 id="launch-title">Launch Setup</h2>
+      <p class="gear-muted">Getting the floor into the system for the first day: what still has to be set up, barcode tags in bulk, and the trays that are already ground or coated.</p>
+    </div>
+    <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : '↻ Refresh' }}</button>
+  </div>
+
+  <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert"><strong>Unable to continue.</strong><span>{{ error }}</span></div>
+
+  <!-- 1. Checklist -->
+  <div class="gear-panel launch-panel" *ngIf="status as current">
+    <div class="gear-step-title"><span class="gear-step-number">1</span><span>Set up</span></div>
+    <div danaTableShell class="table-wrap">
+      <table danaTable class="gear-table">
+        <thead><tr><th data-dana-table-static>Item</th><th data-dana-table-static>Now</th><th data-dana-table-static>What it is for</th><th data-dana-table-static aria-label="Open"></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let row of checklist">
+            <td><strong>{{ row.label }}</strong></td>
+            <td><span class="gear-badge" [danaTone]="row.done ? 'ok' : 'pending'">{{ row.value }}</span></td>
+            <td class="gear-muted">{{ row.hint }}</td>
+            <td><button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="openTab.emit(row.tab)">Open</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 2. Tags -->
+  <form class="gear-panel launch-panel" (ngSubmit)="makeTags()" aria-label="Barcode tags">
+    <div class="gear-step-title"><span class="gear-step-number">2</span><span>Barcode tags in bulk</span></div>
+    <p class="gear-muted">Makes a run of numbered records and prints a tag for each. A number that already exists is not created again; its tag is printed again.</p>
+    <div class="gear-form-grid">
+      <label class="gear-field">What to tag
+        <select class="gear-select" name="tagKind" [(ngModel)]="tagKindId" (ngModelChange)="onKindChange()" [disabled]="tagBusy">
+          <option *ngFor="let kind of tagKinds" [value]="kind.id">{{ kind.label }}</option>
+        </select>
+      </label>
+      <label class="gear-field">First number
+        <input class="gear-input mono" name="tagFirst" type="number" min="0" step="1" [(ngModel)]="tagFirst" [disabled]="tagBusy" />
+      </label>
+      <label class="gear-field">How many
+        <input class="gear-input mono" name="tagCount" type="number" min="1" max="100" step="1" [(ngModel)]="tagCount" [disabled]="tagBusy" />
+      </label>
+      <label class="gear-field" *ngIf="!tagKind.digits">Digits
+        <input class="gear-input mono" name="tagDigits" type="number" min="1" max="8" step="1" [(ngModel)]="tagDigits" [disabled]="tagBusy" />
+      </label>
+    </div>
+    <p *ngIf="tagProblem" class="gear-alert gear-alert-danger" role="alert">{{ tagProblem }}</p>
+    <p *ngIf="!tagProblem && tagSerials.length" class="launch-preview">
+      <strong>{{ tagSerials.length }} tag{{ tagSerials.length === 1 ? '' : 's' }}:</strong>
+      <span class="mono">{{ tagSerials[0] }}</span>
+      <ng-container *ngIf="tagSerials.length > 1"> to <span class="mono">{{ tagSerials[tagSerials.length - 1] }}</span></ng-container>
+    </p>
+    <div class="gear-admin-form-actions">
+      <button type="submit" class="gear-btn gear-btn-primary" [disabled]="tagBusy || !!tagProblem">{{ tagBusy ? 'Working… ' + tagProgress : 'Create and Print Tags' }}</button>
+    </div>
+    <div *ngIf="tagResults.length" danaTableShell class="table-wrap">
+      <table danaTable class="gear-table">
+        <thead><tr><th data-dana-table-static>Barcode</th><th data-dana-table-static>Record</th><th data-dana-table-static>Tag</th><th data-dana-table-static>Note</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let result of tagResults; trackBy: trackSerial">
+            <td class="mono">{{ result.serial }}</td>
+            <td><span class="gear-badge" [danaTone]="result.state === 'failed' ? 'failed' : result.state === 'created' ? 'ok' : 'not new'">{{ result.state === 'created' ? 'Created' : result.state === 'existing' ? 'Already existed' : 'Failed' }}</span></td>
+            <td>{{ result.state === 'failed' ? '—' : result.printed ? 'Printed' : 'In the downloaded file' }}</td>
+            <td class="gear-muted">{{ result.note }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </form>
+
+  <!-- 3. Opening inventory -->
+  <form class="gear-panel launch-panel" (ngSubmit)="recordOpening()" aria-label="Opening inventory">
+    <div class="gear-step-title"><span class="gear-step-number">3</span><span>Trays already on the floor</span></div>
+    <p class="gear-muted">Record a full tray that is already ground or already coated, on the shelf where it sits. Each entry can be undone with Cancel Last in Blade Tracking.</p>
+    <div class="gear-form-grid">
+      <label class="gear-field">Tray barcode
+        <input class="gear-input mono" name="openTray" [(ngModel)]="opening.tray" maxlength="80" autocomplete="off" placeholder="Scan the tray" [disabled]="openingBusy" />
+      </label>
+      <label class="gear-field">Part Summary
+        <select class="gear-select" name="openSummary" [(ngModel)]="opening.summary_id" [disabled]="openingBusy">
+          <option value="">Select…</option>
+          <option *ngFor="let summary of summaries" [value]="summary.id">{{ summary.label }}</option>
+        </select>
+      </label>
+      <label class="gear-field">Part type
+        <select class="gear-select" name="openType" [(ngModel)]="opening.part_type_id" [disabled]="openingBusy">
+          <option value="">Select…</option>
+          <option *ngFor="let type of partTypes" [value]="type.id">{{ type.label }}</option>
+        </select>
+      </label>
+      <label class="gear-field">Where it stands
+        <select class="gear-select" name="openStage" [(ngModel)]="opening.stage" [disabled]="openingBusy">
+          <option value="READY_FOR_COATING">Ground, waiting for the coater</option>
+          <option value="READY_FOR_CUTTER">Coated, ready for a cutter build</option>
+        </select>
+      </label>
+      <label class="gear-field">Shelf barcode
+        <input class="gear-input mono" name="openShelf" [(ngModel)]="opening.shelf" maxlength="80" autocomplete="off" [placeholder]="openingStageShelf + '-001'" [disabled]="openingBusy" />
+        <small class="gear-field-help">A numbered {{ openingStageShelf }}-### shelf.</small>
+      </label>
+      <label class="gear-field">Times reground so far
+        <input class="gear-input mono" name="openCycle" type="number" min="0" max="99" step="1" [(ngModel)]="opening.service_cycle" [disabled]="openingBusy" />
+        <small class="gear-field-help">Leave 0 when it is not known.</small>
+      </label>
+    </div>
+    <p *ngIf="openingError" class="gear-alert gear-alert-danger" role="alert">{{ openingError }}</p>
+    <div class="gear-admin-form-actions">
+      <button type="submit" class="gear-btn gear-btn-primary" [disabled]="openingBusy">{{ openingBusy ? 'Recording…' : 'Record Tray' }}</button>
+    </div>
+    <p class="gear-field-help">The tray is recorded with the full blade count its Summary requires. Use the normal screens for everything else: dull or new blades in Blade Intake, a built cutter in Cutter Builder > Build, and a cutter on a machine in Greenshed > Setup.</p>
+
+    <div *ngIf="entries.length" danaTableShell class="table-wrap">
+      <table danaTable class="gear-table">
+        <thead><tr><th data-dana-table-static>Tray</th><th data-dana-table-static>Summary</th><th data-dana-table-static>Type</th><th data-dana-table-static>Stage</th><th data-dana-table-static>Shelf</th><th data-dana-table-static>Blades</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let entry of entries">
+            <td class="mono">{{ entry.tray }}</td><td class="mono">{{ entry.summary }}</td><td>{{ entry.part_type }}</td>
+            <td>{{ entry.stage }}</td><td class="mono">{{ entry.shelf }}</td><td>{{ entry.blades }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </form>
+
+  <!-- 4. What is recorded -->
+  <div class="gear-panel launch-panel" *ngIf="status as current">
+    <div class="gear-step-title"><span class="gear-step-number">4</span><span>What the system holds now</span></div>
+    <div danaTableShell class="table-wrap">
+      <table danaTable class="gear-table">
+        <thead><tr><th data-dana-table-static>Tray stage</th><th data-dana-table-static>Trays</th><th data-dana-table-static>Blades</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let stage of current.inventory.stages">
+            <td>{{ stage.name }}</td><td>{{ stage.trays }}</td><td>{{ stage.blades }}</td>
+          </tr>
+          <tr *ngIf="!current.inventory.stages.length"><td danaTableEmpty colspan="3" class="empty-row">No tray stages are configured.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="launch-cutters"><strong>{{ current.inventory.cutters_built }}</strong> cutters built and not yet pulled · <strong>{{ current.inventory.cutters_running }}</strong> running on machines.</p>
+  </div>
+</section>

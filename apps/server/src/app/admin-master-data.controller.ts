@@ -30,6 +30,13 @@ export class AdminMasterDataController {
     return this.service.listDepartments();
   }
 
+  /** What is set up and what is on the floor, for the go-live checklist. */
+  @Get('launch-status')
+  @Auth([RoleType.ADMIN])
+  launchStatus() {
+    return this.service.launchStatus();
+  }
+
   @Get('models')
   @Auth([RoleType.ADMIN])
   listModels() {
