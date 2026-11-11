@@ -62,7 +62,7 @@ export class AdminMasterDataService {
       count(`SELECT count(*) FROM gear_label_printers WHERE enabled AND is_default AND label_type='ASSET_TAG'`),
     ]);
     const shelves: Array<{ kind: string; count: string }> = await this.dataSource.query(`SELECT CASE
-        WHEN serial_number ~ '^CGR[RP]-[0-9]{3}$' THEN 'rough'
+        WHEN serial_number ~ '^CGR[RP]-[A-Z][1-9][A-Z]$' THEN 'rough'
         WHEN serial_number ~ '^CGF[RP]-[A-Z][1-9][A-Z]$' THEN 'finished'
         WHEN serial_number ~ '^CGD[RP]-[A-Z][1-9][A-Z]$' THEN 'dull'
         WHEN serial_number ~ '^GS[RP]-' THEN 'greenshed'

@@ -44,7 +44,7 @@
         <label class="gear-field">How many
           <input class="gear-input mono" name="tagCount" type="number" min="1" max="100" step="1" [(ngModel)]="tagCount" [disabled]="tagBusy" />
         </label>
-        <label class="gear-field" *ngIf="!tagKind.digits">Digits
+        <label class="gear-field">Digits
           <input class="gear-input mono" name="tagDigits" type="number" min="1" max="8" step="1" [(ngModel)]="tagDigits" [disabled]="tagBusy" />
         </label>
       </ng-container>
@@ -115,8 +115,8 @@
         </select>
       </label>
       <label class="gear-field">Shelf barcode
-        <input class="gear-input mono" name="openShelf" [(ngModel)]="opening.shelf" maxlength="80" autocomplete="off" [placeholder]="openingStageShelf + (opening.stage === 'READY_FOR_COATING' ? '-001' : '-A1A')" [disabled]="openingBusy" />
-        <small class="gear-field-help">{{ opening.stage === 'READY_FOR_COATING' ? 'A numbered ' + openingStageShelf + '-### shelf.' : 'A ' + openingStageShelf + ' shelf bin: shelf, layer, bin, such as ' + openingStageShelf + '-A1A.' }}</small>
+        <input class="gear-input mono" name="openShelf" [(ngModel)]="opening.shelf" maxlength="80" autocomplete="off" [placeholder]="openingStageShelf + '-A1A'" [disabled]="openingBusy" />
+        <small class="gear-field-help">A {{ openingStageShelf }} shelf bin: shelf, layer, bin, such as {{ openingStageShelf }}-A1A.</small>
       </label>
       <label class="gear-field">Times reground so far
         <input class="gear-input mono" name="openCycle" type="number" min="0" max="99" step="1" [(ngModel)]="opening.service_cycle" [disabled]="openingBusy" />

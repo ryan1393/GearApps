@@ -76,7 +76,7 @@ export class OpeningInventoryService {
         throw new UnprocessableEntityException('No enabled blade quantity requirement exists for this summary and part type');
       }
 
-      // The same shelves the workflow accepts for this stage: a numbered rough shelf after
+      // The same shelves the workflow accepts for this stage: a rough shelf bin (CGRR-A1A) after
       // grinding, a finished shelf bin (CGFR-A1A) after coating, for the tray's own part type.
       const shelfTag = dto.stage === 'READY_FOR_COATING'
         ? parseCuttergrindRoughShelfTag(shelfSerial)
@@ -86,9 +86,7 @@ export class OpeningInventoryService {
         : (partType.code === 'RING' ? 'CGFR' : 'CGFP');
       if (!shelfTag || shelfTag.partTypeCode !== partType.code
         || (dto.stage === 'READY_FOR_CUTTER' && shelfTag.kind !== 'CUTTERGRIND_FINISHED')) {
-        throw new UnprocessableEntityException(dto.stage === 'READY_FOR_COATING'
-          ? `A ${partType.code} tray at this stage belongs on a numbered ${prefix}-### shelf`
-          : `A ${partType.code} tray at this stage belongs on a ${prefix} shelf addressed by shelf, layer and bin, such as ${prefix}-A1A`);
+        throw new UnprocessableEntityException(`A ${partType.code} tray at this stage belongs on a ${prefix} shelf addressed by shelf, layer and bin, such as ${prefix}-A1A`);
       }
       const shelf = await manager.getRepository(LocationOrmEntity).findOne({
         where: { serial_number: shelfTag.serialNumber, enabled: true }, lock: { mode: 'pessimistic_read' },

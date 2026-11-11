@@ -28,6 +28,6 @@ for (const marker of ["cuttergrindPartLetter", "^CGD[RP]-", "^CGF[RP]-", "locati
 for (const marker of ["CGD${requirement.part_type_code === 'RING' ? 'R' : 'P'}-", "CGF${requirement.part_type_code === 'RING' ? 'R' : 'P'}-"]) if (!fixtures.includes(marker)) throw new Error(`Workflow fixture missing ${marker}`);
 if (!workflow.includes("ValidateSet('GSR','GSP','CGDR','CGDP','CGFR','CGFP')")) throw new Error('Full workflow does not enforce part-specific Cuttergrind prefixes.');
 for (const tool of [shelfTest, ensureShelves]) if (!tool.includes('CGD$cuttergrindPart-$summary') || !tool.includes('CGF$cuttergrindPart-$summary')) throw new Error('Shelf helper/test missing part-specific Cuttergrind tags.');
-if (!adminHtml.includes('CGRR-001')) throw new Error('Admin examples missing numbered Cuttergrind shelf tags.');
+if (!adminHtml.includes('CGRR-A1A')) throw new Error('Admin examples missing numbered Cuttergrind shelf tags.');
 for (const marker of ['CGD-${summary}', 'CGF-${summary}', 'CGD${summary}', 'CGF${summary}', 'CGDR-${summary}', 'CGDP-${summary}', 'CGFR-${summary}', 'CGFP-${summary}']) if (!migration.includes(marker)) throw new Error(`Migration must understand ${marker}`);
 console.log('[PASS] Summary shelf dash contract passed: GSR-/GSP-/CGDR-/CGDP-/CGFR-/CGFP- are canonical and generic CGD-/CGF- are migration-only.');

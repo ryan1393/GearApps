@@ -66,45 +66,52 @@ export function buildSummaryShelfTag(
 
 
 
+/** Where a Cuttergrind shelf tag sits: shelf A, layer 1, bin A for CGRR-A1A / CGDR-A1A / CGFR-A1A. */
+export interface CuttergrindShelfPosition {
+  shelf: string;
+  layer: number;
+  bin: string;
+}
+
 export interface CuttergrindRoughShelfTag {
   serialNumber: string;
+  /** What follows the prefix: shelf letter, layer number, bin letter, such as A1A. */
   shelfNumber: string;
   department: typeof DEPARTMENT_CUTTERGRIND;
   locationType: typeof LOCATION_TYPE_SHELF;
   kind: 'CUTTERGRIND_ROUGH';
   partTypeCode: SummaryShelfPartType;
+  position: CuttergrindShelfPosition;
 }
 
-/** Numbered physical rough shelves. Legacy CGRR/CGRP are not new placement targets. */
+/** Rough shelves are addressed by shelf letter, layer number and bin letter: CGRR-A1A. */
+export const CUTTERGRIND_ROUGH_SHELF_PATTERN = /^(CGRR|CGRP)-([A-Z])([1-9])([A-Z])$/;
+
+/** Physical rough shelf bins. Legacy CGRR/CGRP and CGRR-### are not new placement targets. */
 export function parseCuttergrindRoughShelfTag(
   value: string,
 ): CuttergrindRoughShelfTag | null {
   const serialNumber = value.trim().toUpperCase();
-  const match = /^(CGRR|CGRP)-(\d{3})$/.exec(serialNumber);
+  const match = CUTTERGRIND_ROUGH_SHELF_PATTERN.exec(serialNumber);
   if (!match) return null;
+  const [, prefix, shelf, layer, bin] = match;
   return {
     serialNumber,
-    shelfNumber: match[2],
+    shelfNumber: `${shelf}${layer}${bin}`,
     department: DEPARTMENT_CUTTERGRIND,
     locationType: LOCATION_TYPE_SHELF,
     kind: 'CUTTERGRIND_ROUGH',
-    partTypeCode: match[1] === 'CGRR' ? 'RING' : 'PINION',
+    partTypeCode: prefix === 'CGRR' ? 'RING' : 'PINION',
+    position: { shelf, layer: Number(layer), bin },
   };
 }
 
-/** Returns only the expected prefix; the operator supplies the actual numbered shelf. */
+/** Returns only the expected prefix; the operator supplies the actual shelf bin. */
 export function cuttergrindRoughShelfForPartType(
   partTypeCode: string | null | undefined,
 ): 'CGRR' | 'CGRP' | null {
   const partType = normalizeSummaryShelfPartType(partTypeCode);
   return partType === 'RING' ? 'CGRR' : partType === 'PINION' ? 'CGRP' : null;
-}
-
-/** Where a dull or finished shelf tag sits: shelf A, layer 1, bin A for CGDR-A1A / CGFR-A1A. */
-export interface CuttergrindShelfPosition {
-  shelf: string;
-  layer: number;
-  bin: string;
 }
 
 export interface CuttergrindNumberedShelfTag {
@@ -125,7 +132,7 @@ export interface CuttergrindNumberedShelfTag {
 export const CUTTERGRIND_BIN_SHELF_PATTERN = /^(CGDR|CGDP|CGFR|CGFP)-([A-Z])([1-9])([A-Z])$/;
 
 export function buildCuttergrindShelfTag(
-  kind: CuttergrindNumberedShelfTag['kind'],
+  kind: CuttergrindNumberedShelfTag['kind'] | CuttergrindRoughShelfTag['kind'],
   partTypeCode: string | null | undefined,
   shelf: string,
   layer: number,
@@ -133,9 +140,10 @@ export function buildCuttergrindShelfTag(
 ): string | null {
   const partType = normalizeSummaryShelfPartType(partTypeCode);
   if (!partType) return null;
-  const prefix = `CG${kind === 'CUTTERGRIND_DULL' ? 'D' : 'F'}${partType === 'RING' ? 'R' : 'P'}`;
-  const serial = `${prefix}-${shelf.trim().toUpperCase()}${layer}${bin.trim().toUpperCase()}`;
-  return CUTTERGRIND_BIN_SHELF_PATTERN.test(serial) ? serial : null;
+  const stage = kind === 'CUTTERGRIND_ROUGH' ? 'R' : kind === 'CUTTERGRIND_DULL' ? 'D' : 'F';
+  const serial = `CG${stage}${partType === 'RING' ? 'R' : 'P'}-${shelf.trim().toUpperCase()}${layer}${bin.trim().toUpperCase()}`;
+  const pattern = kind === 'CUTTERGRIND_ROUGH' ? CUTTERGRIND_ROUGH_SHELF_PATTERN : CUTTERGRIND_BIN_SHELF_PATTERN;
+  return pattern.test(serial) ? serial : null;
 }
 
 export function describeCuttergrindShelfPosition(position: CuttergrindShelfPosition): string {

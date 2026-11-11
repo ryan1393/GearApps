@@ -446,12 +446,12 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
       !legacyExisting
     ) {
       throw new UnprocessableEntityException(
-        `Cuttergrind shelves use CGRR-### / CGRP-### (rough), CGDR-A1A / CGDP-A1A (dull) or CGFR-A1A / CGFP-A1A (finished), where A1A is shelf, layer, bin`,
+        `Cuttergrind shelves use CGRR-A1A / CGRP-A1A (rough), CGDR-A1A / CGDP-A1A (dull) or CGFR-A1A / CGFP-A1A (finished), where A1A is shelf, layer, bin`,
       );
     }
 
     if (looksLikeRoughShelf && !roughShelf && !legacyExisting) {
-      throw new UnprocessableEntityException(`${serialNumber} is not a numbered rough shelf; use CGRR-001 or CGRP-001, for example`);
+      throw new UnprocessableEntityException(`${serialNumber} is not a rough shelf bin; use a shelf letter, layer number and bin letter, such as CGRR-A1A or CGRP-B2C`);
     }
   }
 
