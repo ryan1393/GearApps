@@ -40,47 +40,6 @@
         ><span>Lapping Summaries</span></a
       >
 
-      @if (user.role === 'admin') {
-        <!-- Master data is shared with every Gear app and edited in Admin. -->
-        <div class="nav-heading">MASTER DATA</div>
-        <a
-          (click)="mobileNav.close()"
-          routerLink="/admin"
-          [queryParams]="{ tab: 'lapping-machines' }"
-          class="side-link"
-          ><span class="nav-icon"
-            ><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span
-          ><span>Lapping Machines</span></a
-        >
-        <a
-          (click)="mobileNav.close()"
-          routerLink="/admin"
-          [queryParams]="{ tab: 'gearsets' }"
-          class="side-link"
-          ><span class="nav-icon"
-            ><span class="gear-glyph gear-glyph-gearset" aria-hidden="true"></span></span
-          ><span>Gearsets</span></a
-        >
-        <a
-          (click)="mobileNav.close()"
-          routerLink="/admin"
-          [queryParams]="{ tab: 'parts' }"
-          class="side-link"
-          ><span class="nav-icon"
-            ><span class="gear-glyph gear-glyph-gearset" aria-hidden="true"></span></span
-          ><span>Parts</span></a
-        >
-        <a
-          (click)="mobileNav.close()"
-          routerLink="/admin"
-          [queryParams]="{ tab: 'part-summaries' }"
-          class="side-link"
-          ><span class="nav-icon"
-            ><span class="gear-glyph gear-glyph-summary" aria-hidden="true"></span></span
-          ><span>Part Summaries</span></a
-        >
-      }
-
       <div class="nav-heading">CONFIGURATION</div>
       <a
         (click)="mobileNav.close()"

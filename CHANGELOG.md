@@ -29,8 +29,8 @@
     offered: gearset parts are created with their assembly. The parts API refuses a bare GEARSET
     part, a change to or from that type, and identity changes (number, type, Summary, teeth) on a
     part used by a gearset; its status can still change.
-  - As in the other apps, master data is for administrators only: the Lapper sidebar and dashboard
-    show these links to admins.
+  - As in the other apps, master data is for administrators only: they reach it through Admin
+    in the sidebar (Lapper has no separate Master Data group), and the dashboard links to the tabs.
 - **Lapper Read records every cycle, scanner or not.** A cycle gets the scanned serial when the
   machine's scanner is online; with no scanner, an offline scanner or nothing scanned it is
   recorded without a serial instead of being dropped. An offline scanner is pinged and its port
