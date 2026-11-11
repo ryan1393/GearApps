@@ -23,6 +23,7 @@ import {
   CuttergrindNumberedShelfTag,
   CuttergrindRoughShelfTag,
   describeCuttergrindShelfPrefix,
+  locationPartTypeFromSerial,
   parseCuttergrindNumberedShelfTag,
   parseCuttergrindRoughShelfTag,
   parseSummaryShelfTag,
@@ -94,7 +95,7 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
       roughShelf,
     );
 
-    const contents = await this.resolveContents(this.locationRepo.manager, dto, shelfTag);
+    const contents = await this.resolveContents(this.locationRepo.manager, dto, shelfTag, serialNumber);
 
     const saved = await this.locationRepo.save(
       this.locationRepo.create({
@@ -125,6 +126,11 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
 
     return this.locationRepo.manager.transaction(async (manager) => {
       const repo = manager.getRepository(LocationOrmEntity);
+      // Every bin of one prefix holds the same part type: the R or P in CGDR / CGDP.
+      const partTypeCode = locationPartTypeFromSerial(serials[0]);
+      const partType = partTypeCode
+        ? await manager.getRepository(CutterPartTypeOrmEntity).findOne({ where: { code: partTypeCode, enabled: true } })
+        : null;
       const before = new Set(
         (await repo.find({ where: { serial_number: In(serials) }, select: { id: true } })).map(({ id }) => id),
       );
@@ -138,6 +144,7 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
           department: tag.department,
           location_type: tag.locationType,
           enabled: true,
+          part_type_id: partType?.id ?? null,
           createdBy: userId,
           updatedBy: userId,
         };
@@ -355,7 +362,7 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
       await this.assertSummaryShelfReferences(shelfTag);
     }
 
-    const contents = await this.resolveContents(manager, data, shelfTag);
+    const contents = await this.resolveContents(manager, data, shelfTag, serialNumber);
 
     const normalized = {
       ...data,
@@ -423,13 +430,16 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
 
   /**
    * The Summary and part type a location holds. A GSR-/GSP- summary shelf names both in its
-   * barcode, so they are always taken from there. Otherwise the chosen ones must exist and be
-   * enabled; null clears one, and a field left out stays as it is.
+   * barcode, so they are always taken from there. Any other shelf whose barcode carries R or P
+   * (CGRR/CGRP, CGDR/CGDP, CGFR/CGFP) takes its part type from that letter, whatever was chosen.
+   * Otherwise the chosen ones must exist and be enabled; null clears one, and a field left out
+   * stays as it is.
    */
   private async resolveContents(
     manager: EntityManager,
     data: { summary_id?: string | null; part_type_id?: string | null },
     shelfTag: SummaryShelfTag | null,
+    serialNumber: string,
   ): Promise<{ summary_id?: string | null; part_type_id?: string | null }> {
     const summaries = manager.getRepository(PartSummaryOrmEntity);
     const partTypes = manager.getRepository(CutterPartTypeOrmEntity);
@@ -451,7 +461,11 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
       }
       contents.summary_id = data.summary_id || null;
     }
-    if (data.part_type_id !== undefined) {
+    const barcodePartType = locationPartTypeFromSerial(serialNumber);
+    if (barcodePartType) {
+      const partType = await partTypes.findOne({ where: { code: barcodePartType, enabled: true } });
+      contents.part_type_id = partType?.id ?? null;
+    } else if (data.part_type_id !== undefined) {
       if (data.part_type_id && !(await partTypes.exists({ where: { id: data.part_type_id, enabled: true } }))) {
         throw new UnprocessableEntityException('The chosen part type does not exist or is disabled');
       }

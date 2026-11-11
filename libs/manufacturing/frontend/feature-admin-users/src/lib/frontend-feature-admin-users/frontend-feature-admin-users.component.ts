@@ -22,6 +22,7 @@ import {
   parseCuttergrindRoughShelfTag,
   parseCuttergrindNumberedShelfTag,
   describeCuttergrindShelfPosition,
+  locationPartTypeFromSerial,
   parseSummaryShelfTag,
   SummaryShelfTag,
 } from '@meshforge/manufacturing/shared/util-constants';
@@ -714,6 +715,14 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     return [...byNumber.values()].sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true }));
   }
 
+  /**
+   * RING or PINION when the barcode names it (the R or P in GSR, CGDR, CGFP...). The server always
+   * sets the part type from it, so it is shown but not chosen.
+   */
+  get locationBarcodePartType(): string | null {
+    return locationPartTypeFromSerial(this.locationForm.serial_number);
+  }
+
   get locationPartTypeChoices(): PartTypeRow[] {
     return this.partTypeChoices.filter((type) => type.enabled || type.id === this.locationForm.part_type_id);
   }
@@ -755,10 +764,9 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
         numberedShelf?.locationType ?? shelfTag?.locationType ??
         (this.locationForm.location_type.trim().toUpperCase() || 'INTERNAL'),
       enabled: this.locationForm.enabled,
-      // A summary shelf's barcode sets these on the server.
-      ...(shelfTag
-        ? {}
-        : { summary_id: this.locationForm.summary_id || null, part_type_id: this.locationForm.part_type_id || null }),
+      // A summary shelf's barcode sets both on the server; a barcode with R or P sets the part type.
+      ...(shelfTag ? {} : { summary_id: this.locationForm.summary_id || null }),
+      ...(shelfTag || locationPartTypeFromSerial(serialNumber) ? {} : { part_type_id: this.locationForm.part_type_id || null }),
     };
 
     const request = this.editingLocationId
