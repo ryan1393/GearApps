@@ -15,32 +15,32 @@ const { LAPPER_ARCHIVE_GUARD_SQL } = require('../../libs/api/postgres/src/lib/ar
 const literal = (value) => "'" + value.replaceAll("'", "''") + "'";
 function migration(version, sql, condition = 'true') {
   const checksum = migrationChecksum(sql);
-  if (sql.includes('$gearapps_migration$')) throw new Error('SQL delimiter collision');
-  return `DO $gearapps_migration$
+  if (sql.includes('$meshforge_migration$')) throw new Error('SQL delimiter collision');
+  return `DO $meshforge_migration$
 DECLARE installed text;
 BEGIN
   IF ${condition} THEN
-    SELECT checksum INTO installed FROM gearapps_meta.schema_migrations WHERE version=${literal(version)};
+    SELECT checksum INTO installed FROM meshforge_meta.schema_migrations WHERE version=${literal(version)};
     IF installed IS NOT NULL AND installed<>${literal(checksum)} THEN
       RAISE EXCEPTION 'Installed migration checksum differs: %',${literal(version)};
     END IF;
     IF installed IS NULL THEN
       ${sql}
-      INSERT INTO gearapps_meta.schema_migrations(version,checksum) VALUES(${literal(version)},${literal(checksum)});
+      INSERT INTO meshforge_meta.schema_migrations(version,checksum) VALUES(${literal(version)},${literal(checksum)});
     END IF;
   END IF;
-END $gearapps_migration$;`;
+END $meshforge_migration$;`;
 }
 function cleanupPlan() {
   const lapper = "to_regclass('lapper.machines') IS NOT NULL";
-  return `-- GearApps 70.3.0 integrity cleanup. Back up the target first.
+  return `-- MeshForge 70.3.0 integrity cleanup. Back up the target first.
 -- Apply the legacy merge before this cleanup. All changes are transactional.
 BEGIN;
 SET LOCAL lock_timeout='5s';
 SET LOCAL statement_timeout='120s';
 ${GEAR_DATABASE_SCHEMA_LOCK};
-CREATE SCHEMA IF NOT EXISTS gearapps_meta;
-CREATE TABLE IF NOT EXISTS gearapps_meta.schema_migrations (
+CREATE SCHEMA IF NOT EXISTS meshforge_meta;
+CREATE TABLE IF NOT EXISTS meshforge_meta.schema_migrations (
   version text PRIMARY KEY,checksum char(64) NOT NULL,
   applied_at timestamptz NOT NULL DEFAULT clock_timestamp(),applied_by text NOT NULL DEFAULT session_user
 );

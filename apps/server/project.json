@@ -1,5 +1,5 @@
 {
-  "name": "gear-app-server",
+  "name": "meshforge-server",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "apps/server/src",
   "projectType": "application",
@@ -36,14 +36,14 @@
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "options": {
-        "buildTarget": "gear-app-server:build"
+        "buildTarget": "meshforge-server:build"
       },
       "configurations": {
         "development": {
-          "buildTarget": "gear-app-server:build:development"
+          "buildTarget": "meshforge-server:build:development"
         },
         "production": {
-          "buildTarget": "gear-app-server:build:production"
+          "buildTarget": "meshforge-server:build:production"
         }
       }
     },

@@ -12,7 +12,7 @@ BEGIN
 END $validate_components$;
 
 ALTER TABLE public.gearsets ADD CONSTRAINT ck_gearsets_positive_finite_ratio CHECK(ratio_value>0 AND ratio_value<>'NaN'::numeric);
-CREATE FUNCTION gearapps_meta.check_gearset_components() RETURNS trigger LANGUAGE plpgsql AS $gearset_components$
+CREATE FUNCTION meshforge_meta.check_gearset_components() RETURNS trigger LANGUAGE plpgsql AS $gearset_components$
 BEGIN
   IF EXISTS(
     SELECT 1 FROM public.gearsets g JOIN public.parts gp ON gp.id=g.gearset_part_id JOIN public.part_types gt ON gt.id=gp.part_type_id
@@ -29,9 +29,9 @@ BEGIN
 END $gearset_components$;
 -- Deferred checks permit valid multi-row maintenance transactions and validate their final state.
 CREATE CONSTRAINT TRIGGER guard_gearset_components AFTER INSERT OR UPDATE ON public.gearsets
-  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION gearapps_meta.check_gearset_components();
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION meshforge_meta.check_gearset_components();
 CREATE CONSTRAINT TRIGGER guard_gearset_part_changes AFTER UPDATE ON public.parts
-  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION gearapps_meta.check_gearset_components();
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION meshforge_meta.check_gearset_components();
 CREATE CONSTRAINT TRIGGER guard_gearset_type_changes AFTER UPDATE ON public.part_types
-  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION gearapps_meta.check_gearset_components();
+  DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION meshforge_meta.check_gearset_components();
 `;

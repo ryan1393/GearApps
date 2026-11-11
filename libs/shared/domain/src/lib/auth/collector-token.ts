@@ -8,7 +8,7 @@ import { AuthenticatedUser } from './auth';
 export const COLLECTOR_TOKEN_PREFIX = 'glr_';
 
 /** Nest injection token for the service that turns a raw collector token into a request user. */
-export const COLLECTOR_TOKEN_RESOLVER = 'GEARAPPS_COLLECTOR_TOKEN_RESOLVER';
+export const COLLECTOR_TOKEN_RESOLVER = 'MESHFORGE_COLLECTOR_TOKEN_RESOLVER';
 
 export type CollectorTokenUser = AuthenticatedUser & { collectorTokenId: string };
 

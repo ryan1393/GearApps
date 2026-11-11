@@ -7,7 +7,7 @@ The current Gear domain stack contains:
 - `dana-postgres` — PostgreSQL 16, host port 5432
 - `gear-db-bootstrap` — one-shot fresh/verified schema + seed-user/reference bootstrap
 - `gear-base-data-bootstrap` — one-shot idempotent base master-data import
-- `gear-app-server` — NestJS API, host port 3333
+- `meshforge-server` — NestJS API, host port 3333
 - `blade-tracking` — Angular/Nginx, host port 4200
 - `cutter-builder` — Angular/Nginx, host port 4201
 - `greenshed` — Angular/Nginx, host port 4202

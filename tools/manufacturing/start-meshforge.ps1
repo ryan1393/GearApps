@@ -144,8 +144,8 @@ Write-Host 'Preparing local UI test login...' -ForegroundColor Yellow
 if ($LASTEXITCODE -ne 0) {
     throw 'Local UI test-user provisioning failed.'
 }
-Write-Host '[PASS] Local operator account ensured: test@gearapps.local' -ForegroundColor Green
-Write-Host '[PASS] Local admin account ensured: admin@gearapps.local' -ForegroundColor Green
+Write-Host '[PASS] Local operator account ensured: test@meshforge.local' -ForegroundColor Green
+Write-Host '[PASS] Local admin account ensured: admin@meshforge.local' -ForegroundColor Green
 
 if ($ValidateData) {
     Write-Host ''
@@ -161,7 +161,7 @@ Write-Host '[2/5] Starting API server...' -ForegroundColor Yellow
 if (Test-Api) {
     Write-Host "      API is already responding on port $ServerPort." -ForegroundColor Green
 } else {
-    Start-GearProcess -Title 'MeshForge - API Server' -Command 'node --env-file=.env node_modules/nx/dist/bin/nx.js serve gear-app-server'
+    Start-GearProcess -Title 'MeshForge - API Server' -Command 'node --env-file=.env node_modules/nx/dist/bin/nx.js serve meshforge-server'
 
     $deadline = (Get-Date).AddSeconds($ServerWaitSeconds)
     Write-Host '      Waiting for API to respond' -NoNewline

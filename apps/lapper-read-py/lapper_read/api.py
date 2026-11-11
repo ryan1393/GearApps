@@ -1,4 +1,4 @@
-"""GearApps API client: sign-in, token refresh and idempotent writes (stdlib only)."""
+"""MeshForge API client: sign-in, token refresh and idempotent writes (stdlib only)."""
 
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ TOKEN_FILE_MISSING = (
 )
 
 
-class GearAppsApi:
+class MeshForgeApi:
     def __init__(self, base_url: str, email: str, password: str, timeout_s: float = 10.0, token: str = "",
                  token_file: str = ""):
         self.base_url = base_url.rstrip("/")
@@ -152,7 +152,7 @@ class GearAppsApi:
     def gearset_by_number(self, part_number: int) -> dict:
         found = self.request("GET", f"/api/v1/gearset/number/{part_number}", allow_404=True)
         if found is None:
-            # Unknown gearsets are created as pending records an admin completes in GearApps.
+            # Unknown gearsets are created as pending records an admin completes in MeshForge.
             found = self.request("POST", "/api/v1/gearset", {
                 "number": str(part_number), "status": "active", "summary_id": None,
                 "pinion_id": None, "ring_id": None, "user_id": None,

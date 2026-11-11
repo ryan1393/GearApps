@@ -1,4 +1,4 @@
-"""python -m lapper_read supervise  one worker per machine saved in GearApps (Docker default)
+"""python -m lapper_read supervise  one worker per machine saved in MeshForge (Docker default)
 python -m lapper_read run        one worker for LAPPER_MACHINE_IP / LAPPER_SCANNER_IP
 python -m lapper_read check      read the controller once and print signals and macros
 python -m lapper_read health     exit 0 when the supervisor (or single worker) is alive"""
@@ -10,7 +10,7 @@ import signal
 import sys
 
 from . import __version__
-from .api import GearAppsApi
+from .api import MeshForgeApi
 from .config import ConfigError, from_env
 from .fanuc import MACRO_CONSEC, MACRO_IDENT, Fanuc
 from .focas import FocasTransport
@@ -41,7 +41,7 @@ def main(argv: list[str]) -> int:
         except OSError:
             return 1
 
-    api = GearAppsApi(settings.api_base_url, settings.api_email, settings.api_password, settings.api_timeout_s,
+    api = MeshForgeApi(settings.api_base_url, settings.api_email, settings.api_password, settings.api_timeout_s,
                       token=settings.api_token, token_file=settings.api_token_file)
     transport = FocasTransport(settings.focas_library, settings.focas_log, settings.focas_port)
     fanuc = Fanuc(transport, settings.machine_ip, settings.io_timeout_ms, api)

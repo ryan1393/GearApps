@@ -44,7 +44,7 @@ assert(
   'Master runner must consume all automatically provisioned workflow inputs',
 );
 assert(
-  runner.includes("$Password = 'GearApps-E2E-Only-2026!'"),
+  runner.includes("$Password = 'MeshForge-E2E-Only-2026!'"),
   'Master runner must have a no-prompt dedicated E2E login',
 );
 
@@ -57,7 +57,7 @@ assert(
 );
 
 
-const fixturePasswordDeclaration = fixture.indexOf("const AUTO_TEST_PASSWORD = 'GearApps-E2E-Only-2026!';");
+const fixturePasswordDeclaration = fixture.indexOf("const AUTO_TEST_PASSWORD = 'MeshForge-E2E-Only-2026!';");
 const fixtureUserFunction = fixture.indexOf('async function ensureAutomaticTestUser');
 assert(
   fixturePasswordDeclaration >= 0 && fixturePasswordDeclaration < fixtureUserFunction,

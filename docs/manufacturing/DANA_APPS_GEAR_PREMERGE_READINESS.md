@@ -14,7 +14,7 @@ Runtime applications:
 - `apps/blade-tracking`
 - `apps/cutter-builder`
 - `apps/greenshed`
-- `apps/server` (Nx project name remains `gear-app-server` for now)
+- `apps/server` (Nx project name remains `meshforge-server` for now)
 
 The physical `apps/server` path is deliberately not renamed during pre-merge hardening. A path rename can happen later after the combined Dana Apps workspace is green.
 

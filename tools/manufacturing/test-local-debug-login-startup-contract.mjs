@@ -10,8 +10,8 @@ const start = fs.readFileSync(contractPath(process.cwd(), startPath), 'utf8');
 
 for (const marker of [
   "['localhost', '127.0.0.1'].includes(window.location.hostname)",
-  "readonly localTestEmail = 'test@gearapps.local';",
-  "readonly localAdminEmail = 'admin@gearapps.local';",
+  "readonly localTestEmail = 'test@meshforge.local';",
+  "readonly localAdminEmail = 'admin@meshforge.local';",
   'useLocalTestLogin(): void {',
   'useLocalAdminLogin(): void {',
   'email: this.localTestEmail,',
@@ -20,8 +20,8 @@ for (const marker of [
 ]) if (!login.includes(marker)) throw new Error(`Missing local debug login marker: ${marker}`);
 
 for (const forbidden of [
-  'GearApps-E2E-Only-2026!',
-  'GearApps-Admin-Only-2026!',
+  'MeshForge-E2E-Only-2026!',
+  'MeshForge-Admin-Only-2026!',
   'localTestPassword',
   'localAdminPassword',
   'password: this.localTestPassword',

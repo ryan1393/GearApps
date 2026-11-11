@@ -1,26 +1,26 @@
-GearApps 70.3.0 database update: legacy Lapper merge and integrity cleanup
+MeshForge 70.3.0 database update: legacy Lapper merge and integrity cleanup
 
-Run this on the computer that can access the GearApps PostgreSQL container.
+Run this on the computer that can access the MeshForge PostgreSQL container.
 Use PostgreSQL 16. The script finds POSTGRES_USER in the container unless you
 supply the database username explicitly. No database password is printed.
 
-1. Schedule the update and stop the shared GearApps API and Lapper Read
+1. Schedule the update and stop the shared MeshForge API and Lapper Read
    collection during it. Leave the PostgreSQL container running.
    Keep the updated shared API stopped until step 3 succeeds.
    Keep every collector checkpoint/state file. Deploy the updated shared API
    before restarting the collectors, so old record IDs resolve through aliases.
    Keep DATABASE_SYNCHRONIZE=false on the shared API. Keep the existing PostgreSQL volume.
 
-2. Extract the entire ZIP. List containers and identify the GearApps PostgreSQL one:
+2. Extract the entire ZIP. List containers and identify the MeshForge PostgreSQL one:
      docker ps --format "table {{.Names}}\t{{.Image}}"
 
 3. From the extracted folder run ONE of these, replacing POSTGRES_CONTAINER:
 
    PowerShell (Windows or PowerShell 7):
-     ./Apply-DatabaseCleanup.ps1 -PgContainer POSTGRES_CONTAINER -Database GearApps
+     ./Apply-DatabaseCleanup.ps1 -PgContainer POSTGRES_CONTAINER -Database MeshForge
 
    Bash (Linux):
-     bash ./Apply-DatabaseCleanup.sh POSTGRES_CONTAINER GearApps
+     bash ./Apply-DatabaseCleanup.sh POSTGRES_CONTAINER MeshForge
 
    If the database name differs, use its exact name. You can supply an explicit
    username using -DatabaseUser in PowerShell or the third Bash argument.
@@ -34,7 +34,7 @@ If constraints, lock timeouts or conflicting snapshots stop the transaction,
 the transaction rolls back and the pre-update backup remains available.
 
 The preserved values and review items
-  - Existing GearApps users, masters, inventory and audit history are retained.
+  - Existing MeshForge users, masters, inventory and audit history are retained.
   - Legitimate summary revisions remain separate records.
   - Exact duplicate Lapper cycles and macro snapshots are consolidated.
   - Original records/IDs remain in immutable archives and alias views.

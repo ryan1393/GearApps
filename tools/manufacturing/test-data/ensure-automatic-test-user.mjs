@@ -7,10 +7,10 @@ import pg from 'pg';
 import { assertTestAccountsAllowed } from './test-account-guard.mjs';
 
 const { Client } = pg;
-const AUTO_TEST_EMAIL = 'test@gearapps.local';
-const AUTO_TEST_PASSWORD = 'GearApps-E2E-Only-2026!';
-const AUTO_ADMIN_EMAIL = 'admin@gearapps.local';
-const AUTO_ADMIN_PASSWORD = 'GearApps-Admin-Only-2026!';
+const AUTO_TEST_EMAIL = 'test@meshforge.local';
+const AUTO_TEST_PASSWORD = 'MeshForge-E2E-Only-2026!';
+const AUTO_ADMIN_EMAIL = 'admin@meshforge.local';
+const AUTO_ADMIN_PASSWORD = 'MeshForge-Admin-Only-2026!';
 
 function loadDotEnv(filePath) {
   const values = {};

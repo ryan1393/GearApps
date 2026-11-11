@@ -27,7 +27,7 @@ New-Item -ItemType Directory -Path $env:NX_CACHE_DIRECTORY -Force | Out-Null
 Write-Host "[NX] Isolated validation workspace: $NxValidationRoot" -ForegroundColor DarkGray
 
 try {
-    Invoke-NativeChecked '[1/4] Building server...' { npx nx build gear-app-server }
+    Invoke-NativeChecked '[1/4] Building server...' { npx nx build meshforge-server }
     Invoke-NativeChecked '[2/4] Building Blade Tracking...' { npx nx build blade-tracking }
     Invoke-NativeChecked '[3/4] Building Cutter Builder...' { npx nx build cutter-builder }
     Invoke-NativeChecked '[4/4] Building Green Shed...' { npx nx build greenshed }

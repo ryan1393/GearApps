@@ -9,7 +9,7 @@ import { assertTestAccountsAllowed } from './test-data/test-account-guard.mjs';
 assertTestAccountsAllowed(process.env, 'test-release-regressions');
 for (const name of ['DATABASE_HOST','DATABASE_PORT','DATABASE_USERNAME','DATABASE_PASSWORD','DATABASE_NAME']) assert.ok(process.env[name], `Missing ${name}`);
 const client = new pg.Client({ host: process.env.DATABASE_HOST, port: Number(process.env.DATABASE_PORT), user: process.env.DATABASE_USERNAME, password: process.env.DATABASE_PASSWORD, database: process.env.DATABASE_NAME });
-const base = (process.env.GEAR_APPS_BASE_URL || 'http://localhost:3333/api/v1').replace(/\/$/,'');
+const base = (process.env.MESHFORGE_BASE_URL || 'http://localhost:3333/api/v1').replace(/\/$/,'');
 const tag = `RELEASE-${crypto.randomUUID()}`;
 const password = `Release-${crypto.randomBytes(24).toString('base64url')}!`;
 const users = []; const blades = []; let tray; let checks = 0;

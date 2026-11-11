@@ -238,7 +238,7 @@ Assert-True ($departments.Count -gt 0) 'Admin machine department fixture' 'At le
 $adminUserEmail=("e2e-admin-created-$RunToken@example.local").ToLower()
 $adminCreatedUser=Invoke-Api POST '/users' @{
     email=$adminUserEmail
-    password='GearApps1!'
+    password='MeshForge1!'
     firstName='E2E'
     lastName='Admin Created'
     role='admin'

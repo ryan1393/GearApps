@@ -26,7 +26,7 @@ if (!read('libs/manufacturing/shared/util-constants/src/lib/app-version.constant
 if (
   !fs
     .readFileSync(contractPath(process.cwd(), path.join(workspaceRoot, 'README.md')), 'utf8')
-    .includes(`# GearApps ${version}`)
+    .includes(`# MeshForge ${version}`)
 )
   fail('Root README release differs from root package');
 if (constant !== version)
@@ -64,7 +64,7 @@ if (/__version__\s*=\s*"([^"]+)"/.exec(pythonCollector)?.[1] !== version)
 const tags = [
   ...read('compose.yml').matchAll(/image: (dana-apps-[a-z-]+):(\S+)/g),
 ];
-const expectedImages = ['gear-app-server','lapper-client','blade-tracking','cutter-builder','greenshed','lapper-read'];
+const expectedImages = ['meshforge-server','lapper-client','blade-tracking','cutter-builder','greenshed','lapper-read'];
 if (tags.length !== expectedImages.length || expectedImages.some(name => !tags.some(([,image]) => image === 'dana-apps-' + name)))
   fail(`compose.yml should tag all ${expectedImages.length} Gear images; found ${tags.length}`);
 for (const [, image, tag] of tags)

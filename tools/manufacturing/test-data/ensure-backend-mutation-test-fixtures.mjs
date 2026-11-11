@@ -7,10 +7,10 @@ import { assertTestAccountsAllowed } from './test-account-guard.mjs';
 import { fileURLToPath } from 'node:url';
 
 const { Client }=pg;
-const ADMIN_EMAIL='e2e.admin@gearapps.local';
-const ADMIN_PASSWORD='GearApps-E2E-Admin-2026!';
-const USER_EMAIL='e2e.user@gearapps.local';
-const USER_PASSWORD='GearApps-E2E-User-2026!';
+const ADMIN_EMAIL='e2e.admin@meshforge.local';
+const ADMIN_PASSWORD='MeshForge-E2E-Admin-2026!';
+const USER_EMAIL='e2e.user@meshforge.local';
+const USER_PASSWORD='MeshForge-E2E-User-2026!';
 
 function loadDotEnv(filePath){
   const out={};
@@ -136,8 +136,8 @@ try{
   );
 
   const targetUserId=crypto.randomUUID();
-  const targetUserEmail=`e2e.mutation.target.${runToken.toLowerCase()}@gearapps.local`;
-  const targetHash=await bcrypt.hash('GearApps-E2E-Target-2026!',10);
+  const targetUserEmail=`e2e.mutation.target.${runToken.toLowerCase()}@meshforge.local`;
+  const targetHash=await bcrypt.hash('MeshForge-E2E-Target-2026!',10);
   await client.query(
     `insert into users
       (id,"createdAt","updatedAt",email,password,"firstName","lastName",role,active,

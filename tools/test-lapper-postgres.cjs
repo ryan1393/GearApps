@@ -1,5 +1,5 @@
-/* Run only against a disposable copy of GearApps, never the production DB.
- * GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES DATABASE_NAME=..._lapper_test
+/* Run only against a disposable copy of MeshForge, never the production DB.
+ * MESHFORGE_ALLOW_TEST_ACCOUNTS=YES DATABASE_NAME=..._lapper_test
  * DATABASE_HOST/PORT/USERNAME/PASSWORD must point at that restored copy.
  */
 const assert = require('node:assert/strict');
@@ -8,10 +8,10 @@ const path = require('node:path');
 const test = require('node:test');
 
 if (
-  process.env.GEAR_APPS_ALLOW_TEST_ACCOUNTS !== 'YES' ||
+  process.env.MESHFORGE_ALLOW_TEST_ACCOUNTS !== 'YES' ||
   !process.env.DATABASE_NAME?.endsWith('_lapper_test')
 ) {
-  throw new Error('Use a disposable *_lapper_test database and GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES');
+  throw new Error('Use a disposable *_lapper_test database and MESHFORGE_ALLOW_TEST_ACCOUNTS=YES');
 }
 Object.assign(process.env, {
   DATABASE_TYPE: 'postgres',
@@ -38,7 +38,7 @@ const { AppModule } = require('../apps/server/src/app/app.module');
 const { configureApi } = require('../apps/server/src/configure-api');
 const { migrateLapperPostgres } = require('../libs/api/postgres/src/lib/schema');
 
-test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 }, async (t) => {
+test('Lapper uses the shared MeshForge PostgreSQL database', { timeout: 180000 }, async (t) => {
   const app = await NestFactory.create(AppModule, { logger: ['error', 'warn'] });
   configureApi(app);
   await app.init();
@@ -170,7 +170,7 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
       const [greenshedDepartment] = await query(
         "SELECT id FROM public.departments WHERE code='48' AND active AND enabled LIMIT 1",
       );
-      assert.ok(greenshedDepartment, 'Restored GearApps has the Greenshed department');
+      assert.ok(greenshedDepartment, 'Restored MeshForge has the Greenshed department');
       await query('UPDATE public.users SET "departmentId"=$1 WHERE id=$2', [
         greenshedDepartment.id,
         fixtures.users[1].id,
@@ -604,7 +604,7 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
         assert.equal(shared.ring_part_id, pair.ring);
         assert.equal(shared.pinion_part_id, pair.pinion);
         assert.equal(assembly.ratio, Number((pair.ring_teeth / pair.pinion_teeth).toFixed(4)));
-        // GearApps may complete an assembly independently of this API.
+        // MeshForge may complete an assembly independently of this API.
         await query('UPDATE lapper.gearsets SET public_gearset_id=NULL WHERE id=$1', [pending.id]);
         assert.equal(
           (await request('GET', `gearset/${pending.id}`, undefined, operator)).id,
@@ -703,7 +703,7 @@ test('Lapper uses the shared GearApps PostgreSQL database', { timeout: 180000 },
     assert.deepEqual(
       after,
       before,
-      'Lapper startup, reads and collector writes must preserve all existing public GearApps data',
+      'Lapper startup, reads and collector writes must preserve all existing public MeshForge data',
     );
   }
 });

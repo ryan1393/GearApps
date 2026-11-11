@@ -272,7 +272,7 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
       <ol class="lapper-token-steps">
         <li>
           Give it to the Lapper Read installation it is for (for example the Windows service's
-          <code>GearAppsApi</code> settings).
+          <code>MeshForgeApi</code> settings).
         </li>
         <li>
           The Docker collector does not need this: use

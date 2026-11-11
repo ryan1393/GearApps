@@ -1,4 +1,4 @@
-# Compatibility entry point: package the complete, single GearApps workspace.
+# Compatibility entry point: package the complete, single MeshForge workspace.
 param(
     [string]$OutputDirectory = '',
     [string]$ArchivePrefix = ''
@@ -17,13 +17,13 @@ if (-not [string]::IsNullOrWhiteSpace($OutputDirectory)) {
     $NodeArgs += @('--output-dir', $AbsoluteOutput)
 }
 if (-not [string]::IsNullOrWhiteSpace($ArchivePrefix)) {
-    Write-Warning 'ArchivePrefix is retained for compatibility. The unified release always uses GearApps-<version>.zip.'
+    Write-Warning 'ArchivePrefix is retained for compatibility. The unified release always uses MeshForge-<version>.zip.'
 }
 Push-Location $WorkspaceRoot
 try {
     & $Node.Source @NodeArgs
     if ($LASTEXITCODE -ne 0) {
-        throw "GearApps release packaging failed with exit code $LASTEXITCODE."
+        throw "MeshForge release packaging failed with exit code $LASTEXITCODE."
     }
 } finally {
     Pop-Location

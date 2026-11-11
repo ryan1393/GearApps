@@ -42,7 +42,7 @@ export function setReleaseVersion(root, next) {
   );
   edit(
     'README.md',
-    /(# GearApps )\d+\.\d+\.\d+/,
+    /(# MeshForge )\d+\.\d+\.\d+/,
     (_all, prefix) => prefix + next,
   );
   edit(

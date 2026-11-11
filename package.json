@@ -108,8 +108,8 @@
     "test:dana-diamond-brand": "nx run manufacturing-tools:test-dana-diamond-brand",
     "test:shared-icon-assets": "nx run manufacturing-tools:test-shared-icon-assets",
     "test:toast-notifications": "nx run manufacturing-tools:test-toast-notifications",
-    "serve:gear-app-server": "nx serve gear-app-server",
-    "build:gear-app-server": "nx build gear-app-server",
+    "serve:meshforge-server": "nx serve meshforge-server",
+    "build:meshforge-server": "nx build meshforge-server",
     "test:dana-apps-premerge": "nx run manufacturing-tools:test-dana-apps-premerge",
     "test:native-asset-tags": "nx run manufacturing-tools:test-native-asset-tags",
     "configure:label-printer": "nx run manufacturing-tools:configure-label-printer",
@@ -132,7 +132,7 @@
     "test:release-regressions": "nx run manufacturing-tools:test-release-regressions",
     "test:ui": "nx test dana-ui",
     "package:release": "node tools/package-release.mjs",
-    "serve:api": "nx serve gear-app-server"
+    "serve:api": "nx serve meshforge-server"
   },
   "devDependencies": {
     "@angular-devkit/core": "20.3.42",

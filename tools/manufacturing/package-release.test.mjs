@@ -44,7 +44,7 @@ test('nested build pages survive generated-output exclusions', () => {
     'manufacturing/.angular/cache/file',
     '.git/config',
     'coverage/report.html',
-    'releases/GearApps-70.3.0.zip',
+    'releases/MeshForge-70.3.0.zip',
     'tools/database/cleanup.sql',
     'tools/database/legacy-import.sql',
   ]);
@@ -99,8 +99,8 @@ test('browser sessions and runtime data are excluded at any depth', () => {
     'manufacturing/runtime-data/session.txt',
     'manufacturing/database.db',
     'manufacturing/database.sqlite3',
-    'tools/database/backups/GearApps-before-cleanup.dump',
-    'backups/gearapps.sql',
+    'tools/database/backups/MeshForge-before-cleanup.dump',
+    'backups/meshforge.sql',
     'manufacturing/database.dump',
     'manufacturing/database.bak',
     'database-reports/private-audit.json',
@@ -111,7 +111,7 @@ test('browser sessions and runtime data are excluded at any depth', () => {
 
 test('archived sources and import scratch data do not enter the current release', () => {
   blocked([
-    'source-archives/GearApps-70.2.0.zip',
+    'source-archives/MeshForge-70.2.0.zip',
     '_archive/old-source.ts',
     'manufacturing/_archive/old-source.ts',
     '_patch_backups/service.ts',

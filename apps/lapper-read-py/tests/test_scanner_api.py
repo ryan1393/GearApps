@@ -8,7 +8,7 @@ import unittest
 from decimal import Decimal
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from lapper_read.api import ApiError, GearAppsApi
+from lapper_read.api import ApiError, MeshForgeApi
 from lapper_read.config import ConfigError, from_env
 from lapper_read.scanner import Scanner
 from lapper_read.state import ScannerState
@@ -116,7 +116,7 @@ class ApiTests(unittest.TestCase):
         self.addCleanup(self.tmp.cleanup)
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), FakeServer)
         threading.Thread(target=self.server.serve_forever, daemon=True).start()
-        self.api = GearAppsApi(f"http://127.0.0.1:{self.server.server_port}", "svc@plant", "secret", 3)
+        self.api = MeshForgeApi(f"http://127.0.0.1:{self.server.server_port}", "svc@plant", "secret", 3)
 
     def tearDown(self):
         self.server.shutdown()
@@ -147,14 +147,14 @@ class ApiTests(unittest.TestCase):
         self.assertIsInstance(values[0], int)
 
     def test_collector_token_is_sent_without_signing_in(self):
-        api = GearAppsApi(f"http://127.0.0.1:{self.server.server_port}", "", "", 3, token="glr_abc")
+        api = MeshForgeApi(f"http://127.0.0.1:{self.server.server_port}", "", "", 3, token="glr_abc")
         api.request("GET", "/api/v1/macro")
         self.assertEqual(FakeServer.log[-1][2], "Bearer glr_abc")
         self.assertFalse(any(e[1].endswith("/auth/email/login") for e in FakeServer.log))
 
     def test_token_file_is_used_and_reread_after_the_api_rejects_it(self):
         path = os.path.join(self.tmp.name, "token")
-        api = GearAppsApi(f"http://127.0.0.1:{self.server.server_port}", "", "", 3, token_file=path)
+        api = MeshForgeApi(f"http://127.0.0.1:{self.server.server_port}", "", "", 3, token_file=path)
         with self.assertRaises(ApiError) as missing:
             api.request("GET", "/api/v1/macro")
         self.assertIn("Connect Docker collector", str(missing.exception))
@@ -175,7 +175,7 @@ class ApiTests(unittest.TestCase):
         with open(path, "w", encoding="utf-8") as handle:
             handle.write("glr_first")
         FakeServer.revoked = {"glr_first"}
-        api = GearAppsApi(f"http://127.0.0.1:{self.server.server_port}", "", "", 3, token_file=path)
+        api = MeshForgeApi(f"http://127.0.0.1:{self.server.server_port}", "", "", 3, token_file=path)
         with self.assertRaises(ApiError) as error:
             api.request("GET", "/api/v1/macro")
         self.assertIn("Connect Docker collector", str(error.exception))
@@ -196,7 +196,7 @@ class ApiTests(unittest.TestCase):
 
 class ConfigTests(unittest.TestCase):
     BASE = {"LAPPER_MACHINE_IP": "10.16.81.15", "LAPPER_SCANNER_IP": "10.16.80.57",
-            "GEARAPPS_API_EMAIL": "svc@plant", "GEARAPPS_API_PASSWORD": "x"}
+            "MESHFORGE_API_EMAIL": "svc@plant", "MESHFORGE_API_PASSWORD": "x"}
 
     def test_valid_settings_and_defaults(self):
         s = from_env(self.BASE)
@@ -205,18 +205,18 @@ class ConfigTests(unittest.TestCase):
 
     def test_missing_credentials_or_bad_ip_fail_fast(self):
         with self.assertRaises(ConfigError):
-            from_env({**self.BASE, "GEARAPPS_API_PASSWORD": ""})
+            from_env({**self.BASE, "MESHFORGE_API_PASSWORD": ""})
         with self.assertRaises(ConfigError):
             from_env({**self.BASE, "LAPPER_MACHINE_IP": "lapper-1"})
 
     def test_a_collector_token_replaces_email_and_password(self):
-        s = from_env({"GEARAPPS_API_TOKEN": "glr_abc"}, mode="supervise")
+        s = from_env({"MESHFORGE_API_TOKEN": "glr_abc"}, mode="supervise")
         self.assertEqual(s.api_token, "glr_abc")
         with self.assertRaises(ConfigError):
-            from_env({"GEARAPPS_API_TOKEN": "eyJhbGciOi.jwt"}, mode="supervise")
+            from_env({"MESHFORGE_API_TOKEN": "eyJhbGciOi.jwt"}, mode="supervise")
 
     def test_supervise_only_needs_api_credentials(self):
-        s = from_env({"GEARAPPS_API_EMAIL": "svc@plant", "GEARAPPS_API_PASSWORD": "x"}, mode="supervise")
+        s = from_env({"MESHFORGE_API_EMAIL": "svc@plant", "MESHFORGE_API_PASSWORD": "x"}, mode="supervise")
         self.assertEqual(s.discover_interval_s, 30)
 
     def test_check_only_needs_the_controller_address(self):

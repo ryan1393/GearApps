@@ -16,7 +16,7 @@ public class ConfigurationTests
             {
                 ["LapperConfiguration:MachineIp"] = "127.0.0.1", ["LapperConfiguration:ScannerIp"] = "127.0.0.3",
                 ["LapperConfiguration:StateDirectory"] = area.DirectoryPath, ["LapperConfiguration:IoTimeoutMilliseconds"] = "250",
-                ["GearAppsApi:Email"] = "test@example.invalid", ["GearAppsApi:Password"] = "test"
+                ["MeshForgeApi:Email"] = "test@example.invalid", ["MeshForgeApi:Password"] = "test"
             })).Build();
         var settings = host.Services.GetRequiredService<IOptions<LapperConfiguration>>().Value;
         Assert.Equal("127.0.0.2", settings.MachineIp); Assert.Equal("127.0.0.3", settings.ScannerIp); Assert.Equal(250, settings.IoTimeoutMilliseconds);
@@ -30,7 +30,7 @@ public class ConfigurationTests
             .ConfigureAppConfiguration((_, builder) => builder.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["LapperConfiguration:MachineIp"] = "127.0.0.1", ["LapperConfiguration:ScannerIp"] = "127.0.0.3",
-                ["LapperConfiguration:StateDirectory"] = area.DirectoryPath, ["GearAppsApi:Email"] = "", ["GearAppsApi:Password"] = ""
+                ["LapperConfiguration:StateDirectory"] = area.DirectoryPath, ["MeshForgeApi:Email"] = "", ["MeshForgeApi:Password"] = ""
             })).Build();
         Assert.Throws<OptionsValidationException>(() => host.Services.GetRequiredService<IOptions<ApiConfiguration>>().Value);
     }

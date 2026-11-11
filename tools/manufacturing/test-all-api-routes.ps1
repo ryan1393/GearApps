@@ -1,6 +1,6 @@
 param(
     [string]$ServerRoot = "http://localhost:3333",
-    [string]$Email = "test@gearapps.local",
+    [string]$Email = "test@meshforge.local",
     [string]$Password,
     [string]$ManifestPath = "$PSScriptRoot\api-route-manifest.json"
 )
@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host ""
 Write-Host "============================================================"
-Write-Host " GearApps ALL-ROUTE Runtime Probe"
+Write-Host " MeshForge ALL-ROUTE Runtime Probe"
 Write-Host "============================================================"
 Write-Host ""
 Write-Host "This probe covers EVERY route in the source manifest."
@@ -80,7 +80,7 @@ function Resolve-ProbePath {
 
     # Valid-looking, guaranteed-nonexistent UUID for id-like parameters.
     $fakeUuid = "00000000-0000-4000-8000-000000000001"
-    $fakeText = "__gearapps_route_probe_no_record__"
+    $fakeText = "__meshforge_route_probe_no_record__"
 
     $resolved = $resolved -replace ":id(?=/|$)", $fakeUuid
     $resolved = $resolved -replace ":trayId(?=/|$)", $fakeUuid
@@ -162,7 +162,7 @@ function Invoke-RequestProbe {
         # A correctly protected route returns 401/403 BEFORE its controller mutates data.
         # Fake path IDs additionally protect path-based business actions.
         $expectedMode = "PROTECTED-WRITE-GUARD"
-        $body = "__GEARAPPS_NON_MUTATING_ROUTE_PROBE__"
+        $body = "__MESHFORGE_NON_MUTATING_ROUTE_PROBE__"
         $contentType = "text/plain"
     }
 
@@ -362,7 +362,7 @@ Write-Host "Passed             : $passed" -ForegroundColor Green
 Write-Host "Review             : $review" -ForegroundColor Yellow
 Write-Host "Failed             : $failed" -ForegroundColor $(if ($failed -eq 0) { "Green" } else { "Red" })
 
-$reportFile = Join-Path (Get-Location) "gearapps-all-api-route-results.json"
+$reportFile = Join-Path (Get-Location) "meshforge-all-api-route-results.json"
 
 $Results |
     ConvertTo-Json -Depth 8 |

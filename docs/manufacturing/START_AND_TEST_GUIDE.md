@@ -431,7 +431,7 @@ If no valid cache exists, setup runs `npm ci --prefer-offline --no-audit --no-fu
 
 Open `/admin` from any MeshForge frontend while signed in with an admin-role account. The shared screen creates and lists Users, Part Summaries, Models, Machines, and Cutter Bodies. The Admin navigation item is hidden for non-admin users.
 
-Local development provides a dedicated admin account: `admin@gearapps.local` / `GearApps-Admin-Only-2026!`. The normal `test@gearapps.local` account intentionally remains a non-admin operator so authorization tests continue to exercise 403 behavior.
+Local development provides a dedicated admin account: `admin@meshforge.local` / `MeshForge-Admin-Only-2026!`. The normal `test@meshforge.local` account intentionally remains a non-admin operator so authorization tests continue to exercise 403 behavior.
 
 ### Cutter Body administration
 

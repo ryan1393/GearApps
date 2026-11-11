@@ -11,7 +11,7 @@ This file tracks only remaining work. Completed setup/test/fake-data behavior is
 
 ## Data and migration validation
 
-- [ ] Validate a clean PostgreSQL GearApps schema from scratch.
+- [ ] Validate a clean PostgreSQL MeshForge schema from scratch.
 - [ ] Run `npm run validate:base-data` and `npm run import:base-data` on the target database; verify counts including 15 summary additions, 216 blade requirements, and 120 cutter bodies.
 - [ ] Resolve the 16 duplicate/ambiguous cutter-body serial mappings in `tools/manufacturing/base-data/source/cutter-body-info-BASE-DATA-READY.xlsx`; they are intentionally not imported yet.
 - [ ] Review base-data export/import counts for departments, employees/users, machines, models, summaries, gears, pinions, and cutter pull reasons.

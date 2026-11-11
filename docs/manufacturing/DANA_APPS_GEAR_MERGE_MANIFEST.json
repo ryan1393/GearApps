@@ -18,7 +18,7 @@
     "typescript": "5.9.3"
   },
   "rootHashes": {
-    "package.json": "3B680F0C08CD5A0E9C52972DA40FA0FA06289378CC9EAB012EB270C29F73F091",
+    "package.json": "7F29E36D8A0839B589A1ACB0BADA4893E225330A40E1A49346E2CC848CF11203",
     "package-lock.json": "E5F61837CA394A12374DB118FEA8BCE168FEC12E7BE85FDB9821E48C0961A686",
     "nx.json": "73A2F6BD253030EAD5B14930871A240C60AFD9B5378940CC224689ABC36E5ACD",
     "tsconfig.base.json": "EF99605E3A43A47E3E88FE368966A8ACD1E27E5EC70BDC985FC8F2056694FA3F"
@@ -26,7 +26,7 @@
   "composeFiles": [
     {
       "path": "compose.yml",
-      "sha256": "F4312DA95BA1378364D627B72A2054A2DA05B88C0D34DE8A449838A2B851D103"
+      "sha256": "4C05271BAAD076369F91176483809961DBD0D79E153C37BF30D8765B1C6176CC"
     }
   ],
   "runtimeProjects": [
@@ -133,7 +133,7 @@
       "hasTestTarget": true
     },
     {
-      "name": "gear-app-server",
+      "name": "meshforge-server",
       "root": "apps/server",
       "projectType": "application",
       "tags": [
@@ -533,41 +533,6 @@
       "hasTestTarget": true
     },
     {
-      "name": "gear-app-server",
-      "root": "apps/server",
-      "projectType": "application",
-      "tags": [
-        "domain:meshforge",
-        "scope:server",
-        "type:app"
-      ],
-      "targets": [
-        "build",
-        "build-fresh-db-bootstrap",
-        "lint",
-        "serve",
-        "test"
-      ],
-      "hasBuildTarget": true,
-      "hasServeTarget": true,
-      "hasTestTarget": true
-    },
-    {
-      "name": "gear-app-server-e2e",
-      "root": "apps/server-e2e",
-      "projectType": null,
-      "tags": [
-        "domain:meshforge"
-      ],
-      "targets": [
-        "e2e",
-        "lint"
-      ],
-      "hasBuildTarget": false,
-      "hasServeTarget": false,
-      "hasTestTarget": false
-    },
-    {
       "name": "greenshed",
       "root": "apps/greenshed",
       "projectType": "application",
@@ -642,6 +607,41 @@
       "hasBuildTarget": false,
       "hasServeTarget": false,
       "hasTestTarget": true
+    },
+    {
+      "name": "meshforge-server",
+      "root": "apps/server",
+      "projectType": "application",
+      "tags": [
+        "domain:meshforge",
+        "scope:server",
+        "type:app"
+      ],
+      "targets": [
+        "build",
+        "build-fresh-db-bootstrap",
+        "lint",
+        "serve",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": true,
+      "hasTestTarget": true
+    },
+    {
+      "name": "meshforge-server-e2e",
+      "root": "apps/server-e2e",
+      "projectType": null,
+      "tags": [
+        "domain:meshforge"
+      ],
+      "targets": [
+        "e2e",
+        "lint"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
     },
     {
       "name": "server-data-access",

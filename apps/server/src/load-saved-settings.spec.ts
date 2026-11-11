@@ -11,7 +11,7 @@ const environment = (): NodeJS.ProcessEnv => ({
   DATABASE_PORT: '5432',
   DATABASE_USERNAME: 'api',
   DATABASE_PASSWORD: 'database-password',
-  DATABASE_NAME: 'GearApps',
+  DATABASE_NAME: 'MeshForge',
   SCANNER_TIMEOUT_MS: '4000',
 });
 const NO_FILE = '/nonexistent/.env';

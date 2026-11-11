@@ -1,7 +1,7 @@
 {
   "sourceRepository": "https://github.com/ryan1393/Dana-UI",
   "sourceTreeSha": "b9ead55f435bb5ca225852c02c3918ce0a825f0c",
-  "compatibilityStyles": "Preserved from the uploaded GearApps 70.2.0 vendored DanaUI 0.3.0 package; canonical functional table and dialog corrections added.",
+  "compatibilityStyles": "Preserved from the uploaded MeshForge 70.2.0 vendored DanaUI 0.3.0 package; canonical functional table and dialog corrections added.",
   "buildAngular": "20.3.35",
   "recoveredReleaseVersion": "0.3.2",
   "releaseVersion": "0.3.3",

@@ -5,8 +5,8 @@
 //   npm run test:workflow
 //
 // Needs a running API and a TEST database (it creates fixtures with known-password
-// accounts, so the machine's .env must contain GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES).
-// GEAR_APPS_BASE_URL overrides http://localhost:3333/api/v1.
+// accounts, so the machine's .env must contain MESHFORGE_ALLOW_TEST_ACCOUNTS=YES).
+// MESHFORGE_BASE_URL overrides http://localhost:3333/api/v1.
 import crypto from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
@@ -14,8 +14,8 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const fixtureOut = execFileSync(process.execPath, [path.join(root, 'tools/manufacturing/test-data/ensure-workflow-test-fixtures.mjs')], { cwd: root, encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] });
 const fx = JSON.parse(fixtureOut.trim().split(/\r?\n/).pop());
-const B = (process.env.GEAR_APPS_BASE_URL || 'http://localhost:3333/api/v1').replace(/\/$/, '');
-const login = await (await fetch(B + '/auth/email/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: process.env.GEAR_APPS_ADMIN_EMAIL || 'admin@gearapps.local', password: process.env.GEAR_APPS_ADMIN_PASSWORD || 'GearApps-Admin-Only-2026!' }) })).json();
+const B = (process.env.MESHFORGE_BASE_URL || 'http://localhost:3333/api/v1').replace(/\/$/, '');
+const login = await (await fetch(B + '/auth/email/login', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: process.env.MESHFORGE_ADMIN_EMAIL || 'admin@meshforge.local', password: process.env.MESHFORGE_ADMIN_PASSWORD || 'MeshForge-Admin-Only-2026!' }) })).json();
 if (!login.accessToken) throw new Error('Admin login failed; run tools/manufacturing/test-data/ensure-automatic-test-user.mjs first.');
 const H = { authorization: 'Bearer ' + login.accessToken, 'content-type': 'application/json' };
 const enc = encodeURIComponent; let n = 0;

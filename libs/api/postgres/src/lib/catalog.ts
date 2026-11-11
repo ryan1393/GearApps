@@ -22,7 +22,7 @@ export const numberOrNull = (value: unknown): number | null =>
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const owner = (value: unknown) => (uuidPattern.test(text(value)) ? value : null);
 const status = (row: Row) => (row.active && row.enabled && !row.deletedAt ? 'active' : 'inactive');
-// Pending collector numbers may later become complete GearApps assemblies.
+// Pending collector numbers may later become complete MeshForge assemblies.
 // Resolve them at read time too, so their existing history follows that assembly.
 const resolvedGearset = `COALESCE(g.public_gearset_id,(SELECT pg.id FROM public.gearsets pg
   JOIN public.parts gp ON gp.id=pg.gearset_part_id

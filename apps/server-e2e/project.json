@@ -1,8 +1,8 @@
 {
-  "name": "gear-app-server-e2e",
+  "name": "meshforge-server-e2e",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "implicitDependencies": [
-    "gear-app-server"
+    "meshforge-server"
   ],
   "targets": {
     "e2e": {

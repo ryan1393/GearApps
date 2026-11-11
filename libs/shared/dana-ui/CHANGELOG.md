@@ -6,9 +6,9 @@ Move the maintained Dana UI source into the shared root Nx library. All four app
 
 ## 0.3.2
 
-Allow applications to align `danaMobileNav` with their CSS using `desktopMinWidth`, retaining 1025 as the canonical default. GearApps explicitly binds 1024 to match its existing desktop media query.
+Allow applications to align `danaMobileNav` with their CSS using `desktopMinWidth`, retaining 1025 as the canonical default. MeshForge explicitly binds 1024 to match its existing desktop media query.
 
-Restore the complete GearApps 70.2.0 compatibility styles and Tailwind package paths while retaining 0.3.1 table cleanup, Escape/focus, and native-modal fixes. Canonical functional table rules use low specificity so optional Gear styles retain precedence. Build with Angular 19.2.25/ng-packagr 19.2.2/TypeScript 5.7.3 for the recovered manufacturing workspace.
+Restore the complete MeshForge 70.2.0 compatibility styles and Tailwind package paths while retaining 0.3.1 table cleanup, Escape/focus, and native-modal fixes. Canonical functional table rules use low specificity so optional Gear styles retain precedence. Build with Angular 19.2.25/ng-packagr 19.2.2/TypeScript 5.7.3 for the recovered manufacturing workspace.
 
 Source recovery is pinned in RECOVERY_PROVENANCE.json. Public component exports are retained and verified by strict Angular 19 AOT and Chromium consumer checks.
 

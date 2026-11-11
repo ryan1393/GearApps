@@ -1,6 +1,6 @@
 param(
     [string]$BaseUrl = "http://localhost:3333/api/v1",
-    [string]$Email = "test@gearapps.local",
+    [string]$Email = "test@meshforge.local",
     [string]$Password,
     [Parameter(Mandatory=$true)] [string]$SummaryNumber,
     [Parameter(Mandatory=$true)] [ValidateSet('RING','PINION')] [string]$PartTypeCode,

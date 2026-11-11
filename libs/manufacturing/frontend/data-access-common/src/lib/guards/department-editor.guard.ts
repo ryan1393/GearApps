@@ -2,11 +2,11 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
 import {
-  canEditGearApp,
-  GearAppKey,
+  canEditMeshForgeApp,
+  MeshForgeAppKey,
 } from '@meshforge/manufacturing/shared/util-constants';
 
-const dashboardRoutes: Record<GearAppKey, string> = {
+const dashboardRoutes: Record<MeshForgeAppKey, string> = {
   BLADE_TRACKING: '/blades',
   CUTTER_BUILDER: '/cutter-builder',
   GREENSHED: '/greenshed',
@@ -17,7 +17,7 @@ const dashboardRoutes: Record<GearAppKey, string> = {
  * redirect back to the dashboard unless their department owns that app.
  * Admin role always passes.
  */
-export function departmentEditorGuard(app: GearAppKey): CanActivateFn {
+export function departmentEditorGuard(app: MeshForgeAppKey): CanActivateFn {
   return () => {
     const session = inject(AuthSessionService);
     const router = inject(Router);
@@ -27,7 +27,7 @@ export function departmentEditorGuard(app: GearAppKey): CanActivateFn {
       return router.createUrlTree(['/login']);
     }
 
-    return canEditGearApp(app, user.role, user.departmentCode)
+    return canEditMeshForgeApp(app, user.role, user.departmentCode)
       ? true
       : router.createUrlTree([dashboardRoutes[app]], {
           queryParams: { viewOnly: '1' },

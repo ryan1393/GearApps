@@ -19,7 +19,7 @@ export class ServerFeatureHealthController {
   @Get('live')
   @SkipAuth()
   live() {
-    return { status: 'ok', service: 'gear-app-server', version: MESHFORGE_VERSION };
+    return { status: 'ok', service: 'meshforge-server', version: MESHFORGE_VERSION };
   }
 
   @Get('ready')

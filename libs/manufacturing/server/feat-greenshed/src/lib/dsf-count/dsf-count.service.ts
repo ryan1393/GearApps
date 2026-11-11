@@ -404,7 +404,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       await client.query('SET LOCAL max_parallel_workers_per_gather=0');
       await client.query('SET LOCAL search_path=pg_catalog,public');
       const identity=(await client.query(SOURCE_IDENTITY_SQL)).rows[0];
-      if(!identity?.is_source||!identity.not_gear_apps||!identity.read_only)throw new DsfRefusal('WRONG_SOURCE_OR_NOT_READ_ONLY');
+      if(!identity?.is_source||!identity.not_meshforge||!identity.read_only)throw new DsfRefusal('WRONG_SOURCE_OR_NOT_READ_ONLY');
       const at:string=identity.now_utc;
       const clockGap=timestampUs(new Date().toISOString())-timestampUs(at);
       if(clockGap>10000000n||clockGap< -10000000n)throw new DsfRefusal('CLOCK_DIFFERENCE');

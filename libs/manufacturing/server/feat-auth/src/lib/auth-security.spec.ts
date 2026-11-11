@@ -21,7 +21,7 @@ import {
   IJwtPayload,
   RoleType,
 } from '@meshforge/manufacturing/shared/util-types';
-import { canEditGearApp } from '@meshforge/manufacturing/shared/util-constants';
+import { canEditMeshForgeApp } from '@meshforge/manufacturing/shared/util-constants';
 import { ServerFeatAuthService } from './server-feat-auth.service';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
@@ -165,10 +165,10 @@ describe('authentication security regressions', () => {
     );
     expect(identity.departmentCode).toBe('45');
     expect(
-      canEditGearApp('BLADE_TRACKING', identity.role, identity.departmentCode),
+      canEditMeshForgeApp('BLADE_TRACKING', identity.role, identity.departmentCode),
     ).toBe(true);
     expect(
-      canEditGearApp('GREENSHED', identity.role, identity.departmentCode),
+      canEditMeshForgeApp('GREENSHED', identity.role, identity.departmentCode),
     ).toBe(false);
   });
   it('matches legacy mixed-case email using an exact bound comparison', async () => {

@@ -15,14 +15,14 @@ export async function runDatabaseMigration(
   version: string,
   sql: string,
 ): Promise<void> {
-  await manager.query('CREATE SCHEMA IF NOT EXISTS gearapps_meta');
-  await manager.query(`CREATE TABLE IF NOT EXISTS gearapps_meta.schema_migrations (
+  await manager.query('CREATE SCHEMA IF NOT EXISTS meshforge_meta');
+  await manager.query(`CREATE TABLE IF NOT EXISTS meshforge_meta.schema_migrations (
     version text PRIMARY KEY, checksum char(64) NOT NULL,
     applied_at timestamptz NOT NULL DEFAULT clock_timestamp(), applied_by text NOT NULL DEFAULT session_user
   )`);
   const checksum = migrationChecksum(sql);
   const [installed] = await manager.query<Array<{ checksum: string }>>(
-    'SELECT checksum FROM gearapps_meta.schema_migrations WHERE version=$1',
+    'SELECT checksum FROM meshforge_meta.schema_migrations WHERE version=$1',
     [version],
   );
   if (installed) {
@@ -32,7 +32,7 @@ export async function runDatabaseMigration(
   }
   await manager.query(sql);
   await manager.query(
-    'INSERT INTO gearapps_meta.schema_migrations(version,checksum) VALUES ($1,$2)',
+    'INSERT INTO meshforge_meta.schema_migrations(version,checksum) VALUES ($1,$2)',
     [version, checksum],
   );
 }
@@ -133,7 +133,7 @@ BEGIN
   END LOOP;
 END $gearset_integrity$;
 
-CREATE OR REPLACE VIEW gearapps_meta.gearset_findings AS
+CREATE OR REPLACE VIEW meshforge_meta.gearset_findings AS
 SELECT g.id,gp.part_number AS gearset_number,g.ratio_value,g.ratio_text,
   r.teeth AS ring_teeth,p.teeth AS pinion_teeth,
   round(r.teeth::numeric/nullif(p.teeth,0),4) AS calculated_ratio,

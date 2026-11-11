@@ -1,7 +1,7 @@
 # MeshForge 70.5.0
 
 MeshForge is the Dana manufacturing workspace for four workflows sharing one API and database:
-**Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root GearApps Nx workspace. All frontends use
+**Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root MeshForge Nx workspace. All frontends use
 Angular 20.3.35 and Dana UI 0.3.3; the shared API uses NestJS 11.2.9 and TypeORM 1.1.2.
 Manufacturing retains PostgreSQL 16 and Docker Compose.
 
@@ -60,7 +60,7 @@ npx nx serve blade-tracking
 ```
 
 The authentication, recovery, inventory, scanning, and deployment fixes from 70.2.1
-are retained. API routes and PostgreSQL workflow rules remain compatible. All four clients and Lapper Read use gear-app-server on port 3333. The only API
+are retained. API routes and PostgreSQL workflow rules remain compatible. All four clients and Lapper Read use meshforge-server on port 3333. The only API
 environment is .env. See [unified API setup](../UNIFIED_API.md).
 
 Users must sign in again after upgrading. Emailed recovery requires SMTP and the public
@@ -69,7 +69,7 @@ frontend origin (`PUBLIC_WEB_BASE_URL`, or Docker `GEAR_PUBLIC_WEB_BASE_URL`).
 Portable checks: `npm test` runs every project's Nx `test` target (Jest, the .NET and Python
 collectors) and the deployment/configuration tests; `npm run test:unit` runs only the Jest projects;
 `npm run test:contracts` runs source contracts. Live workflow scripts require a dedicated
-test database and explicit `GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES`.
+test database and explicit `MESHFORGE_ALLOW_TEST_ACCOUNTS=YES`.
 
 ## Earlier 70.1.0 improvements
 
@@ -86,7 +86,7 @@ Full detail is in `CHANGELOG.md`. In short:
 - **Security.** Test-fixture scripts that create known-password admin accounts now refuse to run
   unless the machine opts in. The deploy script refuses placeholder or short JWT secrets, and the
   API warns about them at startup.
-- **New deploy** (`Deploy-GearApps.cmd`), see below.
+- **New deploy** (`Deploy-MeshForge.cmd`), see below.
 - **UI fixes.** Intake focus after a tray scan, Summary and Part Type on the Internal Movement
   confirmation, Green Shed Setup on the shared workflow layout, garbled `â€”`/`â€¢` characters.
 - **Code health.** All server libraries compile under their strict settings. All server unit tests
@@ -97,7 +97,7 @@ Full detail is in `CHANGELOG.md`. In short:
 
 Run deployment from the repository root with
 `node tools/manufacturing/deploy/deploy-remote.mjs` (Windows:
-`commands\Deploy-GearApps.cmd`). To deploy to the plant Docker host in one step, run
+`commands\Deploy-MeshForge.cmd`). To deploy to the plant Docker host in one step, run
 `commands\Deploy-To-usftwvmdocker.cmd`: it creates the `usftwvmdocker`
 Docker context for `image@usftwvmdocker` if this PC does not have it, then runs the same
 deployment. The archive contains the single root workspace;
@@ -108,15 +108,15 @@ When upgrading an older split layout, it carries the former shared
 `manufacturing/.env` into the repository root.
 
 
-`Deploy-GearApps.cmd` (or `node tools/manufacturing/deploy/deploy-remote.mjs`) deploys the shared repository to the Linux
+`Deploy-MeshForge.cmd` (or `node tools/manufacturing/deploy/deploy-remote.mjs`) deploys the shared repository to the Linux
 Docker host behind your active **SSH Docker context** (`docker context use <name>`). It needs `ssh`,
 `scp`, `tar`, `docker`, Node 24.22.1 and npm 11.9.0 on the Windows machine.
 
-1. **Preflight (changes nothing):** `Deploy-GearApps.cmd --check`. This checks the version, the SSH
+1. **Preflight (changes nothing):** `Deploy-MeshForge.cmd --check`. This checks the version, the SSH
    context, host Docker, and the host `.env` (JWT secrets 32+ random characters, no
-   `GEAR_APPS_ALLOW_TEST_ACCOUNTS`; a short database password only warns, because Postgres must be
+   `MESHFORGE_ALLOW_TEST_ACCOUNTS`; a short database password only warns, because Postgres must be
    changed first with `ALTER USER`).
-2. **Deploy:** `Deploy-GearApps.cmd`. It:
+2. **Deploy:** `Deploy-MeshForge.cmd`. It:
    1. backs up the database with `pg_dump` to `~/dana-apps-backups/` on the host (owner-only files,
       newest 20 kept); a failed backup stops the deploy;
    2. copies the source to `~/dana-apps`, keeping the previous release in `~/dana-apps.prev`
@@ -127,10 +127,10 @@ Docker host behind your active **SSH Docker context** (`docker context use <name
    4. waits for every service and checks that the API reports `70.5.0`. Only then does the old
       release become `~/dana-apps.prev`. If the deploy fails, the last good release is protected
       (a retry discards the failed one) and `--rollback` brings it back.
-3. **Rollback:** `Deploy-GearApps.cmd --rollback` swaps `~/dana-apps.prev` back in and restarts it.
+3. **Rollback:** `Deploy-MeshForge.cmd --rollback` swaps `~/dana-apps.prev` back in and restarts it.
    Schema changes in this app are additive, so the previous release runs against the current database.
    To restore data as well, load the backup taken before the deploy:
-   `cd ~/dana-apps && gunzip -c ~/dana-apps-backups/<file>.sql.gz | docker compose --env-file .env -f compose.yml exec -T dana-postgres psql -U <GEAR_DB_USERNAME> -d GearApps`
+   `cd ~/dana-apps && gunzip -c ~/dana-apps-backups/<file>.sql.gz | docker compose --env-file .env -f compose.yml exec -T dana-postgres psql -U <GEAR_DB_USERNAME> -d MeshForge`
    (restore into an emptied database).
 
 **First 70.1.0 deploy:** earlier releases lived in `/tmp/dana-apps.v0.1` on the host, and most
@@ -141,7 +141,7 @@ placeholder JWT secrets the deploy stops and tells you how to generate new ones 
 out once; nothing else changes).
 
 **Brand-new host:** put a filled-in `.env` (from `.env.example`) at the repository root and run
-`Deploy-GearApps.cmd --upload-env`.
+`Deploy-MeshForge.cmd --upload-env`.
 
 ## Verify a database
 
@@ -252,9 +252,9 @@ Machines, Parts and Part Summaries links redirect there.
 
 The existing Users feature was retained as the admin route but rebuilt into the shared MeshForge administration workspace. Part Summary and Cutter Body creation reuse their existing backend APIs. Admin-only master-data endpoints were added for Models, Machines, and Department lookup, and an admin-only `POST /api/v1/users` route was added so the selected User/Admin role is preserved.
 
-For local development on a **test** database (its `.env` must contain `GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES`), `commands\START-MESHFORGE.cmd` provisions:
-- Operator: `test@gearapps.local` / `GearApps-E2E-Only-2026!`
-- Admin: `admin@gearapps.local` / `GearApps-Admin-Only-2026!`
+For local development on a **test** database (its `.env` must contain `MESHFORGE_ALLOW_TEST_ACCOUNTS=YES`), `commands\START-MESHFORGE.cmd` provisions:
+- Operator: `test@meshforge.local` / `MeshForge-E2E-Only-2026!`
+- Admin: `admin@meshforge.local` / `MeshForge-Admin-Only-2026!`
 
 These passwords are published in this repository. The fixture scripts refuse to run without that opt-in, and the deploy script refuses a production `.env` that sets it.
 

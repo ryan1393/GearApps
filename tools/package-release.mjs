@@ -104,7 +104,7 @@ export function packageRelease(outputDirectory = path.join(workspaceRoot, 'relea
   let offset = 0,
     centralSize = 0;
   for (const entry of entries) {
-    const name = Buffer.from(`GearApps-${pkg.version}/${entry.name}`, 'utf8');
+    const name = Buffer.from(`MeshForge-${pkg.version}/${entry.name}`, 'utf8');
     const data = fs.readFileSync(entry.full);
     const compressed = deflateRawSync(data, { level: 9 });
     const checksum = crc32(data);
@@ -150,7 +150,7 @@ export function packageRelease(outputDirectory = path.join(workspaceRoot, 'relea
     b.writeUInt32LE(centralSize, 12);
     b.writeUInt32LE(offset, 16);
   });
-  const output = path.resolve(outputDirectory, `GearApps-${pkg.version}.zip`);
+  const output = path.resolve(outputDirectory, `MeshForge-${pkg.version}.zip`);
   fs.mkdirSync(path.dirname(output), { recursive: true });
   const temporary = `${output}.tmp`;
   try {

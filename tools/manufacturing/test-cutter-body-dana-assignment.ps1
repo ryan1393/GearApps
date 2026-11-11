@@ -1,6 +1,6 @@
 param(
     [string]$BaseUrl = "http://localhost:3333/api/v1",
-    [string]$Email = "admin@gearapps.local",
+    [string]$Email = "admin@meshforge.local",
     [Parameter(Mandatory=$true)][string]$Password,
     [switch]$Execute,
     [switch]$ShowResponses

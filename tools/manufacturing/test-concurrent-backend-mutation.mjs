@@ -1,6 +1,6 @@
-const base=(process.env.GEAR_APPS_BASE_URL||'http://localhost:3333/api/v1').replace(/\/$/,'');
-const email=process.env.GEAR_APPS_E2E_ADMIN_EMAIL||'e2e.admin@gearapps.local';
-const password=process.env.GEAR_APPS_E2E_ADMIN_PASSWORD||'GearApps-E2E-Admin-2026!';
+const base=(process.env.MESHFORGE_BASE_URL||'http://localhost:3333/api/v1').replace(/\/$/,'');
+const email=process.env.MESHFORGE_E2E_ADMIN_EMAIL||'e2e.admin@meshforge.local';
+const password=process.env.MESHFORGE_E2E_ADMIN_PASSWORD||'MeshForge-E2E-Admin-2026!';
 
 async function jsonOrText(res){
   const text=await res.text();

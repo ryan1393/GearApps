@@ -119,7 +119,7 @@ export class PostgresCollectorTokens
     if (!file) {
       throw new ServiceUnavailableException(
         'This API is not running in the Docker stack, so it cannot hand a token to the Docker collector. ' +
-          'Create a token instead and set GEARAPPS_API_TOKEN for the collector.',
+          'Create a token instead and set MESHFORGE_API_TOKEN for the collector.',
       );
     }
     await this.catalog.db.transaction(async (manager) => {

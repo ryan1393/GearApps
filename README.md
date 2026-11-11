@@ -1,4 +1,4 @@
-# GearApps 70.5.0
+# MeshForge 70.5.0
 
 One Nx monorepo contains Lapper, Lapper Read, Blade Tracking, Cutter Builder and
 Greenshed. All four web applications and the collector use **one NestJS API on
@@ -6,7 +6,7 @@ port 3333**, one authentication service and the same PostgreSQL database.
 
 | Application    | Project / source                                   | Browser port                             |
 | -------------- | -------------------------------------------------- | ---------------------------------------- |
-| Shared API     | gear-app-server / apps/server        | 3333 (API)                               |
+| Shared API     | meshforge-server / apps/server        | 3333 (API)                               |
 | Lapper         | lapper-client / apps/lapper-client                 | 4203                                     |
 | Blade Tracking | blade-tracking / apps/blade-tracking | 4200                                     |
 | Cutter Builder | cutter-builder / apps/cutter-builder | 4201                                     |
@@ -34,11 +34,11 @@ docker compose up -d --build --remove-orphans
 
 The root `compose.yml` reads that same `.env`. It builds one
 API image shared by the bootstrap jobs and the running API. All four nginx clients
-proxy /api to gear-app-server:3333. Keep the existing PostgreSQL volume.
+proxy /api to meshforge-server:3333. Keep the existing PostgreSQL volume.
 
 For an existing installation, follow [the unified API upgrade procedure](docs/UNIFIED_API.md).
 Build the application source ZIP with `npm run package:release`; it writes
-`releases/GearApps-<version>.zip` and its `.sha256`. Release archives are not committed:
+`releases/MeshForge-<version>.zip` and its `.sha256`. Release archives are not committed:
 attach them to a GitHub release instead. Earlier archives remain in git history.
 
 Docker dependency stages include Python, Make and a C++ compiler, as required by
@@ -68,7 +68,7 @@ All applications sign in through POST /api/v1/auth/email/login and use the same
 accessToken/refreshToken response. Account management, password recovery,
 department access and token revocation belong to the shared API. Lapper Read uses
 the same flow; [collector configuration](apps/lapper-read/SETUP.txt) describes its
-GearAppsApi settings.
+MeshForgeApi settings.
 
 ## Database and validation
 

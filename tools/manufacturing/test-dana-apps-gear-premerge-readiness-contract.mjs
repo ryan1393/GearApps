@@ -32,8 +32,8 @@ for (const p of [
 
 const serverProject = JSON.parse(read('apps/server/project.json'));
 must(
-  serverProject.name === 'gear-app-server' || read('apps/server/project.json').includes('"gear-app-server"'),
-  'apps/server must remain the Gear backend Nx project (gear-app-server) during pre-merge.'
+  serverProject.name === 'meshforge-server' || read('apps/server/project.json').includes('"meshforge-server"'),
+  'apps/server must remain the Gear backend Nx project (meshforge-server) during pre-merge.'
 );
 
 for (const project of ['blade-tracking', 'cutter-builder', 'greenshed']) {
@@ -70,7 +70,7 @@ for (const marker of [
 
 for (const marker of [
   'MeshForge V69.3.0R1 marks the Gear side as ready',
-  '`apps/server` (Nx project name remains `gear-app-server` for now)',
+  '`apps/server` (Nx project name remains `meshforge-server` for now)',
   '`npm run test:meshforge` remains the authoritative Gear regression gate',
   'Gear database/schema/data remain separate from Truck Log',
   'The future monorepo may contain Truck Log paths',

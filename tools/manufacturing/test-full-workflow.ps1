@@ -1,6 +1,6 @@
 param(
     [string]$BaseUrl = "http://localhost:3333/api/v1",
-    [string]$Email = "test@gearapps.local",
+    [string]$Email = "test@meshforge.local",
     [string]$Password,
 
     [Parameter(Mandatory=$true)] [string]$TraySerialNumber,
@@ -188,7 +188,7 @@ try {
     Invoke-RestMethod -Method Get -Uri "$BaseUrl/health" | Out-Null
     Add-Result 'Server health' 'PASS' $BaseUrl
 } catch {
-    Fail-Test 'Server health' 'API is not reachable. Start it with: npx nx serve gear-app-server'
+    Fail-Test 'Server health' 'API is not reachable. Start it with: npx nx serve meshforge-server'
 }
 
 # Login
@@ -590,7 +590,7 @@ $report = [pscustomobject]@{
     failed = $failed
     results = $Results
 }
-$reportPath = Join-Path (Get-Location) 'gearapps-full-workflow-results.json'
+$reportPath = Join-Path (Get-Location) 'meshforge-full-workflow-results.json'
 $report | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $reportPath -Encoding UTF8
 Write-Host "Report: $reportPath"
 

@@ -1,4 +1,4 @@
-/** Static option lists carried over from the legacy forms; departments come from the shared GearApps department list. */
+/** Static option lists carried over from the legacy forms; departments come from the shared MeshForge department list. */
 export const MACHINE_TYPES = ['L-60', '600'];
 export const MACHINE_BUILDERS = ['Klingelnberg', 'Gleason'];
 export const MACHINE_CELLS = [

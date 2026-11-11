@@ -37,8 +37,8 @@ export class FrontendFeatureLoginComponent {
     isDevMode() &&
     typeof window !== 'undefined' &&
     ['localhost', '127.0.0.1'].includes(window.location.hostname);
-  readonly localTestEmail = 'test@gearapps.local';
-  readonly localAdminEmail = 'admin@gearapps.local';
+  readonly localTestEmail = 'test@meshforge.local';
+  readonly localAdminEmail = 'admin@meshforge.local';
   loginError = '';
   submitting = false;
 

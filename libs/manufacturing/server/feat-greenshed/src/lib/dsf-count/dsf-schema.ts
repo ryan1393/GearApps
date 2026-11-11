@@ -98,9 +98,9 @@ export async function ensureDsfCutterSchema(database: SchemaDatabase): Promise<v
     await manager.query(STARTUP_SCHEMA_LOCK_SQL);
     const guard = await manager.query(
       `SELECT to_regclass('public.machines') IS NOT NULL AND to_regclass('public.cutter_machine_runs') IS NOT NULL
-         AND to_regclass('public.tbl_whiteboard_cycles_master') IS NULL AS is_gear_apps`,
-    ) as Array<{ is_gear_apps: boolean }>;
-    if (guard[0]?.is_gear_apps !== true) throw new Error('DSF tables can only be created in the MeshForge database.');
+         AND to_regclass('public.tbl_whiteboard_cycles_master') IS NULL AS is_meshforge`,
+    ) as Array<{ is_meshforge: boolean }>;
+    if (guard[0]?.is_meshforge !== true) throw new Error('DSF tables can only be created in the MeshForge database.');
     for (const sql of DSF_CUTTER_SCHEMA_SQL) await manager.query(sql);
     const columns = await manager.query(
       `SELECT table_name, string_agg(column_name, ',' ORDER BY ordinal_position) AS columns

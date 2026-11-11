@@ -28,6 +28,17 @@
     gold so it stays distinct from the orange actions.
   - On-screen wording, API messages and the printed cutter card and packing slip say MeshForge
     instead of MeshForge. Scan buttons use the orange action style.
+  - **Everything is named MeshForge, including the system's own names.** There is no byline. The
+    import prefix is `@meshforge/`, the API project is `meshforge-server`, launchers are
+    `START-MESHFORGE.cmd` and so on. Existing installs must be updated by hand, because the old
+    names are no longer read:
+    - `.env`: `GEAR_APPS_...` settings are now `MESHFORGE_...`; the default database name is
+      `MeshForge`.
+    - Database: the bookkeeping schema is `meshforge_meta` (was `gearapps_meta`). Recreate the
+      database, or rename the database and that schema, before starting this version.
+    - Built-in accounts use `@meshforge.local` addresses.
+    - Lapper Read collectors: the settings section is `MeshForgeApi` (.NET) and the variables are
+      `MESHFORGE_API_...` (Python).
   - Not recoloured: informational blue, success, danger, the Greenshed running-machines state
     colours, and colours set in TypeScript or with Tailwind utility classes.
 - **Lapping master data is in Admin.** The shared Admin screen (every app's `/admin`) now edits
@@ -216,7 +227,7 @@ manifest and lockfile. Application releases share the root version constant.
   the shared API and the Lapper Read collector.
 - One root `compose.yml` and existing root `.env` configure the whole stack.
   Deployments retain the `dana-apps` project and PostgreSQL volume identity.
-- Every web client and Lapper Read uses `gear-app-server` on port 3333, the shared
+- Every web client and Lapper Read uses `meshforge-server` on port 3333, the shared
   email login and PostgreSQL connection. The standalone Lapper API is removed.
 
 - Aligned Angular 20.3.35, NestJS 11.2.9, TypeORM 1.1.2, Nx 24.0.5,
@@ -240,7 +251,7 @@ npm run test:versions to detect dependency or release-version drift.
 
 Recovered from the original 70.2.0 upload and rebuilt with security, inventory,
 deployment, and user-interface fixes. The original archive and this source are
-retained in the GearApps GitHub repository alongside the existing Lapper app.
+retained in the MeshForge GitHub repository alongside the existing Lapper app.
 
 - Department relations load during authentication, restoring operator permissions.
 - Refresh tokens use complete digests, unique IDs, token purposes, and atomic
@@ -273,7 +284,7 @@ All MeshForge styling now comes from **@dana/ui 0.3.0** (Dana UI). No screen loo
 the compiled stylesheet has the same 1,496 rules in the same order, and 86 screenshots (every route,
 every admin tab, login and an error toast, on desktop and phone) are pixel-identical to 70.1.2.
 
-Deploy as usual with `Deploy-GearApps.cmd`. There is no database change.
+Deploy as usual with `Deploy-MeshForge.cmd`. There is no database change.
 
 ### Changed
 
@@ -336,16 +347,16 @@ V70.0.8R61R23 in comments and patch folders, while `package.json` said `0.0.0` a
 
 ### Do these in production
 
-1. **Check for test accounts.** Earlier test scripts created `admin@gearapps.local` and
-   `e2e.admin@gearapps.local` (role admin) and `test@gearapps.local` with passwords published in
+1. **Check for test accounts.** Earlier test scripts created `admin@meshforge.local` and
+   `e2e.admin@meshforge.local` (role admin) and `test@meshforge.local` with passwords published in
    this repository, in whatever database `.env` pointed at. The development `.env` in the upload
    points at `DATABASE_HOST=usftwvmdocker`, the Docker host. Run this against production:
-   `SELECT email, role, active FROM users WHERE email ILIKE '%@gearapps.local';`
+   `SELECT email, role, active FROM users WHERE email ILIKE '%@meshforge.local';`
    Disable or delete any rows it returns.
 2. **Rotate the JWT secrets** if the production `.env` uses the template placeholders or anything
    under 32 random characters. The deploy script checks this for you and stops if they are weak.
    Rotating signs everyone out once.
-3. **Use `Deploy-GearApps.cmd` from now on.** The first run moves the release from
+3. **Use `Deploy-MeshForge.cmd` from now on.** The first run moves the release from
    `/tmp/dana-apps.v0.1` to `~/dana-apps` and carries the `.env` over.
 4. **After deploying**, run `npm run db:check-drift` against production (read-only).
 
@@ -379,14 +390,14 @@ V70.0.8R61R23 in comments and patch folders, while `package.json` said `0.0.0` a
 
 - `MESHFORGE_VERSION`, shown in all three sidebars, Swagger and `GET /api/v1/health/live`;
   `npm run version:set` and `npm run test:version`. Docker images are tagged with the version.
-- `Deploy-GearApps.cmd` / `tools/deploy/deploy-remote.mjs`: backup before deploy, release kept for
+- `Deploy-MeshForge.cmd` / `tools/deploy/deploy-remote.mjs`: backup before deploy, release kept for
   `--rollback`, `--check` preflight, refuses weak secrets and test-account opt-in, verifies the
   deployed version. It replaces `Dana-Apps-Native-Remote-Deploy.cmd`, now in `tools/retired/`.
 - `npm run db:check-drift`: a read-only comparison of the entities with a live database. Two
   indexes created at startup are now declared on the entities, so a fresh install has zero drift.
 - `npm run test:workflow`: a cross-platform 23-call end-to-end test. Fixtures now create numbered
   E2E shelves (`-990`), the rough shelf and an E2E Cutter Builder machine.
-- `GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES` opt-in for the fixture scripts. The API warns at startup about
+- `MESHFORGE_ALLOW_TEST_ACCOUNTS=YES` opt-in for the fixture scripts. The API warns at startup about
   placeholder or short JWT secrets.
 
 ### Changed

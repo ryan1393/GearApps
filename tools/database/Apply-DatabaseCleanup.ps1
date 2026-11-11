@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)][string]$PgContainer,
-    [string]$Database = 'GearApps',
+    [string]$Database = 'MeshForge',
     [string]$DatabaseUser = '',
     [string]$SqlPath = (Join-Path $PSScriptRoot 'cleanup.sql'),
     [string]$ValidationPath = (Join-Path $PSScriptRoot 'validate.sql'),
@@ -40,18 +40,18 @@ if ([string]::IsNullOrWhiteSpace($DatabaseUser)) {
 }
 $connection = @('exec', '--env', "PGDATABASE=$Database", '--env', "PGUSER=$DatabaseUser", $PgContainer)
 $probe = @(Invoke-DockerChecked ($connection + @('psql', '-X', '-At', '--set', 'ON_ERROR_STOP=1', '--command', "SELECT (to_regclass('public.users') IS NOT NULL AND to_regclass('public.gearsets') IS NOT NULL AND to_regclass('public.parts') IS NOT NULL)::text")))
-if ($probe.Count -ne 1 -or $probe[0] -ne 'true') { throw 'This target does not have the expected GearApps shared master tables.' }
+if ($probe.Count -ne 1 -or $probe[0] -ne 'true') { throw 'This target does not have the expected MeshForge shared master tables.' }
 
 $resolvedBackup = [IO.Path]::GetFullPath($BackupDirectory)
 [IO.Directory]::CreateDirectory($resolvedBackup) | Out-Null
 $operationId = [Guid]::NewGuid().ToString('N')
 $stamp = [DateTime]::UtcNow.ToString('yyyyMMddTHHmmssZ')
-$containerBackup = "/tmp/gearapps-before-cleanup-$operationId.dump"
-$containerDirectory = "/tmp/gearapps-cleanup-$operationId"
+$containerBackup = "/tmp/meshforge-before-cleanup-$operationId.dump"
+$containerDirectory = "/tmp/meshforge-cleanup-$operationId"
 $containerSql = "$containerDirectory/cleanup.sql"
 $containerValidation = "$containerDirectory/validate.sql"
 $containerLegacy = "$containerDirectory/legacy-import.sql"
-$backupFile = Join-Path $resolvedBackup "GearApps-before-cleanup-$stamp-$operationId.dump"
+$backupFile = Join-Path $resolvedBackup "MeshForge-before-cleanup-$stamp-$operationId.dump"
 
 # pg_dump runs in the existing PostgreSQL container. No database password is printed or copied.
 Invoke-DockerChecked ($connection + @('pg_dump', '--format=custom', '--no-owner', '--file', $containerBackup)) | Out-Null

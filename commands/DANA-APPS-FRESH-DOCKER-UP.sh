@@ -77,7 +77,7 @@ for attempt in $(seq 1 60); do
   if [[ "$attempt" == "60" ]]; then
     echo "[FAIL] Gear API did not become ready." >&2
     docker compose --env-file "$ENV_FILE" -f compose.yml ps
-    docker compose --env-file "$ENV_FILE" -f compose.yml logs --tail=160 dana-postgres gear-db-bootstrap gear-base-data-bootstrap gear-app-server
+    docker compose --env-file "$ENV_FILE" -f compose.yml logs --tail=160 dana-postgres gear-db-bootstrap gear-base-data-bootstrap meshforge-server
     exit 1
   fi
   sleep 5

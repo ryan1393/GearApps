@@ -73,7 +73,7 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
     await manager.query("SET LOCAL lock_timeout='5s'");
     await manager.query("SET LOCAL statement_timeout='120s'");
     await manager.query(
-      "SELECT pg_advisory_xact_lock(hashtextextended('gearapps-lapper-api-schema',0))",
+      "SELECT pg_advisory_xact_lock(hashtextextended('meshforge-lapper-api-schema',0))",
     );
     const [master] = await manager.query(
       "SELECT to_regclass('public.users') AS users,to_regclass('public.machines') AS machines,to_regclass('public.gearsets') AS gearsets,to_regclass('public.parts') AS parts",

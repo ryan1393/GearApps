@@ -21,7 +21,7 @@ describe('ServerFeatureHealthController', () => {
   afterEach(async () => module.close());
 
   it('reports liveness without requiring a database connection', () => {
-    expect(controller.live()).toEqual({ status: 'ok', service: 'gear-app-server', version: MESHFORGE_VERSION });
+    expect(controller.live()).toEqual({ status: 'ok', service: 'meshforge-server', version: MESHFORGE_VERSION });
     expect(pingCheck).not.toHaveBeenCalled();
   });
   it('checks database readiness through the public Terminus service', async () => {

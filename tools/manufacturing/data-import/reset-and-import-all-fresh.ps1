@@ -1,6 +1,6 @@
 ﻿param(
     [string]$SqlServer = "usftwplvsql01",
-    [string]$SqlDatabase = "GearAppsNew",
+    [string]$SqlDatabase = "MeshForgeNew",
     [switch]$Apply,
     [switch]$YesReallyDeleteOldData,
     [switch]$KeepFreshExports

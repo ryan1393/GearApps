@@ -8,9 +8,9 @@ import { assertTestAccountsAllowed } from './test-account-guard.mjs';
 
 const { Client } = pg;
 
-const AUTO_TEST_EMAIL = 'test@gearapps.local';
+const AUTO_TEST_EMAIL = 'test@meshforge.local';
 const E2E_CUTTERGRIND_SHELF_NUMBER = '990';
-const AUTO_TEST_PASSWORD = 'GearApps-E2E-Only-2026!';
+const AUTO_TEST_PASSWORD = 'MeshForge-E2E-Only-2026!';
 
 function parseArgs(argv) {
   const out = {};

@@ -9,7 +9,7 @@ const must = (ok, message) => { if (!ok) throw new Error(message); };
 const canonicalRecord = (value) => Object.fromEntries(Object.entries(value ?? {}).sort(([a],[b]) => a.localeCompare(b)));
 const pkg = json('package.json');
 const lock = json('package-lock.json');
-must(pkg.name === '@meshforge/source', 'One root package must own GearApps and Lapper');
+must(pkg.name === '@meshforge/source', 'One root package must own MeshForge and Lapper');
 must(pkg.packageManager === 'npm@11.9.0', 'The root npm toolchain must be 11.9.0');
 must(pkg.engines?.node === '24.22.1', 'The root Node toolchain must be 24.22.1');
 must(lock.name === pkg.name && lock.packages?.['']?.name === pkg.name, 'Lockfile root identity must match the unified package');
@@ -39,7 +39,7 @@ for (const name of ['blade-tracking','cutter-builder','greenshed','server']) {
   must(!/manufacturing\/package(?:-lock)?\.json/.test(dockerfile), `${name} image still installs an independent manufacturing graph`);
 }
 const server = json('apps/server/project.json');
-must(server.name === 'gear-app-server', 'Preserve the manufacturing API project identity');
+must(server.name === 'meshforge-server', 'Preserve the manufacturing API project identity');
 must(server.targets?.['build-fresh-db-bootstrap'], 'Keep the guarded fresh database bootstrap build');
 const compose = read('compose.yml');
 for (const marker of ['dana-postgres:','gear-db-bootstrap:','gear-base-data-bootstrap:','condition: service_completed_successfully','health/ready','--bootstrap-only']) must(compose.includes(marker), `Manufacturing deployment safety marker missing: ${marker}`);
@@ -49,7 +49,7 @@ for (const nav of ['apps/blade-tracking/src/app/layout/app-nav/app-nav.component
   must(read(nav).includes('@meshforge/manufacturing/shared/dana-app-config'), `${nav} lost shared navigation ownership`);
 }
 const login = read('libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.ts');
-must(!login.includes('GearApps-E2E-Only-2026!') && !login.includes('GearApps-Admin-Only-2026!'), 'Do not embed fixture passwords in frontend bundles');
-console.log('[PASS] Unified GearApps contract: one install/toolchain, all applications in the root graph, shared Dana UI, and guarded deployment.');
+must(!login.includes('MeshForge-E2E-Only-2026!') && !login.includes('MeshForge-Admin-Only-2026!'), 'Do not embed fixture passwords in frontend bundles');
+console.log('[PASS] Unified MeshForge contract: one install/toolchain, all applications in the root graph, shared Dana UI, and guarded deployment.');
 
 must(!fs.existsSync(path.join(root,'manufacturing')), 'Manufacturing sources live in libs/manufacturing, tools/manufacturing, docs/manufacturing and commands; do not restore a manufacturing/ directory');

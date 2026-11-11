@@ -186,10 +186,10 @@ function Get-DependencyCacheKey {
 }
 
 function Get-DependencyCachePath {
-    $cacheBase = $env:GEAR_APPS_DEP_CACHE
+    $cacheBase = $env:MESHFORGE_DEP_CACHE
     if (-not $cacheBase) {
         if ($env:LOCALAPPDATA) {
-            $cacheBase = Join-Path $env:LOCALAPPDATA 'GearApps\dependency-cache'
+            $cacheBase = Join-Path $env:LOCALAPPDATA 'MeshForge\dependency-cache'
         } else {
             $cacheBase = Join-Path $env:USERPROFILE '.meshforge\dependency-cache'
         }
@@ -393,7 +393,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $requiredProjects = @(
-    'gear-app-server',
+    'meshforge-server',
     'blade-tracking',
     'cutter-builder',
     'greenshed'

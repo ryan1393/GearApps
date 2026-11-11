@@ -1,5 +1,5 @@
 module.exports = {
-  displayName: 'gear-app-server',
+  displayName: 'meshforge-server',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {

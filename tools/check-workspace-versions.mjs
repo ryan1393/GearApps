@@ -71,4 +71,4 @@ assert.equal(ui.version, '0.3.3');
 assert.equal(pkg.dependencies?.['@dana/ui'] ?? pkg.devDependencies?.['@dana/ui'], undefined, 'Do not install a separate @dana/ui package');
 assert.deepEqual(json('tsconfig.base.json').compilerOptions.paths['@dana/ui'], ['./libs/shared/dana-ui/src/index.ts']);
 assert.equal(ui.devDependencies, undefined, 'Dana UI uses root build dependencies');
-console.log(`GearApps ${pkg.version}: one lockfile, one framework stack, Dana UI ${ui.version}.`);
+console.log(`MeshForge ${pkg.version}: one lockfile, one framework stack, Dana UI ${ui.version}.`);

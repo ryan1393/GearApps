@@ -38,7 +38,7 @@ export async function auditGearDatabase(source: DataSource): Promise<DatabaseAud
       SELECT n.nspname AS schema,c.relname AS name,c.oid::int AS oid,
         EXISTS(SELECT 1 FROM pg_constraint p WHERE p.conrelid=c.oid AND p.contype='p') AS has_pk
       FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace
-      WHERE n.nspname IN ('public','lapper','gearapps_meta') AND c.relkind IN ('r','p') ORDER BY 1,2`);
+      WHERE n.nspname IN ('public','lapper','meshforge_meta') AND c.relkind IN ('r','p') ORDER BY 1,2`);
     const rowCounts: Record<string, number> = {};
     for (const table of tables) {
       const [{ count }] = await manager.query<Array<{ count: number }>>(
@@ -55,7 +55,7 @@ export async function auditGearDatabase(source: DataSource): Promise<DatabaseAud
           JOIN pg_attribute a ON a.attrelid=c.confrelid AND a.attnum=k.num ORDER BY k.ord) AS ref_columns
       FROM pg_constraint c JOIN pg_class t ON t.oid=c.conrelid JOIN pg_namespace n ON n.oid=t.relnamespace
       JOIN pg_class rt ON rt.oid=c.confrelid JOIN pg_namespace rn ON rn.oid=rt.relnamespace
-      WHERE c.contype='f' AND n.nspname IN ('public','lapper','gearapps_meta') ORDER BY 1,2,3`);
+      WHERE c.contype='f' AND n.nspname IN ('public','lapper','meshforge_meta') ORDER BY 1,2,3`);
     const foreignKeyViolations: DatabaseAuditReport['foreignKeyViolations'] = [];
     for (const key of foreignKeys) {
       const nonnull = key.columns.map((c) => 'r.' + identifier(c) + ' IS NOT NULL').join(' AND ');
@@ -88,7 +88,7 @@ export async function auditGearDatabase(source: DataSource): Promise<DatabaseAud
     await check(
       'invalid_indexes',
       'error',
-      `SELECT count(*)::int AS count FROM pg_index i JOIN pg_class c ON c.oid=i.indrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','lapper','gearapps_meta') AND NOT i.indisvalid`,
+      `SELECT count(*)::int AS count FROM pg_index i JOIN pg_class c ON c.oid=i.indrelid JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname IN ('public','lapper','meshforge_meta') AND NOT i.indisvalid`,
     );
     await check(
       'normalized_summary_revision_duplicates',
@@ -137,16 +137,16 @@ export async function auditGearDatabase(source: DataSource): Promise<DatabaseAud
       );
       return !!row.present;
     };
-    if (await relation('gearapps_meta.gearset_findings')) {
+    if (await relation('meshforge_meta.gearset_findings')) {
       await check(
         'gearset_ratio_conflicts',
         'review',
-        "SELECT count(*)::int AS count FROM gearapps_meta.gearset_findings WHERE 'ratio_disagrees_with_teeth'=ANY(issues)",
+        "SELECT count(*)::int AS count FROM meshforge_meta.gearset_findings WHERE 'ratio_disagrees_with_teeth'=ANY(issues)",
       );
       await check(
         'gearset_component_summary_conflicts',
         'review',
-        "SELECT count(*)::int AS count FROM gearapps_meta.gearset_findings WHERE 'component_summary_number_differs'=ANY(issues)",
+        "SELECT count(*)::int AS count FROM meshforge_meta.gearset_findings WHERE 'component_summary_number_differs'=ANY(issues)",
       );
     } else if (await relation('public.gearsets')) {
       await check(
@@ -217,10 +217,10 @@ export async function auditGearDatabase(source: DataSource): Promise<DatabaseAud
         );
       }
     }
-    const migrations = (await relation('gearapps_meta.schema_migrations'))
+    const migrations = (await relation('meshforge_meta.schema_migrations'))
       ? (
           await manager.query<Array<{ version: string }>>(
-            'SELECT version FROM gearapps_meta.schema_migrations ORDER BY version',
+            'SELECT version FROM meshforge_meta.schema_migrations ORDER BY version',
           )
         ).map((m) => m.version)
       : [];

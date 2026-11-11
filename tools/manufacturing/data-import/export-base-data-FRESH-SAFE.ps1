@@ -1,6 +1,6 @@
 param(
     [string]$SqlServer = "usftwplvsql01",
-    [string]$SqlDatabase = "GearAppsNew",
+    [string]$SqlDatabase = "MeshForgeNew",
     [string]$OutputDirectory = ".\tools\manufacturing\data-import\work\base-sql-fresh"
 )
 
@@ -27,7 +27,7 @@ function Export-QueryJson(
     [Parameter(Mandatory=$true)][string]$FileName,
     [Parameter(Mandatory=$true)][string]$TargetDirectory
 ) {
-    $tmp = Join-Path $env:TEMP ("gearapps-base-" + [guid]::NewGuid().ToString("N") + ".txt")
+    $tmp = Join-Path $env:TEMP ("meshforge-base-" + [guid]::NewGuid().ToString("N") + ".txt")
     try {
         $out = & sqlcmd -S $SqlServer -E -d $SqlDatabase -b -W -s "|" `
             -Q "SET NOCOUNT ON; $Query" 2>&1

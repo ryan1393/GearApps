@@ -4,7 +4,7 @@ import { DsfRefusal } from './dsf-core';
 const base = {
   DSF_COUNT_ENABLED: 'true', DSF_DB_HOST: '10.16.80.10', DSF_DB_PORT: '5432', DSF_DB_NAME: 'maindblocal',
   DSF_DB_USER: 'dana_dsf_reader', DSF_DB_PASSWORD: 'secret', DSF_DB_SSL_MODE: 'disable', DSF_COUNT_MACHINES: '516,517',
-  DATABASE_HOST: 'dana-postgres', DATABASE_NAME: 'GearApps',
+  DATABASE_HOST: 'dana-postgres', DATABASE_NAME: 'MeshForge',
 } as NodeJS.ProcessEnv;
 
 describe('DSF connection settings', () => {
@@ -29,7 +29,7 @@ describe('DSF connection settings', () => {
     expect(invalid({ DSF_DB_SSL_MODE: 'prefer' })).toBe(false);
     expect(invalid({ DSF_COUNT_INTERVAL_SECONDS: '5' })).toBe(false);
     // Never the MeshForge database itself.
-    expect(invalid({ DSF_DB_HOST: 'dana-postgres', DSF_DB_NAME: 'GearApps' })).toBe(false);
+    expect(invalid({ DSF_DB_HOST: 'dana-postgres', DSF_DB_NAME: 'MeshForge' })).toBe(false);
     // An acknowledgment with the wrong text, or for a different source, is refused.
     expect(invalid({ DSF_PRIVILEGED_READER_ACK: 'yes' })).toBe(false);
     expect(invalid({ DSF_PRIVILEGED_READER_ACK: DSF_PRIVILEGED_ACK, DSF_DB_HOST: '10.0.0.9' })).toBe(false);

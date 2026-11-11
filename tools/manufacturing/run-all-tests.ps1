@@ -1,10 +1,10 @@
 param(
     [string]$BaseUrl = "http://localhost:3333/api/v1",
     [string]$ServerRoot = "http://localhost:3333",
-    [string]$Email = "test@gearapps.local",
+    [string]$Email = "test@meshforge.local",
     [string]$Password,
-    [string]$AdminEmail = "admin@gearapps.local",
-    [string]$AdminPassword = "GearApps-Admin-Only-2026!",
+    [string]$AdminEmail = "admin@meshforge.local",
+    [string]$AdminPassword = "MeshForge-Admin-Only-2026!",
 
     # Full workflow test inputs. If omitted, the runner prompts for them.
     [string]$TraySerialNumber,
@@ -275,7 +275,7 @@ function Test-ApiReady {
     }
 }
 
-function Start-GearAppsApi {
+function Start-MeshForgeApi {
     if (Test-ApiReady) {
         Add-MasterResult 'API startup' 'PASS' 'Existing API server is reachable.'
         return
@@ -283,7 +283,7 @@ function Start-GearAppsApi {
 
     Write-Host "Starting MeshForge API in a separate PowerShell process..." -ForegroundColor Yellow
     $escapedRoot = $WorkspaceRoot.Replace("'", "''")
-    $command = "Set-Location '$escapedRoot'; `$env:NX_DAEMON='false'; `$env:NX_ISOLATE_PLUGINS='false'; npx nx serve gear-app-server"
+    $command = "Set-Location '$escapedRoot'; `$env:NX_DAEMON='false'; `$env:NX_ISOLATE_PLUGINS='false'; npx nx serve meshforge-server"
     $script:ServerProcess = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-Command',$command) -PassThru
     $script:StartedServer = $true
 
@@ -396,7 +396,7 @@ try {
     }
 
     if (-not $Password) {
-        $Password = 'GearApps-E2E-Only-2026!'
+        $Password = 'MeshForge-E2E-Only-2026!'
     }
 
     if (-not $SkipBuild) {
@@ -965,7 +965,7 @@ try {
     }
     Add-MasterResult 'Read-only API smoke source contract' 'PASS' 'Container/location scan probes select enabled source records before calling enabled-only scan endpoints.'
 
-    Start-GearAppsApi
+    Start-MeshForgeApi
 
     Invoke-ChildTest '113-route runtime probe' "$PSScriptRoot\test-all-api-routes.ps1" @{
         ServerRoot = $ServerRoot
@@ -1027,13 +1027,13 @@ try {
         try {
             Invoke-ChildTest 'Authenticated backend mutation suite' "$PSScriptRoot\test-authenticated-backend-mutations.ps1" $backendParams
 
-            $oldBackendBase = $env:GEAR_APPS_BASE_URL
-            $oldBackendAdminEmail = $env:GEAR_APPS_E2E_ADMIN_EMAIL
-            $oldBackendAdminPassword = $env:GEAR_APPS_E2E_ADMIN_PASSWORD
+            $oldBackendBase = $env:MESHFORGE_BASE_URL
+            $oldBackendAdminEmail = $env:MESHFORGE_E2E_ADMIN_EMAIL
+            $oldBackendAdminPassword = $env:MESHFORGE_E2E_ADMIN_PASSWORD
             try {
-                $env:GEAR_APPS_BASE_URL = $BaseUrl
-                $env:GEAR_APPS_E2E_ADMIN_EMAIL = [string]$backendFixture.admin_email
-                $env:GEAR_APPS_E2E_ADMIN_PASSWORD = [string]$backendFixture.admin_password
+                $env:MESHFORGE_BASE_URL = $BaseUrl
+                $env:MESHFORGE_E2E_ADMIN_EMAIL = [string]$backendFixture.admin_email
+                $env:MESHFORGE_E2E_ADMIN_PASSWORD = [string]$backendFixture.admin_password
                 & node "$PSScriptRoot\test-concurrent-backend-mutation.mjs"
                 if ($LASTEXITCODE -ne 0) {
                     Add-MasterResult 'Concurrent duplicate mutation test' 'FAIL' "Exit code $LASTEXITCODE"
@@ -1041,9 +1041,9 @@ try {
                 }
                 Add-MasterResult 'Concurrent duplicate mutation test' 'PASS' 'One duplicate create committed; the other returned 409 with a message.'
             } finally {
-                $env:GEAR_APPS_BASE_URL = $oldBackendBase
-                $env:GEAR_APPS_E2E_ADMIN_EMAIL = $oldBackendAdminEmail
-                $env:GEAR_APPS_E2E_ADMIN_PASSWORD = $oldBackendAdminPassword
+                $env:MESHFORGE_BASE_URL = $oldBackendBase
+                $env:MESHFORGE_E2E_ADMIN_EMAIL = $oldBackendAdminEmail
+                $env:MESHFORGE_E2E_ADMIN_PASSWORD = $oldBackendAdminPassword
             }
         } finally {
             & node "$PSScriptRoot\test-data\cleanup-backend-mutation-direct-fixtures.mjs" `

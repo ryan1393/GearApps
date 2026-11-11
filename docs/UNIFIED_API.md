@@ -1,6 +1,6 @@
-# One API for every GearApps application
+# One API for every MeshForge application
 
-The running backend is the gear-app-server Nx project at
+The running backend is the meshforge-server Nx project at
 apps/server. Lapper is a feature module of this API. There is one
 Nest application, one listener on port 3333, one TypeORM DataSource and one
 PostgreSQL database. The former lapper-api application and Compose service have
@@ -8,7 +8,7 @@ been removed.
 
 ```mermaid
 flowchart LR
-  L[Lapper] --> A[GearApps API :3333]
+  L[Lapper] --> A[MeshForge API :3333]
   B[Blade Tracking] --> A
   C[Cutter Builder] --> A
   G[Greenshed] --> A
@@ -69,12 +69,12 @@ application; tokens issued by the former Lapper server use a different contract.
 variables, and restart it:
 
 ```powershell
-$env:GearAppsApi__BaseAddress = 'http://YOUR-HOST:3333'
-$env:GearAppsApi__Email = 'YOUR-GEARAPPS-EMAIL'
-$env:GearAppsApi__Password = 'YOUR-GEARAPPS-PASSWORD'
+$env:MeshForgeApi__BaseAddress = 'http://YOUR-HOST:3333'
+$env:MeshForgeApi__Email = 'YOUR-MESHFORGE-EMAIL'
+$env:MeshForgeApi__Password = 'YOUR-MESHFORGE-PASSWORD'
 ```
 
-The configuration section is now GearAppsApi. Machine/scanner configuration
+The configuration section is now MeshForgeApi. Machine/scanner configuration
 and collector checkpoints stay in place. See the collector SETUP.txt for
 Windows publishing and licensed FANUC requirements.
 
@@ -100,8 +100,8 @@ CI runs the collector through Nx with .NET SDK 8 and also boots the compiled API
 against a fresh PostgreSQL service, including both initialization jobs and a
 read-only integrity audit.
 
-On an isolated cleaned GearApps restore whose name ends in _lapper_test, set
-DATABASE_HOST/PORT/USERNAME/PASSWORD/NAME and GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES,
+On an isolated cleaned MeshForge restore whose name ends in _lapper_test, set
+DATABASE_HOST/PORT/USERNAME/PASSWORD/NAME and MESHFORGE_ALLOW_TEST_ACCOUNTS=YES,
 then run npm run test:lapper-postgres. This starts the actual combined AppModule
 with its production HTTP configuration. It checks shared authentication,
 revocation, role/department boundaries, manufacturing and Lapper routes, lack of

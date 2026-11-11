@@ -8,7 +8,7 @@ import {
   CutterDashboardData,
   cutterApiErrorText,
 } from '@meshforge/manufacturing/frontend/data-access-cutter-builder';
-import { canEditGearApp } from '@meshforge/manufacturing/shared/util-constants';
+import { canEditMeshForgeApp } from '@meshforge/manufacturing/shared/util-constants';
 import {
   DanaCountBadgeDirective,
   DanaDashboardGridComponent,
@@ -42,7 +42,7 @@ export class CutterBuilderDashboardComponent implements OnInit {
 
   get canEdit(): boolean {
     const user = this.session.currentUser;
-    return canEditGearApp(
+    return canEditMeshForgeApp(
       'CUTTER_BUILDER',
       user?.role,
       user?.departmentCode,

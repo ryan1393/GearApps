@@ -1,6 +1,6 @@
 param(
     [string]$BaseUrl = "http://localhost:3333/api/v1",
-    [string]$Email = "test@gearapps.local",
+    [string]$Email = "test@meshforge.local",
     [string]$Password,
     [switch]$ShowResponses
 )
@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 
 Write-Host ""
 Write-Host "===================================================="
-Write-Host " GearApps READ-ONLY API Smoke Test"
+Write-Host " MeshForge READ-ONLY API Smoke Test"
 Write-Host "===================================================="
 Write-Host "Base URL: $BaseUrl"
 Write-Host ""
@@ -579,7 +579,7 @@ Write-Host "Passed : $passed" -ForegroundColor Green
 Write-Host "Skipped: $skipped" -ForegroundColor Yellow
 Write-Host "Failed : $failed" -ForegroundColor $(if ($failed -eq 0) { "Green" } else { "Red" })
 
-$reportPath = Join-Path (Get-Location) "gearapps-api-smoke-results.json"
+$reportPath = Join-Path (Get-Location) "meshforge-api-smoke-results.json"
 
 $Results |
     ConvertTo-Json -Depth 8 |
