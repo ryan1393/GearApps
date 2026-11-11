@@ -4,6 +4,7 @@ import { EnvironmentSettingsController } from './environment-settings.controller
 import { CycleTestsController } from './cycle-tests.controller';
 import { CycleTestsService } from './cycle-tests.service';
 import { ArgonautTestService } from './argonaut-test.service';
+import { ControllerValuesService } from './controller-values.service';
 import { LapperReadSettingsController } from './lapper-read-settings.controller';
 import { EnvironmentSettingsService } from './environment-settings.service';
 import { ServerFeatGreenshedModule } from '@meshforge/manufacturing/server/feat-greenshed';
@@ -74,6 +75,7 @@ const featureModules = [
   providers: [
     CycleTestsService,
     ArgonautTestService,
+    ControllerValuesService,
     AdminMasterDataService,
     EnvironmentSettingsService,
     { provide: APP_GUARD, useClass: JwtAccessTokenGuard },

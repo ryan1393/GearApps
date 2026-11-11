@@ -4,6 +4,14 @@ export interface CycleTestInput {
   serial_number: string;
   values: Record<string, number>;
 }
+/** Cycle Test Lab > Read values from machine: the controller's current macro values. */
+export interface ControllerMacroValues {
+  machine_id: string;
+  read_at: string;
+  /** Macro number to value; null when the controller did not answer for it. */
+  values: Record<string, number | null>;
+}
+
 export interface CycleTestRun extends CycleTestInput {
   id: string;
   created_at: string;

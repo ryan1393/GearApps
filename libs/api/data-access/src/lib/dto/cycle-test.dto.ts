@@ -7,6 +7,9 @@ export class CreateCycleTestDto implements CycleTestInput {
   @ApiProperty({ maxLength: 160 }) @IsString() @Matches(/\S/) @MaxLength(160) serial_number!: string;
   @ApiProperty({ type: 'object', additionalProperties: { type: 'number' } }) @IsObject() values!: Record<string, number>;
 }
+export class ReadControllerValuesDto {
+  @ApiProperty() @IsUUID('loose') machine_id!: string;
+}
 export class SendArgonautTestDto implements ArgonautTestInput {
   @ApiProperty() @IsUUID('loose') machine_id!: string;
   @ApiProperty() @IsUUID('loose') gearset_id!: string;

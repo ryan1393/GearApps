@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import logging
 import os
+import queue
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from . import argonaut as argo
 from .api import MeshForgeApi, utc_now
@@ -30,6 +31,19 @@ class Telemetry:
     scanner: str | None
 
 
+@dataclass
+class MacroRead:
+    """A request to read macros now, served by the sampling thread (the only one that uses FOCAS)."""
+    numbers: tuple[int, ...]
+    done: threading.Event = field(default_factory=threading.Event)
+    values: dict[str, str | None] | None = None
+    error: str | None = None
+
+
+class MacroReadError(RuntimeError):
+    pass
+
+
 class Worker:
     def __init__(self, settings, api: MeshForgeApi, fanuc: Fanuc, scanner: Scanner | None, store: CycleStateStore,
                  scanner_monitor: ScannerMonitor | None = None, argonaut: argo.ArgonautClient | None = None):
@@ -50,6 +64,7 @@ class Worker:
         self.argonaut_last_sent_at: str | None = None
         self.argonaut_last_error: str | None = None
         self.stop_event = threading.Event()
+        self._reads: queue.Queue[MacroRead] = queue.Queue()
         self._lock = threading.Lock()
         self._tracker = self._new_tracker(CycleState())
         self._dirty = False
@@ -113,6 +128,7 @@ class Worker:
                         self._checkpoint()
                     except Exception:  # noqa: BLE001
                         log.exception("Unable to flush the final cycle checkpoint")
+            self._serve_reads(stopping=True)
             self.fanuc.close()
             self.fanuc.release_thread()
             if self.scanner_monitor:
@@ -125,6 +141,32 @@ class Worker:
 
     def stop(self, *_args) -> None:
         self.stop_event.set()
+
+    def read_macros(self, numbers, timeout_s: float = 15.0) -> dict[str, str | None]:
+        """The controller's current values of `numbers` (None for a macro it does not answer), read
+        between samples so the FOCAS handle is only ever used by the sampling thread."""
+        request = MacroRead(tuple(int(n) for n in numbers))
+        self._reads.put(request)
+        if not request.done.wait(timeout_s):
+            raise MacroReadError(f"the controller did not answer within {timeout_s:.0f}s (worker is {self.phase})")
+        if request.error is not None:
+            raise MacroReadError(request.error)
+        return request.values or {}
+
+    def _serve_reads(self, stopping: bool = False) -> None:
+        while True:
+            try:
+                request = self._reads.get_nowait()
+            except queue.Empty:
+                return
+            try:
+                if stopping:
+                    raise MacroReadError("the worker is stopping")
+                request.values = self.fanuc.capture_numbers(request.numbers)
+            except Exception as error:  # noqa: BLE001 - reported to whoever asked
+                request.error = f"reading the controller failed: {error}"
+            finally:
+                request.done.set()
 
     def _sleep(self, ms: int) -> bool:
         """Sleeps unless stopping; returns False when the worker should stop."""
@@ -169,6 +211,7 @@ class Worker:
         s = self.settings
         label = s.machine_number or s.machine_ip
         while not self.stop_event.is_set():
+            self._serve_reads()
             try:
                 with self._lock:
                     if self._dirty:

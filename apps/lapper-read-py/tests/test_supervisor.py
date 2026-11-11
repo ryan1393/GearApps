@@ -57,12 +57,21 @@ class FakeWorker:
     def status(self):
         return {"phase": self.phase}
 
+    def read_macros(self, numbers, timeout_s=15.0):
+        from lapper_read.worker import MacroReadError
+        if self.fail:
+            raise MacroReadError("the controller did not answer within 15s")
+        return {str(n): ("373" if n == 10020 else None) for n in numbers}
+
 
 class FakeApi:
     def __init__(self):
         self.machines = []
         self.argonaut = None
         self.argonaut_error = None
+
+    def is_collector_token(self, presented):
+        return presented == "glr_good"
 
     def argonaut_settings(self):
         if self.argonaut_error:
@@ -199,3 +208,41 @@ class ArgonautSettingsTests(unittest.TestCase):
                          ("https://machine/x", "admin-loc"))
         self.assertIsNone(ArgonautOverride.from_api(None))
 
+
+class MacroReadTests(unittest.TestCase):
+    setUp, tearDown, _wait = SupervisorTests.setUp, SupervisorTests.tearDown, SupervisorTests._wait
+
+    def test_cycle_test_lab_reads_need_the_collector_token_and_a_running_worker(self):
+        self.api.machines = [machine("m1")]
+        self.supervisor.discover_once()
+        self._wait(lambda: self.supervisor._slots["m1"].worker is not None)
+        read = self.supervisor.read_macros
+        self.assertEqual(read("m1", "numbers=10020", "")[0], 401)
+        self.assertEqual(read("m1", "numbers=10020", "Bearer glr_wrong")[0], 401)
+        self.assertEqual(read("m1", "numbers=abc", "Bearer glr_good")[0], 400)
+        self.assertEqual(read("m1", "numbers=", "Bearer glr_good")[0], 400)
+        self.assertEqual(read("nope", "numbers=10020", "Bearer glr_good")[0], 404)
+        code, body = read("m1", "numbers=10020,10039", "Bearer glr_good")
+        self.assertEqual(code, 200)
+        self.assertEqual(body["values"], {"10020": "373", "10039": None})
+        self.supervisor._slots["m1"].worker.fail = True
+        self.assertEqual(read("m1", "numbers=10020", "Bearer glr_good")[0], 503)
+
+
+    def test_only_this_collectors_own_token_is_accepted(self):
+        import os
+        from lapper_read.api import MeshForgeApi
+        pasted = MeshForgeApi("http://api", "", "", token="glr_pasted")
+        self.assertTrue(pasted.is_collector_token("glr_pasted"))
+        self.assertFalse(pasted.is_collector_token("glr_other"))
+        self.assertFalse(pasted.is_collector_token(""))
+        path = os.path.join(self.dir.name, "token")
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write("glr_file\n")
+        from_file = MeshForgeApi("http://api", "", "", token_file=path)
+        self.assertTrue(from_file.is_collector_token("glr_file"))
+        with open(path, "w", encoding="utf-8") as handle:
+            handle.write("glr_reconnected")  # an admin reconnected the collector: the new token is read
+        self.assertTrue(from_file.is_collector_token("glr_reconnected"))
+        self.assertFalse(from_file.is_collector_token("glr_file"))
+        self.assertFalse(MeshForgeApi("http://api", "a@b", "pw").is_collector_token("glr_file"))

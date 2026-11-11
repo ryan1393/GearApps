@@ -129,6 +129,12 @@ is sent as 0, as before. The macro list is in `lapper_read/argonaut.py`.
   retried. A cycle with no scanned serial is not sent.
 - `/status` shows `argonaut`, `argonaut_pending`, `argonaut_last_sent_at` and `argonaut_last_error`
   for each machine.
+- **Live values for the Cycle Test Lab:** `GET /machines/<machine id>/macros?numbers=…` on the status
+  port returns the controller's current values of those macros (`null` when it does not answer). The
+  machine's worker reads them between samples, so FOCAS stays on one thread. Only a caller holding
+  this collector's own token may ask (`Authorization: Bearer glr_…`): MeshForge's API, which reaches
+  the collector at `LAPPER_READ_STATUS_URL` (default `http://lapper-read:8080`) for Admin > Cycle Test
+  Lab > Read values from machine. A collector that signs in with an account instead refuses it.
 - **Test without a machine:** Admin > Cycle Test Lab > Send to Argonaut sends one transaction built
   the same way (`buildArgonautPayload` in `libs/shared/domain`; keep its macro lists in step with
   `lapper_read/argonaut.py`) from the API, using these same `LAPPER_READ_ARGONAUT_*` settings.
