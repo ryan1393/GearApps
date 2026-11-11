@@ -23,6 +23,12 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
 - **Shelves.** A shelf barcode's R or P sets its part type (existing locations are corrected on
   startup), and when exactly one shelf holds a tray's Summary and part type, Move Tray, Grinding
   (rough shelf) and Receive Container select it for the operator.
+- **Cutter-body blade rules.** Body capacity is read only from the Dana S/N by position, and a new
+  Summary Body Size Rule (Admin > Part Summaries) sets a Summary's Required Blades. See
+  [CUTTER_BODY_BLADE_RULES.md](CUTTER_BODY_BLADE_RULES.md).
+- **One copy of machine data.** Lapper reads a machine's number, department, cell and description
+  from `public.machines`. Three unused tables and the `/api/v1/toc` and `/api/v1/gearset-marriage`
+  endpoints are removed. **Back up the database before deploying.**
 
 See [CHANGELOG.md](../../CHANGELOG.md).
 

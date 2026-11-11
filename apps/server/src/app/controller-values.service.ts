@@ -44,7 +44,9 @@ export class ControllerValuesService {
 
   async read(machineId: string, userId: string): Promise<ControllerMacroValues> {
     const [machine] = await this.db.query(
-      'SELECT number FROM lapper.machines WHERE id=$1 OR public_machine_id=$1 LIMIT 1',
+      `SELECT pm.machine_number AS number FROM lapper.machines lm
+         JOIN public.machines pm ON pm.id = lm.public_machine_id
+        WHERE lm.id = $1 OR lm.public_machine_id = $1 LIMIT 1`,
       [machineId],
     );
     if (!machine) throw new BadRequestException('Choose a configured lapping machine.');

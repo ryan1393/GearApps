@@ -421,6 +421,27 @@
   },
   {
     "method": "GET",
+    "path": "/api/v1/cutter-config/summary-body-rules",
+    "controller": "ServerFeatCutterConfigController",
+    "source": "libs/manufacturing/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/cutter-config/summary-body-rules/:summaryId",
+    "controller": "ServerFeatCutterConfigController",
+    "source": "libs/manufacturing/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "DELETE",
+    "path": "/api/v1/cutter-config/summary-body-rules/:summaryId",
+    "controller": "ServerFeatCutterConfigController",
+    "source": "libs/manufacturing/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
     "path": "/api/v1/greenshed/builds",
     "controller": "ServerFeatGreenshedController",
     "source": "libs/manufacturing/server/feat-greenshed/src/lib/server-feat-greenshed.controller.ts",

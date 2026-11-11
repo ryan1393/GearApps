@@ -25,7 +25,11 @@ import {
   locationPartTypeFromSerial,
   parseSummaryShelfTag,
   SummaryShelfTag,
+  CUTTER_BODY_RULES,
+  CutterBodyRuleResolution,
+  resolveCutterBodyRule,
 } from '@meshforge/manufacturing/shared/util-constants';
+import { ISummaryBodyRuleRow } from '@meshforge/manufacturing/shared/util-types';
 import {
   AdminApiService,
   AdminLocationRow,
@@ -98,6 +102,10 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   containers: AdminContainerRow[] = [];
   locations: AdminLocationRow[] = [];
   cutterBodies: CutterBodyRow[] = [];
+  /** Summary Body Size Rules keyed by Summary id; the rule controls the read-only Required Blades. */
+  summaryBodyRules = new Map<string, ISummaryBodyRuleRow>();
+  summaryBodyRuleEdits: Record<string, string | undefined> = {};
+  readonly cutterBodyRules = CUTTER_BODY_RULES;
   danaAssignments: Record<string, string | undefined> = {};
   userSearch = '';
   partSummarySearch = '';
@@ -303,6 +311,60 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   }
 
   cancelPartSummaryEdit(): void { this.resetPartSummaryForm(); this.clearNotice(); this.cdr.markForCheck(); }
+
+  summaryBodyRule(summary: PartSummaryRow): ISummaryBodyRuleRow | null {
+    return this.summaryBodyRules.get(summary.id) ?? null;
+  }
+
+  /** Read-only Required Blades: Summary-based, shown in total blades and matched sets. */
+  summaryRequiredBladesText(summary: PartSummaryRow): string {
+    const row = this.summaryBodyRule(summary);
+    if (!row || row.required_total_blades == null) return row?.status === 'CONFLICT' ? 'Needs review' : '—';
+    return `${row.required_total_blades} blades (${row.required_blade_sets} sets)`;
+  }
+
+  summaryBodyRuleText(summary: PartSummaryRow): string {
+    const row = this.summaryBodyRule(summary);
+    if (!row) return '—';
+    switch (row.status) {
+      case 'CONFIGURED': return row.effective_body_rule_label ?? row.configured_body_rule ?? '—';
+      case 'DERIVED': return `${row.effective_body_rule_label} (from quantity)`;
+      case 'UNRESOLVED': return `Unresolved — ${row.detail}. Cutter Builder is blocked until a rule is set.`;
+      case 'CONFLICT': return `Conflict — ${row.detail}`;
+      default: return 'No blade requirement';
+    }
+  }
+
+  saveSummaryBodyRule(summary: PartSummaryRow): void {
+    const current = this.summaryBodyRule(summary)?.configured_body_rule ?? '';
+    const wanted = this.summaryBodyRuleEdits[summary.id] ?? current;
+    if (wanted === current) return;
+    if (!wanted) {
+      this.runCreate(this.api.clearSummaryBodyRule(summary.id), `Body Size Rule cleared for ${summary.number}; quantities unchanged.`, () => this.loadSummaryBodyRules());
+      return;
+    }
+    const rule = CUTTER_BODY_RULES.find((r) => r.code === wanted);
+    const existing = this.summaryBodyRule(summary)?.required_blade_sets;
+    if (rule && existing != null && existing !== rule.blade_sets &&
+        !globalThis.confirm(`${rule.label} changes ${summary.number}'s Required Blades from ${existing * 2} to ${rule.total_blades} for every Part Type. Trays already ground keep their quantity. Continue?`)) {
+      return;
+    }
+    this.busy = true; this.clearNotice();
+    this.api.setSummaryBodyRule(summary.id, wanted).subscribe({
+      next: (row) => {
+        this.busy = false;
+        const trays = row.open_trays_with_other_quantity ?? 0;
+        this.toast.success(`${summary.number}: ${row.effective_body_rule_label ?? wanted}.${trays ? ` ${trays} tray(s) hold the previous quantity and need review.` : ''}`, 'Saved');
+        this.loadSummaryBodyRules();
+      },
+      error: (error: HttpErrorResponse) => { this.busy = false; this.toast.error(this.errorMessage(error), 'Save failed'); this.cdr.markForCheck(); },
+    });
+  }
+
+  /** Read-only decode of a cutter body's Dana S/N (never its MF serial). */
+  cutterBodyDecode(body: CutterBodyRow): CutterBodyRuleResolution {
+    return resolveCutterBodyRule(body);
+  }
 
   togglePartSummaryEnabled(summary: PartSummaryRow): void {
     const enabled = !summary.enabled;
@@ -905,6 +967,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     this.loadModels();
     this.loadDepartments();
     this.loadPartSummaries();
+    this.loadSummaryBodyRules();
     this.loadPartTypes();
     this.loadParts();
     this.loadRollMasters();
@@ -1069,6 +1132,17 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
           return;
         }
         this.locations = combined;
+        this.cdr.markForCheck();
+      },
+      error: (error) => this.handleLoadError(error),
+    });
+  }
+
+  private loadSummaryBodyRules(): void {
+    this.api.listSummaryBodyRules().subscribe({
+      next: (rows) => {
+        this.summaryBodyRules = new Map((rows ?? []).map((row) => [row.summary_id, row]));
+        this.summaryBodyRuleEdits = {};
         this.cdr.markForCheck();
       },
       error: (error) => this.handleLoadError(error),

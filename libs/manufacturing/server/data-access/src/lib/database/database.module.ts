@@ -26,7 +26,6 @@ import { CutterPartTypeOrmEntity } from './entities/cutter-tracking/cutter-part-
 import { CutterPullReasonOrmEntity } from './entities/cutter-tracking/cutter-pull-reason.orm-entity';
 import { CutterBodyOrmEntity } from './entities/cutter-tracking/cutter-body.orm-entity';
 import { CutterBodyDefinitionOrmEntity } from './entities/cutter-tracking/cutter-body-definition.orm-entity';
-import { CutterLegacyOrphanRecordOrmEntity } from './entities/cutter-tracking/cutter-legacy-orphan-record.orm-entity';
 import { CutterBuildOrmEntity } from './entities/cutter-tracking/cutter-build.orm-entity';
 import { CutterBuildBladeOrmEntity } from './entities/cutter-tracking/cutter-build-blade.orm-entity';
 import { CutterEventOrmEntity } from './entities/cutter-tracking/cutter-event.orm-entity';
@@ -69,7 +68,6 @@ const entities: EntityClassOrSchema[] = [
   CutterPullReasonOrmEntity,
   CutterBodyOrmEntity,
   CutterBodyDefinitionOrmEntity,
-  CutterLegacyOrphanRecordOrmEntity,
   CutterBuildOrmEntity,
   CutterBuildBladeOrmEntity,
   CutterEventOrmEntity,

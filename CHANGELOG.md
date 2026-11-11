@@ -5,8 +5,23 @@
 ## 70.6.0 (2026-11-11)
 
 MeshForge branding and Server Settings in Admin, Launch Setup and Coater RPA for going live,
-Lapper Read sending each cycle (with its cycle time) to Argonaut, and shelves that set their part
-type from the barcode and are picked for the tray automatically.
+Lapper Read sending each cycle (with its cycle time) to Argonaut, shelves that set their part type
+from the barcode and are picked for the tray automatically, cutter-body blade rules read from the
+Dana S/N with a per-Summary Body Size Rule, and one copy of machine data. **Back up the database
+before deploying**: this release drops three unused tables (see below).
+
+- **Database: one copy of machine data, three unused tables removed.** `lapper.machines` no
+  longer keeps its own copy of a machine's number, department, cell and description; Lapper reads
+  them from `public.machines`, so a change in Admin shows everywhere (the Lapper production
+  dashboard showed the stale cell before). A description only Lapper had is moved to the machine
+  first. Lapper also stops copying a gearset's ratio into `lapper.gearsets` when it links one, and
+  the dashboard's last-gearset name follows the MeshForge part number. Dropped:
+  `lapper.type_of_checks` and `lapper.gearset_marriages` with their `/api/v1/toc` and
+  `/api/v1/gearset-marriage` endpoints (no screen or collector used them), and
+  `public.cutter_legacy_orphan_records`; the cutter-history importer now writes those unmapped
+  legacy rows to `cutter-history-legacy-orphans.json` beside its report. Migrations
+  `20261111-lapper-master-data-dedup-v1` and `20261111-drop-cutter-legacy-orphan-records-v1` run
+  once at API start. **Back up the database before deploying**: the dropped data is gone after.
 
 - **Lapper Read: cycle time to Argonaut.** Each finished lapping cycle is timed from going into
   cycle to coming out of it (Y3.2), and the seconds are sent to Argonaut as `floatData[0]`, which
@@ -23,6 +38,26 @@ type from the barcode and are picked for the tray automatically.
   when Grinding uses a rough shelf, and an empty finished shelf in Receive Container (one tap,
   Receive onto …). With two or more such shelves nothing is selected and the operator scans or
   chooses one, as before. Nothing is moved until the operator confirms.
+- **Cutter-body blade rules corrected.** Cutter body capacity now comes only from the Dana S/N by
+  position (characters 5–7 body size, 8th character `8` on a 105 = 105 Special). Previously the
+  check searched the whole serial for `064/076/088/105`, removed punctuation (shifting positions)
+  and fell back to the MF serial, so an MF-only body or a malformed serial could be given a
+  capacity and a real 105 could be misread. Approved rules are stated in total blades
+  (22/26/34/38, 105 Special 26); stored requirement and tray quantities stay in matched inner/outer
+  sets (11/13/17/19) and are never doubled. Screens show both units.
+  - New **Summary Body Size Rule** (Admin > Part Summaries, table `cutter_summary_body_rules`,
+    migration `20261111-cutter-summary-body-rules-v1`, nothing backfilled). It controls the
+    Summary-based Required Blades for RING and PINION and keeps 076 Standard and 105 Special
+    apart although both are 26 blades. 26-blade Summaries without a rule are left unresolved and
+    Cutter Builder refuses to build them until the rule is set.
+  - Requirement API accepts only approved set counts and keeps RING/PINION of a Summary equal.
+    New endpoints `GET /api/v1/cutter-config/summary-body-rules`,
+    `PUT|DELETE /api/v1/cutter-config/summary-body-rules/:summaryId`.
+  - Admin > Cutter Bodies cards show the decoded Dana S/N fields and Required Blades read-only.
+  - Base-data rows declare `Blade_Quantity_Unit`; blank/zero rows are skipped without overwriting,
+    requirement rows no longer create Summaries, and a configured rule is never overwritten.
+  - `npm run audit:cutter-blade-rules` (read-only) and the opt-in
+    `npm run apply:proposed-special-105`. See `docs/manufacturing/CUTTER_BODY_BLADE_RULES.md`.
 - **Lapper Read: paste the Argonaut API per machine.** Admin > Lapping machines now has one
   **Argonaut API** field: paste the full address including `?locationId=…` and that machine's
   cycles are sent there as pasted. The separate location ID field is gone, and a `locationId` in

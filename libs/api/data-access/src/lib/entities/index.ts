@@ -9,7 +9,6 @@ import {
 import {
   DepartmentEntity,
   GearsetEntity,
-  GearsetMarriageEntity,
   MachineCycleEntity,
   MachineEntity,
   MachineFanucVariableEntity,
@@ -35,7 +34,6 @@ export const ALL_ENTITIES = [
   SummaryEntity,
   PartEntity,
   GearsetEntity,
-  GearsetMarriageEntity,
   ScannerDetailEntity,
   MachineEntity,
   MachineCycleEntity,

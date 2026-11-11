@@ -5,6 +5,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import { shouldImportBaseData } from './bootstrap-policy.mjs';
+import { planBladeRequirements, setsForRule } from './blade-requirement-plan.mjs';
 
 const { Client } = pg;
 const scriptFile = fileURLToPath(import.meta.url);
@@ -316,22 +317,12 @@ async function importBaseData() {
   //   * Summary_Rev "(blank)"    -> exactly the blank revision
   //   * blank Excel revision     -> EVERY enabled revision of that summary (the plant
   //                                 confirmed blade requirements are the same across
-  //                                 revisions); if none exists, a blank revision is created
-  const BLANK_REVISION = '(blank)';
-  const requirementRevision = (row) => {
-    const raw = clean(row.Summary_Rev) ?? '';
-    return raw.toLowerCase() === BLANK_REVISION
-      ? { revision: '', explicit: true }
-      : { revision: raw, explicit: raw !== '' };
-  };
-  const bladeRequirementSummaryKeys = new Map();
-  for (const row of bladeRequirements) {
-    const number = clean(row.Summary);
-    const { revision, explicit } = requirementRevision(row);
-    if (!number) {
-      throw new Error('cutter_blade_requirements.json contains a blank Summary');
-    }
-    bladeRequirementSummaryKeys.set(`${number}\u0000${revision}\u0000${explicit}`, { number, revision, explicit });
+  //                                 revisions)
+  // A requirement row never creates a Summary: master scope comes from summaries.json
+  // and summary_additions.json only. A row for a Summary outside it is skipped and reported.
+  const requirementPlan = planBladeRequirements(bladeRequirements);
+  if (requirementPlan.errors.length) {
+    throw new Error(`cutter_blade_requirements.json:\n  ${requirementPlan.errors.join('\n  ')}`);
   }
 
   const resolveBladeRequirementSummaryIds = async (number, revision, explicit = Boolean(revision)) => {
@@ -355,22 +346,6 @@ async function importBaseData() {
     );
     return matches.rows.map((r) => r.id);
   };
-
-  for (const { number, revision, explicit } of bladeRequirementSummaryKeys.values()) {
-    const existingIds = await resolveBladeRequirementSummaryIds(number, revision, explicit);
-    if (existingIds.length) continue;
-
-    await client.query(
-      `INSERT INTO part_summaries
-       (id, number, revision, model_id, hos, active, enabled, "createdAt", "updatedAt")
-       VALUES ($1,$2,$3,NULL,NULL,true,true,NOW(),NOW())
-       ON CONFLICT (number, revision) DO UPDATE
-       SET enabled=true,
-           "updatedAt"=NOW()`,
-      [id(), number, revision],
-    );
-  }
-
 
   const partTypes = await client.query(
     `SELECT id, code FROM part_types WHERE code IN ('RING','PINION') AND enabled=true`,
@@ -447,48 +422,54 @@ async function importBaseData() {
   await importParts(pinions, 'PINION');
 
 
-  for (const row of bladeRequirements) {
-    const summaryNumber = clean(row.Summary);
-    const { revision, explicit } = requirementRevision(row);
-    const partTypeCode = clean(row.Part_Type_Code)?.toUpperCase();
-    const requiredBladeCount = Number(row.Blades_Required);
-
-    if (!summaryNumber) throw new Error('Blade requirement has a blank Summary');
-    if (!['RING', 'PINION'].includes(partTypeCode)) {
-      throw new Error(
-        `Summary ${summaryNumber}: invalid Part_Type_Code ${row.Part_Type_Code}`,
-      );
-    }
-    if (!Number.isInteger(requiredBladeCount) || requiredBladeCount <= 0) {
-      throw new Error(
-        `Summary ${summaryNumber} ${partTypeCode}: invalid Blades_Required ${row.Blades_Required}`,
-      );
-    }
-
-    const summaryIds = await resolveBladeRequirementSummaryIds(
-      summaryNumber,
-      revision,
-      explicit,
-    );
+  // Required quantity is Summary-based: every Part Type row of a Summary carries the same
+  // matched-set quantity. Values are stored in matched sets and never doubled, so a repeat
+  // import writes the same numbers. A configured Summary Body Size Rule wins over the
+  // source file: a conflicting row is reported, not applied.
+  const hasBodyRules = (await client.query(
+    "SELECT to_regclass('public.cutter_summary_body_rules') IS NOT NULL AS present",
+  )).rows[0].present;
+  const requirementReport = { written: 0, skipped: [...requirementPlan.skipped] };
+  for (const group of requirementPlan.planned) {
+    const summaryIds = await resolveBladeRequirementSummaryIds(group.summary, group.revision, group.explicit);
     if (!summaryIds.length) {
-      throw new Error(
-        `Blade requirement ${summaryNumber} ${partTypeCode}: summary resolution failed after bootstrap`,
-      );
+      requirementReport.skipped.push({ summary: group.summary, revision: group.revision, partTypeCode: '*', reason: 'Summary is not in master data; requirement not created' });
+      continue;
     }
-
-    const partTypeId = partTypeByCode.get(partTypeCode);
     for (const summaryId of summaryIds) {
+      if (hasBodyRules) {
+        const configured = (await client.query(
+          'SELECT body_rule FROM public.cutter_summary_body_rules WHERE summary_id=$1',
+          [summaryId],
+        )).rows[0]?.body_rule;
+        if (configured && setsForRule(configured) !== group.sets) {
+          requirementReport.skipped.push({ summary: group.summary, revision: group.revision, partTypeCode: '*', reason: `configured Body Size Rule ${configured} conflicts with ${group.sets} sets; left unchanged` });
+          continue;
+        }
+      }
+      for (const row of group.rows) {
+        await client.query(
+          `INSERT INTO cutter_blade_requirements
+           (id, summary_id, part_type_id, required_blade_count, enabled, "createdAt", "updatedAt")
+           VALUES ($1,$2,$3,$4,true,NOW(),NOW())
+           ON CONFLICT (summary_id, part_type_id) DO UPDATE
+           SET required_blade_count=EXCLUDED.required_blade_count,
+               enabled=true,
+               "updatedAt"=NOW()`,
+          [id(), summaryId, partTypeByCode.get(row.partTypeCode), group.sets],
+        );
+        requirementReport.written += 1;
+      }
+      // Part Type rows of this Summary that the source did not list move with it.
       await client.query(
-        `INSERT INTO cutter_blade_requirements
-         (id, summary_id, part_type_id, required_blade_count, enabled, "createdAt", "updatedAt")
-         VALUES ($1,$2,$3,$4,true,NOW(),NOW())
-         ON CONFLICT (summary_id, part_type_id) DO UPDATE
-         SET required_blade_count=EXCLUDED.required_blade_count,
-             enabled=true,
-             "updatedAt"=NOW()`,
-        [id(), summaryId, partTypeId, requiredBladeCount],
+        `UPDATE cutter_blade_requirements SET required_blade_count=$2, "updatedAt"=NOW()
+          WHERE summary_id=$1 AND required_blade_count<>$2`,
+        [summaryId, group.sets],
       );
     }
+  }
+  for (const skip of requirementReport.skipped) {
+    console.warn(`[SKIP] Blade requirement ${skip.summary}${skip.revision ? ` rev ${skip.revision}` : ''} ${skip.partTypeCode}: ${skip.reason}`);
   }
 
   // Cutter body definition/reference data decoded from the Dana serial convention.
@@ -744,6 +725,8 @@ async function importBaseData() {
     cutter_pull_reasons: pullReasons.length,
     summary_additions: summaryAdditions.length,
     cutter_blade_requirements: bladeRequirements.length,
+    cutter_blade_requirement_rows_written: requirementReport.written,
+    cutter_blade_requirement_rows_skipped: requirementReport.skipped.length,
     cutter_body_definitions: cutterBodyDefinitions.length,
     cutter_bodies: cutterBodies.length,
   });

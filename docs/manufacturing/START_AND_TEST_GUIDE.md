@@ -363,11 +363,11 @@ If no summary exists, a blank-revision summary is created. If more than one enab
 
 ### Legacy orphan archive
 
-Legacy source detail rows that cannot be safely attached to an operational cutter event are not discarded. They are retained verbatim in `cutter_legacy_orphan_records` with their source type, Check_ID/Build_ID when available, reason they could not be linked, and the original JSON payload. This preserves source data without inventing a relationship that the legacy database does not prove.
+Legacy source detail rows that cannot be safely attached to an operational cutter event are not discarded. They are retained verbatim in `cutter-history-legacy-orphans.json`, written beside `cutter-history-dynamic-migration-report.json` on every run, with their source type, Check_ID/Build_ID when available, reason they could not be linked, and the original JSON payload. This preserves source data without inventing a relationship that the legacy database does not prove.
 
 ### Orphan build rows are archive-only
 
-If a legacy cutter-build row has no exact `CB + Check_ID` relationship in the central log, MeshForge does not invent a build number or operational history. The source row is preserved in `cutter_legacy_orphan_records`, but **no `cutter_builds`, `cutter_events`, setup/frequency/pull events, or machine-run records are created for it**. This is the rule used for legacy Check_ID `278` in the current source report.
+If a legacy cutter-build row has no exact `CB + Check_ID` relationship in the central log, MeshForge does not invent a build number or operational history. The source row is preserved in `cutter-history-legacy-orphans.json`, but **no `cutter_builds`, `cutter_events`, setup/frequency/pull events, or machine-run records are created for it**. This is the rule used for legacy Check_ID `278` in the current source report.
 
 ### Duplicate central-log rows
 
@@ -377,7 +377,7 @@ Duplicate `ToC_ID + Check_ID` rows are collapsed only when all business fields (
 
 The legacy SQL Server can contain repeated Central Log inserts for the same `ToC_ID + Check_ID`. MeshForge treats that pair as one logical source operation.
 
-If `Build_ID`, `Part_Count`, and `Emp_ID` agree, timestamp/Log_ID differences are treated as repeat inserts: the earliest row is used for the migrated event and every extra source row is archived in `cutter_legacy_orphan_records` as `CENTRAL_LOG_DUPLICATE`. The duplicates do not create extra work/events/logs.
+If `Build_ID`, `Part_Count`, and `Emp_ID` agree, timestamp/Log_ID differences are treated as repeat inserts: the earliest row is used for the migrated event and every extra source row is archived in `cutter-history-legacy-orphans.json` as `CENTRAL_LOG_DUPLICATE`. The duplicates do not create extra work/events/logs.
 
 If `Build_ID`, `Part_Count`, or `Emp_ID` disagree, the migration still stops because that is a genuine ambiguous source conflict.
 
@@ -488,7 +488,7 @@ To start the floor over without reloading from SQL Server, close the running Mes
 - **Locations**, chosen when the command starts (or with `--locations=`):
   - `keep-shelves` (option 1, the default): shelf/layer/bin locations (the Cuttergrind shelf bins such as `CGDR-A1A`, `CGFP-B3C` or `CGRR-A1A` that **Admin > Locations > Bulk shelf locations** makes) and `COATER-STAGING` are kept, with nothing on them. Every other location is deleted, including older numbered (`CGDR-001`) and Summary (`GSR-1010`, `CGDR-1010`) shelf tags.
   - `delete-all` (option 2): every location is deleted. The API recreates `COATER-STAGING` when it next starts; make the shelves again in **Admin > Locations > Bulk shelf locations**.
-- **Kept:** users, departments, models, parts, part summaries, blade requirements, cutter body definitions, cutter bodies, roll masters, gearsets, machines, lookup lists (part types, tray stages, statuses, event types, pull reasons, check results), server settings, label printers, Coater RPA setup, DSF machine mappings, all Lapper data, and every other table that does not point at operational data.
+- **Kept:** users, departments, models, parts, part summaries, blade requirements, Summary Body Size Rules, cutter body definitions, cutter bodies, roll masters, gearsets, machines, lookup lists (part types, tray stages, statuses, event types, pull reasons, check results), server settings, label printers, Coater RPA setup, DSF machine mappings, all Lapper data, and every other table that does not point at operational data.
 
 The preview stops, deleting nothing, if a kept table (or one outside the `public` schema) points at operational data, or if rows in a table that is not emptied point at a location that would be deleted; it names them. Everything runs in one transaction without `CASCADE`: on any error nothing is deleted. The command also stops, deleting nothing, if the API still has the tables in use. Row counts from just before the clear are written to `tools/manufacturing/data-import/work/pre-clear-operational-data-manifest.json` (counts only, not a backup).
 

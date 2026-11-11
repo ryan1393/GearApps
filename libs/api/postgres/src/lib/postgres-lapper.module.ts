@@ -3,8 +3,6 @@ import {
   CollectorTokensService,
   DepartmentsController,
   DepartmentsService,
-  GearsetMarriagesController,
-  GearsetMarriagesService,
   GearsetsController,
   GearsetsService,
   MachineCyclesController,
@@ -23,8 +21,6 @@ import {
   ScannerDetailsService,
   SummariesController,
   SummariesService,
-  TypeOfChecksController,
-  TypeOfChecksService,
 } from '@meshforge/api/feature-gear';
 import { ScannerClientService, ScannerController } from '@meshforge/api/feature-scanner';
 import { Module } from '@nestjs/common';
@@ -49,11 +45,9 @@ import {
   imports: [ConfigModule.forFeature(scannerConfig)],
   controllers: [
     DepartmentsController,
-    TypeOfChecksController,
     SummariesController,
     PartsController,
     GearsetsController,
-    GearsetMarriagesController,
     MachinesController,
     ScannerDetailsController,
     MachineCyclesController,
@@ -79,8 +73,6 @@ import {
         [DepartmentsService, 'department'],
         [PartsService, 'part'],
         [SummariesService, 'part-summary'],
-        [TypeOfChecksService, 'toc'],
-        [GearsetMarriagesService, 'gearset-marriage'],
       ] as const
     ).map(([provide, resource]) => ({
       provide,

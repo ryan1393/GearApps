@@ -1154,6 +1154,10 @@ for (const fk of externalFks.rows) {
 const migrationReportPath = path.resolve('./cutter-history-dynamic-migration-report.json');
 fs.writeFileSync(migrationReportPath, JSON.stringify(report, null, 2), 'utf8');
 console.log(`Dynamic migration report: ${migrationReportPath}`);
+// Legacy rows that cannot be attached to a cutter event are kept verbatim here, not discarded.
+const legacyOrphanArchivePath = path.resolve('./cutter-history-legacy-orphans.json');
+fs.writeFileSync(legacyOrphanArchivePath, JSON.stringify(legacyOrphanArchiveRows, null, 2), 'utf8');
+console.log(`Unmapped legacy rows (${legacyOrphanArchiveRows.length}): ${legacyOrphanArchivePath}`);
 
 console.log('\nMeshForge cutter-history import plan');
 console.log('===================================');
@@ -1218,25 +1222,6 @@ await client.query('BEGIN');
 
 try {
   progress('Dynamic full-refresh transaction started');
-
-  await client.query(`
-    CREATE TABLE IF NOT EXISTS cutter_legacy_orphan_records (
-      id uuid PRIMARY KEY,
-      source_type varchar NOT NULL,
-      legacy_check_id varchar NULL,
-      legacy_build_id varchar NULL,
-      reason text NOT NULL,
-      payload jsonb NOT NULL,
-      "createdAt" timestamp NOT NULL DEFAULT NOW(),
-      "updatedAt" timestamp NOT NULL DEFAULT NOW(),
-      "createdBy" varchar NULL,
-      "updatedBy" varchar NULL,
-      "deletedAt" timestamp NULL,
-      "deletedBy" varchar NULL
-    )
-  `);
-  await client.query('DELETE FROM cutter_legacy_orphan_records');
-  progress('cleared cutter_legacy_orphan_records');
 
   progress('Clearing existing cutter tracking test/history data');
 
@@ -1615,16 +1600,6 @@ try {
   // -------------------------------------------------------------
   // Bulk inserts.
   // -------------------------------------------------------------
-  await bulkInsertJson(
-    'cutter_legacy_orphan_records',
-    [
-      'id','source_type','legacy_check_id','legacy_build_id','reason','payload',
-      'createdAt','updatedAt'
-    ],
-    legacyOrphanArchiveRows,
-    500,
-  );
-
   await bulkInsertJson(
     'cutter_bodies',
     [

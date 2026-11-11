@@ -236,7 +236,10 @@ export interface InventoryAvailabilityData {
 
 export interface EmptyBodyShelfView {
   body_id: string; body_serial: string; placement_id: string; shelf_serial: string;
-  placed_at: string; blade_capacity: number | null; state: string;
+  placed_at: string;
+  /** Matched inner/outer sets (existing field); total blades are in blade_capacity_total_blades. */
+  blade_capacity: number | null; blade_capacity_total_blades?: number | null; body_rule?: string | null; body_rule_problem?: string | null;
+  state: string;
 }
 
 export interface GrindingMachine { id: string; machine_number: string; department: string; }

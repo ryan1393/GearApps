@@ -18,7 +18,7 @@
     "typescript": "5.9.3"
   },
   "rootHashes": {
-    "package.json": "A2E939DC32502A967CDDBCEADDB8D0616F0FA5138F04050057C1D3DA97FC684D",
+    "package.json": "752DDA2D7A687C9698C95FF40A56C33AD73B5D4EB0CA1030B464D30A842A1211",
     "package-lock.json": "DA65DCDB5EBF5F91CA1EFB79332CD77A1B317A176D690AAA3682BFAC9CD8A936",
     "nx.json": "73A2F6BD253030EAD5B14930871A240C60AFD9B5378940CC224689ABC36E5ACD",
     "tsconfig.base.json": "EF99605E3A43A47E3E88FE368966A8ACD1E27E5EC70BDC985FC8F2056694FA3F"
@@ -980,11 +980,12 @@
         "type:util"
       ],
       "targets": [
-        "lint"
+        "lint",
+        "test"
       ],
       "hasBuildTarget": false,
       "hasServeTarget": false,
-      "hasTestTarget": false
+      "hasTestTarget": true
     },
     {
       "name": "shared-util-types",

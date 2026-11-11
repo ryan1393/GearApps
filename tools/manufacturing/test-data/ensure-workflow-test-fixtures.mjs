@@ -465,10 +465,18 @@ async function ensureE2EGrinder(client, machineNumber = 'E2E-GRINDER') {
   return { id, machine_number: machineNumber, created: true };
 }
 
-async function ensureE2ECutterBody(client, count) {
-  const size = new Map([[11, '064'], [13, '076'], [17, '088'], [19, '105']]).get(count);
-  if (!size) throw new Error(`Workflow fixture requires a supported cutter capacity, got ${count}`);
-  const prefix = `E2E-MF-WORKFLOW-${size}-`;
+// Blade capacity comes only from the Dana S/N (characters 5-7 = body size, 8th = special
+// 105 marker), never from the MF serial, so the fixture body is etched with a valid one.
+// 'Z' in the 8th position keeps it a standard body; the random tail keeps it unique.
+// A configured Summary Body Size Rule picks the body (13 sets is 076 Standard or 105 Special).
+const e2eDanaPrefix = (size, special) => (special ? `CGRT${size}8Z` : `CGRT${size}Z`);
+const e2eDanaSerial = (size, special) => `${e2eDanaPrefix(size, special)}${crypto.randomUUID().replace(/-/g, '').slice(0, 6).toUpperCase()}`;
+
+async function ensureE2ECutterBody(client, count, bodyRule = null) {
+  const special = bodyRule === '105-SPECIAL';
+  const size = special ? '105' : bodyRule ?? new Map([[11, '064'], [17, '088'], [19, '105']]).get(count);
+  if (!size) throw new Error(`Workflow fixture requires a supported cutter capacity with a known body rule, got ${count} sets and rule ${bodyRule ?? 'none'}`);
+  const prefix = `E2E-MF-WORKFLOW-${size}${special ? 'S' : ''}-`;
 
   const existing = await one(
     client,
@@ -486,22 +494,25 @@ async function ensureE2ECutterBody(client, count) {
     [`${prefix}%`],
   );
   if (existing) {
-    return {
-      id: existing.id,
-      serial_number: existing.dana_serial_number || existing.mf_serial_number,
-      created: false,
-    };
+    let dana = existing.dana_serial_number;
+    if (!dana || !dana.startsWith(e2eDanaPrefix(size, special))) {
+      // Older fixture bodies were MF-only; etch them so the Dana S/N decides capacity.
+      dana = e2eDanaSerial(size, special);
+      await client.query('update cutter_bodies set dana_serial_number=$2, "updatedAt"=now() where id=$1', [existing.id, dana]);
+    }
+    return { id: existing.id, serial_number: dana, created: false };
   }
 
   const id = crypto.randomUUID();
   const mf = `${prefix}${serialStamp()}-${crypto.randomUUID().slice(0,6).toUpperCase()}`;
+  const dana = e2eDanaSerial(size, special);
   await client.query(
     `insert into cutter_bodies
       (id, "createdAt", "updatedAt", dana_serial_number, mf_serial_number, definition_id, description, enabled)
-     values ($1, now(), now(), null, $2, null, 'Dedicated automated MeshForge workflow test cutter', true)`,
-    [id, mf],
+     values ($1, now(), now(), $2, $3, null, 'Dedicated automated MeshForge workflow test cutter', true)`,
+    [id, dana, mf],
   );
-  return { id, serial_number: mf, created: true };
+  return { id, serial_number: dana, created: true };
 }
 
 async function ensureE2EPart(client, summaryId, partTypeId) {
@@ -652,6 +663,9 @@ async function main() {
         [summaryId, partTypeId],
       );
     } else {
+      // Skip 13-set (26-blade) Summaries without a Body Size Rule: Cutter Builder refuses
+      // them until the rule is set, so they cannot carry the full workflow.
+      const hasRules = (await one(client, "select to_regclass('public.cutter_summary_body_rules') is not null as present")).present;
       requirement = await one(
         client,
         `select r.summary_id, r.part_type_id, r.required_blade_count,
@@ -664,6 +678,7 @@ async function main() {
             and s.active = true
             and pt.enabled = true
             and r.required_blade_count > 0
+            ${hasRules ? 'and (r.required_blade_count <> 13 or exists (select 1 from public.cutter_summary_body_rules br where br.summary_id = r.summary_id))' : 'and r.required_blade_count <> 13'}
           order by s.number, pt.code
           limit 1`,
       );
@@ -823,7 +838,10 @@ async function main() {
       client,
       requirement.part_type_code === 'PINION' ? 'RING' : 'PINION',
     );
-    const workflowCutterBody = await ensureE2ECutterBody(client, requiredBladeCount);
+    const bodyRuleRow = (await one(client, "select to_regclass('public.cutter_summary_body_rules') is not null as present")).present
+      ? await one(client, 'select body_rule from public.cutter_summary_body_rules where summary_id = $1', [requirement.summary_id])
+      : null;
+    const workflowCutterBody = await ensureE2ECutterBody(client, requiredBladeCount, bodyRuleRow?.body_rule ?? null);
     const workflowPart = await ensureE2EPart(
       client,
       requirement.summary_id,

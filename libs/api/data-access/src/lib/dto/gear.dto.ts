@@ -1,7 +1,6 @@
 import {
   CreateDepartment,
   CreateGearset,
-  CreateGearsetMarriage,
   CreateMachine,
   CreateMachineCycle,
   CreateMachineFanucVariable,
@@ -10,10 +9,8 @@ import {
   CreatePart,
   CreateScannerDetail,
   CreateSummary,
-  CreateTypeOfCheck,
   Department,
   Gearset,
-  GearsetMarriage,
   LappingSummaryRow,
   Machine,
   MachineCycle,
@@ -24,10 +21,8 @@ import {
   PART_TYPES,
   ScannerDetail,
   Summary,
-  TypeOfCheck,
   UpdateDepartment,
   UpdateGearset,
-  UpdateGearsetMarriage,
   UpdateMachine,
   UpdateMachineCycle,
   UpdateMachineFanucVariable,
@@ -37,7 +32,6 @@ import {
   UpdateScannerDetail,
   UpdateScannerSerialNumbers,
   UpdateSummary,
-  UpdateTypeOfCheck,
 } from '@meshforge/shared/domain';
 import { ApiProperty, ApiPropertyOptional, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -73,22 +67,6 @@ export class CreateDepartmentDto
 export class UpdateDepartmentDto
   extends PartialType(CreateDepartmentDto)
   implements UpdateDepartment {}
-
-// ---------- Type of Check ----------
-export class TypeOfCheckDto implements TypeOfCheck {
-  @ApiProperty({ readOnly: true, example: uuidExample }) @IsUUID('loose') id!: string;
-  @ApiProperty({ example: 'CMM' }) @IsString() @IsNotEmpty() name!: string;
-  @ApiProperty({ example: 'Coordinate measuring machine check' })
-  @IsString()
-  @IsNotEmpty()
-  description!: string;
-}
-export class CreateTypeOfCheckDto
-  extends OmitType(TypeOfCheckDto, ['id'])
-  implements CreateTypeOfCheck {}
-export class UpdateTypeOfCheckDto
-  extends PartialType(CreateTypeOfCheckDto)
-  implements UpdateTypeOfCheck {}
 
 // ---------- Summary ----------
 export class SummaryDto implements Summary {
@@ -166,21 +144,6 @@ export class CreateGearsetDto extends OmitType(GearsetDto, ['id']) implements Cr
 export class UpdateGearsetDto
   extends PartialType(PickType(GearsetDto, ['rev', 'status', 'user_id']))
   implements UpdateGearset {}
-
-export class GearsetMarriageDto implements GearsetMarriage {
-  @ApiProperty({ readOnly: true, example: uuidExample }) @IsUUID('loose') id!: string;
-  @ApiPropertyOptional({ nullable: true }) @IsOptional() @IsString() rev!: string | null;
-  @ApiPropertyOptional({ nullable: true }) @IsOptional() @IsUUID('loose') gearset_id!:
-    string | null;
-  @ApiPropertyOptional({ nullable: true }) @IsOptional() @IsUUID('loose') pinion_id!: string | null;
-  @ApiPropertyOptional({ nullable: true }) @IsOptional() @IsUUID('loose') ring_id!: string | null;
-}
-export class CreateGearsetMarriageDto
-  extends OmitType(GearsetMarriageDto, ['id'])
-  implements CreateGearsetMarriage {}
-export class UpdateGearsetMarriageDto
-  extends PartialType(PickType(GearsetMarriageDto, ['rev']))
-  implements UpdateGearsetMarriage {}
 
 // ---------- Scanner detail ----------
 export class ScannerDetailDto implements ScannerDetail {

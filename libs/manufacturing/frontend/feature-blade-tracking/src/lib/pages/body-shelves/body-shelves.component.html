@@ -17,7 +17,7 @@
     <p *ngIf="loading" class="mt-3">Loading shelves…</p>
     <p class="my-3 text-sm text-slate-600">Only SHELVED bodies count as confirmed shelf stock. IN USE and RECHECK REQUIRED observations are excluded. A new build invalidates the old empty-body observation, even if that build is later canceled.</p>
     <div danaTableShell class="table-wrap"><table danaTable class="gear-table"><thead><tr><th>Body</th><th>Shelf</th><th>Blade Capacity</th><th>Status</th><th>Recorded</th><th>Action</th></tr></thead><tbody>
-      <tr *ngFor="let row of filteredRows"><td>{{row.body_serial}}</td><td>{{row.shelf_serial}}</td><td>{{row.blade_capacity ?? 'Unknown'}}</td><td>{{row.state.split('_').join(' ')}}</td><td>{{row.placed_at | date:'short'}}</td><td><button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy || loading" (click)="remove(row)" data-icon="delete" title="Remove">Remove</button></td></tr>
+      <tr *ngFor="let row of filteredRows"><td>{{row.body_serial}}</td><td>{{row.shelf_serial}}</td><td [attr.title]="row.body_rule_problem || null">{{row.blade_capacity_total_blades ? row.blade_capacity_total_blades + ' blades (' + row.blade_capacity + ' sets)' : 'Unknown'}}</td><td>{{row.state.split('_').join(' ')}}</td><td>{{row.placed_at | date:'short'}}</td><td><button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy || loading" (click)="remove(row)" data-icon="delete" title="Remove">Remove</button></td></tr>
       <tr *ngIf="!loading && !filteredRows.length"><td colspan="6">No matching empty-body shelf observations. Record the actual shelf above; old build locations are not assumed to be current.</td></tr>
     </tbody></table></div>
   </section>

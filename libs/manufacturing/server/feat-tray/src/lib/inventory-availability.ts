@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { BadRequestException, ConflictException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
-import { cutterBodyBladeCapacity, cutterBodyMatchesRequirement, classifyTrayAvailabilityStage } from '@meshforge/manufacturing/shared/util-constants';
+import { cutterBodyMatchesRequirement, cutterBodyRulesForBladeSets, classifyTrayAvailabilityStage, resolveCutterBodyRule } from '@meshforge/manufacturing/shared/util-constants';
+import { readSummaryBodyRule } from '@meshforge/manufacturing/server/data-access';
 
 interface AvailabilityTrayRow {
   id: string; serial_number: string; part_type_code: string | null;
@@ -13,17 +14,23 @@ interface AvailabilityTrayRow {
 
 interface BodyRow {
   id: string; dana_serial_number: string | null; mf_serial_number: string | null;
-  blade_family_name: string | null; shelf_serial: string; last_increment: number;
+  blade_family_name: string | null; size_code: string | null; hand_code: string | null;
+  blade_family_code: string | null; supplier_code: string | null; cutter_head_code: string | null; shelf_serial: string; last_increment: number;
   build_increment_at_placement: number; placement_id: string; placed_at: string;
   enabled: boolean; location_enabled: boolean; on_machine: boolean; occupied: boolean;
 }
 const serialOf = (body: {dana_serial_number: string | null; mf_serial_number: string | null}) => body.dana_serial_number || body.mf_serial_number || '';
-const bodyModel = (body: BodyRow) => ({ ...body, definition: { blade_family_name: body.blade_family_name } });
+// Only definition columns that were actually joined are passed; a body without a definition has none.
+const bodyModel = (body: BodyRow) => ({ ...body, definition: {
+  blade_family_name: body.blade_family_name, size_code: body.size_code, hand_code: body.hand_code,
+  blade_family_code: body.blade_family_code, supplier_code: body.supplier_code, cutter_head_code: body.cutter_head_code,
+} });
 // Deliberately includes canceled/deleted build increments: a build invalidates the
 // previous physical observation. Old build shelf rows NEVER represent empty bodies.
 export const EMPTY_BODY_SHELVES_SQL = `
   SELECT body.id, body.dana_serial_number, body.mf_serial_number, body.enabled,
-         d.blade_family_name, p.id AS placement_id, p.placed_at, p.build_increment_at_placement,
+         d.blade_family_name, d.size_code, d.hand_code, d.blade_family_code, d.supplier_code, d.cutter_head_code,
+         p.id AS placement_id, p.placed_at, p.build_increment_at_placement,
          l.serial_number AS shelf_serial, (l.enabled AND l."deletedAt" IS NULL AND l.location_type='SHELF') AS location_enabled,
          COALESCE((SELECT MAX(b.build_increment) FROM cutter_builds b WHERE b.cutter_body_id=body.id),0)::int AS last_increment,
          EXISTS (SELECT 1 FROM cutter_machine_runs mr JOIN cutter_builds b ON b.id=mr.cutter_build_id
@@ -46,11 +53,18 @@ export function shelfObservationState(body: BodyRow): string {
 
 export async function listEmptyBodyShelves(manager: EntityManager) {
   const rows: BodyRow[] = await manager.query(EMPTY_BODY_SHELVES_SQL);
-  return rows.map(body => ({
-    body_id: body.id, body_serial: serialOf(body), placement_id: body.placement_id,
-    shelf_serial: body.shelf_serial, placed_at: body.placed_at,
-    blade_capacity: cutterBodyBladeCapacity(body), state: shelfObservationState(body),
-  }));
+  return rows.map(body => {
+    const resolved = resolveCutterBodyRule(bodyModel(body));
+    return {
+      body_id: body.id, body_serial: serialOf(body), placement_id: body.placement_id,
+      shelf_serial: body.shelf_serial, placed_at: body.placed_at,
+      // blade_capacity keeps its existing unit (matched inner/outer sets).
+      blade_capacity: resolved.rule?.blade_sets ?? null,
+      blade_capacity_total_blades: resolved.rule?.total_blades ?? null,
+      body_rule: resolved.rule?.code ?? null, body_rule_problem: resolved.problem,
+      state: shelfObservationState(body),
+    };
+  });
 }
 
 /** One consistent database snapshot; distinct physical items, never history-row totals. */
@@ -113,7 +127,8 @@ export async function readInventoryAvailability(manager: EntityManager, summaryI
                         WHERE mr.enabled=true AND mb.cutter_body_id=body.id)`, params);
   const emptyRows: BodyRow[] = await manager.query(EMPTY_BODY_SHELVES_SQL);
   const eligible = emptyRows.filter(body => shelfObservationState(body)==='SHELVED');
-  const empty = eligible.filter(body => requirements.some(req => cutterBodyMatchesRequirement(bodyModel(body), Number(req.required_blade_count), req.part_type_code)));
+  const summaryRule = await readSummaryBodyRule(manager, summaryId);
+  const empty = eligible.filter(body => requirements.some(req => cutterBodyMatchesRequirement(bodyModel(body), Number(req.required_blade_count), req.part_type_code, summaryRule)));
   const emptyIds = new Set(empty.map(body => body.id));
   const withIds = new Set(withBlades.map(body => body.id));
   // A corrupted body with both kinds of assignment must never inflate the totals.
@@ -135,7 +150,9 @@ export async function readInventoryAvailability(manager: EntityManager, summaryI
     shelved_cutter_bodies: { total: withIds.size+emptyIds.size, with_blades: withIds.size, empty: emptyIds.size },
     notes: [
       ...(!requirements.length ? ['No enabled blade requirement is configured for this selection; empty-body availability cannot be matched.'] : []),
-      ...(eligible.some(body => cutterBodyBladeCapacity(body)===null) ? ['Some recorded empty bodies have an unrecognized blade capacity and are excluded.'] : []),
+      ...(!summaryRule && requirements.some(req => cutterBodyRulesForBladeSets(Number(req.required_blade_count)).length > 1)
+        ? ['This Summary\'s Body Size Rule is not set (26 blades fits 076 Standard or 105 Special), so no empty body is counted for it. Set the rule in Admin > Part Summaries.'] : []),
+      ...(eligible.some(body => resolveCutterBodyRule(bodyModel(body)).rule===null) ? ['Some recorded empty bodies have a missing, malformed or conflicting Dana S/N and are excluded.'] : []),
       'Empty bodies require a current shelf observation. After a build or cancellation, record their actual shelf again. Shared compatible bodies are counted once in this selection.',
     ],
   };
