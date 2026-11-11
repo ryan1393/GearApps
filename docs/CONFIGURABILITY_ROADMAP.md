@@ -28,7 +28,7 @@ Keep the normal workstation focused on scanning. Additional fields appear only w
 - Use one configuration model and evaluator for Blade Tracking, Cutter Builder, Greenshed and Lapper; document supported workflow actions and available input variables.
 - Validate variable types, formulas, references and rule dependencies before publication. Define missing-value, rounding and error behavior explicitly.
 - Evaluate business rules on the server as well as providing operator feedback in the client. Configuration must preserve authentication, inventory transactions, quantity accounting and machine-attribution guarantees.
-- Keep existing collector API paths compatible. Changes affecting collector input must be tested against both collector implementations before publication.
+- Keep existing collector API paths compatible. Changes affecting collector input must be tested against the Python/Docker collector before publication.
 - Retain immutable published versions and record the version used by each operation. Reject conflicting edits and make inherited versus overridden values visible.
 - Test individual-machine overrides, conditional fields, warning/blocking behavior, stale edits, rollback and production/test isolation.
 

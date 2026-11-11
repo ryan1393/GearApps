@@ -6,9 +6,6 @@
 **/.nx
 **/.angular
 **/coverage
-apps/lapper-read/**/bin
-apps/lapper-read/**/obj
-apps/lapper-read/**/TestResults
 **/.env
 **/.env.*
 !**/.env.example

@@ -4,7 +4,7 @@
   "baseline": "Dana Apps V70.0.0",
   "releaseVersion": "70.5.0",
   "workspace": "single-root",
-  "authoritativeTest": "nx run-many -t test --exclude=*-e2e,lapper-read,lapper-read-py",
+  "authoritativeTest": "nx run-many -t test --exclude=*-e2e,lapper-read-py",
   "sourcePackager": "tools/package-release.mjs",
   "masterUiBaseline": "docs/manufacturing/DANA_MASTER_UI_BASELINE.md",
   "gearPreMergeReadiness": "docs/manufacturing/DANA_APPS_GEAR_PREMERGE_READINESS.md",
@@ -18,7 +18,7 @@
     "typescript": "5.9.3"
   },
   "rootHashes": {
-    "package.json": "9D548F9D12018252667A4DEC970A6B0731A5862ACD061F78AC2FD6D7671988D2",
+    "package.json": "16A3FA07614C82A264A2A5E6CD5142C4A89418C25596946D418DA1347B6CFEC3",
     "package-lock.json": "4728FD555AC57B979CA0366F8075514AC966BB3021BF1DA4854D6CD14AC7B1F4",
     "nx.json": "73A2F6BD253030EAD5B14930871A240C60AFD9B5378940CC224689ABC36E5ACD",
     "tsconfig.base.json": "EF99605E3A43A47E3E88FE368966A8ACD1E27E5EC70BDC985FC8F2056694FA3F"
@@ -50,19 +50,20 @@
       "hasTestTarget": false
     },
     {
-      "name": "lapper-read",
-      "root": "apps/lapper-read",
+      "name": "lapper-read-py",
+      "root": "apps/lapper-read-py",
       "projectType": "application",
       "tags": [
-        "language:dotnet",
+        "language:python",
         "platform:server",
         "scope:lapper"
       ],
       "targets": [
-        "build",
+        "docker-build",
+        "lint",
         "test"
       ],
-      "hasBuildTarget": true,
+      "hasBuildTarget": false,
       "hasServeTarget": false,
       "hasTestTarget": true
     },
@@ -572,23 +573,6 @@
       "hasBuildTarget": true,
       "hasServeTarget": true,
       "hasTestTarget": false
-    },
-    {
-      "name": "lapper-read",
-      "root": "apps/lapper-read",
-      "projectType": "application",
-      "tags": [
-        "language:dotnet",
-        "platform:server",
-        "scope:lapper"
-      ],
-      "targets": [
-        "build",
-        "test"
-      ],
-      "hasBuildTarget": true,
-      "hasServeTarget": false,
-      "hasTestTarget": true
     },
     {
       "name": "lapper-read-py",

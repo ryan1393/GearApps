@@ -43,15 +43,6 @@ export function packageFileAllowed(relativePath) {
   if (parts.some((part) => excludedDirectories.has(part.toLowerCase()))) return false;
   if (relative.startsWith('tools/manufacturing/data-import/work/')) return false;
   if (/^tools\/database\/(?:cleanup|legacy-import)\.sql$/i.test(relative)) return false;
-  if (
-    relative.startsWith('apps/lapper-read/') &&
-    parts.some((part) =>
-      ['bin', 'obj', '.vs', '.tools', '.nuget', 'state', 'testresults'].includes(
-        part.toLowerCase(),
-      ),
-    )
-  )
-    return false;
   const name = parts.at(-1);
   const template = /(?:^|[._-])(?:example|sample|template)(?:[._-]|$)/i.test(name);
   if (/^\.env(?:\.|$)/i.test(name) && !template) return false;

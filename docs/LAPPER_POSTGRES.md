@@ -8,7 +8,7 @@ describe the unified deployment.
 
 The four browser ports remain 4200-4203. Lapper's nginx and development proxy
 send /api requests to the same API as the manufacturing clients. Lapper Read
-connects directly to that API on port 3333, using its MeshForgeApi configuration.
+connects directly to that API on port 3333, using its `MESHFORGE_API_...` settings.
 
 Public users, departments, machines, parts, summaries and gearsets are canonical
 shared records. Lapper profiles, telemetry and history remain in schema lapper
@@ -29,9 +29,8 @@ scanner serial slots. Shared deletions and manufacturing inventory changes use
 the existing guarded workflows. Cycle and macro retries use transactional request
 keys and natural database uniqueness. Conflicting snapshots return HTTP 409.
 
-For duplicate machine IPs, configure LapperConfiguration__MachineNumber. The
-scanner must belong to that machine. Keep all worker checkpoint/state files.
-[Collector setup](../apps/lapper-read/SETUP.txt) explains build and configuration.
+Keep all collector checkpoint/state files. The
+[collector README](../apps/lapper-read-py/README.md) explains build and configuration.
 
 The private backup-first legacy import/cleanup package is separate from source.
 If the owner already applied it successfully, use that existing database. Startup

@@ -18,7 +18,7 @@ test('release manifest is identical across Git checkout line endings and detects
     'nx.json': '{\n  "defaultBase": "main"\n}\n',
     'tsconfig.base.json': '{\n  "compilerOptions": {}\n}\n',
     'compose.yml': 'name: suite\nservices: {}\n',
-    'apps/collector/project.json': JSON.stringify({ name: 'lapper-read', targets: { build: {} } }, null, 2) + '\n',
+    'apps/collector/project.json': JSON.stringify({ name: 'lapper-read-py', targets: { build: {} } }, null, 2) + '\n',
   };
   const write = (lineEnding) => {
     for (const [name, text] of Object.entries(files)) {

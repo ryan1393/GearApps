@@ -29,10 +29,6 @@ function fixture() {
     'libs/shared/domain/src/lib/app-version.ts',
     "export const MESHFORGE_VERSION = '1.2.3';\n",
   );
-  put(
-    'apps/lapper-read/Directory.Build.props',
-    '<Project><PropertyGroup><Version>1.2.3</Version></PropertyGroup></Project>\n',
-  );
   put('apps/lapper-read-py/lapper_read/__init__.py', '__version__ = "1.2.3"\n');
   put('README.md', '# MeshForge 1.2.3\n');
   put(
@@ -54,10 +50,6 @@ test('version ownership updates package and lock versions without changing depen
   try {
     setReleaseVersion(f.root, '1.2.4');
     assert.equal(f.read('package.json').version, '1.2.4');
-    assert.match(
-      f.text('apps/lapper-read/Directory.Build.props'),
-      /<Version>1\.2\.4<\/Version>/,
-    );
     assert.match(
       f.text('apps/lapper-read-py/lapper_read/__init__.py'),
       /__version__ = "1\.2\.4"/,
@@ -106,7 +98,7 @@ test('invalid release version is rejected before accessing files', () =>
 test('missing collector version marker cannot change the release partially', () => {
   const f = fixture();
   try {
-    f.put('apps/lapper-read/Directory.Build.props', '<Project />\n');
+    f.put('apps/lapper-read-py/lapper_read/__init__.py', '\n');
     assert.throws(() => setReleaseVersion(f.root, '1.2.4'), /version marker/);
     assert.equal(f.read('package.json').version, '1.2.3');
     assert.match(

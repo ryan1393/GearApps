@@ -1,8 +1,8 @@
 # Lapper Read (Python, Docker)
 
 Collects lapping runs from a FANUC controller and its barcode scanner and publishes them
-to the MeshForge API. It is a Python port of the Windows `apps/lapper-read` service and
-uses the same API endpoints, so the Lapper screens work unchanged.
+to the MeshForge API. It replaced the earlier Windows (.NET) Lapper Read service, which is
+no longer in this repository, and uses the same API endpoints.
 
 ## Workers follow the machines saved in Lapper
 

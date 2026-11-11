@@ -31,11 +31,6 @@ export function setReleaseVersion(root, next) {
     (_all, a, b) => a + next + b,
   );
   edit(
-    'apps/lapper-read/Directory.Build.props',
-    /(<Version>\s*)[^<]+(\s*<\/Version>)/,
-    (_all, prefix, suffix) => prefix + next + suffix,
-  );
-  edit(
     'apps/lapper-read-py/lapper_read/__init__.py',
     /(__version__\s*=\s*")[^"]+(")/,
     (_all, a, b) => a + next + b,

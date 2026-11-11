@@ -16,9 +16,9 @@ The collector token handoff now explicitly applies its documented file permissio
 
 ## Verification
 
-- Full `npm run build`: all seven targets passed; the separate fresh-database bootstrap target also passed. Both an existing database upgrade and a newly bootstrapped PostgreSQL database contain the grinder attribution columns.
-- Full `npm test`, including deployment tests: passed. The .NET collector requires system mutex access outside the cloud command sandbox.
-- Python collector: 55 tests passed; .NET collector: 46 tests passed.
+- Full `npm run build`: all current targets passed; the separate fresh-database bootstrap target also passed. Both an existing database upgrade and a newly bootstrapped PostgreSQL database contain the grinder attribution columns.
+- Full `npm test`, including deployment tests: passed.
+- Python collector: 55 tests passed. The retired Windows/.NET collector was removed in the final branch integration.
 - Shared API, manufacturing workflow, grinding, DSF attribution/configuration and frontend unit suites: passed.
 - Source contracts: 82/82 passed; workspace version validation and lint passed (existing warnings remain).
 - Individual-grinder regression: 29 end-to-end API calls passed, including missing/wrong grinder rejection, active-grinder protection, saved machine identity and per-grinder history through packing, cutter setup and teardown.
@@ -28,6 +28,8 @@ The collector token handoff now explicitly applies its documented file permissio
 - Chromium: all four login fonts match app fonts; Admin renders at 1440, 768 and 390 pixels without horizontal page overflow. Cycle simulation and historical selection work through the UI. Lapper dashboard, settings, blade grinding, shipments and inventory also passed responsive checks. Machine DSF Counts passed at all three widths in all four apps; grinder selection survives refresh and its saved pass history renders without overflow.
 
 ## Remaining external validation
+
+The final branch integration includes the Windows/.NET collector removal from `892e03b`; the Python/Docker collector is the supported collector. Its Nx commands, release manifest and cloud setup no longer require .NET. The earlier `feat/lapper-app` commits (`366e319`, `228df14`) are retained in merge history. Their standalone API, Docker driver injection and automatic table synchronization were superseded by the shared PostgreSQL API, root production dependencies and explicit fresh-database bootstrap. The current `compose.yml`, database schemas, authentication and four-client deployment are preserved.
 
 Coater RPA restoration from PR #20 is integrated with these changes. It adds workbook preparation/download, saved request history, explicit email delivery and an import tool for the server-held workbook, settings, part mappings and history. The dump and saved addresses remain on the user's server; they are not repository artifacts. See [Coater RPA](manufacturing/COATER_RPA.md) for the import preview/apply workflow. Live import against that dump and SMTP delivery are not part of this cloud validation.
 
