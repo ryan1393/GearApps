@@ -180,6 +180,8 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     department: '',
     location_type: 'INTERNAL',
     enabled: true,
+    summary_id: '',
+    part_type_id: '',
   };
 
   cutterBodyForm = {
@@ -649,6 +651,8 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
         location.description,
         location.department,
         location.location_type,
+        location.summary?.number,
+        location.part_type?.code,
         location.tray_count,
         location.blade_count,
         location.enabled ? 'active' : 'inactive',
@@ -673,6 +677,27 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       parseCuttergrindNumberedShelfTag(this.locationForm.serial_number) ??
       parseSummaryShelfTag(this.locationForm.serial_number)
     );
+  }
+
+  /** A Green Shed summary shelf names its Summary and part type in its barcode, so they are not chosen. */
+  get locationContentsFromBarcode(): boolean {
+    const serial = this.locationForm.serial_number;
+    return !parseCuttergrindRoughShelfTag(serial) && !parseCuttergrindNumberedShelfTag(serial) && !!parseSummaryShelfTag(serial);
+  }
+
+  get locationSummaryChoices(): PartSummaryRow[] {
+    return this.partSummaries
+      .filter((summary) => summary.enabled || summary.id === this.locationForm.summary_id)
+      .sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true }) || a.revision.localeCompare(b.revision));
+  }
+
+  get locationPartTypeChoices(): PartTypeRow[] {
+    return this.partTypeChoices.filter((type) => type.enabled || type.id === this.locationForm.part_type_id);
+  }
+
+  /** What the location's summary tag reads, such as 1.955FC-RING. Null until both are set. */
+  locationSummaryTag(location: AdminLocationRow): string | null {
+    return location.summary && location.part_type ? `${location.summary.number}-${location.part_type.code}`.toUpperCase() : null;
   }
 
   locationShelfDisplay(shelf: CuttergrindRoughShelfTag | CuttergrindNumberedShelfTag | SummaryShelfTag): string {
@@ -706,6 +731,10 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
         numberedShelf?.locationType ?? shelfTag?.locationType ??
         (this.locationForm.location_type.trim().toUpperCase() || 'INTERNAL'),
       enabled: this.locationForm.enabled,
+      // A summary shelf's barcode sets these on the server.
+      ...(shelfTag
+        ? {}
+        : { summary_id: this.locationForm.summary_id || null, part_type_id: this.locationForm.part_type_id || null }),
     };
 
     const request = this.editingLocationId
@@ -731,6 +760,8 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       department: location.department || '',
       location_type: location.location_type || 'INTERNAL',
       enabled: location.enabled,
+      summary_id: location.summary_id || '',
+      part_type_id: location.part_type_id || '',
     };
     this.clearNotice();
     this.cdr.markForCheck();
@@ -758,7 +789,8 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   ): void {
     if (this.printingTagId) return;
     this.clearNotice();
-    this.printingTagId = recordId;
+    // A location's summary tag is printed from the same row as its location tag.
+    this.printingTagId = kind === 'LOCATION_SUMMARY' ? `${recordId}:summary` : recordId;
     this.api.printAssetTag(kind, recordId).subscribe({
       next: (result) => {
         this.printingTagId = null;
@@ -1045,6 +1077,8 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       department: '',
       location_type: 'INTERNAL',
       enabled: true,
+      summary_id: '',
+      part_type_id: '',
     };
   }
 

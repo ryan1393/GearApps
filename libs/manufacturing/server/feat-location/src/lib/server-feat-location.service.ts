@@ -1,10 +1,11 @@
-import { FindOptionsWhere, In, Repository } from 'typeorm';
+import { EntityManager, FindOptionsWhere, In, Repository } from 'typeorm';
 
 import {
   BladeTrayOrmEntity,
   CreateLocationDto,
   CutterBladeRequirementOrmEntity,
   CutterBuildLocationOrmEntity,
+  CutterPartTypeOrmEntity,
   LocationOrmEntity,
   LocationTrayOrmEntity,
   PartSummaryOrmEntity,
@@ -31,6 +32,9 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+
+/** What a location holds: shown in its details and printed on its summary tag. */
+const LOCATION_CONTENTS = { summary: true, part_type: true } as const;
 
 @Injectable()
 export class ServerFeatLocationService extends PaginationService<LocationOrmEntity> {
@@ -86,9 +90,12 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
       roughShelf,
     );
 
-    return this.locationRepo.save(
+    const contents = await this.resolveContents(this.locationRepo.manager, dto, shelfTag);
+
+    const saved = await this.locationRepo.save(
       this.locationRepo.create({
         ...dto,
+        ...contents,
         serial_number: serialNumber,
         number: roughShelf?.shelfNumber ?? numberedShelf?.shelfNumber ?? shelfTag?.summaryNumber ?? dto.number.trim(),
         department: normalizedDepartment,
@@ -97,15 +104,17 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
         updatedBy: userId,
       }),
     );
+    return this.locationRepo.findOneOrFail({ where: { id: saved.id }, relations: LOCATION_CONTENTS });
   }
 
   async getLocation(locationId: Uuid) {
-    return this.locationRepo.findOneOrFail({ where: { id: locationId } });
+    return this.locationRepo.findOneOrFail({ where: { id: locationId }, relations: LOCATION_CONTENTS });
   }
 
   async getLocationBySerialNumber(serialNumber: string) {
     const location = await this.locationRepo.findOne({
       where: { serial_number: serialNumber.trim().toUpperCase(), enabled: true },
+      relations: LOCATION_CONTENTS,
     });
     if (!location) {
       throw new NotFoundException(`Location ${serialNumber} could not be found`);
@@ -146,7 +155,10 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
     const perPage = Math.min(Math.max(query?.perPage ?? 50, 1), 50);
     const search = query?.search?.trim();
 
-    const qb = this.locationRepo.createQueryBuilder('location');
+    const qb = this.locationRepo
+      .createQueryBuilder('location')
+      .leftJoinAndSelect('location.summary', 'summary')
+      .leftJoinAndSelect('location.part_type', 'partType');
 
     if (search) {
       qb.andWhere(
@@ -154,7 +166,9 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
           OR location.number ILIKE :search
           OR location.description ILIKE :search
           OR location.department ILIKE :search
-          OR location.location_type ILIKE :search)`,
+          OR location.location_type ILIKE :search
+          OR summary.number ILIKE :search
+          OR partType.code ILIKE :search)`,
         { search: `%${search}%` },
       );
     }
@@ -285,8 +299,11 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
       await this.assertSummaryShelfReferences(shelfTag);
     }
 
+    const contents = await this.resolveContents(manager, data, shelfTag);
+
     const normalized = {
       ...data,
+      ...contents,
       serial_number: data.serial_number === undefined ? undefined : serialNumber,
       number:
         roughShelf?.shelfNumber ??
@@ -344,8 +361,47 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
       ...normalized,
       updatedBy: userId,
     });
-    return locationRepo.findOneOrFail({ where: { id: locationId } });
+    return locationRepo.findOneOrFail({ where: { id: locationId }, relations: LOCATION_CONTENTS });
     });
+  }
+
+  /**
+   * The Summary and part type a location holds. A GSR-/GSP- summary shelf names both in its
+   * barcode, so they are always taken from there. Otherwise the chosen ones must exist and be
+   * enabled; null clears one, and a field left out stays as it is.
+   */
+  private async resolveContents(
+    manager: EntityManager,
+    data: { summary_id?: string | null; part_type_id?: string | null },
+    shelfTag: SummaryShelfTag | null,
+  ): Promise<{ summary_id?: string | null; part_type_id?: string | null }> {
+    const summaries = manager.getRepository(PartSummaryOrmEntity);
+    const partTypes = manager.getRepository(CutterPartTypeOrmEntity);
+
+    if (shelfTag) {
+      const [summary] = await summaries.find({
+        where: { number: shelfTag.summaryNumber, enabled: true },
+        order: { active: 'DESC', revision: 'DESC' },
+        take: 1,
+      });
+      const partType = await partTypes.findOne({ where: { code: shelfTag.partTypeCode, enabled: true } });
+      return { summary_id: summary?.id ?? null, part_type_id: partType?.id ?? null };
+    }
+
+    const contents: { summary_id?: string | null; part_type_id?: string | null } = {};
+    if (data.summary_id !== undefined) {
+      if (data.summary_id && !(await summaries.exists({ where: { id: data.summary_id, enabled: true } }))) {
+        throw new UnprocessableEntityException('The chosen Summary does not exist or is disabled');
+      }
+      contents.summary_id = data.summary_id || null;
+    }
+    if (data.part_type_id !== undefined) {
+      if (data.part_type_id && !(await partTypes.exists({ where: { id: data.part_type_id, enabled: true } }))) {
+        throw new UnprocessableEntityException('The chosen part type does not exist or is disabled');
+      }
+      contents.part_type_id = data.part_type_id || null;
+    }
+    return contents;
   }
 
   private assertSummaryShelfTagConvention(

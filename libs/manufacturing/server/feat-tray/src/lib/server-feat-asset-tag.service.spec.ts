@@ -225,4 +225,37 @@ describe('CreateTrayDto', () => {
     expect(await validate(dto, { whitelist: true, forbidNonWhitelisted: true })).toEqual([]);
     expect(Object.keys(dto).sort()).toEqual(['blade_count', 'enabled', 'serial_number']);
   });
+  describe('location summary tag', () => {
+    const locationWith = async (summary: string | null, partType: string | null) =>
+      new ServerFeatAssetTagService(
+        {} as never,
+        {} as never,
+        {
+          findOne: jest.fn().mockResolvedValue({
+            id: RECORD_ID,
+            serial_number: 'RACK-A-03',
+            enabled: true,
+            summary: summary ? { number: summary } : null,
+            part_type: partType ? { code: partType } : null,
+          }),
+        } as never,
+        await printerRegistry(),
+      );
+
+    it("prints the location's Summary and part type as the barcode and text", async () => {
+      const result = await (await locationWith('1.955fc', 'RING')).printTag({ kind: 'LOCATION_SUMMARY', record_id: RECORD_ID });
+
+      expect(result).toMatchObject({ kind: 'LOCATION_SUMMARY', serial_number: '1.955FC-RING', file_name: '1.955FC-RING.prn' });
+      expect(Buffer.from(result.prn_base64, 'base64')).toEqual(buildAssetTag('IPL', '1.955FC-RING'));
+    });
+
+    it('says what to set when the location has no Summary or part type', async () => {
+      await expect((await locationWith(null, 'RING')).printTag({ kind: 'LOCATION_SUMMARY', record_id: RECORD_ID })).rejects.toThrow('RACK-A-03 has no Summary set');
+      await expect((await locationWith('1.955FC', null)).printTag({ kind: 'LOCATION_SUMMARY', record_id: RECORD_ID })).rejects.toThrow('RACK-A-03 has no part type set');
+    });
+
+    it('refuses a Summary too long for the tag', async () => {
+      await expect((await locationWith('X'.repeat(26), 'PINION')).printTag({ kind: 'LOCATION_SUMMARY', record_id: RECORD_ID })).rejects.toBeInstanceOf(BadRequestException);
+    });
+  });
 });

@@ -42,12 +42,15 @@ requireText(controller, "@Post('print')", 'asset tag controller');
 requireText(controller, "@DepartmentAppEdit('BLADE_TRACKING')", 'asset tag controller');
 requireText(controller, '@Auth([RoleType.ADMIN, RoleType.USER])', 'asset tag controller');
 
-requireText(dto, "['TRAY', 'CONTAINER', 'LOCATION']", 'asset tag DTO');
+requireText(dto, "['TRAY', 'CONTAINER', 'LOCATION', 'LOCATION_SUMMARY']", 'asset tag DTO');
 requireText(dto, 'record_id!: string', 'asset tag DTO database-record identity');
 forbidText(dto, 'serial_number!:', 'asset tag DTO client-supplied serial');
 
 requireText(service, 'this.getAssetById(kind, dto.record_id)', 'database record lookup');
 requireText(service, 'asset.serial_number.trim().toUpperCase()', 'database-backed printable serial');
+// A location's summary tag prints the Summary and part type stored on the location, never ones the caller sends.
+requireText(service, "relations: { summary: true, part_type: true }", 'database-backed location summary tag');
+requireText(service, '`${location.summary.number}-${location.part_type.code}`', 'location summary tag value');
 requireText(service, "!/^T[0-9]{4,}$/.test(serialNumber)", 'tray stored serial rule');
 requireText(service, "!/^C[0-9]{4,}$/.test(serialNumber)", 'container stored serial rule');
 requireText(label, 'export const ASSET_TAG_WIDTH_DOTS = 431', '2.125 inch label width');
@@ -112,6 +115,8 @@ requireText(adminTs, 'this.loadContainers();', 'Admin container load');
 requireText(adminHtml, "(click)=\"printTag('TRAY', tray.id, tray.serial_number)\"", 'Admin tray Print Tag');
 requireText(adminHtml, "(click)=\"printTag('CONTAINER', container.id, container.serial_number)\"", 'Admin container Print Tag');
 requireText(adminHtml, "(click)=\"printTag('LOCATION', location.id, location.serial_number)\"", 'Admin location Print Tag');
+requireText(adminHtml, "printTag('LOCATION_SUMMARY', location.id,", 'Admin location Print Summary Tag');
+requireText(locationsHtml, "printTag('LOCATION_SUMMARY', location.id, summary)", 'Blade Locations Print Summary Tag');
 
 for(const marker of [
   'GEAR_LABEL_PRINTER_HOST=',
