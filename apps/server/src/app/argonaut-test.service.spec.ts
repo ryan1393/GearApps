@@ -57,6 +57,14 @@ describe('Argonaut test transaction', () => {
       .toMatchObject({ username: 'mes', password: 's', verify_tls: true });
   });
 
+  it('reads the gearset number from public.parts.part_number (there is no parts.number column)', async () => {
+    const query = jest.fn(async (sql: string) => (sql.includes('lapper.machines') ? [{ argonaut_url: 'https://argo/x' }] : [{ number: '373' }]));
+    await new ArgonautTestService({ query } as never, { get: () => undefined } as never).prepare(input);
+    const gearsetSql = query.mock.calls.map(([sql]) => sql).find((sql) => sql.includes('public.parts')) ?? '';
+    expect(gearsetSql).toContain('p.part_number AS number');
+    expect(gearsetSql).not.toMatch(/\bp\.number\b/);
+  });
+
   it('refuses without an address, an unknown machine or a non-numeric value', async () => {
     await expect(service({}, { number: '1' }).prepare(input)).rejects.toThrow('No Argonaut address');
     await expect(service(undefined, { number: '1' }).prepare(input)).rejects.toThrow('Choose a configured');
