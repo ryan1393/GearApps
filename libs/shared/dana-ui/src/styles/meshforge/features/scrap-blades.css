@@ -75,21 +75,6 @@
   margin-top: .25rem;
   color: var(--gear-muted);
 }
-
-.scrap-status-pill {
-  display: inline-flex;
-  align-items: center;
-  min-height: 22px;
-  border: 1px solid #fecaca;
-  border-radius: var(--dana-radius-pill);
-  padding: .18rem .5rem;
-  background: #fff5f5;
-  color: #b42318;
-  font-size: var(--gear-font-xs);
-  font-weight: 850;
-  letter-spacing: .05em;
-}
-
 .scrap-detail-cell {
   max-width: 300px;
 }

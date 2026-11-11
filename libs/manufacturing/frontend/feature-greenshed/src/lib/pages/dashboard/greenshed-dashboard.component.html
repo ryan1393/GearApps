@@ -42,7 +42,7 @@
           <td>{{ r.cutter_body_serial_number }}</td>
           <td>{{ r.summary_number }}</td>
           <td>{{ r.part_type_code }}</td>
-          <td><span danaStatusBadge class="status-pill">{{ r.status_code }}</span></td>
+          <td><span danaStatusBadge class="status-pill" [danaTone]="r.status_code">{{ r.status_code }}</span></td>
           <td><strong>{{ r.shelf_location || 'Available — no shelf recorded' }}</strong><small>{{ r.shelf_description || '' }}</small></td>
         </tr>
         <tr *ngIf="!d.available_cutters.length"><td danaTableEmpty colspan="6" class="empty-row">No available cutter builds in the database.</td></tr>

@@ -1,7 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { randomUUID } from 'node:crypto';
-import { CycleTestInput, CycleTestRun, Macro } from '@meshforge/shared/domain';
+import {
+  CycleTestInput,
+  CycleTestRun,
+  Macro,
+  macroLimitState,
+  macroLimitText,
+} from '@meshforge/shared/domain';
 
 export function validateCycleTest(macros: Macro[], values: Record<string, number>): CycleTestRun['result'] {
   const active = macros.filter(m => m.status === 1);
@@ -16,7 +22,16 @@ export function validateCycleTest(macros: Macro[], values: Record<string, number
     else if (Math.abs(value) >= 100000000) issues.push(`Macro #${m.number} exceeds the stored numeric range.`);
     else if (/^(int|integer)$/i.test(m.type) && !Number.isInteger(value)) issues.push(`Macro #${m.number} requires a whole number.`);
     else if (/^(bool|boolean|bit)$/i.test(m.type) && ![-1, 0, 1].includes(value)) issues.push(`Macro #${m.number} requires -1, 0 or 1.`);
-    return { number: m.number, name: m.name, type: m.type, value: typeof value === 'number' && Number.isFinite(value) ? value : null };
+    else {
+      // The limits an administrator set for this macro in Admin > Macros.
+      const state = macroLimitState(value, m);
+      if (state !== 'ok') issues.push(`Macro #${m.number} (${m.name}) is ${value}, ${state === 'low' ? 'below' : 'above'} its limit of ${macroLimitText(m)}.`);
+    }
+    return {
+      number: m.number, name: m.name, type: m.type,
+      value: typeof value === 'number' && Number.isFinite(value) ? value : null,
+      min_value: m.min_value ?? null, max_value: m.max_value ?? null, unit: m.unit ?? null,
+    };
   });
   return { passed: issues.length === 0, issues, macros: snapshot };
 }
@@ -33,7 +48,10 @@ export class CycleTestsService {
       const machines = await manager.query('SELECT id FROM lapper.machines WHERE id=$1 OR public_machine_id=$1', [input.machine_id]);
       const gearsets = await manager.query('SELECT id FROM lapper.gearsets WHERE id=$1 OR public_gearset_id=$1 UNION ALL SELECT id FROM public.gearsets WHERE id=$1', [input.gearset_id]);
       if (!machines.length || !gearsets.length) throw new BadRequestException('Choose a configured lapping machine and gearset.');
-      const macros: Macro[] = await manager.query('SELECT * FROM lapper.macros ORDER BY tab_index NULLS LAST, number');
+      const rows: Macro[] = await manager.query('SELECT * FROM lapper.macros ORDER BY tab_index NULLS LAST, number');
+      // PostgreSQL returns numeric limits as text.
+      const limit = (value: unknown) => (value == null ? null : Number(value));
+      const macros = rows.map(m => ({ ...m, min_value: limit(m.min_value), max_value: limit(m.max_value) }));
       const result = validateCycleTest(macros, input.values);
       const [run] = await manager.query(`INSERT INTO lapper.cycle_tests
         (id,machine_id,gearset_id,serial_number,values,result,created_by)

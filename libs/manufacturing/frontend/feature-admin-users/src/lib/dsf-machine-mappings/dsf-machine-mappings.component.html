@@ -79,7 +79,7 @@
               <td><strong>{{ row.machine_number }}</strong></td>
               <td>{{ row.department }}</td>
               <td>{{ row.mapping?.whiteboard_name || 'No source selected' }}<small class="dsf-map-sub" *ngIf="row.mapping">{{ row.mapping_origin === 'ADMIN' ? 'Admin selected' : 'Reference mapping' }}</small><small class="dsf-map-sub" *ngIf="!row.mapping || classification(row) === 'review'">{{ row.note }}</small></td>
-              <td><span class="gear-badge" [class.dsf-map-review]="classification(row) === 'review'">{{ badgeText(row) }}</span></td>
+              <td><span class="gear-badge" [danaTone]="badgeTone(row)">{{ badgeText(row) }}</span></td>
               <td>{{ row.count === null ? '—' : (row.count | number:'1.0-0') }}</td>
               <td [class.dsf-map-review-text]="row.writer_status === 'REVIEW'">{{ writerText(row) }}</td>
               <td class="dsf-map-action"><button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" [disabled]="!current.configured" (click)="open(row)">{{ row.mapping ? 'Change' : 'Map' }}</button></td>

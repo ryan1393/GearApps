@@ -37,11 +37,10 @@ import {
   QualityCheckDto,
   SetupCutterDto,
 } from './greenshed.dto';
-import { GREENSHED_CHECK_INTERVAL, cutterBodyIdentifier, normalizeMachine, loadGreenshedDashboard, loadRunningMachines, loadGreenshedMachine } from './greenshed.queries';
+import { greenshedCheckInterval, cutterBodyIdentifier, normalizeMachine, loadGreenshedDashboard, loadRunningMachines, loadGreenshedMachine } from './greenshed.queries';
 
 @Injectable()
 export class ServerFeatGreenshedService {
-  private static readonly CHECK_INTERVAL = GREENSHED_CHECK_INTERVAL;
 
   constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
 
@@ -68,7 +67,7 @@ export class ServerFeatGreenshedService {
       ],
       pull_reasons: pullReasons,
       check_results: checkResults,
-      check_interval: ServerFeatGreenshedService.CHECK_INTERVAL,
+      check_interval: greenshedCheckInterval(),
       // True when DSF credits production to cutters: the running count then moves on its own
       // and a check records the count it was taken at instead of setting the running count.
       dsf_cutter_counts: dsfCutterCountsEnabled(),
@@ -123,7 +122,7 @@ export class ServerFeatGreenshedService {
             last_check_piece_count: run.last_check_piece_count,
             next_check_piece_count:
               run.last_check_piece_count +
-              ServerFeatGreenshedService.CHECK_INTERVAL,
+              greenshedCheckInterval(),
             installed_at: run.installed_at,
           }
         : null,
@@ -430,7 +429,7 @@ export class ServerFeatGreenshedService {
         part_number: part.part_number,
         current_piece_count: startingPieceCount,
         next_check_piece_count:
-          startingLastCheckPieceCount + ServerFeatGreenshedService.CHECK_INTERVAL,
+          startingLastCheckPieceCount + greenshedCheckInterval(),
         status_code: runningStatus.code,
         installed_at: installedAt,
       };
@@ -472,7 +471,7 @@ export class ServerFeatGreenshedService {
       await runRepo.save(run);
 
       const nextCheck =
-        run.last_check_piece_count + ServerFeatGreenshedService.CHECK_INTERVAL;
+        run.last_check_piece_count + greenshedCheckInterval();
 
       return {
         build_number: run.cutter_build.build_number,
@@ -678,7 +677,7 @@ export class ServerFeatGreenshedService {
         result_code: result.code,
         piece_count: dto.piece_count,
         next_check_piece_count:
-          dto.piece_count + ServerFeatGreenshedService.CHECK_INTERVAL,
+          dto.piece_count + greenshedCheckInterval(),
         occurred_at: occurredAt,
       };
     });

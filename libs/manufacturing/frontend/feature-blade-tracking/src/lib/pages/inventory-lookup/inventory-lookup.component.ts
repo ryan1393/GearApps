@@ -19,12 +19,13 @@ import {
   DanaPageHeaderComponent,
   DanaTableDirective,
   DanaTableShellDirective,
+  DanaToneDirective,
 } from '@dana/ui';
 
 @Component({
   selector: 'gear-inventory-lookup',
   standalone: true,
-  imports: [GearLabelPrinterPickerComponent, CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
+  imports: [DanaToneDirective, GearLabelPrinterPickerComponent, CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
   templateUrl: './inventory-lookup.component.html',
 })
 export class InventoryLookupComponent implements OnInit, OnDestroy {

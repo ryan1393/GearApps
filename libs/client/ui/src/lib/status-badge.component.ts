@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { DanaTone, danaToneFor } from '@dana/ui';
 
-export type Tone = 'success' | 'warning' | 'danger' | 'info' | 'neutral';
+export type Tone = DanaTone;
 
 /** Dana status badge driven by an Active/Inactive-style status string (or an explicit tone). */
 @Component({
@@ -19,12 +20,6 @@ export class StatusBadgeComponent {
     const raw = this.text() ?? this.status() ?? 'Unknown';
     return this.text() ? raw : raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
   });
-  readonly resolvedTone = computed<Tone>(() => {
-    if (this.tone()) return this.tone() as Tone;
-    const s = (this.status() ?? '').trim().toLowerCase();
-    if (['active', 'running', 'ok', 'pass', 'on', 'true'].includes(s)) return 'success';
-    if (['inactive', 'stopped', 'fail', 'error', 'off'].includes(s)) return 'danger';
-    if (['idle', 'warning', 'pending'].includes(s)) return 'warning';
-    return 'neutral';
-  });
+  /** The shared Dana vocabulary decides the colour unless a tone is given. */
+  readonly resolvedTone = computed<Tone>(() => this.tone() ?? danaToneFor(this.status()));
 }

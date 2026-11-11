@@ -21,6 +21,7 @@ import {
   DanaTableDirective,
   DanaTableEmptyDirective,
   DanaTableShellDirective,
+  DanaToneDirective,
 } from '@dana/ui';
 import { IPaginationMeta } from '@meshforge/manufacturing/shared/util-types';
 
@@ -35,7 +36,7 @@ interface InventoryPageState<T> {
 @Component({
   selector: 'gear-inventory-overview',
   standalone: true,
-  imports: [
+  imports: [DanaToneDirective, 
     GearLabelPrinterPickerComponent,
     CommonModule,
     FormsModule,

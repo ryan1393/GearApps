@@ -52,6 +52,7 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
 } from 'class-validator';
 
 const uuidExample = 'DCA76BCC-F6CD-4211-A9F5-CD4E24381EC8';
@@ -289,6 +290,19 @@ export class MacroDto implements Macro {
   used_form!: string | null;
   @ApiProperty({ example: 'L60_GENERAL' }) @IsString() @IsNotEmpty() l60_table!: string;
   @ApiPropertyOptional({ nullable: true }) @IsOptional() @IsString() extra!: string | null;
+  @ApiPropertyOptional({ nullable: true, example: 0, description: 'Lowest acceptable value' })
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  min_value?: number | null;
+  @ApiPropertyOptional({ nullable: true, example: 12.5, description: 'Highest acceptable value' })
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  max_value?: number | null;
+  @ApiPropertyOptional({ nullable: true, example: 'mm' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(24)
+  unit?: string | null;
 }
 export class CreateMacroDto extends OmitType(MacroDto, ['id']) implements CreateMacro {}
 export class UpdateMacroDto extends PartialType(CreateMacroDto) implements UpdateMacro {}
@@ -316,5 +330,8 @@ export class LappingSummaryRowDto implements LappingSummaryRow {
   @ApiProperty({ nullable: true }) used_form!: string | null;
   @ApiProperty() l60_table!: string;
   @ApiProperty({ nullable: true }) extra!: string | null;
+  @ApiPropertyOptional({ nullable: true }) min_value?: number | null;
+  @ApiPropertyOptional({ nullable: true }) max_value?: number | null;
+  @ApiPropertyOptional({ nullable: true }) unit?: string | null;
   @ApiProperty() value!: number;
 }

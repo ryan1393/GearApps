@@ -18,7 +18,7 @@ import {
 import { LapperAccess, loadable, MacrosApi, ToastService } from '@meshforge/client/core';
 import { summaryPlacement } from '@meshforge/client/feature-lapping-summary';
 import { StatusBadgeComponent } from '@meshforge/client/ui';
-import { Macro } from '@meshforge/shared/domain';
+import { Macro, macroLimitText } from '@meshforge/shared/domain';
 import { MacroFormDialogComponent } from './macro-form-dialog.component';
 import { MACRO_FORM_OPTIONS } from './options';
 
@@ -49,7 +49,7 @@ interface MacroRow extends Macro {
         danaPageHeader
         eyebrow="LAPPER / CONFIGURATION"
         heading="Macros"
-        description="Every Fanuc macro variable the lappers report, the summary form it belongs to and the field that shows it."
+        description="Every Fanuc macro variable the lappers report, the summary form it belongs to and the limits its values are checked against."
       >
         <div danaPageHeaderAction class="dana-toolbar">
           <button
@@ -107,6 +107,7 @@ interface MacroRow extends Macro {
                 <th>Name</th>
                 <th>Summary field</th>
                 <th>Type</th>
+                <th>Limits</th>
                 <th>Tab</th>
                 <th>Status</th>
                 <th data-dana-table-static aria-label="Actions"></th>
@@ -132,12 +133,16 @@ interface MacroRow extends Macro {
                     }
                   </td>
                   <td>{{ m.type }}</td>
+                  <td>
+                    @if (limitText(m); as limits) {
+                      {{ limits }}
+                    } @else {
+                      <span class="gear-muted">No limits</span>
+                    }
+                  </td>
                   <td>{{ m.tab_index ?? '—' }}</td>
                   <td>
-                    <gear-status-badge
-                      [tone]="m.status === 1 ? 'success' : 'neutral'"
-                      [text]="m.status === 1 ? 'Active' : 'Inactive'"
-                    />
+                    <gear-status-badge [status]="m.status === 1 ? 'Active' : 'Inactive'" />
                   </td>
                   <td class="right">
                     @if (access.canEditSetup()) {
@@ -164,7 +169,7 @@ interface MacroRow extends Macro {
                 </tr>
               } @empty {
                 <tr>
-                  <td danaTableEmpty colspan="7" class="empty-row">
+                  <td danaTableEmpty colspan="8" class="empty-row">
                     {{ macros.loading() ? 'Loading macros…' : 'No macros match.' }}
                   </td>
                 </tr>
@@ -198,6 +203,7 @@ interface MacroRow extends Macro {
 })
 export class MacrosPageComponent implements OnInit {
   private readonly api = inject(MacrosApi);
+  protected readonly limitText = macroLimitText;
   private readonly toast = inject(ToastService);
   protected readonly access = inject(LapperAccess);
 

@@ -10,9 +10,10 @@ import {
   DanaTableDirective,
   DanaTableEmptyDirective,
   DanaTableShellDirective,
+  DanaToneDirective,
 } from '@dana/ui';
 
-@Component({selector:'gear-greenshed-lookup',standalone:true,imports: [CommonModule, FormsModule, DanaPageHeaderComponent, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],templateUrl:'./greenshed-lookup.component.html'})
+@Component({selector:'gear-greenshed-lookup',standalone:true,imports: [DanaToneDirective, CommonModule, FormsModule, DanaPageHeaderComponent, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],templateUrl:'./greenshed-lookup.component.html'})
 export class GreenshedLookupComponent implements OnInit {
  private readonly api=inject(GreenshedApiService);private readonly route=inject(ActivatedRoute);private readonly destroyRef=inject(DestroyRef);private request=0;q='';status='';rows:GreenshedSearchRow[]=[];build:GreenshedBuild|null=null;history:GreenshedHistoryEvent[]=[];busy=false;error='';
  readonly statuses=['','READY','RUNNING','SHELF','PULLED'];

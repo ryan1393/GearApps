@@ -24,12 +24,13 @@ import {
   DanaPageHeaderComponent,
   DanaOperationCardComponent,
   DanaOperationGridDirective,
+  DanaToneDirective,
 } from '@dana/ui';
 
 @Component({
   selector: 'gear-cutter-builder-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaKpiGridDirective, DanaKpiCardDirective, DanaPanelHeaderDirective, DanaPanelActionDirective, DanaTableShellDirective, DanaTableDirective, DanaCountBadgeDirective, DanaStatusBadgeDirective, DanaTableEmptyDirective, DanaPageHeaderComponent, DanaOperationCardComponent, DanaOperationGridDirective],
+  imports: [DanaToneDirective, CommonModule, RouterLink, DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaKpiGridDirective, DanaKpiCardDirective, DanaPanelHeaderDirective, DanaPanelActionDirective, DanaTableShellDirective, DanaTableDirective, DanaCountBadgeDirective, DanaStatusBadgeDirective, DanaTableEmptyDirective, DanaPageHeaderComponent, DanaOperationCardComponent, DanaOperationGridDirective],
   templateUrl: './cutter-builder-dashboard.component.html',
 })
 export class CutterBuilderDashboardComponent implements OnInit {

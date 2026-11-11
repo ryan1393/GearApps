@@ -126,6 +126,15 @@ async function importBaseData() {
       [newId, clean(row.Department_ID), clean(row.Department_Desc) ?? ''],
     ).then(({ rows }) => departmentIds.set(String(row.Dept_ID), rows[0].id));
   }
+  // The legacy cutter database has no Lapping department, and Lapper machines belong to it.
+  // A department that already exists is left exactly as it is.
+  await client.query(
+    `INSERT INTO departments
+     (id, code, description, active, enabled, "createdAt", "updatedAt")
+     VALUES ($1,'181','LAPPING',true,true,NOW(),NOW())
+     ON CONFLICT (code) DO NOTHING`,
+    [id()],
+  );
 
   const modelIds = new Map();
   for (const row of models) {

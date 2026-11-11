@@ -18,8 +18,20 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 
-/** Pieces between required quality checks. */
-export const GREENSHED_CHECK_INTERVAL = 25;
+/** Pieces between required quality checks when GREENSHED_CHECK_INTERVAL is not set. */
+export const DEFAULT_GREENSHED_CHECK_INTERVAL = 25;
+
+/**
+ * Pieces between required quality checks. An administrator changes it in
+ * Admin > Server Settings > Greenshed (GREENSHED_CHECK_INTERVAL); the API, dashboard and
+ * workstation all read this one value.
+ */
+export function greenshedCheckInterval(): number {
+  const value = Number(process.env['GREENSHED_CHECK_INTERVAL']);
+  return Number.isInteger(value) && value >= 1 && value <= 10000
+    ? value
+    : DEFAULT_GREENSHED_CHECK_INTERVAL;
+}
 
 export function cutterBodyIdentifier(body: {
   id: string;
@@ -117,7 +129,7 @@ export async function loadGreenshedDashboard(dataSource: DataSource) {
 
   const activeMachines = runs.map((run) => {
     const nextCheckPieceCount =
-      run.last_check_piece_count + GREENSHED_CHECK_INTERVAL;
+      run.last_check_piece_count + greenshedCheckInterval();
     return {
       run_id: run.id,
       build_number: run.cutter_build.build_number,
@@ -310,7 +322,7 @@ export async function loadRunningMachines(
         .getOne();
 
       const nextCheckPieceCount =
-        run.last_check_piece_count + GREENSHED_CHECK_INTERVAL;
+        run.last_check_piece_count + greenshedCheckInterval();
 
       return {
         machine_id: machine.id,
@@ -400,7 +412,7 @@ export async function loadGreenshedMachine(
   }
 
   const nextCheckPieceCount =
-    run.last_check_piece_count + GREENSHED_CHECK_INTERVAL;
+    run.last_check_piece_count + greenshedCheckInterval();
 
   return {
     machine_id: machine.id,

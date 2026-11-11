@@ -7,11 +7,23 @@ import {
 } from '@nestjs/common';
 import { createHash, randomUUID } from 'node:crypto';
 import { EntityManager } from 'typeorm';
-import { PostgresLapperCatalog, Resource, Row, text } from './catalog';
+import { numberOrNull, PostgresLapperCatalog, Resource, Row, text } from './catalog';
 import { migrateLapperPostgres } from './schema';
 
 const columns: Partial<Record<Resource, string[]>> = {
-  macro: ['number', 'name', 'status', 'type', 'tab_index', 'used_form', 'l60_table', 'extra'],
+  macro: [
+    'number',
+    'name',
+    'status',
+    'type',
+    'tab_index',
+    'used_form',
+    'l60_table',
+    'extra',
+    'min_value',
+    'max_value',
+    'unit',
+  ],
   'scanner-detail': [
     'model',
     'type',
@@ -325,6 +337,25 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
       if (!saved)
         throw new ConflictException('This cycle already has a different value for that macro');
       return text(saved.id);
+    }
+    if (kind === 'macro') {
+      // Limits are optional. When both are set the saved pair must describe a real range.
+      if (typeof values.unit === 'string') values.unit = values.unit.trim() || null;
+      const current = exists
+        ? await manager
+            .createQueryBuilder()
+            .select(['m.min_value AS min_value', 'm.max_value AS max_value'])
+            .from(table, 'm')
+            .where('m.id=:id', { id: rowId })
+            .getRawOne<Row>()
+        : undefined;
+      const min = numberOrNull(values.min_value !== undefined ? values.min_value : current?.min_value);
+      const max = numberOrNull(values.max_value !== undefined ? values.max_value : current?.max_value);
+      for (const limit of [min, max])
+        if (limit !== null && (!Number.isFinite(limit) || Math.abs(limit) >= 100000000))
+          throw new BadRequestException('Macro limits must be numbers below 100,000,000');
+      if (min !== null && max !== null && min > max)
+        throw new BadRequestException('The minimum cannot be greater than the maximum');
     }
     if (kind === 'scanner-detail' && data.machine_id !== undefined) {
       values.machine_id =

@@ -45,7 +45,7 @@ import { groupByCell } from './cells';
         danaPageHeader
         eyebrow="LAPPER"
         heading="Dashboard"
-        description="Production over the past 24 hours. Open a cell for live machine status or inspect cycle history."
+        description="Production over the past 24 hours, machine by machine. Open a cell for live status or a machine for its cycle history."
         [dashboard]="true"
       >
         <button
@@ -153,14 +153,108 @@ import { groupByCell } from './cells';
               description="Summary numbers shared by rings, pinions and gearsets (Admin)."
               aria-label="Part Summaries"
             ></a>
+            <a
+              routerLink="/admin"
+              [queryParams]="{ tab: 'macros' }"
+              danaOperationCard
+              icon="lapping"
+              tone="teal"
+              heading="Macros and Limits"
+              description="The variables each cycle records and their acceptable ranges (Admin)."
+              aria-label="Macros and Limits"
+            ></a>
+            <a
+              routerLink="/admin"
+              [queryParams]="{ tab: 'cycle-tests' }"
+              danaOperationCard
+              icon="scanner"
+              tone="green"
+              heading="Cycle Test Lab"
+              description="Try a cycle with a serial number without touching production (Admin)."
+              aria-label="Cycle Test Lab"
+            ></a>
           }
         </div>
       </section>
 
-      <section class="gear-panel p-5" aria-live="polite">
-        @if (production.error()) { <p role="alert">Production totals are unavailable. Refresh to retry.</p> }
-        @else { <p>Last recorded cycle: {{ production.value()?.last_cycle_at ? (production.value()?.last_cycle_at | date:'medium') : 'No production recorded' }}</p> }
-        @if (access.canEditSetup()) { <a class="gear-btn gear-btn-secondary" routerLink="/admin" [queryParams]="{ tab: 'cycle-tests' }">Cycle Test Lab</a> }
+      <section class="gear-panel data-panel" danaDashboardPanel aria-live="polite">
+        <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+          <div>
+            <h2>Production by Machine</h2>
+            <p>
+              @if (production.error()) {
+                Production totals are unavailable. Refresh to retry.
+              } @else if (production.value()?.last_cycle_at) {
+                Last recorded cycle {{ production.value()?.last_cycle_at | date: 'medium' }}.
+              } @else {
+                No production recorded yet.
+              }
+            </p>
+          </div>
+          <span danaCountBadge class="gear-count-badge count-chip">{{ machineRows().length }}</span>
+        </div>
+        <div danaTableShell class="table-wrap">
+          <table danaTable class="gear-table dashboard-table">
+            <thead>
+              <tr>
+                <th>Machine</th>
+                <th>Cell</th>
+                <th>Last hour</th>
+                <th>24 hours</th>
+                <th>Missing serials</th>
+                <th>Last cycle</th>
+                <th>Last gearset</th>
+                <th data-dana-table-static></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of machineRows(); track row.machine_id) {
+                <tr>
+                  <td class="mono strong">{{ row.number }}</td>
+                  <td>{{ row.cell || '—' }}</td>
+                  <td>{{ row.cycles_1h }}</td>
+                  <td class="strong">{{ row.cycles_24h }}</td>
+                  <td>
+                    @if (row.missing_serial_24h) {
+                      <gear-status-badge tone="warning" [text]="row.missing_serial_24h + ' missing'" />
+                    } @else {
+                      0
+                    }
+                  </td>
+                  <td>
+                    @if (row.last_cycle_at) {
+                      {{ row.last_cycle_at | date: 'MMM d, HH:mm' }}
+                    } @else {
+                      <gear-status-badge [tone]="isActive(row.status) ? 'warning' : 'neutral'" [text]="isActive(row.status) ? 'No cycles yet' : 'Inactive'" />
+                    }
+                  </td>
+                  <td class="mono">
+                    {{ row.last_gearset || '—' }}
+                    @if (row.last_serial_number) {
+                      <small class="gear-muted">· {{ row.last_serial_number }}</small>
+                    }
+                  </td>
+                  <td class="right">
+                    @if (row.last_gearset_id) {
+                      <a
+                        class="gear-btn gear-btn-secondary gear-btn-sm"
+                        routerLink="/lapping-summaries"
+                        [queryParams]="{ machine: row.machine_id, gearset: row.last_gearset_id }"
+                        >Cycle history</a
+                      >
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td danaTableEmpty colspan="8" class="empty-row">
+                    {{ production.loading() ? 'Loading production…' : 'No lapping machines are set up yet.' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section class="gear-panel data-panel" danaDashboardPanel>
@@ -247,6 +341,8 @@ export class CellsOverviewPageComponent implements OnInit {
   protected readonly access = inject(LapperAccess);
   protected readonly machines = loadable<Machine[]>([]);
   protected readonly cells = computed(() => groupByCell(this.machines.value()));
+  protected readonly machineRows = computed(() => this.production.value()?.machines ?? []);
+  protected readonly isActive = (status: string) => status?.toLowerCase() === 'active';
   protected readonly activeCount = computed(
     () => this.machines.value().filter((m) => m.status?.toLowerCase() === 'active').length,
   );

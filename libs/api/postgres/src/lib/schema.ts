@@ -105,6 +105,15 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
       );
       CREATE INDEX IF NOT EXISTS ix_cycle_tests_created ON lapper.cycle_tests(created_at DESC);
     `);
+    // Optional acceptance limits and a unit for each macro, edited in Admin > Macros.
+    await runDatabaseMigration(manager, '20261111-lapper-macro-limits-v1', `
+      ALTER TABLE lapper.macros ADD COLUMN IF NOT EXISTS min_value numeric(13,5);
+      ALTER TABLE lapper.macros ADD COLUMN IF NOT EXISTS max_value numeric(13,5);
+      ALTER TABLE lapper.macros ADD COLUMN IF NOT EXISTS unit text;
+      ALTER TABLE lapper.macros DROP CONSTRAINT IF EXISTS ck_lapper_macro_limits;
+      ALTER TABLE lapper.macros ADD CONSTRAINT ck_lapper_macro_limits
+        CHECK (min_value IS NULL OR max_value IS NULL OR min_value <= max_value);
+    `);
     await applySharedDatabaseIntegrity(manager);
     await runDatabaseMigration(
       manager,

@@ -48,6 +48,7 @@ import { LappingGearsetsComponent } from '../lapping/lapping-gearsets.component'
 import { LappingMachinesComponent } from '../lapping/lapping-machines.component';
 import {
   DanaPageHeaderComponent,
+  DanaToneDirective,
 } from '@dana/ui';
 
 import { CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent } from '@meshforge/client/feature-config';
@@ -60,7 +61,7 @@ const isAdminTab = (value: unknown): value is AdminTab => ADMIN_TABS.includes(va
 @Component({
   selector: 'gear-admin-users-page',
   standalone: true,
-  imports: [MachineDsfCountComponent,CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent, CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, ServerSettingsComponent, GearLabelPrinterPickerComponent, LappingGearsetsComponent, LappingMachinesComponent],
+  imports: [DanaToneDirective, MachineDsfCountComponent,CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent, CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, ServerSettingsComponent, GearLabelPrinterPickerComponent, LappingGearsetsComponent, LappingMachinesComponent],
   templateUrl: './frontend-feature-admin-users.component.html',
   styleUrls: ['./frontend-feature-admin-users.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,

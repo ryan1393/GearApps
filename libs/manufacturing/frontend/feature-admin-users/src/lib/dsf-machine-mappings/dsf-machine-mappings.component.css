@@ -9,14 +9,13 @@
 .dsf-map-action, .dsf-map-action .gear-btn { white-space: nowrap; }
 .dsf-map-action { width: 1%; }
 .dsf-map-detail { scroll-margin-top: 5.5rem; }
-.dsf-map-selected > td { background: #f2f3f5; }
-.dsf-map-review { border-color: #e1a809; background: #fffbeb; color: #6f540b; }
-.dsf-map-review-text { color: #6f540b; font-weight: 600; }
+.dsf-map-selected > td { background: var(--dana-neutral-soft); }
+.dsf-map-review-text { color: var(--dana-warning); font-weight: 600; }
 .dsf-map-detail { display: grid; gap: .75rem; }
 .dsf-map-sources { display: grid; gap: .4rem; max-height: 18rem; overflow: auto; }
-.dsf-map-source { display: flex; justify-content: space-between; gap: 1rem; padding: .6rem .75rem; border: 1px solid #d1d4d9; border-radius: 8px; background: #fff; text-align: left; cursor: pointer; }
-.dsf-map-source:hover, .dsf-map-source:focus-visible { border-color: #aa5413; }
-.dsf-map-chosen { border-color: #aa5413; background: #f2f3f5; }
+.dsf-map-source { display: flex; justify-content: space-between; gap: 1rem; padding: .6rem .75rem; border: 1px solid var(--dana-control-border); border-radius: 8px; background: var(--dana-surface); text-align: left; cursor: pointer; }
+.dsf-map-source:hover, .dsf-map-source:focus-visible { border-color: var(--dana-primary); }
+.dsf-map-chosen { border-color: var(--dana-primary); background: var(--dana-neutral-soft); }
 .dsf-map-facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; margin: 0; }
 .dsf-map-facts dt { font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; opacity: .7; }
 .dsf-map-facts dd { margin: .15rem 0 0; overflow-wrap: anywhere; }

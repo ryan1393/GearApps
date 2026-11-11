@@ -9,6 +9,7 @@ import {
   DanaTableDirective,
   DanaTableEmptyDirective,
   DanaTableShellDirective,
+  DanaToneDirective,
 } from '@dana/ui';
 
 interface DsfSourceOption {
@@ -42,7 +43,7 @@ interface DsfMappingBoard {
 @Component({
   selector: 'gear-admin-dsf-machine-mappings',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaSummaryGridDirective, DanaSummaryCardDirective, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
+  imports: [DanaToneDirective, CommonModule, FormsModule, DanaSummaryGridDirective, DanaSummaryCardDirective, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
   templateUrl: './dsf-machine-mappings.component.html',
   styleUrls: ['./dsf-machine-mappings.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -163,6 +164,13 @@ export class DsfMachineMappingsComponent implements OnInit {
     if (!row.active) return 'inactive';
     if (!row.mapping || ['MAPPING_REVIEW', 'DATA_REVIEW', 'SHIFT_REVIEW'].includes(row.status)) return 'review';
     return 'mapped';
+  }
+  /** Pill colour: counting is green, anything needing review is amber, a retired machine is red. */
+  badgeTone(row: AdminMappingRow): string {
+    if (!row.active) return 'inactive';
+    if (this.classification(row) === 'review') return 'review';
+    if (row.status === 'OK') return 'ok';
+    return row.status === 'STALE' ? 'stale' : 'not configured';
   }
   badgeText(row: AdminMappingRow): string {
     if (!row.active) return 'Inactive'; if (!row.mapping) return 'Unmapped';

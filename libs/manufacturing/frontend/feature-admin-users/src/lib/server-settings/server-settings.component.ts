@@ -1,3 +1,4 @@
+import { DanaToneDirective } from '@dana/ui';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
@@ -52,7 +53,7 @@ const RESTART_CHECKS = 40;
 @Component({
   selector: 'gear-admin-server-settings',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [DanaToneDirective, CommonModule, FormsModule],
   templateUrl: './server-settings.component.html',
   styleUrls: ['./server-settings.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,

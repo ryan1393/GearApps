@@ -76,7 +76,7 @@
                 <td class="font-mono font-bold">{{ assignment.blade.serial_number }}</td>
                 <td>{{ assignment.blade.summary?.number || traySummary }}</td>
                 <td>{{ assignment.blade.part_type?.code || trayPartType }}</td>
-                <td><span class="status-pill">{{ readable(assignment.blade.status) }}</span></td>
+                <td><span class="status-pill" [danaTone]="readable(assignment.blade.status)">{{ readable(assignment.blade.status) }}</span></td>
                 <td>{{ assignment.blade.service_cycle }}</td>
                 <td>
                   <button

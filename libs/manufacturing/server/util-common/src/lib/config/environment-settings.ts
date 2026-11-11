@@ -133,6 +133,18 @@ export const ENVIRONMENT_SETTING_GROUPS: readonly EnvironmentSettingGroup[] = [
     ],
   },
   {
+    id: 'greenshed',
+    title: 'Greenshed quality checks',
+    description: 'How often a running machine must be checked.',
+    settings: [
+      number(
+        'GREENSHED_CHECK_INTERVAL',
+        'Pieces between quality checks',
+        '1 to 10000. Running machines use the new interval from their last check once the API restarts.',
+      ),
+    ],
+  },
+  {
     id: 'lapping',
     title: 'Lapping and scanners',
     description: 'Lapper time zone and the scanner connections.',

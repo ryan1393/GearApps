@@ -18,9 +18,25 @@ export type CreateMachineCycle = Pick<
 >;
 export type UpdateMachineCycle = Partial<Omit<MachineCycle, 'id' | 'machine' | 'gearset'>>;
 
+/** One lapper's production, for the dashboard's machine-by-machine table. */
+export interface LapperMachineProduction {
+  machine_id: string;
+  number: string;
+  cell: string | null;
+  status: string;
+  cycles_1h: number;
+  cycles_24h: number;
+  missing_serial_24h: number;
+  last_cycle_at: string | null;
+  /** Gearset and serial of the most recent cycle in the past 24 hours. */
+  last_gearset_id: string | null;
+  last_gearset: string | null;
+  last_serial_number: string | null;
+}
 export interface LapperProduction {
   cycles_24h: number;
   machines_reporting_24h: number;
   missing_serial_24h: number;
   last_cycle_at: string | null;
+  machines: LapperMachineProduction[];
 }

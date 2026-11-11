@@ -171,7 +171,7 @@ import { ScannerControlsComponent } from './scanner-controls.component';
     }
     .gear-live-image {
       aspect-ratio: 1;
-      background: #0f1b2c;
+      background: var(--dana-sidebar);
       border-radius: var(--dana-radius-md);
       overflow: hidden;
       display: grid;
@@ -184,12 +184,12 @@ import { ScannerControlsComponent } from './scanner-controls.component';
       display: block;
     }
     .gear-live-placeholder {
-      color: #9fb0c6;
+      color: var(--gear-sidebar-text);
       font-size: 13px;
       font-weight: 700;
     }
     .gear-live-placeholder.is-error {
-      color: #f3b48f;
+      color: var(--dana-focus-border);
     }
     .gear-live-data {
       display: grid;
