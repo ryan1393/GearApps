@@ -21,7 +21,6 @@ export * from './lib/database/entities/cutter-tracking/cutter-part-type.orm-enti
 export * from './lib/database/entities/cutter-tracking/cutter-pull-reason.orm-entity';
 export * from './lib/database/entities/cutter-tracking/cutter-body.orm-entity';
 export * from './lib/database/entities/cutter-tracking/cutter-body-definition.orm-entity';
-export * from './lib/database/entities/cutter-tracking/cutter-legacy-orphan-record.orm-entity';
 export * from './lib/database/entities/cutter-tracking/cutter-build.orm-entity';
 export * from './lib/database/entities/cutter-tracking/cutter-build-blade.orm-entity';
 export * from './lib/database/entities/cutter-tracking/cutter-event.orm-entity';

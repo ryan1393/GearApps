@@ -13,9 +13,7 @@ export type Resource =
   | 'machine-fanuc-variable'
   | 'department'
   | 'part'
-  | 'part-summary'
-  | 'toc'
-  | 'gearset-marriage';
+  | 'part-summary';
 export const text = (value: unknown): string => (value == null ? '' : String(value));
 /**
  * PostgreSQL only knows the old alias zone names when its host installs them (Ubuntu 24.04
@@ -205,7 +203,7 @@ export class PostgresLapperCatalog {
         number: l.api_number,
         ip: l.machine_ip,
         dept_id: l.department_code,
-        description: l.api_description ?? l.description,
+        description: l.api_description,
         type: l.type,
         builder: l.builder,
         cell: l.api_cell == null ? null : text(l.api_cell),
@@ -327,8 +325,8 @@ export class PostgresLapperCatalog {
     // Every lapper, busiest first, so an idle or untraceable machine stands out.
     const machines = await this.db.query(`SELECT
       lm.public_machine_id AS machine_id,
-      COALESCE(NULLIF(BTRIM(pm.machine_number), ''), NULLIF(BTRIM(lm.number), ''), lm.machine_ip) AS number,
-      lm.cell, lm.status,
+      COALESCE(NULLIF(BTRIM(pm.machine_number), ''), lm.machine_ip) AS number,
+      pm.cell::text AS cell, lm.status,
       COALESCE(p.cycles_1h, 0)::integer AS cycles_1h,
       COALESCE(p.cycles_24h, 0)::integer AS cycles_24h,
       COALESCE(p.missing_serial_24h, 0)::integer AS missing_serial_24h,
@@ -341,10 +339,12 @@ export class PostgresLapperCatalog {
         COUNT(*) FILTER (WHERE c.occurred_at >= now() - interval '24 hours' AND NULLIF(BTRIM(c.serial_number), '') IS NULL) AS missing_serial_24h,
         MAX(c.occurred_at) AS last_cycle_at,
         (ARRAY_AGG(COALESCE(g.public_gearset_id, g.id) ORDER BY c.occurred_at DESC, c.id DESC) FILTER (WHERE c.occurred_at >= now() - interval '24 hours'))[1] AS last_gearset_id,
-        (ARRAY_AGG(g.number ORDER BY c.occurred_at DESC, c.id DESC) FILTER (WHERE c.occurred_at >= now() - interval '24 hours'))[1] AS last_gearset,
+        (ARRAY_AGG(COALESCE(gp.part_number, g.number) ORDER BY c.occurred_at DESC, c.id DESC) FILTER (WHERE c.occurred_at >= now() - interval '24 hours'))[1] AS last_gearset,
         (ARRAY_AGG(c.serial_number ORDER BY c.occurred_at DESC, c.id DESC) FILTER (WHERE c.occurred_at >= now() - interval '24 hours'))[1] AS last_serial_number
         FROM (SELECT id, machine_id, gearset_id, serial_number, COALESCE(recorded_at, timestamp AT TIME ZONE $1) AS occurred_at FROM lapper.machine_cycles) c
         JOIN lapper.gearsets g ON g.id = c.gearset_id
+        LEFT JOIN public.gearsets pg ON pg.id = g.public_gearset_id
+        LEFT JOIN public.parts gp ON gp.id = pg.gearset_part_id
         GROUP BY c.machine_id) p ON p.machine_id = lm.id
       ORDER BY COALESCE(p.cycles_24h, 0) DESC, 2`, [this.timeZone]);
     return { ...row, machines };
@@ -572,23 +572,6 @@ export class PostgresLapperCatalog {
         return this.cycles({}, manager);
       case 'macro-log':
         return this.logs(undefined, manager);
-      case 'toc':
-        return manager
-          .createQueryBuilder()
-          .select('t.*')
-          .from('lapper.type_of_checks', 't')
-          .getRawMany<Row>();
-      case 'gearset-marriage':
-        return manager
-          .createQueryBuilder()
-          .select('g.id', 'id')
-          .addSelect('g.gearset_part_id', 'gearset_id')
-          .addSelect('g.ring_part_id', 'ring_id')
-          .addSelect('g.pinion_part_id', 'pinion_id')
-          .addSelect('l.rev', 'rev')
-          .from('public.gearsets', 'g')
-          .leftJoin('(SELECT * FROM lapper.gearset_marriages)', 'l', 'l.id=g.id')
-          .getRawMany<Row>();
     }
   }
 

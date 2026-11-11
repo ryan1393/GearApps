@@ -75,6 +75,13 @@ export class GearMasterDataBootstrap implements OnModuleInit {
       // like the other physical shelf bins. Do not invent a shelf count,
       // rename CGRR/CGRP to an assumed slot, or move historical/current placements.
       await applySharedDatabaseIntegrity(manager);
+      // Unmappable rows from the one-off SQL Server cutter-history import. Nothing in the
+      // application read them; the importer now writes them to a JSON file beside its report.
+      await runDatabaseMigration(
+        manager,
+        '20261111-drop-cutter-legacy-orphan-records-v1',
+        'DROP TABLE IF EXISTS public.cutter_legacy_orphan_records;',
+      );
     });
     this.logger.log('Gear master-data schema verified');
   }

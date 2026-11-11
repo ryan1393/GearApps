@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **Database: one copy of machine data, three unused tables removed.** `lapper.machines` no
+  longer keeps its own copy of a machine's number, department, cell and description; Lapper reads
+  them from `public.machines`, so a change in Admin shows everywhere (the Lapper production
+  dashboard showed the stale cell before). A description only Lapper had is moved to the machine
+  first. Lapper also stops copying a gearset's ratio into `lapper.gearsets` when it links one, and
+  the dashboard's last-gearset name follows the MeshForge part number. Dropped:
+  `lapper.type_of_checks` and `lapper.gearset_marriages` with their `/api/v1/toc` and
+  `/api/v1/gearset-marriage` endpoints (no screen or collector used them), and
+  `public.cutter_legacy_orphan_records`; the cutter-history importer now writes those unmapped
+  legacy rows to `cutter-history-legacy-orphans.json` beside its report. Migrations
+  `20261111-lapper-master-data-dedup-v1` and `20261111-drop-cutter-legacy-orphan-records-v1` run
+  once at API start. **Back up the database before deploying**: the dropped data is gone after.
+
 - **Lapper Read: cycle time to Argonaut.** Each finished lapping cycle is timed from going into
   cycle to coming out of it (Y3.2), and the seconds are sent to Argonaut as `floatData[0]`, which
   was always 0. A cycle whose start or end was missed (collector down or restarting, controller

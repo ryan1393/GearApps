@@ -26,6 +26,7 @@ tools/manufacturing/data-import/work/
 /_cutter-history-export_backup_*/
 /_cutter-history-export_incoming_*/
 /cutter-history-dynamic-migration-report.json
+/cutter-history-legacy-orphans.json
 /swagger.json
 /_patch_backups/
 /deploy-reports/
