@@ -151,7 +151,7 @@
         <span class="gear-workflow-step">3</span>
         <div>
           <h2>Build Details</h2>
-          <p>Record finishing state and optional roll-off values, then create the build.</p>
+          <p>Record finishing state and optional roll-off values, then create the build. The cutter card prints automatically.</p>
         </div>
       </div>
       <div class="gear-workflow-section-body">
@@ -194,6 +194,9 @@
           <textarea [(ngModel)]="comments" name="comments" class="gear-textarea" rows="3"></textarea>
         </label>
 
+        <!-- The card prints by itself when the build is created, so the printer is chosen before building. -->
+        <gear-label-printer-picker labelType="CUTTER_CARD" label="Print cards to" />
+
         <div class="gear-workflow-actions">
           <button type="button" class="gear-btn gear-btn-secondary" (click)="reset()" [disabled]="busy">Reset</button>
           <button type="button" class="gear-btn gear-btn-primary gear-workflow-submit" (click)="build()" [disabled]="!canBuild">
@@ -231,7 +234,6 @@
     <div *ngIf="r.build.comments" class="gear-workflow-comments"><strong>Comments:</strong> {{ r.build.comments }}</div>
 
     <div class="gear-workflow-actions gear-print-hide">
-      <gear-label-printer-picker labelType="CUTTER_CARD" label="Print cards to" />
       <button type="button" class="gear-btn gear-btn-secondary" (click)="print()" [disabled]="printing">{{ printing ? 'Printing…' : 'Print Cutter Card' }}</button>
       <button type="button" class="gear-btn gear-btn-secondary" (click)="browserPrint()">Browser Print</button>
       <button type="button" class="gear-btn gear-btn-primary" (click)="reset()">Build Another</button>
