@@ -57,13 +57,13 @@ def cycle_seconds(started_at: str | None, ended_at: str | None) -> float | None:
     if not started_at or not ended_at:
         return None
     try:
-        seconds = (_instant(ended_at) - _instant(started_at)).total_seconds()
+        seconds = (parse_timestamp(ended_at) - parse_timestamp(started_at)).total_seconds()
     except ValueError:
         return None
     return round(seconds, 3) if seconds >= 0 else None
 
 
-def _instant(text: str) -> datetime:
+def parse_timestamp(text: str) -> datetime:
     # utc_now() writes a trailing Z, which datetime.fromisoformat only accepts from Python 3.11.
     return datetime.fromisoformat(text[:-1] + "+00:00" if text.endswith("Z") else text)
 
@@ -112,10 +112,10 @@ class InvalidCheckpoint(ValueError):
 def _cycle(raw: dict[str, Any]) -> PendingCycle:
     try:
         cycle = PendingCycle(**raw)
-        _instant(cycle.started_at)
+        parse_timestamp(cycle.started_at)
         for moment in (cycle.completed_at, cycle.cycle_started_at, cycle.cycle_ended_at):
             if moment:
-                _instant(moment)
+                parse_timestamp(moment)
         for value in cycle.macros.values():
             Decimal(value)
         return cycle

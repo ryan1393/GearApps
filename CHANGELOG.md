@@ -4,7 +4,8 @@
 
 - **Lapper Read: cycle time to Argonaut.** Each finished lapping cycle is timed from going into
   cycle to coming out of it (Y3.2), and the seconds are sent to Argonaut as `floatData[0]`, which
-  was always 0. A cycle already running when the collector started sends 0. The Cycle Test Lab's
+  was always 0. A cycle whose start or end was missed (collector down or restarting, controller
+  not answering) sends 0 rather than a wrong time. The Cycle Test Lab's
   Send to Argonaut has a matching optional Cycle time field (`cycle_time_s`).
 - **Location part type comes from the barcode.** A shelf barcode's R or P now sets its part type:
   GSR/GSP, CGRR/CGRP, CGDR/CGDP and CGFR/CGFP are RING or PINION whatever is chosen, on create,
