@@ -240,3 +240,37 @@ class _Scanner:
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PerMachineUrlTests(unittest.TestCase):
+    def test_admin_url_turns_argonaut_on_for_that_machine_only(self):
+        from lapper_read.supervisor import desired_machines, with_machine_argonaut
+
+        machines = [
+            {"id": "m1", "number": "A", "ip": "10.0.0.1", "status": "Active",
+             "argonaut_url": " https://argo-1:3003/api/mes/trigger-transaction ", "argonaut_location_id": "loc-1"},
+            {"id": "m2", "number": "B", "ip": "10.0.0.2", "status": "Active", "argonaut_url": None},
+        ]
+        wanted, _ = desired_machines(machines, [])
+        self.assertEqual(wanted["m1"].argonaut_url, "https://argo-1:3003/api/mes/trigger-transaction")
+        self.assertEqual(wanted["m2"].argonaut_url, "")
+        base = Settings(machine_ip="", scanner_ip="", argonaut_location_id="default-loc", argonaut_username="u")
+        one = with_machine_argonaut(base, wanted["m1"].argonaut_url, wanted["m1"].argonaut_location_id)
+        self.assertTrue(one.argonaut_enabled)
+        self.assertEqual((one.argonaut_url, one.argonaut_location_id, one.argonaut_username),
+                         ("https://argo-1:3003/api/mes/trigger-transaction", "loc-1", "u"))
+        self.assertIs(with_machine_argonaut(base, "", ""), base)  # collector default (off here)
+        self.assertEqual(with_machine_argonaut(base, "http://x", "").argonaut_location_id, "default-loc")
+
+    def test_changing_the_url_in_admin_restarts_that_worker(self):
+        from lapper_read.supervisor import desired_machines
+
+        m = {"id": "m1", "number": "A", "ip": "10.0.0.1", "status": "Active", "argonaut_url": "http://a"}
+        before, _ = desired_machines([m], [])
+        after, _ = desired_machines([{**m, "argonaut_url": "http://b"}], [])
+        self.assertNotEqual(before["m1"], after["m1"])
+
+    def test_a_malformed_url_is_retried_not_raised(self):
+        with self.assertRaises(argo.ArgonautError) as error:
+            argo.ArgonautClient("notaurl").post({})
+        self.assertFalse(error.exception.permanent)

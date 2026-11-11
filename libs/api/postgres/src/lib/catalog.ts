@@ -212,6 +212,8 @@ export class PostgresLapperCatalog {
         status: l.api_active && l.api_enabled ? l.status : 'inactive',
         scanner_id: scanner?.id ?? null,
         scanner: scanner ? { ...scanner, machine_id: l.api_id } : null,
+        argonaut_url: l.argonaut_url ?? null,
+        argonaut_location_id: l.argonaut_location_id ?? null,
       };
     });
   }

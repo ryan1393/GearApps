@@ -114,6 +114,11 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
       ALTER TABLE lapper.macros ADD CONSTRAINT ck_lapper_macro_limits
         CHECK (min_value IS NULL OR max_value IS NULL OR min_value <= max_value);
     `);
+    // Per-machine Argonaut endpoint for Lapper Read, edited in Admin > Lapping machines.
+    await runDatabaseMigration(manager, '20261111-lapper-machine-argonaut-v1', `
+      ALTER TABLE lapper.machines ADD COLUMN IF NOT EXISTS argonaut_url text;
+      ALTER TABLE lapper.machines ADD COLUMN IF NOT EXISTS argonaut_location_id text;
+    `);
     await applySharedDatabaseIntegrity(manager);
     await runDatabaseMigration(
       manager,

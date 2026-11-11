@@ -80,6 +80,7 @@ import { MachineFormDialogComponent } from './machine-form-dialog.component';
               <th title="FANUC controller IP">FANUC IP</th>
               <th>Machine</th>
               <th>Scanner</th>
+              <th title="Argonaut address Lapper Read posts finished cycles to">Argonaut</th>
               <th>Status</th>
               <th data-dana-table-static aria-label="Actions"></th>
             </tr>
@@ -94,6 +95,9 @@ import { MachineFormDialogComponent } from './machine-form-dialog.component';
                 <td>{{ machineModel(m) }}</td>
                 <td class="mono nowrap">
                   {{ m.scanner?.ip || m.scanner?.model || (m.scanner_id ? 'Assigned' : '—') }}
+                </td>
+                <td class="mono nowrap" [title]="m.argonaut_url || 'Collector default'">
+                  {{ argonautHost(m.argonaut_url) }}
                 </td>
                 <td><gear-status-badge [status]="m.status" /></td>
                 <td class="right">
@@ -198,6 +202,16 @@ export class LappingMachinesComponent implements OnInit {
 
   protected reload() {
     this.machines.load(this.api.list());
+  }
+
+  /** The host:port a machine's Argonaut URL points at, or "Default" when it uses the collector's. */
+  protected argonautHost(url: string | null | undefined): string {
+    if (!url) return 'Default';
+    try {
+      return new URL(url).host || url;
+    } catch {
+      return url;
+    }
   }
 
   protected machineModel(m: Machine): string {

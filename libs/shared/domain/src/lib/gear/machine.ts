@@ -13,6 +13,13 @@ export interface Machine extends BaseEntity {
   status: string;
   scanner_id?: string | null;
   scanner?: ScannerDetail;
+  /**
+   * Argonaut (Track and Trace) endpoint Lapper Read posts this machine's finished cycles to.
+   * Empty: the collector's default (ARGONAUT_ENABLED / ARGONAUT_URL) applies.
+   */
+  argonaut_url?: string | null;
+  /** Argonaut `locationId` for this machine; empty uses the collector's ARGONAUT_LOCATION_ID. */
+  argonaut_location_id?: string | null;
 }
 export type CreateMachine = Pick<
   Machine,
@@ -25,5 +32,7 @@ export type CreateMachine = Pick<
   | 'builder'
   | 'cell'
   | 'status'
+  | 'argonaut_url'
+  | 'argonaut_location_id'
 >;
 export type UpdateMachine = Partial<Omit<Machine, 'id' | 'number' | 'scanner'>>;

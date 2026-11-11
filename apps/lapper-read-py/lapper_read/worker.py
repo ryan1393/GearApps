@@ -93,6 +93,11 @@ class Worker:
         self.store.acquire_lease()
         try:
             self._tracker = self._new_tracker(self.store.load())
+            held = len(self._tracker.state.argonaut_pending)
+            if held and not self.argonaut:
+                log.warning("[%s] %d cycle(s) are waiting for Argonaut, which is now off for this machine; "
+                            "they are kept and sent if it is turned back on",
+                            self.settings.machine_number or self.settings.machine_ip, held)
             if not self._initialize():
                 return
             publisher = threading.Thread(target=self._publish_loop, name="publisher", daemon=True)
@@ -291,7 +296,9 @@ class Worker:
         try:
             self.argonaut.post(argo.build_payload(post.serial, post.part_number, post.consec, post.values,
                                                   self.settings.argonaut_transaction_type_id))
-        except argo.ArgonautError as error:
+        except Exception as error:  # noqa: BLE001 - Argonaut must never stop MeshForge publishing
+            if not isinstance(error, argo.ArgonautError):
+                error = argo.ArgonautError(str(error))
             self.argonaut_last_error = str(error)
             if error.permanent:
                 log.error("[%s] Argonaut rejected cycle %s for serial %s; not retried: %s",

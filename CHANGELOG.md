@@ -7,7 +7,10 @@
   gearset and consec, posted when the cycle ends. Off by default; turn it on with
   `LAPPER_READ_ARGONAUT_ENABLED=true` in `.env` (URL, location, sign-in and certificate settings
   beside it). Argonaut has its own retry queue, so an outage never delays recording cycles in
-  MeshForge.
+  MeshForge. Each machine can have its own Argonaut URL and location ID in Admin > Lapping
+  machines (new nullable columns `lapper.machines.argonaut_url` and `argonaut_location_id`,
+  migration `20261111-lapper-machine-argonaut-v1`); a machine with a URL sends to it, and an empty
+  URL uses the collector default.
 - **Launch Setup.** A new Admin tab for going live: a checklist of what still has to be set up,
   barcode tags in bulk for trays, containers and numbered shelves, and recording trays that are
   already ground or already coated on the shelf where they sit (see

@@ -19,3 +19,6 @@ export const MACHINE_CELLS = [
 ];
 export const STATUS_OPTIONS = ['Active', 'Inactive'];
 export const IPV4_PATTERN = /^(25[0-5]|2[0-4]\d|1?\d?\d)(\.(25[0-5]|2[0-4]\d|1?\d?\d)){3}$/;
+
+/** An http(s) address, optionally with a port and path; empty is allowed (collector default). */
+export const ARGONAUT_URL_PATTERN = /^\s*https?:\/\/[^\s/?#]+(?:[/?#]\S*)?\s*$/i;

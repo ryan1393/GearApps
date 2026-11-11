@@ -89,11 +89,11 @@ class ArgonautClient:
                 self._context.verify_mode = ssl.CERT_NONE
 
     def post(self, payload: dict) -> None:
-        request = urllib.request.Request(self.url, data=json.dumps(payload).encode(), method="POST")
-        request.add_header("Content-Type", "application/json")
-        if self._auth:
-            request.add_header("Authorization", self._auth)
         try:
+            request = urllib.request.Request(self.url, data=json.dumps(payload).encode(), method="POST")
+            request.add_header("Content-Type", "application/json")
+            if self._auth:
+                request.add_header("Authorization", self._auth)
             with urllib.request.urlopen(request, timeout=self._timeout, context=self._context) as response:
                 response.read()
         except urllib.error.HTTPError as error:
@@ -101,3 +101,5 @@ class ArgonautClient:
             raise ArgonautError(f"Argonaut answered HTTP {error.code} {body}".strip(), error.code) from error
         except (urllib.error.URLError, OSError) as error:
             raise ArgonautError(f"Argonaut is unreachable: {getattr(error, 'reason', error)}") from error
+        except ValueError as error:  # e.g. a malformed Argonaut URL saved for the machine
+            raise ArgonautError(f"Argonaut URL is not usable: {error}") from error

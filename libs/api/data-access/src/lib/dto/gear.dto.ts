@@ -51,8 +51,10 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUrl,
   IsUUID,
   MaxLength,
+  ValidateIf,
 } from 'class-validator';
 
 const uuidExample = 'DCA76BCC-F6CD-4211-A9F5-CD4E24381EC8';
@@ -236,6 +238,22 @@ export class MachineDto implements Machine {
   @IsOptional()
   @IsUUID('loose')
   scanner_id?: string | null;
+  @ApiPropertyOptional({
+    nullable: true,
+    example: 'https://argonaut.example:3003/api/mes/trigger-transaction',
+    description:
+      "Argonaut endpoint Lapper Read posts this machine's finished cycles to; empty uses the collector default",
+  })
+  @IsOptional()
+  @ValidateIf((_, value) => value !== '')
+  @IsUrl({ protocols: ['http', 'https'], require_protocol: true, require_tld: false })
+  @MaxLength(500)
+  argonaut_url?: string | null;
+  @ApiPropertyOptional({ nullable: true, example: uuidExample, description: 'Argonaut locationId' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(200)
+  argonaut_location_id?: string | null;
 }
 export class CreateMachineDto extends OmitType(MachineDto, ['id']) implements CreateMachine {}
 export class UpdateMachineDto

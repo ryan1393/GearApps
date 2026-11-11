@@ -111,6 +111,11 @@ cycle's consec as the sequence, 63 macros as `floatData` (after a leading 0) and
 `#10021`, `#10023`, `#10400`, `#10480` as `stringData`. A macro the controller does not answer
 is sent as 0, as before. The macro list is in `lapper_read/argonaut.py`.
 
+- **Per machine:** in Admin > Lapping machines, each machine has an **Argonaut URL** and
+  **Argonaut location ID**. A machine with its own URL sends to it, even when `ARGONAUT_ENABLED`
+  is off, and its location ID (when set) replaces `ARGONAUT_LOCATION_ID`. Sign-in, TLS and timeout
+  stay the collector's. Leave the URL empty to use the collector default. Changing it restarts that
+  machine's worker within `LAPPER_DISCOVER_INTERVAL_S`.
 - Argonaut has its own queue in the machine's checkpoint, so an Argonaut outage never holds up
   recording cycles in MeshForge. Failed posts are retried with a growing delay (up to 5
   minutes) and survive restarts; at most 1000 unsent cycles are kept per machine.
