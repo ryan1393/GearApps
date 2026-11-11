@@ -672,6 +672,29 @@
         />
       </label>
 
+      <div class="gear-form-grid">
+        <label class="gear-field">
+          Summary
+          <select class="gear-select" [(ngModel)]="locationForm.summary_id" name="locationSummary" [disabled]="locationContentsFromBarcode">
+            <option value="">None</option>
+            <option *ngFor="let summary of locationSummaryChoices" [value]="summary.id">
+              {{ summary.number }}<ng-container *ngIf="summary.revision"> rev {{ summary.revision }}</ng-container>
+            </option>
+          </select>
+        </label>
+
+        <label class="gear-field">
+          Part Type
+          <select class="gear-select" [(ngModel)]="locationForm.part_type_id" name="locationPartType" [disabled]="locationContentsFromBarcode">
+            <option value="">None</option>
+            <option *ngFor="let type of locationPartTypeChoices" [value]="type.id">{{ type.code }}</option>
+          </select>
+        </label>
+      </div>
+      <small class="gear-field-help">
+        {{ locationContentsFromBarcode ? 'Set from the Green Shed shelf barcode.' : 'Optional. Printed on the location\'s summary tag, for example 1.955FC-RING.' }}
+      </small>
+
       <label class="gear-field gear-admin-check-field">
         <input type="checkbox" [(ngModel)]="locationForm.enabled" name="locationEnabled" />
         <span>Location is active</span>
@@ -737,6 +760,14 @@
               <span class="gear-admin-record-value">{{ location.description || 'No description' }}</span>
             </div>
             <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Summary</span>
+              <span class="gear-admin-record-value mono">{{ location.summary?.number || '—' }}</span>
+            </div>
+            <div class="gear-admin-record-field">
+              <span class="gear-admin-record-label">Part Type</span>
+              <span class="gear-admin-record-value">{{ location.part_type?.code || '—' }}</span>
+            </div>
+            <div class="gear-admin-record-field">
               <span class="gear-admin-record-label">Trays</span>
               <span class="gear-admin-record-value gear-admin-record-value-strong">{{ location.tray_count }}</span>
             </div>
@@ -753,6 +784,15 @@
               (click)="printTag('LOCATION', location.id, location.serial_number)"
              data-icon="print" title="Print tag">
               {{ printingTagId === location.id ? 'Printing…' : 'Print Tag' }}
+            </button>
+            <button
+              type="button"
+              class="gear-btn gear-btn-secondary"
+              [disabled]="busy || !location.enabled || !locationSummaryTag(location) || printingTagId === location.id + ':summary'"
+              (click)="printTag('LOCATION_SUMMARY', location.id, locationSummaryTag(location) || location.serial_number)"
+              data-icon="print"
+              [title]="locationSummaryTag(location) ? 'Print a tag reading ' + locationSummaryTag(location) : 'Set a Summary and Part Type to print a summary tag'">
+              {{ printingTagId === location.id + ':summary' ? 'Printing…' : 'Print Summary Tag' }}
             </button>
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditLocation(location)" data-icon="edit" title="Edit">Edit</button>
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleLocationEnabled(location)">

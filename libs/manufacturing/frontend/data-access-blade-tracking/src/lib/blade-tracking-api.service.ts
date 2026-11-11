@@ -19,7 +19,8 @@ import {
 } from '@meshforge/manufacturing/shared/util-types';
 
 
-export type AssetTagKind = 'TRAY' | 'CONTAINER' | 'LOCATION';
+/** LOCATION_SUMMARY: a location's summary tag, whose barcode is its Summary and part type. */
+export type AssetTagKind = 'TRAY' | 'CONTAINER' | 'LOCATION' | 'LOCATION_SUMMARY';
 
 export interface AssetTagPrintResult {
   kind: AssetTagKind;

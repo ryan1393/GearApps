@@ -45,10 +45,14 @@ export class ServerFeatAssetTagService {
 
   async printTag(dto: PrintAssetTagDto): Promise<AssetTagPrintResult> {
     const kind = dto.kind;
-    const asset = await this.getAssetById(kind, dto.record_id);
-
     // Database truth wins. The client never supplies the printable serial.
-    const serialNumber = asset.serial_number.trim().toUpperCase();
+    let serialNumber: string;
+    if (kind === 'LOCATION_SUMMARY') {
+      serialNumber = await this.locationSummaryTagValue(dto.record_id);
+    } else {
+      const asset = await this.getAssetById(kind, dto.record_id);
+      serialNumber = asset.serial_number.trim().toUpperCase();
+    }
     this.assertSerialFormat(kind, serialNumber);
 
     const result = await this.sendTag(serialNumber, dto.printer_id);
@@ -106,11 +110,13 @@ export class ServerFeatAssetTagService {
     }
 
     if (
-      kind === 'LOCATION' &&
+      (kind === 'LOCATION' || kind === 'LOCATION_SUMMARY') &&
       !/^[A-Z0-9][A-Z0-9._-]{0,63}$/.test(serialNumber)
     ) {
       throw new BadRequestException(
-        'The stored location serial contains unsupported tag characters.',
+        kind === 'LOCATION_SUMMARY'
+          ? `The Summary and part type ${serialNumber} contain characters a tag cannot print.`
+          : 'The stored location serial contains unsupported tag characters.',
       );
     }
 
@@ -121,8 +127,25 @@ export class ServerFeatAssetTagService {
     }
   }
 
+  /** The summary tag's barcode: the location's Summary and part type, such as 1.955FC-RING. */
+  private async locationSummaryTagValue(recordId: string): Promise<string> {
+    const location = await this.locationRepo.findOne({
+      where: { id: recordId, enabled: true },
+      relations: { summary: true, part_type: true },
+    });
+    if (!location) {
+      throw new NotFoundException('Location record could not be found or is disabled.');
+    }
+    if (!location.summary || !location.part_type) {
+      throw new BadRequestException(
+        `${location.serial_number} has no ${location.summary ? 'part type' : 'Summary'} set. Set its Summary and Part Type in Admin > Locations, then print the summary tag.`,
+      );
+    }
+    return `${location.summary.number}-${location.part_type.code}`.trim().toUpperCase();
+  }
+
   private async getAssetById(
-    kind: AssetTagKind,
+    kind: Exclude<AssetTagKind, 'LOCATION_SUMMARY'>,
     recordId: string,
   ): Promise<TagAsset> {
     const found =

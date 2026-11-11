@@ -8,6 +8,8 @@ import {
 } from '@meshforge/manufacturing/shared/util-types';
 import { LocationDto, LocationDtoOptions } from '../../../dtos/blade-tracking/locations/location.dto';
 import { UserOrmEntity } from '../user.orm-entity';
+import { PartSummaryOrmEntity } from '../base/part-summary.orm-entity';
+import { CutterPartTypeOrmEntity } from '../cutter-tracking/cutter-part-type.orm-entity';
 
 
 @Entity({ name: 'locations' })
@@ -46,6 +48,22 @@ export class LocationOrmEntity
     default: true,
   })
   enabled!: boolean;
+
+  /** The Summary kept at this location. Optional; printed on the location's summary tag. */
+  @Column({ type: String, nullable: true })
+  summary_id!: string | null;
+
+  @ManyToOne(() => PartSummaryOrmEntity, { nullable: true })
+  @JoinColumn({ name: 'summary_id' })
+  summary?: PartSummaryOrmEntity | null;
+
+  /** The part type kept at this location. Optional; printed on the location's summary tag. */
+  @Column({ type: String, nullable: true })
+  part_type_id!: string | null;
+
+  @ManyToOne(() => CutterPartTypeOrmEntity, { nullable: true })
+  @JoinColumn({ name: 'part_type_id' })
+  part_type?: CutterPartTypeOrmEntity | null;
 
   @ManyToOne(() => UserOrmEntity, {
     nullable: true,

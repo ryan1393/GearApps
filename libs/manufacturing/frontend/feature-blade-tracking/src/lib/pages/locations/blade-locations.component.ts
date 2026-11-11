@@ -57,6 +57,8 @@ export class BladeLocationsComponent implements OnInit {
         location.description,
         location.department,
         location.location_type,
+        location.summary?.number,
+        location.part_type?.code,
       ]
         .filter(Boolean)
         .join(' ')
@@ -110,6 +112,11 @@ export class BladeLocationsComponent implements OnInit {
     return this.rows.filter((location) => location.tray_count === 0).length;
   }
 
+
+  /** What the location's summary tag reads, such as 1.955FC-RING. Null until both are set in Admin. */
+  summaryTag(location: InventoryLocationRow): string | null {
+    return location.summary && location.part_type ? `${location.summary.number}-${location.part_type.code}`.toUpperCase() : null;
+  }
 
   printTag(kind: AssetTagKind, recordId: string, serialNumber: string): void {
     if (this.printingTagSerial) return;
