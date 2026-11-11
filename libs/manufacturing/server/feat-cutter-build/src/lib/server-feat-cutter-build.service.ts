@@ -8,6 +8,7 @@ import {
   LocationTrayOrmEntity,
   MachineOrmEntity,
   CutterBladeRequirementOrmEntity,
+  CutterBodyDefinitionOrmEntity,
   CutterBodyOrmEntity,
   CutterBuildBladeOrmEntity,
   CutterBuildOrmEntity,
@@ -26,6 +27,7 @@ import {
 } from '@meshforge/manufacturing/server/data-access';
 import {
   DEPARTMENT_CUTTERGRIND,
+  danaSerialEntryProblem,
   evaluateCutterBodyCompatibility,
   formatBladeSetQuantity,
   parseCuttergrindNumberedShelfTag,
@@ -85,10 +87,14 @@ export class ServerFeatCutterBuildService {
       }
     }
 
+    const definition = await this.findDefinition(dto.definition_id ?? null);
+    this.assertDanaSerialFits(danaSerial, definition);
+
     return repo.save(
       repo.create({
         dana_serial_number: danaSerial,
         mf_serial_number: mfSerial,
+        definition_id: definition?.id ?? null,
         description: dto.description?.trim() || null,
         enabled: true,
         createdBy: userId,
@@ -136,6 +142,10 @@ export class ServerFeatCutterBuildService {
       throw new ConflictException(
         `Dana serial ${danaSerial} is already assigned to another cutter body`,
       );
+    }
+
+    if (normalizeCutterSerial(body.dana_serial_number) !== danaSerial) {
+      this.assertDanaSerialFits(danaSerial, body.definition);
     }
 
     // Updating the same cutter-body row preserves every pre-etch build and
@@ -192,8 +202,21 @@ export class ServerFeatCutterBuildService {
 
   async updateCutterBody(id: Uuid, dto: UpdateCutterBodyDto, userId: Uuid) {
     const repo = this.dataSource.getRepository(CutterBodyOrmEntity);
-    const body = await repo.findOne({ where: { id } });
+    const body = await repo.findOne({ where: { id }, relations: { definition: true } });
     if (!body) throw new NotFoundException('Cutter body not found');
+
+    // A Dana S/N or body type that changes must agree; an unchanged legacy value is left alone.
+    const nextDefinition = dto.definition_id === undefined ? body.definition : await this.findDefinition(dto.definition_id);
+    const nextDana = dto.dana_serial_number === undefined
+      ? normalizeCutterSerial(body.dana_serial_number)
+      : normalizeCutterSerial(dto.dana_serial_number);
+    const danaChanged = nextDana !== normalizeCutterSerial(body.dana_serial_number);
+    const definitionChanged = (nextDefinition?.id ?? null) !== (body.definition_id ?? null);
+    if (danaChanged || definitionChanged) this.assertDanaSerialFits(nextDana, nextDefinition);
+    if (definitionChanged) {
+      body.definition_id = nextDefinition?.id ?? null;
+      body.definition = nextDefinition;
+    }
 
     if (dto.mf_serial_number !== undefined) {
       const value = dto.mf_serial_number ? normalizeCutterSerial(dto.mf_serial_number) : null;
@@ -230,10 +253,32 @@ export class ServerFeatCutterBuildService {
       .getMany();
   }
 
+  /** Body definitions (types), for Admin and the compatibility matrix. */
+  async listCutterBodyDefinitions() {
+    return this.dataSource.getRepository(CutterBodyDefinitionOrmEntity).find({
+      order: { definition_code: 'ASC' },
+    });
+  }
+
+  private async findDefinition(definitionId: string | null): Promise<CutterBodyDefinitionOrmEntity | null> {
+    if (!definitionId) return null;
+    const definition = await this.dataSource.getRepository(CutterBodyDefinitionOrmEntity).findOne({ where: { id: definitionId } });
+    if (!definition) throw new NotFoundException('Cutter body definition not found');
+    return definition;
+  }
+
+  /** A malformed Dana S/N, or one that contradicts the body definition, is refused, never stored and guessed later. */
+  private assertDanaSerialFits(danaSerial: string | null, definition: CutterBodyDefinitionOrmEntity | null): void {
+    const problem = danaSerialEntryProblem(danaSerial, definition);
+    if (problem) throw new UnprocessableEntityException(problem);
+  }
+
   async listCutterBodies() {
+    // The definition is joined so the pick list resolves each body exactly as the build check does.
     return this.dataSource
       .getRepository(CutterBodyOrmEntity)
       .createQueryBuilder('body')
+      .leftJoinAndSelect('body.definition', 'definition')
       .where('body.enabled = :enabled', { enabled: true })
       .andWhere(
         'NOT EXISTS (SELECT 1 FROM cutter_builds open_build WHERE open_build.cutter_body_id = body.id AND open_build.completed_at IS NULL)',

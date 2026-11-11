@@ -12,7 +12,13 @@ import {
 } from '@meshforge/manufacturing/server/data-access';
 import {
   CUTTER_BODY_RULES,
+  CutterBodyDefinitionCodes,
+  CutterBodyMatrixRow,
+  CutterBodyMatrixSummaryInput,
+  buildCutterBodyCompatibilityMatrix,
   cutterBodyRuleByCode,
+  evaluateCutterBodyCompatibility,
+  permittedCutterBodyDefinitions,
   formatBladeSetQuantity,
   isApprovedBladeSetCount,
   summaryBodyRuleState,
@@ -469,7 +475,8 @@ export class ServerFeatCutterConfigService {
         LEFT JOIN public.cutter_summary_body_rules r ON r.summary_id=s.id
        WHERE s."deletedAt" IS NULL
        ORDER BY s.number, s.revision`);
-    return rows.map((row) => toSummaryBodyRuleRow(row));
+    const definitions = await this.readDefinitions();
+    return rows.map((row) => toSummaryBodyRuleRow(row, definitions));
   }
 
   /**
@@ -593,7 +600,17 @@ export class ServerFeatCutterConfigService {
       activeBladeCount === requirement.required_blade_count &&
       tray.blade_count === requirement.required_blade_count;
 
+    const bodyCheck = dto.cutter_body_identifier?.trim()
+      ? await this.checkBodyForRequirement(
+        dto.cutter_body_identifier,
+        requirement.required_blade_count,
+        requirement.part_type?.code ?? null,
+        await readSummaryBodyRule(this.requirementRepo.manager, dto.summary_id),
+      )
+      : null;
+
     const valid =
+      (bodyCheck ? bodyCheck.compatible && bodyCheck.available : true) &&
       grindingComplete &&
       trayStageReady &&
       summaryMatches &&
@@ -620,6 +637,8 @@ export class ServerFeatCutterConfigService {
     }
     if (alreadyAssignedToBuild) reasons.push('Tray is already assigned to an active cutter build');
     if (stillInContainer) reasons.push('Tray is still loaded in a container');
+    if (bodyCheck && !bodyCheck.compatible) reasons.push(`Cutter body does not match this tray requirement: ${bodyCheck.reason}`);
+    if (bodyCheck && bodyCheck.compatible && !bodyCheck.available) reasons.push(bodyCheck.availability_reason ?? 'Cutter body is not available');
 
     return {
       valid,
@@ -639,8 +658,86 @@ export class ServerFeatCutterConfigService {
       already_assigned_to_build: alreadyAssignedToBuild,
       still_in_container: stillInContainer,
       tray_stage_ready: trayStageReady,
+      ...(bodyCheck ? {
+        cutter_body_id: bodyCheck.body_id,
+        body_compatible: bodyCheck.compatible,
+        body_rule: bodyCheck.body_rule,
+        body_reason: bodyCheck.reason,
+        body_available: bodyCheck.available,
+        body_availability_reason: bodyCheck.availability_reason,
+      } : {}),
       reason: valid ? undefined : reasons.join('; '),
     };
+  }
+
+  /**
+   * Type compatibility (the shared rule) and physical availability, kept apart, for the body
+   * an operator scanned. The same evaluation the build itself runs, with the body's definition.
+   */
+  private async checkBodyForRequirement(identifier: string, requiredSets: number, partTypeCode: string | null, summaryRule: string | null) {
+    const serial = identifier.trim().toUpperCase();
+    const rows: Array<BodyWithDefinitionRow & { open_build: boolean }> = await this.requirementRepo.manager.query(
+      `${BODY_WITH_DEFINITION_SQL}
+         AND (UPPER(b.dana_serial_number)=$1 OR UPPER(b.mf_serial_number)=$1)`,
+      [serial],
+    );
+    const danaMatch = rows.find((row) => row.dana_serial_number?.toUpperCase() === serial);
+    const row = danaMatch ?? (rows.length === 1 ? rows[0] : null);
+    if (!row) {
+      return {
+        body_id: null, compatible: false, body_rule: null, available: false, availability_reason: null,
+        reason: rows.length ? `Manufacturer serial ${serial} matches multiple cutter bodies. Enter the Dana serial number.` : `No enabled cutter body has Dana or MF serial ${serial}`,
+      };
+    }
+    const result = evaluateCutterBodyCompatibility(toBodyModel(row), requiredSets, partTypeCode, summaryRule);
+    return {
+      body_id: row.id,
+      compatible: result.compatible,
+      body_rule: result.body_rule?.code ?? null,
+      reason: result.reason,
+      available: !row.open_build,
+      availability_reason: row.open_build ? `Cutter body ${row.dana_serial_number || row.mf_serial_number} already has an open build` : null,
+    };
+  }
+
+  /**
+   * Summary + Part Type → permitted cutter-body definitions, from the configured requirements,
+   * Body Size Rules and enabled definitions. Type compatibility only: whether a particular
+   * physical body is free is answered by availability and the build check.
+   */
+  async listBodyCompatibilityMatrix(summaryId: string | null): Promise<CutterBodyMatrixRow[]> {
+    const [summaries, definitions] = await Promise.all([
+      this.readMatrixSummaries(summaryId),
+      this.readDefinitions(),
+    ]);
+    return buildCutterBodyCompatibilityMatrix(summaries, definitions);
+  }
+
+  private async readDefinitions(): Promise<CutterBodyDefinitionCodes[]> {
+    return this.requirementRepo.manager.query(`
+      SELECT id, definition_code, cutter_head_code, supplier_code, hand_code, blade_family_code, blade_family_name, size_code, enabled
+        FROM public.cutter_body_definitions WHERE "deletedAt" IS NULL ORDER BY definition_code`);
+  }
+
+  private async readMatrixSummaries(summaryId: string | null): Promise<CutterBodyMatrixSummaryInput[]> {
+    const rows: Array<CutterBodyMatrixSummaryInput & { body_rule: string | null; requirements: CutterBodyMatrixSummaryInput['requirements'] | null }> =
+      await this.requirementRepo.manager.query(`
+      SELECT s.id AS summary_id, s.number AS summary_number, s.revision AS summary_revision, s.enabled AS summary_enabled,
+             m.model_number::text AS model_number, s.hos, r.body_rule,
+             (SELECT json_agg(json_build_object('part_type_code', pt.code, 'required_blade_count', q.required_blade_count,
+                       'enabled', q.enabled AND pt.enabled) ORDER BY pt.code)
+                FROM public.cutter_blade_requirements q JOIN public.part_types pt ON pt.id=q.part_type_id
+               WHERE q.summary_id=s.id AND q."deletedAt" IS NULL) AS requirements
+        FROM public.part_summaries s
+        LEFT JOIN public.models m ON m.id=s.model_id
+        LEFT JOIN public.cutter_summary_body_rules r ON r.summary_id=s.id
+       WHERE s."deletedAt" IS NULL AND ($1::uuid IS NULL OR s.id=$1::uuid)
+       ORDER BY s.number, s.revision`, [summaryId]);
+    return rows.map((row) => ({
+      ...row,
+      configured_body_rule: row.body_rule,
+      requirements: (row.requirements ?? []).map((r) => ({ ...r, required_blade_count: Number(r.required_blade_count) })),
+    }));
   }
 
   async disableRequirement(id: Uuid): Promise<void> {
@@ -726,9 +823,12 @@ export function toSummaryBodyRuleRow(row: {
   summary_id: string; summary_number: string; summary_revision: string | null; summary_enabled: boolean;
   model_number: string | null; body_rule: string | null;
   requirements: Array<{ id: string; part_type_code: string; required_blade_count: number; enabled: boolean }> | null;
-}): ISummaryBodyRuleRow {
+}, definitions: readonly CutterBodyDefinitionCodes[] = []): ISummaryBodyRuleRow {
   const requirements = (row.requirements ?? []).map((r) => ({ ...r, required_blade_count: Number(r.required_blade_count) }));
   const state = summaryBodyRuleState(row.body_rule, requirements.map((r) => r.required_blade_count));
+  const usable = state.status === 'CONFIGURED' || state.status === 'DERIVED' ? state.effective_rule : null;
+  const permitted = [...new Set(requirements.flatMap((r) =>
+    permittedCutterBodyDefinitions(usable, r.part_type_code, definitions).map((d) => d.definition_code)))].sort();
   return {
     summary_id: row.summary_id,
     summary_number: row.summary_number,
@@ -742,7 +842,37 @@ export function toSummaryBodyRuleRow(row: {
     required_blade_sets: state.blade_sets,
     required_total_blades: totalBladesForSets(state.blade_sets),
     detail: state.detail,
+    permitted_body_definitions: permitted,
     requirements,
+  };
+}
+
+/** A body with its definition columns, as the build check and the matrix read them. */
+interface BodyWithDefinitionRow {
+  id: string; dana_serial_number: string | null; mf_serial_number: string | null; enabled: boolean;
+  definition_id: string | null; definition_code: string | null; cutter_head_code: string | null; supplier_code: string | null;
+  hand_code: string | null; blade_family_code: string | null; blade_family_name: string | null; size_code: string | null;
+  definition_enabled: boolean | null;
+}
+
+const BODY_WITH_DEFINITION_SQL = `
+  SELECT b.id, b.dana_serial_number, b.mf_serial_number, b.enabled, d.id AS definition_id, d.definition_code,
+         d.cutter_head_code, d.supplier_code, d.hand_code, d.blade_family_code, d.blade_family_name, d.size_code,
+         d.enabled AS definition_enabled,
+         EXISTS (SELECT 1 FROM public.cutter_builds ob WHERE ob.cutter_body_id=b.id AND ob.completed_at IS NULL) AS open_build
+    FROM public.cutter_bodies b
+    LEFT JOIN public.cutter_body_definitions d ON d.id=b.definition_id
+   WHERE b."deletedAt" IS NULL AND b.enabled=true`;
+
+function toBodyModel(row: BodyWithDefinitionRow) {
+  return {
+    dana_serial_number: row.dana_serial_number,
+    mf_serial_number: row.mf_serial_number,
+    definition: row.definition_id ? {
+      id: row.definition_id, definition_code: row.definition_code, cutter_head_code: row.cutter_head_code,
+      supplier_code: row.supplier_code, hand_code: row.hand_code, blade_family_code: row.blade_family_code,
+      blade_family_name: row.blade_family_name, size_code: row.size_code, enabled: row.definition_enabled,
+    } : null,
   };
 }
 

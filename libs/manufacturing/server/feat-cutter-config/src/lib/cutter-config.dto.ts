@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, Min } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
 
 export class CreateCutterBladeRequirementDto {
   @IsUUID() summary_id!: string;
@@ -20,6 +20,13 @@ export class ValidateCutterTrayDto {
   @IsUUID() summary_id!: string;
   @IsUUID() part_type_id!: string;
   @IsString() tray_serial_number!: string;
+  /** Optional Dana or MF serial of the body the tray is for; the answer then includes body compatibility. */
+  @ApiPropertyOptional({ description: 'Dana S/N (or MF S/N of an unetched body). When given, the tray is valid only for a compatible, free body.' })
+  @IsOptional() @IsString() @MaxLength(100) cutter_body_identifier?: string;
+}
+
+export class CutterBodyCompatibilityQueryDto {
+  @ApiPropertyOptional({ format: 'uuid' }) @IsOptional() @IsUUID() summary_id?: string;
 }
 
 export class SetSummaryBodyRuleDto {

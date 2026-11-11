@@ -34,7 +34,7 @@ import {
   AdminApiService,
   AdminLocationRow,
   AdminUser,
-  CutterBodyRow,
+  CutterBodyDefinitionRow, CutterBodyRow,
   DepartmentRow,
   MachineRow,
   ModelRow,
@@ -199,7 +199,9 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     mf_serial_number: '',
     dana_serial_number: '',
     description: '',
+    definition_id: '',
   };
+  cutterBodyDefinitions: CutterBodyDefinitionRow[] = [];
 
   ngOnInit(): void {
     // ?tab= deep links, e.g. the old Lapping master-data pages redirect to /admin?tab=gearsets.
@@ -359,6 +361,15 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       },
       error: (error: HttpErrorResponse) => { this.busy = false; this.toast.error(this.errorMessage(error), 'Save failed'); this.cdr.markForCheck(); },
     });
+  }
+
+  /** Body definitions this Summary's blades may be loaded into, or why none are permitted yet. */
+  summaryPermittedBodiesText(summary: PartSummaryRow): string {
+    const row = this.summaryBodyRule(summary);
+    if (!row) return '—';
+    const codes = row.permitted_body_definitions ?? [];
+    if (codes.length) return codes.join(', ') + (row.effective_body_rule?.startsWith('105') ? ' (8th Dana S/N character decides 105 Standard / Special)' : '');
+    return row.effective_body_rule ? 'No enabled body definition of this size' : 'None until the Body Size Rule is resolved';
   }
 
   /** Read-only decode of a cutter body's Dana S/N (never its MF serial). */
@@ -914,6 +925,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       mf_serial_number: this.cutterBodyForm.mf_serial_number.trim(),
       dana_serial_number: this.cutterBodyForm.dana_serial_number.trim() || null,
       description: this.cutterBodyForm.description.trim() || null,
+      definition_id: this.cutterBodyForm.definition_id || null,
     };
     const request = this.editingCutterBodyId
       ? this.api.updateCutterBody(this.editingCutterBodyId, payload)
@@ -925,7 +937,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
 
   beginEditCutterBody(body: CutterBodyRow): void {
     this.editingCutterBodyId = body.id;
-    this.cutterBodyForm = { mf_serial_number: body.mf_serial_number || '', dana_serial_number: body.dana_serial_number || '', description: body.description || '' };
+    this.cutterBodyForm = { mf_serial_number: body.mf_serial_number || '', dana_serial_number: body.dana_serial_number || '', description: body.description || '', definition_id: body.definition_id || body.definition?.id || '' };
     this.clearNotice(); this.cdr.markForCheck();
   }
 
@@ -1150,6 +1162,10 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   }
 
   private loadCutterBodies(): void {
+    this.api.listCutterBodyDefinitions().subscribe({
+      next: (rows) => { this.cutterBodyDefinitions = rows ?? []; this.cdr.markForCheck(); },
+      error: (error) => this.handleLoadError(error),
+    });
     this.api.listCutterBodies().subscribe({
         next: (rows) => {
           this.cutterBodies = rows ?? [];
@@ -1176,7 +1192,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
 
   private resetCutterBodyForm(): void {
     this.editingCutterBodyId = null;
-    this.cutterBodyForm = { mf_serial_number: '', dana_serial_number: '', description: '' };
+    this.cutterBodyForm = { mf_serial_number: '', dana_serial_number: '', description: '', definition_id: '' };
   }
 
   private resetLocationForm(): void {

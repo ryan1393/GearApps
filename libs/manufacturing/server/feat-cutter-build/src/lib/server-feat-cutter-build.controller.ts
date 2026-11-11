@@ -83,6 +83,12 @@ export class ServerFeatCutterBuildController {
     return this.service.getCutterBodyBySerial(serialNumber);
   }
 
+  @Get('cutter-body-definitions')
+  @Auth([RoleType.ADMIN, RoleType.USER])
+  listCutterBodyDefinitions() {
+    return this.service.listCutterBodyDefinitions();
+  }
+
 
 
   @Get('machines')

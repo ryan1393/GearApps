@@ -123,8 +123,11 @@ export interface CutterBodyRow {
   dana_serial_number?: string | null;
   description?: string | null;
   enabled: boolean;
+  definition_id?: string | null;
   definition?: {
+    id?: string;
     definition_code?: string | null;
+    enabled?: boolean;
     cutter_head_code?: string | null;
     supplier_code?: string | null;
     supplier_name?: string | null;
@@ -134,6 +137,17 @@ export interface CutterBodyRow {
     blade_family_name?: string | null;
     size_code?: string | null;
   } | null;
+}
+
+/** A cutter body type (definition) an administrator can link a body to. */
+export interface CutterBodyDefinitionRow {
+  id: string;
+  definition_code: string;
+  hand_name: string;
+  blade_family_name: string;
+  size_code: string;
+  size_description: string | null;
+  enabled: boolean;
 }
 
 export interface RollMasterRow {
@@ -435,10 +449,15 @@ export class AdminApiService {
     return this.http.get<CutterBodyRow[]>('/api/v1/cutter-builder/cutter-bodies/admin');
   }
 
+  listCutterBodyDefinitions() {
+    return this.http.get<CutterBodyDefinitionRow[]>('/api/v1/cutter-builder/cutter-body-definitions');
+  }
+
   createCutterBody(input: {
     mf_serial_number: string;
     dana_serial_number: string | null;
     description: string | null;
+    definition_id?: string | null;
   }) {
     return this.http.post<CutterBodyRow>(
       '/api/v1/cutter-builder/cutter-bodies',
@@ -451,6 +470,7 @@ export class AdminApiService {
     mf_serial_number: string | null;
     dana_serial_number: string | null;
     description: string | null;
+    definition_id: string | null;
     enabled: boolean;
   }>) {
     return this.http.patch<CutterBodyRow>(`/api/v1/cutter-builder/cutter-bodies/${encodeURIComponent(id)}`, input);
