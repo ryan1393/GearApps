@@ -483,14 +483,15 @@ After the refresh completes, start the apps normally with `commands\START-MESHFO
 
 To start the floor over without reloading from SQL Server, close the running MeshForge API/server windows and run `commands\CLEAR-OPERATIONAL-DATA.cmd` from the project root. It first lists what will be emptied and kept, then requires the exact phrase `CLEAR DATA`.
 
-- **Emptied:** blades, trays, containers and the ground blade sets packed in them, **every location** (the `COATER-STAGING` location is recreated when the API next starts), cutter builds with their events, checks, teardowns and machine runs, coater shipments and RPA requests, Greenshed shift counts, DSF run state and the Cancel Last journal.
+- **Emptied:** blades, trays, containers and the ground blade sets packed in them, cutter builds with their events, checks, teardowns and machine runs, coater shipments and RPA requests, Greenshed shift counts, DSF run state and the Cancel Last journal.
+- **Locations:** shelf/layer/bin locations (the Cuttergrind shelf bins such as `CGDR-A1A`, `CGFP-B3C` or `CGRR-A1A` that **Admin > Locations > Bulk shelf locations** makes) and `COATER-STAGING` are kept, with nothing on them. **Every other location is deleted**, including older numbered (`CGDR-001`) and Summary (`GSR-1010`, `CGDR-1010`) shelf tags.
 - **Kept:** users, departments, models, parts, part summaries, blade requirements, cutter body definitions, cutter bodies, roll masters, gearsets, machines, lookup lists (part types, tray stages, statuses, event types, pull reasons, check results), server settings, label printers, Coater RPA setup, DSF machine mappings and all Lapper data.
 
-Only the listed tables are truncated, in one transaction and without `CASCADE`: if a kept table still pointed at an emptied one, PostgreSQL refuses and nothing is deleted. The command also stops, deleting nothing, if the API still has the tables in use. Row counts from just before the clear are written to `tools/manufacturing/data-import/work/pre-clear-operational-data-manifest.json` (counts only, not a backup).
+Only the listed tables are truncated, in one transaction and without `CASCADE`, and then the other locations are deleted: if a kept table still pointed at an emptied table or a deleted location, PostgreSQL refuses and nothing is deleted. The command also stops, deleting nothing, if the API still has the tables in use. Row counts from just before the clear are written to `tools/manufacturing/data-import/work/pre-clear-operational-data-manifest.json` (counts only, not a backup).
 
 Preview only: `npm run clear:operational-data`. Apply: `npm run clear:operational-data:apply`.
 
-Afterwards make the shelves again in **Admin > Locations > Bulk shelf locations**, and trays and containers in **Admin > Launch Setup**.
+Afterwards make trays and containers again in **Admin > Launch Setup**, and any other locations you still need in **Admin > Locations**.
 
 ## Configure the IPL label printer
 

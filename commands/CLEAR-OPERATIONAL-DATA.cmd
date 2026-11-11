@@ -5,13 +5,15 @@ echo ============================================================
 echo  MESHFORGE - CLEAR OPERATIONAL DATA (KEEP USERS + BASE DATA)
 echo ============================================================
 echo.
-echo This EMPTIES blades, trays, containers, ALL locations, cutter builds,
-echo cutter events and history, coater shipments and Greenshed counts in the
-echo PostgreSQL database named in .env.
+echo This EMPTIES blades, trays, containers, cutter builds, cutter events and
+echo history, coater shipments and Greenshed counts in the PostgreSQL
+echo database named in .env. It DELETES every location except the
+echo shelf/layer/bin bins (CGDR-A1A etc.) and COATER-STAGING.
 echo.
 echo KEPT: users, departments, models, parts, part summaries, blade
 echo requirements, cutter body definitions, cutter bodies, roll masters,
-echo gearsets, machines, settings, label printers and all Lapper data.
+echo gearsets, machines, settings, label printers, shelf/layer/bin
+echo locations (now empty) and all Lapper data.
 echo.
 node tools\manufacturing\data-import\clear-operational-data.mjs
 if errorlevel 1 (
@@ -41,6 +43,6 @@ if errorlevel 1 (
 )
 
 echo.
-echo Operational data cleared. Start MeshForge, then make shelves in
-echo Admin ^> Locations ^> Bulk shelf locations.
+echo Operational data cleared. Start MeshForge, then make trays and
+echo containers in Admin ^> Launch Setup.
 pause

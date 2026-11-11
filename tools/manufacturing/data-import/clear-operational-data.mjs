@@ -1,16 +1,18 @@
 // Clears operational data from the MeshForge PostgreSQL database in .env and keeps
 // users and base data. Runs as a preview unless --apply is given.
 //
-// Emptied: blades, trays, containers and the blade sets packed in them, every location,
-// cutter builds and their events, checks, teardowns and machine runs, coater shipments,
-// Greenshed/DSF counts and the Cancel Last journal. The COATER-STAGING location is
-// recreated by the API the next time it starts.
+// Emptied: blades, trays, containers and the blade sets packed in them, cutter builds and
+// their events, checks, teardowns and machine runs, coater shipments, Greenshed/DSF counts
+// and the Cancel Last journal.
+// Locations: shelf/layer/bin locations (CGDR-A1A and the other Cuttergrind shelf bins) and
+// COATER-STAGING are kept, empty; every other location is deleted.
 // Kept: users, departments, models, parts, part summaries, blade requirements, cutter
 // body definitions, cutter bodies, roll masters, gearsets, machines, lookup lists,
 // server settings, label printers, Coater RPA setup, DSF machine mappings and all Lapper data.
 //
 // Only the tables named in EMPTY are truncated, without CASCADE: if a kept table still
-// referenced one of them, PostgreSQL refuses and nothing is deleted.
+// referenced one of them, PostgreSQL refuses and nothing is deleted. Locations are then
+// deleted row by row, so a kept table still pointing at one also stops the run.
 import fs from 'node:fs';
 import path from 'node:path';
 import pg from 'pg';
@@ -28,7 +30,7 @@ export const EMPTY = [
   // Ground blade sets packed into coater containers (they point at containers, blades,
   // trays and locations, so they must be emptied with them)
   'container_sets', 'container_set_blades',
-  'locations', 'cutter_body_shelf_placements',
+  'cutter_body_shelf_placements',
   // Cutter builds and everything that happened to them
   'cutter_builds', 'cutter_build_blades', 'cutter_build_trays', 'cutter_build_locations',
   'cutter_events', 'cutter_cmm_checks', 'cutter_frequency_checks',
@@ -55,6 +57,22 @@ export const KEEP = [
   'dana_dsf_machine_mapping_v1', 'dana_dsf_machine_mapping_audit_v1',
   'dana_greenshed_shift_tracking',
 ];
+
+/** Partly cleared: only the locations that are not shelf/layer/bin bins are deleted. */
+export const LOCATIONS_TABLE = 'locations';
+
+/**
+ * Shelf/layer/bin tags made by Admin > Locations > Bulk shelf locations: prefix, shelf letter,
+ * layer 1-9 and bin letter (CGDR-A1A). Must match CUTTERGRIND_BIN_SHELF_PATTERN and
+ * CUTTERGRIND_ROUGH_SHELF_PATTERN in libs/manufacturing/shared/util-constants (the contract
+ * test checks this). Also valid as a PostgreSQL regular expression.
+ */
+export const KEPT_SHELF_LOCATION_PATTERN = '^(CGDR|CGDP|CGFR|CGFP|CGRR|CGRP)-[A-Z][1-9][A-Z]$';
+/** The coater staging location the API seeds; kept so it does not have to be recreated. */
+export const KEPT_LOCATION_SERIALS = ['COATER-STAGING'];
+
+const KEPT_LOCATION_WHERE = 'upper(serial_number) ~ $1 OR upper(serial_number) = ANY($2::text[])';
+const keptLocationParams = [KEPT_SHELF_LOCATION_PATTERN, KEPT_LOCATION_SERIALS];
 
 export const CONFIRM_FLAG = '--yes-delete-operational-data';
 
@@ -85,6 +103,16 @@ async function countRows(client, tables) {
   return counts;
 }
 
+async function countLocations(client) {
+  const { rows } = await client.query(
+    `SELECT COUNT(*) FILTER (WHERE ${KEPT_LOCATION_WHERE})::bigint AS kept,
+            COUNT(*) FILTER (WHERE NOT (${KEPT_LOCATION_WHERE}))::bigint AS deleted
+       FROM public.locations`,
+    keptLocationParams,
+  );
+  return { kept: Number(rows[0]?.kept ?? 0), deleted: Number(rows[0]?.deleted ?? 0) };
+}
+
 function printCounts(title, counts) {
   console.log(title);
   const width = Math.max(...[...counts.keys()].map((name) => name.length), 10);
@@ -113,7 +141,8 @@ async function main() {
     const present = new Set(rows.map((row) => row.tablename));
     const empty = EMPTY.filter((table) => present.has(table));
     const keep = KEEP.filter((table) => present.has(table));
-    const other = [...present].filter((table) => !EMPTY.includes(table) && !KEEP.includes(table)).sort();
+    const other = [...present]
+      .filter((table) => !EMPTY.includes(table) && !KEEP.includes(table) && table !== LOCATIONS_TABLE).sort();
     for (const required of ['users', 'locations', 'trays']) {
       if (!present.has(required)) throw new Error(`Table ${required} is missing: this is not a MeshForge database.`);
     }
@@ -121,7 +150,11 @@ async function main() {
     console.log(`[TARGET] ${env.DATABASE_HOST}:${env.DATABASE_PORT}/${env.DATABASE_NAME}`);
     const before = await countRows(client, empty);
     const keptBefore = await countRows(client, keep);
+    const locationsBefore = await countLocations(client);
     printCounts('\nWill be EMPTIED (rows now):', before);
+    console.log('\nLocations:');
+    console.log(`  deleted: ${locationsBefore.deleted}`);
+    console.log(`  kept, emptied (shelf/layer/bin bins and COATER-STAGING): ${locationsBefore.kept}`);
     printCounts('\nWill be KEPT (rows now):', keptBefore);
     if (other.length) console.log(`\nNot touched (not on either list): ${other.join(', ')}`);
     console.log('Not touched: every table in the lapper schema.');
@@ -146,6 +179,7 @@ async function main() {
       database_host: env.DATABASE_HOST,
       database_name: env.DATABASE_NAME,
       emptied: Object.fromEntries(before),
+      locations: locationsBefore,
       kept: Object.fromEntries(keptBefore),
       note: 'Counts only. The cleared rows were not backed up by this command.',
     }, null, 2) + '\n');
@@ -158,6 +192,11 @@ async function main() {
       await client.query(`TRUNCATE TABLE ${empty.map((table) => `public.${quoteIdent(table)}`).join(', ')} RESTART IDENTITY`);
       const left = [...(await countRows(client, empty))].filter(([, count]) => count !== 0);
       if (left.length) throw new Error(`Rows remain in ${left.map(([table]) => table).join(', ')}.`);
+      await client.query(`DELETE FROM public.locations WHERE NOT (${KEPT_LOCATION_WHERE})`, keptLocationParams);
+      const locationsAfter = await countLocations(client);
+      if (locationsAfter.deleted !== 0 || locationsAfter.kept !== locationsBefore.kept) {
+        throw new Error(`Locations did not clear as expected: ${JSON.stringify(locationsAfter)}.`);
+      }
       const changed = [...(await countRows(client, keep))].filter(([table, count]) => count !== keptBefore.get(table));
       if (changed.length) throw new Error(`Kept tables changed: ${changed.map(([table]) => table).join(', ')}.`);
       await client.query('COMMIT');
@@ -165,11 +204,13 @@ async function main() {
       await client.query('ROLLBACK');
       if (error?.code === '55P03') throw new Error('Another connection is using these tables. Stop the MeshForge API and try again. Nothing was deleted.');
       if (error?.code === '0A000') throw new Error(`A kept table still points at a table being emptied, so nothing was deleted: ${error.message}. ${error.detail ?? ''}`.trim());
+      if (error?.code === '23503') throw new Error(`A kept table still points at a location being deleted, so nothing was deleted: ${error.message}. ${error.detail ?? ''}`.trim());
       throw error;
     }
 
-    console.log(`[PASS] Emptied ${empty.length} tables. Users and base data kept: ${keep.length} tables unchanged.`);
-    console.log('Next: start MeshForge and create shelves in Admin > Locations > Bulk shelf locations.');
+    console.log(`[PASS] Emptied ${empty.length} tables. Deleted ${locationsBefore.deleted} locations; kept ${locationsBefore.kept} shelf/layer/bin and staging locations.`);
+    console.log(`Users and base data kept: ${keep.length} tables unchanged.`);
+    console.log('Next: start MeshForge, then make trays and containers in Admin > Launch Setup.');
   } finally {
     await client.end();
   }
