@@ -22,10 +22,12 @@ import {
   TrayOrmEntity,
   TrayStageOrmEntity,
   UserOrmEntity,
+  readSummaryBodyRule,
 } from '@meshforge/manufacturing/server/data-access';
 import {
   DEPARTMENT_CUTTERGRIND,
-  cutterBodyMatchesRequirement,
+  evaluateCutterBodyCompatibility,
+  formatBladeSetQuantity,
   parseCuttergrindNumberedShelfTag,
 } from '@meshforge/manufacturing/shared/util-constants';
 import {
@@ -406,8 +408,16 @@ export class ServerFeatCutterBuildService {
             'No blade requirement exists for this Summary and Part Type',
           );
         }
-        if (!cutterBodyMatchesRequirement(body, requirement.required_blade_count, partType.code)) {
-          throw new UnprocessableEntityException('Cutter body capacity or blade family does not match this tray requirement');
+        const compatibility = evaluateCutterBodyCompatibility(
+          body,
+          requirement.required_blade_count,
+          partType.code,
+          await readSummaryBodyRule(manager, summaryId),
+        );
+        if (!compatibility.compatible) {
+          throw new UnprocessableEntityException(
+            `Cutter body does not match this tray requirement: ${compatibility.reason}`,
+          );
         }
         if (!readyStatus || !buildEventType || !readyForCutterStage) {
           throw new UnprocessableEntityException(
@@ -454,7 +464,7 @@ export class ServerFeatCutterBuildService {
           tray.blade_count !== requirement.required_blade_count
         ) {
           throw new UnprocessableEntityException(
-            `Tray ${traySerial} must contain exactly ${requirement.required_blade_count} blades`,
+            `Tray ${traySerial} must contain exactly ${formatBladeSetQuantity(requirement.required_blade_count)}`,
           );
         }
 

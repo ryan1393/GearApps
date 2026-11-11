@@ -6,7 +6,8 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { STARTUP_SCHEMA_LOCK_SQL } from '@meshforge/manufacturing/shared/util-constants';
 import { CUTTER_BODY_SHELF_SCHEMA } from './cutter-body-shelf.schema';
-import { applySharedDatabaseIntegrity } from '@meshforge/shared/database';
+import { applySharedDatabaseIntegrity, runDatabaseMigration } from '@meshforge/shared/database';
+import { CUTTER_SUMMARY_BODY_RULE_MIGRATION } from './cutter-summary-body-rule.schema';
 
 /**
  * Additive schema evolution for MeshForge master-data features that must work
@@ -63,6 +64,7 @@ export class GearMasterDataBootstrap implements OnModuleInit {
 
       `);
       await manager.query(CUTTER_BODY_SHELF_SCHEMA);
+      await runDatabaseMigration(manager, CUTTER_SUMMARY_BODY_RULE_MIGRATION.version, CUTTER_SUMMARY_BODY_RULE_MIGRATION.sql);
       await manager.query(COATER_SHIPMENT_SCHEMA);
       await manager.query(CONTAINER_SET_SCHEMA);
       await manager.query(COATER_STAGING_SEED.sql, COATER_STAGING_SEED.params());

@@ -169,8 +169,10 @@ export interface CutterDashboardData {
     shelf_description: string | null;
     summary_number: string | null;
     part_type_code: string | null;
+    /** Matched inner/outer blade sets. */
     blade_count: number;
     required_blade_count: number | null;
+    summary_body_rule?: string | null;
   }>;
 }
 
@@ -192,7 +194,10 @@ export interface CutterTrayValidation {
   tray_id: string;
   tray_serial_number: string;
   grinding_complete: boolean;
+  /** Matched inner/outer blade sets. */
   required_blade_count: number;
+  required_total_blades?: number | null;
+  summary_body_rule?: string | null;
   tray_declared_blade_count: number;
   active_blade_count: number;
   requirement_id: string;

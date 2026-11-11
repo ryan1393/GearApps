@@ -181,10 +181,12 @@ for (const key of requirementSummaryKeys) {
   );
 }
 console.log('[PASS] Every blade-requirement Summary is either present once in the SQL regression snapshot or explicitly supplemental.');
+// Master scope comes from summaries.json + summary_additions.json (checked above). A blade
+// requirement row must never create a Summary; one outside master data is skipped and reported.
 assert(
-  baseImporter.includes('bladeRequirementSummaryKeys') &&
-    baseImporter.includes('for (const { number, revision, explicit } of bladeRequirementSummaryKeys.values())'),
-  'Base importer does not guarantee every blade-requirement summary exists before requirement import',
+  !baseImporter.includes('bladeRequirementSummaryKeys') &&
+    baseImporter.includes("reason: 'Summary is not in master data; requirement not created'"),
+  'Base importer must not create Summaries from blade-requirement rows',
 );
 
 for (const script of [
@@ -198,7 +200,7 @@ for (const script of [
 
 const manifest = json('tools/manufacturing/api-route-manifest.json');
 const routes = Array.isArray(manifest) ? manifest : manifest.routes;
-assert(routes.length === 114, `Expected 114 API routes; found ${routes.length}`);
+assert(routes.length === 117, `Expected 117 API routes; found ${routes.length}`);
 
 console.log('[PASS] Fresh all-data import contract validated.');
 console.log({
@@ -211,7 +213,7 @@ console.log({
 
 const routeProbe = read('tools/manufacturing/test-all-api-routes.ps1');
 assert(
-  routeProbe.includes('Count -ne 114') &&
+  routeProbe.includes('Count -ne 117') &&
     !routeProbe.includes('Count -ne 103'),
-  'Runtime API route probe is not synchronized to the 114-route manifest',
+  'Runtime API route probe is not synchronized to the 117-route manifest',
 );

@@ -11,6 +11,25 @@
         "cwd": "libs/manufacturing/shared/util-constants"
       },
       "cache": true
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/manufacturing/shared/util-constants"
+      ],
+      "options": {
+        "command": "jest --config libs/manufacturing/shared/util-constants/jest.config.cts --runInBand --passWithNoTests",
+        "cwd": ".",
+        "env": {
+          "NODE_ENV": "test",
+          "NX_DAEMON": "false"
+        }
+      },
+      "configurations": {
+        "ci": {
+          "command": "jest --config libs/manufacturing/shared/util-constants/jest.config.cts --runInBand --passWithNoTests --ci --coverage"
+        }
+      }
     }
   },
   "tags": [

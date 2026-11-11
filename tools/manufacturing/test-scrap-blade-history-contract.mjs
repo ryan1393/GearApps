@@ -127,11 +127,11 @@ for (const marker of [
   if (!sharedStyles.includes(marker)) throw new Error(`Shared MeshForge stylesheet missing ${marker}`);
 }
 
-if (manifest.length !== 114) {
-  throw new Error(`Scrap/history screen should reuse existing blade routes; expected 114 API routes, found ${manifest.length}`);
+if (manifest.length !== 117) {
+  throw new Error(`Scrap/history screen should reuse existing blade routes; expected 117 API routes, found ${manifest.length}`);
 }
 
 const historyRoute = manifest.find((route) => route.method === 'GET' && route.path === '/api/v1/blades/:id/history');
 if (!historyRoute) throw new Error('Existing GET /api/v1/blades/:id/history route must remain available.');
 
-console.log('[PASS] Scrap / Discarded Blades contract passed: SCRAPPED filtering/search, readable scrap details, full lifecycle history drill-in, shared styling, and the current 114-route API contract are preserved.');
+console.log('[PASS] Scrap / Discarded Blades contract passed: SCRAPPED filtering/search, readable scrap details, full lifecycle history drill-in, shared styling, and the current 117-route API contract are preserved.');

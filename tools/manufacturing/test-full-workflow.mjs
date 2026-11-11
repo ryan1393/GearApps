@@ -28,6 +28,9 @@ async function api(method, path, body, label, expect = [200, 201]) {
   return j;
 }
 const s = fx.shelves, bt = fx.blade_tracking;
+// The fixture uses whichever requirement the database has; set counts are matched inner/outer sets.
+const setCount = Number(fx.required_blade_count);
+if (!Number.isInteger(setCount) || setCount <= 0) throw new Error('Fixture did not report its required blade-set count');
 const tray = await api('GET', `/trays/scan/${enc(fx.source_tray_serial_number)}`, null, 'scan source tray');
 const container = await api('GET', `/containers/scan/${enc(bt.container_serial_number)}`, null, 'scan container');
 await api('POST', `/trays/${tray.id}/start-grinding`, {}, 'reject missing grinder', [422]);
@@ -75,19 +78,19 @@ if (!packed.tray_emptied || packed.location_serial_number !== 'COATER-STAGING' |
 let emptied = await api('GET', `/trays/scan/${enc(fx.teardown_tray_serial_number)}`, null, 'read emptied tray');
 if (emptied.blade_count !== 0 || emptied.current_stage?.code !== 'EMPTY') throw new Error('Tray was not emptied after its set went into the container');
 let box = await api('GET', `/containers/scan/${enc(bt.container_serial_number)}`, null, 'read container set');
-if (box.blade_set?.blades?.length !== 13 || box.blade_set.location_serial_number !== 'COATER-STAGING' || box.workflow_eligibility.load) throw new Error('Container does not hold exactly one staged set: ' + JSON.stringify(box.blade_set));
+if (box.blade_set?.blades?.length !== setCount || box.blade_set.location_serial_number !== 'COATER-STAGING' || box.workflow_eligibility.load) throw new Error('Container does not hold exactly one staged set: ' + JSON.stringify(box.blade_set));
 const undo = await api('GET', `/workflow-cancellation/blade-tracking?identifier=${enc(fx.teardown_tray_serial_number)}`, null, 'read cancel last for packing');
 if (!undo.latest?.can_cancel) throw new Error('Grinding into a container cannot be canceled: ' + JSON.stringify(undo.latest));
 await api('POST', '/workflow-cancellation/blade-tracking', { identifier: fx.teardown_tray_serial_number, operation_id: undo.latest.id, reason: 'workflow test undo' }, 'cancel grinding into container');
 box = await api('GET', `/containers/scan/${enc(bt.container_serial_number)}`, null, 'read container after undo');
 const restored = await api('GET', `/trays/scan/${enc(fx.teardown_tray_serial_number)}`, null, 'read tray after undo');
-if (box.blade_set || restored.blade_count !== 13 || restored.current_stage?.code !== 'GRINDING') throw new Error('Cancel Last did not restore the tray and empty the container');
+if (box.blade_set || restored.blade_count !== setCount || restored.current_stage?.code !== 'GRINDING') throw new Error('Cancel Last did not restore the tray and empty the container');
 packed = await api('POST', `/trays/${td.id}/complete-grinding`, { ...grind, container_serial_number: bt.container_serial_number }, 'complete grinding into coater container again');
 let sh2 = await api('POST', '/coater-shipments', { request_id: crypto.randomUUID(), destination: 'E2E Coater', notes: 'node-workflow set' }, 'create set shipment');
 const sid2 = sh2.id ?? sh2.shipment?.id;
 sh2 = await api('POST', `/coater-shipments/${sid2}/containers`, { revision: rev(sh2), serial: bt.container_serial_number }, 'add set container to shipment');
 const setRow = (sh2.manifest ?? sh2.shipment?.manifest)?.containers?.[0]?.trays?.[0];
-if (setRow?.kind !== 'SET' || setRow.count !== 13 || setRow.rough_shelf !== 'COATER-STAGING') throw new Error('Shipment manifest is missing the container set: ' + JSON.stringify(setRow));
+if (setRow?.kind !== 'SET' || setRow.count !== setCount || setRow.rough_shelf !== 'COATER-STAGING') throw new Error('Shipment manifest is missing the container set: ' + JSON.stringify(setRow));
 sh2 = await api('POST', `/coater-shipments/${sid2}/review`, { revision: rev(sh2) }, 'review set shipment');
 sh2 = await api('POST', `/coater-shipments/${sid2}/print`, { revision: rev(sh2) }, 'print set shipment');
 sh2 = await api('POST', `/coater-shipments/${sid2}/dispatch`, { revision: rev(sh2), printed_and_checked: true }, 'dispatch set shipment');
@@ -95,7 +98,7 @@ const src = await api('GET', `/trays/scan/${enc(fx.source_tray_serial_number)}`,
 await api('POST', `/containerTrays/container/${container.id}/tray/${src.id}/unload`, { shelf_location_serial_number: s.rough }, 'reject rough shelf for returned set', [422]);
 await api('POST', `/containerTrays/container/${container.id}/tray/${src.id}/unload`, { shelf_location_serial_number: s.finished }, 'receive set into empty tray on finished shelf');
 const ready = await api('GET', `/trays/scan/${enc(fx.source_tray_serial_number)}`, null, 'read tray holding returned set');
-if (ready.blade_count !== 13 || ready.current_stage?.code !== 'READY_FOR_CUTTER') throw new Error('Returned set is not ready for a cutter build in its new tray');
+if (ready.blade_count !== setCount || ready.current_stage?.code !== 'READY_FOR_CUTTER') throw new Error('Returned set is not ready for a cutter build in its new tray');
 box = await api('GET', `/containers/scan/${enc(bt.container_serial_number)}`, null, 'read container after receiving');
 if (box.blade_set || !box.workflow_eligibility.load) throw new Error('Container is not empty and reusable after receiving its set');
 console.log(`[PASS] END-TO-END WORKFLOW COMPLETE (${n} API calls) build=${bn}`);

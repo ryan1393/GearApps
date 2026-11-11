@@ -465,6 +465,11 @@ async function ensureE2EGrinder(client, machineNumber = 'E2E-GRINDER') {
   return { id, machine_number: machineNumber, created: true };
 }
 
+// Blade capacity comes only from the Dana S/N (characters 5-7 = body size, 8th = special
+// 105 marker), never from the MF serial, so the fixture body is etched with a valid one.
+// 'Z' in the 8th position keeps it a standard body; the random tail keeps it unique.
+const e2eDanaSerial = (size) => `CGRT${size}Z${crypto.randomUUID().replace(/-/g, '').slice(0, 6).toUpperCase()}`;
+
 async function ensureE2ECutterBody(client, count) {
   const size = new Map([[11, '064'], [13, '076'], [17, '088'], [19, '105']]).get(count);
   if (!size) throw new Error(`Workflow fixture requires a supported cutter capacity, got ${count}`);
@@ -486,22 +491,25 @@ async function ensureE2ECutterBody(client, count) {
     [`${prefix}%`],
   );
   if (existing) {
-    return {
-      id: existing.id,
-      serial_number: existing.dana_serial_number || existing.mf_serial_number,
-      created: false,
-    };
+    let dana = existing.dana_serial_number;
+    if (!dana || !dana.startsWith(`CGRT${size}Z`)) {
+      // Older fixture bodies were MF-only; etch them so the Dana S/N decides capacity.
+      dana = e2eDanaSerial(size);
+      await client.query('update cutter_bodies set dana_serial_number=$2, "updatedAt"=now() where id=$1', [existing.id, dana]);
+    }
+    return { id: existing.id, serial_number: dana, created: false };
   }
 
   const id = crypto.randomUUID();
   const mf = `${prefix}${serialStamp()}-${crypto.randomUUID().slice(0,6).toUpperCase()}`;
+  const dana = e2eDanaSerial(size);
   await client.query(
     `insert into cutter_bodies
       (id, "createdAt", "updatedAt", dana_serial_number, mf_serial_number, definition_id, description, enabled)
-     values ($1, now(), now(), null, $2, null, 'Dedicated automated MeshForge workflow test cutter', true)`,
-    [id, mf],
+     values ($1, now(), now(), $2, $3, null, 'Dedicated automated MeshForge workflow test cutter', true)`,
+    [id, dana, mf],
   );
-  return { id, serial_number: mf, created: true };
+  return { id, serial_number: dana, created: true };
 }
 
 async function ensureE2EPart(client, summaryId, partTypeId) {

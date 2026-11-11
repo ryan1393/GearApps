@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { planBladeRequirements } from './blade-requirement-plan.mjs';
 
 const scriptFile = fileURLToPath(import.meta.url);
 const projectRoot = path.resolve(path.dirname(scriptFile), '..', '..', '..');
@@ -37,26 +38,12 @@ for (const row of summaryAdditions) {
   summaryKeys.add(key);
 }
 
-const requirementKeys = new Set();
-for (const row of requirements) {
-  const summary = clean(row.Summary);
-  const revision = clean(row.Summary_Rev);
-  const partType = clean(row.Part_Type_Code).toUpperCase();
-  const count = Number(row.Blades_Required);
-
-  if (!summary) throw new Error('Blade requirement contains a blank Summary');
-  if (!['RING', 'PINION'].includes(partType)) {
-    throw new Error(`Invalid part type ${row.Part_Type_Code} for ${summary}`);
-  }
-  if (!Number.isInteger(count) || count <= 0) {
-    throw new Error(`Invalid blade count ${row.Blades_Required} for ${summary} ${partType}`);
-  }
-
-  const key = `${summary}\u0000${revision}\u0000${partType}`;
-  if (requirementKeys.has(key)) {
-    throw new Error(`Duplicate blade requirement: ${summary} ${partType}`);
-  }
-  requirementKeys.add(key);
+const requirementPlan = planBladeRequirements(requirements);
+if (requirementPlan.errors.length) {
+  throw new Error(`cutter_blade_requirements.json:\n  ${requirementPlan.errors.join('\n  ')}`);
+}
+for (const skip of requirementPlan.skipped) {
+  console.warn(`[SKIP] Blade requirement ${skip.summary} ${skip.partTypeCode}: ${skip.reason}`);
 }
 
 const definitionCodes = new Set();
@@ -115,6 +102,8 @@ console.log('[PASS] Cutter reference base-data validation passed.');
 console.log({
   summary_additions: summaryAdditions.length,
   cutter_blade_requirements: requirements.length,
+  cutter_blade_requirement_summaries: requirementPlan.planned.length,
+  cutter_blade_requirement_rows_skipped: requirementPlan.skipped.length,
   cutter_body_definitions: definitions.length,
   cutter_bodies: cutterBodies.length,
 });

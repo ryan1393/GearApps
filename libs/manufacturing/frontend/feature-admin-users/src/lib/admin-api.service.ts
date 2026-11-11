@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { LabelPrinterChoiceService } from '@meshforge/manufacturing/frontend/util-common';
-import { IBulkCreateShelfLocations, IBulkShelfLocationsResult } from '@meshforge/manufacturing/shared/util-types';
+import { IBulkCreateShelfLocations, IBulkShelfLocationsResult, ISummaryBodyRuleRow } from '@meshforge/manufacturing/shared/util-types';
 import { Observable } from 'rxjs';
 
 export interface PagedResponse<T> {
@@ -123,6 +123,17 @@ export interface CutterBodyRow {
   dana_serial_number?: string | null;
   description?: string | null;
   enabled: boolean;
+  definition?: {
+    definition_code?: string | null;
+    cutter_head_code?: string | null;
+    supplier_code?: string | null;
+    supplier_name?: string | null;
+    hand_code?: string | null;
+    hand_name?: string | null;
+    blade_family_code?: string | null;
+    blade_family_name?: string | null;
+    size_code?: string | null;
+  } | null;
 }
 
 export interface RollMasterRow {
@@ -406,6 +417,18 @@ export class AdminApiService {
       `/api/v1/locations/${encodeURIComponent(id)}`,
       input,
     );
+  }
+
+  listSummaryBodyRules() {
+    return this.http.get<ISummaryBodyRuleRow[]>('/api/v1/cutter-config/summary-body-rules');
+  }
+
+  setSummaryBodyRule(summaryId: string, bodyRule: string) {
+    return this.http.put<ISummaryBodyRuleRow>(`/api/v1/cutter-config/summary-body-rules/${encodeURIComponent(summaryId)}`, { body_rule: bodyRule });
+  }
+
+  clearSummaryBodyRule(summaryId: string) {
+    return this.http.delete<ISummaryBodyRuleRow>(`/api/v1/cutter-config/summary-body-rules/${encodeURIComponent(summaryId)}`);
   }
 
   listCutterBodies() {

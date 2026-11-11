@@ -166,6 +166,26 @@
               <span class="gear-admin-record-label">HOS</span>
               <span class="gear-admin-record-value">{{ summary.hos || '—' }}</span>
             </div>
+            <div class="gear-admin-record-field gear-admin-record-field-wide" data-gear-summary-body-rule>
+              <span class="gear-admin-record-label">Body Size Rule</span>
+              <span class="gear-admin-record-value">{{ summaryBodyRuleText(summary) }}</span>
+            </div>
+            <div class="gear-admin-record-field" data-gear-summary-required-blades>
+              <span class="gear-admin-record-label">Required Blades (read-only)</span>
+              <span class="gear-admin-record-value">{{ summaryRequiredBladesText(summary) }}</span>
+            </div>
+          </div>
+          <div *ngIf="summaryBodyRule(summary)" class="gear-admin-inline-edit gear-admin-record-inline-action">
+            <span class="gear-admin-record-label">Set Body Size Rule (controls Required Blades for RING and PINION)</span>
+            <div class="gear-admin-inline-edit-controls">
+              <select class="gear-select" [name]="'body-rule-' + summary.id" [disabled]="busy"
+                      [ngModel]="summaryBodyRuleEdits[summary.id] ?? (summaryBodyRule(summary)?.configured_body_rule || '')"
+                      (ngModelChange)="summaryBodyRuleEdits[summary.id] = $event">
+                <option value="">Not configured</option>
+                <option *ngFor="let rule of cutterBodyRules" [value]="rule.code">{{ rule.label }} · {{ rule.total_blades }} blades</option>
+              </select>
+              <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="saveSummaryBodyRule(summary)">Save Rule</button>
+            </div>
           </div>
           <div class="gear-admin-actions gear-admin-record-actions">
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditPartSummary(summary)" data-icon="edit" title="Edit">Edit</button>
@@ -849,6 +869,28 @@
               <span class="gear-admin-record-label">MF Serial</span>
               <span class="gear-admin-record-value mono">{{ body.mf_serial_number || '—' }}</span>
             </div>
+            <ng-container *ngIf="cutterBodyDecode(body) as decoded">
+              <ng-container *ngIf="decoded.decoded as d">
+                <div class="gear-admin-record-field"><span class="gear-admin-record-label">Cutter Head</span><span class="gear-admin-record-value mono">{{ d.cutter_head_code }}</span></div>
+                <div class="gear-admin-record-field"><span class="gear-admin-record-label">Supplier</span><span class="gear-admin-record-value">{{ d.supplier_code }}{{ body.definition?.supplier_name ? ' · ' + body.definition?.supplier_name : '' }}</span></div>
+                <div class="gear-admin-record-field"><span class="gear-admin-record-label">Hand</span><span class="gear-admin-record-value">{{ d.hand_code }}{{ body.definition?.hand_name ? ' · ' + body.definition?.hand_name : '' }}</span></div>
+                <div class="gear-admin-record-field"><span class="gear-admin-record-label">Blade Family</span><span class="gear-admin-record-value">{{ d.blade_family_code }}{{ body.definition?.blade_family_name ? ' · ' + body.definition?.blade_family_name : '' }}</span></div>
+                <div class="gear-admin-record-field"><span class="gear-admin-record-label">Body Size</span><span class="gear-admin-record-value mono">{{ d.size_code }}</span></div>
+                <div class="gear-admin-record-field"><span class="gear-admin-record-label">8th Character</span><span class="gear-admin-record-value mono">{{ d.special_character }}</span></div>
+              </ng-container>
+              <div class="gear-admin-record-field" data-gear-cutter-body-rule>
+                <span class="gear-admin-record-label">Body Rule</span>
+                <span class="gear-admin-record-value">{{ decoded.rule?.label || 'Unresolved' }}</span>
+              </div>
+              <div class="gear-admin-record-field" data-gear-cutter-body-required-blades>
+                <span class="gear-admin-record-label">Required Blades (read-only)</span>
+                <span class="gear-admin-record-value">{{ decoded.rule ? decoded.rule.total_blades + ' blades (' + decoded.rule.blade_sets + ' sets)' : '—' }}</span>
+              </div>
+              <div *ngIf="decoded.problem" class="gear-admin-record-field gear-admin-record-field-wide">
+                <span class="gear-admin-record-label">Decode</span>
+                <span class="gear-admin-record-value">{{ decoded.problem }}</span>
+              </div>
+            </ng-container>
             <div class="gear-admin-record-field gear-admin-record-field-wide">
               <span class="gear-admin-record-label">Description</span>
               <span class="gear-admin-record-value">{{ body.description || 'No description' }}</span>

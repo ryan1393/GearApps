@@ -1,5 +1,11 @@
 import { Subject, takeUntil } from 'rxjs';
-import { cutterBodyBladeCapacity, cutterBodyMatchesRequirement } from '@meshforge/manufacturing/shared/util-constants';
+import {
+  CutterBodyRuleResolution,
+  cutterBodyMatchesRequirement,
+  evaluateCutterBodyCompatibility,
+  formatBladeSetQuantity,
+  resolveCutterBodyRule,
+} from '@meshforge/manufacturing/shared/util-constants';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, inject } from '@angular/core';
@@ -110,8 +116,26 @@ export class CutterBuildComponent implements OnDestroy {
     this.scanTray();
   }
 
-  cutterBodyRequiredBladeCount(body: CutterBody | null = this.cutterBody): number | null {
-    return cutterBodyBladeCapacity(body);
+  /** The body's rule decoded from its Dana S/N (never the MF serial). */
+  cutterBodyRule(body: CutterBody | null = this.cutterBody): CutterBodyRuleResolution {
+    return resolveCutterBodyRule(body);
+  }
+
+  /** "105 Standard · 38 blades (19 sets)" or the reason it is unresolved. */
+  cutterBodyCapacityText(body: CutterBody | null = this.cutterBody): string {
+    const rule = resolveCutterBodyRule(body).rule;
+    return rule ? `${rule.label} · ${rule.total_blades} blades (${rule.blade_sets} sets)` : 'Blade capacity unresolved';
+  }
+
+  bladeSetText(sets: number | null | undefined): string {
+    return formatBladeSetQuantity(sets);
+  }
+
+  /** Compatibility of the selected body with the validated tray, including the Summary Body Size Rule. */
+  get bodyCompatibility() {
+    if (!this.cutterBody || !this.trayValidation || !this.tray) return null;
+    return evaluateCutterBodyCompatibility(this.cutterBody, this.trayValidation.required_blade_count,
+      this.tray.part_type?.code ?? '', this.trayValidation.summary_body_rule ?? null);
   }
 
   get compatibleReadyTrays(): CutterDashboardData['ready_for_cutter'] {
@@ -119,7 +143,7 @@ export class CutterBuildComponent implements OnDestroy {
     if (!body) return [];
     return this.availableReadyTrays.filter(row =>
       row.required_blade_count !== null && row.blade_count === row.required_blade_count &&
-      cutterBodyMatchesRequirement(body, row.required_blade_count, row.part_type_code ?? ''),
+      cutterBodyMatchesRequirement(body, row.required_blade_count, row.part_type_code ?? '', row.summary_body_rule ?? null),
     );
   }
 
@@ -133,7 +157,7 @@ export class CutterBuildComponent implements OnDestroy {
         this.trayValidation?.valid &&
         this.traySerial.trim().toUpperCase() === this.tray.serial_number.toUpperCase() &&
         [this.cutterBody.dana_serial_number, this.cutterBody.mf_serial_number].some(serial => serial?.toUpperCase() === this.cutterBodySerial.trim().toUpperCase()) &&
-        cutterBodyMatchesRequirement(this.cutterBody, this.trayValidation.required_blade_count, this.tray.part_type?.code ?? '') &&
+        cutterBodyMatchesRequirement(this.cutterBody, this.trayValidation.required_blade_count, this.tray.part_type?.code ?? '', this.trayValidation.summary_body_rule ?? null) &&
         this.trayValidation.blades_ready_for_cutter &&
         !this.trayValidation.already_assigned_to_build &&
         !this.trayValidation.still_in_container &&
@@ -310,9 +334,12 @@ export class CutterBuildComponent implements OnDestroy {
           if (version !== this.scanVersion) return;
           this.busy = false;
           this.trayValidation = validation;
-          if (this.cutterBody && !cutterBodyMatchesRequirement(this.cutterBody, validation.required_blade_count, tray.part_type?.code ?? '')) {
+          const compatibility = this.cutterBody
+            ? evaluateCutterBodyCompatibility(this.cutterBody, validation.required_blade_count, tray.part_type?.code ?? '', validation.summary_body_rule ?? null)
+            : null;
+          if (compatibility && !compatibility.compatible) {
             this.trayValidation = null;
-            this.error = 'This tray does not match the selected Cutter Body capacity or blade family.';
+            this.error = `This tray does not match the selected Cutter Body: ${compatibility.reason}`;
           } else if (!validation.valid) {
             this.error = validation.reason || 'This tray is not ready for Cutter Builder.';
           }

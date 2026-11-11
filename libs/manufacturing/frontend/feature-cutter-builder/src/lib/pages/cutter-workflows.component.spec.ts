@@ -10,7 +10,7 @@ import { CutterTeardownComponent } from './teardown/cutter-teardown.component';
 import { CutterBuildComponent } from './build/cutter-build.component';
 import { CutterLookupComponent } from './lookup/cutter-lookup.component';
 
-const body = { id: 'body', dana_serial_number: 'BODY064', mf_serial_number: null, enabled: true, description: null, definition_id: null } as CutterBody;
+const body = { id: 'body', dana_serial_number: 'CGRT064AAA', mf_serial_number: null, enabled: true, description: null, definition_id: null } as CutterBody;
 const tray = { id: 'tray', serial_number: 'TRAY-A', blade_count: 0, part_type: { code: 'RING' } } as unknown as ITray;
 const build = { build_number: 'BUILD-A', status_code: 'PULLED', part_type_code: 'RING', blade_count: 11 } as CutterBuildCard;
 
@@ -57,7 +57,7 @@ describe('Cutter workflow selection safety', () => {
     component.cutterBodyChanged('OTHER'); expect(component.cutterBody).toBeNull(); expect(component.tray).toBeNull();
   });
   it('requires body capacity compatibility in final build eligibility', () => {
-    const component = cutter(); component.cutterBody = body; component.cutterBodySerial = 'BODY064';
+    const component = cutter(); component.cutterBody = body; component.cutterBodySerial = 'CGRT064AAA';
     component.tray = tray; component.traySerial = 'TRAY-A'; component.selectedCutterBuilderMachineId = 'machine';
     component.availableCutterBuilderMachines = [{ id: 'machine' }] as typeof component.availableCutterBuilderMachines;
     component.trayValidation = { valid: true, required_blade_count: 19, blades_ready_for_cutter: true, tray_stage_ready: true,
@@ -66,7 +66,7 @@ describe('Cutter workflow selection safety', () => {
     expect(component.canBuild).toBe(true);
   });
   function readyToBuild() {
-    const component = cutter(); component.cutterBody = body; component.cutterBodySerial = 'BODY064';
+    const component = cutter(); component.cutterBody = body; component.cutterBodySerial = 'CGRT064AAA';
     component.tray = tray; component.traySerial = 'TRAY-A'; component.selectedCutterBuilderMachineId = 'machine';
     component.availableCutterBuilderMachines = [{ id: 'machine' }] as typeof component.availableCutterBuilderMachines;
     component.trayValidation = { valid: true, required_blade_count: 11, blades_ready_for_cutter: true, tray_stage_ready: true,
@@ -94,8 +94,40 @@ describe('Cutter workflow selection safety', () => {
   });
   it('rejects a scanned tray whose server validation is valid but body capacity is wrong', () => {
     api['validateTray'].mockReturnValue(of({ valid: true, required_blade_count: 19 }));
-    const component = cutter(); component.cutterBody = body; component.cutterBodySerial = 'BODY064'; component.traySerial = 'TRAY-A';
-    component.scanTray(); expect(component.trayValidation).toBeNull(); expect(component.error).toContain('capacity');
+    const component = cutter(); component.cutterBody = body; component.cutterBodySerial = 'CGRT064AAA'; component.traySerial = 'TRAY-A';
+    component.scanTray(); expect(component.trayValidation).toBeNull(); expect(component.error).toContain('064 Standard');
+  });
+  function special105ReadyToBuild(summaryRule: string | null, cutterBody: CutterBody) {
+    const component = cutter(); component.cutterBody = cutterBody; component.cutterBodySerial = cutterBody.dana_serial_number ?? cutterBody.mf_serial_number ?? '';
+    component.tray = tray; component.traySerial = 'TRAY-A'; component.selectedCutterBuilderMachineId = 'machine';
+    component.availableCutterBuilderMachines = [{ id: 'machine' }] as typeof component.availableCutterBuilderMachines;
+    component.trayValidation = { valid: true, required_blade_count: 13, summary_body_rule: summaryRule, blades_ready_for_cutter: true, tray_stage_ready: true,
+      already_assigned_to_build: false, still_in_container: false } as CutterTrayValidation;
+    return component;
+  }
+  it('keeps 076 and special 105 apart when the Summary Body Size Rule is configured', () => {
+    const std076 = { ...body, dana_serial_number: 'CGRT076AAA' } as CutterBody;
+    const special = { ...body, dana_serial_number: 'CGRT1058AA' } as CutterBody;
+    expect(special105ReadyToBuild('105-SPECIAL', special).canBuild).toBe(true);
+    expect(special105ReadyToBuild('105-SPECIAL', std076).canBuild).toBe(false);
+    expect(special105ReadyToBuild('076', std076).canBuild).toBe(true);
+    expect(special105ReadyToBuild('076', special).canBuild).toBe(false);
+  });
+  it('allows either 26-blade body for an unresolved Summary but shows the warning', () => {
+    const component = special105ReadyToBuild(null, { ...body, dana_serial_number: 'CGRT076AAA' } as CutterBody);
+    expect(component.canBuild).toBe(true);
+    expect(component.bodyCompatibility?.warning).toContain('unresolved');
+  });
+  it('never takes capacity from the MF serial', () => {
+    const component = special105ReadyToBuild(null, { ...body, dana_serial_number: null, mf_serial_number: 'CGRT1058AA' } as CutterBody);
+    expect(component.canBuild).toBe(false);
+    expect(component.cutterBodyCapacityText()).toBe('Blade capacity unresolved');
+  });
+  it('labels capacity in total blades and sets', () => {
+    const component = cutter();
+    expect(component.cutterBodyCapacityText({ ...body, dana_serial_number: 'CGRT105AAA' } as CutterBody)).toBe('105 Standard · 38 blades (19 sets)');
+    expect(component.cutterBodyCapacityText({ ...body, dana_serial_number: 'CGRT1058AA' } as CutterBody)).toBe('105 Special (8th Dana S/N character 8) · 26 blades (13 sets)');
+    expect(component.bladeSetText(19)).toBe('19 sets · 38 blades');
   });
 });
 

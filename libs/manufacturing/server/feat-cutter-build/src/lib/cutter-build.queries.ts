@@ -138,6 +138,16 @@ export async function loadCutterBuilderDashboard(dataSource: DataSource) {
     }),
   );
 
+  const readySummaryIds = [...new Set(readyForCutter.map((a) => a.tray.summary_id).filter((id): id is string => Boolean(id)))];
+  const summaryRules = new Map<string, string>(
+    readySummaryIds.length
+      ? (await dataSource.query(
+          'SELECT summary_id, body_rule FROM public.cutter_summary_body_rules WHERE summary_id = ANY($1::uuid[])',
+          [readySummaryIds],
+        ) as Array<{ summary_id: string; body_rule: string }>).map((r) => [r.summary_id, r.body_rule])
+      : [],
+  );
+
   return {
     counts: {
       builds_in_progress: buildsInProgress,
@@ -185,6 +195,7 @@ export async function loadCutterBuilderDashboard(dataSource: DataSource) {
       part_type_code: assignment.tray.part_type?.code ?? null,
       blade_count: assignment.tray.blade_count,
       required_blade_count: assignment.tray.required_blade_count,
+      summary_body_rule: assignment.tray.summary_id ? summaryRules.get(assignment.tray.summary_id) ?? null : null,
     })),
   };
 }
