@@ -3,6 +3,10 @@ on:
   push:
     branches: [main]
   pull_request:
+# A newer push to the same pull request replaces the run still in progress.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   docker-images:
     runs-on: ubuntu-latest
@@ -16,10 +20,10 @@ jobs:
       - name: Build every web image
         shell: bash
         run: |
-          for app in blade-tracking cutter-builder greenshed; do
-            docker build --build-arg BUILD_NATIVE_MODULES_FROM_SOURCE=true -t "meshforge-ci:$app" -f "apps/$app/Dockerfile" .
+          # These reuse the dependency layer the API image installed above.
+          for app in blade-tracking cutter-builder greenshed lapper-client; do
+            docker build -t "meshforge-ci:$app" -f "apps/$app/Dockerfile" .
           done
-          docker build -t meshforge-ci:lapper-client -f apps/lapper-client/Dockerfile .
   verify:
     runs-on: ubuntu-latest
     env:
