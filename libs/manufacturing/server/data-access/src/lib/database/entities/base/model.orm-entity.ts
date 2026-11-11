@@ -7,8 +7,9 @@ import { IModel } from '@meshforge/manufacturing/shared/util-types';
 @Entity({ name: 'models' })
 @Index(['model_number', 'model_type'], { unique: true })
 export class ModelOrmEntity extends AbstractOrmEntity {
-  @Column({ type: Number, nullable: true })
-  model_number!: number | null;
+  /** Text, so a model can be numbered like "S-110" or "9¼" as well as "174". */
+  @Column({ type: String, nullable: true })
+  model_number!: string | null;
 
   @Column({ type: String, nullable: true })
   model_type!: string | null;
