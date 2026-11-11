@@ -432,9 +432,15 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
       );
     }
 
+    if (/^(CGDR|CGDP)-/.test(serialNumber) && !numberedShelf) {
+      throw new UnprocessableEntityException(
+        `Dull shelves use a shelf letter, layer number and bin letter, such as CGDR-A1A or CGDP-B2C (shelf, layer, bin); ${serialNumber} is invalid`,
+      );
+    }
+
     if (looksLikeCuttergrindShelf && !numberedShelf) {
       throw new UnprocessableEntityException(
-        `Cuttergrind shelves must use a three-digit physical shelf number such as CGDR-001, CGDP-001, CGFR-001, or CGFP-001; ${serialNumber} is invalid`,
+        `Finished shelves must use a three-digit physical shelf number such as CGFR-001 or CGFP-001; ${serialNumber} is invalid`,
       );
     }
 
@@ -446,7 +452,7 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
       !legacyExisting
     ) {
       throw new UnprocessableEntityException(
-        `Cuttergrind shelves use CGRR-/CGRP- (rough), CGDR-/CGDP- (dull), or CGFR-/CGFP- (finished), followed by a three-digit physical shelf number`,
+        `Cuttergrind shelves use CGRR-### / CGRP-### (rough), CGDR-A1A / CGDP-A1A (dull: shelf, layer, bin), or CGFR-### / CGFP-### (finished)`,
       );
     }
 

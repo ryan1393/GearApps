@@ -99,7 +99,7 @@ export class CreateCutterTeardownDto {
   teardown_tray_serial_number!: string;
 
   @ApiPropertyOptional({
-    description: 'Required only when teardown returns one or more blades. Scan CGDR-<summary> for RING or CGDP-<summary> for PINION.',
+    description: 'Required only when teardown returns one or more blades. Scan a CGDR dull shelf for RING or CGDP for PINION, addressed by shelf letter, layer number and bin letter (CGDR-A1A).',
     nullable: true,
   })
   @IsOptional()

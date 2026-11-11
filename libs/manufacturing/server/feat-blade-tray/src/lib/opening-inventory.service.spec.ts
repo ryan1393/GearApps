@@ -83,7 +83,7 @@ describe('Opening inventory', () => {
     for (const shelf of ['CGFR-001', 'CGRP-001', 'CGRR-1', 'SHELF-A']) {
       await expect(setup().service.record(dto({ shelf_serial_number: shelf }), USER)).rejects.toThrow('numbered CGRR-### shelf');
     }
-    await expect(setup().service.record(dto({ stage: 'READY_FOR_CUTTER', shelf_serial_number: 'CGDR-001' }), USER))
+    await expect(setup().service.record(dto({ stage: 'READY_FOR_CUTTER', shelf_serial_number: 'CGDR-A1A' }), USER))
       .rejects.toThrow('numbered CGFR-### shelf');
     await expect(setup({ shelf: null }).service.record(dto(), USER)).rejects.toThrow('missing, disabled, or not set up as a shelf');
   });

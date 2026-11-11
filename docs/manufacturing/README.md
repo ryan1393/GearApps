@@ -189,7 +189,7 @@ The normal master test requires no typed workflow inputs. It provisions dedicate
 - PINION builds run only on `PINION CUTTING` machines.
 - RING builds run only on `GEAR CUTTING` machines.
 - Green Shed shelves: `GSR-<summary>` for RING and `GSP-<summary>` for PINION.
-- Cuttergrind shelves are **numbered** physical shelves configured in Admin: rough `CGRR-###` / `CGRP-###` (required when completing grinding of a full tray), dull `CGDR-###` / `CGDP-###`, finished `CGFR-###` / `CGFP-###` (RING / PINION). Summary-derived `CGD?-<summary>` / `CGF?-<summary>` tags are legacy and are rejected for placement.
+- Cuttergrind shelves are **numbered** physical shelves configured in Admin: rough `CGRR-###` / `CGRP-###` (required when completing grinding of a full tray), dull `CGDR-A1A` / `CGDP-A1A` (shelf letter, layer number, bin letter: shelf A, layer 1, bin A), finished `CGFR-###` / `CGFP-###` (RING / PINION). Summary-derived `CGD?-<summary>` / `CGF?-<summary>` tags are legacy and are rejected for placement.
 - Coated trays reach the coater through a **Coater Shipment** (create, add containers, review, print, dispatch); loading a tray only marks it Packed for Coater.
 - A cutter build records the Department 45 **Cutter Builder machine** that built it.
 - Empty trays with 0 blades do **not** require a physical location. They remain `EMPTY`, unassigned, and are operator-visible as **Available / Ready to Use** until selected for a workflow such as Cutter Builder teardown.

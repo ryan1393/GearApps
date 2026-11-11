@@ -16,7 +16,7 @@ Makes a run of numbered records and prints a tag for each one.
 | Coater containers | `C0001`, ... |
 | Rough shelves | `CGRR-001` (ring), `CGRP-001` (pinion) |
 | Finished shelves | `CGFR-001`, `CGFP-001` |
-| Dull shelves | `CGDR-001`, `CGDP-001` |
+| Dull shelves | `CGDR-A1A`, `CGDP-A1A` (shelf letter, layer number, bin letter; made as a grid of shelves × layers × bins) |
 
 Choose the first number and how many (up to 100 at a time). A number that already exists is not created again; its tag is printed again, so a run can be repeated safely. With no tag printer set up, the tags that could not be printed come down as one file.
 

@@ -21,6 +21,7 @@ import {
   CuttergrindRoughShelfTag,
   parseCuttergrindRoughShelfTag,
   parseCuttergrindNumberedShelfTag,
+  describeCuttergrindShelfPosition,
   parseSummaryShelfTag,
   SummaryShelfTag,
 } from '@meshforge/manufacturing/shared/util-constants';
@@ -701,6 +702,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   }
 
   locationShelfDisplay(shelf: CuttergrindRoughShelfTag | CuttergrindNumberedShelfTag | SummaryShelfTag): string {
+    if ('position' in shelf && shelf.position) return describeCuttergrindShelfPosition(shelf.position);
     return 'shelfNumber' in shelf
       ? `Shelf ${shelf.shelfNumber}`
       : `Summary ${shelf.summaryNumber}`;

@@ -203,7 +203,7 @@ export class CutterTeardownComponent implements OnInit, OnDestroy {
         ) {
           this.shelfLocation = null;
           this.error = this.build
-            ? `${this.build.part_type_code} dull blades must go to an available ${expectedPartType === 'RING' ? 'CGDR' : 'CGDP'} numbered shelf.`
+            ? `${this.build.part_type_code} dull blades must go to an available ${expectedPartType === 'RING' ? 'CGDR' : 'CGDP'} dull shelf, such as ${expectedPartType === 'RING' ? 'CGDR' : 'CGDP'}-A1A (shelf, layer, bin).`
             : 'Scan the cutter build before scanning the dull shelf.';
           return;
         }

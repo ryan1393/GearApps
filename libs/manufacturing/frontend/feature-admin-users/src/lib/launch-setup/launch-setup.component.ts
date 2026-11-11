@@ -5,6 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective, DanaToneDirective } from '@dana/ui';
 import { GearToastService } from '@meshforge/manufacturing/frontend/util-common';
+import { describeCuttergrindShelfPosition, parseCuttergrindNumberedShelfTag } from '@meshforge/manufacturing/shared/util-constants';
 import { firstValueFrom } from 'rxjs';
 
 import { AdminApiService, AssetTagKind, AssetTagPrintResult, adminApiErrorText } from '../admin-api.service';
@@ -36,6 +37,8 @@ interface TagKind {
   /** Barcodes follow fixed rules: a prefix, then digits (three exactly for numbered shelves). */
   prefix: string;
   digits?: number;
+  /** Dull shelves are addressed by shelf letter, layer number and bin letter (CGDR-A1A). */
+  grid?: boolean;
   description?: string;
 }
 interface TagResult { serial: string; state: 'created' | 'existing' | 'failed'; printed: boolean; note: string }
@@ -50,10 +53,12 @@ const TAG_KINDS: TagKind[] = [
   { id: 'cgrp', label: 'Rough shelves, pinion (CGRP-###)', kind: 'LOCATION', prefix: 'CGRP-', digits: 3, description: 'Cuttergrind rough PINION shelf' },
   { id: 'cgfr', label: 'Finished shelves, ring (CGFR-###)', kind: 'LOCATION', prefix: 'CGFR-', digits: 3, description: 'Cuttergrind finished RING shelf' },
   { id: 'cgfp', label: 'Finished shelves, pinion (CGFP-###)', kind: 'LOCATION', prefix: 'CGFP-', digits: 3, description: 'Cuttergrind finished PINION shelf' },
-  { id: 'cgdr', label: 'Dull shelves, ring (CGDR-###)', kind: 'LOCATION', prefix: 'CGDR-', digits: 3, description: 'Cuttergrind dull RING shelf' },
-  { id: 'cgdp', label: 'Dull shelves, pinion (CGDP-###)', kind: 'LOCATION', prefix: 'CGDP-', digits: 3, description: 'Cuttergrind dull PINION shelf' },
+  { id: 'cgdr', label: 'Dull shelves, ring (CGDR-A1A)', kind: 'LOCATION', prefix: 'CGDR-', grid: true, description: 'Cuttergrind dull RING shelf' },
+  { id: 'cgdp', label: 'Dull shelves, pinion (CGDP-A1A)', kind: 'LOCATION', prefix: 'CGDP-', grid: true, description: 'Cuttergrind dull PINION shelf' },
 ];
 const MAX_TAGS = 100;
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const MAX_LAYERS = 9;
 
 /**
  * Go-live in one place: what still has to be set up, barcode tags in bulk, and recording the
@@ -87,6 +92,11 @@ export class LaunchSetupComponent implements OnInit {
   tagFirst = 1;
   tagCount = 10;
   tagDigits = 4;
+  // Dull shelf grid: shelves A to B, each with layers 1..n, each layer with bins A..
+  gridShelfFrom = 'A';
+  gridShelfTo = 'A';
+  gridLayers = 4;
+  gridBins = 4;
   tagBusy = false;
   tagProgress = '';
   tagResults: TagResult[] = [];
@@ -109,6 +119,7 @@ export class LaunchSetupComponent implements OnInit {
   /** The serial numbers the current range makes. */
   get tagSerials(): string[] {
     const kind = this.tagKind;
+    if (kind.grid) return this.gridSerials(kind);
     const prefix = kind.prefix ?? '';
     const digits = kind.digits ?? Math.min(Math.max(Number(this.tagDigits) || 1, 1), 8);
     const first = Math.max(Number(this.tagFirst) || 0, 0), count = Math.min(Math.max(Number(this.tagCount) || 0, 0), MAX_TAGS);
@@ -117,6 +128,7 @@ export class LaunchSetupComponent implements OnInit {
 
   get tagProblem(): string {
     const kind = this.tagKind;
+    if (kind.grid) return this.gridProblem();
     if (!Number.isInteger(Number(this.tagFirst)) || Number(this.tagFirst) < 0) return 'The first number must be a whole number.';
     if (!Number.isInteger(Number(this.tagCount)) || Number(this.tagCount) < 1 || Number(this.tagCount) > MAX_TAGS) return `Make 1 to ${MAX_TAGS} tags at a time.`;
     if (kind.digits && Number(this.tagFirst) + Number(this.tagCount) - 1 > 10 ** kind.digits - 1) return `Shelf numbers go up to ${10 ** kind.digits - 1}.`;
@@ -229,13 +241,46 @@ export class LaunchSetupComponent implements OnInit {
 
   trackSerial(_: number, result: TagResult): string { return result.serial; }
 
+  /** Every shelf, layer and bin in the grid, in shelf, layer, bin order: CGDR-A1A, CGDR-A1B, ... */
+  private gridSerials(kind: TagKind): string[] {
+    if (this.gridProblem()) return [];
+    const from = LETTERS.indexOf(this.gridShelfFrom.trim().toUpperCase());
+    const to = LETTERS.indexOf(this.gridShelfTo.trim().toUpperCase());
+    const serials: string[] = [];
+    for (let shelf = from; shelf <= to; shelf++)
+      for (let layer = 1; layer <= Number(this.gridLayers); layer++)
+        for (let bin = 0; bin < Number(this.gridBins); bin++)
+          serials.push(`${kind.prefix}${LETTERS[shelf]}${layer}${LETTERS[bin]}`);
+    return serials;
+  }
+
+  private gridProblem(): string {
+    const from = LETTERS.indexOf(this.gridShelfFrom.trim().toUpperCase());
+    const to = LETTERS.indexOf(this.gridShelfTo.trim().toUpperCase());
+    const layers = Number(this.gridLayers), bins = Number(this.gridBins);
+    if (this.gridShelfFrom.trim().length !== 1 || from < 0) return 'The first shelf must be one letter, A to Z.';
+    if (this.gridShelfTo.trim().length !== 1 || to < 0) return 'The last shelf must be one letter, A to Z.';
+    if (to < from) return 'The last shelf must come after the first shelf.';
+    if (!Number.isInteger(layers) || layers < 1 || layers > MAX_LAYERS) return `Layers go from 1 to ${MAX_LAYERS}.`;
+    if (!Number.isInteger(bins) || bins < 1 || bins > LETTERS.length) return `Bins per layer go from 1 to ${LETTERS.length} (A to Z).`;
+    const count = (to - from + 1) * layers * bins;
+    if (count > MAX_TAGS) return `That is ${count} bins; make 1 to ${MAX_TAGS} tags at a time.`;
+    return '';
+  }
+
   private create(kind: TagKind, serial: string) {
     if (kind.kind === 'TRAY') return this.api.createTray({ serial_number: serial, enabled: true });
     if (kind.kind === 'CONTAINER') return this.api.createContainer({ serial_number: serial, enabled: true });
     return this.api.createLocation({
-      serial_number: serial, number: serial.split('-').pop() ?? serial, description: kind.description ?? null,
+      serial_number: serial, number: serial.split('-').pop() ?? serial,
+      description: kind.grid ? `${kind.description}, ${this.gridDescription(serial)}` : kind.description ?? null,
       department: 'CUTTERGRIND', location_type: 'SHELF', enabled: true,
     });
+  }
+
+  private gridDescription(serial: string): string {
+    const position = parseCuttergrindNumberedShelfTag(serial)?.position;
+    return position ? describeCuttergrindShelfPosition(position).toLowerCase() : serial;
   }
 
   private async existingId(kind: TagKind, serial: string): Promise<string | null> {
