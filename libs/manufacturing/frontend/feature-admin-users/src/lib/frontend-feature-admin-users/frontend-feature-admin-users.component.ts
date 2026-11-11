@@ -686,10 +686,31 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     return !parseCuttergrindRoughShelfTag(serial) && !parseCuttergrindNumberedShelfTag(serial) && !!parseSummaryShelfTag(serial);
   }
 
+  /**
+   * One choice per Summary number, without revisions. The location keeps its current pick;
+   * otherwise each number offers the revision a shelf barcode would choose (active, then newest).
+   */
   get locationSummaryChoices(): PartSummaryRow[] {
-    return this.partSummaries
-      .filter((summary) => summary.enabled || summary.id === this.locationForm.summary_id)
-      .sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true }) || a.revision.localeCompare(b.revision));
+    const selectedId = this.locationForm.summary_id;
+    const preference = (summary: PartSummaryRow) => [summary.id === selectedId, summary.active] as const;
+    const byNumber = new Map<string, PartSummaryRow>();
+    for (const summary of this.partSummaries) {
+      if (!summary.enabled && summary.id !== selectedId) continue;
+      const key = summary.number.trim().toUpperCase();
+      const current = byNumber.get(key);
+      if (!current) {
+        byNumber.set(key, summary);
+        continue;
+      }
+      const [aSelected, aActive] = preference(summary);
+      const [bSelected, bActive] = preference(current);
+      const better =
+        aSelected !== bSelected ? aSelected
+        : aActive !== bActive ? aActive
+        : summary.revision.localeCompare(current.revision, undefined, { numeric: true }) > 0;
+      if (better) byNumber.set(key, summary);
+    }
+    return [...byNumber.values()].sort((a, b) => a.number.localeCompare(b.number, undefined, { numeric: true }));
   }
 
   get locationPartTypeChoices(): PartTypeRow[] {

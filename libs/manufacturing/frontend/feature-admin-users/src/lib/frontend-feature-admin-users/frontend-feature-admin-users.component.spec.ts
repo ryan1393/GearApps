@@ -48,6 +48,23 @@ describe('FrontendFeatureAdminUsersComponent', () => {
       expect(payload).not.toHaveProperty('part_type_id');
     });
 
+    it('lists each Summary number once, without revisions', () => {
+      const row = (id: string, number: string, revision: string, active = true, enabled = true) =>
+        ({ id, number, revision, active, enabled, model_id: null, hos: null });
+      component.partSummaries = [
+        row('a-1', '1.955FC', '1'),
+        row('a-2', '1.955FC', '2'),
+        row('a-3', '1.955FC', '3', false),
+        row('b-1', '1.500FC', 'A'),
+        row('c-1', '2.000FC', 'A', true, false),
+      ];
+      component.locationForm = { ...component.locationForm, summary_id: '' };
+      expect(component.locationSummaryChoices.map((s) => s.id)).toEqual(['b-1', 'a-2']);
+
+      component.locationForm = { ...component.locationForm, summary_id: 'a-1' };
+      expect(component.locationSummaryChoices.map((s) => s.id)).toEqual(['b-1', 'a-1']);
+    });
+
     it('reads the summary tag as Summary-PART TYPE, and only once both are set', () => {
       const location = { summary: { id: 's', number: '1.955fc' }, part_type: { id: 'r', code: 'RING' } } as AdminLocationRow;
       expect(component.locationSummaryTag(location)).toBe('1.955FC-RING');
