@@ -74,7 +74,10 @@ def build_payload(serial: str, part_number: int | str, consec: int, values: dict
 class ArgonautClient:
     def __init__(self, url: str, location_id: str = "", username: str = "", password: str = "",
                  timeout_s: float = 10.0, verify_tls: bool = True, ca_file: str = ""):
-        query = {"locationId": location_id} if location_id else {}
+        # A pasted Argonaut address that already carries ?locationId= is used exactly as given;
+        # otherwise the configured location ID is added.
+        has_location = "locationid" in {k.lower() for k in urllib.parse.parse_qs(urllib.parse.urlsplit(url).query)}
+        query = {"locationId": location_id} if location_id and not has_location else {}
         self.url = url + (("&" if "?" in url else "?") + urllib.parse.urlencode(query) if query else "")
         self._auth = (
             "Basic " + base64.b64encode(f"{username}:{password}".encode()).decode() if username or password else None

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **Lapper Read: paste the Argonaut API per machine.** Admin > Lapping machines now has one
+  **Argonaut API** field: paste the full address including `?locationId=…` and that machine's
+  cycles are sent there as pasted. The separate location ID field is gone, and a `locationId` in
+  the pasted address is never replaced by the collector's default.
 - **Lapper Read: optional Argonaut post.** The collector can again send each finished lapping
   cycle to Argonaut (Track and Trace), as the original C# Lapper Read did: the same macros, serial,
   gearset and consec, posted when the cycle ends. Off by default; turn it on with

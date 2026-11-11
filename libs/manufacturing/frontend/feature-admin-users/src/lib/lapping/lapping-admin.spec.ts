@@ -81,9 +81,9 @@ describe('Lapping master data in Admin', () => {
   });
 
   it('accepts only http(s) Argonaut addresses', () => {
-    expect(ARGONAUT_URL_PATTERN.test('https://10.16.81.71:3003/api/mes/trigger-transaction')).toBe(true);
+    expect(ARGONAUT_URL_PATTERN.test('https://10.0.0.9:3003/api/mes/trigger-transaction?locationId=abc-123')).toBe(true);
     expect(ARGONAUT_URL_PATTERN.test('http://argonaut/x?y=1')).toBe(true);
-    expect(ARGONAUT_URL_PATTERN.test('10.16.81.71:3003')).toBe(false);
+    expect(ARGONAUT_URL_PATTERN.test('10.0.0.9:3003')).toBe(false);
     expect(ARGONAUT_URL_PATTERN.test('ftp://host/x')).toBe(false);
   });
 
