@@ -190,6 +190,8 @@ html body .gear-page.ops-station {
   margin: 0;
   font-size: 1.2rem;
   font-weight: 900;
+  /* Long barcodes such as COATER-STAGING wrap inside their cell. */
+  overflow-wrap: break-word;
 }
 
 /* Toasts sit bottom-right on the station, never over the tabs. Errors also stay in the operation's status line. */

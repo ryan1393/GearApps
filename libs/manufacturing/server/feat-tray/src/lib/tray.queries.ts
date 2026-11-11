@@ -192,6 +192,7 @@ export async function loadTrayDashboard(trayRepo: Repository<TrayOrmEntity>) {
     coaterRows,
     recentLocationAssignments,
     recentContainerAssignments,
+    setRows,
   ] = await Promise.all([
     bladeRepo
       .createQueryBuilder('blade')
@@ -318,7 +319,27 @@ export async function loadTrayDashboard(trayRepo: Repository<TrayOrmEntity>) {
       order: { updatedAt: 'DESC' },
       take: 10,
     }),
+    // Blade sets moved out of their trays into coater containers: packed (waiting) or at the coater.
+    trayRepo.manager.query(`SELECT c.id, c.serial_number,
+        CASE WHEN bool_and(b.status = 'at_coater') THEN 'AT_COATER' ELSE 'PACKED_FOR_COATER' END AS stage,
+        count(b.id)::int AS blade_count
+       FROM container_sets cs
+       JOIN containers c ON c.id = cs.container_id
+       JOIN container_set_blades sb ON sb.container_set_id = cs.id AND sb.enabled AND sb."deletedAt" IS NULL
+       JOIN blades b ON b.id = sb.blade_id AND b.enabled
+      WHERE cs.enabled AND cs."deletedAt" IS NULL
+      GROUP BY c.id, c.serial_number
+      ORDER BY c.serial_number`) as Promise<Array<{ id: string; serial_number: string; stage: string; blade_count: number }>>,
   ]);
+  const setsAtCoater = setRows.filter(row => row.stage === 'AT_COATER');
+  const setsPacked = setRows.filter(row => row.stage !== 'AT_COATER');
+  const setStageRows = [
+    { code: 'SET_PACKED_FOR_COATER', name: 'Sets in containers, waiting for coater', sets: setsPacked },
+    { code: 'SET_AT_COATER', name: 'Sets at coater', sets: setsAtCoater },
+  ].filter(row => row.sets.length).map(row => ({
+    code: row.code, name: row.name, tray_count: 0,
+    blade_count: String(row.sets.reduce((total, set) => total + Number(set.blade_count), 0)),
+  }));
 
   const recentActivity = [
     ...recentLocationAssignments.map((assignment) => ({
@@ -379,12 +400,14 @@ export async function loadTrayDashboard(trayRepo: Repository<TrayOrmEntity>) {
     counts: {
       blades_in_process: bladesInProcess,
       trays_at_coater: traysAtCoater,
+      sets_at_coater: setsAtCoater.length,
+      sets_packed_for_coater: setsPacked.length,
       trays_in_house: Math.max(totalEnabledTrays - traysAtCoater, 0),
       total_trays: totalEnabledTrays,
       movements_today:
         locationMovesToday + containerLoadsToday + containerReturnsToday,
     },
-    stage_breakdown: stageRows.map((row) => ({
+    stage_breakdown: [...stageRows, ...setStageRows].map((row) => ({
       code: row.code,
       name: row.name,
       tray_count: Number(row.tray_count),
@@ -395,11 +418,14 @@ export async function loadTrayDashboard(trayRepo: Repository<TrayOrmEntity>) {
       tray_count: Number(row.tray_count),
       blade_count: Number(row.blade_count),
     })),
-    coater_containers: coaterRows.map((row) => ({
-      ...row,
-      tray_count: Number(row.tray_count),
-      blade_count: Number(row.blade_count),
-    })),
+    coater_containers: [
+      ...coaterRows.map((row) => ({
+        ...row,
+        tray_count: Number(row.tray_count),
+        blade_count: Number(row.blade_count),
+      })),
+      ...setsAtCoater.map((row) => ({ id: row.id, serial_number: row.serial_number, tray_count: 0, blade_count: Number(row.blade_count) })),
+    ],
     recent_activity: recentActivity,
   };
 }

@@ -121,11 +121,32 @@ export interface InventoryContainedTrayRow {
   blades: InventoryTrayBladeRow[];
 }
 
+/** One complete set moved out of its tray into a coater container. */
+export interface ContainerBladeSetRow {
+  id: string;
+  summary_number: string | null;
+  part_type_code: string | null;
+  required_blade_count: number;
+  location_serial_number: string | null;
+  packed_from_tray_serial_number: string | null;
+  packed_at: string;
+  stage_code: 'PACKED_FOR_COATER' | 'AT_COATER' | 'NEEDS_REVIEW';
+  blades: InventoryTrayBladeRow[];
+}
+
 export interface InventoryContainerRow extends IContainer {
   workflow_eligibility?: ContainerWorkflowEligibility;
   tray_count: number;
   blade_count: number;
   trays: InventoryContainedTrayRow[];
+  /** Set when the container holds a blade set rather than whole trays. */
+  blade_set?: ContainerBladeSetRow | null;
+}
+
+/** Where a complete set goes after grinding. */
+export interface GrindingPacking {
+  destination: 'CONTAINER' | 'TRAY';
+  containerSerialNumber?: string;
 }
 
 export interface InventoryLocationTrayRow extends InventoryContainedTrayRow {
@@ -144,6 +165,9 @@ export interface BladeTrackingDashboardData {
   counts: {
     blades_in_process: number;
     trays_at_coater: number;
+    /** Blade sets in coater containers (absent on servers before container sets). */
+    sets_at_coater?: number;
+    sets_packed_for_coater?: number;
     trays_in_house: number;
     total_trays: number;
     movements_today: number;
@@ -410,8 +434,9 @@ export class BladeTrackingApiService {
     });
   }
 
+  /** Moves the tray's complete set into the empty container; the tray is emptied for reuse. */
   loadTrayIntoContainer(containerId: string, trayId: string) {
-    return this.http.post<IContainerTray>('/api/v1/containerTrays', {
+    return this.http.post<{ container_serial_number: string; tray_serial_number: string; blade_count: number; location_serial_number: string; tray_emptied: boolean }>('/api/v1/containerTrays', {
       container_id: containerId,
       tray_id: trayId,
     });
@@ -423,8 +448,9 @@ export class BladeTrackingApiService {
     );
   }
 
+  /** Receives a tray packed whole, or a container's blade set into the given empty tray. */
   unloadTray(containerId: string, trayId: string, shelfLocationSerialNumber: string) {
-    return this.http.post<IContainerTray>(
+    return this.http.post<unknown>(
       `/api/v1/containerTrays/container/${encodeURIComponent(containerId)}/tray/${encodeURIComponent(trayId)}/unload`,
       { shelf_location_serial_number: shelfLocationSerialNumber },
     );
@@ -454,6 +480,7 @@ export class BladeTrackingApiService {
     scrappedBladeCount: number,
     roughShelfSerialNumber?: string,
     grinderId?: string,
+    packing?: GrindingPacking,
   ) {
     return this.http.post<{
       grinding_run_id: string;
@@ -465,12 +492,17 @@ export class BladeTrackingApiService {
       blades_needed: number;
       complete: boolean;
       rough_shelf_serial_number: string | null;
+      location_serial_number: string | null;
+      container_serial_number: string | null;
+      tray_emptied: boolean;
     }>(`/api/v1/trays/${encodeURIComponent(trayId)}/complete-grinding`, {
       summary_id: summaryId,
       part_type_id: partTypeId,
       scrapped_blade_count: scrappedBladeCount,
       rough_shelf_serial_number: roughShelfSerialNumber,
       grinding_machine_id: grinderId,
+      destination: packing?.destination,
+      container_serial_number: packing?.destination === 'CONTAINER' ? packing.containerSerialNumber : undefined,
     });
   }
 

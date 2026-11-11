@@ -1,9 +1,9 @@
 import { readInventoryAvailability, listEmptyBodyShelves, recordEmptyBodyShelf } from './inventory-availability';
-import { cuttergrindRoughShelfForPartType, parseCuttergrindRoughShelfTag, isPendingGrindingStatus, trayWorkflowEligibility } from '@meshforge/manufacturing/shared/util-constants';
+import { isPendingGrindingStatus, trayWorkflowEligibility } from '@meshforge/manufacturing/shared/util-constants';
 import { EntityManager, FindOptionsWhere, Not, Repository } from 'typeorm';
 
-import { beginWorkflowJournal } from '@meshforge/manufacturing/server/data-access';
-import { BladeHistoryOrmEntity, BladeOrmEntity, BladeTrayOrmEntity, CreateTrayDto, ContainerTrayOrmEntity, LocationOrmEntity, LocationTrayOrmEntity, CutterBladeRequirementOrmEntity, CutterBuildTrayOrmEntity, CutterPartTypeOrmEntity, InventoryListQueryDto, PaginationService, PartSummaryOrmEntity, TrayOrmEntity, TrayStageOrmEntity, TrayGrindingRunOrmEntity } from '@meshforge/manufacturing/server/data-access';
+import { beginWorkflowJournal, CoaterPlacement, ContainerForPacking, lockEmptyContainer, packTrayIntoContainerSet, resolveCoaterPlacement } from '@meshforge/manufacturing/server/data-access';
+import { BladeHistoryOrmEntity, BladeOrmEntity, BladeTrayOrmEntity, CreateTrayDto, ContainerTrayOrmEntity, LocationTrayOrmEntity, CutterBladeRequirementOrmEntity, CutterBuildTrayOrmEntity, CutterPartTypeOrmEntity, InventoryListQueryDto, PaginationService, PartSummaryOrmEntity, TrayOrmEntity, TrayStageOrmEntity, TrayGrindingRunOrmEntity } from '@meshforge/manufacturing/server/data-access';
 import { BladeHistoryEvent, BladeStatus, ITrayEntity, Uuid } from '@meshforge/manufacturing/shared/util-types';
 import {
   ConflictException,
@@ -174,6 +174,7 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
     userId: Uuid,
     roughShelfInput?: string | null,
     grinderId?: string,
+    packing: { destination: 'CONTAINER' | 'TRAY'; containerSerial?: string | null } = { destination: 'TRAY' },
   ) {
     return this.trayRepo.manager.transaction(async (manager) => {
       const trayRepo = manager.getRepository(TrayOrmEntity);
@@ -185,7 +186,6 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
       const partTypeRepo = manager.getRepository(CutterPartTypeOrmEntity);
       const stageRepo = manager.getRepository(TrayStageOrmEntity);
       const grindingRunRepo = manager.getRepository(TrayGrindingRunOrmEntity);
-      const locationRepo = manager.getRepository(LocationOrmEntity);
       const locationTrayRepo = manager.getRepository(LocationTrayOrmEntity);
 
       const tray = await trayRepo.findOne({
@@ -300,28 +300,16 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
         );
       }
 
-      // Choose a physical slot, never an automatic department-wide shelf.
-      // Lock its routing metadata until the same transaction records placement.
-      let roughShelf: LocationOrmEntity | null = null;
-      let roughShelfSerial: string | null = null;
+      // A complete set goes to the coater staging area unless a rough shelf bin is scanned,
+      // either left in its tray or moved into an empty coater container (one set per container).
+      // Lock the location and container until this transaction records them.
+      let placement: CoaterPlacement | null = null;
+      let container: ContainerForPacking | null = null;
       if (totalReturnedBladeCount === requiredBladeCount) {
-        const shelfTag = parseCuttergrindRoughShelfTag(String(roughShelfInput ?? ''));
-        const expectedPrefix = cuttergrindRoughShelfForPartType(partType.code);
-        if (!shelfTag || shelfTag.partTypeCode !== partType.code) {
-          throw new UnprocessableEntityException(
-            `Scan or select the actual numbered ${expectedPrefix ?? 'CGRR/CGRP'}-### shelf before completing a full tray`,
-          );
-        }
-        roughShelfSerial = shelfTag.serialNumber;
-        roughShelf = await locationRepo.findOne({
-          where: { serial_number: roughShelfSerial, enabled: true },
-          lock: { mode: 'pessimistic_read' },
-        });
-        if (!roughShelf || roughShelf.location_type !== shelfTag.locationType || roughShelf.department !== shelfTag.department) {
-          throw new UnprocessableEntityException(`${roughShelfSerial} is missing, disabled, or not a correctly configured rough shelf`);
-        }
-      } else if (String(roughShelfInput ?? '').trim()) {
-        throw new UnprocessableEntityException('A short tray needs replacement blades and cannot be placed on a ready-for-coating shelf');
+        placement = await resolveCoaterPlacement(manager, roughShelfInput, partType.code);
+        if (packing.destination === 'CONTAINER') container = await lockEmptyContainer(manager, String(packing.containerSerial ?? ''));
+      } else if (String(roughShelfInput ?? '').trim() || String(packing.containerSerial ?? '').trim()) {
+        throw new UnprocessableEntityException('A short tray needs replacement blades; it stays in its tray and cannot go to a shelf or a coater container');
       }
 
       const grinder = await this.requireGrinder(manager, grinderId);
@@ -335,7 +323,7 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
       const returnedAssignments = pendingAssignments.slice(0, returnedBladeCount);
       const scrappedAssignments = pendingAssignments.slice(returnedBladeCount);
       const completedAt = new Date();
-      const journal = await beginWorkflowJournal(manager, { app: 'BLADE_TRACKING', trayIds: [tray.id] }, userId);
+      const journal = await beginWorkflowJournal(manager, { app: 'BLADE_TRACKING', trayIds: [tray.id], containerIds: container ? [container.id] : [] }, userId);
 
       for (const assignment of returnedAssignments) {
         const blade = assignment.blade;
@@ -405,11 +393,11 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
         { tray_id: tray.id, enabled: true },
         { enabled: false, updatedBy: userId },
       );
-      if (roughShelf) {
+      if (placement && !container) {
         await locationTrayRepo.save(
           locationTrayRepo.create({
             tray_id: tray.id,
-            location_id: roughShelf.id,
+            location_id: placement.id,
             enabled: true,
             createdBy: userId,
             updatedBy: userId,
@@ -435,7 +423,19 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
         }),
       );
 
-      await journal.commit(tray.serial_number, 'Complete grinding');
+      if (placement && container) {
+        await packTrayIntoContainerSet(manager, {
+          tray, container, placement, summaryId, partTypeId, requiredBladeCount,
+          grindingCompletedAt: completedAt, userId,
+        });
+      }
+
+      await journal.commit(
+        tray.serial_number,
+        container
+          ? `Complete grinding; set into container ${container.serial_number} at ${placement?.serial_number}`
+          : placement ? `Complete grinding; tray to ${placement.serial_number}` : 'Complete grinding',
+      );
       return {
         tray,
         grinding_run_id: grindingRun.id,
@@ -450,7 +450,10 @@ export class ServerFeatTrayService extends PaginationService<TrayOrmEntity> {
           0,
         ),
         complete: totalReturnedBladeCount === requiredBladeCount,
-        rough_shelf_serial_number: roughShelfSerial,
+        rough_shelf_serial_number: placement && !placement.staging ? placement.serial_number : null,
+        location_serial_number: placement?.serial_number ?? null,
+        container_serial_number: container?.serial_number ?? null,
+        tray_emptied: !!container,
       };
     });
   }

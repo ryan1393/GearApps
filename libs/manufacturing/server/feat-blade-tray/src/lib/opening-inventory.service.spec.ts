@@ -87,7 +87,7 @@ describe('Opening inventory', () => {
       await expect(setup().service.record(dto({ stage: 'READY_FOR_CUTTER', shelf_serial_number: shelf }), USER))
         .rejects.toThrow('such as CGFR-A1A');
     }
-    await expect(setup({ shelf: null }).service.record(dto(), USER)).rejects.toThrow('missing, disabled, or not set up as a shelf');
+    await expect(setup({ shelf: null }).service.record(dto(), USER)).rejects.toThrow('missing, disabled, or not set up correctly');
   });
 
   it('refuses a tray that is missing, in use or not empty, and writes nothing', async () => {

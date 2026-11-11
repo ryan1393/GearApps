@@ -143,7 +143,8 @@ export class LaunchSetupComponent implements OnInit {
       row('Grinders', setup.grinders, 'Add each grinder as a machine of type Grinder.', 'machines'),
       row('Cutter builder machines', setup.cutter_builder_machines, 'Add each build station as a machine of type Cutter Builder.', 'machines'),
       row('Production machines', setup.production_machines, 'The cutting machines Greenshed runs cutters on.', 'machines'),
-      row('Rough shelves (CGRR / CGRP)', setup.shelves.rough, 'Shelf bins (CGRR-A1A) for trays that are ground and waiting for the coater.', 'locations'),
+      // Optional: ground sets wait at COATER-STAGING unless the shop also uses rough shelf bins.
+      { ...row('Rough shelves (CGRR / CGRP)', setup.shelves.rough, 'Optional shelf bins (CGRR-A1A) for ground sets waiting for the coater; COATER-STAGING is the default.', 'locations'), done: true },
       row('Finished shelves (CGFR / CGFP)', setup.shelves.finished, 'Shelf bins (CGFR-A1A) for coated trays waiting for a cutter build.', 'locations'),
       row('Dull shelves (CGDR / CGDP)', setup.shelves.dull, 'Where torn-down trays wait for grinding.', 'locations'),
       row('Greenshed shelves (GSR / GSP)', setup.shelves.greenshed, 'Where built cutters wait for a machine.', 'locations'),

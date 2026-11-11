@@ -63,8 +63,8 @@ export class LoadContainerComponent implements OnDestroy, StationOperation {
   get prompt(): string {
     if (this.busy) return 'Working…';
     if (!this.container) return 'Scan the container to load, or choose it from the list.';
-    if (!this.trays.length) return `Scan each tray going into ${this.container.serial_number}.`;
-    return `Scan the next tray, or tap Finish Loading when ${this.container.serial_number} is full.`;
+    if (!this.trays.length) return `Scan the full, ground tray whose blades go into ${this.container.serial_number}.`;
+    return `Scan the next container.`;
   }
   get finishBlockedReason(): string {
     if (!this.container || this.busy || this.trays.length) return '';
@@ -92,7 +92,7 @@ export class LoadContainerComponent implements OnDestroy, StationOperation {
     this.api.scanContainer(serial).pipe(takeUntil(this.destroyed$)).subscribe({
       next: (container) => {
         if (!container.workflow_eligibility?.load) {
-          this.busy = false; this.message = { tone: 'error', text: `${container.serial_number} cannot be loaded. Use an empty container or one already packed for dispatch; a container that was sent belongs on Receive From Coater.` }; this.containerScanner?.select(); return;
+          this.busy = false; this.message = { tone: 'error', text: `${container.serial_number} cannot be loaded. A container takes one complete set, so use an empty one; a container that was sent belongs on Receive From Coater.` }; this.containerScanner?.select(); return;
         }
         this.container = container;
         this.trays = [...container.trays];
@@ -116,7 +116,7 @@ export class LoadContainerComponent implements OnDestroy, StationOperation {
     this.api.scanTray(serial).pipe(takeUntil(this.destroyed$)).subscribe({
       next: (tray) => {
         if (!tray.workflow_eligibility?.coater_load) {
-          this.busy = false; this.message = { tone: 'error', text: `Tray ${tray.serial_number} cannot be loaded. Only a full, ground tray on a rough shelf can go to the coater.` }; this.trayScanner?.select(); return;
+          this.busy = false; this.message = { tone: 'error', text: `Tray ${tray.serial_number} cannot be loaded. Only a full, ground tray at COATER-STAGING or on a rough shelf bin can go to the coater.` }; this.trayScanner?.select(); return;
         }
         if (this.trays.some((x) => x.id === tray.id)) {
           this.busy = false;
@@ -130,13 +130,17 @@ export class LoadContainerComponent implements OnDestroy, StationOperation {
         const container = this.container;
         if (!container) return;
         this.api.loadTrayIntoContainer(container.id, tray.id).pipe(takeUntil(this.destroyed$)).subscribe({
-          next: () => {
-            this.trays = [tray, ...this.trays];
+          next: (loaded) => {
+            // One complete set fills the container, so loading it finishes the container.
+            this.trays = [];
+            this.container = null;
+            this.lastCompleted = { serial: container.serial_number, trayCount: 1, bladeCount: loaded.blade_count };
             this.refreshPickers();
             this.busy = false;
-            this.message = { tone: 'success', text: `Tray ${tray.serial_number} loaded into ${container.serial_number} (${this.trays.length} tray${this.trays.length === 1 ? '' : 's'}).` };
-            this.toast.success(`Tray ${tray.serial_number} added.`, 'Tray loaded');
-            this.trayScanner?.clearAndFocus();
+            const text = `${loaded.blade_count} blades moved from tray ${tray.serial_number} into ${container.serial_number}. Take the container to ${loaded.location_serial_number}; tray ${tray.serial_number} is empty and ready to reuse.`;
+            this.message = { tone: 'success', text };
+            this.toast.success(text, 'Container loaded');
+            queueMicrotask(() => this.containerScanner?.clearAndFocus());
           },
           error: (err: HttpErrorResponse) =>
             this.fail(

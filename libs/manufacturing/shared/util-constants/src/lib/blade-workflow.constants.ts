@@ -1,4 +1,4 @@
-import { parseCuttergrindRoughShelfTag } from './shelf-location.constants';
+import { isCoaterStagingLocation, isCoaterStagingPlacement, parseCuttergrindRoughShelfTag } from './shelf-location.constants';
 
 /** R37: inventory eligibility and grinding-pass rules. No persistence or UI effects. */
 export const PENDING_GRINDING_STATUSES: readonly string[] = ['new', 'grinding', 'resharpening'];
@@ -45,7 +45,9 @@ export function trayWorkflowEligibility(tray: TrayWorkflowInput): TrayWorkflowEl
     : '';
   const partTypeCode = tray.part_type?.code?.trim().toUpperCase();
   const shelfTag = parseCuttergrindRoughShelfTag(roughShelf);
-  const onExpectedRoughShelf = completed && Boolean(shelfTag) && shelfTag?.partTypeCode === partTypeCode;
+  // A ground, full tray waits for the coater at the staging area or on a matching rough shelf bin.
+  const waitingForCoater = completed && (isCoaterStagingLocation(roughShelf) ||
+    (Boolean(shelfTag) && shelfTag?.partTypeCode === partTypeCode));
   return {
     // Intake owns creation/top-up only. A dull tray waiting to begin grinding belongs on Grinding.
     intake: Boolean(inHouse && consistent && (
@@ -57,24 +59,35 @@ export function trayWorkflowEligibility(tray: TrayWorkflowInput): TrayWorkflowEl
     )),
     internal_movement: Boolean(inHouse && consistent && configured && tray.blade_count > 0 &&
       ['WAITING_FOR_GRINDING', 'GRINDING', 'READY_FOR_COATING', 'READY_FOR_CUTTER'].includes(stage ?? '')),
-    coater_load: Boolean(inHouse && consistent && configured && completed && onExpectedRoughShelf &&
+    coater_load: Boolean(inHouse && consistent && configured && completed && waitingForCoater &&
       tray.blade_count === tray.required_blade_count &&
       tray.blades.every(b => b.status === 'ready_for_coating')),
   };
 }
 export interface ContainerWorkflowEligibility { load: boolean; receive: boolean; }
+/** The complete blade set a container holds, moved out of its tray (current way of packing). */
+export interface ContainerBladeSetInput {
+  required_blade_count: number;
+  blades: ReadonlyArray<{ status: string }>;
+}
+/**
+ * A container takes one complete set, so it can be loaded only while empty. It is received when
+ * its set, or every tray packed in it the old way, has come back from the coater.
+ */
 export function containerWorkflowEligibility(
   enabled: boolean,
   assignmentCount: number,
   trays: ReadonlyArray<{ stage_code: string | null; blade_count: number; blades: ReadonlyArray<{ status: string }> }>,
+  bladeSet: ContainerBladeSetInput | null = null,
 ): ContainerWorkflowEligibility {
+  const setAtCoater = !!bladeSet && bladeSet.blades.length > 0 &&
+    bladeSet.blades.length === bladeSet.required_blade_count && bladeSet.blades.every(b => b.status === 'at_coater');
+  const traysAtCoater = assignmentCount > 0 && assignmentCount === trays.length &&
+    trays.every(t => t.stage_code === 'AT_COATER' && t.blade_count > 0 &&
+      t.blades.length === t.blade_count && t.blades.every(b => b.status === 'at_coater'));
   return {
-    load: enabled && (assignmentCount === 0 || (assignmentCount === trays.length &&
-      trays.every(t => t.stage_code === 'PACKED_FOR_COATER' && t.blade_count > 0 &&
-        t.blades.length === t.blade_count && t.blades.every(b => b.status === 'ready_for_coating')))),
-    receive: enabled && assignmentCount > 0 && assignmentCount === trays.length &&
-      trays.every(t => t.stage_code === 'AT_COATER' && t.blade_count > 0 &&
-        t.blades.length === t.blade_count && t.blades.every(b => b.status === 'at_coater')),
+    load: enabled && assignmentCount === 0 && !bladeSet,
+    receive: enabled && (bladeSet ? assignmentCount === 0 && setAtCoater : traysAtCoater),
   };
 }
 
@@ -101,10 +114,13 @@ export function classifyTrayAvailabilityStage(tray: TrayAvailabilityStageInput):
     return { code: 'NEEDS_REVIEW', name: 'Inventory Needs Review' };
   }
   if (count < required) return { code: 'NEEDS_REPLACEMENT_BLADES', name: 'Needs Replacement Blades' };
+  if (isCoaterStagingPlacement(tray.location_serial, tray.location_department)) {
+    return { code: 'READY_FOR_COATING', name: 'Ready for Coating' };
+  }
   const shelf = parseCuttergrindRoughShelfTag(tray.location_serial ?? '');
   if (!shelf || shelf.partTypeCode !== tray.part_type_code ||
       tray.location_department !== shelf.department || tray.location_type !== shelf.locationType) {
     return { code: 'NEEDS_SHELF_PLACEMENT', name: 'Needs Shelf Placement' };
   }
-  return { code: 'READY_FOR_COATING', name: 'Ready for Coating - Rough Shelf' };
+  return { code: 'READY_FOR_COATING', name: 'Ready for Coating' };
 }

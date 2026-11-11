@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import { EntityManager } from 'typeorm';
 import { CoaterManifest, CoaterShipmentTray } from '@meshforge/manufacturing/shared/util-types';
-import { parseCuttergrindRoughShelfTag, DEPARTMENT_CUTTERGRIND } from '@meshforge/manufacturing/shared/util-constants';
+import { parseCuttergrindRoughShelfTag, DEPARTMENT_CUTTERGRIND, isCoaterStagingLocation } from '@meshforge/manufacturing/shared/util-constants';
 
 export function coaterContentHash(destination: string, notes: string, manifest: CoaterManifest): string {
   // PostgreSQL jsonb may reorder object keys. Sort keys recursively so storing a
@@ -42,12 +42,52 @@ export async function readCoaterManifest(manager: EntityManager, ids: string[]):
     FROM blade_tray bt LEFT JOIN blades b ON b.id=bt.blade_id
     WHERE bt.tray_id::text=ANY($1::text[]) AND bt.enabled AND bt."deletedAt" IS NULL
     ORDER BY b.serial_number,bt.id`, [trayIds]) : [];
+  // Containers that hold one complete set moved out of its tray (the current way of packing).
+  const sets = await manager.query(`SELECT cs.id,cs.container_id,cs.required_blade_count,cs.summary_id,cs.part_type_id,
+    pt2.serial_number AS from_tray,ps.number AS summary,ps.enabled AS summary_enabled,ps."deletedAt" AS summary_deleted,
+    pt.code AS part_type,pt.enabled AS type_enabled,pt."deletedAt" AS type_deleted,
+    l.serial_number AS location,l.enabled AS location_enabled,l."deletedAt" AS location_deleted,
+    l.department AS location_department,l.location_type
+    FROM container_sets cs LEFT JOIN part_summaries ps ON ps.id=cs.summary_id LEFT JOIN part_types pt ON pt.id=cs.part_type_id
+    LEFT JOIN trays pt2 ON pt2.id=cs.packed_from_tray_id LEFT JOIN locations l ON l.id=cs.location_id
+    WHERE cs.container_id::text=ANY($1::text[]) AND cs.enabled AND cs."deletedAt" IS NULL ORDER BY cs.id`, [ids]);
+  const setBlades = sets.length ? await manager.query(`SELECT sb.container_set_id,b.id,b.serial_number,b.status,b.service_cycle,
+    b.enabled,b."deletedAt",b.summary_id,b.part_type_id,
+    (SELECT count(*)::int FROM container_set_blades s2 WHERE s2.blade_id=b.id AND s2.enabled AND s2."deletedAt" IS NULL) AS set_links,
+    (SELECT count(*)::int FROM blade_tray b2 WHERE b2.blade_id=b.id AND b2.enabled AND b2."deletedAt" IS NULL) AS tray_links,
+    (SELECT count(*)::int FROM cutter_build_blades cb WHERE cb.blade_id=b.id AND cb.enabled AND cb."deletedAt" IS NULL) AS cutter_links
+    FROM container_set_blades sb LEFT JOIN blades b ON b.id=sb.blade_id
+    WHERE sb.container_set_id::text=ANY($1::text[]) AND sb.enabled AND sb."deletedAt" IS NULL
+    ORDER BY b.serial_number,sb.id`, [sets.map((s: any) => s.id)]) : [];
   const summary = new Map<string, { summary: string; part_type: string; trays: number; blades: number }>();
+  const tally = (row: CoaterShipmentTray, bladeCount: number) => {
+    result.totals.trays++;
+    result.totals.blades += bladeCount;
+    const key = JSON.stringify([row.summary,row.part_type]);
+    const total = summary.get(key) ?? { summary: row.summary, part_type: row.part_type, trays: 0, blades: 0 };
+    total.trays++; total.blades += bladeCount; summary.set(key,total);
+  };
   for (const container of containers) {
     const item = { id: String(container.id), serial: String(container.serial_number), trays: [] as CoaterShipmentTray[], issues: [] as string[] };
     if (!container.enabled || container.deletedAt) item.issues.push('Container is disabled or deleted.');
     const children = trays.filter((t: any) => t.container_id === container.id);
-    if (!children.length) item.issues.push('Container is empty.');
+    const containerSets = sets.filter((s: any) => s.container_id === container.id);
+    if (!children.length && !containerSets.length) item.issues.push('Container is empty.');
+    if (children.length && containerSets.length) item.issues.push('Container holds both a packed tray and a blade set; it needs review.');
+    for (const s of containerSets) {
+      const label = s.from_tray || 'Set';
+      const fail = (message: string) => item.issues.push(`Set from ${label}: ${message}`);
+      if (!s.summary || !s.summary_enabled || s.summary_deleted || !['RING','PINION'].includes(s.part_type) || !s.type_enabled || s.type_deleted) fail('Summary or Part Type is invalid or disabled.');
+      const rough = parseCuttergrindRoughShelfTag(s.location || '');
+      const placedOk = isCoaterStagingLocation(s.location) || (!!rough && rough.partTypeCode === s.part_type && s.location_type === 'SHELF');
+      if (!placedOk || !s.location_enabled || s.location_deleted || s.location_department !== DEPARTMENT_CUTTERGRIND) fail('the container is not at the coater staging area or a matching rough shelf bin.');
+      const assigned = setBlades.filter((b: any) => b.container_set_id === s.id);
+      if (assigned.length !== s.required_blade_count || new Set(assigned.map((b: any) => b.id)).size !== assigned.length) fail(`the set has ${assigned.length} blades but must be one complete set of ${s.required_blade_count}.`);
+      if (assigned.some((b: any) => !b.id || !b.enabled || b.deletedAt || b.status !== 'ready_for_coating' || b.summary_id !== s.summary_id || b.part_type_id !== s.part_type_id || b.set_links !== 1 || b.tray_links !== 0 || b.cutter_links !== 0)) fail('every blade must be ready for coating, match the set and be in no tray or cutter.');
+      const row: CoaterShipmentTray = { kind: 'SET', id: s.id, assignment_id: s.id, serial: label, summary: s.summary || 'Unassigned', part_type: s.part_type || 'Unknown', count: assigned.length, required: s.required_blade_count, rough_shelf: s.location || '', blades: assigned.map((b: any) => ({ id: b.id, serial: b.serial_number || 'Unknown', status: b.status, cycle: b.service_cycle })) };
+      item.trays.push(row);
+      tally(row, assigned.length);
+    }
     for (const t of children) {
       const label = t.serial_number || 'Unidentified tray';
       const fail = (message: string) => item.issues.push(`${label}: ${message}`);
@@ -61,13 +101,9 @@ export async function readCoaterManifest(manager: EntityManager, ids: string[]):
       const assigned = blades.filter((b: any) => b.tray_id === t.id);
       if (assigned.length !== t.blade_count || new Set(assigned.map((b: any) => b.id)).size !== assigned.length) fail('blade count or identity does not match the tray.');
       if (assigned.some((b: any) => !b.id || !b.enabled || b.deletedAt || b.status !== 'ready_for_coating' || b.summary_id !== t.summary_id || b.part_type_id !== t.part_type_id || b.tray_links !== 1 || b.cutter_links !== 0)) fail('every blade must be available, ready for coating and match the tray.');
-      const row: CoaterShipmentTray = { id: t.id, assignment_id: t.assignment_id, serial: label, summary: t.summary || 'Unassigned', part_type: t.part_type || 'Unknown', count: t.blade_count || 0, required: t.required_blade_count, rough_shelf: t.rough_shelf || '', blades: assigned.map((b: any) => ({ id: b.id, serial: b.serial_number || 'Unknown', status: b.status, cycle: b.service_cycle })) };
+      const row: CoaterShipmentTray = { kind: 'TRAY', id: t.id, assignment_id: t.assignment_id, serial: label, summary: t.summary || 'Unassigned', part_type: t.part_type || 'Unknown', count: t.blade_count || 0, required: t.required_blade_count, rough_shelf: t.rough_shelf || '', blades: assigned.map((b: any) => ({ id: b.id, serial: b.serial_number || 'Unknown', status: b.status, cycle: b.service_cycle })) };
       item.trays.push(row);
-      result.totals.trays++;
-      result.totals.blades += assigned.length;
-      const key = JSON.stringify([row.summary,row.part_type]);
-      const total = summary.get(key) ?? { summary: row.summary, part_type: row.part_type, trays: 0, blades: 0 };
-      total.trays++; total.blades += assigned.length; summary.set(key,total);
+      tally(row, assigned.length);
     }
     result.containers.push(item);
     result.issues.push(...item.issues.map(message => `${item.serial}: ${message}`));

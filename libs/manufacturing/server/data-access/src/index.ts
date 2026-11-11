@@ -58,5 +58,6 @@ export * from './lib/database/seeds/seed.module';
 export * from './lib/database/seeds/users.database-seed';
 
 export * from './lib/coater-shipment.schema';
+export * from './lib/coater-container-set';
 
 export * from './lib/database/subscribers/user.entity-subscriber';

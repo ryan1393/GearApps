@@ -25,7 +25,7 @@ Choose the first number and how many (up to 100 at a time). A number that alread
 Records a tray that is already ground or already coated on the day the system starts, without replaying grinding and coater history that was never captured.
 
 - Scan the tray, choose its Summary and part type, say where it stands, and scan the shelf it is on.
-  - **Ground, waiting for the coater** goes on a rough shelf bin (`CGRR-A1A` / `CGRP-A1A`: shelf, layer, bin).
+  - **Ground, waiting for the coater** goes at `COATER-STAGING` or on a rough shelf bin (`CGRR-A1A` / `CGRP-A1A`: shelf, layer, bin).
   - **Coated, ready for a cutter build** goes on a finished shelf bin (`CGFR-A1A` / `CGFP-A1A`: shelf, layer, bin).
 - The tray must exist, be empty and not be in a container or a cutter build. It is recorded with the full blade quantity its Summary requires, in the same state the normal workflow would leave it in, so it continues through coater loading or cutter building like any other tray.
 - Each entry is journaled. **Cancel Last** in Blade Tracking undoes it.

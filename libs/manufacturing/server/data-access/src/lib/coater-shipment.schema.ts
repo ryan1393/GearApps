@@ -76,7 +76,7 @@ export async function lockCoaterInventory(manager: EntityManager): Promise<void>
   await manager.query("SET LOCAL lock_timeout = '5s'");
   await manager.query("SELECT pg_advisory_xact_lock(hashtext('dana-coater-shipments-v1'))");
   await manager.query(`LOCK TABLE public.blade_history, public.blade_tray, public.blades,
-    public.container_tray, public.containers, public.cutter_build_blades, public.cutter_build_trays,
+    public.container_tray, public.container_sets, public.container_set_blades, public.containers, public.cutter_build_blades, public.cutter_build_trays,
     public.location_tray, public.locations, public.part_summaries,
     public.part_types, public.tray_stages, public.trays IN SHARE ROW EXCLUSIVE MODE`);
 }

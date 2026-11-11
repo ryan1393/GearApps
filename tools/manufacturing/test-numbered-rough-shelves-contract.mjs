@@ -34,4 +34,19 @@ assert.equal(shelf.buildCuttergrindShelfTag('CUTTERGRIND_ROUGH','PINION','c',3,'
 assert.equal(shelf.buildCuttergrindShelfTag('CUTTERGRIND_FINISHED','RING','A',0,'A'),null);cases++;
 assert.equal(shelf.describeCuttergrindShelfPosition({shelf:'A',layer:1,bin:'A'}),'Shelf A, layer 1, bin A');cases++;
 assert.equal(shelf.parseSummaryShelfTag('GSR-31706').summaryNumber,'31706');cases++;
+// Ground sets wait at COATER-STAGING by default; a container takes exactly one complete set.
+assert.equal(workflow.classifyTrayAvailabilityStage({...full,location_serial:'COATER-STAGING'}).code,'READY_FOR_COATING');cases++;
+assert.equal(workflow.classifyTrayAvailabilityStage({...full,location_serial:'COATER-STAGING',location_department:'GREENSHED'}).code,'NEEDS_SHELF_PLACEMENT');cases++;
+const set=(status,count=13)=>({required_blade_count:13,blades:Array.from({length:count},()=>({status}))});
+for(const [args,expected] of [
+  [[true,0,[],null],{load:true,receive:false}],
+  [[true,0,[],set('ready_for_coating')],{load:false,receive:false}],
+  [[true,0,[],set('at_coater')],{load:false,receive:true}],
+  [[true,0,[],set('at_coater',12)],{load:false,receive:false}],
+  [[false,0,[],set('at_coater')],{load:false,receive:false}],
+]) {assert.deepEqual(workflow.containerWorkflowEligibility(...args),expected);cases++;}
+const ready={enabled:true,blade_count:13,required_blade_count:13,grinding_completed_at:'2026-09-30',summary_id:'s',part_type_id:'p',part_type:{code:'RING'},current_stage:{code:'READY_FOR_COATING'},current_container:null,current_cutter_build:null,blades:Array.from({length:13},()=>({status:'ready_for_coating'}))};
+assert.equal(workflow.trayWorkflowEligibility({...ready,current_location:{serial_number:'COATER-STAGING'}}).coater_load,true);cases++;
+assert.equal(workflow.trayWorkflowEligibility({...ready,current_location:{serial_number:'CGRR-A1A'}}).coater_load,true);cases++;
+assert.equal(workflow.trayWorkflowEligibility({...ready,current_location:{serial_number:'CGRP-A1A'}}).coater_load,false);cases++;
 console.log(`[PASS] Numbered rough shelves / readiness: ${cases} read-only cases`);

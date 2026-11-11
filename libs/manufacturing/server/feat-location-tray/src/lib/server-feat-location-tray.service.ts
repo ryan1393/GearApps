@@ -19,7 +19,7 @@ import {
   IPaginatedResponse,
   Uuid,
 } from '@meshforge/manufacturing/shared/util-types';
-import { parseCuttergrindNumberedShelfTag, parseCuttergrindRoughShelfTag, parseSummaryShelfTag } from '@meshforge/manufacturing/shared/util-constants';
+import { isCoaterStagingLocation, parseCuttergrindNumberedShelfTag, parseCuttergrindRoughShelfTag, parseSummaryShelfTag } from '@meshforge/manufacturing/shared/util-constants';
 import { ConflictException, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -116,6 +116,11 @@ export class ServerFeatLocationTrayService extends PaginationService<LocationTra
             `${location.serial_number} requires completed grinding and tray stage READY_FOR_COATING`,
           );
         }
+      }
+      if (isCoaterStagingLocation(location.serial_number) &&
+          (tray.current_stage?.code !== 'READY_FOR_COATING' || !tray.grinding_completed_at || !tray.required_blade_count ||
+           tray.blade_count !== tray.required_blade_count || blades.some(({ blade }) => blade.status !== BladeStatus.READY_FOR_COATING))) {
+        throw new UnprocessableEntityException(`${location.serial_number} only takes a full, ground tray waiting for the coater`);
       }
       if (cuttergrindShelf) {
         if (location.department !== cuttergrindShelf.department || location.location_type !== cuttergrindShelf.locationType) {

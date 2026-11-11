@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsUUID, Min, IsString, Length, Matches, IsOptional } from 'class-validator';
+import { IsInt, IsUUID, Min, IsString, Length, Matches, IsOptional, IsIn } from 'class-validator';
 
 export class StartTrayGrindingDto {
   @ApiProperty({ type: String, format: 'uuid' })
@@ -25,12 +25,30 @@ export class CompleteTrayGrindingDto extends StartTrayGrindingDto {
   @Min(0)
   scrapped_blade_count!: number;
 
-  @ApiProperty({ required: false, example: 'CGRR-A1A', description: 'Actual rough shelf bin (shelf letter, layer number, bin letter); required for a complete tray, omitted for a short tray.' })
+  @ApiProperty({
+    required: false,
+    example: 'CGRR-A1A',
+    description: 'Where a complete tray or its container goes: blank or COATER-STAGING for the coater staging area (the default), or a rough shelf bin such as CGRR-A1A. Omitted for a short tray.',
+  })
   @IsOptional()
   @IsString()
-  @Length(8, 8)
-  @Matches(/^(CGRR|CGRP)-[A-Z][1-9][A-Z]$/i)
+  @Matches(/^((CGRR|CGRP)-[A-Z][1-9][A-Z]|COATER-STAGING)$/i)
   rough_shelf_serial_number?: string;
+
+  @ApiProperty({
+    required: false,
+    enum: ['CONTAINER', 'TRAY'],
+    description: 'CONTAINER moves the complete set into an empty coater container and empties the tray; TRAY leaves the blades in the tray. Defaults to CONTAINER when a container is scanned, otherwise TRAY.',
+  })
+  @IsOptional()
+  @IsIn(['CONTAINER', 'TRAY'])
+  destination?: 'CONTAINER' | 'TRAY';
+
+  @ApiProperty({ required: false, example: 'C0001', description: 'The empty coater container a complete set goes into (destination CONTAINER).' })
+  @IsOptional()
+  @IsString()
+  @Length(1, 80)
+  container_serial_number?: string;
 }
 
 export class EmptyBodyIdentifierDto {

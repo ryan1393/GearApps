@@ -72,6 +72,21 @@ export class AdminMasterDataService {
       `SELECT s.code, s.name, count(t.id) AS trays, COALESCE(sum(t.blade_count), 0) AS blades
          FROM tray_stages s LEFT JOIN trays t ON t.current_stage_id=s.id AND t.enabled
         GROUP BY s.code, s.name, s.sort_order ORDER BY s.sort_order, s.code`);
+    // Blade sets moved out of their trays into coater containers are counted as containers, not trays.
+    const sets: Array<{ code: string; name: string; trays: string; blades: string }> = await this.dataSource.query(
+      `SELECT CASE WHEN bool_and(b.status = 'at_coater') THEN 'SET_AT_COATER' ELSE 'SET_PACKED_FOR_COATER' END AS code,
+              CASE WHEN bool_and(b.status = 'at_coater') THEN 'Sets at coater (containers)' ELSE 'Sets in containers, waiting for coater' END AS name,
+              0 AS trays, count(b.id) AS blades
+         FROM container_sets cs
+         JOIN container_set_blades sb ON sb.container_set_id = cs.id AND sb.enabled AND sb."deletedAt" IS NULL
+         JOIN blades b ON b.id = sb.blade_id AND b.enabled
+        WHERE cs.enabled AND cs."deletedAt" IS NULL
+        GROUP BY cs.id`);
+    for (const set of sets) {
+      const row = stages.find((stage) => stage.code === set.code);
+      if (row) row.blades = String(Number(row.blades) + Number(set.blades));
+      else stages.push({ ...set });
+    }
     const [cuttersBuilt, cuttersRunning, rpaForm, rpaSettings, rpaMappings] = await Promise.all([
       count(`SELECT count(*) FROM cutter_builds b JOIN cutter_build_statuses s ON s.id=b.status_id WHERE s.code NOT IN ('PULLED','CLOSED')`),
       count(`SELECT count(*) FROM cutter_machine_runs WHERE enabled`),

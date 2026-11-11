@@ -11,7 +11,7 @@ import {
   LocationTrayOrmEntity, PartSummaryOrmEntity, TrayOrmEntity, TrayStageOrmEntity,
 } from '@meshforge/manufacturing/server/data-access';
 import {
-  parseCuttergrindNumberedShelfTag, parseCuttergrindRoughShelfTag,
+  COATER_STAGING_LOCATION_SERIAL, DEPARTMENT_CUTTERGRIND, isCoaterStagingLocation, parseCuttergrindNumberedShelfTag, parseCuttergrindRoughShelfTag,
 } from '@meshforge/manufacturing/shared/util-constants';
 import { BladeHistoryEvent, BladeStatus, Uuid } from '@meshforge/manufacturing/shared/util-types';
 
@@ -76,23 +76,27 @@ export class OpeningInventoryService {
         throw new UnprocessableEntityException('No enabled blade quantity requirement exists for this summary and part type');
       }
 
-      // The same shelves the workflow accepts for this stage: a rough shelf bin (CGRR-A1A) after
-      // grinding, a finished shelf bin (CGFR-A1A) after coating, for the tray's own part type.
+      // The same places the workflow accepts for this stage: the coater staging area or a rough
+      // shelf bin (CGRR-A1A) after grinding, a finished shelf bin (CGFR-A1A) after coating.
+      const staging = dto.stage === 'READY_FOR_COATING' && isCoaterStagingLocation(shelfSerial);
       const shelfTag = dto.stage === 'READY_FOR_COATING'
         ? parseCuttergrindRoughShelfTag(shelfSerial)
         : parseCuttergrindNumberedShelfTag(shelfSerial);
       const prefix = dto.stage === 'READY_FOR_COATING'
         ? (partType.code === 'RING' ? 'CGRR' : 'CGRP')
         : (partType.code === 'RING' ? 'CGFR' : 'CGFP');
-      if (!shelfTag || shelfTag.partTypeCode !== partType.code
-        || (dto.stage === 'READY_FOR_CUTTER' && shelfTag.kind !== 'CUTTERGRIND_FINISHED')) {
-        throw new UnprocessableEntityException(`A ${partType.code} tray at this stage belongs on a ${prefix} shelf addressed by shelf, layer and bin, such as ${prefix}-A1A`);
+      if (!staging && (!shelfTag || shelfTag.partTypeCode !== partType.code
+        || (dto.stage === 'READY_FOR_CUTTER' && shelfTag.kind !== 'CUTTERGRIND_FINISHED'))) {
+        throw new UnprocessableEntityException(dto.stage === 'READY_FOR_COATING'
+          ? `A ${partType.code} tray at this stage belongs at ${COATER_STAGING_LOCATION_SERIAL} or on a ${prefix} shelf addressed by shelf, layer and bin, such as ${prefix}-A1A`
+          : `A ${partType.code} tray at this stage belongs on a ${prefix} shelf addressed by shelf, layer and bin, such as ${prefix}-A1A`);
       }
+      const placeSerial = staging ? COATER_STAGING_LOCATION_SERIAL : shelfTag!.serialNumber;
       const shelf = await manager.getRepository(LocationOrmEntity).findOne({
-        where: { serial_number: shelfTag.serialNumber, enabled: true }, lock: { mode: 'pessimistic_read' },
+        where: { serial_number: placeSerial, enabled: true }, lock: { mode: 'pessimistic_read' },
       });
-      if (!shelf || shelf.location_type !== shelfTag.locationType || shelf.department !== shelfTag.department) {
-        throw new UnprocessableEntityException(`${shelfTag.serialNumber} is missing, disabled, or not set up as a shelf. Add it in Admin > Locations.`);
+      if (!shelf || shelf.department !== DEPARTMENT_CUTTERGRIND || (!staging && shelf.location_type !== shelfTag!.locationType)) {
+        throw new UnprocessableEntityException(`${placeSerial} is missing, disabled, or not set up correctly. Check it in Admin > Locations.`);
       }
       const stage = await stageRepo.findOne({ where: { code: dto.stage, enabled: true } });
       if (!stage) throw new UnprocessableEntityException(`${dto.stage} tray stage is not configured`);

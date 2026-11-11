@@ -116,7 +116,7 @@
       </label>
       <label class="gear-field">Shelf barcode
         <input class="gear-input mono" name="openShelf" [(ngModel)]="opening.shelf" maxlength="80" autocomplete="off" [placeholder]="openingStageShelf + '-A1A'" [disabled]="openingBusy" />
-        <small class="gear-field-help">A {{ openingStageShelf }} shelf bin: shelf, layer, bin, such as {{ openingStageShelf }}-A1A.</small>
+        <small class="gear-field-help">A {{ openingStageShelf }} shelf bin: shelf, layer, bin, such as {{ openingStageShelf }}-A1A{{ opening.stage === 'READY_FOR_COATING' ? ', or COATER-STAGING' : '' }}.</small>
       </label>
       <label class="gear-field">Times reground so far
         <input class="gear-input mono" name="openCycle" type="number" min="0" max="99" step="1" [(ngModel)]="opening.service_cycle" [disabled]="openingBusy" />

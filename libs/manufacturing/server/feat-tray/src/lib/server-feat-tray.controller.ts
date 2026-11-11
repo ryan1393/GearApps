@@ -143,6 +143,10 @@ export class ServerFeatTrayController {
       userId,
       dto.rough_shelf_serial_number,
       dto.grinding_machine_id,
+      {
+        destination: dto.destination ?? (dto.container_serial_number?.trim() ? 'CONTAINER' : 'TRAY'),
+        containerSerial: dto.container_serial_number,
+      },
     );
   }
 
