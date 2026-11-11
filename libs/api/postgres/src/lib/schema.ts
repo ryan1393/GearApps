@@ -140,5 +140,25 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
       '20261111-lapper-collector-token-purpose-v1',
       COLLECTOR_TOKEN_PURPOSE_SQL,
     );
+    await runDatabaseMigration(manager, '20261111-lapper-master-data-dedup-v1', LAPPER_MASTER_DATA_DEDUP_SQL);
   });
 }
+
+/**
+ * public.machines owns a machine's number, department, cell and description; lapper.machines
+ * kept stale copies of them. A description only Lapper had is moved to the master first, so
+ * nothing shown today is lost. The legacy type-of-check and gearset-marriage tables had no
+ * screen or collector and are dropped with their endpoints. Runs after the legacy import
+ * cut-off (lapper-history-integrity-v2), so the import can no longer write these columns.
+ */
+export const LAPPER_MASTER_DATA_DEDUP_SQL = `
+UPDATE public.machines p SET description=btrim(l.description), "updatedAt"=now()
+  FROM lapper.machines l
+ WHERE l.public_machine_id=p.id AND p.description IS NULL AND nullif(btrim(l.description),'') IS NOT NULL;
+ALTER TABLE lapper.machines DROP COLUMN IF EXISTS number, DROP COLUMN IF EXISTS dept_id,
+  DROP COLUMN IF EXISTS cell, DROP COLUMN IF EXISTS description;
+DROP TABLE IF EXISTS lapper.type_of_checks;
+DROP TABLE IF EXISTS lapper.gearset_marriages;
+COMMENT ON TABLE lapper.machines IS 'Lapper connection profile of a public.machines row: controller and scanner IPs, Argonaut endpoint, Lapper type/builder and Lapper status. Machine number, department, cell and description are read from public.machines.';
+COMMENT ON TABLE lapper.gearsets IS 'Gearset references of recorded cycles. Rows with public_gearset_id read number, ratio and components from public.gearsets; their own columns are imported lineage. Rows without one are collector numbers not yet matched to a MeshForge assembly.';
+`;

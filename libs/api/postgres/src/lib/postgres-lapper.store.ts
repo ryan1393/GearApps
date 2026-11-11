@@ -35,8 +35,6 @@ const columns: Partial<Record<Resource, string[]>> = {
     'ip',
   ],
   'machine-fanuc-variable': ['x06_7_frt_dr_closed', 'x01_2_start_cycle', 'y03_2_stack_inCycle'],
-  toc: ['name', 'description'],
-  'gearset-marriage': ['rev', 'gearset_id', 'pinion_id', 'ring_id'],
 };
 const tables: Partial<Record<Resource, string>> = {
   macro: 'lapper.macros',
@@ -44,8 +42,6 @@ const tables: Partial<Record<Resource, string>> = {
   'machine-fanuc-variable': 'lapper.machine_fanuc_variables',
   'machine-cycle': 'lapper.machine_cycles',
   'macro-log': 'lapper.macro_logs',
-  toc: 'lapper.type_of_checks',
-  'gearset-marriage': 'lapper.gearset_marriages',
   machine: 'lapper.machines',
   gearset: 'lapper.gearsets',
 };
@@ -109,7 +105,6 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
         'part',
         'part-summary',
         'department',
-        'gearset-marriage',
       ].includes(kind);
       const effectiveId =
         existing && ['machine-cycle', 'macro-log'].includes(kind) ? text(existing.id) : id;
@@ -195,12 +190,13 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
     await manager.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
       'lapper-gear:' + apiId,
     ]);
+    // Number is the lineage key cycles are matched by. Ratio and components stay in
+    // public.gearsets; status is Lapper's own override, so it starts without one.
     const values = {
       id: apiId,
       number: publicGear.number,
       rev: null,
-      ratio: publicGear.ratio_value,
-      status: publicGear.active && publicGear.enabled ? 'active' : 'inactive',
+      status: 'active',
       public_gearset_id: apiId,
     };
     await manager
@@ -222,7 +218,6 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
   ): Promise<string> {
     if (kind === 'machine') return this.writeMachine(manager, id, data);
     if (kind === 'gearset') return this.writeGearset(manager, id, data);
-    if (kind === 'gearset-marriage') return this.writeMarriage(manager, id, data);
     if (['department', 'part', 'part-summary'].includes(kind))
       return this.writeMaster(manager, kind, id, data);
     const table = localTable(kind);
@@ -457,7 +452,6 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
           id: assembly,
           number: name,
           public_gearset_id: assembly,
-          ratio: data.ratio ?? null,
           status: data.status ?? 'active',
           ...pick(data, ['rev', 'user_id']),
         })
@@ -589,42 +583,6 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
     return gearId;
   }
 
-  private async writeMarriage(
-    manager: EntityManager,
-    id: string | undefined,
-    data: Row,
-  ): Promise<string> {
-    const gear = await manager
-      .createQueryBuilder()
-      .select('g.*')
-      .from('public.gearsets', 'g')
-      .where(id ? 'g.id=:id' : 'g.gearset_part_id=:id', { id: id ?? data.gearset_id })
-      .getRawOne<Row>();
-    if (!gear)
-      throw new BadRequestException(
-        'Create the complete assembly using Gearsets or MeshForge master data',
-      );
-    if (
-      (data.ring_id && data.ring_id !== gear.ring_part_id) ||
-      (data.pinion_id && data.pinion_id !== gear.pinion_part_id)
-    )
-      throw new ConflictException('Assembly components must match MeshForge master data');
-    await manager
-      .createQueryBuilder()
-      .insert()
-      .into('lapper.gearset_marriages')
-      .values({
-        id: gear.id,
-        gearset_id: gear.gearset_part_id,
-        ring_id: gear.ring_part_id,
-        pinion_id: gear.pinion_part_id,
-        rev: data.rev ?? null,
-      })
-      .orUpdate(['rev'], ['id'])
-      .execute();
-    return text(gear.id);
-  }
-
   private async writeMachine(
     manager: EntityManager,
     id: string | undefined,
@@ -696,6 +654,15 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
         .set({ cell: parsedCell, ...pick(data, ['description']) })
         .where('id=:id', { id: master.id })
         .execute();
+    } else if (data.description != null && master.description == null) {
+      // Attaching a Lapper profile to a MeshForge machine never overwrites its master data;
+      // it only supplies a description the machine does not have yet.
+      await manager
+        .createQueryBuilder()
+        .update('public.machines')
+        .set({ description: data.description })
+        .where('id=:id AND description IS NULL', { id: master.id })
+        .execute();
     }
     const existingProfile = await manager
       .createQueryBuilder()
@@ -705,11 +672,9 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
       .getRawOne<Row>();
     profile = profile ?? existingProfile;
     const legacyId = text(profile?.id ?? master.id);
+    // Number, department, cell and description live only in public.machines (above).
     const fields = {
-      number: name,
-      dept_id: departmentCode,
-      cell: parsedCell == null ? null : text(parsedCell),
-      ...pick(data, ['description', 'type', 'builder', 'status']),
+      ...pick(data, ['type', 'builder', 'status']),
       machine_ip: data.ip ?? profile?.machine_ip ?? '',
       public_machine_id: master.id,
       // Lapper Read's per-machine Argonaut endpoint; blank clears it back to the collector default.
@@ -889,7 +854,6 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
           'department',
           'part',
           'part-summary',
-          'gearset-marriage',
           'machine-cycle',
           'macro-log',
         ].includes(kind)

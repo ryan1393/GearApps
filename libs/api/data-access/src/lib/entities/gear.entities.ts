@@ -1,7 +1,6 @@
 import {
   Department,
   Gearset,
-  GearsetMarriage,
   Machine,
   MachineCycle,
   MachineFanucVariable,
@@ -73,22 +72,6 @@ export const GearsetEntity = new EntitySchema<Gearset>({
     pinion: manyToOne('Parts', 'pinion_id', { nullable: true }),
     ring: manyToOne('Parts', 'ring_id', { nullable: true }),
     user: manyToOne('Users', 'user_id', { nullable: true }),
-  },
-});
-
-export const GearsetMarriageEntity = new EntitySchema<GearsetMarriage>({
-  name: 'GearsetMarriages',
-  columns: {
-    id: uuidPrimary,
-    rev: str(true),
-    gearset_id: fk(true),
-    pinion_id: fk(true),
-    ring_id: fk(true),
-  },
-  relations: {
-    gearset: manyToOne('Parts', 'gearset_id', { nullable: true }),
-    pinion: manyToOne('Parts', 'pinion_id', { nullable: true }),
-    ring: manyToOne('Parts', 'ring_id', { nullable: true }),
   },
 });
 
