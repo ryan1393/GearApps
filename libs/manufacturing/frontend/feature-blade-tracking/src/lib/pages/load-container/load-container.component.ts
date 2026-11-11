@@ -18,11 +18,12 @@ import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import { StationStatusComponent } from '../../shared/station-status/station-status.component';
 import { StationOperation } from '../operations-station/operations-station.operations';
+import { DanaPageHeaderComponent } from '@dana/ui';
 
 @Component({
   selector: 'gear-load-container',
   standalone: true,
-  imports: [RouterLink, CommonModule, FormsModule, ScanPanelComponent, StationStatusComponent, OptionPickerComponent],
+  imports: [DanaPageHeaderComponent, RouterLink, CommonModule, FormsModule, ScanPanelComponent, StationStatusComponent, OptionPickerComponent],
   templateUrl: './load-container.component.html',
 })
 export class LoadContainerComponent implements OnDestroy, StationOperation {

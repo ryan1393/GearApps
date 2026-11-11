@@ -1,4 +1,5 @@
-<section class="gear-page op-page" aria-label="Grinding">
+<section class="gear-page op-page">
+  <header class="gear-page-header" danaPageHeader eyebrow="CUTTER GRIND / GRINDING" heading="Grinding Station" description="Scan a tray, then follow the next action. Scrap defaults to zero."></header>
   <div class="op-steps">
     <gear-station-status [message]="message" [prompt]="prompt" (dismiss)="message = null" />
 
@@ -45,7 +46,7 @@
               <button type="button" class="gear-btn gear-btn-secondary mt-2" [disabled]="busy || shelvesLoading" (click)="refreshShelves()">Refresh shelves</button>
             </gear-scan-panel>
           }
-          @if (requiredBlades !== null && previouslyReadyCount + returnedAfterGrinding < requiredBlades) {
+          @if (shortAfterGrinding) {
             <p class="mt-2 text-sm">A short tray needs replacement blades and another grinding pass, so it gets no ready-for-coating shelf.</p>
           }
         }

@@ -12,9 +12,10 @@ import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import { StationStatusComponent } from '../../shared/station-status/station-status.component';
 import { StationOperation } from '../operations-station/operations-station.operations';
+import { DanaPageHeaderComponent } from '@dana/ui';
 
 @Component({ selector:'gear-blade-intake', standalone:true,
-  imports:[CommonModule,FormsModule,RouterLink,ScanPanelComponent,StationStatusComponent,OptionPickerComponent,CountStepperComponent], templateUrl:'./intake.component.html' })
+  imports:[DanaPageHeaderComponent, CommonModule,FormsModule,RouterLink,ScanPanelComponent,StationStatusComponent,OptionPickerComponent,CountStepperComponent], templateUrl:'./intake.component.html' })
 export class IntakeComponent implements OnInit, OnDestroy, StationOperation {
   private readonly api=inject(BladeTrackingApiService);
   private readonly toast=inject(GearToastService);
@@ -23,7 +24,7 @@ export class IntakeComponent implements OnInit, OnDestroy, StationOperation {
   private requirementVersion=0;
   @ViewChild('summarySelect') summarySelect?:ElementRef<HTMLSelectElement>;
   @ViewChild('partTypeSelect') partTypeSelect?:ElementRef<HTMLSelectElement>;
-  @ViewChild(CountStepperComponent) quantityStepper?:CountStepperComponent;
+  @ViewChild(CountStepperComponent) quantityInput?:CountStepperComponent;
   @ViewChild('trayScanner') trayScanner?:ScanPanelComponent;
   tray:InventoryTrayRow|null=null;
   availableTrays:InventoryTrayRow[]=[];
@@ -113,7 +114,7 @@ export class IntakeComponent implements OnInit, OnDestroy, StationOperation {
   private focusNextField(version:number):void {
     setTimeout(()=>{
       if(version!==this.selectionVersion||!this.tray)return;
-      const el=!this.summaryId?this.summarySelect?.nativeElement:!this.partTypeId?this.partTypeSelect?.nativeElement:this.quantityStepper?.input; if(!el||el.disabled)return;
+      const el=!this.summaryId?this.summarySelect?.nativeElement:!this.partTypeId?this.partTypeSelect?.nativeElement:this.quantityInput?.input; if(!el||el.disabled)return;
       el.focus(); if(el instanceof HTMLInputElement)el.select();
     });
   }

@@ -156,8 +156,7 @@ function remember(key: BladeOperationKey): void {
 
 function storedHiddenTabs(): ReadonlySet<BladeOperationKey> {
   try {
-    const stored: unknown = JSON.parse(localStorage.getItem(HIDDEN_TABS_KEY) ?? '[]');
-    const keys = Array.isArray(stored) ? stored.filter(isBladeOperation) : [];
+    const keys = (localStorage.getItem(HIDDEN_TABS_KEY) ?? '').split(',').filter(isBladeOperation);
     return new Set(keys.length < BLADE_OPERATIONS.length ? keys : []);
   } catch {
     return new Set();
@@ -166,7 +165,7 @@ function storedHiddenTabs(): ReadonlySet<BladeOperationKey> {
 
 function storeHiddenTabs(hidden: ReadonlySet<BladeOperationKey>): void {
   try {
-    localStorage.setItem(HIDDEN_TABS_KEY, JSON.stringify([...hidden]));
+    localStorage.setItem(HIDDEN_TABS_KEY, [...hidden].join(','));
   } catch {
     // Storage may be blocked; the choice then lasts until the page reloads.
   }

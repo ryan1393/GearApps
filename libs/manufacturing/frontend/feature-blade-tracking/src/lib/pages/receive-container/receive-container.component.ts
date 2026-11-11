@@ -19,11 +19,12 @@ import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import { StationStatusComponent } from '../../shared/station-status/station-status.component';
 import { StationOperation } from '../operations-station/operations-station.operations';
+import { DanaPageHeaderComponent } from '@dana/ui';
 
 @Component({
   selector: 'gear-receive-container',
   standalone: true,
-  imports: [CommonModule, FormsModule, ScanPanelComponent, StationStatusComponent, OptionPickerComponent],
+  imports: [DanaPageHeaderComponent, CommonModule, FormsModule, ScanPanelComponent, StationStatusComponent, OptionPickerComponent],
   templateUrl: './receive-container.component.html',
 })
 export class ReceiveContainerComponent implements OnDestroy, StationOperation {

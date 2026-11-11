@@ -20,12 +20,12 @@ import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import { StationStatusComponent } from '../../shared/station-status/station-status.component';
 import { StationOperation } from '../operations-station/operations-station.operations';
-import { DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
+import { DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
 
 @Component({
   selector: 'gear-blade-grinding',
   standalone: true,
-  imports: [MachineDsfCountComponent, CommonModule, FormsModule, RouterLink, ScanPanelComponent, StationStatusComponent, OptionPickerComponent, CountStepperComponent, DanaTableDirective, DanaTableShellDirective],
+  imports: [DanaPageHeaderComponent, MachineDsfCountComponent, CommonModule, FormsModule, RouterLink, ScanPanelComponent, StationStatusComponent, OptionPickerComponent, CountStepperComponent, DanaTableDirective, DanaTableShellDirective],
   templateUrl: './grinding.component.html',
 })
 export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
@@ -152,6 +152,10 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
   get requiredBlades(): number | null {
     const count = this.tray?.required_blade_count ?? this.resolvedRequiredBlades;
     return Number.isInteger(count) && Number(count) > 0 ? Number(count) : null;
+  }
+  /** The pass would leave the tray below its requirement, so it needs replacements and gets no shelf. */
+  get shortAfterGrinding(): boolean {
+    return this.requiredBlades !== null && this.previouslyReadyCount + this.returnedAfterGrinding < this.requiredBlades;
   }
   get fullAfterGrinding(): boolean {
     return this.requiredBlades !== null && this.previouslyReadyCount + this.returnedAfterGrinding === this.requiredBlades;

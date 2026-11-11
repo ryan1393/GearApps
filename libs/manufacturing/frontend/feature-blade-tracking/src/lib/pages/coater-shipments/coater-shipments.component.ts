@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { CoaterAvailableContainer, CoaterShipment, CoaterShipmentContainer, CoaterShipmentList } from '@meshforge/manufacturing/shared/util-types';
 import { CoaterShipmentsApiService, apiErrorText } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
-import { DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
+import { DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
 import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/option-picker.component';
 import { StationOperation } from '../operations-station/operations-station.operations';
 import { coaterPackingSlipHtml, coaterContainerLabelsHtml } from './coater-packing-slip';
@@ -13,7 +13,7 @@ import { createCoaterRequestId } from './coater-request-id';
 
 @Component({
   selector: 'gear-coater-shipments', standalone: true,
-  imports: [CommonModule,FormsModule,RouterLink,OptionPickerComponent,DanaTableDirective,DanaTableShellDirective],
+  imports: [DanaPageHeaderComponent, CommonModule,FormsModule,RouterLink,OptionPickerComponent,DanaTableDirective,DanaTableShellDirective],
   templateUrl: './coater-shipments.component.html', styleUrls: ['./coater-shipments.component.css'],
 })
 export class CoaterShipmentsComponent implements OnDestroy, StationOperation {

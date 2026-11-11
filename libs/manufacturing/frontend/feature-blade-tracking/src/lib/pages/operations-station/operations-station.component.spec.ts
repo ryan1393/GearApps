@@ -54,7 +54,7 @@ describe('blade operations station', () => {
     station.toggleTab('intake');
     expect(station.shownOperations().map((op) => op.key)).not.toContain('coater-shipments');
     expect(station.shownOperations().map((op) => op.key)).toContain('intake');
-    expect(JSON.parse(localStorage.getItem('meshforge.blade-tracking.operations-station.hidden-tabs') ?? '[]')).toEqual(['coater-shipments', 'intake']);
+    expect(localStorage.getItem('meshforge.blade-tracking.operations-station.hidden-tabs')).toBe('coater-shipments,intake');
     for (const { key } of BLADE_OPERATIONS) if (!station.hidden().has(key)) station.toggleTab(key);
     expect(BLADE_OPERATIONS.length - station.hidden().size).toBe(1);
     const lastShown = BLADE_OPERATIONS.find(({ key }) => !station.hidden().has(key));

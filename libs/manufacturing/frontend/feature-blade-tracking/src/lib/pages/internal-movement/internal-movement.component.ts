@@ -11,9 +11,9 @@ import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import { StationStatusComponent } from '../../shared/station-status/station-status.component';
 import { StationOperation } from '../operations-station/operations-station.operations';
-import { DanaDetailGridDirective, DanaDetailItemComponent } from '@dana/ui';
+import { DanaDetailGridDirective, DanaDetailItemComponent, DanaPageHeaderComponent } from '@dana/ui';
 
-@Component({ selector: 'gear-internal-movement', standalone: true, imports: [CommonModule, FormsModule, ScanPanelComponent, StationStatusComponent, OptionPickerComponent, DanaDetailGridDirective, DanaDetailItemComponent], templateUrl: './internal-movement.component.html' })
+@Component({ selector: 'gear-internal-movement', standalone: true, imports: [DanaPageHeaderComponent, CommonModule, FormsModule, ScanPanelComponent, StationStatusComponent, OptionPickerComponent, DanaDetailGridDirective, DanaDetailItemComponent], templateUrl: './internal-movement.component.html' })
 export class InternalMovementComponent implements OnDestroy, StationOperation {
   private readonly destroyed$ = new Subject<void>();
   ngOnDestroy(): void { this.destroyed$.next(); this.destroyed$.complete(); }

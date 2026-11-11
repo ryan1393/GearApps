@@ -1,4 +1,5 @@
-<section class="gear-page op-page" aria-label="Internal Movement">
+<section class="gear-page op-page">
+  <header class="gear-page-header" danaPageHeader eyebrow="INTERNAL MOVEMENT" heading="Move Tray" description="Scan the tray, then the destination location serial."></header>
   <div class="op-steps">
     <gear-station-status [message]="message" [prompt]="prompt" (dismiss)="message = null" />
 
@@ -38,7 +39,7 @@
       <div class="gear-panel p-5">
         <div class="grid gap-4 sm:grid-cols-2">
           <div><span class="op-card-eyebrow">From</span><div class="op-card-title">{{ current?.location?.serial_number || 'Unassigned' }}</div><div *ngIf="current?.location?.description" class="text-sm text-slate-500">{{ current?.location?.description }}</div></div>
-          <div><span class="op-card-eyebrow">To</span><div class="op-card-title">{{ destination?.serial_number || '—' }}</div><div *ngIf="destination?.description" class="text-sm text-slate-500">{{ destination?.description }}</div></div>
+          <div><span class="op-card-eyebrow">To</span>@if (destination) {<div class="op-card-title">{{ destination.serial_number }}</div><div *ngIf="destination.description" class="text-sm text-slate-500">{{ destination.description }}</div>} @else {<div class="op-card-title">—</div>}</div>
         </div>
       </div>
       <div class="gear-panel p-5">
