@@ -1,4 +1,4 @@
-# Gear Apps Tools
+# MeshForge Tools
 
 Operational scripts and data utilities live in this folder.
 
@@ -6,8 +6,8 @@ Operational scripts and data utilities live in this folder.
 
 | Script | Purpose |
 | --- | --- |
-| `setup-gear-apps.ps1` | First-time/dependency setup |
-| `start-gear-apps.ps1` | Start API and all three applications |
+| `setup-meshforge.ps1` | First-time/dependency setup |
+| `start-meshforge.ps1` | Start API and all three applications |
 | `run-all-tests.ps1` | Master test runner |
 | `smoke-test-api.ps1` | Read-only API smoke checks |
 | `test-all-api-routes.ps1` | API route compatibility checks |
@@ -67,8 +67,8 @@ It combines fresh SQL Server base/master data, fresh SQL Server cutter history, 
 `node --env-file=.env tools/manufacturing/test-release-regressions.mjs` checks real operator
 permissions, refresh-token rotation/replay, credential serialization, and inventory
 mutation safeguards against a running API and a dedicated test database. Set
-`GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES`, inject the usual `DATABASE_*` settings, and set
-`GEAR_APPS_BASE_URL` if the API is not at `http://localhost:3333/api/v1`.
+`MESHFORGE_ALLOW_TEST_ACCOUNTS=YES`, inject the usual `DATABASE_*` settings, and set
+`MESHFORGE_BASE_URL` if the API is not at `http://localhost:3333/api/v1`.
 
 Load base/reference data first. The script creates unique accounts and a tray,
 uses only its own fixtures, and removes them in `finally`. It never prints passwords

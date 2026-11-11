@@ -38,7 +38,7 @@ const canonical = fs.readFileSync(
   'utf8',
 );
 assert.ok(
-  canonical.includes('GearApps-${pkg.version}.zip'),
+  canonical.includes('MeshForge-${pkg.version}.zip'),
   'Release archive identity must follow the single root release version.',
 );
 assert.ok(

@@ -1,9 +1,9 @@
-/* @dana/ui Gear compatibility: overrides Gear Apps applies on top of the Dana core while it
+/* @dana/ui Gear compatibility: overrides MeshForge applies on top of the Dana core while it
    migrates (formerly Gear's libs/gear/ui/src/styles/dana-ui-migration.css). Load LAST, after
    dana-ui.css. Temporary migration debt; Truck Log must not import it. */
 /* BEGIN MESHFORGE THEME FOR THE DANA CORE
    The Dana core (dana-core/*.css) stays identical to its Truck Log visual source. These rules repeat
-   its selectors with only the colour declarations changed, so Gear Apps gets the MeshForge palette.
+   its selectors with only the colour declarations changed, so MeshForge gets the MeshForge palette.
    Informational blue, success and danger colours are intentionally not overridden. */
 :root { --dana-text:#303743; --dana-muted:#707886; --dana-border:#e3e5e8; --dana-page:#f6f7f8; --dana-warning:#8d6a07; --dana-primary:#b4581a; --dana-primary-dark:#232830; --dana-sidebar:#14171c; --dana-sidebar-raised:#232830; --dana-shadow-panel:0 1px 2px rgba(21, 24, 29, .035), 0 5px 18px rgba(21, 24, 29, .045); --dana-shadow-raised:0 12px 30px rgba(21, 24, 29, .10); --dana-neutral-soft:#f3f4f5; --dana-control-border:#d6d8dc; --dana-placeholder:#818996; --dana-focus-border:#ed9959; --dana-focus-ring:0 0 0 3px rgba(170,84,19,.12); }
 .dana-sidebar { background: radial-gradient(circle at 12% 8%,rgba(202,100,22,.28),transparent 34%), linear-gradient(180deg,var(--dana-sidebar-raised),var(--dana-sidebar)); }
@@ -1273,7 +1273,7 @@ html body .gear-summary-card {
 
 
 
-/* Compact toast stack for Gear Apps (formerly inline styles in Gear's local copy of the toast
+/* Compact toast stack for MeshForge (formerly inline styles in Gear's local copy of the toast
    host, DANA-R35R5). Kept here, not in the shared component, so Truck Log's toasts are unchanged. */
 /* DANA-R35R5-COMPACT-TOAST */
 :is(dana-toast-host, gear-toast-host) {

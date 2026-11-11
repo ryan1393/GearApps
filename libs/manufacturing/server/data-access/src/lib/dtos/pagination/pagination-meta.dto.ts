@@ -10,8 +10,8 @@ import {
 import {
   PAGINATION_DEFAULT_PAGE,
   PAGINATION_DEFAULT_PER_PAGE,
-} from '@gearapps/manufacturing/shared/util-constants';
-import { IPaginationMeta } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-constants';
+import { IPaginationMeta } from '@meshforge/manufacturing/shared/util-types';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class PaginationMetaDto implements IPaginationMeta {

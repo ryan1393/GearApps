@@ -27,7 +27,7 @@
 
 .metric-purple { background:#7c3aed; }
 
-/* === GEAR APPS MANAGED CUTTER DASHBOARD GEOMETRY START === */
+/* === MESHFORGE MANAGED CUTTER DASHBOARD GEOMETRY START === */
 /* Feature owns tracks/columns. DanaDashboardGrid/Panel own gap, margins, and panel shell. */
 .cutter-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 .cutter-dashboard-grid .table-wrap{width:100%;min-width:0}
@@ -50,4 +50,4 @@
 @media (min-width:1500px){.cutter-queue-table col.cutter-col-tray{width:96px}.cutter-queue-table col.cutter-col-summary{width:118px}.cutter-queue-table col.cutter-col-type{width:94px}.cutter-queue-table col.cutter-col-blades{width:100px}.cutter-history-table col.cutter-col-build{width:140px}.cutter-history-table col.cutter-col-body{width:136px}.cutter-history-table col.cutter-col-state{width:90px}.cutter-history-table col.cutter-col-date{width:112px}}
 @media (max-width:1350px){.cutter-dashboard-grid{grid-template-columns:1fr}}
 @media (max-width:640px){.cutter-queue-table col.cutter-col-tray{width:72px}.cutter-queue-table col.cutter-col-summary{width:84px}.cutter-queue-table col.cutter-col-type{width:68px}.cutter-queue-table col.cutter-col-blades{width:70px}.cutter-history-table col.cutter-col-build{width:96px}.cutter-history-table col.cutter-col-body{width:92px}.cutter-history-table col.cutter-col-state{width:70px}.cutter-history-table col.cutter-col-date{width:86px}}
-/* === GEAR APPS MANAGED CUTTER DASHBOARD GEOMETRY END === */
+/* === MESHFORGE MANAGED CUTTER DASHBOARD GEOMETRY END === */

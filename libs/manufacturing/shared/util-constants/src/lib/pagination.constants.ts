@@ -1,4 +1,4 @@
-import { SortOrderType } from '@gearapps/manufacturing/shared/util-types';
+import { SortOrderType } from '@meshforge/manufacturing/shared/util-types';
 
 export const PAGINATION_DEFAULT_PAGE = 1;
 export const PAGINATION_DEFAULT_PER_PAGE = 10;

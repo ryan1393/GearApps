@@ -3,8 +3,8 @@ import { Component, ElementRef, ViewChild, inject, OnDestroy } from '@angular/co
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Observable, Subject, takeUntil } from 'rxjs';
-import { CoaterAvailableContainer, CoaterShipment, CoaterShipmentContainer, CoaterShipmentList } from '@gearapps/manufacturing/shared/util-types';
-import { CoaterShipmentsApiService, apiErrorText } from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
+import { CoaterAvailableContainer, CoaterShipment, CoaterShipmentContainer, CoaterShipmentList } from '@meshforge/manufacturing/shared/util-types';
+import { CoaterShipmentsApiService, apiErrorText } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
 import { DanaPageHeaderComponent } from '@dana/ui';
 import { coaterPackingSlipHtml, coaterContainerLabelsHtml } from './coater-packing-slip';
 import { createCoaterRequestId } from './coater-request-id';

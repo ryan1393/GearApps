@@ -1,6 +1,6 @@
 # Migration and Data Carryover
 
-All Gear Apps import/export tooling and bundled migration data live under `tools/manufacturing/`.
+All MeshForge import/export tooling and bundled migration data live under `tools/manufacturing/`.
 
 ## Base/master data
 

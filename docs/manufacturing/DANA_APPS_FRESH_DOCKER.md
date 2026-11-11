@@ -1,10 +1,10 @@
 # Dana Apps — Fresh Docker Host
 
-The consolidated Gear Apps workspace supports a brand-new Docker host without requiring a pre-existing Gear PostgreSQL volume.
+The consolidated MeshForge workspace supports a brand-new Docker host without requiring a pre-existing Gear PostgreSQL volume.
 
 ## Safety model
 
-- Every application uses the shared GearApps PostgreSQL database and named volume.
+- Every application uses the shared MeshForge PostgreSQL database and named volume.
 - Lapper history is linked to the shared masters through the `lapper` schema.
 - Runtime Gear API always starts with `DATABASE_SYNCHRONIZE=false`.
 - The one-shot `gear-db-bootstrap` service may enable TypeORM synchronize **only when the Gear database has zero public tables**.

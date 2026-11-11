@@ -1,6 +1,6 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
-import { readGearAppsStyles } from './lib/read-gear-apps-styles.mjs';
+import { readMeshForgeStyles } from './lib/read-meshforge-styles.mjs';
 
 const adminTs=fs.readFileSync(
   contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.ts'),
@@ -50,7 +50,7 @@ const locationController=fs.readFileSync(
   contractPath(process.cwd(), 'libs/manufacturing/server/feat-location/src/lib/server-feat-location.controller.ts'),
   'utf8'
 );
-const sharedStyle=readGearAppsStyles();
+const sharedStyle=readMeshForgeStyles();
 
 for(const marker of [
   "activeTab: AdminTab = 'users'",
@@ -122,7 +122,7 @@ if(!adminApi.includes('perPage=${perPage}&page=${page}')){
 }
 
 if(adminCss.replace(/\/\*[\s\S]*?\*\//g,'').trim()){
-  throw new Error('Admin feature must not own private styling; use the central Gear Apps stylesheet.');
+  throw new Error('Admin feature must not own private styling; use the central MeshForge stylesheet.');
 }
 
 for(const marker of [

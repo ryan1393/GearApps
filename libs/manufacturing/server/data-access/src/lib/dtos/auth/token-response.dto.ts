@@ -1,4 +1,4 @@
-import { ITokenResponse } from '@gearapps/manufacturing/shared/util-types';
+import { ITokenResponse } from '@meshforge/manufacturing/shared/util-types';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class TokenResponseDto implements ITokenResponse {

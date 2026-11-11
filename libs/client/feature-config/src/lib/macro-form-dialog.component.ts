@@ -10,9 +10,9 @@ import {
   untracked,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { apiErrorMessage, MacrosApi } from '@gearapps/client/core';
-import { DialogComponent, SegmentedComponent } from '@gearapps/client/ui';
-import { Macro } from '@gearapps/shared/domain';
+import { apiErrorMessage, MacrosApi } from '@meshforge/client/core';
+import { DialogComponent, SegmentedComponent } from '@meshforge/client/ui';
+import { Macro } from '@meshforge/shared/domain';
 import { MACRO_FORM_OPTIONS, MACRO_STATUS_OPTIONS, MACRO_TYPES } from './options';
 
 @Component({

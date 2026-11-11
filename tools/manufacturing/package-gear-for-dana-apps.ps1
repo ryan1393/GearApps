@@ -1,4 +1,4 @@
-# Compatibility entry point: package the complete, single GearApps workspace.
+# Compatibility entry point: package the complete, single MeshForge workspace.
 param(
     [string]$OutputDirectory = ''
 )
@@ -19,7 +19,7 @@ Push-Location $WorkspaceRoot
 try {
     & $Node.Source @NodeArgs
     if ($LASTEXITCODE -ne 0) {
-        throw "GearApps release packaging failed with exit code $LASTEXITCODE."
+        throw "MeshForge release packaging failed with exit code $LASTEXITCODE."
     }
 } finally {
     Pop-Location

@@ -1,8 +1,8 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
-import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
-import { IMachine } from '@gearapps/manufacturing/shared/util-types';
+import { AbstractOrmEntity } from '@meshforge/manufacturing/server/util-common';
+import { IMachine } from '@meshforge/manufacturing/shared/util-types';
 import { DepartmentOrmEntity } from './department.orm-entity';
 
 @Entity({ name: 'machines' })

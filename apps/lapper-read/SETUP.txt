@@ -18,9 +18,9 @@ Configuration
 
   Supply credentials through the Windows service environment or a secure
   configuration provider. Environment variable names are:
-    GearAppsApi__Email
-    GearAppsApi__Password
-    GearAppsApi__BaseAddress                 (optional API-address override)
+    MeshForgeApi__Email
+    MeshForgeApi__Password
+    MeshForgeApi__BaseAddress                 (optional API-address override)
     LapperConfiguration__MachineNumber    (asset number; required if machines share an IP)
     LapperConfiguration__StateDirectory    (optional writable-directory override)
 
@@ -54,9 +54,9 @@ Recovery and API contract
   part number, consecutive count, completion timestamp and macro values are used
   on every retry. Values are not re-read from a later machine cycle.
 
-  With GearApps 70.3.0, point BaseAddress at the shared GearApps API (default port 3333),
+  With MeshForge 70.3.0, point BaseAddress at the shared MeshForge API (default port 3333),
   not the manufacturing API on port 3333. Sign in using an existing active
-  GearApps account; GearAppsApi__Email is the shared GearApps account email.
+  MeshForge account; MeshForgeApi__Email is the shared MeshForge account email.
   The worker uses the API; PostgreSQL credentials stay on the server.
   Machine/scanner profiles must exist in Lapper, with the scanner assigned to the
   selected machine. The optional MachineNumber distinguishes machines sharing an IP.
@@ -65,7 +65,7 @@ Recovery and API contract
   API saves those keys and responses in the same transaction as each write.
   Replaying an acknowledged request returns the original record; using the same
   key with a different payload returns HTTP 409. This has been tested against a
-  restored GearApps database. Legacy SQLite/SQL Server stores do not implement
+  restored MeshForge database. Legacy SQLite/SQL Server stores do not implement
   this server-side deduplication.
 
   Test on the actual machine and scanner before deployment. Automated tests use

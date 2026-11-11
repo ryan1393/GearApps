@@ -1,6 +1,6 @@
-import { LapperWritePolicy, CrudService, crudController } from '@gearapps/api/core';
-import { CreateMachineDto, MachineDto, UpdateMachineDto } from '@gearapps/api/data-access';
-import { Machine } from '@gearapps/shared/domain';
+import { LapperWritePolicy, CrudService, crudController } from '@meshforge/api/core';
+import { CreateMachineDto, MachineDto, UpdateMachineDto } from '@meshforge/api/data-access';
+import { Machine } from '@meshforge/shared/domain';
 import {
   UseInterceptors,
   Controller,

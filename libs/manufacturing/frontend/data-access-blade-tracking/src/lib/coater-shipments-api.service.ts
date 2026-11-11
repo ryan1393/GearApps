@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { CoaterAvailableContainer, CoaterPackingSlip, CoaterShipment, CoaterShipmentList } from '@gearapps/manufacturing/shared/util-types';
+import { CoaterAvailableContainer, CoaterPackingSlip, CoaterShipment, CoaterShipmentList } from '@meshforge/manufacturing/shared/util-types';
 
 @Injectable({ providedIn: 'root' })
 export class CoaterShipmentsApiService {

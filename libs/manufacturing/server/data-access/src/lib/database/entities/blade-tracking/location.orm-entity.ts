@@ -1,11 +1,11 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
-import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { AbstractOrmEntity } from '@meshforge/manufacturing/server/util-common';
 import {
   ILocation,
   ILocationEntity,
-} from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-types';
 import { LocationDto, LocationDtoOptions } from '../../../dtos/blade-tracking/locations/location.dto';
 import { UserOrmEntity } from '../user.orm-entity';
 

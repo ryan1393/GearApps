@@ -8,8 +8,8 @@ import {
   OneToOne,
 } from 'typeorm';
 
-import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
-import { IPart } from '@gearapps/manufacturing/shared/util-types';
+import { AbstractOrmEntity } from '@meshforge/manufacturing/server/util-common';
+import { IPart } from '@meshforge/manufacturing/shared/util-types';
 import { PartSummaryOrmEntity } from './part-summary.orm-entity';
 import { CutterPartTypeOrmEntity } from '../cutter-tracking/cutter-part-type.orm-entity';
 import { RollMasterOrmEntity } from './roll-master.orm-entity';

@@ -2,7 +2,7 @@
  *
  * The API PULLS from the DSF PostgreSQL source on a serialized poll; nothing pushes to us.
  * The source session is read-only (transaction, role policy and fixed SELECTs), and it is
- * closed before any Gear Apps write happens. Everything here is off unless
+ * closed before any MeshForge write happens. Everything here is off unless
  * DSF_COUNT_ENABLED=true, and counts only reach cutter runs when DSF_CUTTER_WRITE_ENABLED=true.
  * Restored from the earlier integration; see docs/manufacturing/DSF_COUNTS.md.
  */
@@ -56,7 +56,7 @@ const SOURCE_OPTIONS_SQL = `SELECT wm.id::text AS mapping_id,wm.whiteboard_id::t
 // DSFCONNECT2: a user-approved exception, NOT removal of source/readonly/mapping guards.
 export const DSF_PRIVILEGED_ACK = 'TEMPORARY_APP_READ_ONLY_ACCEPTED';
 // The only source and logins the acknowledgment is accepted for. 'whiteboard' is the DSF
-// application's own login and can write to DSF; Gear Apps relies on its read-only session.
+// application's own login and can write to DSF; MeshForge relies on its read-only session.
 const DSF_ACK_LOGINS:readonly string[] = ['dana_dsf_reader','whiteboard'];
 const dsfAckSource = (host:unknown,database:unknown,user:unknown):boolean =>
   host==='10.16.80.10' && database==='maindblocal' && typeof user==='string' && DSF_ACK_LOGINS.includes(user);
@@ -172,7 +172,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
     this.timer=setTimeout(()=>{void this.poll();},ms);this.timer.unref?.();
   }
   private makeClient():SourceClient {
-    // The same `pg` module TypeORM loaded for the Gear Apps connection; a separate Client, never the app pool.
+    // The same `pg` module TypeORM loaded for the MeshForge connection; a separate Client, never the app pool.
     const pg=(this.db.driver as unknown as {postgres?:{Client:new(config:Record<string,unknown>)=>SourceClient}}).postgres;
     if(!pg?.Client)throw new DsfRefusal('POSTGRES_DRIVER_UNAVAILABLE');
     return new pg.Client(this.config.client);
@@ -404,7 +404,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       await client.query('SET LOCAL max_parallel_workers_per_gather=0');
       await client.query('SET LOCAL search_path=pg_catalog,public');
       const identity=(await client.query(SOURCE_IDENTITY_SQL)).rows[0];
-      if(!identity?.is_source||!identity.not_gear_apps||!identity.read_only)throw new DsfRefusal('WRONG_SOURCE_OR_NOT_READ_ONLY');
+      if(!identity?.is_source||!identity.not_meshforge||!identity.read_only)throw new DsfRefusal('WRONG_SOURCE_OR_NOT_READ_ONLY');
       const at:string=identity.now_utc;
       const clockGap=timestampUs(new Date().toISOString())-timestampUs(at);
       if(clockGap>10000000n||clockGap< -10000000n)throw new DsfRefusal('CLOCK_DIFFERENCE');

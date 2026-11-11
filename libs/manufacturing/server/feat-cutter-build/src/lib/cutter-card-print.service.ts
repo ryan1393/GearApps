@@ -1,4 +1,4 @@
-import { LabelPrinterService } from '@gearapps/manufacturing/server/feat-tray';
+import { LabelPrinterService } from '@meshforge/manufacturing/server/feat-tray';
 import { Injectable } from '@nestjs/common';
 
 import { cutterCardBuildDate, moveCutterCardIpl } from './cutter-card-ipl';

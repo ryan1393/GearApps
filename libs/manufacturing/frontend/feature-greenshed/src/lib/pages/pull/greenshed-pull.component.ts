@@ -4,19 +4,19 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 import {
   buildSummaryShelfTag,
   normalizeSummaryNumber,
-} from '@gearapps/manufacturing/shared/util-constants';
-import { ILocation } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-constants';
+import { ILocation } from '@meshforge/manufacturing/shared/util-types';
 import {
   GreenshedApiService,
   GreenshedBuild,
   GreenshedPullResult,
   GreenshedReferenceData,
   greenshedApiErrorText,
-} from '@gearapps/manufacturing/frontend/data-access-greenshed';
+} from '@meshforge/manufacturing/frontend/data-access-greenshed';
 import { DanaPageHeaderComponent } from '@dana/ui';
 
 @Component({

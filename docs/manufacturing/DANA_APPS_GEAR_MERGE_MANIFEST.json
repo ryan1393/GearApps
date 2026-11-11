@@ -18,15 +18,15 @@
     "typescript": "5.9.3"
   },
   "rootHashes": {
-    "package.json": "13272836A850B93F2BCCD2393B64CF8F70E187BBBFDAB39CD04EFEAA06588D11",
-    "package-lock.json": "AE0FD8AC8FF366D873A89D64D243C4F6E2A4B0328520B32E147F6FAACA69D86D",
+    "package.json": "7F29E36D8A0839B589A1ACB0BADA4893E225330A40E1A49346E2CC848CF11203",
+    "package-lock.json": "E5F61837CA394A12374DB118FEA8BCE168FEC12E7BE85FDB9821E48C0961A686",
     "nx.json": "73A2F6BD253030EAD5B14930871A240C60AFD9B5378940CC224689ABC36E5ACD",
-    "tsconfig.base.json": "1F66B611B9F5B6574D4916B73B0B493B6353B49FA1A88E467098FF67BC1C5AE1"
+    "tsconfig.base.json": "EF99605E3A43A47E3E88FE368966A8ACD1E27E5EC70BDC985FC8F2056694FA3F"
   },
   "composeFiles": [
     {
       "path": "compose.yml",
-      "sha256": "F4312DA95BA1378364D627B72A2054A2DA05B88C0D34DE8A449838A2B851D103"
+      "sha256": "4C05271BAAD076369F91176483809961DBD0D79E153C37BF30D8765B1C6176CC"
     }
   ],
   "runtimeProjects": [
@@ -35,7 +35,7 @@
       "root": "apps/lapper-client",
       "projectType": "application",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "framework:angular",
         "scope:client",
         "type:app"
@@ -71,7 +71,7 @@
       "root": "apps/blade-tracking",
       "projectType": "application",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "framework:angular",
         "scope:frontend",
         "type:app"
@@ -93,7 +93,7 @@
       "root": "apps/cutter-builder",
       "projectType": "application",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "framework:angular",
         "scope:frontend",
         "type:app"
@@ -115,7 +115,7 @@
       "root": "apps/greenshed",
       "projectType": "application",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "framework:angular",
         "scope:frontend",
         "type:app"
@@ -133,11 +133,11 @@
       "hasTestTarget": true
     },
     {
-      "name": "gear-app-server",
+      "name": "meshforge-server",
       "root": "apps/server",
       "projectType": "application",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:app"
       ],
@@ -219,7 +219,7 @@
       "root": "apps/blade-tracking",
       "projectType": "application",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "framework:angular",
         "scope:frontend",
         "type:app"
@@ -241,7 +241,7 @@
       "root": "apps/blade-tracking-e2e",
       "projectType": "application",
       "tags": [
-        "domain:gear-apps"
+        "domain:meshforge"
       ],
       "targets": [
         "e2e",
@@ -306,7 +306,7 @@
       "root": "apps/cutter-builder",
       "projectType": "application",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "framework:angular",
         "scope:frontend",
         "type:app"
@@ -346,7 +346,7 @@
       "root": "libs/manufacturing/frontend/data-access-blade-tracking",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:frontend",
         "type:data-access"
       ],
@@ -362,7 +362,7 @@
       "root": "libs/manufacturing/frontend/data-access-common",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "framework:angular",
         "scope:frontend",
         "type:data-access"
@@ -380,7 +380,7 @@
       "root": "libs/manufacturing/frontend/data-access-cutter-builder",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:frontend",
         "type:data-access"
       ],
@@ -397,7 +397,7 @@
       "root": "libs/manufacturing/frontend/data-access-greenshed",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:frontend",
         "type:data-access"
       ],
@@ -414,7 +414,7 @@
       "root": "libs/manufacturing/frontend/data-access-user",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:frontend",
         "type:data-access"
       ],
@@ -431,7 +431,7 @@
       "root": "libs/manufacturing/frontend/feature-admin-users",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "framework:angular",
         "scope:frontend",
         "type:feature"
@@ -449,7 +449,7 @@
       "root": "libs/manufacturing/frontend/feature-blade-tracking",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "framework:angular",
         "scope:frontend",
         "type:feature"
@@ -467,7 +467,7 @@
       "root": "libs/manufacturing/frontend/feature-cutter-builder",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:frontend",
         "type:feature"
       ],
@@ -484,7 +484,7 @@
       "root": "libs/manufacturing/frontend/feature-greenshed",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:frontend",
         "type:feature"
       ],
@@ -501,7 +501,7 @@
       "root": "libs/manufacturing/frontend/feature-login",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "framework:angular",
         "scope:frontend",
         "type:feature"
@@ -533,46 +533,11 @@
       "hasTestTarget": true
     },
     {
-      "name": "gear-app-server",
-      "root": "apps/server",
-      "projectType": "application",
-      "tags": [
-        "domain:gear-apps",
-        "scope:server",
-        "type:app"
-      ],
-      "targets": [
-        "build",
-        "build-fresh-db-bootstrap",
-        "lint",
-        "serve",
-        "test"
-      ],
-      "hasBuildTarget": true,
-      "hasServeTarget": true,
-      "hasTestTarget": true
-    },
-    {
-      "name": "gear-app-server-e2e",
-      "root": "apps/server-e2e",
-      "projectType": null,
-      "tags": [
-        "domain:gear-apps"
-      ],
-      "targets": [
-        "e2e",
-        "lint"
-      ],
-      "hasBuildTarget": false,
-      "hasServeTarget": false,
-      "hasTestTarget": false
-    },
-    {
       "name": "greenshed",
       "root": "apps/greenshed",
       "projectType": "application",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "framework:angular",
         "scope:frontend",
         "type:app"
@@ -594,7 +559,7 @@
       "root": "apps/lapper-client",
       "projectType": "application",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "framework:angular",
         "scope:client",
         "type:app"
@@ -644,11 +609,46 @@
       "hasTestTarget": true
     },
     {
+      "name": "meshforge-server",
+      "root": "apps/server",
+      "projectType": "application",
+      "tags": [
+        "domain:meshforge",
+        "scope:server",
+        "type:app"
+      ],
+      "targets": [
+        "build",
+        "build-fresh-db-bootstrap",
+        "lint",
+        "serve",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": true,
+      "hasTestTarget": true
+    },
+    {
+      "name": "meshforge-server-e2e",
+      "root": "apps/server-e2e",
+      "projectType": null,
+      "tags": [
+        "domain:meshforge"
+      ],
+      "targets": [
+        "e2e",
+        "lint"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
       "name": "server-data-access",
       "root": "libs/manufacturing/server/data-access",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:data-access"
       ],
@@ -665,7 +665,7 @@
       "root": "libs/manufacturing/server/feat-auth",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -682,7 +682,7 @@
       "root": "libs/manufacturing/server/feat-blade",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -699,7 +699,7 @@
       "root": "libs/manufacturing/server/feat-blade-tray",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -716,7 +716,7 @@
       "root": "libs/manufacturing/server/feat-container",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -733,7 +733,7 @@
       "root": "libs/manufacturing/server/feat-container-tray",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -750,7 +750,7 @@
       "root": "libs/manufacturing/server/feat-cutter-build",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -767,7 +767,7 @@
       "root": "libs/manufacturing/server/feat-cutter-config",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -784,7 +784,7 @@
       "root": "libs/manufacturing/server/feat-greenshed",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -801,7 +801,7 @@
       "root": "libs/manufacturing/server/feat-health",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -818,7 +818,7 @@
       "root": "libs/manufacturing/server/feat-location",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -835,7 +835,7 @@
       "root": "libs/manufacturing/server/feat-location-tray",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -852,7 +852,7 @@
       "root": "libs/manufacturing/server/feat-part-summary",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -869,7 +869,7 @@
       "root": "libs/manufacturing/server/feat-tray",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -886,7 +886,7 @@
       "root": "libs/manufacturing/server/feat-user",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:feature"
       ],
@@ -903,7 +903,7 @@
       "root": "libs/manufacturing/server/util-common",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:shared",
         "type:util"
       ],
@@ -920,7 +920,7 @@
       "root": "libs/manufacturing/server/util-mailer",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:util"
       ],
@@ -937,7 +937,7 @@
       "root": "libs/manufacturing/server/util-testing",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:server",
         "type:util"
       ],
@@ -991,7 +991,7 @@
       "root": "libs/manufacturing/shared/util-constants",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:shared",
         "type:util"
       ],
@@ -1007,7 +1007,7 @@
       "root": "libs/manufacturing/shared/util-types",
       "projectType": "library",
       "tags": [
-        "domain:gear-apps",
+        "domain:meshforge",
         "scope:shared",
         "type:util"
       ],

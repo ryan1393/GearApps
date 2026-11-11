@@ -1,6 +1,6 @@
 @echo off
 setlocal
-rem Deploys this GearApps folder to the Docker host usftwvmdocker as user "image".
+rem Deploys this MeshForge folder to the Docker host usftwvmdocker as user "image".
 rem It copies the source over SSH, backs up the database, builds, starts every service and
 rem waits until the API reports this version. It never deletes the database volume.
 rem
@@ -10,8 +10,8 @@ cd /d "%~dp0.."
 set "GEAR_DEPLOY_CONTEXT=usftwvmdocker"
 set "GEAR_DEPLOY_TARGET=ssh://image@usftwvmdocker"
 
-if not exist "commands\Deploy-GearApps.cmd" (
-    echo [FAIL] commands\Deploy-GearApps.cmd was not found. Keep this file in the GearApps commands folder.
+if not exist "commands\Deploy-MeshForge.cmd" (
+    echo [FAIL] commands\Deploy-MeshForge.cmd was not found. Keep this file in the MeshForge commands folder.
     pause
     exit /b 1
 )
@@ -27,5 +27,5 @@ if errorlevel 1 (
     )
 )
 
-call "commands\Deploy-GearApps.cmd" --context %GEAR_DEPLOY_CONTEXT% %*
+call "commands\Deploy-MeshForge.cmd" --context %GEAR_DEPLOY_CONTEXT% %*
 exit /b %ERRORLEVEL%

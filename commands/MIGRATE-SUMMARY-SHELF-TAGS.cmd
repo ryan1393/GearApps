@@ -3,7 +3,7 @@ setlocal
 cd /d "%~dp0.."
 
 echo ============================================================
-echo  Gear Apps - Summary Shelf Tag Migration
+echo  MeshForge - Summary Shelf Tag Migration
 echo  Current tags: GSR- / GSP- / CGDR- / CGDP- / CGFR- / CGFP-
 echo.
 echo  First pass is DRY RUN only. Ambiguous shelves are NEVER guessed.

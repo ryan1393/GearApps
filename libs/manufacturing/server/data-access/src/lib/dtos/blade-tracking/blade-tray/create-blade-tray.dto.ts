@@ -4,7 +4,7 @@ import {
   IsString,
 } from 'class-validator';
 
-import { ICreateBladeTray, Uuid } from '@gearapps/manufacturing/shared/util-types';
+import { ICreateBladeTray, Uuid } from '@meshforge/manufacturing/shared/util-types';
 import {
   ApiProperty,
   ApiPropertyOptional,

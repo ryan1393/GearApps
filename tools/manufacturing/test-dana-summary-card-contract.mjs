@@ -10,10 +10,10 @@ const count = (text, needle) => text.split(needle).length - 1;
 
 const inventory = read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/inventory-overview/inventory-overview.component.html');
 const locations = read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/locations/blade-locations.component.html');
-const dataDisplay = read('libs/shared/dana-ui/src/styles/gear-apps/components/data-display.css');
-const inventoryCore = read('libs/shared/dana-ui/src/styles/gear-apps/features/inventory-core.css');
-const inventoryRelations = read('libs/shared/dana-ui/src/styles/gear-apps/features/inventory-relations.css');
-const responsive = read('libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css');
+const dataDisplay = read('libs/shared/dana-ui/src/styles/meshforge/components/data-display.css');
+const inventoryCore = read('libs/shared/dana-ui/src/styles/meshforge/features/inventory-core.css');
+const inventoryRelations = read('libs/shared/dana-ui/src/styles/meshforge/features/inventory-relations.css');
+const responsive = read('libs/shared/dana-ui/src/styles/meshforge/foundation/responsive.css');
 const index = danaUiPublicApiText();
 
 must(count(inventory, 'danaSummaryGrid') === 1, 'Inventory Control Center must use one Dana summary grid.');

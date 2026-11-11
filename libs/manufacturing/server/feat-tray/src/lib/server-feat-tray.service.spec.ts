@@ -6,8 +6,8 @@ import {
   CutterPartTypeOrmEntity,
   PartSummaryOrmEntity,
   TrayOrmEntity,
-} from '@gearapps/manufacturing/server/data-access';
-import { mockRepoFactory, MockType } from '@gearapps/manufacturing/server/util-testing';
+} from '@meshforge/manufacturing/server/data-access';
+import { mockRepoFactory, MockType } from '@meshforge/manufacturing/server/util-testing';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 

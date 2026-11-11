@@ -4,7 +4,7 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { GreenshedApiService, GreenshedBuild, GreenshedHistoryEvent, GreenshedSearchRow, greenshedApiErrorText } from '@gearapps/manufacturing/frontend/data-access-greenshed';
+import { GreenshedApiService, GreenshedBuild, GreenshedHistoryEvent, GreenshedSearchRow, greenshedApiErrorText } from '@meshforge/manufacturing/frontend/data-access-greenshed';
 import {
   DanaPageHeaderComponent,
   DanaTableDirective,

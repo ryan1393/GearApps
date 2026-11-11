@@ -1,6 +1,6 @@
 param(
     [string]$SqlServer = "usftwplvsql01",
-    [string]$SqlDatabase = "GearAppsNew",
+    [string]$SqlDatabase = "MeshForgeNew",
     [string]$OutputDirectory = ".\tools/manufacturing/cutter-history/data"
 )
 
@@ -39,7 +39,7 @@ function Get-ExistingTable([string[]]$Candidates, [string[]]$RequiredColumns) {
 
         $query = @"
 SET NOCOUNT ON;
-SELECT 'GEARAPPS_TABLE=' + TABLE_NAME
+SELECT 'MESHFORGE_TABLE=' + TABLE_NAME
 FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_SCHEMA='dbo'
   AND TABLE_NAME='$candidateEscaped'
@@ -48,11 +48,11 @@ HAVING $having;
 "@
 
         $result = SqlRows $query |
-            Where-Object { $_ -like "GEARAPPS_TABLE=*" } |
+            Where-Object { $_ -like "MESHFORGE_TABLE=*" } |
             Select-Object -First 1
 
         if ($result) {
-            return ($result -replace '^GEARAPPS_TABLE=', '').Trim()
+            return ($result -replace '^MESHFORGE_TABLE=', '').Trim()
         }
     }
     return $null
@@ -66,7 +66,7 @@ function Discover-TableByColumns([string[]]$RequiredColumns, [string]$NamePatter
 
     $query = @"
 SET NOCOUNT ON;
-SELECT TOP (1) 'GEARAPPS_TABLE=' + TABLE_NAME
+SELECT TOP (1) 'MESHFORGE_TABLE=' + TABLE_NAME
 FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_SCHEMA='dbo'
   AND TABLE_NAME LIKE '$($NamePattern.Replace("'","''"))'
@@ -76,11 +76,11 @@ ORDER BY TABLE_NAME;
 "@
 
     $result = SqlRows $query |
-        Where-Object { $_ -like "GEARAPPS_TABLE=*" } |
+        Where-Object { $_ -like "MESHFORGE_TABLE=*" } |
         Select-Object -First 1
 
     if ($result) {
-        return ($result -replace '^GEARAPPS_TABLE=', '').Trim()
+        return ($result -replace '^MESHFORGE_TABLE=', '').Trim()
     }
 
     return $null
@@ -93,7 +93,7 @@ function Export-Table([string]$TableName, [string]$FileName, [string]$TargetDire
     }
 
     $escaped = $TableName.Replace("]", "]]")
-    $tmp = Join-Path $env:TEMP ("gearapps-cutter-" + [guid]::NewGuid().ToString("N") + ".txt")
+    $tmp = Join-Path $env:TEMP ("meshforge-cutter-" + [guid]::NewGuid().ToString("N") + ".txt")
 
     try {
         $out = & sqlcmd -S $SqlServer -E -d $SqlDatabase -b -W -s "|" `

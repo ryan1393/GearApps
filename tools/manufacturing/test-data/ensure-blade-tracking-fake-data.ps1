@@ -11,7 +11,7 @@ Set-Location $ProjectRoot
 $fixtureScript = Join-Path $PSScriptRoot 'ensure-workflow-test-fixtures.mjs'
 $envFile = Join-Path $ProjectRoot '.env'
 if (-not (Test-Path -LiteralPath $envFile -PathType Leaf)) {
-    throw "Gear Apps .env file not found: $envFile"
+    throw "MeshForge .env file not found: $envFile"
 }
 
 $requiredDbKeys = @(

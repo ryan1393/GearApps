@@ -1,6 +1,6 @@
-import { LapperWritePolicy, CrudService, crudController } from '@gearapps/api/core';
-import { CreateMacroDto, MacroDto, UpdateMacroDto } from '@gearapps/api/data-access';
-import { Macro } from '@gearapps/shared/domain';
+import { LapperWritePolicy, CrudService, crudController } from '@meshforge/api/core';
+import { CreateMacroDto, MacroDto, UpdateMacroDto } from '@meshforge/api/data-access';
+import { Macro } from '@meshforge/shared/domain';
 import { UseInterceptors, Controller, Get, Injectable, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 @Injectable()

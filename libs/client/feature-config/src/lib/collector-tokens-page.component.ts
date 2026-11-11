@@ -17,9 +17,9 @@ import {
   DanaTableEmptyDirective,
   DanaTableShellDirective,
 } from '@dana/ui';
-import { apiErrorMessage, CollectorTokensApi, loadable, ToastService } from '@gearapps/client/core';
-import { DialogComponent, StatusBadgeComponent } from '@gearapps/client/ui';
-import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from '@gearapps/shared/domain';
+import { apiErrorMessage, CollectorTokensApi, loadable, ToastService } from '@meshforge/client/core';
+import { DialogComponent, StatusBadgeComponent } from '@meshforge/client/ui';
+import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from '@meshforge/shared/domain';
 
 @Component({
   selector: 'gear-collector-tokens-page',
@@ -272,7 +272,7 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
       <ol class="lapper-token-steps">
         <li>
           Give it to the Lapper Read installation it is for (for example the Windows service's
-          <code>GearAppsApi</code> settings).
+          <code>MeshForgeApi</code> settings).
         </li>
         <li>
           The Docker collector does not need this: use

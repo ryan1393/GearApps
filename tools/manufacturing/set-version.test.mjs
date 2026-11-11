@@ -27,21 +27,21 @@ function fixture() {
   );
   put(
     'libs/shared/domain/src/lib/app-version.ts',
-    "export const GEAR_APPS_VERSION = '1.2.3';\n",
+    "export const MESHFORGE_VERSION = '1.2.3';\n",
   );
   put(
     'apps/lapper-read/Directory.Build.props',
     '<Project><PropertyGroup><Version>1.2.3</Version></PropertyGroup></Project>\n',
   );
   put('apps/lapper-read-py/lapper_read/__init__.py', '__version__ = "1.2.3"\n');
-  put('README.md', '# GearApps 1.2.3\n');
+  put('README.md', '# MeshForge 1.2.3\n');
   put(
     'compose.yml',
-    ['gear-app-server', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed', 'lapper-read']
+    ['meshforge-server', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed', 'lapper-read']
       .map((name) => `image: dana-apps-${name}:1.2.3`)
       .join('\n') + '\n',
   );
-  put('docs/manufacturing/README.md', '# Gear Apps 1.2.3\n');
+  put('docs/manufacturing/README.md', '# MeshForge 1.2.3\n');
   return {
     root,
     put,
@@ -71,17 +71,17 @@ test('version ownership updates package and lock versions without changing depen
     );
     assert.match(
       f.text('libs/shared/domain/src/lib/app-version.ts'),
-      /GEAR_APPS_VERSION = '1\.2\.4'/,
+      /MESHFORGE_VERSION = '1\.2\.4'/,
     );
-    assert.equal(f.text('README.md'), '# GearApps 1.2.4\n');
-    assert.equal(f.text('docs/manufacturing/README.md'), '# Gear Apps 1.2.4\n');
+    assert.equal(f.text('README.md'), '# MeshForge 1.2.4\n');
+    assert.equal(f.text('docs/manufacturing/README.md'), '# MeshForge 1.2.4\n');
     assert.deepEqual(
       [
         ...f
           .text('compose.yml')
           .matchAll(/dana-apps-([a-z-]+):(\S+)/g),
       ].map(([, name, version]) => [name, version]),
-      ['gear-app-server', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed', 'lapper-read'].map(
+      ['meshforge-server', 'lapper-client', 'blade-tracking', 'cutter-builder', 'greenshed', 'lapper-read'].map(
         (name) => [name, '1.2.4'],
       ),
     );
@@ -111,7 +111,7 @@ test('missing collector version marker cannot change the release partially', () 
     assert.equal(f.read('package.json').version, '1.2.3');
     assert.match(
       f.text('libs/shared/domain/src/lib/app-version.ts'),
-      /GEAR_APPS_VERSION = '1\.2\.3'/,
+      /MESHFORGE_VERSION = '1\.2\.3'/,
     );
   } finally {
     fs.rmSync(f.root, { recursive: true, force: true });

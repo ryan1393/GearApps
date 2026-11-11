@@ -37,7 +37,7 @@ interface DsfMappingBoard {
 
 /**
  * Admin view of which DSF (Digital Shop Floor) source feeds each cutting machine in
- * Departments 132 and 152. Saving changes Gear Apps only; nothing is ever written to DSF.
+ * Departments 132 and 152. Saving changes MeshForge only; nothing is ever written to DSF.
  */
 @Component({
   selector: 'gear-admin-dsf-machine-mappings',

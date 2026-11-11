@@ -2,11 +2,11 @@ import { contractPath } from './contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Gear Apps styles all ship in @dana/ui (source: libs/shared/dana-ui/src/styles).
-export const GEAR_APPS_STYLE_ENTRY = 'libs/shared/dana-ui/src/styles/gear-apps.css';
-export const GEAR_APPS_STYLE_ENTRY_INSTALLED = 'libs/shared/dana-ui/src/styles/gear-compat.css';
-export const GEAR_APPS_DOMAIN_STYLE_ENTRY_INSTALLED = 'libs/shared/dana-ui/src/styles/gear-compat-features.css';
-export const GEAR_APPS_DOMAIN_STYLE_ENTRY = 'libs/shared/dana-ui/src/styles/gear-compat-features.css';
+// MeshForge styles all ship in @dana/ui (source: libs/shared/dana-ui/src/styles).
+export const MESHFORGE_STYLE_ENTRY = 'libs/shared/dana-ui/src/styles/meshforge.css';
+export const MESHFORGE_STYLE_ENTRY_INSTALLED = 'libs/shared/dana-ui/src/styles/gear-compat.css';
+export const MESHFORGE_DOMAIN_STYLE_ENTRY_INSTALLED = 'libs/shared/dana-ui/src/styles/gear-compat-features.css';
+export const MESHFORGE_DOMAIN_STYLE_ENTRY = 'libs/shared/dana-ui/src/styles/gear-compat-features.css';
 const IMPORT_PATTERN = /@import\s+['"]([^'"]+)['"]\s*;/g;
 
 function listStyleModules(root, entryRel) {
@@ -18,14 +18,14 @@ function listStyleModules(root, entryRel) {
   }
   return modules;
 }
-export function listGearAppsStyleModules(root=process.cwd()){ return listStyleModules(root,GEAR_APPS_STYLE_ENTRY); }
-export function listGearAppsDomainStyleModules(root=process.cwd()){ return listStyleModules(root,GEAR_APPS_DOMAIN_STYLE_ENTRY); }
+export function listMeshForgeStyleModules(root=process.cwd()){ return listStyleModules(root,MESHFORGE_STYLE_ENTRY); }
+export function listMeshForgeDomainStyleModules(root=process.cwd()){ return listStyleModules(root,MESHFORGE_DOMAIN_STYLE_ENTRY); }
 
 function readStyleGraph(root, entryRel){
   const entryPath=contractPath(root,entryRel); if(!fs.existsSync(entryPath)) return '';
   const seen=new Set();
   const readFileGraph=(filePath)=>{
-    const absolutePath=path.resolve(filePath); if(seen.has(absolutePath)) throw new Error(`Circular Gear Apps stylesheet import detected: ${absolutePath}`); seen.add(absolutePath);
+    const absolutePath=path.resolve(filePath); if(seen.has(absolutePath)) throw new Error(`Circular MeshForge stylesheet import detected: ${absolutePath}`); seen.add(absolutePath);
     const css=fs.readFileSync(absolutePath,'utf8'); let resolved=''; let cursor=0;
     for(const match of css.matchAll(IMPORT_PATTERN)){
       const index=match.index??0; resolved+=css.slice(cursor,index); resolved+=readFileGraph(path.resolve(path.dirname(absolutePath),match[1])); cursor=index+match[0].length;
@@ -34,6 +34,6 @@ function readStyleGraph(root, entryRel){
   };
   return readFileGraph(entryPath);
 }
-export function readGearAppsStyles(root=process.cwd()){
-  return [readStyleGraph(root,GEAR_APPS_STYLE_ENTRY),readStyleGraph(root,GEAR_APPS_DOMAIN_STYLE_ENTRY)].filter(Boolean).join('\n');
+export function readMeshForgeStyles(root=process.cwd()){
+  return [readStyleGraph(root,MESHFORGE_STYLE_ENTRY),readStyleGraph(root,MESHFORGE_DOMAIN_STYLE_ENTRY)].filter(Boolean).join('\n');
 }

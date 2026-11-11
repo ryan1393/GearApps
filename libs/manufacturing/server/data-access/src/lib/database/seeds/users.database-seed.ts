@@ -6,7 +6,7 @@ import {
   AuthProviderType,
   ICreateUser,
   RoleType,
-} from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-types';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 

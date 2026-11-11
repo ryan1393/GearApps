@@ -1,5 +1,5 @@
-import { SkipAuth } from '@gearapps/manufacturing/server/util-common';
-import { AuthProviderType, ITokenResponse } from '@gearapps/manufacturing/shared/util-types';
+import { SkipAuth } from '@meshforge/manufacturing/server/util-common';
+import { AuthProviderType, ITokenResponse } from '@meshforge/manufacturing/shared/util-types';
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 

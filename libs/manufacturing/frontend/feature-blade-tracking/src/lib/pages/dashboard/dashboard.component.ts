@@ -10,10 +10,10 @@ import {
   BladeTrackingDashboardData,
   InventoryAvailabilityData,
   apiErrorText,
-} from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
-import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
-import { canEditGearApp } from '@gearapps/manufacturing/shared/util-constants';
-import { IPartSummary, IPartType } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
+import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
+import { canEditMeshForgeApp } from '@meshforge/manufacturing/shared/util-constants';
+import { IPartSummary, IPartType } from '@meshforge/manufacturing/shared/util-types';
 import {
   DanaCountBadgeDirective,
   DanaDashboardGridComponent,
@@ -116,7 +116,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   get canEdit(): boolean {
     const user = this.session.currentUser;
-    return canEditGearApp(
+    return canEditMeshForgeApp(
       'BLADE_TRACKING',
       user?.role,
       user?.departmentCode,

@@ -2,19 +2,19 @@ import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {
-  GEAR_APPS_STYLE_ENTRY_INSTALLED,
-  GEAR_APPS_DOMAIN_STYLE_ENTRY_INSTALLED,
-  GEAR_APPS_STYLE_ENTRY,
-  GEAR_APPS_DOMAIN_STYLE_ENTRY,
-  listGearAppsStyleModules,
-  listGearAppsDomainStyleModules,
-  readGearAppsStyles,
-} from './lib/read-gear-apps-styles.mjs';
+  MESHFORGE_STYLE_ENTRY_INSTALLED,
+  MESHFORGE_DOMAIN_STYLE_ENTRY_INSTALLED,
+  MESHFORGE_STYLE_ENTRY,
+  MESHFORGE_DOMAIN_STYLE_ENTRY,
+  listMeshForgeStyleModules,
+  listMeshForgeDomainStyleModules,
+  readMeshForgeStyles,
+} from './lib/read-meshforge-styles.mjs';
 
 const root=process.cwd();
 const must=(ok,msg)=>{if(!ok) throw new Error(msg)};
-const sharedStyle=GEAR_APPS_STYLE_ENTRY;
-const domainStyle=GEAR_APPS_DOMAIN_STYLE_ENTRY;
+const sharedStyle=MESHFORGE_STYLE_ENTRY;
+const domainStyle=MESHFORGE_DOMAIN_STYLE_ENTRY;
 const factory='../../tools/manufacturing/tailwind/create-app-tailwind-config';
 const moved=['blade-dashboard.css','cutter-builder.css','greenshed-running-machines.css','greenshed-running-machines-typography.css','greenshed-running-machines-colors.css','greenshed-running-machines-counts.css','inventory-core.css','inventory-relations.css','scrap-blades.css'];
 const criticalOrder=[
@@ -35,8 +35,8 @@ function assertImportOnly(file,label){
 assertImportOnly(sharedStyleFile,'Dana shared stylesheet');
 assertImportOnly(domainStyleFile,'Gear domain stylesheet');
 
-const sharedModules=listGearAppsStyleModules(root);
-const domainModules=listGearAppsDomainStyleModules(root);
+const sharedModules=listMeshForgeStyleModules(root);
+const domainModules=listMeshForgeDomainStyleModules(root);
 must(sharedModules.length>=12,`Dana shared style graph is unexpectedly small (${sharedModules.length} modules).`);
 must(domainModules.length===moved.length,`Gear domain style graph must contain exactly ${moved.length} migrated workflow modules; found ${domainModules.length}.`);
 const domainNames=domainModules.map(p=>path.basename(p));
@@ -60,8 +60,8 @@ for(const suffix of criticalOrder){
   must(i>last,`Dana critical module order is invalid around ${suffix}.`); last=i;
 }
 
-const combined=readGearAppsStyles(root);
-for(const marker of ['GEAR APPS DESIGN SYSTEM','--gear-sidebar-width','.gear-sidebar','.gear-topbar','.gear-page','.gear-panel','.gear-btn','.gear-table','.login-page','.running-machines-page','.inventory-overview-kpis','.scrap-history-timeline']){
+const combined=readMeshForgeStyles(root);
+for(const marker of ['MESHFORGE DESIGN SYSTEM','--gear-sidebar-width','.gear-sidebar','.gear-topbar','.gear-page','.gear-panel','.gear-btn','.gear-table','.login-page','.running-machines-page','.inventory-overview-kpis','.scrap-history-timeline']){
   must(combined.includes(marker),`Combined Dana/Gear style graph missing ${marker}`);
 }
 
@@ -71,11 +71,11 @@ const frontendApps=fs.readdirSync(contractPath(process.cwd(), appsDir),{withFile
   const project=JSON.parse(fs.readFileSync(contractPath(process.cwd(), file),'utf8')); const tags=new Set(project.tags??[]);
   return project.projectType==='application'&&tags.has('scope:frontend')&&tags.has('framework:angular');
 });
-must(frontendApps.length>=3,'Expected the Gear Apps Angular frontends to be discoverable.');
+must(frontendApps.length>=3,'Expected the MeshForge Angular frontends to be discoverable.');
 for(const app of frontendApps){
   const projectFile=contractPath(root,'apps',app,'project.json'); const project=JSON.parse(fs.readFileSync(contractPath(process.cwd(), projectFile),'utf8'));
   const sourceRoot=project.sourceRoot||`apps/${app}/src`; const appStyle=`${sourceRoot}/styles.css`; const styles=project.targets?.build?.options?.styles??[];
-  const sharedIndex=styles.indexOf(GEAR_APPS_STYLE_ENTRY_INSTALLED),domainIndex=styles.indexOf(GEAR_APPS_DOMAIN_STYLE_ENTRY_INSTALLED),appIndex=styles.indexOf(appStyle);
+  const sharedIndex=styles.indexOf(MESHFORGE_STYLE_ENTRY_INSTALLED),domainIndex=styles.indexOf(MESHFORGE_DOMAIN_STYLE_ENTRY_INSTALLED),appIndex=styles.indexOf(appStyle);
   // Gear owns no CSS: every stylesheet an app loads must come from @dana/ui.
   for(const entry of styles) must(entry===appStyle||entry.startsWith('libs/shared/dana-ui/src/styles/'),`${app}: loads a stylesheet that is not from @dana/ui: ${entry}`);
   must(sharedIndex===appIndex+1,`${app}: Dana shared style entry must load immediately after Tailwind.`);

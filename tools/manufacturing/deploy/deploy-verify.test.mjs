@@ -29,8 +29,8 @@ esac
 
 test('a failed ssh call is "not found", never a container id built from its error text', (t) => {
   fakeDocker(t, '70.5.0');
-  assert.equal(containerState({ name: 'usftwvmdocker' }, 'gear-app-server'), null);
-  assert.deepEqual(containerState({ name: 'usftwvmdocker' }, 'gear-app-server'), {
+  assert.equal(containerState({ name: 'usftwvmdocker' }, 'meshforge-server'), null);
+  assert.deepEqual(containerState({ name: 'usftwvmdocker' }, 'meshforge-server'), {
     id: '0123456789abcdef',
     state: { Status: 'running', Health: { Status: 'healthy' } },
   });
@@ -57,7 +57,7 @@ function runUpScript(t, { collectorRunning }) {
   fs.writeFileSync(path.join(bin, 'docker'), `#!/bin/sh
 echo "$*" >> '${log}'
 case " $* " in
-  *" config --services "*) printf 'gear-app-server\\nlapper-read\\n' ;;
+  *" config --services "*) printf 'meshforge-server\\nlapper-read\\n' ;;
   *" ps -a -q lapper-read "*) ${collectorRunning ? "echo 0123456789ab" : 'true'} ;;
 esac
 `, { mode: 0o755 });

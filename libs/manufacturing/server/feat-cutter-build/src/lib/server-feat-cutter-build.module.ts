@@ -1,5 +1,5 @@
-import { ServerDataAccessModule } from '@gearapps/manufacturing/server/data-access';
-import { ServerFeatTrayModule } from '@gearapps/manufacturing/server/feat-tray';
+import { ServerDataAccessModule } from '@meshforge/manufacturing/server/data-access';
+import { ServerFeatTrayModule } from '@meshforge/manufacturing/server/feat-tray';
 import { Module } from '@nestjs/common';
 
 import { CutterCardPrintService } from './cutter-card-print.service';

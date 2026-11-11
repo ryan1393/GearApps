@@ -1,8 +1,8 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index } from 'typeorm';
 
-import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
-import { IDepartment } from '@gearapps/manufacturing/shared/util-types';
+import { AbstractOrmEntity } from '@meshforge/manufacturing/server/util-common';
+import { IDepartment } from '@meshforge/manufacturing/shared/util-types';
 
 @Entity({ name: 'departments' })
 export class DepartmentOrmEntity extends AbstractOrmEntity {

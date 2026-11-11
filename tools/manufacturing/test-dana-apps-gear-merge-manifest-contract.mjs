@@ -21,7 +21,7 @@ must(actual.schemaVersion === 1, 'Gear merge manifest schemaVersion must remain 
 must(actual.baseline === 'Dana Apps V70.0.0', 'Dana Apps merge manifest baseline is not V70.0.0.');
 must(
   typeof actual.authoritativeTest === 'string' && actual.authoritativeTest.length > 0,
-  'Gear merge manifest is missing the authoritative test:gear-apps command.'
+  'Gear merge manifest is missing the authoritative test:meshforge command.'
 );
 must(
   actual.sourcePackager === 'tools/package-release.mjs',
@@ -41,7 +41,7 @@ must(
 );
 
 const names = new Set(actual.projects.map((p) => p.name).filter(Boolean));
-for (const name of ['lapper-client', 'lapper-read', 'blade-tracking', 'cutter-builder', 'greenshed', 'gear-app-server']) {
+for (const name of ['lapper-client', 'lapper-read', 'blade-tracking', 'cutter-builder', 'greenshed', 'meshforge-server']) {
   must(names.has(name), `Gear merge manifest is missing runtime project ${name}`);
 }
 must(

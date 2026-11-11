@@ -1,4 +1,4 @@
-"""Runs one collector worker per lapper, following the machines saved in GearApps.
+"""Runs one collector worker per lapper, following the machines saved in MeshForge.
 
 Every `discover_interval_s` the supervisor reads Lapper's machines and scanners:
 
@@ -11,7 +11,7 @@ Every `discover_interval_s` the supervisor reads Lapper's machines and scanners:
 - making it Inactive, removing its IP, or deleting it stops the worker.
 
 Each worker runs on its own thread, so its FOCAS handle is opened and used on one thread,
-and keeps its checkpoint under the machine's GearApps id (it survives IP changes).
+and keeps its checkpoint under the machine's MeshForge id (it survives IP changes).
 """
 
 from __future__ import annotations
@@ -25,7 +25,7 @@ from dataclasses import dataclass, replace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Callable
 
-from .api import GearAppsApi, utc_now
+from .api import MeshForgeApi, utc_now
 from .fanuc import Fanuc
 from .scanner import Scanner
 from .state import CycleStateStore
@@ -129,7 +129,7 @@ class _Slot:
 
 
 class Supervisor:
-    def __init__(self, settings, api: GearAppsApi, worker_factory: WorkerFactory | None = None):
+    def __init__(self, settings, api: MeshForgeApi, worker_factory: WorkerFactory | None = None):
         self.settings, self.api = settings, api
         self._factory = worker_factory or self._build_worker
         self._slots: dict[str, _Slot] = {}
@@ -180,7 +180,7 @@ class Supervisor:
 
     def run(self) -> None:
         self._start_status_server()
-        log.info("Supervisor watching GearApps machines every %ss", self.settings.discover_interval_s)
+        log.info("Supervisor watching MeshForge machines every %ss", self.settings.discover_interval_s)
         try:
             while not self._stop.is_set():
                 try:

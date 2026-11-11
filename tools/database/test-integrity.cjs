@@ -7,18 +7,18 @@ const {
   compareOriginalProjection,
   runDatabaseMigration,
   SHARED_CORE_INTEGRITY_SQL,
-} = require('@gearapps/shared/database');
+} = require('@meshforge/shared/database');
 const { migrateLapperPostgres } = require('../../libs/api/postgres/src/lib/schema.ts');
 if (
-  process.env.GEAR_APPS_ALLOW_TEST_ACCOUNTS !== 'YES' ||
+  process.env.MESHFORGE_ALLOW_TEST_ACCOUNTS !== 'YES' ||
   !process.env.DATABASE_NAME?.endsWith('_integrity_test')
 )
   throw new Error(
-    'Use a disposable *_integrity_test restore and GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES',
+    'Use a disposable *_integrity_test restore and MESHFORGE_ALLOW_TEST_ACCOUNTS=YES',
   );
 
 test(
-  'GearApps cleanup preserves source history and enforces database integrity',
+  'MeshForge cleanup preserves source history and enforces database integrity',
   { timeout: 180000 },
   async (t) => {
     const source = databaseSource();
@@ -64,7 +64,7 @@ test(
       }
     };
     try {
-      const [state] = await q("SELECT to_regclass('gearapps_meta.schema_migrations') AS installed");
+      const [state] = await q("SELECT to_regclass('meshforge_meta.schema_migrations') AS installed");
       assert.equal(
         state.installed,
         null,
@@ -91,7 +91,7 @@ test(
           await assert.rejects(() => migrateLapperPostgres(source), /conflicting macro values/);
           assert.deepEqual(await snapshot(), withConflict);
           assert.equal(
-            (await q("SELECT to_regclass('gearapps_meta.schema_migrations') AS installed"))[0]
+            (await q("SELECT to_regclass('meshforge_meta.schema_migrations') AS installed"))[0]
               .installed,
             null,
           );

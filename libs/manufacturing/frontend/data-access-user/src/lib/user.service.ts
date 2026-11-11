@@ -6,7 +6,7 @@ import {
   IUpdateUser,
   IUser,
   IUserLogin,
-} from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-types';
 
 import { AuthSessionService } from './auth-session.service';
 import { UserApiService } from './user-api.service';

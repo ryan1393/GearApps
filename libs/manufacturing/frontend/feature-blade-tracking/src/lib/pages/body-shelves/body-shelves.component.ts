@@ -3,8 +3,8 @@ import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { BladeTrackingApiService, EmptyBodyShelfView, apiErrorText } from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
-import { GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { BladeTrackingApiService, EmptyBodyShelfView, apiErrorText } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
+import { GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 import { DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
 
 @Component({ selector:'gear-body-shelves', standalone:true,

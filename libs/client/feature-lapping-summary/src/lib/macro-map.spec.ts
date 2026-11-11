@@ -1,4 +1,4 @@
-import { LappingSummaryRow } from '@gearapps/shared/domain';
+import { LappingSummaryRow } from '@meshforge/shared/domain';
 import { fieldValue, findByName, groupByForm, isOn, summaryPlacement } from './macro-map';
 
 const row = (

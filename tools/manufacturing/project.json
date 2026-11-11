@@ -8,15 +8,15 @@
     "type:tooling"
   ],
   "targets": {
-    "start-gear-apps": {
+    "start-meshforge": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/start-gear-apps.ps1",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/start-meshforge.ps1",
         "cwd": "."
       },
       "cache": false
     },
-    "test-gear-apps": {
+    "test-meshforge": {
       "executor": "nx:run-commands",
       "options": {
         "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/run-all-tests.ps1",
@@ -166,10 +166,10 @@
       },
       "cache": false
     },
-    "commands-gear-apps": {
+    "commands-meshforge": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/show-gear-apps-commands.ps1",
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/show-meshforge-commands.ps1",
         "cwd": "."
       },
       "cache": false

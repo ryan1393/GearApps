@@ -11,7 +11,7 @@ import {
   RunningMachineRow,
   RunningMachinesBoard,
   greenshedApiErrorText,
-} from '@gearapps/manufacturing/frontend/data-access-greenshed';
+} from '@meshforge/manufacturing/frontend/data-access-greenshed';
 import {
   DanaTableDirective,
   DanaTableShellDirective,

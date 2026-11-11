@@ -2,7 +2,7 @@ param(
   [Parameter(Mandatory=$true)]
   [string]$SqlServer,
 
-  [string]$Database = "GearApps",
+  [string]$Database = "MeshForge",
 
   [string]$OutputDirectory = ".\tools/manufacturing/base-data/data"
 )

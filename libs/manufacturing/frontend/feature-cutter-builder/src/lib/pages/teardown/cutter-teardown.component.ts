@@ -4,19 +4,19 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 import {
   CutterBuildCard,
   CutterTeardownResult,
   CutterBuilderApiService,
   CutterDashboardData,
   cutterApiErrorText,
-} from '@gearapps/manufacturing/frontend/data-access-cutter-builder';
+} from '@meshforge/manufacturing/frontend/data-access-cutter-builder';
 import {
   DEPARTMENT_CUTTERGRIND,
   parseCuttergrindNumberedShelfTag,
-} from '@gearapps/manufacturing/shared/util-constants';
-import { ILocation, ITray } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-constants';
+import { ILocation, ITray } from '@meshforge/manufacturing/shared/util-types';
 import {
   DanaPageHeaderComponent,
 } from '@dana/ui';

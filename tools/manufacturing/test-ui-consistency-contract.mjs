@@ -11,7 +11,7 @@ const navs={
 
 for(const [name,html] of Object.entries(navs)){
   for(const marker of ['gear-sidebar','brand-row','side-nav','side-link primary','sidebar-footer','gear-topbar','global-search','topbar-user','signout-button','Shared manufacturing workspace','v{{ appVersion }}']){
-    if(!html.includes(marker)) throw new Error(`${name} navigation is missing shared Gear Apps shell marker: ${marker}`);
+    if(!html.includes(marker)) throw new Error(`${name} navigation is missing shared MeshForge shell marker: ${marker}`);
   }
   if(!html.includes('Dashboard')) throw new Error(`${name} navigation must expose a combined app dashboard link.`);
   if(!html.includes('global-search') || !html.includes('aria-label=')) throw new Error(`${name} topbar must expose an accessible app-specific search treatment.`);
@@ -46,4 +46,4 @@ for(const name of ['cutter','greenshed']){
   }
 }
 
-console.log('[PASS] Blade Tracking, Cutter Builder, and Greenshed use the shared Gear Apps shell and dashboard design language.');
+console.log('[PASS] Blade Tracking, Cutter Builder, and Greenshed use the shared MeshForge shell and dashboard design language.');

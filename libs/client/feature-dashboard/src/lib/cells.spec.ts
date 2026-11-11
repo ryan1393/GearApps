@@ -1,4 +1,4 @@
-import { Machine } from '@gearapps/shared/domain';
+import { Machine } from '@meshforge/shared/domain';
 import { groupByCell } from './cells';
 
 const m = (number: string, cell: string | null, status = 'Active'): Machine =>

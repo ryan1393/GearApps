@@ -1,4 +1,4 @@
-import { BaseCrudService, crudController } from '@gearapps/api/core';
+import { BaseCrudService, crudController } from '@meshforge/api/core';
 import {
   CheckCmmDto,
   CheckCmmEntity,
@@ -25,7 +25,7 @@ import {
   UpdateCutterLogDto,
   UpdatePullCutterReasonDto,
   UpdateRetiredCutterDto,
-} from '@gearapps/api/data-access';
+} from '@meshforge/api/data-access';
 import {
   CheckCmm,
   CheckFrequency,
@@ -33,7 +33,7 @@ import {
   CutterLog,
   PullCutterReason,
   RetiredCutter,
-} from '@gearapps/shared/domain';
+} from '@meshforge/shared/domain';
 import { Controller, Get, Injectable, Param, ParseUUIDPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { InjectRepository } from '@nestjs/typeorm';

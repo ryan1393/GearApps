@@ -1,4 +1,4 @@
-import { ServerDataAccessModule } from '@gearapps/manufacturing/server/data-access';
+import { ServerDataAccessModule } from '@meshforge/manufacturing/server/data-access';
 import { Module } from '@nestjs/common';
 
 import { ServerFeatUserController } from './server-feat-user.controller';

@@ -1,8 +1,8 @@
-# Gear Apps Architecture
+# MeshForge Architecture
 
 ## Deployable applications
 
-Gear Apps has four deployable Nx applications:
+MeshForge has four deployable Nx applications:
 
 ```text
 apps/

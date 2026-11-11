@@ -1,7 +1,7 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index } from 'typeorm';
 
-import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { AbstractOrmEntity } from '@meshforge/manufacturing/server/util-common';
 
 @Entity({ name: 'cutter_legacy_orphan_records' })
 @Index(['source_type', 'legacy_check_id'])

@@ -5,7 +5,7 @@ const swagger=fs.readFileSync(contractPath(process.cwd(), 'apps/server/src/swagg
 const auth=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/server/feat-auth/src/lib/server-feat-auth.service.ts'),'utf8');
 const login=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.ts'),'utf8');
 const loginHtml=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.html'),'utf8');
-const start=fs.readFileSync(contractPath(process.cwd(), 'tools/manufacturing/start-gear-apps.ps1'),'utf8');
+const start=fs.readFileSync(contractPath(process.cwd(), 'tools/manufacturing/start-meshforge.ps1'),'utf8');
 
 if(!swagger.includes(".addServer('/')")){
   throw new Error('Swagger must use same-origin root server.');
@@ -35,14 +35,14 @@ for(const marker of [
   if(!loginHtml.includes(marker)) throw new Error(`Login template missing ${marker}`);
 }
 if(!start.includes('ensure-automatic-test-user.mjs') ||
-   !start.includes('test@gearapps.local') ||
-   !start.includes('admin@gearapps.local')){
+   !start.includes('test@meshforge.local') ||
+   !start.includes('admin@meshforge.local')){
   throw new Error('Development launcher must provision local operator + admin accounts.');
 }
 for(const marker of [
   "['localhost', '127.0.0.1'].includes(window.location.hostname)",
-  "readonly localTestEmail = 'test@gearapps.local'",
-  "readonly localAdminEmail = 'admin@gearapps.local'",
+  "readonly localTestEmail = 'test@meshforge.local'",
+  "readonly localAdminEmail = 'admin@meshforge.local'",
   'email: this.localTestEmail',
   'email: this.localAdminEmail',
   'if (!this.showLocalTestLogin) return;',
@@ -50,8 +50,8 @@ for(const marker of [
   if(!login.includes(marker)) throw new Error(`Local debug login email-fill missing ${marker}`);
 }
 for(const forbidden of [
-  'GearApps-E2E-Only-2026!',
-  'GearApps-Admin-Only-2026!',
+  'MeshForge-E2E-Only-2026!',
+  'MeshForge-Admin-Only-2026!',
   'localTestPassword',
   'localAdminPassword',
   'password: this.localTestPassword',

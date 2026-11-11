@@ -8,7 +8,7 @@ import threading
 import time
 from dataclasses import dataclass
 
-from .api import GearAppsApi, utc_now
+from .api import MeshForgeApi, utc_now
 from .fanuc import Fanuc, NoGearsetLoaded
 from .scanner import Scanner
 from .scanner_monitor import ScannerMonitor
@@ -27,7 +27,7 @@ class Telemetry:
 
 
 class Worker:
-    def __init__(self, settings, api: GearAppsApi, fanuc: Fanuc, scanner: Scanner | None, store: CycleStateStore,
+    def __init__(self, settings, api: MeshForgeApi, fanuc: Fanuc, scanner: Scanner | None, store: CycleStateStore,
                  scanner_monitor: ScannerMonitor | None = None):
         """`scanner` None: the machine has no scanner, so cycles are recorded without a serial."""
         self.settings, self.api, self.fanuc, self.scanner, self.store = settings, api, fanuc, scanner, store
@@ -114,7 +114,7 @@ class Worker:
                     self.scanner_detail = self.api.scanner_by_ip(s.scanner_ip)
                     assigned = self.scanner_detail.get("machine_id") or (self.scanner_detail.get("machine") or {}).get("id")
                     if str(assigned).lower() != str(self.machine["id"]).lower():
-                        raise IOError("The configured scanner is not assigned to this machine in GearApps (Lapper > Scanners).")
+                        raise IOError("The configured scanner is not assigned to this machine in MeshForge (Lapper > Scanners).")
                 self.fanuc.initialize()
                 self.phase, self.last_error = "collecting", None
                 log.info("[%s] Collecting for machine %s (%s), %s, %d macros",

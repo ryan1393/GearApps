@@ -25,18 +25,18 @@ class Settings:
     retry_delay_ms: int = 5000
     io_timeout_ms: int = 3000
     state_dir: str = "/data"
-    api_base_url: str = "http://gear-app-server:3333"
+    api_base_url: str = "http://meshforge-server:3333"
     api_email: str = ""
     api_password: str = ""
     #: Collector token from Lapper > Configuration > Collector Tokens; replaces email/password.
     api_token: str = ""
-    #: File the GearApps API writes the Docker collector's token to (Lapper > Collector Tokens >
+    #: File the MeshForge API writes the Docker collector's token to (Lapper > Collector Tokens >
     #: Connect Docker collector). Used when no api_token is set; re-read when the API rejects it.
     api_token_file: str = ""
     api_timeout_s: float = 10.0
-    #: Supervisor: names this machine's checkpoint (its GearApps id) so it survives IP changes.
+    #: Supervisor: names this machine's checkpoint (its MeshForge id) so it survives IP changes.
     state_key: str | None = None
-    #: Supervisor: how often the machine list is re-read from GearApps.
+    #: Supervisor: how often the machine list is re-read from MeshForge.
     discover_interval_s: int = 30
     #: Supervisor: status/health HTTP port inside the container (0 disables it).
     status_port: int = 8080
@@ -77,14 +77,14 @@ class Settings:
             raise ConfigError("Polling intervals and timeouts must be positive.")
         url = urlparse(self.api_base_url)
         if url.scheme not in ("http", "https") or not url.netloc:
-            raise ConfigError("GEARAPPS_API_BASE_URL must be an http(s) URL.")
+            raise ConfigError("MESHFORGE_API_BASE_URL must be an http(s) URL.")
         if self.api_token and not self.api_token.startswith("glr_"):
-            raise ConfigError("GEARAPPS_API_TOKEN must be a collector token from Lapper (it starts with glr_).")
+            raise ConfigError("MESHFORGE_API_TOKEN must be a collector token from Lapper (it starts with glr_).")
         if mode in ("run", "supervise") and not self.api_token and not self.api_token_file \
                 and (not self.api_email or not self.api_password):
             raise ConfigError(
-                "Connect the Docker collector in Lapper > Configuration > Collector Tokens (GEARAPPS_API_TOKEN_FILE), "
-                "or set GEARAPPS_API_TOKEN, or GEARAPPS_API_EMAIL and GEARAPPS_API_PASSWORD."
+                "Connect the Docker collector in Lapper > Configuration > Collector Tokens (MESHFORGE_API_TOKEN_FILE), "
+                "or set MESHFORGE_API_TOKEN, or MESHFORGE_API_EMAIL and MESHFORGE_API_PASSWORD."
             )
         if not self.state_dir:
             raise ConfigError("LAPPER_STATE_DIR is required.")
@@ -117,12 +117,12 @@ def from_env(env: dict[str, str] | None = None, mode: str = "run") -> Settings:
         retry_delay_ms=_int(env, "LAPPER_RETRY_DELAY_MS", 5000),
         io_timeout_ms=_int(env, "LAPPER_IO_TIMEOUT_MS", 3000),
         state_dir=env.get("LAPPER_STATE_DIR", "/data").strip(),
-        api_base_url=env.get("GEARAPPS_API_BASE_URL", "http://gear-app-server:3333").strip().rstrip("/"),
-        api_email=env.get("GEARAPPS_API_EMAIL", "").strip(),
-        api_password=env.get("GEARAPPS_API_PASSWORD", ""),
-        api_token=env.get("GEARAPPS_API_TOKEN", "").strip(),
-        api_token_file=env.get("GEARAPPS_API_TOKEN_FILE", "").strip(),
-        api_timeout_s=float(env.get("GEARAPPS_API_TIMEOUT_S", "10") or 10),
+        api_base_url=env.get("MESHFORGE_API_BASE_URL", "http://meshforge-server:3333").strip().rstrip("/"),
+        api_email=env.get("MESHFORGE_API_EMAIL", "").strip(),
+        api_password=env.get("MESHFORGE_API_PASSWORD", ""),
+        api_token=env.get("MESHFORGE_API_TOKEN", "").strip(),
+        api_token_file=env.get("MESHFORGE_API_TOKEN_FILE", "").strip(),
+        api_timeout_s=float(env.get("MESHFORGE_API_TIMEOUT_S", "10") or 10),
         discover_interval_s=_int(env, "LAPPER_DISCOVER_INTERVAL_S", 30),
         status_port=_int(env, "LAPPER_STATUS_PORT", 8080),
     ).validate(mode)

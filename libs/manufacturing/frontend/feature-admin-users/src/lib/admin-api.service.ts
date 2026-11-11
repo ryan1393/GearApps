@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { LabelPrinterChoiceService } from '@gearapps/manufacturing/frontend/util-common';
+import { LabelPrinterChoiceService } from '@meshforge/manufacturing/frontend/util-common';
 import { Observable } from 'rxjs';
 
 export interface PagedResponse<T> {

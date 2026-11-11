@@ -1,5 +1,5 @@
 /**
- * Exact CutterLabel_FILLED.prn template supplied for Gear Apps Cutter Build labels.
+ * Exact CutterLabel_FILLED.prn template supplied for MeshForge Cutter Build labels.
  * The native IPL bytes are embedded as Base64 so production builds do not depend on
  * the workstation file system. The PNG preview is intentionally generated separately
  * in the browser; this PRN remains the printer-authoritative artifact.

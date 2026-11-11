@@ -1,11 +1,11 @@
-import { LapperWritePolicy, CrudService, crudController } from '@gearapps/api/core';
+import { LapperWritePolicy, CrudService, crudController } from '@meshforge/api/core';
 import {
   CreateScannerDetailDto,
   ScannerDetailDto,
   UpdateScannerDetailDto,
   UpdateScannerSerialNumbersDto,
-} from '@gearapps/api/data-access';
-import { ScannerDetail } from '@gearapps/shared/domain';
+} from '@meshforge/api/data-access';
+import { ScannerDetail } from '@meshforge/shared/domain';
 import {
   UseInterceptors,
   Body,

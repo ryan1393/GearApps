@@ -1,6 +1,6 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
-import { readGearAppsStyles } from './lib/read-gear-apps-styles.mjs';
+import { readMeshForgeStyles } from './lib/read-meshforge-styles.mjs';
 
 const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8');
 
@@ -15,7 +15,7 @@ const locationController=read('libs/manufacturing/server/feat-location/src/lib/s
 const adminApi=read('libs/manufacturing/frontend/feature-admin-users/src/lib/admin-api.service.ts');
 const adminTs=read('libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.ts');
 const adminHtml=read('libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.html');
-const styles=readGearAppsStyles();
+const styles=readMeshForgeStyles();
 
 for(const marker of [
   "path: 'locations'",

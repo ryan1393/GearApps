@@ -10,16 +10,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build API with native dependencies compiled from source
-        run: docker build --build-arg BUILD_NATIVE_MODULES_FROM_SOURCE=true -t gearapps-ci:server -f apps/server/Dockerfile .
+        run: docker build --build-arg BUILD_NATIVE_MODULES_FROM_SOURCE=true -t meshforge-ci:server -f apps/server/Dockerfile .
       - name: Verify the final API image against disposable PostgreSQL
-        run: bash tools/test-api-image.sh gearapps-ci:server
+        run: bash tools/test-api-image.sh meshforge-ci:server
       - name: Build every web image
         shell: bash
         run: |
           for app in blade-tracking cutter-builder greenshed; do
-            docker build --build-arg BUILD_NATIVE_MODULES_FROM_SOURCE=true -t "gearapps-ci:$app" -f "apps/$app/Dockerfile" .
+            docker build --build-arg BUILD_NATIVE_MODULES_FROM_SOURCE=true -t "meshforge-ci:$app" -f "apps/$app/Dockerfile" .
           done
-          docker build -t gearapps-ci:lapper-client -f apps/lapper-client/Dockerfile .
+          docker build -t meshforge-ci:lapper-client -f apps/lapper-client/Dockerfile .
   verify:
     runs-on: ubuntu-latest
     env:
@@ -44,7 +44,7 @@ jobs:
       - run: npm test
       - run: npm run test:contracts
       - run: npm run build
-      - run: npx nx run gear-app-server:build-fresh-db-bootstrap --configuration=production
+      - run: npx nx run meshforge-server:build-fresh-db-bootstrap --configuration=production
   fresh-database:
     runs-on: ubuntu-latest
     services:
@@ -53,11 +53,11 @@ jobs:
         env:
           POSTGRES_USER: api_test
           POSTGRES_PASSWORD: ci-only-postgres-password
-          POSTGRES_DB: GearApps_ci_fresh_test
+          POSTGRES_DB: MeshForge_ci_fresh_test
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U api_test -d GearApps_ci_fresh_test"
+          --health-cmd "pg_isready -U api_test -d MeshForge_ci_fresh_test"
           --health-interval 5s --health-timeout 5s --health-retries 20
     env:
       CYPRESS_INSTALL_BINARY: '0'
@@ -68,7 +68,7 @@ jobs:
       DATABASE_PORT: '5432'
       DATABASE_USERNAME: api_test
       DATABASE_PASSWORD: ci-only-postgres-password
-      DATABASE_NAME: GearApps_ci_fresh_test
+      DATABASE_NAME: MeshForge_ci_fresh_test
       DATABASE_SYNCHRONIZE: 'false'
       DATABASE_LOGGING_ENABLED: 'false'
       DANA_FRESH_DB_BOOTSTRAP: 'YES'
@@ -89,8 +89,8 @@ jobs:
           cache: npm
       - run: npm install -g npm@11.9.0
       - run: npm ci
-      - run: npx nx build gear-app-server --configuration=production
-      - run: npx nx run gear-app-server:build-fresh-db-bootstrap --configuration=production
+      - run: npx nx build meshforge-server --configuration=production
+      - run: npx nx run meshforge-server:build-fresh-db-bootstrap --configuration=production
       - run: node dist/apps/server-bootstrap/main.js
       - run: node tools/manufacturing/base-data/import-base-data.mjs --bootstrap-only
       - name: Verify shared API on a fresh database

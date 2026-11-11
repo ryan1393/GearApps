@@ -6,7 +6,7 @@ export interface SegmentOption<T = string> {
   value: T;
 }
 
-/** Small choice group built from Gear Apps buttons, usable with reactive forms / ngModel. */
+/** Small choice group built from MeshForge buttons, usable with reactive forms / ngModel. */
 @Component({
   selector: 'gear-segmented',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -40,7 +40,7 @@ import {
   ENV_SOCIAL_GOOGLE_CLIENT_SECRET,
   ENV_SOCIAL_GOOGLE_ENABLED,
   ENV_SWAGGER_JSON_FILE,
-} from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-constants';
 
 export const validationSchema = Joi.object({
   // api config

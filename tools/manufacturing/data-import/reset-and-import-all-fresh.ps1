@@ -1,6 +1,6 @@
 ﻿param(
     [string]$SqlServer = "usftwplvsql01",
-    [string]$SqlDatabase = "GearAppsNew",
+    [string]$SqlDatabase = "MeshForgeNew",
     [switch]$Apply,
     [switch]$YesReallyDeleteOldData,
     [switch]$KeepFreshExports
@@ -31,7 +31,7 @@ $SeedMockInventory = Join-Path $PSScriptRoot 'seed-trays-containers-mock-data.mj
 
 Write-Host ''
 Write-Host '################################################################' -ForegroundColor Cyan
-Write-Host ' Gear Apps - DELETE OLD DATA + FULL FRESH REFRESH' -ForegroundColor Cyan
+Write-Host ' MeshForge - DELETE OLD DATA + FULL FRESH REFRESH' -ForegroundColor Cyan
 Write-Host '################################################################' -ForegroundColor Cyan
 Write-Host "SQL Server source : $SqlServer / $SqlDatabase"
 Write-Host 'PostgreSQL target : DATABASE_* values from this project .env'
@@ -40,7 +40,7 @@ Write-Host ''
 Write-Host 'This is a TRUE refresh:' -ForegroundColor Yellow
 Write-Host '  1. Export + validate fresh SQL Server/Excel source data FIRST.'
 Write-Host '  2. Delete existing PostgreSQL application rows while preserving schema.'
-Write-Host '  3. Re-bootstrap required Gear Apps system reference rows.'
+Write-Host '  3. Re-bootstrap required MeshForge system reference rows.'
 Write-Host '  4. Import fresh base/reference data.'
 Write-Host '  5. Import fresh cutter history.'
 Write-Host '  6. Recreate the local operator/admin test logins.'
@@ -69,8 +69,8 @@ if (-not $Apply) {
 if (-not $YesReallyDeleteOldData) {
     Write-Host ''
     Write-Host 'DESTRUCTIVE ACTION BLOCKED.' -ForegroundColor Red
-    Write-Host 'This mode intentionally deletes all existing Gear Apps application rows from the target PostgreSQL database.' -ForegroundColor Yellow
-    Write-Host 'Close all running Gear Apps API/server windows first.' -ForegroundColor Yellow
+    Write-Host 'This mode intentionally deletes all existing MeshForge application rows from the target PostgreSQL database.' -ForegroundColor Yellow
+    Write-Host 'Close all running MeshForge API/server windows first.' -ForegroundColor Yellow
     Write-Host ''
     Write-Host 'Re-run with:' -ForegroundColor Cyan
     Write-Host '  npm run refresh:all-data:reset -- -Apply -YesReallyDeleteOldData' -ForegroundColor White
@@ -86,7 +86,7 @@ try {
 finally { Pop-Location }
 Pass 'Old target rows deleted; schema preserved'
 
-Step 'Re-bootstrap required Gear Apps system reference data'
+Step 'Re-bootstrap required MeshForge system reference data'
 Push-Location $ProjectRoot
 try {
     & node $BootstrapSystemReference --apply
@@ -122,7 +122,7 @@ try {
 finally { Pop-Location }
 Pass 'Fresh cutter history imported'
 
-Step 'Recreating local Gear Apps operator/admin logins'
+Step 'Recreating local MeshForge operator/admin logins'
 Push-Location $ProjectRoot
 try {
     & node $EnsureLocalUsers
@@ -164,5 +164,5 @@ Write-Host 'Reusable trays                  : 300 (T0001 .. T0300)'
 Write-Host 'Reusable containers             : 100 (C0001 .. C0100)'
 Write-Host 'Mock inventory                  : SEEDED across locations / coater / Green Shed shelves'
 Write-Host ''
-Write-Host 'Now start Gear Apps normally with commands\START-GEAR-APPS.cmd.' -ForegroundColor Cyan
+Write-Host 'Now start MeshForge normally with commands\START-MESHFORGE.cmd.' -ForegroundColor Cyan
 

@@ -4,7 +4,7 @@ import {
   IsString,
 } from 'class-validator';
 
-import { ICreateLocationTray, Uuid } from '@gearapps/manufacturing/shared/util-types';
+import { ICreateLocationTray, Uuid } from '@meshforge/manufacturing/shared/util-types';
 import {
   ApiProperty,
   ApiPropertyOptional,

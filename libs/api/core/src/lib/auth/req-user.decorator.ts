@@ -1,5 +1,5 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
-import { AuthenticatedUser } from '@gearapps/shared/domain';
+import { AuthenticatedUser } from '@meshforge/shared/domain';
 
 export type RequestUser = AuthenticatedUser;
 

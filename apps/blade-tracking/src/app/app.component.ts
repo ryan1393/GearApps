@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { GearToastHostComponent } from '@gearapps/manufacturing/frontend/util-common';
+import { GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
 
 import { AppNavComponent } from './layout/app-nav/app-nav.component';
 
@@ -18,7 +18,7 @@ export class AppComponent {
 
   title = 'blade-tracking';
 
-  // Gear Apps browser tab identity v24
+  // MeshForge browser tab identity v24
   private readonly pageTitles: ReadonlyArray<readonly [string, string]> = [
       ['/blades/cancel-last', 'Cancel Last Tray Transaction'],
       ['/blades/internal-movement', 'Internal Movement'],

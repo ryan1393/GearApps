@@ -1,6 +1,6 @@
 import { IsBoolean, IsOptional, IsString, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ICreatePartSummary } from '@gearapps/manufacturing/shared/util-types';
+import { ICreatePartSummary } from '@meshforge/manufacturing/shared/util-types';
 
 export class CreatePartSummaryDto implements ICreatePartSummary {
   @ApiProperty() @IsString() number!: string;

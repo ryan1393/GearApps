@@ -1,6 +1,6 @@
-import { ReqUser, RequestUser } from '@gearapps/api/core';
-import { CreateCollectorTokenDto } from '@gearapps/api/data-access';
-import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from '@gearapps/shared/domain';
+import { ReqUser, RequestUser } from '@meshforge/api/core';
+import { CreateCollectorTokenDto } from '@meshforge/api/data-access';
+import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from '@meshforge/shared/domain';
 import {
   Body,
   Controller,

@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { GearToastHostComponent } from '@gearapps/manufacturing/frontend/util-common';
+import { GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { GreenshedNavComponent } from './layout/greenshed-nav/greenshed-nav.component';
 
 @Component({
@@ -17,7 +17,7 @@ export class AppComponent {
 
   title = 'greenshed';
 
-  // Gear Apps browser tab identity v24
+  // MeshForge browser tab identity v24
   private readonly pageTitles: ReadonlyArray<readonly [string, string]> = [
       ['/greenshed/cancel-last', 'Cancel Last Check'],
       ['/greenshed/machines', 'Running Machines'],

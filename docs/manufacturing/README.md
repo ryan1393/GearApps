@@ -1,7 +1,7 @@
-# Gear Apps 70.5.0
+# MeshForge 70.5.0
 
-Gear Apps is the Dana manufacturing workspace for four workflows sharing one API and database:
-**Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root GearApps Nx workspace. All frontends use
+MeshForge is the Dana manufacturing workspace for four workflows sharing one API and database:
+**Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root MeshForge Nx workspace. All frontends use
 Angular 20.3.35 and Dana UI 0.3.3; the shared API uses NestJS 11.2.9 and TypeORM 1.1.2.
 Manufacturing retains PostgreSQL 16 and Docker Compose.
 
@@ -15,7 +15,7 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
 
 ## What changed in 70.5.0
 
-Lapper now shares the Gear Apps shell, sign-in and Admin with the other apps, and gains
+Lapper now shares the MeshForge shell, sign-in and Admin with the other apps, and gains
 Scanners, Macros, Fanuc Variables and Collector Tokens pages. A Python Lapper Read collector
 runs in Docker (`docker compose --profile collectors up -d --build lapper-read`) with one
 worker per saved machine. See [CHANGELOG.md](CHANGELOG.md).
@@ -60,7 +60,7 @@ npx nx serve blade-tracking
 ```
 
 The authentication, recovery, inventory, scanning, and deployment fixes from 70.2.1
-are retained. API routes and PostgreSQL workflow rules remain compatible. All four clients and Lapper Read use gear-app-server on port 3333. The only API
+are retained. API routes and PostgreSQL workflow rules remain compatible. All four clients and Lapper Read use meshforge-server on port 3333. The only API
 environment is .env. See [unified API setup](../UNIFIED_API.md).
 
 Users must sign in again after upgrading. Emailed recovery requires SMTP and the public
@@ -69,7 +69,7 @@ frontend origin (`PUBLIC_WEB_BASE_URL`, or Docker `GEAR_PUBLIC_WEB_BASE_URL`).
 Portable checks: `npm test` runs every project's Nx `test` target (Jest, the .NET and Python
 collectors) and the deployment/configuration tests; `npm run test:unit` runs only the Jest projects;
 `npm run test:contracts` runs source contracts. Live workflow scripts require a dedicated
-test database and explicit `GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES`.
+test database and explicit `MESHFORGE_ALLOW_TEST_ACCOUNTS=YES`.
 
 ## Earlier 70.1.0 improvements
 
@@ -86,7 +86,7 @@ Full detail is in `CHANGELOG.md`. In short:
 - **Security.** Test-fixture scripts that create known-password admin accounts now refuse to run
   unless the machine opts in. The deploy script refuses placeholder or short JWT secrets, and the
   API warns about them at startup.
-- **New deploy** (`Deploy-GearApps.cmd`), see below.
+- **New deploy** (`Deploy-MeshForge.cmd`), see below.
 - **UI fixes.** Intake focus after a tray scan, Summary and Part Type on the Internal Movement
   confirmation, Green Shed Setup on the shared workflow layout, garbled `â€”`/`â€¢` characters.
 - **Code health.** All server libraries compile under their strict settings. All server unit tests
@@ -97,7 +97,7 @@ Full detail is in `CHANGELOG.md`. In short:
 
 Run deployment from the repository root with
 `node tools/manufacturing/deploy/deploy-remote.mjs` (Windows:
-`commands\Deploy-GearApps.cmd`). To deploy to the plant Docker host in one step, run
+`commands\Deploy-MeshForge.cmd`). To deploy to the plant Docker host in one step, run
 `commands\Deploy-To-usftwvmdocker.cmd`: it creates the `usftwvmdocker`
 Docker context for `image@usftwvmdocker` if this PC does not have it, then runs the same
 deployment. The archive contains the single root workspace;
@@ -108,15 +108,15 @@ When upgrading an older split layout, it carries the former shared
 `manufacturing/.env` into the repository root.
 
 
-`Deploy-GearApps.cmd` (or `node tools/manufacturing/deploy/deploy-remote.mjs`) deploys the shared repository to the Linux
+`Deploy-MeshForge.cmd` (or `node tools/manufacturing/deploy/deploy-remote.mjs`) deploys the shared repository to the Linux
 Docker host behind your active **SSH Docker context** (`docker context use <name>`). It needs `ssh`,
 `scp`, `tar`, `docker`, Node 24.22.1 and npm 11.9.0 on the Windows machine.
 
-1. **Preflight (changes nothing):** `Deploy-GearApps.cmd --check`. This checks the version, the SSH
+1. **Preflight (changes nothing):** `Deploy-MeshForge.cmd --check`. This checks the version, the SSH
    context, host Docker, and the host `.env` (JWT secrets 32+ random characters, no
-   `GEAR_APPS_ALLOW_TEST_ACCOUNTS`; a short database password only warns, because Postgres must be
+   `MESHFORGE_ALLOW_TEST_ACCOUNTS`; a short database password only warns, because Postgres must be
    changed first with `ALTER USER`).
-2. **Deploy:** `Deploy-GearApps.cmd`. It:
+2. **Deploy:** `Deploy-MeshForge.cmd`. It:
    1. backs up the database with `pg_dump` to `~/dana-apps-backups/` on the host (owner-only files,
       newest 20 kept); a failed backup stops the deploy;
    2. copies the source to `~/dana-apps`, keeping the previous release in `~/dana-apps.prev`
@@ -127,10 +127,10 @@ Docker host behind your active **SSH Docker context** (`docker context use <name
    4. waits for every service and checks that the API reports `70.5.0`. Only then does the old
       release become `~/dana-apps.prev`. If the deploy fails, the last good release is protected
       (a retry discards the failed one) and `--rollback` brings it back.
-3. **Rollback:** `Deploy-GearApps.cmd --rollback` swaps `~/dana-apps.prev` back in and restarts it.
+3. **Rollback:** `Deploy-MeshForge.cmd --rollback` swaps `~/dana-apps.prev` back in and restarts it.
    Schema changes in this app are additive, so the previous release runs against the current database.
    To restore data as well, load the backup taken before the deploy:
-   `cd ~/dana-apps && gunzip -c ~/dana-apps-backups/<file>.sql.gz | docker compose --env-file .env -f compose.yml exec -T dana-postgres psql -U <GEAR_DB_USERNAME> -d GearApps`
+   `cd ~/dana-apps && gunzip -c ~/dana-apps-backups/<file>.sql.gz | docker compose --env-file .env -f compose.yml exec -T dana-postgres psql -U <GEAR_DB_USERNAME> -d MeshForge`
    (restore into an emptied database).
 
 **First 70.1.0 deploy:** earlier releases lived in `/tmp/dana-apps.v0.1` on the host, and most
@@ -141,7 +141,7 @@ placeholder JWT secrets the deploy stops and tells you how to generate new ones 
 out once; nothing else changes).
 
 **Brand-new host:** put a filled-in `.env` (from `.env.example`) at the repository root and run
-`Deploy-GearApps.cmd --upload-env`.
+`Deploy-MeshForge.cmd --upload-env`.
 
 ## Verify a database
 
@@ -158,7 +158,7 @@ out once; nothing else changes).
 | `npm test` | installed dependencies | Isolated unit/behavior and deployment/configuration tests |
 | `npm run test:contracts` | installed dependencies | Portable source contracts |
 | `npm run test:workflow` | API + **test** DB | 23-call end-to-end: grinding, coater shipment, build, setup, QC, changeover, teardown |
-| `npm run test:gear-apps` | Windows PowerShell, API + test DB | Original master suite (see note below) |
+| `npm run test:meshforge` | Windows PowerShell, API + test DB | Original master suite (see note below) |
 
 Note: `tools/manufacturing/test-full-workflow.ps1` predates numbered Cuttergrind shelves, coater shipments and
 Cutter Builder machines. `npm run test:workflow` is the current end-to-end path; the fixtures it
@@ -166,14 +166,14 @@ uses (`tools/manufacturing/test-data/ensure-workflow-test-fixtures.mjs`) were up
 
 ## Start
 
-After extracting the project, run `commands\SETUP-GEAR-APPS.cmd` once, then use `commands\START-GEAR-APPS.cmd` to start the API, Blade Tracking, Cutter Builder, and Green Shed.
+After extracting the project, run `commands\SETUP-MESHFORGE.cmd` once, then use `commands\START-MESHFORGE.cmd` to start the API, Blade Tracking, Cutter Builder, and Green Shed.
 
 ## Test
 
 Run the complete automatic test from the project root:
 
 ```powershell
-npm run test:gear-apps
+npm run test:meshforge
 ```
 
 The normal master test requires no typed workflow inputs. It provisions dedicated E2E test data automatically. See `docs/manufacturing/TESTING.md` for the complete run procedure and the PINION/RING compatibility tests.
@@ -215,7 +215,7 @@ Rules for this app:
 - Layout for a single screen (grid, ordering, spacing between sections) is fine in the screen's
   own template.
 - If something needs a new look or a new shared component, it belongs in Dana UI so Truck Log and
-  Gear Apps both get it. Change `libs/shared/dana-ui` directly.
+  MeshForge both get it. Change `libs/shared/dana-ui` directly.
 
 Each app loads, in this order (`../apps/<app>/project.json`):
 
@@ -235,7 +235,7 @@ To check Dana UI on its own, run `npx nx test dana-ui` (it builds the publishabl
 
 ## Admin management
 
-The shared `/admin` screen is available in Blade Tracking, Cutter Builder, Greenshed, and Lapping for admin-role accounts. It uses the same centralized Gear Apps design system and provides create/list workflows for:
+The shared `/admin` screen is available in Blade Tracking, Cutter Builder, Greenshed, and Lapping for admin-role accounts. It uses the same centralized MeshForge design system and provides create/list workflows for:
 
 - Users
 - Part Summaries
@@ -250,11 +250,11 @@ The shared `/admin` screen is available in Blade Tracking, Cutter Builder, Green
 Open a tab directly with `/admin?tab=<tab>` (for example `/admin?tab=gearsets`); Lapping's old
 Machines, Parts and Part Summaries links redirect there.
 
-The existing Users feature was retained as the admin route but rebuilt into the shared Gear Apps administration workspace. Part Summary and Cutter Body creation reuse their existing backend APIs. Admin-only master-data endpoints were added for Models, Machines, and Department lookup, and an admin-only `POST /api/v1/users` route was added so the selected User/Admin role is preserved.
+The existing Users feature was retained as the admin route but rebuilt into the shared MeshForge administration workspace. Part Summary and Cutter Body creation reuse their existing backend APIs. Admin-only master-data endpoints were added for Models, Machines, and Department lookup, and an admin-only `POST /api/v1/users` route was added so the selected User/Admin role is preserved.
 
-For local development on a **test** database (its `.env` must contain `GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES`), `commands\START-GEAR-APPS.cmd` provisions:
-- Operator: `test@gearapps.local` / `GearApps-E2E-Only-2026!`
-- Admin: `admin@gearapps.local` / `GearApps-Admin-Only-2026!`
+For local development on a **test** database (its `.env` must contain `MESHFORGE_ALLOW_TEST_ACCOUNTS=YES`), `commands\START-MESHFORGE.cmd` provisions:
+- Operator: `test@meshforge.local` / `MeshForge-E2E-Only-2026!`
+- Admin: `admin@meshforge.local` / `MeshForge-Admin-Only-2026!`
 
 These passwords are published in this repository. The fixture scripts refuse to run without that opt-in, and the deploy script refuses a production `.env` that sets it.
 
@@ -268,7 +268,7 @@ All Admin UI HTTP calls are centralized in `libs/manufacturing/frontend/feature-
 
 ## Department-scoped application access
 
-Normal Gear Apps users are now department-scoped for operational editing. Cross-department users can open an application's dashboard, but the operational navigation/actions are shown as view-only and deep links redirect back to the dashboard. The backend independently rejects cross-department mutations with HTTP 403, so the rule cannot be bypassed by calling the API directly.
+Normal MeshForge users are now department-scoped for operational editing. Cross-department users can open an application's dashboard, but the operational navigation/actions are shown as view-only and deep links redirect back to the dashboard. The backend independently rejects cross-department mutations with HTTP 403, so the rule cannot be bypassed by calling the API directly.
 
 Current ownership is centralized in `libs/manufacturing/shared/util-constants/src/lib/app-access.constants.ts`:
 
@@ -316,13 +316,13 @@ That Blade Locations feature itself added no backend route. After the native ass
 
 ## Native IPL tags for trays, containers, and locations
 
-Gear Apps can generate printer-native Intermec IPL tags from Find Inventory, the Inventory Control Center, Blade Locations, Tray Contents, and the shared `/admin` page. Admin has dedicated Tray and Container record tabs plus per-record Print Tag actions on Trays, Containers, and Locations.
+MeshForge can generate printer-native Intermec IPL tags from Find Inventory, the Inventory Control Center, Blade Locations, Tray Contents, and the shared `/admin` page. Admin has dedicated Tray and Container record tabs plus per-record Print Tag actions on Trays, Containers, and Locations.
 
 Each tag contains one Code 128 barcode plus the same identifier in human-readable text. The browser sends only the database record ID; the backend reloads the record and prints its persisted `serial_number`. Tray tags therefore print the table's `T0001`-style serial, container tags the table's `C0001`-style serial, and location tags the exact stored location serial. New/edited Tray and Container serials are normalized to `T`/`C` plus at least four zero-padded digits.
 
 The shared label stock is 2.25 in web width with a 2.125 in x 0.625 in label and 0.125 in physical gap above/below. The IPL format uses a 431 x 127 dot label face at the existing Intermec 203 dpi coordinate family.
 
-The authenticated print endpoint is `POST /api/v1/asset-tags/print`. Run `commands\CONFIGURE-GEAR-APPS-LABEL-PRINTER.cmd` (or configure `GEAR_LABEL_PRINTER_HOST`) to send raw IPL directly to the industrial printer on `GEAR_LABEL_PRINTER_PORT` (default 9100). If no printer host is configured or the printer cannot be reached, the UI downloads the native `.prn` payload instead. No browser-rendered barcode is substituted.
+The authenticated print endpoint is `POST /api/v1/asset-tags/print`. Run `commands\CONFIGURE-MESHFORGE-LABEL-PRINTER.cmd` (or configure `GEAR_LABEL_PRINTER_HOST`) to send raw IPL directly to the industrial printer on `GEAR_LABEL_PRINTER_PORT` (default 9100). If no printer host is configured or the printer cannot be reached, the UI downloads the native `.prn` payload instead. No browser-rendered barcode is substituted.
 
 See `docs/manufacturing/printing/ASSET-TAG-IPL.md`. The current API manifest is **113 routes**.
 

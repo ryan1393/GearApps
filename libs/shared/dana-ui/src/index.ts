@@ -4,7 +4,7 @@ export const DANA_UI_CORE_STYLESHEET = '@dana/ui/styles/dana-core.css';
 export const DANA_UI_GEAR_COMPAT_STYLESHEET = '@dana/ui/styles/gear-compat.css';
 export const DANA_UI_GLOBAL_STYLESHEET = '@dana/ui/styles/dana-ui.css';
 export const DANA_APPS_GLOBAL_STYLESHEET = DANA_UI_GLOBAL_STYLESHEET;
-export const GEAR_APPS_GLOBAL_STYLESHEET = DANA_UI_GLOBAL_STYLESHEET;
+export const MESHFORGE_GLOBAL_STYLESHEET = DANA_UI_GLOBAL_STYLESHEET;
 
 export { DanaDashboardGridComponent } from './lib/components/dashboard/dana-dashboard-grid.component';
 export { DanaDashboardPanelComponent } from './lib/components/dashboard/dana-dashboard-panel.component';

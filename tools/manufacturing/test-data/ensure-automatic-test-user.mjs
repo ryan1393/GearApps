@@ -7,10 +7,10 @@ import pg from 'pg';
 import { assertTestAccountsAllowed } from './test-account-guard.mjs';
 
 const { Client } = pg;
-const AUTO_TEST_EMAIL = 'test@gearapps.local';
-const AUTO_TEST_PASSWORD = 'GearApps-E2E-Only-2026!';
-const AUTO_ADMIN_EMAIL = 'admin@gearapps.local';
-const AUTO_ADMIN_PASSWORD = 'GearApps-Admin-Only-2026!';
+const AUTO_TEST_EMAIL = 'test@meshforge.local';
+const AUTO_TEST_PASSWORD = 'MeshForge-E2E-Only-2026!';
+const AUTO_ADMIN_EMAIL = 'admin@meshforge.local';
+const AUTO_ADMIN_PASSWORD = 'MeshForge-Admin-Only-2026!';
 
 function loadDotEnv(filePath) {
   const values = {};
@@ -89,7 +89,7 @@ try {
   await upsertLocalAccount({
     email: AUTO_TEST_EMAIL,
     password: AUTO_TEST_PASSWORD,
-    firstName: 'Gear Apps',
+    firstName: 'MeshForge',
     lastName: 'E2E Test',
     role: 'user',
     departmentCode: '45',
@@ -98,13 +98,13 @@ try {
   await upsertLocalAccount({
     email: AUTO_ADMIN_EMAIL,
     password: AUTO_ADMIN_PASSWORD,
-    firstName: 'Gear Apps',
+    firstName: 'MeshForge',
     lastName: 'Local Admin',
     role: 'admin',
     departmentCode: '99',
   });
 
-  console.log('[PASS] Dedicated automatic Gear Apps user + local admin are ready.');
+  console.log('[PASS] Dedicated automatic MeshForge user + local admin are ready.');
 } finally {
   await client.end();
 }

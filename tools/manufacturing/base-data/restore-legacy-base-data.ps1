@@ -1,12 +1,12 @@
 param(
     [string]$SqlServer = "usftwplvsql01",
-    [string]$SqlDatabase = "GearAppsNew",
+    [string]$SqlDatabase = "MeshForgeNew",
     [string]$PgContainer = "dana-postgres",
     [string]$PgHost = "usftwvmdocker",
     [int]$PgPort = 5432,
     [string]$PgUser = "api",
     [string]$PgPassword = "api",
-    [string]$PgDatabase = "GearApps",
+    [string]$PgDatabase = "MeshForge",
     [string]$ExportDirectory = ".\tools/manufacturing/base-data/data",
     [string]$Importer = ".\tools\manufacturing\base-data\import-base-data.mjs"
 )
@@ -38,7 +38,7 @@ function Export-SqlServerJson {
         [Parameter(Mandatory=$true)][string]$FileName
     )
 
-    $tmp = Join-Path $env:TEMP ("gearapps_" + [Guid]::NewGuid().ToString("N") + ".txt")
+    $tmp = Join-Path $env:TEMP ("meshforge_" + [Guid]::NewGuid().ToString("N") + ".txt")
 
     try {
         $output = @(
@@ -139,7 +139,7 @@ function Export-SqlServerJson {
 
 Write-Host ""
 Write-Host "===================================================="
-Write-Host " GearApps Legacy Base-Data Restore"
+Write-Host " MeshForge Legacy Base-Data Restore"
 Write-Host " BUILD: $BuildTag"
 Write-Host "===================================================="
 
@@ -304,7 +304,7 @@ if (Test-Path -LiteralPath $ExportPath) {
 New-Item -ItemType Directory -Path $ExportPath -Force | Out-Null
 Pass $ExportPath
 
-Step "Exporting fresh data from GearAppsNew"
+Step "Exporting fresh data from MeshForgeNew"
 Export-SqlServerJson "SELECT Dept_ID, Department_ID, Department_Desc FROM dbo.tbl_departments" "departments.json"
 Export-SqlServerJson "SELECT Emp_ID, Dept_ID, Name_First, Name_Last, Status FROM dbo.tbl_Employees" "employees.json"
 Export-SqlServerJson "SELECT Machine_ID, Asset_ID, Dept_ID, Cell, Status FROM dbo.tbl_Machines" "machines.json"
@@ -369,7 +369,7 @@ Write-Host ("  Pull Reasons        : {0}" -f $counts.cutter_pull_reasons)
 Pass "Source JSON validated"
 
 Step "Configuring PostgreSQL connection for import-base-data.mjs"
-# These are the exact working PostgreSQL settings used by this GearApps project.
+# These are the exact working PostgreSQL settings used by this MeshForge project.
 $env:DATABASE_HOST = $PgHost
 $env:DATABASE_PORT = "$PgPort"
 $env:DATABASE_USERNAME = $PgUser

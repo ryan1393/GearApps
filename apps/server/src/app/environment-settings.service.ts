@@ -10,8 +10,8 @@ import {
   environmentWithDefaults,
   readEnvironmentOverlay,
   StoredEnvironmentSetting,
-} from '@gearapps/manufacturing/server/util-common';
-import { STARTUP_SCHEMA_LOCK_SQL } from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/server/util-common';
+import { STARTUP_SCHEMA_LOCK_SQL } from '@meshforge/manufacturing/shared/util-constants';
 import {
   BadRequestException,
   ConflictException,

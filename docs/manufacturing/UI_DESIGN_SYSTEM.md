@@ -1,16 +1,16 @@
-# Gear Apps UI Design System
+# MeshForge UI Design System
 
-> **Superseded in 70.2.0.** Gear Apps styling now lives in @dana/ui (Dana UI). The paths below
+> **Superseded in 70.2.0.** MeshForge styling now lives in @dana/ui (Dana UI). The paths below
 > (`libs/shared/ui-tailwind`, `libs/gear/ui`) no longer exist; see the "Styling (Dana UI)" section
 > of the README. This file is kept for history.
 
 
 ## Public style entry point
 
-All Angular frontends load exactly one Gear Apps stylesheet from their Nx build configuration:
+All Angular frontends load exactly one MeshForge stylesheet from their Nx build configuration:
 
 ```text
-libs/shared/ui-tailwind/src/styles/gear-apps.css
+libs/shared/ui-tailwind/src/styles/meshforge.css
 ```
 
 That file is intentionally an **import-only entry point**. It owns module order but does not own declarations. Blade Tracking, Cutter Builder, Greenshed, Admin, and feature components must not import private modules directly.
@@ -21,8 +21,8 @@ The public entry point currently loads 22 ordered modules. The shared component 
 
 ```text
 libs/shared/ui-tailwind/src/styles/
-├── gear-apps.css
-└── gear-apps/
+├── meshforge.css
+└── meshforge/
     ├── foundation/
     │   ├── tokens.css
     │   ├── base.css
@@ -51,7 +51,7 @@ libs/shared/ui-tailwind/src/styles/
         └── typography.css
 ```
 
-`features/design-tokens.css` and `features/ui-cleanup.css` remain only as declaration-free retirement notes. They are not loaded by `gear-apps.css` and must not regain active ownership.
+`features/design-tokens.css` and `features/ui-cleanup.css` remain only as declaration-free retirement notes. They are not loaded by `meshforge.css` and must not regain active ownership.
 
 ## Ownership rules
 
@@ -110,7 +110,7 @@ npm run test:ui-style-duplicates
 
 ## Standard reusable vocabulary
 
-Prefer the existing Gear Apps classes before inventing a page-specific equivalent. Current shared vocabulary includes:
+Prefer the existing MeshForge classes before inventing a page-specific equivalent. Current shared vocabulary includes:
 
 ```text
 .gear-page
@@ -146,7 +146,7 @@ npm run test:login-ui-consistency
 
 The modular style contract verifies:
 
-- `gear-apps.css` remains import-only;
+- `meshforge.css` remains import-only;
 - all 17 canonical modules exist in reviewed order;
 - retired override-only modules do not return;
 - applications load only the public entry point;
@@ -164,7 +164,7 @@ The duplicate contract verifies **zero same-cascade duplicate selectors** and se
 3. Put only workflow-specific presentation in `features/`.
 4. Do not create an override-only module just to restyle another shared module later in the import order.
 5. Do not add large `<style>` blocks to Angular templates.
-6. Do not add Gear Apps shell/component rules to `apps/*/src/styles.css` or `app.component.css`.
+6. Do not add MeshForge shell/component rules to `apps/*/src/styles.css` or `app.component.css`.
 7. Do not import a private module directly from an app.
 8. Run the shared-style, duplicate, deep-UI, and no-raw-debug contracts before delivery.
 9. For deliberate visual changes, review Blade Tracking, Cutter Builder, Greenshed, and Admin rather than only the page being edited.
@@ -272,7 +272,7 @@ npm run test:location-identity-display
 Parent/child inventory relationships use a shared visual vocabulary from:
 
 ```text
-libs/shared/ui-tailwind/src/styles/gear-apps/features/inventory-relations.css
+libs/shared/ui-tailwind/src/styles/meshforge/features/inventory-relations.css
 ```
 
 Canonical classes include:
@@ -304,7 +304,7 @@ The contract verifies both the relationship behavior and the shared style vocabu
 
 ## Shop-floor readability and child containment standard
 
-Gear Apps body content now uses a shared readability scale from `foundation/tokens.css`:
+MeshForge body content now uses a shared readability scale from `foundation/tokens.css`:
 
 ```text
 --gear-font-xs: 11px
@@ -351,7 +351,7 @@ node tools/manufacturing/test-inventory-control-center-search-contract.mjs
 node tools/manufacturing/test-shared-table-migration-contract.mjs
 node tools/manufacturing/test-workflow-surface-consolidation-contract.mjs
 npm run audit:ui-styles
-npm run test:gear-apps
+npm run test:meshforge
 ```
 
 V69.2 must not be called a live baseline until the final Windows authoritative regression passes.

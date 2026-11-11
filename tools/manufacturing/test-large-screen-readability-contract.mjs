@@ -7,7 +7,7 @@ const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8');
 const fail = (message) => { console.error(`[FAIL] ${message}`); process.exit(1); };
 const need = (text, marker, label) => { if (!text.includes(marker)) fail(`${label} missing marker: ${marker}`); };
 
-const responsivePath = 'libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css';
+const responsivePath = 'libs/shared/dana-ui/src/styles/meshforge/foundation/responsive.css';
 const responsive = read(responsivePath);
 
 for (const marker of [

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { ValueFieldComponent } from '@gearapps/client/ui';
-import { LappingSummaryRow } from '@gearapps/shared/domain';
+import { ValueFieldComponent } from '@meshforge/client/ui';
+import { LappingSummaryRow } from '@meshforge/shared/domain';
 import { fieldValue, GroupDef, RETRACT_MODES } from './macro-map';
 
 /** One titled group of macro-backed fields inside a Dana card section. */

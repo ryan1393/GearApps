@@ -4,15 +4,15 @@ import { RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, ViewChild, inject } from '@angular/core';
-import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
-import { IContainer } from '@gearapps/manufacturing/shared/util-types';
+import { GearToastService } from '@meshforge/manufacturing/frontend/util-common';
+import { IContainer } from '@meshforge/manufacturing/shared/util-types';
 import {
   BladeTrackingApiService,
   InventoryContainerRow,
   InventoryContainedTrayRow,
   InventoryTrayRow,
   apiErrorText,
-} from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
+} from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
 import { ScanMessage } from '../../models/scan-message';
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import {

@@ -1,6 +1,6 @@
 import { OAuth2Client } from 'google-auth-library';
 
-import { ISocialPayload } from '@gearapps/manufacturing/shared/util-types';
+import { ISocialPayload } from '@meshforge/manufacturing/shared/util-types';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 

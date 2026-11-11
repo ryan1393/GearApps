@@ -1,8 +1,8 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
-import { readGearAppsStyles } from './lib/read-gear-apps-styles.mjs';
+import { readMeshForgeStyles } from './lib/read-meshforge-styles.mjs';
 
-const css=readGearAppsStyles();
+const css=readMeshForgeStyles();
 
 const navs=[
   'apps/blade-tracking/src/app/layout/app-nav/app-nav.component.html',
@@ -17,7 +17,7 @@ const dashboards=[
 ];
 
 for(const marker of [
-  'GEAR APPS DESIGN SYSTEM TOKENS',
+  'MESHFORGE DESIGN SYSTEM TOKENS',
   '--gear-sidebar-width: 272px',
   '.brand-copy',
   '.nav-current',
@@ -85,5 +85,5 @@ for(const file of dashboards){
 }
 
 console.log(
-  '[PASS] Global professional UI contract passed: all apps share the canonical Gear Apps shell/dashboard design and Blade sidebar exposes the Inventory Control Center.',
+  '[PASS] Global professional UI contract passed: all apps share the canonical MeshForge shell/dashboard design and Blade sidebar exposes the Inventory Control Center.',
 );

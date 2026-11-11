@@ -2,14 +2,14 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@meshforge/manufacturing/frontend/util-common';
 
 import {
   AssetTagKind,
   BladeTrackingApiService,
   InventoryLocationRow,
   apiErrorText,
-} from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
+} from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
 import {
   DanaSummaryCardDirective,
   DanaSummaryGridDirective,

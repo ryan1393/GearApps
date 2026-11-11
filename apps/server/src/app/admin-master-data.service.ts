@@ -3,8 +3,8 @@ import {
   CutterMachineRunOrmEntity,
   MachineOrmEntity,
   ModelOrmEntity,
-} from '@gearapps/manufacturing/server/data-access';
-import { Uuid } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/server/data-access';
+import { Uuid } from '@meshforge/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,

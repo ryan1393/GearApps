@@ -1,6 +1,6 @@
 import { CoaterShipmentsController } from './coater-shipments.controller';
 import { CoaterShipmentsService } from './coater-shipments.service';
-import { ServerDataAccessModule } from '@gearapps/manufacturing/server/data-access';
+import { ServerDataAccessModule } from '@meshforge/manufacturing/server/data-access';
 import { Module } from '@nestjs/common';
 
 import { ServerFeatContainerTrayController } from './server-feat-container-tray.controller';

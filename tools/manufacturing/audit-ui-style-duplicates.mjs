@@ -1,14 +1,14 @@
-import { readGearAppsStyles } from './lib/read-gear-apps-styles.mjs';
+import { readMeshForgeStyles } from './lib/read-meshforge-styles.mjs';
 import {
   summarizeContextualSelectorDuplicates,
   summarizeSelectorDuplicates,
 } from './lib/css-selector-audit.mjs';
 
-const css = readGearAppsStyles();
+const css = readMeshForgeStyles();
 const raw = summarizeSelectorDuplicates(css);
 const contextual = summarizeContextualSelectorDuplicates(css);
 
-console.log(`Gear Apps CSS rules: ${raw.totalRules}`);
+console.log(`MeshForge CSS rules: ${raw.totalRules}`);
 console.log(`Unique selector strings: ${raw.uniqueSelectors}`);
 console.log(`Same-cascade duplicate selectors: ${contextual.duplicateSelectorCount}`);
 console.log(`Selectors intentionally reused across responsive/print contexts: ${raw.duplicateSelectorCount}`);

@@ -1,24 +1,24 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
-import { listGearAppsStyleModules, readGearAppsStyles } from './lib/read-gear-apps-styles.mjs';
+import { listMeshForgeStyleModules, readMeshForgeStyles } from './lib/read-meshforge-styles.mjs';
 import { readDanaUiSource } from './lib/dana-ui-source.mjs';
 
 const root = process.cwd();
 const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8');
 const stripComments = (text) => text.replace(/\/\*[\s\S]*?\*\//g, '').trim();
 
-const entry = read('libs/shared/dana-ui/src/styles/gear-apps.css');
-const tokens = read('libs/shared/dana-ui/src/styles/gear-apps/foundation/tokens.css');
-const designTokens = read('libs/shared/dana-ui/src/styles/gear-apps/features/design-tokens.css');
-const cleanup = read('libs/shared/dana-ui/src/styles/gear-apps/features/ui-cleanup.css');
-const data = read('libs/shared/dana-ui/src/styles/gear-apps/components/data-display.css');
-const dashboard = read('libs/shared/dana-ui/src/styles/gear-apps/features/dashboard.css');
-const typography = read('libs/shared/dana-ui/src/styles/gear-apps/features/typography.css');
-const primitives = read('libs/shared/dana-ui/src/styles/gear-apps/components/primitives.css');
-const admin = read('libs/shared/dana-ui/src/styles/gear-apps/features/admin-core.css');
+const entry = read('libs/shared/dana-ui/src/styles/meshforge.css');
+const tokens = read('libs/shared/dana-ui/src/styles/meshforge/foundation/tokens.css');
+const designTokens = read('libs/shared/dana-ui/src/styles/meshforge/features/design-tokens.css');
+const cleanup = read('libs/shared/dana-ui/src/styles/meshforge/features/ui-cleanup.css');
+const data = read('libs/shared/dana-ui/src/styles/meshforge/components/data-display.css');
+const dashboard = read('libs/shared/dana-ui/src/styles/meshforge/features/dashboard.css');
+const typography = read('libs/shared/dana-ui/src/styles/meshforge/features/typography.css');
+const primitives = read('libs/shared/dana-ui/src/styles/meshforge/components/primitives.css');
+const admin = read('libs/shared/dana-ui/src/styles/meshforge/features/admin-core.css');
 const directive = readDanaUiSource(root, 'lib/components/data/dana-table.directive.ts');
-const icons = read('libs/shared/dana-ui/src/styles/gear-apps/components/icons.css');
+const icons = read('libs/shared/dana-ui/src/styles/meshforge/components/icons.css');
 const navs = [
   'apps/blade-tracking/src/app/layout/app-nav/app-nav.component.html',
   'apps/cutter-builder/src/app/layout/cutter-builder-nav/cutter-builder-nav.component.html',
@@ -41,7 +41,7 @@ for (const marker of [
   if (!tokens.includes(marker)) throw new Error(`Canonical tokens.css is missing ${marker}`);
 }
 
-const sharedCss = readGearAppsStyles(root);
+const sharedCss = readMeshForgeStyles(root);
 for (const retiredFamily of ['--gear-font-size-', '--gear-font-weight-', '--gear-line-height-']) {
   if (sharedCss.includes(retiredFamily)) throw new Error(`Retired duplicate token family remains active: ${retiredFamily}`);
 }
@@ -74,7 +74,7 @@ for (const marker of ['gear-glyph-sort','gear-glyph-sort-asc','gear-glyph-sort-d
   if (!directive.includes(marker) || !icons.includes(`.${marker}`)) throw new Error(`Shared table semantic icon mapping is incomplete: ${marker}`);
 }
 
-const modules = listGearAppsStyleModules(root);
+const modules = listMeshForgeStyleModules(root);
 for (const rel of modules) {
   const lines = read(rel).split(/\r?\n/).length;
   if (lines > 520) throw new Error(`${rel} exceeds the 520-line shared style ceiling (${lines}).`);

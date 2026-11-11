@@ -12,9 +12,9 @@ import {
   DanaTableEmptyDirective,
   DanaTableShellDirective,
 } from '@dana/ui';
-import { apiErrorMessage, LapperAccess, loadable, MachinesApi } from '@gearapps/client/core';
-import { StatusBadgeComponent } from '@gearapps/client/ui';
-import { Machine } from '@gearapps/shared/domain';
+import { apiErrorMessage, LapperAccess, loadable, MachinesApi } from '@meshforge/client/core';
+import { StatusBadgeComponent } from '@meshforge/client/ui';
+import { Machine } from '@meshforge/shared/domain';
 import { groupByCell } from './cells';
 
 @Component({
@@ -118,7 +118,7 @@ import { groupByCell } from './cells';
             aria-label="Lapping Summaries"
           ></a>
           @if (access.canEditSetup()) {
-            <!-- Shared master data lives in Admin, like the other Gear apps. -->
+            <!-- Shared master data lives in Admin, like the other MeshForge apps. -->
             <a
               routerLink="/admin"
               [queryParams]="{ tab: 'lapping-machines' }"

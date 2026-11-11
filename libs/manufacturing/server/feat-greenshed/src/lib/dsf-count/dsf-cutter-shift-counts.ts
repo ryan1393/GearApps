@@ -1,4 +1,4 @@
-import { dsfCutterCountsEnabled } from '@gearapps/manufacturing/server/util-common';
+import { dsfCutterCountsEnabled } from '@meshforge/manufacturing/server/util-common';
 import { DataSource } from 'typeorm';
 
 /**

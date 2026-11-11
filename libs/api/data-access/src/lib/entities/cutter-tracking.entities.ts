@@ -5,7 +5,7 @@ import {
   CutterLog,
   PullCutterReason,
   RetiredCutter,
-} from '@gearapps/shared/domain';
+} from '@meshforge/shared/domain';
 import { EntitySchema } from 'typeorm';
 import {
   bool,

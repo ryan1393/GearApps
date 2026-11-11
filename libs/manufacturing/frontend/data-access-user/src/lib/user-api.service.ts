@@ -6,7 +6,7 @@ import {
   IPaginatedResponse,
   IUpdateUser,
   IUser,
-} from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-types';
 
 @Injectable({ providedIn: 'root' })
 export class UserApiService {

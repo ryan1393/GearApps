@@ -1,5 +1,5 @@
 /* DANA-DSF-CUTTER-V1. Opt-in attribution of already-verified DSF production to
- * Gear Apps cutter machine runs. The source is read-only; writes go ONLY to the Gear Apps DB.
+ * MeshForge cutter machine runs. The source is read-only; writes go ONLY to the MeshForge DB.
  * Requires DSF_CUTTER_WRITE_ENABLED=true.
  *
  * Ledger key: machine + cutter run + shift start. Each poll computes how many RUN pieces the

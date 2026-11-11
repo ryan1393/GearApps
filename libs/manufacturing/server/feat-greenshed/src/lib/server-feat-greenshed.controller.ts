@@ -1,5 +1,5 @@
-import { DepartmentAppEdit, Auth, ReqUserId } from '@gearapps/manufacturing/server/util-common';
-import { RoleType, Uuid } from '@gearapps/manufacturing/shared/util-types';
+import { DepartmentAppEdit, Auth, ReqUserId } from '@meshforge/manufacturing/server/util-common';
+import { RoleType, Uuid } from '@meshforge/manufacturing/shared/util-types';
 import {
   Body,
   Controller,
@@ -75,7 +75,7 @@ export class ServerFeatGreenshedController {
   @Auth([RoleType.ADMIN, RoleType.USER])
   async setupCutter(@Body() dto: SetupCutterDto, @ReqUserId() userId: Uuid) {
     const result = await this.service.setupCutter(dto, userId);
-    // Only after the Gear Apps transaction commits: ask for one early DSF read so the new
+    // Only after the MeshForge transaction commits: ask for one early DSF read so the new
     // cutter starts being credited without waiting a full poll interval. No-op when DSF is off.
     this.dsf.requestImmediate();
     return result;
@@ -104,7 +104,7 @@ export class ServerFeatGreenshedController {
   @Auth([RoleType.ADMIN, RoleType.USER])
   async pullCutter(@Body() dto: PullCutterDto, @ReqUserId() userId: Uuid) {
     const result = await this.service.pullCutter(dto, userId);
-    this.dsf.requestImmediate(); // only after the Gear Apps transaction commits
+    this.dsf.requestImmediate(); // only after the MeshForge transaction commits
     return result;
   }
 }

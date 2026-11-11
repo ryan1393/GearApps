@@ -1,6 +1,6 @@
-import { LapperWritePolicy, CrudService, crudController } from '@gearapps/api/core';
-import { CreateGearsetDto, GearsetDto, UpdateGearsetDto } from '@gearapps/api/data-access';
-import { Gearset } from '@gearapps/shared/domain';
+import { LapperWritePolicy, CrudService, crudController } from '@meshforge/api/core';
+import { CreateGearsetDto, GearsetDto, UpdateGearsetDto } from '@meshforge/api/data-access';
+import { Gearset } from '@meshforge/shared/domain';
 import { UseInterceptors, Controller, Get, Injectable, Param, ParseUUIDPipe } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 @Injectable()

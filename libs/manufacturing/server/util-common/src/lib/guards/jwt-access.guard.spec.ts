@@ -1,6 +1,6 @@
 import { ExecutionContext, ForbiddenException, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { collectorTokenAllows, CollectorTokenResolver } from '@gearapps/shared/domain';
+import { collectorTokenAllows, CollectorTokenResolver } from '@meshforge/shared/domain';
 import { JwtAccessTokenGuard } from './jwt-access.guard';
 
 const context = (method: string, url: string, authorization?: string) => {

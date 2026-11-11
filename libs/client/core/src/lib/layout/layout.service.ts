@@ -1,7 +1,7 @@
 import { DOCUMENT } from '@angular/common';
 import { effect, inject, Injectable, signal } from '@angular/core';
 
-const SCALE_KEY = 'gearapps.textScale';
+const SCALE_KEY = 'meshforge.textScale';
 export const SCALE_MIN = 100;
 export const SCALE_MAX = 140;
 export const SCALE_STEP = 10;
