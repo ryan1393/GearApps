@@ -117,7 +117,7 @@ export class DsfMachineMappingsComponent implements OnInit {
       READ_ONLY_ROLE_REQUIRED: 'the DSF login is not a restricted read-only account',
       SOURCE_ACCOUNT_MISMATCH: 'the DSF login or database is not the configured one',
       WRONG_SOURCE_OR_NOT_READ_ONLY: 'the database reached is not the DSF source, or the session is not read-only',
-      CLOCK_DIFFERENCE: 'the DSF and Gear Apps clocks differ by more than 10 seconds',
+      CLOCK_DIFFERENCE: 'the DSF and MeshForge clocks differ by more than 10 seconds',
       READER_BUSY: 'another API process is already reading DSF',
       READ_DEADLINE: 'the read took too long',
     };
@@ -186,10 +186,10 @@ export class DsfMachineMappingsComponent implements OnInit {
     const text: Record<string, string> = {
       RUN_CHANGED_DURING_WRITE: 'Count changed during update; will retry',
       RUN_CHANGED_OUTSIDE_DSF: 'Cutter count was changed by hand; crediting resumes next shift',
-      DANA_WRITE_UNAVAILABLE: 'Gear Apps count update unavailable; will retry',
+      DANA_WRITE_UNAVAILABLE: 'MeshForge count update unavailable; will retry',
       DSF_COUNT_DECREASE_REVIEW: 'DSF count decreased; review required',
       SOURCE_READ_NOT_FRESH: 'Waiting for a fresh DSF read',
-      SHIFT_SCHEDULE_MISMATCH: 'DSF shift does not match the Gear Apps shift schedule',
+      SHIFT_SCHEDULE_MISMATCH: 'DSF shift does not match the MeshForge shift schedule',
       ACTIVE_RUN_AMBIGUOUS: 'More than one active cutter run; review required',
       COUNT_BELOW_QUALITY_CHECK: 'Cutter count is below its last check; review required',
       API_TIMESTAMP_TIMEZONE_REVIEW: 'The API must run in UTC to credit cutters',

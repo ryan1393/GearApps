@@ -59,7 +59,7 @@ describe('PasswordRecoveryComponent', () => {
     create('forgot', code, false);
     expect(component.resetByEmailAvailable).toBe(false);
     expect(fixture.nativeElement.querySelector('form')).toBeNull();
-    expect(fixture.nativeElement.textContent).toContain('Contact your Gear Apps administrator');
+    expect(fixture.nativeElement.textContent).toContain('Contact your MeshForge administrator');
   });
   it('keeps the forgot form when an older server does not report reset availability', () => {
     create('forgot', code, undefined);

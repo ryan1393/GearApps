@@ -4,7 +4,7 @@
     danaPageHeader
     eyebrow="CUTTER BUILDER / BUILD"
     heading="Build Cutter"
-    description="Scan the Cutter Body and a ready blade tray. Gear Apps validates Summary, part type, blade identity, quantity, tray stage, and active assignments before a build can be created."
+    description="Scan the Cutter Body and a ready blade tray. MeshForge validates Summary, part type, blade identity, quantity, tray stage, and active assignments before a build can be created."
   ></header>
 
   <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert">{{ error }}</div>
@@ -32,7 +32,7 @@
               autocomplete="off"
             />
           </label>
-          <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy">Scan</button>
+          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy">Scan</button>
         </form>
         <div class="gear-workflow-divider">OR</div>
         <label class="gear-field">
@@ -96,7 +96,7 @@
               [disabled]="busy || !cutterBody"
             />
           </label>
-          <button type="submit" class="gear-btn gear-btn-dark" [disabled]="busy || !cutterBody">Scan</button>
+          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy || !cutterBody">Scan</button>
         </form>
         <div class="gear-workflow-divider">OR</div>
         <label class="gear-field">

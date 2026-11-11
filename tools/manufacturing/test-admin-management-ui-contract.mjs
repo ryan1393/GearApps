@@ -92,7 +92,7 @@ for(const marker of [
 
 
 for(const marker of [
-  'Gear Apps Administration',
+  'MeshForge Administration',
   '>Users<',
   '>Part Summaries<',
   '>Parts<',

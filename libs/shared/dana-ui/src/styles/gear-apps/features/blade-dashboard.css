@@ -26,7 +26,7 @@
   align-items: center;
   gap: 10px;
   min-height: 55px;
-  border-bottom: 1px solid #edf1f5;
+  border-bottom: 1px solid #f0f1f2;
 }
 
 .dashboard-activity-row:last-child {
@@ -38,10 +38,10 @@
   width: 30px;
   height: 30px;
   place-items: center;
-  border: 1px solid #d2e2ef;
+  border: 1px solid #dee0e4;
   border-radius: 8px;
-  background: #eef6fc;
-  color: #2b72ad;
+  background: #f4f5f6;
+  color: #ad5613;
   font-size: 12px;
   font-weight: 800;
 }
@@ -63,7 +63,7 @@
 
 .dashboard-activity-row strong {
   overflow: hidden;
-  color: #283d52;
+  color: #343c48;
   font-size: var(--gear-font-sm);
   font-weight: 780;
   text-overflow: ellipsis;
@@ -73,14 +73,14 @@
 .dashboard-activity-row span {
   overflow: hidden;
   margin-top: 3px;
-  color: #758598;
+  color: #7c8492;
   font-size: var(--gear-font-xs);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .dashboard-activity-row time {
-  color: #8291a2;
+  color: #89909c;
   font-size: var(--gear-font-xs);
   white-space: nowrap;
 }

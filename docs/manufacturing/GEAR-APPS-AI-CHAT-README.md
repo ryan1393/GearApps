@@ -102,16 +102,19 @@ The user does NOT want a separate picture/mockup instead of code.
 
 ---
 
-## 4. DANA BRANDING / ICON RULES
+## 4. MESHFORGE BRANDING / ICON RULES
 
-Dana Apps consistency is the target.
+The suite is branded MeshForge ("by Dana Gear Apps Suite"). This replaced the earlier Dana Diamond / Truck Log
+branding direction; older notes below that mention the Dana Diamond describe history.
 
-- Truck Log's Dana branding is the source-of-truth direction.
-- Desired Gear Apps assets:
-  - `dana-diamond.png` for app/sidebar branding;
-  - `dana-favicon.png` for browser tabs.
-- App top/tab bar direction: Dana Diamond plus `page | app`.
-- Blade Tracking app-nav must use the maintained shared file-backed Dana Diamond asset.
+- Brand assets and the palette are documented in `libs/manufacturing/assets/brand/README.md`.
+- Gear Apps assets:
+  - `assets/brand/meshforge-mark.svg` for app/sidebar and login branding;
+  - `assets/branding/meshforge-favicon.png` for browser tabs.
+- App top/tab bar direction: MeshForge mark plus `page | app`.
+- Every app-nav must use the maintained shared file-backed MeshForge mark.
+- Palette: charcoal shell, orange actions. Informational blue, success, danger and Greenshed machine-state
+  colours are operational signals and stay as they are.
 - Shared semantic icon contracts are intentional; current known example:
   - Blade Tracking Receive workflow expects `gear-glyph-receive`.
 

@@ -16,7 +16,7 @@
 
 .sidebar-view-only span {
   display: block;
-  color: #cbd5e1;
+  color: #d1d4d9;
   font-size: .69rem;
   line-height: 1.45;
 }
@@ -33,7 +33,7 @@
 }
 
 .gear-field-help {
-  color: #718096;
+  color: #777f8e;
   font-size: var(--gear-font-sm);
   font-weight: 500;
   line-height: 1.45;

@@ -16,9 +16,9 @@
 .label-printers-sub { display: block; margin-top: .25rem; max-width: 30rem; font-weight: 600; }
 .label-printers-kind { font-weight: 400; opacity: .75; }
 .label-printers-ok { color: #166534; }
-.label-printers-problem { color: #92400e; }
+.label-printers-problem { color: #6f540b; }
 .label-printers-actions { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; }
 .label-printers-actions .gear-btn { white-space: nowrap; }
-.label-printers-editing > td { background: #eef4fb; }
+.label-printers-editing > td { background: #f2f3f5; }
 @media (max-width: 1200px) { .label-printers-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 640px) { .label-printers-fields, .label-printers-defaults, .label-printers-adjust { grid-template-columns: 1fr; } }

@@ -54,7 +54,7 @@
         <label><input type="checkbox" name="printerDefault" [(ngModel)]="form.is_default" [disabled]="!form.enabled" /> Default printer for {{ typeName(form.label_type).toLowerCase() }}</label>
         <label><input type="checkbox" name="printerEnabled" [(ngModel)]="form.enabled" /> Available for printing</label>
       </div>
-      <p class="label-printers-help">The printer must be on the network with raw printing on (port 9100 on most printers), and reachable from the Gear Apps server. A printer plugged into one PC by USB cannot be used. The first printer added for a label becomes its default.</p>
+      <p class="label-printers-help">The printer must be on the network with raw printing on (port 9100 on most printers), and reachable from the MeshForge server. A printer plugged into one PC by USB cannot be used. The first printer added for a label becomes its default.</p>
       <div class="gear-admin-actions">
         <button type="submit" class="gear-btn gear-btn-primary" [disabled]="saving || !current.available">{{ saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Printer' }}</button>
         <button type="button" class="gear-btn gear-btn-secondary" *ngIf="editingId" (click)="cancelEdit()" [disabled]="saving">Cancel</button>

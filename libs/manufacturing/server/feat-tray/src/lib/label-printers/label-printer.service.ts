@@ -259,7 +259,7 @@ function positiveInteger(value: string | undefined, fallback: number): number {
 function describeFailure(failure: NodeJS.ErrnoException | 'timeout', target: LabelPrinterTarget, timeoutMs: number): string {
   const where = `${target.host}:${target.port}`;
   if (failure === 'timeout' || failure.code === 'ETIMEDOUT') {
-    return `No answer from ${where} within ${Math.round(timeoutMs / 1000)} seconds. Check the address, that the printer is switched on, and that the Gear Apps server can reach the printer's network.`;
+    return `No answer from ${where} within ${Math.round(timeoutMs / 1000)} seconds. Check the address, that the printer is switched on, and that the MeshForge server can reach the printer's network.`;
   }
   switch (failure.code) {
     case 'ECONNREFUSED':
@@ -269,7 +269,7 @@ function describeFailure(failure: NodeJS.ErrnoException | 'timeout', target: Lab
       return `The name ${target.host} could not be found. Use the printer's IP address.`;
     case 'EHOSTUNREACH':
     case 'ENETUNREACH':
-      return `The Gear Apps server has no network route to ${target.host}.`;
+      return `The MeshForge server has no network route to ${target.host}.`;
     case 'ECONNRESET':
     case 'EPIPE':
       return `${where} closed the connection before the label was sent.`;

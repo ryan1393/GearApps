@@ -42,7 +42,7 @@ export class AppComponent {
     const prefix =
       exact ??
       this.pageTitles.find(([route]) => route !== '/' && cleanPath.startsWith(`${route}/`));
-    this.browserTitle.setTitle(`${prefix?.[1] ?? 'Gear Apps'} | Lapper`);
+    this.browserTitle.setTitle(`${prefix?.[1] ?? 'MeshForge'} | Lapper`);
   }
 
   get isLoginRoute(): boolean {

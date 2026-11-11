@@ -89,7 +89,7 @@ import {
             <small class="gear-field-help">A machine keeps the department it was created in.</small>
           } @else if (invalid('dept_id')) {
             <small class="gear-field-help" role="alert"
-              >Choose the GearApps department that owns this lapper.</small
+              >Choose the MeshForge department that owns this lapper.</small
             >
           }
         </label>

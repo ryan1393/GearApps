@@ -149,7 +149,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       return;
     }
     try { await ensureDsfCutterSchema(this.db); }
-    catch { this.logger.error('DSF tables could not be prepared in the Gear Apps database; the DSF reader is not running.');return; }
+    catch { this.logger.error('DSF tables could not be prepared in the MeshForge database; the DSF reader is not running.');return; }
     this.schemaReady=true;this.readerState='WAITING';this.schedule(1000);
   }
   private schemaReady=false;
@@ -366,7 +366,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       for(const m of machines) {
         const override=this.mappingOverrides.get(m.machine_id);const mapping=this.effectiveFor(m,override);
         if(mapping)effective.set(m.machine_id,mapping);
-        if(!m.active)nextStates.set(m.machine_id,{status:'INACTIVE',note:'Machine inactive in Gear Apps'});
+        if(!m.active)nextStates.set(m.machine_id,{status:'INACTIVE',note:'Machine inactive in MeshForge'});
         else if(override && (!override.enabled||!override.mapping_id)) {nextStates.set(m.machine_id,{status:'MAPPING_REVIEW',note:'No DSF source selected in Admin'});nextCaches.delete(m.machine_id);}
         else if(!mapping||(!mapping.manual&&mapping.blocked)||machines.filter(x=>x.machine_number===m.machine_number).length!==1) {
           nextStates.set(m.machine_id,{status:'MAPPING_REVIEW',note:mapping?.blocked||'Physical machine mapping not approved'});nextCaches.delete(m.machine_id);
@@ -497,7 +497,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       this.lastFailure={reason,code,at:new Date().toISOString()};
       const safeNote=reason==='READ_ONLY_ROLE_REQUIRED'?'Dedicated read-only source user required':
         reason==='SOURCE_ACCOUNT_MISMATCH'?'Source account/database does not match approved configuration':
-        reason==='CLOCK_DIFFERENCE'?'Source and Gear Apps clocks need review':
+        reason==='CLOCK_DIFFERENCE'?'Source and MeshForge clocks need review':
         reason==='READER_BUSY'?'Another DSF reader is active':'DSF refresh unavailable';
       for(const m of this.machines) {
         const state=this.states.get(m.machine_id);

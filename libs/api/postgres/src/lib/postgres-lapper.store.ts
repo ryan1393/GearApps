@@ -504,7 +504,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
       .from('public.part_types', 't')
       .where("t.code='GEARSET'")
       .getRawOne<Row>();
-    if (!type) throw new BadRequestException('GearApps gearset part type is missing');
+    if (!type) throw new BadRequestException('MeshForge gearset part type is missing');
     const oldPart = await manager
       .createQueryBuilder()
       .select('p.id')
@@ -516,7 +516,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
       .getRawOne();
     if (oldPart)
       throw new ConflictException(
-        'A gearset part with this number already exists. Complete its assembly in GearApps.',
+        'A gearset part with this number already exists. Complete its assembly in MeshForge.',
       );
     const partId = randomUUID();
     const gearId = randomUUID();
@@ -571,13 +571,13 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
       .getRawOne<Row>();
     if (!gear)
       throw new BadRequestException(
-        'Create the complete assembly using Gearsets or GearApps master data',
+        'Create the complete assembly using Gearsets or MeshForge master data',
       );
     if (
       (data.ring_id && data.ring_id !== gear.ring_part_id) ||
       (data.pinion_id && data.pinion_id !== gear.pinion_part_id)
     )
-      throw new ConflictException('Assembly components must match GearApps master data');
+      throw new ConflictException('Assembly components must match MeshForge master data');
     await manager
       .createQueryBuilder()
       .insert()
@@ -614,7 +614,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
     const name = text(data.number ?? current?.number).trim();
     if (!name) throw new BadRequestException('Machine asset number is required');
     if (current && name !== current.number)
-      throw new ConflictException('Change machine asset numbers in GearApps master data');
+      throw new ConflictException('Change machine asset numbers in MeshForge master data');
     await manager.query('SELECT pg_advisory_xact_lock(hashtextextended($1,0))', [
       'lapper-machine-number:' + name.toLowerCase(),
     ]);
@@ -631,7 +631,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
       .from('public.departments', 'd')
       .where('(d.code=:code OR d.id::text=:code)', { code: departmentCode })
       .getRawOne<Row>();
-    if (!department) throw new BadRequestException('Choose an existing GearApps department');
+    if (!department) throw new BadRequestException('Choose an existing MeshForge department');
     const active = text(data.status ?? current?.status ?? 'active').toLowerCase() === 'active';
     const cell = data.cell === undefined ? current?.cell : data.cell;
     const parsedCell = cell == null || cell === '' ? null : Number(cell);
@@ -658,7 +658,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
     } else if (profile) {
       // Department changes must go through manufacturing's compatibility workflow.
       if (master.department_id !== department.id)
-        throw new ConflictException('Change the machine department in GearApps master data');
+        throw new ConflictException('Change the machine department in MeshForge master data');
       await manager
         .createQueryBuilder()
         .update('public.machines')
@@ -757,7 +757,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
           .from('public.models', 'm')
           .where('m.model_number::text=:number', { number: text(data.model) })
           .getRawOne<Row>();
-        if (!model) throw new BadRequestException('Choose an existing GearApps model number');
+        if (!model) throw new BadRequestException('Choose an existing MeshForge model number');
         values.model_id = model.id;
       }
       if (
@@ -765,10 +765,10 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
         ((data.number !== undefined && data.number !== current.number) ||
           (values.model_id !== undefined && values.model_id !== current.model_id))
       )
-        throw new ConflictException('Change summary identity and model in GearApps master data');
+        throw new ConflictException('Change summary identity and model in MeshForge master data');
     } else {
       const summaryId = data.summary_id ?? current?.summary_id;
-      if (!summaryId) throw new BadRequestException('Choose a GearApps part summary');
+      if (!summaryId) throw new BadRequestException('Choose a MeshForge part summary');
       const type = data.type
         ? await manager
             .createQueryBuilder()
@@ -783,7 +783,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
         ((type && type.id !== current.part_type_id) ||
           (data.number !== undefined && data.number !== current.part_number))
       )
-        throw new ConflictException('Change part identity and type in GearApps master data');
+        throw new ConflictException('Change part identity and type in MeshForge master data');
       const currentType = current
         ? await manager
             .createQueryBuilder()
@@ -796,7 +796,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
       const teeth = isGearset ? null : data.teeth === undefined ? current?.teeth : data.teeth;
       if (type?.code === 'GEARSET' && !current)
         throw new BadRequestException(
-          'Create complete gearset assemblies in GearApps master data; they are immediately available in Lapper',
+          'Create complete gearset assemblies in MeshForge master data; they are immediately available in Lapper',
         );
       if (
         teeth !== null &&
@@ -819,7 +819,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
           .getRawOne();
         if (linked)
           throw new ConflictException(
-            'Update parts used by gearset assemblies in GearApps master data',
+            'Update parts used by gearset assemblies in MeshForge master data',
           );
       }
       values = { summary_id: summaryId, teeth: teeth ?? null, active, enabled: active };
@@ -860,7 +860,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
       ) {
         // Shared manufacturing records are managed by its guarded workflows.
         throw new ConflictException(
-          'Remove shared master data in GearApps so inventory and history checks run',
+          'Remove shared master data in MeshForge so inventory and history checks run',
         );
       }
       if (kind === 'gearset') {
@@ -872,7 +872,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
           .getRawOne();
         if (shared)
           throw new ConflictException(
-            'Remove shared gearsets in GearApps so inventory and history checks run',
+            'Remove shared gearsets in MeshForge so inventory and history checks run',
           );
         const ref = await this.gearReference(manager, id);
         await manager

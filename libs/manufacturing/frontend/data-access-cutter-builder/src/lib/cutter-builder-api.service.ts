@@ -504,7 +504,7 @@ function cutterCardPng(card: CutterBuildCard): Promise<Blob> {
 
   context.fillStyle = '#0f172a';
   context.font = '900 38px Arial, sans-serif';
-  context.fillText('GEAR APPS', 55, 78);
+  context.fillText('MESHFORGE', 55, 78);
   context.font = '900 50px Arial, sans-serif';
   context.fillText('CUTTER BUILD CARD', 55, 140);
 
@@ -584,7 +584,7 @@ export async function downloadCutterCardArtifacts(
 ): Promise<{ prnFileName: string; pngFileName: string }> {
   if (printerFile) card = { ...card, prn_base64: printerFile.file_base64, prn_file_name: printerFile.file_name };
   if (!card.prn_base64) {
-    throw new Error('The Gear Apps API did not return a native Cutter Card PRN. Restart the API after installing the cutter-card export patch.');
+    throw new Error('The MeshForge API did not return a native Cutter Card PRN. Restart the API after installing the cutter-card export patch.');
   }
   const stem = cutterCardFileStem(card.build_number);
   const prnFileName = card.prn_file_name || `${stem}.prn`;

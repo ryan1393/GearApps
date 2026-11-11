@@ -7,16 +7,16 @@ module.exports = {
     extend: {
       colors: {
         gear: {
-          950: '#061a2f',
-          900: '#071a30',
-          800: '#08233d',
-          700: '#0b5fc9',
-          600: '#1676e8',
-          500: '#2563eb',
-          page: '#f4f7fb',
-          border: '#dce4ee',
-          text: '#0f1f36',
-          muted: '#64748b',
+          950: '#16191f',
+          900: '#161a1f',
+          800: '#1e2229',
+          700: '#ae520b',
+          600: '#bf5d12',
+          500: '#ad5410',
+          page: '#f6f7f8',
+          border: '#e1e3e7',
+          text: '#1b1f25',
+          muted: '#6b7381',
         },
       },
       fontFamily: {
@@ -29,8 +29,8 @@ module.exports = {
         gear: '12px',
       },
       boxShadow: {
-        'gear-panel': '0 2px 7px rgba(20, 43, 69, .05)',
-        'gear-raised': '0 12px 28px rgba(20, 43, 69, .10)',
+        'gear-panel': '0 2px 7px rgba(37, 42, 51, .05)',
+        'gear-raised': '0 12px 28px rgba(37, 42, 51, .10)',
       },
     },
   },

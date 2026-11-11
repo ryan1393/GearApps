@@ -37,7 +37,7 @@ for(const marker of [
 for(const file of navs){
   const html=fs.readFileSync(contractPath(process.cwd(), file),'utf8');
   for(const marker of [
-    '<small>GEAR APPS</small>',
+    '<small>MESHFORGE</small>',
     'class="brand-copy"',
     'class="nav-current">ACTIVE</span>',
     '<div class="nav-heading">SHARED APPS</div>',
