@@ -36,6 +36,7 @@ class FakeTransport:
 class FakeApi:
     def __init__(self):
         self.calls: list[tuple] = []
+        self.cycle_times: dict[str, float | None] = {}
         self.cycles: dict[str, dict] = {}  # idempotency key -> saved cycle
         self.macro_logs: dict[str, tuple] = {}  # idempotency key -> (cycle, macro, value)
         self.fail_cycle = 0
@@ -58,8 +59,9 @@ class FakeApi:
         self.calls.append(("gearset", part_number))
         return {"id": f"gs-{part_number}"}
 
-    def post_cycle(self, serial, consec, machine_id, gearset_id, completed_at, key):
+    def post_cycle(self, serial, consec, machine_id, gearset_id, completed_at, key, cycle_time_s=None):
         self.calls.append(("cycle", serial, consec, key))
+        self.cycle_times[key] = cycle_time_s
         if self.fail_cycle:
             self.fail_cycle -= 1
             raise IOError("API down")

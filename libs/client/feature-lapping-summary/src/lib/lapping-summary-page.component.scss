@@ -12,7 +12,7 @@
 .lapper-facts dd { margin: 0; font-weight: 700; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 
 // Cycles on the left, values on the right.
-.lapper-columns { display: grid; grid-template-columns: minmax(320px, 400px) minmax(0, 1fr); gap: 12px; align-items: start; }
+.lapper-columns { display: grid; grid-template-columns: minmax(320px, 440px) minmax(0, 1fr); gap: 12px; align-items: start; }
 .lapper-pane { padding: 12px 16px; min-width: 0; position: relative; }
 // On a desktop the whole screen fits the window: the two panes take the space that is left
 // and scroll inside it, so the pickers and the cycle list stay in view.
@@ -32,10 +32,19 @@
 .lapper-serial-filter { margin-bottom: 8px; }
 
 .lapper-cycles-table :is(th, td) { padding: 5px 6px !important; font-size: 13px !important; line-height: 1.25; }
-.lapper-cycles-table th:nth-child(1) { width: 34%; }
-.lapper-cycles-table th:nth-child(2) { width: 36%; }
-.lapper-cycles-table th:nth-child(3) { width: 15%; }
-.lapper-cycles-table th:nth-child(4) { width: 15%; }
+/* Columns size to their content; only a long serial may wrap. Headers, times and cycle times
+   never break mid-value (2:11. / 8). */
+.lapper-cycles-table { table-layout: auto !important; }
+.lapper-cycles-table th,
+.lapper-cycles-table td:nth-child(1),
+.lapper-cycles-table td:nth-child(1) .lapper-cycle-button,
+.lapper-cycles-table td:nth-child(3),
+.lapper-cycles-table td:nth-child(4) { white-space: nowrap !important; }
+/* "Cycle time" may stack over two lines, leaving the serial room for a full Dana serial. */
+.lapper-cycles-table th:nth-child(4) { white-space: normal !important; }
+.lapper-cycles-table td:nth-child(2) { overflow-wrap: anywhere; }
+/* Every column but the serial shrinks to its content, so the serial gets the rest. */
+.lapper-cycles-table th:not(:nth-child(2)) { width: 1%; }
 .lapper-cycle-row { cursor: pointer; }
 .lapper-cycle-row.is-selected > td { background: var(--dana-neutral-soft); box-shadow: inset 0 0 0 1px var(--dana-border); }
 .lapper-cycle-row.is-selected > td:first-child { box-shadow: inset 3px 0 0 var(--dana-primary); }

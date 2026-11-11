@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **Cycle time in Lapping Summaries.** Lapper Read now also records each cycle's time (seconds in
+  cycle, Y3.2) in MeshForge, not only in Argonaut. Lapping Summaries shows it in a Cycle time
+  column (minutes:seconds, such as 2:04.3; exact seconds on hover) and at the top: the latest
+  cycle's time, or the selected cycle's, with the average of the last 20 timed cycles of that
+  machine and gearset. Cycles recorded before this, and cycles whose start or end the collector
+  missed, show a dash. New nullable column `lapper.machine_cycles.cycle_time_s` (migration
+  `20261111-lapper-cycle-time-v1`); `POST /api/v1/machine-cycle` accepts an optional
+  `cycle_time_s` (0 to 86400, up to 3 decimals), so collectors that do not send it are unaffected;
+  `history-page` returns each cycle's time and `cycle_time.average_s`. An upgraded collector
+  talking to an API that is not upgraded yet sends the cycle again without the time.
 - **Cutter-body compatibility: which body types a Summary + Part Type may use.** One shared check
   now answers "which cutter-body definitions can these blades be loaded into?" and the API enforces it
   everywhere. See `docs/manufacturing/CUTTER_BODY_BLADE_RULES.md`.

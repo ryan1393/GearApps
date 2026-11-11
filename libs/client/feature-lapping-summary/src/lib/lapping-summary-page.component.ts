@@ -41,6 +41,7 @@ import {
 import {
   CycleHistoryPage,
   CycleHistoryRow,
+  formatCycleTime,
   Gearset,
   LappingChange,
   LappingSummaryRow,
@@ -156,6 +157,14 @@ export class LappingSummaryPageComponent implements OnInit {
   }
   private requestVersion = 0;
   protected readonly cycle = signal<MachineCycle | null>(null);
+  protected readonly formatCycleTime = formatCycleTime;
+  /** The selected cycle's time, or the latest cycle's when none is selected. */
+  protected readonly shownCycleTime = computed(() => {
+    const selected = this.selected();
+    return selected ? selected.cycle_time_s : (this.cycle()?.cycle_time_s ?? null);
+  });
+  /** Average of the most recent timed cycles of this machine and gearset. */
+  protected readonly averageCycleTime = computed(() => this.history.value()?.cycle_time ?? null);
   private readonly byForm = computed(() => groupByForm(this.rows.value()));
   protected readonly gearData = computed(() => this.byForm().get('gear_data') ?? []);
   protected readonly generalData = computed(() => this.byForm().get('general_data') ?? []);
