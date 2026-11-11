@@ -13,6 +13,20 @@ echo KEPT: users, departments, models, parts, part summaries, blade
 echo requirements, cutter body definitions, cutter bodies, roll masters,
 echo gearsets, machines, settings, label printers and all Lapper data.
 echo.
+if not exist ".env" (
+  echo There is no .env file in this folder.
+  echo Run this from your working MeshForge folder, or copy its .env here first.
+  echo Nothing was deleted.
+  pause
+  exit /b 1
+)
+if not exist "node_modules\pg\package.json" (
+  echo The project packages are not installed in this folder.
+  echo Run commands\SETUP-MESHFORGE.cmd here first, or use your working MeshForge folder.
+  echo Nothing was deleted.
+  pause
+  exit /b 1
+)
 node tools\manufacturing\data-import\clear-operational-data.mjs
 if errorlevel 1 (
   echo.
