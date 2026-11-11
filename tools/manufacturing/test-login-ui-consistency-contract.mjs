@@ -21,7 +21,7 @@ const login=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/fron
 const componentStyle=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.scss'),'utf8');
 const sharedStyle=readGearAppsStyles();
 
-for(const marker of ['MESHFORGE','by Dana Gear Apps Suite','Blade Tracking.','Cutter Builder.','Greenshed.','Sign in to MeshForge','Local accounts','>Operator<','>Admin<']){
+for(const marker of ['MESHFORGE','Connected Manufacturing Platform','Blade Tracking.','Cutter Builder.','Greenshed.','Sign in to MeshForge','Local accounts','>Operator<','>Admin<']){
   if(!login.includes(marker)) throw new Error(`Shared login missing ${marker}`);
 }
 if(login.includes('tailwindui.com') || login.includes('Your Company')) throw new Error('Old placeholder login brand remains');

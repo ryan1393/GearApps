@@ -1,7 +1,7 @@
 # MeshForge shared brand assets
 
 All Gear Apps frontends (Blade Tracking, Cutter Builder, Greenshed, Lapper) use this folder. The suite is
-branded **MeshForge** — "by Dana Gear Apps Suite", "Connected Manufacturing Platform".
+branded **MeshForge** — "Connected Manufacturing Platform". There is no byline.
 
 | File | Use |
 | --- | --- |

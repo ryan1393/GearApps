@@ -18,7 +18,7 @@
     address and port, the API path, settings that name files on the server, the seed passwords
     and `DSF_PRIVILEGED_READER_ACK`. The Docker host settings (published ports, the PostgreSQL
     container, the Lapper Read collector) are not API settings and stay in `.env`.
-- **MeshForge branding.** The suite is now branded MeshForge ("by Dana Gear Apps Suite"). The
+- **MeshForge branding.** The suite is now branded MeshForge. The
   sidebar, login and password-recovery screens show the MeshForge mark and name, and browser tabs
   use the MeshForge icon. Logo files (mark, icon, lockup; dark, light and single-colour; SVG and
   PNG) are in `libs/manufacturing/assets/brand` and `branding`.

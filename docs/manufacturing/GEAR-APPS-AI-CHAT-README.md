@@ -104,7 +104,7 @@ The user does NOT want a separate picture/mockup instead of code.
 
 ## 4. MESHFORGE BRANDING / ICON RULES
 
-The suite is branded MeshForge ("by Dana Gear Apps Suite"). This replaced the earlier Dana Diamond / Truck Log
+The suite is branded MeshForge. This replaced the earlier Dana Diamond / Truck Log
 branding direction; older notes below that mention the Dana Diamond describe history.
 
 - Brand assets and the palette are documented in `libs/manufacturing/assets/brand/README.md`.

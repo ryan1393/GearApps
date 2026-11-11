@@ -10,7 +10,7 @@ const navs = [
   'apps/lapper-client/src/app/layout/lapper-nav/lapper-nav.component.html',
 ];
 
-// The suite is branded MeshForge ("by Dana Gear Apps Suite"). The shell keeps the
+// The suite is branded MeshForge. The shell keeps the
 // established brand-mark class names; only the shared file-backed asset changed.
 const sharedLogo = 'libs/manufacturing/assets/brand/meshforge-mark.svg';
 const sharedLogoPath = contractPath(root, sharedLogo);
