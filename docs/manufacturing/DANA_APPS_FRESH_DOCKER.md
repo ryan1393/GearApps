@@ -11,7 +11,7 @@ The consolidated MeshForge workspace supports a brand-new Docker host without re
 - A non-empty partial schema is refused rather than auto-repaired.
 - The one-shot bootstrap verifies representative Gear tables after schema creation.
 - `gear-base-data-bootstrap` runs the maintained importer with `--bootstrap-only`, initializing an empty master-data set while preserving administrative edits on subsequent deployments.
-- Explicit `npm run import:base-data` still refreshes existing reference data and must be an intentional operator action.
+- Explicit `npm run import:base-data` still refreshes existing reference data and must be an intentional operator action. It never re-enables or reactivates existing Summaries, parts, roll masters or blade requirements, and never re-points parts used by a gearset (see [GEARSETS.md](GEARSETS.md)).
 - Existing Gear volumes are never automatically deleted by the fresh-host helper.
 
 ## Required .env values

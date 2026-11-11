@@ -240,6 +240,8 @@ async function importBaseData() {
     );
   }
 
+  // Rows an explicit refresh left as an administrator set them (never re-enabled or re-pointed).
+  const preserved = [];
   const summaryIds = new Map();
   for (const row of summaries) {
     const modelId =
@@ -253,10 +255,8 @@ async function importBaseData() {
        ON CONFLICT (number, revision) DO UPDATE
        SET model_id=EXCLUDED.model_id,
            hos=EXCLUDED.hos,
-           active=EXCLUDED.active,
-           enabled=true,
            "updatedAt"=NOW()
-       RETURNING id`,
+       RETURNING id, (xmax = 0) AS inserted, active, enabled`,
       [
         newId,
         clean(row.Summary),
@@ -267,6 +267,11 @@ async function importBaseData() {
       ],
     );
     summaryIds.set(String(row.Summary_ID), result.rows[0].id);
+    // An existing Summary keeps the active/enabled state an administrator gave it.
+    const kept = result.rows[0];
+    if (!kept.inserted && (kept.active !== activeFromStatus(row.Status) || !kept.enabled)) {
+      preserved.push(`Summary ${clean(row.Summary)}${clean(row.Summary_Rev) ? ` rev ${clean(row.Summary_Rev)}` : ''}: kept active=${kept.active}, enabled=${kept.enabled} (source ${row.Status ?? 'blank'})`);
+    }
   }
 
   for (const row of summaryAdditions) {
@@ -285,12 +290,13 @@ async function importBaseData() {
       const existingByNumber = await client.query(
         `SELECT id, revision
            FROM part_summaries
-          WHERE number=$1 AND enabled=true
+          WHERE number=$1
           ORDER BY revision ASC`,
         [number],
       );
 
-      // One or more revisions already exist: the summary is present, nothing to add.
+      // One or more revisions already exist (enabled or not): the summary is present, nothing
+      // to add. A disabled Summary stays disabled; this step never re-enables it.
       // (existingByNumber.rows.length === 1 was the original rule; several revisions
       // are equally fine because this step only guarantees existence.)
       if (existingByNumber.rows.length >= 1) {
@@ -302,8 +308,7 @@ async function importBaseData() {
       `INSERT INTO part_summaries
        (id, number, revision, model_id, hos, active, enabled, "createdAt", "updatedAt")
        VALUES ($1,$2,$3,NULL,NULL,true,true,NOW(),NOW())
-       ON CONFLICT (number, revision) DO UPDATE
-       SET active=true, enabled=true, "updatedAt"=NOW()`,
+       ON CONFLICT (number, revision) DO NOTHING`,
       [id(), number, revision],
     );
   }
@@ -347,6 +352,9 @@ async function importBaseData() {
     return matches.rows.map((r) => r.id);
   };
 
+  const hasGearsets = (await client.query(
+    "SELECT to_regclass('public.gearsets') IS NOT NULL AS present",
+  )).rows[0].present;
   const partTypes = await client.query(
     `SELECT id, code FROM part_types WHERE code IN ('RING','PINION') AND enabled=true`,
   );
@@ -371,28 +379,43 @@ async function importBaseData() {
         throw new Error(`${kind} ${partNumber}: invalid Teeth ${row.Teeth}`);
       }
 
-      const partResult = await client.query(
-        `INSERT INTO parts
-         (id, part_number, summary_id, part_type_id, teeth,
-          active, enabled, "createdAt", "updatedAt")
-         VALUES ($1,$2,$3,$4,$5,$6,true,NOW(),NOW())
-         ON CONFLICT (part_number) DO UPDATE
-         SET summary_id=EXCLUDED.summary_id,
-             part_type_id=EXCLUDED.part_type_id,
-             teeth=EXCLUDED.teeth,
-             active=EXCLUDED.active,
-             enabled=true,
-             "updatedAt"=NOW()
-         RETURNING id`,
-        [
-          id(),
-          partNumber,
-          summaryId,
-          partTypeByCode.get(kind),
-          teeth,
-          activeFromStatus(row.Status),
-        ],
-      );
+      // An existing part keeps its active/enabled state, and a part used by a gearset
+      // (as GEARSET, RING or PINION) keeps its number, type, Summary and teeth: changing
+      // them here would silently re-point an assembly. Differences are reported instead.
+      const existingPart = (await client.query(
+        `SELECT p.id, p.summary_id, p.part_type_id, p.teeth, p.active, p.enabled,
+                ${hasGearsets ? `EXISTS (SELECT 1 FROM public.gearsets g
+                          WHERE p.id IN (g.gearset_part_id, g.ring_part_id, g.pinion_part_id))` : 'false'} AS in_gearset
+           FROM parts p WHERE p.part_number=$1`,
+        [partNumber],
+      )).rows[0];
+      let partId;
+      if (!existingPart) {
+        partId = (await client.query(
+          `INSERT INTO parts
+           (id, part_number, summary_id, part_type_id, teeth,
+            active, enabled, "createdAt", "updatedAt")
+           VALUES ($1,$2,$3,$4,$5,$6,true,NOW(),NOW())
+           RETURNING id`,
+          [id(), partNumber, summaryId, partTypeByCode.get(kind), teeth, activeFromStatus(row.Status)],
+        )).rows[0].id;
+      } else {
+        partId = existingPart.id;
+        const differs = existingPart.summary_id !== summaryId || existingPart.part_type_id !== partTypeByCode.get(kind) ||
+          (teeth != null && Number(existingPart.teeth) !== teeth);
+        if (existingPart.in_gearset || existingPart.part_type_id !== partTypeByCode.get(kind)) {
+          if (differs) preserved.push(`${kind} ${partNumber}: used by a gearset or not a ${kind} part; kept its Summary, type and teeth (source teeth ${teeth ?? 'blank'})`);
+        } else if (differs) {
+          await client.query(
+            `UPDATE parts SET summary_id=$2, teeth=COALESCE($3, teeth), "updatedAt"=NOW() WHERE id=$1`,
+            [partId, summaryId, teeth],
+          );
+        }
+        if (existingPart.active !== activeFromStatus(row.Status) || !existingPart.enabled) {
+          preserved.push(`${kind} ${partNumber}: kept active=${existingPart.active}, enabled=${existingPart.enabled} (source ${row.Status ?? 'blank'})`);
+        }
+      }
+      const partResult = { rows: [{ id: partId }] };
 
       const requiredCount =
         row.Roll_Master_Needed == null ? 0 : Number(row.Roll_Master_Needed);
@@ -410,8 +433,6 @@ async function importBaseData() {
          ON CONFLICT (part_id) DO UPDATE
          SET required_count=EXCLUDED.required_count,
              minimum_quantity=EXCLUDED.minimum_quantity,
-             active=true,
-             enabled=true,
              "updatedAt"=NOW()`,
         [id(), partResult.rows[0].id, requiredCount],
       );
@@ -454,7 +475,6 @@ async function importBaseData() {
            VALUES ($1,$2,$3,$4,true,NOW(),NOW())
            ON CONFLICT (summary_id, part_type_id) DO UPDATE
            SET required_blade_count=EXCLUDED.required_blade_count,
-               enabled=true,
                "updatedAt"=NOW()`,
           [id(), summaryId, partTypeByCode.get(row.partTypeCode), group.sets],
         );
@@ -713,6 +733,7 @@ async function importBaseData() {
   );
 
   await client.query('COMMIT');
+  for (const line of preserved) console.warn(`[KEEP] ${line}`);
   console.log('Base/master data import complete.');
   console.log({
     departments: departments.length,
@@ -729,6 +750,7 @@ async function importBaseData() {
     cutter_blade_requirement_rows_skipped: requirementReport.skipped.length,
     cutter_body_definitions: cutterBodyDefinitions.length,
     cutter_bodies: cutterBodies.length,
+    existing_rows_kept_as_administered: preserved.length,
   });
 }
 

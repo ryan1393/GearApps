@@ -43,6 +43,7 @@
     "audit:cutter-blade-rules": "nx run manufacturing-tools:audit-cutter-blade-rules",
     "apply:proposed-special-105": "nx run manufacturing-tools:apply-proposed-special-105",
     "report:cutter-body-matrix": "nx run manufacturing-tools:report-cutter-body-matrix",
+    "audit:gearsets": "nx run manufacturing-tools:audit-gearsets",
     "test:cutter-dana": "nx run manufacturing-tools:test-cutter-dana",
     "export:base:fresh": "nx run manufacturing-tools:export-base-fresh",
     "export:cutter-history:fresh": "nx run manufacturing-tools:export-cutter-history-fresh",

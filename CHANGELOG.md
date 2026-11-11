@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- **Gearsets: master fields visible, relationships and administrator states kept on import.**
+  See `docs/manufacturing/GEARSETS.md`.
+  - **A manual `npm run import:base-data` no longer undoes administrator changes.** It used to
+    re-enable and reactivate every Summary, ring/pinion part, roll master and blade requirement in
+    its files, including ones an administrator had disabled, and could rewrite the Summary or
+    teeth of a ring or pinion already used by a gearset. Existing rows now keep their
+    active/enabled state, parts used by a gearset keep their Summary, type and teeth, and the
+    import lists what it kept (`[KEEP]`). A missing Summary that exists only as a disabled row is
+    no longer recreated or re-enabled. Automatic deploys were never affected (they import only
+    into an empty database).
+  - **Gearset master fields.** The gearset API and Admin > Gearsets now show the stored model,
+    customer, application, business status (Production, Service, …), cut and archived flag,
+    read-only. Business status is shown apart from Status and never makes a gearset inactive.
+  - **`npm run audit:gearsets`** (read-only): actual `public.gearsets` columns and constraints,
+    counts by part type, shared rings/pinions/Summaries, status and archive state with linked
+    parts, integrity findings, and each gearset's Summary blade rule. `--seed <file>` compares a
+    historical seed and lists its import rules without applying them.
+
 - **Cutter-body compatibility: which body types a Summary + Part Type may use.** One shared check
   now answers "which cutter-body definitions can these blades be loaded into?" and the API enforces it
   everywhere. See `docs/manufacturing/CUTTER_BODY_BLADE_RULES.md`.

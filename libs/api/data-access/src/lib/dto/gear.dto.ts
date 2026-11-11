@@ -11,6 +11,7 @@ import {
   CreateSummary,
   Department,
   Gearset,
+  GEARSET_MASTER_READ_ONLY_FIELDS,
   LappingSummaryRow,
   Machine,
   MachineCycle,
@@ -139,8 +140,26 @@ export class GearsetDto implements Gearset {
   @IsOptional()
   @IsUUID('loose')
   user_id!: string | null;
+  @ApiPropertyOptional({ readOnly: true, nullable: true, example: '3.45 (38-11)' }) @IsOptional() @IsString()
+  ratio_text?: string | null;
+  @ApiPropertyOptional({ readOnly: true, nullable: true, example: '186', description: "The Summary's model" })
+  @IsOptional() @IsString() model?: string | null;
+  @ApiPropertyOptional({ readOnly: true, nullable: true, example: 'Stellantis' }) @IsOptional() @IsString()
+  customer?: string | null;
+  @ApiPropertyOptional({ readOnly: true, nullable: true, example: 'JL Jeep Wrangler Front' }) @IsOptional() @IsString()
+  application?: string | null;
+  @ApiPropertyOptional({
+    readOnly: true, type: [String], example: ['Production'],
+    description: 'Business classification (Production, Service, ...). Separate from status (active/inactive).',
+  })
+  @IsOptional() @IsString({ each: true }) business_statuses?: string[];
+  @ApiPropertyOptional({ readOnly: true, nullable: true, example: '3-Axis' }) @IsOptional() @IsString()
+  cut?: string | null;
+  @ApiPropertyOptional({ readOnly: true }) @IsOptional() @IsBoolean() archived?: boolean;
 }
-export class CreateGearsetDto extends OmitType(GearsetDto, ['id']) implements CreateGearset {}
+export class CreateGearsetDto
+  extends OmitType(GearsetDto, ['id', ...GEARSET_MASTER_READ_ONLY_FIELDS])
+  implements CreateGearset {}
 export class UpdateGearsetDto
   extends PartialType(PickType(GearsetDto, ['rev', 'status', 'user_id']))
   implements UpdateGearset {}

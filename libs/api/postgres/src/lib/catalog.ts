@@ -157,6 +157,15 @@ export class PostgresLapperCatalog {
           pinion_id: g.pinion_part_id,
           pinion: partById.get(g.pinion_part_id),
           user_id: override?.user_id ?? owner(g.created_by),
+          // Stored master fields, read-only here. business_statuses is the business
+          // classification (Production, Service, ...), kept apart from status above.
+          ratio_text: g.ratio_text ?? null,
+          model: summary?.model ? text(summary.model) : null,
+          customer: g.customer ?? null,
+          application: g.application ?? null,
+          business_statuses: Array.isArray(g.statuses) ? (g.statuses as unknown[]).map(text) : [],
+          cut: g.cut ?? null,
+          archived: Boolean(g.archived_at),
         },
       ];
     });
