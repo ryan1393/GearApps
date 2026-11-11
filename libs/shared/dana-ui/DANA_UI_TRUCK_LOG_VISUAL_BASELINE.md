@@ -30,9 +30,9 @@ The Dana core follows Truck Log's current visual direction:
 `@dana/ui/styles/gear-compat.css` remains packaged only as a temporary migration
 aid. It is not part of the canonical Dana UI entry.
 
-Gear Apps should move toward the Truck Log-derived Dana core, not redefine it.
+MeshForge should move toward the Truck Log-derived Dana core, not redefine it.
 
 ## Product boundaries
 
-Dana UI is a presentation package only. Truck Log and Gear Apps remain separate
+Dana UI is a presentation package only. Truck Log and MeshForge remain separate
 repositories, databases, Docker deployments and release cadences.

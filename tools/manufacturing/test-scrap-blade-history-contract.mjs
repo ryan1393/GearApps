@@ -124,7 +124,7 @@ for (const marker of [
   '.scrap-history-timeline',
   '.scrap-history-event-danger',
 ]) {
-  if (!sharedStyles.includes(marker)) throw new Error(`Shared Gear Apps stylesheet missing ${marker}`);
+  if (!sharedStyles.includes(marker)) throw new Error(`Shared MeshForge stylesheet missing ${marker}`);
 }
 
 if (manifest.length !== 113) {

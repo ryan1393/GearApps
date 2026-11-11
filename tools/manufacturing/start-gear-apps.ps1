@@ -12,11 +12,11 @@ $WorkspaceRoot = $ProjectRoot
 Set-Location $WorkspaceRoot
 
 Write-Host ''
-Write-Host 'Unblocking downloaded Gear Apps files...' -ForegroundColor Yellow
+Write-Host 'Unblocking downloaded MeshForge files...' -ForegroundColor Yellow
 try {
     Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File -ErrorAction Stop |
         Unblock-File -ErrorAction Stop
-    Write-Host '[PASS] Gear Apps files unblocked.' -ForegroundColor Green
+    Write-Host '[PASS] MeshForge files unblocked.' -ForegroundColor Green
 } catch {
     Write-Warning "Could not unblock every project file: $($_.Exception.Message)"
     Write-Warning 'Continuing because this launcher already uses ExecutionPolicy Bypass where required.'
@@ -87,7 +87,7 @@ function Test-Api {
 
 Write-Host ''
 Write-Host '==============================================' -ForegroundColor Cyan
-Write-Host ' Gear Apps - Start All Programs' -ForegroundColor Cyan
+Write-Host ' MeshForge - Start All Programs' -ForegroundColor Cyan
 Write-Host '==============================================' -ForegroundColor Cyan
 Write-Host "Root: $WorkspaceRoot"
 Write-Host "API:  $ApiRoot"
@@ -115,7 +115,7 @@ if (-not $NoReset) {
 
     if (-not $resetSucceeded) {
         Write-Warning 'Nx reset could not clean .nx workspace data (usually a Windows file lock / EPERM).'
-        Write-Warning 'Continuing startup with the Nx daemon disabled. Cache reset is maintenance and is not required to run Gear Apps.'
+        Write-Warning 'Continuing startup with the Nx daemon disabled. Cache reset is maintenance and is not required to run MeshForge.'
     } else {
         Write-Host '[PASS] Nx cache reset completed.' -ForegroundColor Green
     }
@@ -161,7 +161,7 @@ Write-Host '[2/5] Starting API server...' -ForegroundColor Yellow
 if (Test-Api) {
     Write-Host "      API is already responding on port $ServerPort." -ForegroundColor Green
 } else {
-    Start-GearProcess -Title 'Gear Apps - API Server' -Command 'node --env-file=.env node_modules/nx/dist/bin/nx.js serve gear-app-server'
+    Start-GearProcess -Title 'MeshForge - API Server' -Command 'node --env-file=.env node_modules/nx/dist/bin/nx.js serve gear-app-server'
 
     $deadline = (Get-Date).AddSeconds($ServerWaitSeconds)
     Write-Host '      Waiting for API to respond' -NoNewline
@@ -173,19 +173,19 @@ if (Test-Api) {
     Write-Host ''
 
     if (-not (Test-Api)) {
-        throw "API did not respond at $ApiHealthUrl within $ServerWaitSeconds seconds. Check the 'Gear Apps - API Server' window."
+        throw "API did not respond at $ApiHealthUrl within $ServerWaitSeconds seconds. Check the 'MeshForge - API Server' window."
     }
     Write-Host '      API is responding.' -ForegroundColor Green
 }
 
 Write-Host '[3/5] Starting Blade Tracking...' -ForegroundColor Yellow
-Start-GearProcess -Title 'Gear Apps - Blade Tracking' -Command 'npx nx serve blade-tracking'
+Start-GearProcess -Title 'MeshForge - Blade Tracking' -Command 'npx nx serve blade-tracking'
 
 Write-Host '[4/5] Starting Cutter Builder...' -ForegroundColor Yellow
-Start-GearProcess -Title 'Gear Apps - Cutter Builder' -Command 'npx nx serve cutter-builder'
+Start-GearProcess -Title 'MeshForge - Cutter Builder' -Command 'npx nx serve cutter-builder'
 
 Write-Host '[5/5] Starting Green Shed...' -ForegroundColor Yellow
-Start-GearProcess -Title 'Gear Apps - Green Shed' -Command 'npx nx serve greenshed'
+Start-GearProcess -Title 'MeshForge - Green Shed' -Command 'npx nx serve greenshed'
 
 Start-Sleep -Seconds 3
 
@@ -200,7 +200,7 @@ if (-not $NoBrowser) {
 }
 
 Write-Host ''
-Write-Host '[PASS] Gear Apps startup launched.' -ForegroundColor Green
+Write-Host '[PASS] MeshForge startup launched.' -ForegroundColor Green
 Write-Host 'API, Blade Tracking, Cutter Builder, and Green Shed are running in separate PowerShell windows.'
 Write-Host 'Close those windows (or press Ctrl+C in each) to stop the programs.'
 Write-Host ''

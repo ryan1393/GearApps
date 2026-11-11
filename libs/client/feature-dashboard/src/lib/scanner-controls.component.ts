@@ -4,7 +4,7 @@ import { ScannerApi, ToastService } from '@gearapps/client/core';
 interface Cmd {
   label: string;
   op: string;
-  /** Gear Apps button tone; secondary when omitted. */
+  /** MeshForge button tone; secondary when omitted. */
   cls?: string;
 }
 

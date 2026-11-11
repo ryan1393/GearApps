@@ -13,7 +13,7 @@ export class AppComponent {
   private readonly router = inject(Router);
   private readonly browserTitle = inject(Title);
 
-  /** Browser tab identity, matching the other Gear Apps: "<Page> | Lapper". */
+  /** Browser tab identity, matching the other MeshForge: "<Page> | Lapper". */
   private readonly pageTitles: ReadonlyArray<readonly [string, string]> = [
     ['/lapping-summaries', 'Lapping Summaries'],
     ['/scanners', 'Scanners'],

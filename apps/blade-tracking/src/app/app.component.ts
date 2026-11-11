@@ -18,7 +18,7 @@ export class AppComponent {
 
   title = 'blade-tracking';
 
-  // Gear Apps browser tab identity v24
+  // MeshForge browser tab identity v24
   private readonly pageTitles: ReadonlyArray<readonly [string, string]> = [
       ['/blades/cancel-last', 'Cancel Last Tray Transaction'],
       ['/blades/internal-movement', 'Internal Movement'],

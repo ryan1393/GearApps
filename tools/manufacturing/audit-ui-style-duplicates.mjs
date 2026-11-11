@@ -8,7 +8,7 @@ const css = readGearAppsStyles();
 const raw = summarizeSelectorDuplicates(css);
 const contextual = summarizeContextualSelectorDuplicates(css);
 
-console.log(`Gear Apps CSS rules: ${raw.totalRules}`);
+console.log(`MeshForge CSS rules: ${raw.totalRules}`);
 console.log(`Unique selector strings: ${raw.uniqueSelectors}`);
 console.log(`Same-cascade duplicate selectors: ${contextual.duplicateSelectorCount}`);
 console.log(`Selectors intentionally reused across responsive/print contexts: ${raw.duplicateSelectorCount}`);

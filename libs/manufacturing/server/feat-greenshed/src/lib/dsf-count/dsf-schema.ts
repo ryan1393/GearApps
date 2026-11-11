@@ -1,4 +1,4 @@
-/* Gear Apps side tables for DSF cutter counts. Never run against the DSF source.
+/* MeshForge side tables for DSF cutter counts. Never run against the DSF source.
  *
  * Additive and idempotent: the same definitions as the original DSF migrations
  * (cutter ledger V1, Admin machine mapping V2), so a database that already has them is left

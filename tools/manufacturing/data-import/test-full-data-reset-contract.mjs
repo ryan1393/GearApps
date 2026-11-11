@@ -12,11 +12,11 @@ for(const marker of [
   'Preflight fresh source export + validation (NO target changes)',
   '-YesReallyDeleteOldData',
   'Deleting old PostgreSQL application data',
-  'Re-bootstrap required Gear Apps system reference data',
+  'Re-bootstrap required MeshForge system reference data',
   'Importing the already-validated fresh base/reference snapshot',
   'Reconciling fresh cutter history against the new base data',
   'Importing fresh cutter history',
-  'Recreating local Gear Apps operator/admin logins',
+  'Recreating local MeshForge operator/admin logins',
   'Final validation',
 ]) {
   if(!reset.includes(marker)) throw new Error(`Full reset workflow missing ${marker}`);
@@ -41,7 +41,7 @@ if(!pkg.scripts?.['refresh:all-data:reset'] || !pkg.scripts?.['refresh:all-data:
 if(reset.indexOf('Preflight fresh source export + validation') > reset.indexOf('Deleting old PostgreSQL application data')) {
   throw new Error('Source preflight must run before target deletion.');
 }
-if(reset.indexOf('Re-bootstrap required Gear Apps system reference data') >
+if(reset.indexOf('Re-bootstrap required MeshForge system reference data') >
    reset.indexOf('Importing the already-validated fresh base/reference snapshot')) {
   throw new Error('System references must be restored before the base-data importer runs.');
 }

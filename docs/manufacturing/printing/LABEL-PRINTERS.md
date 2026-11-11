@@ -1,6 +1,6 @@
 # Label printers
 
-Gear Apps prints two kinds of label straight to network label printers:
+MeshForge prints two kinds of label straight to network label printers:
 
 | Label | Stock | Printed from |
 | --- | --- | --- |
@@ -19,7 +19,7 @@ Admin > **Label Printers** > *Add a printer*:
 - **Loaded with** — tags or cutter cards. Tags are never sent to a card printer, or cards to a tag printer.
 - **Default** — the printer every Print button uses for that label. The first printer added for a label becomes its default; *Make Default* changes it.
 
-The printer must be on the network and reachable **from the Gear Apps server** (the API container), not just from the operator's PC. A printer attached to one PC by USB cannot be used.
+The printer must be on the network and reachable **from the MeshForge server** (the API container), not just from the operator's PC. A printer attached to one PC by USB cannot be used.
 
 ## Check a printer
 

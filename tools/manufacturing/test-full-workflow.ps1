@@ -162,7 +162,7 @@ function Get-ShelfTag([ValidateSet('GSR','GSP','CGDR','CGDP','CGFR','CGFP')] [st
 
 Write-Host ''
 Write-Host '============================================================'
-Write-Host ' Gear Apps FULL MUTATING WORKFLOW TEST'
+Write-Host ' MeshForge FULL MUTATING WORKFLOW TEST'
 Write-Host ' Blade Tracking -> Coater -> Cutter Builder -> Green Shed'
 Write-Host ' -> Changeover to Greenshed Shelf -> Re-setup -> Pull -> Cutter Builder Teardown'
 Write-Host '============================================================'
@@ -596,7 +596,7 @@ Write-Host "Report: $reportPath"
 
 if ($failed -eq 0) {
     Write-Host ''
-    Write-Host '[PASS] FULL GEAR APPS WORKFLOW COMPLETED SUCCESSFULLY' -ForegroundColor Green
+    Write-Host '[PASS] FULL MESHFORGE WORKFLOW COMPLETED SUCCESSFULLY' -ForegroundColor Green
     Write-Host "Build tested: $script:BuildNumber" -ForegroundColor Green
     exit 0
 }

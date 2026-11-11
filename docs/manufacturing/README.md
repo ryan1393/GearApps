@@ -1,6 +1,6 @@
-# Gear Apps 70.5.0
+# MeshForge 70.5.0
 
-Gear Apps is the Dana manufacturing workspace for four workflows sharing one API and database:
+MeshForge is the Dana manufacturing workspace for four workflows sharing one API and database:
 **Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root GearApps Nx workspace. All frontends use
 Angular 20.3.35 and Dana UI 0.3.3; the shared API uses NestJS 11.2.9 and TypeORM 1.1.2.
 Manufacturing retains PostgreSQL 16 and Docker Compose.
@@ -15,7 +15,7 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
 
 ## What changed in 70.5.0
 
-Lapper now shares the Gear Apps shell, sign-in and Admin with the other apps, and gains
+Lapper now shares the MeshForge shell, sign-in and Admin with the other apps, and gains
 Scanners, Macros, Fanuc Variables and Collector Tokens pages. A Python Lapper Read collector
 runs in Docker (`docker compose --profile collectors up -d --build lapper-read`) with one
 worker per saved machine. See [CHANGELOG.md](CHANGELOG.md).
@@ -215,7 +215,7 @@ Rules for this app:
 - Layout for a single screen (grid, ordering, spacing between sections) is fine in the screen's
   own template.
 - If something needs a new look or a new shared component, it belongs in Dana UI so Truck Log and
-  Gear Apps both get it. Change `libs/shared/dana-ui` directly.
+  MeshForge both get it. Change `libs/shared/dana-ui` directly.
 
 Each app loads, in this order (`../apps/<app>/project.json`):
 
@@ -235,7 +235,7 @@ To check Dana UI on its own, run `npx nx test dana-ui` (it builds the publishabl
 
 ## Admin management
 
-The shared `/admin` screen is available in Blade Tracking, Cutter Builder, Greenshed, and Lapping for admin-role accounts. It uses the same centralized Gear Apps design system and provides create/list workflows for:
+The shared `/admin` screen is available in Blade Tracking, Cutter Builder, Greenshed, and Lapping for admin-role accounts. It uses the same centralized MeshForge design system and provides create/list workflows for:
 
 - Users
 - Part Summaries
@@ -250,7 +250,7 @@ The shared `/admin` screen is available in Blade Tracking, Cutter Builder, Green
 Open a tab directly with `/admin?tab=<tab>` (for example `/admin?tab=gearsets`); Lapping's old
 Machines, Parts and Part Summaries links redirect there.
 
-The existing Users feature was retained as the admin route but rebuilt into the shared Gear Apps administration workspace. Part Summary and Cutter Body creation reuse their existing backend APIs. Admin-only master-data endpoints were added for Models, Machines, and Department lookup, and an admin-only `POST /api/v1/users` route was added so the selected User/Admin role is preserved.
+The existing Users feature was retained as the admin route but rebuilt into the shared MeshForge administration workspace. Part Summary and Cutter Body creation reuse their existing backend APIs. Admin-only master-data endpoints were added for Models, Machines, and Department lookup, and an admin-only `POST /api/v1/users` route was added so the selected User/Admin role is preserved.
 
 For local development on a **test** database (its `.env` must contain `GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES`), `commands\START-GEAR-APPS.cmd` provisions:
 - Operator: `test@gearapps.local` / `GearApps-E2E-Only-2026!`
@@ -268,7 +268,7 @@ All Admin UI HTTP calls are centralized in `libs/manufacturing/frontend/feature-
 
 ## Department-scoped application access
 
-Normal Gear Apps users are now department-scoped for operational editing. Cross-department users can open an application's dashboard, but the operational navigation/actions are shown as view-only and deep links redirect back to the dashboard. The backend independently rejects cross-department mutations with HTTP 403, so the rule cannot be bypassed by calling the API directly.
+Normal MeshForge users are now department-scoped for operational editing. Cross-department users can open an application's dashboard, but the operational navigation/actions are shown as view-only and deep links redirect back to the dashboard. The backend independently rejects cross-department mutations with HTTP 403, so the rule cannot be bypassed by calling the API directly.
 
 Current ownership is centralized in `libs/manufacturing/shared/util-constants/src/lib/app-access.constants.ts`:
 
@@ -316,7 +316,7 @@ That Blade Locations feature itself added no backend route. After the native ass
 
 ## Native IPL tags for trays, containers, and locations
 
-Gear Apps can generate printer-native Intermec IPL tags from Find Inventory, the Inventory Control Center, Blade Locations, Tray Contents, and the shared `/admin` page. Admin has dedicated Tray and Container record tabs plus per-record Print Tag actions on Trays, Containers, and Locations.
+MeshForge can generate printer-native Intermec IPL tags from Find Inventory, the Inventory Control Center, Blade Locations, Tray Contents, and the shared `/admin` page. Admin has dedicated Tray and Container record tabs plus per-record Print Tag actions on Trays, Containers, and Locations.
 
 Each tag contains one Code 128 barcode plus the same identifier in human-readable text. The browser sends only the database record ID; the backend reloads the record and prints its persisted `serial_number`. Tray tags therefore print the table's `T0001`-style serial, container tags the table's `C0001`-style serial, and location tags the exact stored location serial. New/edited Tray and Container serials are normalized to `T`/`C` plus at least four zero-padded digits.
 

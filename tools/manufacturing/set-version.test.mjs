@@ -41,7 +41,7 @@ function fixture() {
       .map((name) => `image: dana-apps-${name}:1.2.3`)
       .join('\n') + '\n',
   );
-  put('docs/manufacturing/README.md', '# Gear Apps 1.2.3\n');
+  put('docs/manufacturing/README.md', '# MeshForge 1.2.3\n');
   return {
     root,
     put,
@@ -74,7 +74,7 @@ test('version ownership updates package and lock versions without changing depen
       /GEAR_APPS_VERSION = '1\.2\.4'/,
     );
     assert.equal(f.text('README.md'), '# GearApps 1.2.4\n');
-    assert.equal(f.text('docs/manufacturing/README.md'), '# Gear Apps 1.2.4\n');
+    assert.equal(f.text('docs/manufacturing/README.md'), '# MeshForge 1.2.4\n');
     assert.deepEqual(
       [
         ...f

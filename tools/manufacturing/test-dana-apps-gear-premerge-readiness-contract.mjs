@@ -69,7 +69,7 @@ for (const marker of [
 }
 
 for (const marker of [
-  'Gear Apps V69.3.0R1 marks the Gear side as ready',
+  'MeshForge V69.3.0R1 marks the Gear side as ready',
   '`apps/server` (Nx project name remains `gear-app-server` for now)',
   '`npm run test:gear-apps` remains the authoritative Gear regression gate',
   'Gear database/schema/data remain separate from Truck Log',

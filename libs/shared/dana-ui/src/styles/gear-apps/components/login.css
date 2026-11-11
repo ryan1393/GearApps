@@ -1,4 +1,4 @@
-/* Shared full-screen Gear Apps login */
+/* Shared full-screen MeshForge login */
 :host{display:block;min-height:100vh}
 .login-page{min-height:100vh;display:grid;grid-template-columns:minmax(420px,.95fr) minmax(520px,1.05fr);background:#f1f2f4;color:#1c2027}
 .login-brand-panel{position:relative;overflow:hidden;min-height:100vh;background:radial-gradient(circle at 18% 12%,rgba(214,101,14,.28),transparent 28rem),linear-gradient(145deg,#1a1e24 0%,#262b34 55%,#303742 100%);color:#fff}
@@ -23,6 +23,6 @@
 
 
 
-/* Shared Gear Apps brand image on desktop + mobile login. */
+/* Shared MeshForge brand image on desktop + mobile login. */
 .login-logo-mark img,.login-mobile-mark img{display:block;width:100%;height:100%;object-fit:contain}
 .login-mobile-mark{width:28px;height:34px;padding:0;background:transparent;border:0;border-radius:0}

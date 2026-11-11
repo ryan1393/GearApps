@@ -122,7 +122,7 @@ if(!adminApi.includes('perPage=${perPage}&page=${page}')){
 }
 
 if(adminCss.replace(/\/\*[\s\S]*?\*\//g,'').trim()){
-  throw new Error('Admin feature must not own private styling; use the central Gear Apps stylesheet.');
+  throw new Error('Admin feature must not own private styling; use the central MeshForge stylesheet.');
 }
 
 for(const marker of [

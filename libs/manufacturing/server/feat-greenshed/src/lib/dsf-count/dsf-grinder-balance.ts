@@ -1,6 +1,6 @@
 /** CutGrind (Department 45) grinder credit importer, restored unchanged in behaviour.
  * It runs only when the grinder ledger tables (dana_dsf_grinder_state_v1 / _ledger_v1) already
- * exist in the Gear Apps database. This codebase does not create them and has no grinder screen:
+ * exist in the MeshForge database. This codebase does not create them and has no grinder screen:
  * they depend on ANCA grinder tracking and loose coater blade sets, which are not part of it.
  *
  * Reuses the existing DSF read-only poll connection.

@@ -1,6 +1,6 @@
-﻿# Gear Apps native asset tags (IPL)
+﻿# MeshForge native asset tags (IPL)
 
-Gear Apps asset tags are sent to the printer in its own language: Intermec Printer Language (IPL), matching the existing Cutter Build label reference, or Zebra ZPL. Which one is set per printer in Admin > Label Printers.
+MeshForge asset tags are sent to the printer in its own language: Intermec Printer Language (IPL), matching the existing Cutter Build label reference, or Zebra ZPL. Which one is set per printer in Admin > Label Printers.
 
 ## Database-backed encoded value
 
@@ -8,7 +8,7 @@ The printer does **not** accept a serial number supplied by the browser. The UI 
 
 - Tray: persisted `T` serial, for example `T0001`.
 - Container: persisted `C` serial, for example `C0001`.
-- Location: exact persisted Gear Apps location serial, for example `GSR-1.955FC` or `CGDR-1.955FC`.
+- Location: exact persisted MeshForge location serial, for example `GSR-1.955FC` or `CGDR-1.955FC`.
 
 Do not add words such as `TRAY`, `T-`, `CONTAINER`, `CONT-`, descriptions, or database UUIDs to the printed barcode.
 
@@ -89,5 +89,5 @@ Reference output for both languages is in [samples](samples); the unit tests com
 
 ## Admin printing
 
-The shared Gear Apps `/admin` screen includes Tray, Container, and Location record lists. Each active record has its own **Print Tag** button. The print request carries the row's UUID only; the backend reloads the row and prints the table's stored serial.
+The shared MeshForge `/admin` screen includes Tray, Container, and Location record lists. Each active record has its own **Print Tag** button. The print request carries the row's UUID only; the backend reloads the row and prints the table's stored serial.
 

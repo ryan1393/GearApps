@@ -3,11 +3,11 @@ cd /d "%~dp0.."
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\tools\manufacturing\setup-gear-apps.ps1"
 if errorlevel 1 (
     echo.
-    echo Gear Apps setup failed.
+    echo MeshForge setup failed.
     pause
     exit /b 1
 )
 echo.
-echo Gear Apps setup completed successfully.
+echo MeshForge setup completed successfully.
 pause
 

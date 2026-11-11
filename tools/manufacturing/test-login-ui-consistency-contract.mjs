@@ -14,7 +14,7 @@ for(const [app,nav] of [
   if(!html.includes('@if (!isLoginRoute)') || !html.includes(`<${nav} />`)) throw new Error(`${app}: nav must hide on login`);
   if(!html.includes('[class.login-shell]="isLoginRoute"')) throw new Error(`${app}: login shell marker missing`);
   const localRules=css.replace(/\/\*[\s\S]*?\*\//g,'').trim();
-  if(localRules) throw new Error(`${app}: app shell styling must come from the central Gear Apps stylesheet.`);
+  if(localRules) throw new Error(`${app}: app shell styling must come from the central MeshForge stylesheet.`);
 }
 
 const login=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.html'),'utf8');
@@ -27,8 +27,8 @@ for(const marker of ['MESHFORGE','Connected Manufacturing Platform','Blade Track
 if(login.includes('tailwindui.com') || login.includes('Your Company')) throw new Error('Old placeholder login brand remains');
 
 const privateRules=componentStyle.replace(/\/\*[\s\S]*?\*\//g,'').trim();
-if(privateRules) throw new Error('Login component styling must come from the central Gear Apps stylesheet.');
+if(privateRules) throw new Error('Login component styling must come from the central MeshForge stylesheet.');
 for(const marker of ['.app-content-shell.login-shell','.login-page','.login-brand-panel','.login-form-panel','.login-card','.login-submit']){
-  if(!sharedStyle.includes(marker)) throw new Error(`Central Gear Apps stylesheet missing ${marker}`);
+  if(!sharedStyle.includes(marker)) throw new Error(`Central MeshForge stylesheet missing ${marker}`);
 }
 console.log('[PASS] Login UI consistency contract passed.');

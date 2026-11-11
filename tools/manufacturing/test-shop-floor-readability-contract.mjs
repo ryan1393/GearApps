@@ -60,7 +60,7 @@ if (relations.includes('font-size: 8px;') || relations.includes('font-size: 9px;
 
 // The body readability pass must not redesign the stable desktop shell.
 if (!nav.includes('--gear-sidebar-width') && !nav.includes('.gear-sidebar')) {
-  fail('Navigation shell no longer appears to be the established Gear Apps shell.');
+  fail('Navigation shell no longer appears to be the established MeshForge shell.');
 }
 
 const relationsLines = relations.split(/\r?\n/).length;

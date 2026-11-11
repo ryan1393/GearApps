@@ -9,7 +9,7 @@ const cssRel = 'libs/shared/dana-ui/src/styles/gear-apps/components/workflow-lay
 const css = read(cssRel);
 
 if (!entry.includes("@import './gear-apps/components/workflow-layout.css';")) {
-  throw new Error('Public Gear Apps style graph is not loading workflow-layout.css.');
+  throw new Error('Public MeshForge style graph is not loading workflow-layout.css.');
 }
 if (css.split(/\r?\n/).length > 520) throw new Error('workflow-layout.css exceeds the 520-line module ceiling.');
 for (const marker of [

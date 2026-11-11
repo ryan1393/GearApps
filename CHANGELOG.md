@@ -22,12 +22,12 @@
   sidebar, login and password-recovery screens show the MeshForge mark and name, and browser tabs
   use the MeshForge icon. Logo files (mark, icon, lockup; dark, light and single-colour; SVG and
   PNG) are in `libs/manufacturing/assets/brand` and `branding`.
-  - The Gear Apps styles are recoloured from Dana blue/navy to charcoal with orange actions. The
+  - The MeshForge styles are recoloured from Dana blue/navy to charcoal with orange actions. The
     shared Dana core is unchanged; its colours are overridden from the Gear layer
     (`gear-compat-overrides.css`). Every colour keeps its previous contrast against its background. Warning amber moved to a yellower
     gold so it stays distinct from the orange actions.
   - On-screen wording, API messages and the printed cutter card and packing slip say MeshForge
-    instead of Gear Apps. Scan buttons use the orange action style.
+    instead of MeshForge. Scan buttons use the orange action style.
   - Not recoloured: informational blue, success, danger, the Greenshed running-machines state
     colours, and colours set in TypeScript or with Tailwind utility classes.
 - **Lapping master data is in Admin.** The shared Admin screen (every app's `/admin`) now edits
@@ -78,7 +78,7 @@
 
 ## 70.5.0 (2026-11-10)
 
-Lapper joins the shared Gear Apps experience, and gets a collector that runs in Docker.
+Lapper joins the shared MeshForge experience, and gets a collector that runs in Docker.
 
 - **Lapper in the shared shell.** Lapper uses the shared sign-in, password recovery, session
   and Admin pages, and the same sidebar, top bar and page vocabulary as Blade Tracking, Cutter
@@ -88,7 +88,7 @@ Lapper joins the shared Gear Apps experience, and gets a collector that runs in 
   summary is required. Parts and part summaries have no Delete action (the API refuses to
   delete shared master data from Lapper); set one Inactive instead.
 - **Lapper configuration.** New Scanners, Macros and Fanuc Variables pages. Setup edits appear
-  only for Gear Apps administrators, because the API rejects them from anyone else.
+  only for MeshForge administrators, because the API rejects them from anyone else.
 - **Python Lapper Read collector in Docker** (`apps/lapper-read-py`, compose profile
   `collectors`). One container keeps a worker for every Active machine that has a FANUC
   controller IP and an assigned scanner, and follows the C# worker's rules. FANUC's licensed
@@ -269,7 +269,7 @@ Use the dedicated workflow endpoints rather than generic blade-assignment PATCH.
 
 ## 70.2.0 (2026-10-28)
 
-All Gear Apps styling now comes from **@dana/ui 0.3.0** (Dana UI). No screen looks different:
+All MeshForge styling now comes from **@dana/ui 0.3.0** (Dana UI). No screen looks different:
 the compiled stylesheet has the same 1,496 rules in the same order, and 86 screenshots (every route,
 every admin tab, login and an error toast, on desktop and phone) are pixel-identical to 70.1.2.
 

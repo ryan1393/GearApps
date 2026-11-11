@@ -2,7 +2,7 @@
 
 # Dana Apps Source Package Hygiene
 
-Gear Apps V69.3.5 hardens the source-packaging rules that Dana Apps should carry forward.
+MeshForge V69.3.5 hardens the source-packaging rules that Dana Apps should carry forward.
 
 ## Why
 

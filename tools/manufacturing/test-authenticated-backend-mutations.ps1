@@ -193,7 +193,7 @@ function New-AssetSerial([ValidateSet('T','C')] [string]$Prefix){
 
 Write-Host ''
 Write-Host '=================================================================' -ForegroundColor Cyan
-Write-Host ' Gear Apps AUTHENTICATED BACKEND MUTATION TEST' -ForegroundColor Cyan
+Write-Host ' MeshForge AUTHENTICATED BACKEND MUTATION TEST' -ForegroundColor Cyan
 Write-Host ' Dedicated E2E records only - no production records are selected' -ForegroundColor Cyan
 Write-Host '=================================================================' -ForegroundColor Cyan
 Write-Host ''

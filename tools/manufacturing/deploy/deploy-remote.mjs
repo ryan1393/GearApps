@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Gear Apps remote deploy (replaces Dana-Apps-Native-Remote-Deploy.cmd).
+// MeshForge remote deploy (replaces Dana-Apps-Native-Remote-Deploy.cmd).
 //
 // Packs the shared repository root, copies it over SSH to the Linux Docker host behind the
 // active SSH Docker context, backs up the database, swaps the new source in (the
@@ -290,7 +290,7 @@ function writeReport(lines) {
 
 // ---------- main ----------
 async function main() {
-  console.log(`Gear Apps ${VERSION} - ${MODE}`);
+  console.log(`MeshForge ${VERSION} - ${MODE}`);
   for (const tool of ['ssh', 'scp', 'tar', 'docker']) {
     if (run(tool, tool === 'ssh' ? ['-V'] : ['--version'], { capture: true, allowFail: true }).status === 127) fail(`${tool} is not installed or not on PATH`);
   }
@@ -371,12 +371,12 @@ async function main() {
   if (MODE !== 'rollback') remote(ctx, finalizeScript(REMOTE_ROOT));
 
   const report = writeReport([
-    `GEAR APPS ${VERSION} ${MODE.toUpperCase()} - PASS`, '',
+    `MESHFORGE ${VERSION} ${MODE.toUpperCase()} - PASS`, '',
     `Docker context: ${ctx.name} (${ctx.target})`, `Release folder: ${REMOTE_ROOT}`, `Previous release: ${REMOTE_ROOT}.prev`,
     `Database backup: ${flag('--skip-backup') ? 'SKIPPED' : BACKUP_DIR}`, '',
     'compose down: NO', 'volumes deleted: NO', 'host root .env preserved: YES',
   ]);
-  console.log(`\n[PASS] Gear Apps ${MODE} complete. Report: ${report}`);
+  console.log(`\n[PASS] MeshForge ${MODE} complete. Report: ${report}`);
   console.log(`Blade Tracking: http://${ctx.host}:4200   Cutter Builder: http://${ctx.host}:4201   Greenshed: http://${ctx.host}:4202`);
 }
 

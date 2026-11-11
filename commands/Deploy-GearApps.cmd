@@ -1,7 +1,7 @@
 @echo off
 setlocal
 cd /d "%~dp0.."
-rem Gear Apps remote deploy. Options: --check  --rollback  --upload-env (first install)
+rem MeshForge remote deploy. Options: --check  --rollback  --upload-env (first install)
 rem See README.md "Deploy". Never runs compose down or deletes volumes.
 node tools\manufacturing\deploy\deploy-remote.mjs %*
 set "RC=%ERRORLEVEL%"

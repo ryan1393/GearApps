@@ -2,7 +2,7 @@ import { contractPath } from './contract-paths.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 
-// Gear Apps styles all ship in @dana/ui (source: libs/shared/dana-ui/src/styles).
+// MeshForge styles all ship in @dana/ui (source: libs/shared/dana-ui/src/styles).
 export const GEAR_APPS_STYLE_ENTRY = 'libs/shared/dana-ui/src/styles/gear-apps.css';
 export const GEAR_APPS_STYLE_ENTRY_INSTALLED = 'libs/shared/dana-ui/src/styles/gear-compat.css';
 export const GEAR_APPS_DOMAIN_STYLE_ENTRY_INSTALLED = 'libs/shared/dana-ui/src/styles/gear-compat-features.css';
@@ -25,7 +25,7 @@ function readStyleGraph(root, entryRel){
   const entryPath=contractPath(root,entryRel); if(!fs.existsSync(entryPath)) return '';
   const seen=new Set();
   const readFileGraph=(filePath)=>{
-    const absolutePath=path.resolve(filePath); if(seen.has(absolutePath)) throw new Error(`Circular Gear Apps stylesheet import detected: ${absolutePath}`); seen.add(absolutePath);
+    const absolutePath=path.resolve(filePath); if(seen.has(absolutePath)) throw new Error(`Circular MeshForge stylesheet import detected: ${absolutePath}`); seen.add(absolutePath);
     const css=fs.readFileSync(absolutePath,'utf8'); let resolved=''; let cursor=0;
     for(const match of css.matchAll(IMPORT_PATTERN)){
       const index=match.index??0; resolved+=css.slice(cursor,index); resolved+=readFileGraph(path.resolve(path.dirname(absolutePath),match[1])); cursor=index+match[0].length;

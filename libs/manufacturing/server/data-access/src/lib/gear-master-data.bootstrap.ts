@@ -8,7 +8,7 @@ import { CUTTER_BODY_SHELF_SCHEMA } from './cutter-body-shelf.schema';
 import { applySharedDatabaseIntegrity } from '@gearapps/shared/database';
 
 /**
- * Additive schema evolution for Gear Apps master-data features that must work
+ * Additive schema evolution for MeshForge master-data features that must work
  * against the existing production database with DATABASE_SYNCHRONIZE=false.
  * Every statement is idempotent. Existing rows and history are preserved.
  */

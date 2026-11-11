@@ -365,7 +365,7 @@ async function ensureAutomaticTestUser(client) {
       (id, "createdAt", "updatedAt", email, password, "firstName", "lastName",
        role, active, "isEmailVerified", "emailVerifiedOn", "socialProvider")
      values
-      ($1, now(), now(), $2, $3, 'Gear Apps', 'E2E Test', 'user', true, true, now(), 'email')`,
+      ($1, now(), now(), $2, $3, 'MeshForge', 'E2E Test', 'user', true, true, now(), 'email')`,
     [id, AUTO_TEST_EMAIL, passwordHash],
   );
   return id;
@@ -415,7 +415,7 @@ async function ensureE2EMachine(client, partTypeCode) {
     `insert into machines
       (id, "createdAt", "updatedAt", machine_number, department_id, cell, active, description, enabled)
      values ($1, now(), now(), $2, $3, null, true, $4, true)`,
-    [id, machineNumber, department.id, `Dedicated automated ${normalizedType} Gear Apps workflow test machine`],
+    [id, machineNumber, department.id, `Dedicated automated ${normalizedType} MeshForge workflow test machine`],
   );
   return { id, machine_number: machineNumber, part_type_code: normalizedType, created: true };
 }
@@ -437,7 +437,7 @@ async function ensureE2ECutterBuilderMachine(client) {
   await client.query(
     `insert into machines
       (id, "createdAt", "updatedAt", machine_number, department_id, cell, active, description, machine_type, enabled)
-     values ($1, now(), now(), $2, $3, null, true, 'Dedicated automated Gear Apps Cutter Builder test machine', 'CUTTER_BUILDER', true)`,
+     values ($1, now(), now(), $2, $3, null, true, 'Dedicated automated MeshForge Cutter Builder test machine', 'CUTTER_BUILDER', true)`,
     [id, machineNumber, department.id],
   );
   return { id, machine_number: machineNumber, created: true };
@@ -476,7 +476,7 @@ async function ensureE2ECutterBody(client, count) {
   await client.query(
     `insert into cutter_bodies
       (id, "createdAt", "updatedAt", dana_serial_number, mf_serial_number, definition_id, description, enabled)
-     values ($1, now(), now(), null, $2, null, 'Dedicated automated Gear Apps workflow test cutter', true)`,
+     values ($1, now(), now(), null, $2, null, 'Dedicated automated MeshForge workflow test cutter', true)`,
     [id, mf],
   );
   return { id, serial_number: mf, created: true };

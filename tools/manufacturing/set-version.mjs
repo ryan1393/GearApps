@@ -52,7 +52,7 @@ export function setReleaseVersion(root, next) {
   );
   edit(
     'docs/manufacturing/README.md',
-    /(# Gear Apps )\d+\.\d+\.\d+/,
+    /(# MeshForge )\d+\.\d+\.\d+/,
     (_all, prefix) => prefix + next,
   );
   for (const [file, value] of staged)

@@ -1,4 +1,4 @@
-/* @dana/ui Gear compatibility: Gear Apps feature presentation (dashboards, Running Machines
+/* @dana/ui Gear compatibility: MeshForge feature presentation (dashboards, Running Machines
    board, inventory, scrap). Load AFTER gear-compat.css and BEFORE dana-ui.css.
    Temporary migration debt like the rest of the Gear layer; Truck Log must not import it. */
 @import './gear-apps/features/blade-dashboard.css';

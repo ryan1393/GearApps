@@ -9,7 +9,7 @@ $ProjectRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path
 $EnvPath = Join-Path $ProjectRoot '.env'
 
 if (-not (Test-Path -LiteralPath $EnvPath -PathType Leaf)) {
-    throw "Gear Apps .env was not found at $EnvPath"
+    throw "MeshForge .env was not found at $EnvPath"
 }
 
 if (-not $HostName) {
@@ -30,9 +30,9 @@ function Set-EnvValue([string]$Text, [string]$Name, [string]$Value) {
 }
 
 $text = Get-Content -LiteralPath $EnvPath -Raw
-if ($text -notmatch '(?m)^#===== Gear Apps IPL serial-tag printer\s*$' -and
+if ($text -notmatch '(?m)^#===== MeshForge IPL serial-tag printer\s*$' -and
     $text -notmatch '(?m)^GEAR_LABEL_PRINTER_HOST=') {
-    $text = $text.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine + '#===== Gear Apps IPL serial-tag printer' + [Environment]::NewLine
+    $text = $text.TrimEnd() + [Environment]::NewLine + [Environment]::NewLine + '#===== MeshForge IPL serial-tag printer' + [Environment]::NewLine
 }
 $text = Set-EnvValue $text 'GEAR_LABEL_PRINTER_HOST' $HostName
 $text = Set-EnvValue $text 'GEAR_LABEL_PRINTER_PORT' ([string]$Port)
@@ -40,7 +40,7 @@ $text = Set-EnvValue $text 'GEAR_LABEL_PRINTER_TIMEOUT_MS' ([string]$TimeoutMs)
 [IO.File]::WriteAllText($EnvPath, $text, [Text.UTF8Encoding]::new($false))
 
 Write-Host ''
-Write-Host '[PASS] Gear Apps IPL label printer configured.' -ForegroundColor Green
+Write-Host '[PASS] MeshForge IPL label printer configured.' -ForegroundColor Green
 Write-Host "Printer: $HostName`:$Port" -ForegroundColor Cyan
 Write-Host 'No label was printed by this configuration command.' -ForegroundColor DarkGray
 Write-Host 'Restart commands\START-GEAR-APPS.cmd before using Print Tag.' -ForegroundColor Yellow

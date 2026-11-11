@@ -8,7 +8,7 @@ const minimalStyle=`@tailwind base;
 @tailwind utilities;
 
 /*
- * Gear Apps visual styling is centralized in:
+ * MeshForge visual styling is centralized in:
  * libs/shared/dana-ui/src/styles/gear-apps.css
  */
 `;
@@ -38,7 +38,7 @@ function wireApp(app){
   const project=JSON.parse(fs.readFileSync(projectFile,'utf8'));
   const tags=new Set(project.tags??[]);
   if(project.projectType!=='application' || !tags.has('scope:frontend') || !tags.has('framework:angular')){
-    throw new Error(`${app} is not tagged as a Gear Apps Angular frontend application.`);
+    throw new Error(`${app} is not tagged as a MeshForge Angular frontend application.`);
   }
 
   const sourceRoot=project.sourceRoot || `apps/${app}/src`;
@@ -67,4 +67,4 @@ const requested=args.filter(x=>!x.startsWith('--'));
 const apps=requested.length ? requested : frontendAngularApps();
 for(const app of apps) wireApp(app);
 
-console.log(`[PASS] Shared Gear Apps styling wired to ${apps.length} frontend app(s).`);
+console.log(`[PASS] Shared MeshForge styling wired to ${apps.length} frontend app(s).`);

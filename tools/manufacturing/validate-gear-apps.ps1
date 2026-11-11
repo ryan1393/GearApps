@@ -11,7 +11,7 @@ function Invoke-NativeChecked {
     }
 }
 
-Write-Host "=== Gear Apps validation ===" -ForegroundColor Cyan
+Write-Host "=== MeshForge validation ===" -ForegroundColor Cyan
 $env:NX_DAEMON = 'false'
 $env:NX_ISOLATE_PLUGINS = 'false'
 
@@ -33,7 +33,7 @@ try {
     Invoke-NativeChecked '[4/4] Building Green Shed...' { npx nx build greenshed }
 
     Write-Host ""
-    Write-Host '[PASS] All four Gear Apps projects built successfully using isolated Nx validation state.' -ForegroundColor Green
+    Write-Host '[PASS] All four MeshForge projects built successfully using isolated Nx validation state.' -ForegroundColor Green
     exit 0
 }
 finally {

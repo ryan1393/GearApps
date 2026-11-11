@@ -13,7 +13,7 @@ const receipt = JSON.parse(read('docs/manufacturing/DANA_UI_DASHBOARD_VISUAL_QA.
 // compact toast block appended after the dashboard polish; the reviewed content is unchanged.
 const css = norm(read('libs/shared/dana-ui/src/styles/gear-compat-overrides.css'))
   .replace(/^\/\* @dana\/ui Gear compatibility: overrides[\s\S]*?\*\/\n/, '')
-  .replace(/\n*\/\* Compact toast stack for Gear Apps[\s\S]*$/, '\n');
+  .replace(/\n*\/\* Compact toast stack for MeshForge[\s\S]*$/, '\n');
 const begin = '/* BEGIN DANA-APPS DASHBOARD VISUAL QA V70.0.4';
 const end = '/* END DANA-APPS DASHBOARD VISUAL QA V70.0.4 */';
 const at = css.indexOf(begin);

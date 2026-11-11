@@ -89,4 +89,4 @@ if (!fs.existsSync(contractPath(root, 'libs/manufacturing/assets/brand/README.md
   throw new Error('Shared brand upload/replace instructions are missing.');
 }
 
-console.log('[PASS] Shared file-backed MeshForge branding contract passed across all Gear Apps frontends.');
+console.log('[PASS] Shared file-backed MeshForge branding contract passed across all MeshForge frontends.');

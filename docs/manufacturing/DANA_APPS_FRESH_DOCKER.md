@@ -1,6 +1,6 @@
 # Dana Apps — Fresh Docker Host
 
-The consolidated Gear Apps workspace supports a brand-new Docker host without requiring a pre-existing Gear PostgreSQL volume.
+The consolidated MeshForge workspace supports a brand-new Docker host without requiring a pre-existing Gear PostgreSQL volume.
 
 ## Safety model
 

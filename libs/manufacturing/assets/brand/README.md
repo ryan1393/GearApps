@@ -1,6 +1,6 @@
 # MeshForge shared brand assets
 
-All Gear Apps frontends (Blade Tracking, Cutter Builder, Greenshed, Lapper) use this folder. The suite is
+All MeshForge frontends (Blade Tracking, Cutter Builder, Greenshed, Lapper) use this folder. The suite is
 branded **MeshForge** — "Connected Manufacturing Platform". There is no byline.
 
 | File | Use |
@@ -43,4 +43,4 @@ Recommended SVG requirements:
 - tight viewBox around the artwork;
 - no external font/image/web dependencies.
 
-Do not create separate logo copies under each app. This folder is the single Gear Apps source of truth.
+Do not create separate logo copies under each app. This folder is the single MeshForge source of truth.

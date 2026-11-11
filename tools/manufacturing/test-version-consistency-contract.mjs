@@ -70,8 +70,8 @@ if (tags.length !== expectedImages.length || expectedImages.some(name => !tags.s
 for (const [, image, tag] of tags)
   if (tag !== version) fail(`compose.yml ${image}:${tag} != ${version}`);
 
-if (!read('docs/manufacturing/README.md').includes(`# Gear Apps ${version}`))
-  fail(`docs/manufacturing/README.md heading must read "# Gear Apps ${version}"`);
+if (!read('docs/manufacturing/README.md').includes(`# MeshForge ${version}`))
+  fail(`docs/manufacturing/README.md heading must read "# MeshForge ${version}"`);
 
 for (const nav of [
   'apps/blade-tracking/src/app/layout/app-nav/app-nav.component',

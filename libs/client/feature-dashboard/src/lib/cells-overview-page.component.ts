@@ -118,7 +118,7 @@ import { groupByCell } from './cells';
             aria-label="Lapping Summaries"
           ></a>
           @if (access.canEditSetup()) {
-            <!-- Shared master data lives in Admin, like the other Gear apps. -->
+            <!-- Shared master data lives in Admin, like the other MeshForge apps. -->
             <a
               routerLink="/admin"
               [queryParams]="{ tab: 'lapping-machines' }"

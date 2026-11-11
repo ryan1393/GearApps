@@ -1,11 +1,11 @@
 # Dana Apps — Gear Domain Pre-Merge Readiness
 
-> **Superseded in 70.2.0.** Gear Apps styling now lives in @dana/ui (Dana UI). The paths below
+> **Superseded in 70.2.0.** MeshForge styling now lives in @dana/ui (Dana UI). The paths below
 > (`libs/shared/ui-tailwind`, `libs/gear/ui`) no longer exist; see the "Styling (Dana UI)" section
 > of the README. This file is kept for history.
 
 
-Gear Apps V69.3.0R1 marks the Gear side as ready to be imported into the Dana Apps monorepo without changing Gear business behavior.
+MeshForge V69.3.0R1 marks the Gear side as ready to be imported into the Dana Apps monorepo without changing Gear business behavior.
 
 ## Protected Gear domain
 

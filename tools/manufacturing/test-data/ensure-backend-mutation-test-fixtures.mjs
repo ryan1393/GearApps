@@ -71,7 +71,7 @@ async function ensureUser(email,password,role,departmentCode){
     `insert into users
       (id,"createdAt","updatedAt",email,password,"firstName","lastName",
        role,"departmentId",active,"isEmailVerified","emailVerifiedOn","socialProvider")
-     values($1,now(),now(),$2,$3,'Gear Apps','E2E Backend',$4,$5,true,true,now(),'email')`,
+     values($1,now(),now(),$2,$3,'MeshForge','E2E Backend',$4,$5,true,true,now(),'email')`,
     [id,email,hash,role,department.id],
   );
   return id;

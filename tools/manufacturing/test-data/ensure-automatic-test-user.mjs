@@ -89,7 +89,7 @@ try {
   await upsertLocalAccount({
     email: AUTO_TEST_EMAIL,
     password: AUTO_TEST_PASSWORD,
-    firstName: 'Gear Apps',
+    firstName: 'MeshForge',
     lastName: 'E2E Test',
     role: 'user',
     departmentCode: '45',
@@ -98,13 +98,13 @@ try {
   await upsertLocalAccount({
     email: AUTO_ADMIN_EMAIL,
     password: AUTO_ADMIN_PASSWORD,
-    firstName: 'Gear Apps',
+    firstName: 'MeshForge',
     lastName: 'Local Admin',
     role: 'admin',
     departmentCode: '99',
   });
 
-  console.log('[PASS] Dedicated automatic Gear Apps user + local admin are ready.');
+  console.log('[PASS] Dedicated automatic MeshForge user + local admin are ready.');
 } finally {
   await client.end();
 }

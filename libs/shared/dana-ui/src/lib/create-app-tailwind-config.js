@@ -3,7 +3,7 @@ const { join } = require('path');
 const sharedTailwindConfig = require('./tailwind.config');
 
 /**
- * One Tailwind configuration factory for every Gear Apps Angular application.
+ * One Tailwind configuration factory for every MeshForge Angular application.
  * Each app's tailwind.config.js should be a one-line call to this function.
  */
 module.exports = function createGearAppTailwindConfig(appRoot) {

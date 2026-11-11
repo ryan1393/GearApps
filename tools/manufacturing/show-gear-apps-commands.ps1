@@ -6,7 +6,7 @@ $rows = @(
     [pscustomobject]@{ Command='npm run setup:gear-apps'; Purpose='Install dependencies, reset Nx, and verify the workspace.'; Safety='SAFE' },
     [pscustomobject]@{ Command='npm run start:gear-apps'; Purpose='Start API, Blade Tracking, Cutter Builder, and Green Shed.'; Safety='SAFE' },
     [pscustomobject]@{ Command='npm run configure:label-printer'; Purpose='Set the IPL serial-tag printer host/port in .env (does not print).'; Safety='SAFE' },
-    [pscustomobject]@{ Command='npm run test:gear-apps'; Purpose='Run the master Gear Apps test suite.'; Safety='SAFE by default' },
+    [pscustomobject]@{ Command='npm run test:gear-apps'; Purpose='Run the master MeshForge test suite.'; Safety='SAFE by default' },
     [pscustomobject]@{ Command='npm run validate:base-data'; Purpose='Validate Excel-derived summary/blade/cutter reference data.'; Safety='SAFE' },
     [pscustomobject]@{ Command='npm run test:data-import'; Purpose='Validate the fresh SQL Server + Excel import contract.'; Safety='SAFE' },
     [pscustomobject]@{ Command='npm run test:blade-data'; Purpose='Create/verify dedicated Blade Tracking E2E data.'; Safety='TEST DATA' },
@@ -21,7 +21,7 @@ $rows = @(
 
 Write-Host ''
 Write-Host '============================================================' -ForegroundColor Cyan
-Write-Host ' Gear Apps Command Center' -ForegroundColor Cyan
+Write-Host ' MeshForge Command Center' -ForegroundColor Cyan
 Write-Host '============================================================' -ForegroundColor Cyan
 
 if ($Compact) {

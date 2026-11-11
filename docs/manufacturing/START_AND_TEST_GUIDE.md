@@ -1,6 +1,6 @@
-﻿# Gear Apps â€” Setup, Start, Test, and Test Data
+﻿# MeshForge â€” Setup, Start, Test, and Test Data
 
-This is the current operator/developer guide for the Gear Apps workspace.
+This is the current operator/developer guide for the MeshForge workspace.
 
 ## Application names and departments
 
@@ -28,11 +28,11 @@ The setup script:
 2. verifies Node.js and npm;
 3. installs npm dependencies;
 4. resets Nx;
-5. verifies the required Gear Apps projects.
+5. verifies the required MeshForge projects.
 
 The `.env` file is intentionally retained. Review its values before using a different environment.
 
-## Start Gear Apps
+## Start MeshForge
 
 ```powershell
 npm run start:gear-apps
@@ -198,13 +198,13 @@ During the cutter-body etching rollout, Cutter Builder accepts either identifier
 - **Dana S/N** â€” preferred and canonical identifier; this is what will be scanned once the body is etched.
 - **MF S/N** â€” temporary manual-entry fallback for bodies that have not been etched yet.
 
-If an MF S/N is entered, Gear Apps resolves it to the cutter body and immediately normalizes the selected body back to its Dana S/N. Builds and history continue to store/use the Dana serial as the canonical cutter-body serial.
+If an MF S/N is entered, MeshForge resolves it to the cutter body and immediately normalizes the selected body back to its Dana S/N. Builds and history continue to store/use the Dana serial as the canonical cutter-body serial.
 
-If an MF S/N ever matches more than one enabled cutter body, Gear Apps refuses to guess and requires the Dana S/N.
+If an MF S/N ever matches more than one enabled cutter body, MeshForge refuses to guess and requires the Dana S/N.
 
 ## Cutter bodies before and after etching
 
-A cutter body exists in Gear Apps before it receives a Dana etched serial.
+A cutter body exists in MeshForge before it receives a Dana etched serial.
 
 Before etching:
 
@@ -223,7 +223,7 @@ After etching, either identifier can still locate the body, but Dana is the pref
 
 An unetched cutter can be created and used with only its MF/manufacturer serial. When that physical cutter is later etched, select the same cutter body by MF S/N and use **Assign etched Dana S/N**.
 
-Gear Apps updates the existing cutter-body row; it does not create a replacement cutter. Older MF-based build numbers remain unchanged and all previous builds/events remain connected through the same cutter-body UUID. New builds use the Dana S/N.
+MeshForge updates the existing cutter-body row; it does not create a replacement cutter. Older MF-based build numbers remain unchanged and all previous builds/events remain connected through the same cutter-body UUID. New builds use the Dana S/N.
 
 
 ### MF-to-Dana assignment test
@@ -311,14 +311,14 @@ The fresh migration records the workbook SHA-256 and supplemental row counts alo
 
 The history refresh **does not delete physical cutter-body records**. Existing Excel MFâ†”Dana mappings and cutter definitions remain attached to the same cutter-body UUID.
 
-Legacy cutter identifiers are matched case-insensitively against both `mf_serial_number` and `dana_serial_number`. If a legacy history row references a cutter not already known from the Excel reference set, Gear Apps creates it as an **MF-only** cutter body. It never invents a Dana S/N.
+Legacy cutter identifiers are matched case-insensitively against both `mf_serial_number` and `dana_serial_number`. If a legacy history row references a cutter not already known from the Excel reference set, MeshForge creates it as an **MF-only** cutter body. It never invents a Dana S/N.
 
 This keeps pre-etch and post-etch history attached to the same physical cutter when the mapping is known.
 
 
-## Gear Apps Command Center
+## MeshForge Command Center
 
-Both `commands\SETUP-GEAR-APPS.cmd` and `commands\START-GEAR-APPS.cmd` now display the current Gear Apps command list when they finish.
+Both `commands\SETUP-GEAR-APPS.cmd` and `commands\START-GEAR-APPS.cmd` now display the current MeshForge command list when they finish.
 
 You can display the same command list at any time with:
 
@@ -357,7 +357,7 @@ Legacy history values such as `NA`, `N/A`, `UNKNOWN`, or `UNASSIGNED` are not tr
 
 ### Blade-requirement revision matching
 
-Blade requirements from the cleaned workbook currently use Summary number with a blank revision. If the fresh SQL Server data already contains exactly one revision for that Summary, Gear Apps attaches the blade requirement to that existing revision rather than creating a duplicate blank-revision summary. For example, the packaged legacy snapshot contains Summary `30135` revision `B`, so the Excel requirement for `30135` resolves to that existing `B` summary.
+Blade requirements from the cleaned workbook currently use Summary number with a blank revision. If the fresh SQL Server data already contains exactly one revision for that Summary, MeshForge attaches the blade requirement to that existing revision rather than creating a duplicate blank-revision summary. For example, the packaged legacy snapshot contains Summary `30135` revision `B`, so the Excel requirement for `30135` resolves to that existing `B` summary.
 
 If no summary exists, a blank-revision summary is created. If more than one enabled revision exists and Excel does not specify which revision, the import stops instead of guessing.
 
@@ -367,7 +367,7 @@ Legacy source detail rows that cannot be safely attached to an operational cutte
 
 ### Orphan build rows are archive-only
 
-If a legacy cutter-build row has no exact `CB + Check_ID` relationship in the central log, Gear Apps does not invent a build number or operational history. The source row is preserved in `cutter_legacy_orphan_records`, but **no `cutter_builds`, `cutter_events`, setup/frequency/pull events, or machine-run records are created for it**. This is the rule used for legacy Check_ID `278` in the current source report.
+If a legacy cutter-build row has no exact `CB + Check_ID` relationship in the central log, MeshForge does not invent a build number or operational history. The source row is preserved in `cutter_legacy_orphan_records`, but **no `cutter_builds`, `cutter_events`, setup/frequency/pull events, or machine-run records are created for it**. This is the rule used for legacy Check_ID `278` in the current source report.
 
 ### Duplicate central-log rows
 
@@ -375,7 +375,7 @@ Duplicate `ToC_ID + Check_ID` rows are collapsed only when all business fields (
 
 ### Central Log repeat-insert reconciliation
 
-The legacy SQL Server can contain repeated Central Log inserts for the same `ToC_ID + Check_ID`. Gear Apps treats that pair as one logical source operation.
+The legacy SQL Server can contain repeated Central Log inserts for the same `ToC_ID + Check_ID`. MeshForge treats that pair as one logical source operation.
 
 If `Build_ID`, `Part_Count`, and `Emp_ID` agree, timestamp/Log_ID differences are treated as repeat inserts: the earliest row is used for the migrated event and every extra source row is archived in `cutter_legacy_orphan_records` as `CENTRAL_LOG_DUPLICATE`. The duplicates do not create extra work/events/logs.
 
@@ -405,11 +405,11 @@ For the current run procedure and compatibility matrix, see `docs/manufacturing/
 
 Run `commands\SETUP-GEAR-APPS.cmd` once after extracting a new package. Setup deletes any previous `node_modules` and `.nx` cache, verifies npm's cache, installs exactly from `package-lock.json` with `npm ci`, and syntax-checks the installed Nx plugin worker before continuing.
 
-Do not copy `node_modules` between Gear Apps folders. The launcher uses the official Nx setting `NX_ISOLATE_PLUGINS=false` together with `NX_DAEMON=false` for deterministic Windows startup. `commands\START-GEAR-APPS.cmd` also refuses to start if the Nx installation is missing or corrupted.
+Do not copy `node_modules` between MeshForge folders. The launcher uses the official Nx setting `NX_ISOLATE_PLUGINS=false` together with `NX_DAEMON=false` for deterministic Windows startup. `commands\START-GEAR-APPS.cmd` also refuses to start if the Nx installation is missing or corrupted.
 
 ### npm/Husky warnings during Setup
 
-A downloaded ZIP is not a Git repository, so Husky may print `fatal: not a git repository` / `git command not found, skipping install` during `npm ci`. That message is non-fatal for Gear Apps and does not mean dependency installation failed.
+A downloaded ZIP is not a Git repository, so Husky may print `fatal: not a git repository` / `git command not found, skipping install` during `npm ci`. That message is non-fatal for MeshForge and does not mean dependency installation failed.
 
 If the Nx integrity check fails, Setup waits for npm lifecycle processes and Windows file handles to close, then retries removal of `node_modules` multiple times with both PowerShell and Windows `rmdir`. Setup will never continue using a partially deleted dependency tree.
 
@@ -423,13 +423,13 @@ No separate command is required in the normal test run. `npm run test:gear-apps`
 
 ### Faster dependency setup
 
-Use `commands\SETUP-GEAR-APPS.cmd` for normal setup. It validates an existing `node_modules`, then checks a shared Gear Apps dependency cache keyed by the exact `package-lock.json` SHA-256, Node ABI, platform, and architecture. A verified cache is reused through a Windows junction, allowing later fresh folders with the same dependency lock to skip `npm ci`.
+Use `commands\SETUP-GEAR-APPS.cmd` for normal setup. It validates an existing `node_modules`, then checks a shared MeshForge dependency cache keyed by the exact `package-lock.json` SHA-256, Node ABI, platform, and architecture. A verified cache is reused through a Windows junction, allowing later fresh folders with the same dependency lock to skip `npm ci`.
 
 If no valid cache exists, setup runs `npm ci --prefer-offline --no-audit --no-fund`, verifies Nx, and publishes the verified dependency tree for reuse. Use `CLEAN-commands\SETUP-GEAR-APPS.cmd` only for deliberate clean recovery.
 
 ### Admin screen
 
-Open `/admin` from any Gear Apps frontend while signed in with an admin-role account. The shared screen creates and lists Users, Part Summaries, Models, Machines, and Cutter Bodies. The Admin navigation item is hidden for non-admin users.
+Open `/admin` from any MeshForge frontend while signed in with an admin-role account. The shared screen creates and lists Users, Part Summaries, Models, Machines, and Cutter Bodies. The Admin navigation item is hidden for non-admin users.
 
 Local development provides a dedicated admin account: `admin@gearapps.local` / `GearApps-Admin-Only-2026!`. The normal `test@gearapps.local` account intentionally remains a non-admin operator so authorization tests continue to exercise 403 behavior.
 
@@ -455,12 +455,12 @@ If you change a user's department or upgrade from an older package that did not 
 
 `npm run import:all-fresh:apply` is an update/reconciliation import; it does **not** guarantee that every stale target-only row is removed.
 
-For a true clean refresh, close the running Gear Apps API/server windows and run `commands\RESET-AND-REFRESH-ALL-DATA.cmd` from the project root. The launcher requires the exact confirmation phrase `DELETE OLD DATA` before it can delete anything.
+For a true clean refresh, close the running MeshForge API/server windows and run `commands\RESET-AND-REFRESH-ALL-DATA.cmd` from the project root. The launcher requires the exact confirmation phrase `DELETE OLD DATA` before it can delete anything.
 
 The workflow is intentionally ordered for safety:
 
 1. Read fresh base/reference data and cutter history from SQL Server and validate it first. SQL Server is never modified.
-2. Only after preflight passes, truncate the Gear Apps application rows in the PostgreSQL target configured in `.env`; the schema is preserved.
+2. Only after preflight passes, truncate the MeshForge application rows in the PostgreSQL target configured in `.env`; the schema is preserved.
 3. Import the already-validated fresh base/reference + Excel supplemental data.
 4. Reconcile and import fresh cutter history.
 5. Recreate the local operator/admin test accounts with their department assignments.

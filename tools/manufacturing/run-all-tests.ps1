@@ -281,7 +281,7 @@ function Start-GearAppsApi {
         return
     }
 
-    Write-Host "Starting Gear Apps API in a separate PowerShell process..." -ForegroundColor Yellow
+    Write-Host "Starting MeshForge API in a separate PowerShell process..." -ForegroundColor Yellow
     $escapedRoot = $WorkspaceRoot.Replace("'", "''")
     $command = "Set-Location '$escapedRoot'; `$env:NX_DAEMON='false'; `$env:NX_ISOLATE_PLUGINS='false'; npx nx serve gear-app-server"
     $script:ServerProcess = Start-Process -FilePath 'powershell.exe' -ArgumentList @('-NoProfile','-ExecutionPolicy','Bypass','-Command',$command) -PassThru
@@ -298,7 +298,7 @@ function Start-GearAppsApi {
             throw "API server process exited before becoming ready. Exit code: $($script:ServerProcess.ExitCode)"
         }
     }
-    throw 'Timed out waiting 90 seconds for the Gear Apps API to become ready.'
+    throw 'Timed out waiting 90 seconds for the MeshForge API to become ready.'
 }
 
 function Ensure-WorkflowTestFixtures {
@@ -377,7 +377,7 @@ try {
 
     Write-Host "" 
     Write-Host "################################################################" -ForegroundColor Cyan
-    Write-Host " Gear Apps - ONE FILE / ALL TESTS" -ForegroundColor Cyan
+    Write-Host " MeshForge - ONE FILE / ALL TESTS" -ForegroundColor Cyan
     Write-Host "################################################################" -ForegroundColor Cyan
     Write-Host "Project: $ProjectRoot"
     if ($PreflightOnly) {
@@ -519,7 +519,7 @@ try {
         Add-MasterResult 'Dana component consolidation contract' 'FAIL' "Exit code $LASTEXITCODE"
         throw 'Dana component consolidation contract failed.'
     }
-    Add-MasterResult 'Dana component consolidation contract' 'PASS' 'Shared page headers and dashboard operation cards remain component-owned across Gear Apps.'
+    Add-MasterResult 'Dana component consolidation contract' 'PASS' 'Shared page headers and dashboard operation cards remain component-owned across MeshForge.'
 
     & node "$PSScriptRoot\test-dana-kpi-balance-icon-contract.mjs"
     if ($LASTEXITCODE -ne 0) {
@@ -550,7 +550,7 @@ try {
         Add-MasterResult 'External Dana UI package contract' 'FAIL' "Exit code $LASTEXITCODE"
         throw 'External Dana UI package contract failed.'
     }
-    Add-MasterResult 'External Dana UI package contract' 'PASS' 'Gear Apps compiles the one libs/shared/dana-ui source from the Truck Log visual baseline while retaining temporary local compatibility/domain layers.'
+    Add-MasterResult 'External Dana UI package contract' 'PASS' 'MeshForge compiles the one libs/shared/dana-ui source from the Truck Log visual baseline while retaining temporary local compatibility/domain layers.'
 
     & node "$PSScriptRoot\audit-dana-ui-migration-test-surface.mjs"
     if ($LASTEXITCODE -ne 0) {
@@ -865,14 +865,14 @@ try {
         Add-MasterResult 'Login UI consistency contract' 'FAIL' "Exit code $LASTEXITCODE"
         throw 'Login UI consistency contract failed.'
     }
-    Add-MasterResult 'Login UI consistency contract' 'PASS' 'All three apps use one full-screen Gear Apps login experience.'
+    Add-MasterResult 'Login UI consistency contract' 'PASS' 'All three apps use one full-screen MeshForge login experience.'
 
     & node "$PSScriptRoot\test-shared-ui-style-source-contract.mjs"
     if ($LASTEXITCODE -ne 0) {
         Add-MasterResult 'Modular UI styling contract' 'FAIL' "Exit code $LASTEXITCODE"
         throw 'Modular UI styling contract failed.'
     }
-    Add-MasterResult 'Modular UI styling contract' 'PASS' 'Every Angular frontend consumes one Gear Apps entry point backed by ordered design-system modules and the shared Tailwind factory.'
+    Add-MasterResult 'Modular UI styling contract' 'PASS' 'Every Angular frontend consumes one MeshForge entry point backed by ordered design-system modules and the shared Tailwind factory.'
 
     & node "$PSScriptRoot\test-admin-management-ui-contract.mjs"
     if ($LASTEXITCODE -ne 0) {
@@ -1213,7 +1213,7 @@ try {
         Write-Host "[FAIL] $failed master test stage(s) failed." -ForegroundColor Red
         exit 1
     }
-    Write-Host '[PASS] ALL REQUESTED GEAR APPS TEST STAGES PASSED.' -ForegroundColor Green
+    Write-Host '[PASS] ALL REQUESTED MESHFORGE TEST STAGES PASSED.' -ForegroundColor Green
     exit 0
 }
 catch {

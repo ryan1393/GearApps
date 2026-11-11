@@ -28,7 +28,7 @@ describe('DSF connection settings', () => {
     expect(invalid({ DSF_DB_PORT: 'abc' })).toBe(false);
     expect(invalid({ DSF_DB_SSL_MODE: 'prefer' })).toBe(false);
     expect(invalid({ DSF_COUNT_INTERVAL_SECONDS: '5' })).toBe(false);
-    // Never the Gear Apps database itself.
+    // Never the MeshForge database itself.
     expect(invalid({ DSF_DB_HOST: 'dana-postgres', DSF_DB_NAME: 'GearApps' })).toBe(false);
     // An acknowledgment with the wrong text, or for a different source, is refused.
     expect(invalid({ DSF_PRIVILEGED_READER_ACK: 'yes' })).toBe(false);

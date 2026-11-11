@@ -1,11 +1,11 @@
-# Gear Apps — Current AI Handoff
+# MeshForge — Current AI Handoff
 _Last updated: 2026-08-27 — V69.2 combined UI completion candidate_
 
 ## 1. CURRENT WORKING PROJECT / BASELINE
 
-- Active Gear Apps workspace:
+- Active MeshForge workspace:
   `C:\Users\ryan.thompson\Downloads\gear-appsv0.1`
-- Gear Apps is a Windows-hosted Nx monorepo.
+- MeshForge is a Windows-hosted Nx monorepo.
 - Frontends:
   - Blade Tracking — port 4200
   - Cutter Builder — port 4201
@@ -24,7 +24,7 @@ _Last updated: 2026-08-27 — V69.2 combined UI completion candidate_
   - deep scans passed;
   - focused UI contracts passed;
   - authoritative `npm run test:gear-apps` passed;
-  - Gear Apps restarted successfully;
+  - MeshForge restarted successfully;
   - `package-lock.json` remained unchanged and no npm install was required.
 - Current source package under review: **V69.2 combined Inventory/Table/Workflow completion**.
   - It is statically validated against V69.0, but must still pass the live Windows authoritative regression before becoming the new baseline.
@@ -33,9 +33,9 @@ _Last updated: 2026-08-27 — V69.2 combined UI completion candidate_
 
 ## 2. ABSOLUTE PATCH DELIVERY RULES
 
-These are now standing Gear Apps rules.
+These are now standing MeshForge rules.
 
-1. Every completed Gear Apps change must be delivered as an actual user-facing patch/code artifact, normally a double-clickable `.cmd`, plus a concise written summary.
+1. Every completed MeshForge change must be delivered as an actual user-facing patch/code artifact, normally a double-clickable `.cmd`, plus a concise written summary.
 2. Do not give the user only a prose summary and say code will come later.
 3. Do not generate pictures/infographics unless the user explicitly asks for an image.
 4. Patches must:
@@ -66,7 +66,7 @@ These are now standing Gear Apps rules.
 
 ## 3. UI / DESIGN SYSTEM DIRECTION
 
-The user wants Gear Apps visually simplified and de-hardened.
+The user wants MeshForge visually simplified and de-hardened.
 
 Primary goals:
 - cleaner shared styling;
@@ -94,8 +94,8 @@ Known design goals:
 - shared CSS variables for spacing, typography, radii, table header/cell padding, colors, shadows, panel rhythm;
 - do not keep appending numbered CSS override blocks;
 - use managed zones such as:
-  - `GEAR APPS MANAGED PROFESSIONAL UI`
-  - `GEAR APPS MANAGED ADMIN LIST TOOLBAR`
+  - `MESHFORGE MANAGED PROFESSIONAL UI`
+  - `MESHFORGE MANAGED ADMIN LIST TOOLBAR`
 - keep style modules under the existing contract ceiling (currently <=520 lines/module).
 
 The user does NOT want a separate picture/mockup instead of code.
@@ -108,7 +108,7 @@ The suite is branded MeshForge. This replaced the earlier Dana Diamond / Truck L
 branding direction; older notes below that mention the Dana Diamond describe history.
 
 - Brand assets and the palette are documented in `libs/manufacturing/assets/brand/README.md`.
-- Gear Apps assets:
+- MeshForge assets:
   - `assets/brand/meshforge-mark.svg` for app/sidebar and login branding;
   - `assets/branding/meshforge-favicon.png` for browser tabs.
 - App top/tab bar direction: MeshForge mark plus `page | app`.
@@ -168,7 +168,7 @@ The Scrap Blade contract expects:
 Important discovery:
 - `tools\manufacturing\test-scrap-blade-history-contract.mjs` passed after the canonical title repair.
 - `tools\manufacturing\test-ui-deep-scan-contract.mjs` is stricter about the canonical page shell than simple semantic equivalence.
-- A prior attempt used `<section class="gear-page">`, but the maintained deep-scan contract expects the canonical Gear Apps form:
+- A prior attempt used `<section class="gear-page">`, but the maintained deep-scan contract expects the canonical MeshForge form:
   `<div class="gear-page">`
 
 Standing rule:
@@ -187,7 +187,7 @@ A long sequence of V55–V67 patches exposed both real contract drift and mistak
 - Several old tests were stale after style ownership was moved into modular shared CSS.
 - Duplicate-selector / style-source contracts exposed old selector debt.
 - `gear-apps.css` is intended to remain an import-only public entry point.
-- Style declarations belong in Gear Apps style modules.
+- Style declarations belong in MeshForge style modules.
 - Historical contracts that no longer represent the maintained architecture should be archived/reconciled instead of repeatedly weakening new source to satisfy obsolete assumptions.
 
 ### V66.3 / V66.4
@@ -472,10 +472,10 @@ Shortcuts must not auto-submit.
 
 ## 15. DANA APPS FUTURE MERGE PLAN
 
-Gear Apps and Truck Log remain separate projects for now.
+MeshForge and Truck Log remain separate projects for now.
 
 Future plan:
-- stabilize Gear Apps;
+- stabilize MeshForge;
 - stabilize Truck Log;
 - later merge under a new Nx monorepo named `Dana Apps`;
 - use one shared Dana design system;
@@ -487,7 +487,7 @@ Do not treat this future merge as already implemented.
 
 ## 16. CURRENT USER EXPECTATION FOR NEXT CHAT
 
-When a new Gear Apps chat starts:
+When a new MeshForge chat starts:
 - use **V69.0** as the confirmed live Windows known-good baseline until V69.2 passes live;
 - do not reopen the old V67 missing-reference/harness detour;
 - do not redo dashboard `danaTable`, Admin search, Dana branding, large-screen shell scaling, or the V69.0 token/icon cleanup;
@@ -513,7 +513,7 @@ When a new Gear Apps chat starts:
 - Shared table/filter ownership consolidated.
 - Semantic SVG controls replaced old Unicode sort/search/close controls.
 - Deep scans, focused contracts, and authoritative `npm run test:gear-apps` passed live on Windows.
-- Gear Apps restarted successfully.
+- MeshForge restarted successfully.
 - V69.0 is the current confirmed source baseline.
 
 ---

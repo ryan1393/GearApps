@@ -1,11 +1,11 @@
 # Dana Apps Master UI Baseline
 
-> **Superseded in 70.2.0.** Gear Apps styling now lives in @dana/ui (Dana UI). The paths below
+> **Superseded in 70.2.0.** MeshForge styling now lives in @dana/ui (Dana UI). The paths below
 > (`libs/shared/ui-tailwind`, `libs/gear/ui`) no longer exist; see the "Styling (Dana UI)" section
 > of the README. This file is kept for history.
 
 
-Gear Apps V69.2.9 freezes the Dana shared UI as the master presentation foundation for Dana Apps.
+MeshForge V69.2.9 freezes the Dana shared UI as the master presentation foundation for Dana Apps.
 
 ## Ownership
 

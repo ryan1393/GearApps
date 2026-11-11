@@ -1,13 +1,13 @@
-# Gear Apps UI Design System
+# MeshForge UI Design System
 
-> **Superseded in 70.2.0.** Gear Apps styling now lives in @dana/ui (Dana UI). The paths below
+> **Superseded in 70.2.0.** MeshForge styling now lives in @dana/ui (Dana UI). The paths below
 > (`libs/shared/ui-tailwind`, `libs/gear/ui`) no longer exist; see the "Styling (Dana UI)" section
 > of the README. This file is kept for history.
 
 
 ## Public style entry point
 
-All Angular frontends load exactly one Gear Apps stylesheet from their Nx build configuration:
+All Angular frontends load exactly one MeshForge stylesheet from their Nx build configuration:
 
 ```text
 libs/shared/ui-tailwind/src/styles/gear-apps.css
@@ -110,7 +110,7 @@ npm run test:ui-style-duplicates
 
 ## Standard reusable vocabulary
 
-Prefer the existing Gear Apps classes before inventing a page-specific equivalent. Current shared vocabulary includes:
+Prefer the existing MeshForge classes before inventing a page-specific equivalent. Current shared vocabulary includes:
 
 ```text
 .gear-page
@@ -164,7 +164,7 @@ The duplicate contract verifies **zero same-cascade duplicate selectors** and se
 3. Put only workflow-specific presentation in `features/`.
 4. Do not create an override-only module just to restyle another shared module later in the import order.
 5. Do not add large `<style>` blocks to Angular templates.
-6. Do not add Gear Apps shell/component rules to `apps/*/src/styles.css` or `app.component.css`.
+6. Do not add MeshForge shell/component rules to `apps/*/src/styles.css` or `app.component.css`.
 7. Do not import a private module directly from an app.
 8. Run the shared-style, duplicate, deep-UI, and no-raw-debug contracts before delivery.
 9. For deliberate visual changes, review Blade Tracking, Cutter Builder, Greenshed, and Admin rather than only the page being edited.
@@ -304,7 +304,7 @@ The contract verifies both the relationship behavior and the shared style vocabu
 
 ## Shop-floor readability and child containment standard
 
-Gear Apps body content now uses a shared readability scale from `foundation/tokens.css`:
+MeshForge body content now uses a shared readability scale from `foundation/tokens.css`:
 
 ```text
 --gear-font-xs: 11px

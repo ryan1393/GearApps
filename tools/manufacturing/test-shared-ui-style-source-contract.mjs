@@ -61,7 +61,7 @@ for(const suffix of criticalOrder){
 }
 
 const combined=readGearAppsStyles(root);
-for(const marker of ['GEAR APPS DESIGN SYSTEM','--gear-sidebar-width','.gear-sidebar','.gear-topbar','.gear-page','.gear-panel','.gear-btn','.gear-table','.login-page','.running-machines-page','.inventory-overview-kpis','.scrap-history-timeline']){
+for(const marker of ['MESHFORGE DESIGN SYSTEM','--gear-sidebar-width','.gear-sidebar','.gear-topbar','.gear-page','.gear-panel','.gear-btn','.gear-table','.login-page','.running-machines-page','.inventory-overview-kpis','.scrap-history-timeline']){
   must(combined.includes(marker),`Combined Dana/Gear style graph missing ${marker}`);
 }
 
@@ -71,7 +71,7 @@ const frontendApps=fs.readdirSync(contractPath(process.cwd(), appsDir),{withFile
   const project=JSON.parse(fs.readFileSync(contractPath(process.cwd(), file),'utf8')); const tags=new Set(project.tags??[]);
   return project.projectType==='application'&&tags.has('scope:frontend')&&tags.has('framework:angular');
 });
-must(frontendApps.length>=3,'Expected the Gear Apps Angular frontends to be discoverable.');
+must(frontendApps.length>=3,'Expected the MeshForge Angular frontends to be discoverable.');
 for(const app of frontendApps){
   const projectFile=contractPath(root,'apps',app,'project.json'); const project=JSON.parse(fs.readFileSync(contractPath(process.cwd(), projectFile),'utf8'));
   const sourceRoot=project.sourceRoot||`apps/${app}/src`; const appStyle=`${sourceRoot}/styles.css`; const styles=project.targets?.build?.options?.styles??[];

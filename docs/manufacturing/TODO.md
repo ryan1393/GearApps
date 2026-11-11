@@ -1,4 +1,4 @@
-# Gear Apps TODO
+# MeshForge TODO
 
 This file tracks only remaining work. Completed setup/test/fake-data behavior is documented in `docs/manufacturing/START_AND_TEST_GUIDE.md`.
 
@@ -37,7 +37,7 @@ This file tracks only remaining work. Completed setup/test/fake-data behavior is
 
 ## UI design-system cleanup
 
-- [x] Split the monolithic Gear Apps stylesheet into one import-only entry point plus ordered foundation/layout/components/theme/feature modules without changing the intended visual cascade.
+- [x] Split the monolithic MeshForge stylesheet into one import-only entry point plus ordered foundation/layout/components/theme/feature modules without changing the intended visual cascade.
 - [x] Add modular-style ownership/regression contracts and a zero-input duplicate-selector audit.
 - [x] Consolidate the layered shell/button/Admin/inventory/table/dashboard overrides into canonical owners; same-cascade duplicate selector debt is now 0.
 - [x] First-pass modular CSS was started successfully on the Windows development laptop and visually confirmed by the user.
@@ -83,7 +83,7 @@ This file tracks only remaining work. Completed setup/test/fake-data behavior is
 - [x] Remove TypeORM pessimistic-lock + relation-join queries from transactional services; lock base rows first and load relations separately.
 
 - [x] Add zero-input authenticated backend mutation suite with CRUD, authorization, rollback, duplicate, concurrency, error-message, and write-route coverage checks.
-- [x] Centralize Gear Apps styling/Tailwind tokens for all current and future Angular frontend apps.
+- [x] Centralize MeshForge styling/Tailwind tokens for all current and future Angular frontend apps.
 - [x] Add shared Admin create screen for Users, Part Summaries, Models, Machines, and Cutter Bodies.
 - [x] Make Cutter Body creation and Dana serial assignment admin-only while preserving operator scan/build access.
 - [x] Enforce department-scoped app editing with cross-department dashboard-only access and admin bypass.

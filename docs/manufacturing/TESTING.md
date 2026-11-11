@@ -1,8 +1,8 @@
-﻿# Gear Apps Testing
+﻿# MeshForge Testing
 
 ## One-command master test
 
-From the Gear Apps project root, run:
+From the MeshForge project root, run:
 
 ```powershell
 npm run test:gear-apps
@@ -33,7 +33,7 @@ Machine compatibility is also enforced by manufacturing department: PINION cutte
 
 ## Safe first run
 
-1. Open PowerShell in the extracted Gear Apps project root.
+1. Open PowerShell in the extracted MeshForge project root.
 2. Run `commands\SETUP-GEAR-APPS.cmd` after a fresh extract or dependency/environment change.
 3. Run `commands\START-GEAR-APPS.cmd` and wait for the API and three applications to start.
 4. Run `npm run test:gear-apps` in another PowerShell terminal.
@@ -57,13 +57,13 @@ Tray-stage codes use uppercase reference values such as `WAITING_FOR_GRINDING`. 
 
 ## PostgreSQL pessimistic-lock relation rule
 
-Transactional service code must not combine a TypeORM `relations` join with a pessimistic `findOne` lock in the same query. PostgreSQL can reject the resulting `FOR UPDATE` when TypeORM uses an outer join for a nullable relation. Gear Apps now locks the base row first, then loads the required relations in a second query inside the same transaction.
+Transactional service code must not combine a TypeORM `relations` join with a pessimistic `findOne` lock in the same query. PostgreSQL can reject the resulting `FOR UPDATE` when TypeORM uses an outer join for a nullable relation. MeshForge now locks the base row first, then loads the required relations in a second query inside the same transaction.
 
 `npm run test:db-lock-queries` scans the affected server services and fails if this unsafe pattern is reintroduced.
 
 ## Foreign-key and loaded-relation synchronization
 
-When a TypeORM entity was loaded with a relation object and the workflow changes the relation's foreign-key column, Gear Apps updates both the foreign-key field and the loaded relation object before saving. This prevents an old loaded relation (for example `WAITING_FOR_GRINDING`) from overwriting the newly assigned foreign key (for example the `GRINDING` stage) during persistence.
+When a TypeORM entity was loaded with a relation object and the workflow changes the relation's foreign-key column, MeshForge updates both the foreign-key field and the loaded relation object before saving. This prevents an old loaded relation (for example `WAITING_FOR_GRINDING`) from overwriting the newly assigned foreign key (for example the `GRINDING` stage) during persistence.
 
 `npm run test:fk-relation-sync` guards the stage/status transitions used by Blade Tracking, Coater, Green Shed, and Cutter Builder.
 

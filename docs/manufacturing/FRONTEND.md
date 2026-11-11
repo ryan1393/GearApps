@@ -1,6 +1,6 @@
 # Frontend Architecture
 
-Gear Apps has three Angular frontends:
+MeshForge has three Angular frontends:
 
 - `apps/blade-tracking`
 - `apps/cutter-builder`
