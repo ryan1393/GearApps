@@ -12,6 +12,19 @@ class ConfigError(ValueError):
     pass
 
 
+#: The Basic sign-in the original C# Lapper Read sent to Argonaut on every request
+#: (`Authorization: Basic dXNlcjpwdw==`), used when ARGONAUT_USERNAME and ARGONAUT_PASSWORD are
+#: both empty. Keep in step with ARGONAUT_DEFAULT_USERNAME/PASSWORD in libs/shared/domain.
+ORIGINAL_USERNAME = "user"
+ORIGINAL_PASSWORD = "pw"
+
+
+def _argonaut_sign_in(env: dict[str, str]) -> tuple[str, str]:
+    username = env.get("ARGONAUT_USERNAME", "").strip()
+    password = env.get("ARGONAUT_PASSWORD", "")
+    return (username, password) if username or password else (ORIGINAL_USERNAME, ORIGINAL_PASSWORD)
+
+
 @dataclass(frozen=True)
 class Settings:
     machine_ip: str
@@ -140,6 +153,7 @@ def _float(env: dict[str, str], name: str, default: float) -> float:
 
 def from_env(env: dict[str, str] | None = None, mode: str = "run") -> Settings:
     env = dict(os.environ if env is None else env)
+    argonaut_username, argonaut_password = _argonaut_sign_in(env)
     return Settings(
         machine_ip=env.get("LAPPER_MACHINE_IP", "").strip(),
         scanner_ip=env.get("LAPPER_SCANNER_IP", "").strip(),
@@ -163,8 +177,8 @@ def from_env(env: dict[str, str] | None = None, mode: str = "run") -> Settings:
         argonaut_enabled=_bool(env, "ARGONAUT_ENABLED", False),
         argonaut_url=env.get("ARGONAUT_URL", "").strip(),
         argonaut_location_id=env.get("ARGONAUT_LOCATION_ID", "").strip(),
-        argonaut_username=env.get("ARGONAUT_USERNAME", "").strip(),
-        argonaut_password=env.get("ARGONAUT_PASSWORD", ""),
+        argonaut_username=argonaut_username,
+        argonaut_password=argonaut_password,
         argonaut_transaction_type_id=_int(env, "ARGONAUT_TRANSACTION_TYPE_ID", 100),
         argonaut_verify_tls=_bool(env, "ARGONAUT_VERIFY_TLS", True),
         argonaut_ca_file=env.get("ARGONAUT_CA_FILE", "").strip(),

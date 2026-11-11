@@ -4,7 +4,7 @@ import time
 import unittest
 
 from lapper_read.config import Settings
-from lapper_read.supervisor import MachineSpec, Supervisor, desired_machines
+from lapper_read.supervisor import ArgonautOverride, MachineSpec, Supervisor, desired_machines, with_machine_argonaut
 
 
 def machine(mid, ip="10.16.81.15", status="Active", scanner_ip="10.16.80.57", number=None):
@@ -61,6 +61,13 @@ class FakeWorker:
 class FakeApi:
     def __init__(self):
         self.machines = []
+        self.argonaut = None
+        self.argonaut_error = None
+
+    def argonaut_settings(self):
+        if self.argonaut_error:
+            raise self.argonaut_error
+        return self.argonaut
 
     def request(self, method, path, *args, **kwargs):
         return self.machines if path.endswith("/machine") else []
@@ -151,3 +158,44 @@ class SupervisorTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ArgonautSettingsTests(unittest.TestCase):
+    setUp, tearDown, _wait = SupervisorTests.setUp, SupervisorTests.tearDown, SupervisorTests._wait
+
+    def test_admin_server_settings_replace_the_environment_and_restart_workers(self):
+        self.api.machines = [machine("m1")]
+        self.supervisor.discover_once()
+        self._wait(lambda: len(self.built) == 1)
+        self.assertIsNone(self.built[0].spec.argonaut)
+        self.assertEqual(self.supervisor.status()["argonaut_settings"], "environment")
+
+        self.api.argonaut = {"url": "https://argo:3003/api/mes/trigger-transaction", "location_id": "loc",
+                             "username": "mes", "password": "secret", "transaction_type_id": 101, "verify_tls": False}
+        self.supervisor.discover_once()
+        self._wait(lambda: len(self.built) == 2)
+        self.assertTrue(self.built[0].stopped.is_set())
+        self.assertNotIn("secret", repr(self.built[1].spec))
+        self.assertEqual(self.supervisor.status()["argonaut_settings"], "MeshForge Server Settings")
+
+        # Unchanged settings leave the worker running; an unreadable API keeps the last ones.
+        self.supervisor.discover_once()
+        self.api.argonaut_error = OSError("API down")
+        self.supervisor.discover_once()
+        self.assertEqual(len(self.built), 2)
+        self.assertEqual(self.built[1].spec.argonaut.username, "mes")
+
+    def test_override_applies_over_the_environment_and_machine_url_still_wins(self):
+        env = Settings(machine_ip="", scanner_ip="", argonaut_url="https://env/x", argonaut_location_id="env-loc",
+                       argonaut_username="user", argonaut_password="pw")
+        o = ArgonautOverride.from_api({"url": "", "location_id": "admin-loc", "username": "mes", "password": "p",
+                                       "transaction_type_id": 101, "verify_tls": False})
+        s = o.apply(env)
+        self.assertEqual((s.argonaut_url, s.argonaut_location_id, s.argonaut_username, s.argonaut_password,
+                          s.argonaut_transaction_type_id, s.argonaut_verify_tls),
+                         ("https://env/x", "admin-loc", "mes", "p", 101, False))
+        machine_specific = with_machine_argonaut(s, "https://machine/x", "")
+        self.assertEqual((machine_specific.argonaut_url, machine_specific.argonaut_location_id),
+                         ("https://machine/x", "admin-loc"))
+        self.assertIsNone(ArgonautOverride.from_api(None))
+

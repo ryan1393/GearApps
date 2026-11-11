@@ -4,6 +4,7 @@ import { EnvironmentSettingsController } from './environment-settings.controller
 import { CycleTestsController } from './cycle-tests.controller';
 import { CycleTestsService } from './cycle-tests.service';
 import { ArgonautTestService } from './argonaut-test.service';
+import { LapperReadSettingsController } from './lapper-read-settings.controller';
 import { EnvironmentSettingsService } from './environment-settings.service';
 import { ServerFeatGreenshedModule } from '@meshforge/manufacturing/server/feat-greenshed';
 import { ServerFeatCutterBuildModule } from '@meshforge/manufacturing/server/feat-cutter-build';
@@ -56,7 +57,7 @@ const featureModules = [
 ];
 
 @Module({
-  controllers: [CycleTestsController, AdminMasterDataController, EnvironmentSettingsController],
+  controllers: [CycleTestsController, AdminMasterDataController, EnvironmentSettingsController, LapperReadSettingsController],
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,

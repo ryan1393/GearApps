@@ -21,7 +21,7 @@ import json
 import logging
 import os
 import threading
-from dataclasses import dataclass, replace
+from dataclasses import dataclass, field, replace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Callable
 
@@ -35,6 +35,44 @@ log = logging.getLogger("lapper_read.supervisor")
 
 
 @dataclass(frozen=True)
+class ArgonautOverride:
+    """Argonaut settings saved in MeshForge Admin > Server Settings; they replace the collector's
+    ARGONAUT_* environment (except ARGONAUT_ENABLED, CA file and timeout). Empty text keeps the
+    environment's value."""
+    url: str = ""
+    location_id: str = ""
+    username: str = ""
+    password: str = field(default="", repr=False)
+    transaction_type_id: int | None = None
+    verify_tls: bool | None = None
+
+    @classmethod
+    def from_api(cls, found: dict | None) -> "ArgonautOverride | None":
+        if not found:
+            return None
+        text = lambda key: str(found.get(key) or "").strip()  # noqa: E731
+        type_id = found.get("transaction_type_id")
+        verify = found.get("verify_tls")
+        return cls(text("url"), text("location_id"), text("username"), str(found.get("password") or ""),
+                   int(type_id) if isinstance(type_id, (int, float)) and not isinstance(type_id, bool) else None,
+                   verify if isinstance(verify, bool) else None)
+
+    def apply(self, settings):
+        changes: dict = {}
+        if self.url:
+            changes["argonaut_url"] = self.url
+        if self.location_id:
+            changes["argonaut_location_id"] = self.location_id
+        if self.username or self.password:
+            changes.update(argonaut_username=self.username, argonaut_password=self.password)
+        if self.transaction_type_id is not None:
+            changes["argonaut_transaction_type_id"] = self.transaction_type_id
+        if self.verify_tls is not None:
+            changes["argonaut_verify_tls"] = self.verify_tls
+        return replace(settings, **changes) if changes else settings
+
+
+@dataclass(frozen=True)
 class MachineSpec:
     machine_id: str
     number: str | None
@@ -44,6 +82,8 @@ class MachineSpec:
     #: Set in Admin > Lapping machines; "" uses the collector's ARGONAUT_URL / ARGONAUT_LOCATION_ID.
     argonaut_url: str = ""
     argonaut_location_id: str = ""
+    #: From Admin > Server Settings; a change restarts the workers so it applies to the next post.
+    argonaut: ArgonautOverride | None = None
 
 
 def desired_machines(
@@ -176,16 +216,18 @@ class Supervisor:
         self._last_error: str | None = None
         self._stop = threading.Event()
         self._http: ThreadingHTTPServer | None = None
+        self._argonaut: ArgonautOverride | None = None
+        self._argonaut_source = "environment"
 
     # -- worker construction --------------------------------------------------------
     def _build_worker(self, spec: MachineSpec) -> Worker:
         from .focas import FocasTransport  # imported lazily so tests never need the library
 
-        s = with_machine_argonaut(
-            replace(self.settings, machine_ip=spec.controller_ip, machine_number=spec.number,
-                    scanner_ip=spec.scanner_ip, state_key=spec.machine_id),
-            spec.argonaut_url, spec.argonaut_location_id,
-        )
+        base = replace(self.settings, machine_ip=spec.controller_ip, machine_number=spec.number,
+                       scanner_ip=spec.scanner_ip, state_key=spec.machine_id)
+        if spec.argonaut is not None:
+            base = spec.argonaut.apply(base)
+        s = with_machine_argonaut(base, spec.argonaut_url, spec.argonaut_location_id)
         transport = FocasTransport(s.focas_library, s.focas_log, s.focas_port)
         fanuc = Fanuc(transport, s.machine_ip, s.io_timeout_ms, self.api)
         scanner = Scanner(s.scanner_ip, s.scanner_input1_port, s.io_timeout_ms / 1000) if s.scanner_ip else None
@@ -196,6 +238,8 @@ class Supervisor:
         machines = self.api.request("GET", "/api/v1/machine") or []
         scanners = self.api.request("GET", "/api/v1/scanner-detail") or []
         wanted, skipped = desired_machines(machines, scanners)
+        argonaut = self._argonaut_settings()
+        wanted = {mid: replace(spec, argonaut=argonaut) for mid, spec in wanted.items()}
         for mid, slot in list(self._slots.items()):
             if mid not in wanted or wanted[mid] != slot.spec:
                 reason = "settings changed" if mid in wanted else "no longer eligible"
@@ -218,6 +262,22 @@ class Supervisor:
         self._last_discovery = utc_now()
         self._last_error = None
         self._heartbeat()
+
+    def _argonaut_settings(self) -> ArgonautOverride | None:
+        """Admin > Server Settings' Argonaut settings; if they cannot be read the last ones read stay."""
+        reader = getattr(self.api, "argonaut_settings", None)
+        if reader is None:
+            return self._argonaut
+        try:
+            found = ArgonautOverride.from_api(reader())
+        except Exception as error:  # noqa: BLE001 - keep the last known settings
+            log.warning("Could not read Argonaut settings from MeshForge; keeping the current ones: %s", error)
+            return self._argonaut
+        source = "MeshForge Server Settings" if found else "environment"
+        if source != self._argonaut_source:
+            log.info("Argonaut settings now come from the %s", source)
+        self._argonaut, self._argonaut_source = found, source
+        return found
 
     def run(self) -> None:
         self._start_status_server()
@@ -247,6 +307,7 @@ class Supervisor:
         return {
             "last_discovery": self._last_discovery,
             "last_error": self._last_error,
+            "argonaut_settings": self._argonaut_source,
             "workers": [slot.status() for slot in self._slots.values()],
             "machines_without_worker": [
                 {"machine_id": mid, "number": label, "reason": reason}

@@ -64,6 +64,7 @@ describe('collectorTokenAllows', () => {
     ['GET', '/api/v1/machine/ip/10.16.81.15?number=01-094-101'],
     ['GET', '/api/v1/macro-log/summary/m/g'],
     ['GET', '/api/v1/gearset/number/373'],
+    ['GET', '/api/v1/lapper-read/argonaut'],
     ['POST', '/api/v1/macro-log'],
     ['POST', '/api/v1/gearset'],
     ['PATCH', '/api/v1/scanner-detail/s1/serial-numbers'],

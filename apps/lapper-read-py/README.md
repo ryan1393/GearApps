@@ -94,7 +94,7 @@ single worker without the supervisor.
 | `ARGONAUT_ENABLED` | false | Also send each finished cycle to Argonaut (see below) |
 | `ARGONAUT_URL` | | Argonaut `trigger-transaction` URL (required when enabled) |
 | `ARGONAUT_LOCATION_ID` | | Sent as `?locationId=` |
-| `ARGONAUT_USERNAME` / `ARGONAUT_PASSWORD` | | Basic sign-in; empty sends no Authorization header |
+| `ARGONAUT_USERNAME` / `ARGONAUT_PASSWORD` | `user` / `pw` | Basic sign-in; both empty uses the original C# collector's (`Basic dXNlcjpwdw==`) |
 | `ARGONAUT_TRANSACTION_TYPE_ID` | 100 | Track and Trace transaction type |
 | `ARGONAUT_VERIFY_TLS` | true | `false` accepts a self-signed certificate |
 | `ARGONAUT_CA_FILE` | | CA/certificate file to trust instead of turning verification off |
@@ -113,10 +113,15 @@ is sent as 0, as before. The macro list is in `lapper_read/argonaut.py`.
 
 - **Per machine:** in Admin > Lapping machines, paste each machine's full **Argonaut API**
   address, including `?locationId=…`. A machine with an address sends to it exactly as pasted,
-  even when `ARGONAUT_ENABLED` is off. Sign-in, TLS and timeout stay the collector's. Leave it
+  even when `ARGONAUT_ENABLED` is off. Sign-in and certificate check come from Server Settings (below). Leave it
   empty to use the collector default. Changing it restarts that machine's worker within
   `LAPPER_DISCOVER_INTERVAL_S`. A `locationId` already in a URL is never replaced by
   `ARGONAUT_LOCATION_ID`.
+- **Admin > Server Settings > Lapping and scanners** holds the Argonaut address, location ID,
+  sign-in, transaction type and certificate check. The collector reads them from MeshForge
+  (`GET /api/v1/lapper-read/argonaut`, collector tokens and admins only) on each machine check and
+  they replace its `ARGONAUT_*` environment; a change restarts the workers. `ARGONAUT_ENABLED`, the
+  CA file and the timeout stay in the environment. Saved settings take effect after the API restarts.
 - Argonaut has its own queue in the machine's checkpoint, so an Argonaut outage never holds up
   recording cycles in MeshForge. Failed posts are retried with a growing delay (up to 5
   minutes) and survive restarts; at most 1000 unsent cycles are kept per machine.

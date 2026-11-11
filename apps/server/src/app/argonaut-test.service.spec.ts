@@ -50,6 +50,13 @@ describe('Argonaut test transaction', () => {
     expect(custom.url).toBe('https://spearhead/t?locationId=test');
   });
 
+  it("serves Lapper Read the saved settings, signing in as the original collector when none is set", () => {
+    expect(service({}, {}, { LAPPER_READ_ARGONAUT_URL: ' https://argo/x ', LAPPER_READ_ARGONAUT_VERIFY_TLS: false }).collectorSettings())
+      .toEqual({ url: 'https://argo/x', location_id: '', username: 'user', password: 'pw', transaction_type_id: 100, verify_tls: false });
+    expect(service({}, {}, { LAPPER_READ_ARGONAUT_USERNAME: 'mes', LAPPER_READ_ARGONAUT_PASSWORD: 's' }).collectorSettings())
+      .toMatchObject({ username: 'mes', password: 's', verify_tls: true });
+  });
+
   it('refuses without an address, an unknown machine or a non-numeric value', async () => {
     await expect(service({}, { number: '1' }).prepare(input)).rejects.toThrow('No Argonaut address');
     await expect(service(undefined, { number: '1' }).prepare(input)).rejects.toThrow('Choose a configured');
@@ -80,6 +87,10 @@ describe('Argonaut test transaction', () => {
       expect(JSON.parse(received[0].body)).toEqual(ok.payload);
       status = 400;
       expect(await argo.send(input, 'user')).toMatchObject({ ok: false, status: 400, response: 'bad serial' });
+      // No user or password configured: sign in as the original C# Lapper Read did.
+      status = 200;
+      await service({ argonaut_url: `http://127.0.0.1:${port}/t` }, { number: '1' }).send(input, 'user');
+      expect(received[2].auth).toBe('Basic dXNlcjpwdw==');
     } finally {
       server.close();
     }

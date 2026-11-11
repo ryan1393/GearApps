@@ -55,6 +55,7 @@ const ALLOWED: Record<string, RegExp[]> = {
     new RegExp(`^/macro-log/${ID}/${ID}$`),
     new RegExp(`^/machine-fanuc-variable/by-machine/${ID}$`),
     new RegExp(`^/gearset/number/${ID}$`),
+    /^\/lapper-read\/argonaut$/,
   ],
   POST: [/^\/machine-cycle$/, /^\/macro-log$/, /^\/machine-fanuc-variable$/, /^\/gearset$/],
   PATCH: [

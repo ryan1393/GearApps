@@ -4,8 +4,11 @@ import axios from 'axios';
 import * as https from 'node:https';
 import { DataSource } from 'typeorm';
 import {
+  ARGONAUT_DEFAULT_PASSWORD,
   ARGONAUT_DEFAULT_TRANSACTION_TYPE_ID,
+  ARGONAUT_DEFAULT_USERNAME,
   argonautAddress,
+  ArgonautCollectorSettings,
   ArgonautPayload,
   ArgonautTestInput,
   ArgonautTestResult,
@@ -25,7 +28,9 @@ export interface ArgonautTestRequest {
  * Cycle Test Lab > Send to Argonaut. Sends one Track and Trace transaction built exactly as
  * Lapper Read builds a finished cycle's, so an Argonaut address can be checked without running a
  * machine. It records a real transaction in Argonaut, so it is admin-only and sent only on request.
- * Sign-in and certificate settings are the collector's (LAPPER_READ_ARGONAUT_* in .env).
+ * Sign-in and certificate settings are the collector's (Admin > Server Settings over
+ * LAPPER_READ_ARGONAUT_* in .env); with no
+ * user or password set it signs in as the original C# Lapper Read did.
  */
 @Injectable()
 export class ArgonautTestService {
@@ -36,6 +41,32 @@ export class ArgonautTestService {
   private setting(key: string): string {
     const value = this.config.get<unknown>(`LAPPER_READ_ARGONAUT_${key}`);
     return value == null ? '' : String(value).trim();
+  }
+
+  /** The configured sign-in, or the original C# Lapper Read's when none is set (as the collector does). */
+  private credentials(): { username: string; password: string } {
+    const username = this.setting('USERNAME');
+    const password = String(this.config.get<unknown>('LAPPER_READ_ARGONAUT_PASSWORD') ?? '');
+    return username || password ? { username, password } : { username: ARGONAUT_DEFAULT_USERNAME, password: ARGONAUT_DEFAULT_PASSWORD };
+  }
+
+  private transactionType(): number {
+    return Number(this.setting('TRANSACTION_TYPE_ID') || ARGONAUT_DEFAULT_TRANSACTION_TYPE_ID);
+  }
+
+  private verifyTls(): boolean {
+    return this.setting('VERIFY_TLS').toLowerCase() !== 'false';
+  }
+
+  /** What Lapper Read uses for every real cycle: Admin > Server Settings over .env. */
+  collectorSettings(): ArgonautCollectorSettings {
+    return {
+      url: this.setting('URL'),
+      location_id: this.setting('LOCATION_ID'),
+      ...this.credentials(),
+      transaction_type_id: this.transactionType(),
+      verify_tls: this.verifyTls(),
+    };
   }
 
   async prepare(input: ArgonautTestInput): Promise<ArgonautTestRequest> {
@@ -59,7 +90,7 @@ export class ArgonautTestService {
     const address = override || machine.argonaut_url?.trim() || this.setting('URL');
     if (!address) {
       throw new BadRequestException(
-        'No Argonaut address. Enter one here, save one for the machine in Admin > Lapping machines, or set LAPPER_READ_ARGONAUT_URL.',
+        'No Argonaut address. Enter one here, save one for the machine in Admin > Lapping machines, or set the Argonaut address in Admin > Server Settings.',
       );
     }
     const location = input.location_id?.trim() || machine.argonaut_location_id?.trim() || this.setting('LOCATION_ID');
@@ -74,16 +105,14 @@ export class ArgonautTestService {
     const values: Record<string, number> = { ...input.values };
     // A real cycle reads the gearset number from #10020; default it to the chosen gearset.
     if (values['10020'] === undefined && /^\d+$/.test(partNumber)) values['10020'] = Number(partNumber);
-    const type = Number(this.setting('TRANSACTION_TYPE_ID') || ARGONAUT_DEFAULT_TRANSACTION_TYPE_ID);
-    const payload = buildArgonautPayload(input.serial_number.trim(), partNumber, input.sequence, values, type);
+    const payload = buildArgonautPayload(input.serial_number.trim(), partNumber, input.sequence, values, this.transactionType());
     return { url, payload };
   }
 
   async send(input: ArgonautTestInput, userId: string): Promise<ArgonautTestResult> {
     const { url, payload } = await this.prepare(input);
-    const username = this.setting('USERNAME');
-    const password = String(this.config.get<unknown>('LAPPER_READ_ARGONAUT_PASSWORD') ?? '');
-    const verify = this.setting('VERIFY_TLS').toLowerCase() !== 'false';
+    const { username, password } = this.credentials();
+    const verify = this.verifyTls();
     const sent_at = new Date().toISOString();
     const result = (ok: boolean, status: number | null, message: string, response = ''): ArgonautTestResult => {
       this.logger.log(`Cycle Test Lab Argonaut test by user ${userId}, serial ${payload.request.serialNumber}, to ${url}: ${message}`);
@@ -97,7 +126,7 @@ export class ArgonautTestService {
         transformResponse: (body) => body,
         validateStatus: () => true,
         headers: { 'Content-Type': 'application/json', Accept: 'application/json, text/plain, */*' },
-        ...(username || password ? { auth: { username, password } } : {}),
+        auth: { username, password },
         // Argonaut servers often use a self-signed certificate on a plant IP address.
         httpsAgent: new https.Agent({ rejectUnauthorized: verify }),
       });
@@ -106,7 +135,7 @@ export class ArgonautTestService {
       return result(ok, reply.status, ok ? `Argonaut accepted the transaction (HTTP ${reply.status}).` : `Argonaut answered HTTP ${reply.status}.`, body);
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
-      const hint = /self[- ]signed|certificate|unable to verify/i.test(reason) ? ' Set LAPPER_READ_ARGONAUT_VERIFY_TLS=false to accept a self-signed certificate.' : '';
+      const hint = /self[- ]signed|certificate|unable to verify/i.test(reason) ? ' Turn off Verify the Argonaut certificate in Admin > Server Settings to accept a self-signed certificate.' : '';
       return result(false, null, `Argonaut is unreachable: ${reason}.${hint}`);
     }
   }
