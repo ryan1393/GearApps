@@ -17,7 +17,8 @@ serial when the machine has an **Active scanner assigned** (Configuration → Sc
 online; with no scanner, an offline scanner, or nothing scanned, it is recorded with **no serial**.
 An offline scanner is pinged and its port retried in the background every 30 seconds, so it never
 slows the machine polling; serials resume by themselves when it answers. The FANUC Variables page
-shows each scanner as Online, Offline (and whether it answers ping) or No scanner. Saving a new machine starts its worker. Changing its controller IP, asset number or
+shows each scanner as Online, Offline (and whether it answers ping) or No scanner, and an idle
+control (no program loaded, so #10020 or #10032 is 0) as No gearset loaded until a program runs. Saving a new machine starts its worker. Changing its controller IP, asset number or
 scanner restarts the worker with the new settings. Making it Inactive, clearing the IP, or
 deleting it stops the worker. Each worker keeps its unsent runs under the
 machine's GearApps id, so they survive IP changes and restarts. A worker that fails is

@@ -278,6 +278,12 @@ export class FanucVariablesPageComponent implements OnInit {
       };
     if (!m.worker)
       return { tone: 'neutral', label: 'No worker', detail: capitalise(m.phase ?? '') };
+    if (m.phase === 'no gearset loaded')
+      return {
+        tone: 'neutral',
+        label: 'No gearset loaded',
+        detail: `Connected and idle · checked ${clock(m.last_sample_at)} · collects once a program is loaded`,
+      };
     if (m.phase === 'collecting') {
       const waiting = m.pending_runs ? ` · ${m.pending_runs} runs waiting to send` : '';
       return {

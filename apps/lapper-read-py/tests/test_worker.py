@@ -146,6 +146,16 @@ class WorkerTests(unittest.TestCase):
         self.assertEqual(status["scanner"], "offline")
         self.assertIn("scanner offline", status["scanner_error"])
 
+    def test_an_idle_control_is_reported_as_no_gearset_loaded_then_collects(self):
+        self.transport.macros[10020] = Decimal(0)
+        thread = self._start(self.worker)
+        self._wait(lambda: self.worker.status()["phase"] == "no gearset loaded")
+        self.assertIsNone(self.worker.status()["last_error"])
+        self.transport.macros[10020] = Decimal(373)  # a program is loaded
+        self._wait(lambda: self.worker.status()["phase"] == "collecting")
+        self.worker.stop()
+        thread.join(3)
+
     def test_scanner_outage_keeps_polling_the_machine(self):
         self.scanner.fail = True
         thread = self._start(self.worker)

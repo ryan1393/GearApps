@@ -37,6 +37,10 @@
   retried every 30 seconds in the background (it no longer stalls machine polling or floods the
   log), and serials resume when it answers. Lapper > FANUC Variables shows each scanner as Online,
   Offline (answers ping or not, last seen) or No scanner.
+- **Idle lappers are not errors.** A control that answers but has no program loaded (#10020 or
+  #10032 is 0) shows as **No gearset loaded** (connected and idle) instead of Controller
+  unavailable, is logged once instead of every few seconds, and starts collecting by itself once
+  a program is loaded.
 - **Deploy keeps the collector current.** When the Lapper Read collector already runs on the host,
   the deploy rebuilds its image and restarts it with the release; before, it kept running the old
   image until it was rebuilt by hand. A host that never started the collector is left alone.

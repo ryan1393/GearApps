@@ -9,7 +9,7 @@ import time
 from dataclasses import dataclass
 
 from .api import GearAppsApi, utc_now
-from .fanuc import Fanuc
+from .fanuc import Fanuc, NoGearsetLoaded
 from .scanner import Scanner
 from .scanner_monitor import ScannerMonitor
 from .state import CycleState, CycleStateStore, MachineState, ScannerState
@@ -180,6 +180,14 @@ class Worker:
                 if self.phase != "collecting" or self.last_error:
                     self.phase, self.last_error = "collecting", None
                 if not self._sleep(s.poll_interval_ms):
+                    break
+            except NoGearsetLoaded as error:
+                # The control is connected but idle: not an error, and logged once per idle spell.
+                if self.phase != "no gearset loaded":
+                    log.info("[%s] Controller connected but idle: %s", label, error)
+                self.phase, self.last_error = "no gearset loaded", None
+                self.last_sample_at = utc_now()
+                if not self._sleep(s.retry_delay_ms):
                     break
             except Exception as error:  # noqa: BLE001
                 self.phase, self.last_error = "controller unavailable", str(error)

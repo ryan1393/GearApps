@@ -24,6 +24,11 @@ class Transport(Protocol):
     def read_pmc_bit(self, handle: int, address_type: int, byte: int, bit: int) -> bool: ...
 
 
+class NoGearsetLoaded(IOError):
+    """The control answers, but #10020 (gearset) or #10032 (consec) is 0: no lapping program is
+    loaded, so there is no cycle to record yet."""
+
+
 class Fanuc:
     def __init__(self, transport: Transport, machine_ip: str, io_timeout_ms: int, api):
         self._transport, self._ip, self._api = transport, machine_ip, api
@@ -72,7 +77,9 @@ class Fanuc:
     def read_state(self) -> MachineState:
         ident, consec = self.macro(MACRO_IDENT), self.macro(MACRO_CONSEC)
         if not _counter(ident) or not _counter(consec):
-            raise IOError("FANUC ident or consecutive count is unavailable.")
+            raise NoGearsetLoaded(
+                f"No gearset loaded: #{MACRO_IDENT}={ident} #{MACRO_CONSEC}={consec} (load a program to start collecting)."
+            )
         return MachineState(
             ident=int(ident),
             consec=int(consec),
