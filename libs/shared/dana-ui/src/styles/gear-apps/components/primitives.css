@@ -8,12 +8,12 @@
   overflow: hidden;
   margin-bottom: 22px;
   padding: 18px 20px 19px;
-  border: 1px solid #d5e3ee;
+  border: 1px solid #dfe1e5;
   border-radius: 14px;
   background:
-    radial-gradient(circle at 92% 0, rgba(60, 141, 195, .105), transparent 15rem),
-    linear-gradient(120deg, rgba(255,255,255,.99), rgba(240,247,252,.98));
-  box-shadow: 0 8px 24px rgba(26, 67, 99, .065);
+    radial-gradient(circle at 92% 0, rgba(211, 105, 23, .105), transparent 15rem),
+    linear-gradient(120deg, rgba(255,255,255,.99), rgba(245,246,247,.98));
+  box-shadow: 0 8px 24px rgba(57, 65, 78, .065);
 }
 
 .gear-page-header::before {
@@ -21,7 +21,7 @@
   position: absolute;
   inset: 0 auto 0 0;
   width: 4px;
-  background: linear-gradient(180deg, #287db8, #3a9a9a);
+  background: linear-gradient(180deg, #bc5d15, #3a9a9a);
 }
 
 .gear-page-header > * {
@@ -32,7 +32,7 @@
 
 .gear-eyebrow {
   margin: 0;
-  color: #48708f;
+  color: #656c79;
   font-size: var(--gear-font-xs);
   font-weight: 800;
   letter-spacing: .15em;
@@ -41,7 +41,7 @@
 
 .gear-page-title {
   margin: .25rem 0 0;
-  color: #132238;
+  color: #1e2229;
   font-size: 28px;
   line-height: 1.2;
   font-weight: 780;
@@ -51,7 +51,7 @@
 .gear-page-description {
   max-width: 58rem;
   margin: 6px 0 0;
-  color: #6c7a8c;
+  color: #717987;
   font-size: var(--gear-font-md);
   line-height: 1.55;
 }
@@ -73,10 +73,10 @@
   place-items: center;
   flex: 0 0 auto;
   border-radius: 999px;
-  border: 1px solid rgba(39, 125, 184, .18);
-  background: linear-gradient(145deg, #dceef9, #edf7fc);
-  color: #1769aa;
-  box-shadow: 0 4px 12px rgba(23, 105, 170, .10);
+  border: 1px solid rgba(188, 93, 21, .18);
+  background: linear-gradient(145deg, #eaebee, #f5f5f7);
+  color: #aa5413;
+  box-shadow: 0 4px 12px rgba(170, 84, 19, .10);
   font-size: var(--gear-font-sm);
   font-weight: 900;
 }
@@ -84,7 +84,7 @@
 .gear-field {
   display: grid;
   gap: .4rem;
-  color: #344054;
+  color: #38404d;
   font-size: var(--gear-font-md);
   font-weight: 700;
 }
@@ -98,7 +98,7 @@
   border-radius: var(--gear-radius-md);
   outline: none;
   background: var(--gear-surface);
-  color: #172033;
+  color: #1c2027;
   font: inherit;
   font-weight: 500;
   transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
@@ -119,16 +119,16 @@
 .gear-input:focus,
 .gear-select:focus,
 .gear-textarea:focus {
-  border-color: #4f80c5;
-  box-shadow: 0 0 0 3px rgba(79,128,197,.14);
+  border-color: #c76316;
+  box-shadow: 0 0 0 3px rgba(199,99,22,.14);
 }
 
 .gear-input:disabled,
 .gear-select:disabled,
 .gear-textarea:disabled {
   cursor: not-allowed;
-  background: #f8fafc;
-  color: #94a3b8;
+  background: #f9fafa;
+  color: #9ca2ac;
 }
 
 .gear-actions {
@@ -166,28 +166,28 @@
 }
 
 .gear-btn-primary {
-  background: #1769aa;
+  background: #aa5413;
   color: #fff;
-  box-shadow: 0 4px 10px rgba(23,105,170,.14);
+  box-shadow: 0 4px 10px rgba(170,84,19,.14);
 }
 
 .gear-btn-primary:hover:not(:disabled) {
-  background: #12598f;
+  background: #aa5413;
 }
 
 .gear-btn-dark {
-  background: #0f172a;
+  background: #15181d;
   color: #fff;
 }
 
 .gear-btn-secondary {
   border-color: var(--gear-border-strong);
   background: #fff;
-  color: #334155;
+  color: #39414e;
 }
 
 .gear-btn-secondary:hover:not(:disabled) {
-  background: #f8fafc;
+  background: #f9fafa;
 }
 
 .gear-btn-success {
@@ -237,15 +237,15 @@
 }
 
 .gear-detail {
-  border: 1px solid #dce7f0;
+  border: 1px solid #e4e6e9;
   border-radius: var(--gear-radius-md);
-  background: linear-gradient(145deg, #f9fbfd, #f1f7fb);
+  background: linear-gradient(145deg, #fafbfb, #f5f6f7);
   padding: .8rem .9rem;
 }
 
 .gear-detail-label {
   display: block;
-  color: #64748b;
+  color: #6b7381;
   font-size: var(--gear-font-xs);
   font-weight: 800;
   letter-spacing: .06em;
@@ -255,7 +255,7 @@
 .gear-detail-value {
   display: block;
   margin-top: .2rem;
-  color: #1e293b;
+  color: #242932;
   font-size: var(--gear-font-lg);
   font-weight: 800;
 }
@@ -264,20 +264,20 @@
 .gear-panel {
   border: 1px solid var(--gear-border);
   border-radius: var(--dana-radius-panel);
-  background: linear-gradient(180deg, #ffffff 0%, #fcfdff 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #fdfdfd 100%);
   box-shadow: var(--gear-shadow-panel);
   transition: border-color .14s ease, box-shadow .14s ease;
 }
 
 .gear-panel:hover {
-  border-color: #cbdbe8;
-  box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 10px 28px rgba(20,52,80,.075);
+  border-color: #d6d9dd;
+  box-shadow: 0 1px 2px rgba(21,24,29,.04), 0 10px 28px rgba(44,50,61,.075);
 }
 
 .gear-workflow-step-number {
   border: 1px solid rgba(255,255,255,.18);
-  background: linear-gradient(145deg, #173b5d, #0d2741);
-  box-shadow: 0 5px 14px rgba(8,35,61,.16);
+  background: linear-gradient(145deg, #323946, #21262e);
+  box-shadow: 0 5px 14px rgba(30,34,41,.16);
 }
 
 .gear-page input[type="text"],
@@ -286,11 +286,11 @@
 .gear-page input[type="password"],
 .gear-page select,
 .gear-page textarea {
-  border-color: #cfd9e4;
+  border-color: #d5d8dc;
   border-radius: var(--dana-radius-control);
-  color: #203247;
+  color: #2b313c;
   background: #fff;
-  box-shadow: inset 0 1px 1px rgba(15,23,42,.018);
+  box-shadow: inset 0 1px 1px rgba(21,24,29,.018);
   transition: border-color .14s ease, box-shadow .14s ease;
 }
 
@@ -301,8 +301,8 @@
 .gear-page select:focus,
 .gear-page textarea:focus {
   outline: none;
-  border-color: #6da3d1;
-  box-shadow: 0 0 0 3px rgba(43,116,178,.10);
+  border-color: #e98437;
+  box-shadow: 0 0 0 3px rgba(176,88,20,.10);
 }
 
 @media (max-width: 640px) {
@@ -322,7 +322,7 @@
 
 /* UX hardening: visible keyboard focus across interactive controls */
 :where(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 3px solid rgba(37, 99, 235, .35);
+  outline: 3px solid rgba(173, 84, 16, .35);
   outline-offset: 2px;
 }
 
@@ -339,25 +339,25 @@
 }
 
 /* === GEAR APPS MANAGED PROFESSIONAL UI START === */
-/* * Final shared visual refinement after a full UI surface scan. * Goal: preserve useful boundaries for records, forms, alerts and workflow states, * while removing decorative card-inside-card framing and excessive depth. */  /* Page identity is a heading, not another card. */ html body .gear-page > .gear-page-header { overflow: visible; margin-bottom: 22px; padding: 2px 2px 15px; border: 0; border-bottom: 1px solid #d8e2eb; border-radius: 0; background: transparent; box-shadow: none; } html body .gear-page > .gear-page-header::before { display: none; }  /* A top-level panel may remain a surface; a panel nested inside it becomes a section. */ html body .gear-page > .gear-panel { border-color: #dce4eb; border-radius: 9px; background: #fff; box-shadow: 0 1px 2px rgba(15,23,42,.025); } html body .gear-page > .gear-panel:hover { border-color: #d5dee7; box-shadow: 0 1px 2px rgba(15,23,42,.025); } html body .gear-page .gear-panel .gear-panel:not(.cutter-card) { margin-top: .8rem; padding-left: 0; padding-right: 0; border: 0; border-top: 1px solid #e7edf2; border-radius: 0; background: transparent; box-shadow: none; }  /* Neutral helper blocks inside an existing surface read as sections, not mini-cards. */ html body .gear-page .gear-panel > .rounded-xl.bg-slate-50, html body .gear-page .gear-panel > .rounded-2xl.bg-slate-50, html body .gear-page .gear-panel > .rounded-xl.bg-white, html body .gear-page .gear-panel > .rounded-2xl.bg-white { border: 0 !important; border-top: 1px solid #edf1f5 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; padding-left: 0 !important; padding-right: 0 !important; } /* Form controls stay clear and tactile without oversized rounding or glow. */ html body .gear-page input.rounded-xl, html body .gear-page select.rounded-xl, html body .gear-page textarea.rounded-xl, html body .gear-page input.rounded-2xl, html body .gear-page select.rounded-2xl, html body .gear-page textarea.rounded-2xl { border-color: #cbd7e2 !important; border-radius: 8px !important; background: #fff !important; box-shadow: none !important; } html body .gear-page button.rounded-xl, html body .gear-page button.rounded-2xl, html body .gear-page a.rounded-xl, html body .gear-page a.rounded-2xl { border-radius: 8px !important; } html body .gear-page .gear-btn:hover:not(:disabled) { transform: none; }  /* Detail grids use typography and dividers instead of a grid of little boxes. */ html body .gear-page .gear-detail { min-width: 0; padding: .55rem .7rem; border: 0; border-left: 2px solid #dce6ef; border-radius: 0; background: transparent; box-shadow: none; } html body .gear-page .inventory-detail-grid { gap: .3rem .8rem; padding: .35rem 0; }   /* Dashboards: one page surface, independent actions/KPIs, no double frame. */ html body .gear-page .operations-panel { border: 0 !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; } html body .gear-page .operation-card { border-color: #dbe3eb; border-radius: 8px; background: #fff; box-shadow: 0 1px 2px rgba(15,23,42,.02); } html body .gear-page .operation-card:hover { transform: none; border-color: #c9d7e3; background: #fbfdff; box-shadow: 0 1px 4px rgba(15,23,42,.035); } html body .gear-page .kpi-card, html body .gear-page .inventory-overview-kpi, html body .gear-page .blade-location-summary-card, html body .gear-page .scrap-summary-card { border-color: #dce5ed; border-radius: 9px; background: #fff; box-shadow: 0 1px 2px rgba(15,23,42,.025); } html body .gear-page .inventory-overview-kpi:hover, html body .gear-page .blade-location-summary-card:hover, html body .gear-page .scrap-summary-card:hover { transform: none; }  /* Reusable list/table toolbars become integrated section headers. */ html body .gear-page .data-panel .panel-heading, html body .gear-page .inventory-table-heading, html body .gear-page .blade-location-toolbar { min-width: 0; padding: .78rem 1rem; border-bottom: 1px solid #e5ebf1; background: #fbfcfd; box-shadow: none; } html body .gear-page .blade-location-toolbar { align-items: center; } html body .gear-page .blade-location-search { min-width: min(360px, 100%); }  /* Inventory drill-downs should read as relationships/rows, not cards nested three deep. */ html body .gear-page .inventory-count { border: 0; border-radius: 0; background: transparent; box-shadow: none; } html body .gear-page .inventory-expanded-panel { border-left: 2px solid #7ca8c9; background: #f8fafc; box-shadow: none; } html body .gear-page .inventory-relation-chip, html body .gear-page .blade-location-tray-card { border-color: #e1e8ef; border-radius: 7px; background: #fff; box-shadow: none; } html body .gear-page .blade-location-blade-row { padding-left: 0; padding-right: 0; border: 0; border-bottom: 1px solid #edf1f5; border-radius: 0; background: transparent; } html body .gear-page .blade-location-blade-row:last-child { border-bottom: 0; }  /* Scrap/history keeps semantic danger styling while removing inner white-card stacking. */ html body .gear-page .scrap-search-panel, html body .gear-page .scrap-history-panel { border-color: #dce5ed; border-radius: 9px; background: #fff; box-shadow: none; } html body .gear-page .scrap-history-content { padding: .65rem 0 .75rem; border: 0; border-bottom: 1px solid #e7edf2; border-radius: 0; background: transparent; } html body .gear-page .scrap-history-event:last-child .scrap-history-content { border-bottom: 0; } html body .gear-page .scrap-history-event-danger .scrap-history-content { padding-left: .7rem; border-left: 2px solid #d97b7b; background: #fffafa; } html body .gear-page .scrap-history-meta span { border: 0; background: #f1f5f9; }  /* Admin: tabs are navigation, the form is one surface, the record area is not another card. */ html body .gear-page .gear-admin-tabs { margin-bottom: 1.25rem; padding: 0 0 .55rem; border: 0; border-bottom: 1px solid #dbe4ec; border-radius: 0; background: transparent; box-shadow: none; } html body .gear-page .gear-admin-form { border-color: #dce4eb !important; border-radius: 9px !important; background: #fff !important; box-shadow: 0 1px 2px rgba(15,23,42,.025) !important; } html body .gear-page .gear-admin-record-grid-professional.gear-panel, html body .gear-page .gear-admin-record-grid-wide.gear-panel, html body .gear-page .gear-admin-record-grid-compact.gear-panel { border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; } html body .gear-page .gear-admin-record-grid-professional .gear-admin-record-card { border-color: #dfe6ed; border-radius: 9px; background: #fff; box-shadow: none; } html body .gear-page .gear-admin-record-grid-professional .gear-admin-record-card:hover { transform: none; border-color: #cdd9e4; background: #fbfdff; box-shadow: none; } html body .gear-page .gear-admin-record-placement { border-radius: 0 !important; background: transparent !important; } html body .gear-page .gear-admin-location-rule { padding: .6rem 0 .6rem .75rem; border: 0; border-left: 2px solid #8fb5d2; border-radius: 0; background: #f8fbfd; }  /* Prevent accidental page overflow without touching purpose-built print documents. */ html body .gear-page, html body .gear-page .gear-panel, html body .gear-page .gear-admin-layout, html body .gear-page .gear-admin-layout > *, html body .gear-page .table-wrap { min-width: 0; } html body .gear-page .cutter-card { box-shadow: none !important; }  @media (max-width: 760px) { html body .gear-page .blade-location-toolbar { align-items: stretch; } html body .gear-page .blade-location-search { width: 100%; min-width: 0; } }
+/* * Final shared visual refinement after a full UI surface scan. * Goal: preserve useful boundaries for records, forms, alerts and workflow states, * while removing decorative card-inside-card framing and excessive depth. */  /* Page identity is a heading, not another card. */ html body .gear-page > .gear-page-header { overflow: visible; margin-bottom: 22px; padding: 2px 2px 15px; border: 0; border-bottom: 1px solid #dfe1e5; border-radius: 0; background: transparent; box-shadow: none; } html body .gear-page > .gear-page-header::before { display: none; }  /* A top-level panel may remain a surface; a panel nested inside it becomes a section. */ html body .gear-page > .gear-panel { border-color: #e1e3e6; border-radius: 9px; background: #fff; box-shadow: 0 1px 2px rgba(21,24,29,.025); } html body .gear-page > .gear-panel:hover { border-color: #dbdde1; box-shadow: 0 1px 2px rgba(21,24,29,.025); } html body .gear-page .gear-panel .gear-panel:not(.cutter-card) { margin-top: .8rem; padding-left: 0; padding-right: 0; border: 0; border-top: 1px solid #ebecef; border-radius: 0; background: transparent; box-shadow: none; }  /* Neutral helper blocks inside an existing surface read as sections, not mini-cards. */ html body .gear-page .gear-panel > .rounded-xl.bg-slate-50, html body .gear-page .gear-panel > .rounded-2xl.bg-slate-50, html body .gear-page .gear-panel > .rounded-xl.bg-white, html body .gear-page .gear-panel > .rounded-2xl.bg-white { border: 0 !important; border-top: 1px solid #f0f1f2 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; padding-left: 0 !important; padding-right: 0 !important; } /* Form controls stay clear and tactile without oversized rounding or glow. */ html body .gear-page input.rounded-xl, html body .gear-page select.rounded-xl, html body .gear-page textarea.rounded-xl, html body .gear-page input.rounded-2xl, html body .gear-page select.rounded-2xl, html body .gear-page textarea.rounded-2xl { border-color: #d3d6da !important; border-radius: 8px !important; background: #fff !important; box-shadow: none !important; } html body .gear-page button.rounded-xl, html body .gear-page button.rounded-2xl, html body .gear-page a.rounded-xl, html body .gear-page a.rounded-2xl { border-radius: 8px !important; } html body .gear-page .gear-btn:hover:not(:disabled) { transform: none; }  /* Detail grids use typography and dividers instead of a grid of little boxes. */ html body .gear-page .gear-detail { min-width: 0; padding: .55rem .7rem; border: 0; border-left: 2px solid #e3e5e8; border-radius: 0; background: transparent; box-shadow: none; } html body .gear-page .inventory-detail-grid { gap: .3rem .8rem; padding: .35rem 0; }   /* Dashboards: one page surface, independent actions/KPIs, no double frame. */ html body .gear-page .operations-panel { border: 0 !important; background: transparent !important; box-shadow: none !important; padding: 0 !important; } html body .gear-page .operation-card { border-color: #e0e2e6; border-radius: 8px; background: #fff; box-shadow: 0 1px 2px rgba(21,24,29,.02); } html body .gear-page .operation-card:hover { transform: none; border-color: #d3d5da; background: #fdfdfd; box-shadow: 0 1px 4px rgba(21,24,29,.035); } html body .gear-page .kpi-card, html body .gear-page .inventory-overview-kpi, html body .gear-page .blade-location-summary-card, html body .gear-page .scrap-summary-card { border-color: #e2e4e7; border-radius: 9px; background: #fff; box-shadow: 0 1px 2px rgba(21,24,29,.025); } html body .gear-page .inventory-overview-kpi:hover, html body .gear-page .blade-location-summary-card:hover, html body .gear-page .scrap-summary-card:hover { transform: none; }  /* Reusable list/table toolbars become integrated section headers. */ html body .gear-page .data-panel .panel-heading, html body .gear-page .inventory-table-heading, html body .gear-page .blade-location-toolbar { min-width: 0; padding: .78rem 1rem; border-bottom: 1px solid #e9eaed; background: #fcfcfc; box-shadow: none; } html body .gear-page .blade-location-toolbar { align-items: center; } html body .gear-page .blade-location-search { min-width: min(360px, 100%); }  /* Inventory drill-downs should read as relationships/rows, not cards nested three deep. */ html body .gear-page .inventory-count { border: 0; border-radius: 0; background: transparent; box-shadow: none; } html body .gear-page .inventory-expanded-panel { border-left: 2px solid #ea8b43; background: #f9fafa; box-shadow: none; } html body .gear-page .inventory-relation-chip, html body .gear-page .blade-location-tray-card { border-color: #e6e7ea; border-radius: 7px; background: #fff; box-shadow: none; } html body .gear-page .blade-location-blade-row { padding-left: 0; padding-right: 0; border: 0; border-bottom: 1px solid #f0f1f2; border-radius: 0; background: transparent; } html body .gear-page .blade-location-blade-row:last-child { border-bottom: 0; }  /* Scrap/history keeps semantic danger styling while removing inner white-card stacking. */ html body .gear-page .scrap-search-panel, html body .gear-page .scrap-history-panel { border-color: #e2e4e7; border-radius: 9px; background: #fff; box-shadow: none; } html body .gear-page .scrap-history-content { padding: .65rem 0 .75rem; border: 0; border-bottom: 1px solid #ebecef; border-radius: 0; background: transparent; } html body .gear-page .scrap-history-event:last-child .scrap-history-content { border-bottom: 0; } html body .gear-page .scrap-history-event-danger .scrap-history-content { padding-left: .7rem; border-left: 2px solid #d97b7b; background: #fffafa; } html body .gear-page .scrap-history-meta span { border: 0; background: #f4f5f6; }  /* Admin: tabs are navigation, the form is one surface, the record area is not another card. */ html body .gear-page .gear-admin-tabs { margin-bottom: 1.25rem; padding: 0 0 .55rem; border: 0; border-bottom: 1px solid #e1e3e6; border-radius: 0; background: transparent; box-shadow: none; } html body .gear-page .gear-admin-form { border-color: #e1e3e6 !important; border-radius: 9px !important; background: #fff !important; box-shadow: 0 1px 2px rgba(21,24,29,.025) !important; } html body .gear-page .gear-admin-record-grid-professional.gear-panel, html body .gear-page .gear-admin-record-grid-wide.gear-panel, html body .gear-page .gear-admin-record-grid-compact.gear-panel { border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; } html body .gear-page .gear-admin-record-grid-professional .gear-admin-record-card { border-color: #e3e5e8; border-radius: 9px; background: #fff; box-shadow: none; } html body .gear-page .gear-admin-record-grid-professional .gear-admin-record-card:hover { transform: none; border-color: #d5d8dc; background: #fdfdfd; box-shadow: none; } html body .gear-page .gear-admin-record-placement { border-radius: 0 !important; background: transparent !important; } html body .gear-page .gear-admin-location-rule { padding: .6rem 0 .6rem .75rem; border: 0; border-left: 2px solid #ee9e62; border-radius: 0; background: #fafbfb; }  /* Prevent accidental page overflow without touching purpose-built print documents. */ html body .gear-page, html body .gear-page .gear-panel, html body .gear-page .gear-admin-layout, html body .gear-page .gear-admin-layout > *, html body .gear-page .table-wrap { min-width: 0; } html body .gear-page .cutter-card { box-shadow: none !important; }  @media (max-width: 760px) { html body .gear-page .blade-location-toolbar { align-items: stretch; } html body .gear-page .blade-location-search { width: 100%; min-width: 0; } }
 /* === GEAR APPS MANAGED PROFESSIONAL UI END === */
 
 /* === DANA APPS SHARED UI VOCABULARY START === */
 /* Shared section-heading composition. Feature modules still own their grid geometry. */
 :where(.gear-section-heading,.inventory-overview-heading,.blade-locations-heading,.scrap-blades-heading){display:flex;align-items:flex-start;justify-content:space-between;gap:var(--dana-section-gap)}
 /* Shared heading typography only. */
-:where(.gear-panel-heading,.panel-heading) h2,:where(.gear-panel-header,.inventory-table-heading,.blade-location-toolbar) h2{margin:0;color:#1a2b3f;font-size:15px;font-weight:780}
-:where(.gear-panel-heading,.panel-heading) p,:where(.gear-panel-header,.inventory-table-heading,.blade-location-toolbar) p{margin:4px 0 0;color:#748397;font-size:var(--gear-font-sm)}
+:where(.gear-panel-heading,.panel-heading) h2,:where(.gear-panel-header,.inventory-table-heading,.blade-location-toolbar) h2{margin:0;color:#252a33;font-size:15px;font-weight:780}
+:where(.gear-panel-heading,.panel-heading) p,:where(.gear-panel-header,.inventory-table-heading,.blade-location-toolbar) p{margin:4px 0 0;color:#7a8290;font-size:var(--gear-font-sm)}
 /* Only elements explicitly marked as a panel header receive toolbar surface geometry. */
 :where(.gear-panel-header,.inventory-table-heading,.blade-location-toolbar){display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:var(--dana-panel-header-pad-y) var(--dana-panel-header-pad-x);border-bottom:1px solid var(--dana-panel-header-border);background:var(--dana-panel-header-bg)}
-:where(.gear-subpanel-header,.inventory-child-section-header){padding:var(--dana-panel-header-pad-y) var(--dana-panel-header-pad-x);border-bottom:1px solid #e3ebf2;background:linear-gradient(180deg,#fbfdff,#f6fafe)}
+:where(.gear-subpanel-header,.inventory-child-section-header){padding:var(--dana-panel-header-pad-y) var(--dana-panel-header-pad-x);border-bottom:1px solid #e8eaed;background:linear-gradient(180deg,#fdfdfd,#f9f9fa)}
 :where(.gear-subpanel-header,.inventory-child-section-header) strong,:where(.gear-subpanel-header,.inventory-child-section-header) small{display:block}
-:where(.gear-subpanel-header,.inventory-child-section-header) strong{color:#21364a;font-size:var(--gear-font-md);font-weight:820}
-:where(.gear-subpanel-header,.inventory-child-section-header) small{margin-top:3px;color:#748397;font-size:var(--gear-font-xs);line-height:1.5}
+:where(.gear-subpanel-header,.inventory-child-section-header) strong{color:#2e3540;font-size:var(--gear-font-md);font-weight:820}
+:where(.gear-subpanel-header,.inventory-child-section-header) small{margin-top:3px;color:#7a8290;font-size:var(--gear-font-xs);line-height:1.5}
 .gear-btn-sm{min-height:32px;padding:.4rem .65rem;border-radius:var(--dana-radius-control);font-size:var(--gear-font-sm)}
-:where(.gear-loading-state,.inventory-loading){padding:2rem;color:#718096;text-align:center;font-size:var(--gear-font-md);font-weight:700}
-:where(.gear-empty-state,.gear-admin-empty,.scrap-history-empty){padding:1.25rem;color:#718096;text-align:center;font-size:var(--gear-font-sm)}
-:where(.gear-empty-surface,.inventory-child-empty,.blade-location-empty){padding:12px 13px;border:1px dashed var(--dana-empty-border);border-radius:var(--dana-radius-control);background:var(--dana-empty-bg);color:#718096;font-size:var(--gear-font-sm)}
+:where(.gear-loading-state,.inventory-loading){padding:2rem;color:#777f8e;text-align:center;font-size:var(--gear-font-md);font-weight:700}
+:where(.gear-empty-state,.gear-admin-empty,.scrap-history-empty){padding:1.25rem;color:#777f8e;text-align:center;font-size:var(--gear-font-sm)}
+:where(.gear-empty-surface,.inventory-child-empty,.blade-location-empty){padding:12px 13px;border:1px dashed var(--dana-empty-border);border-radius:var(--dana-radius-control);background:var(--dana-empty-bg);color:#777f8e;font-size:var(--gear-font-sm)}
 /* === DANA APPS SHARED UI VOCABULARY END === */
 
 /* === DANA DASHBOARD COMPONENT PRIMITIVES START === */
@@ -365,33 +365,33 @@
 .dana-dashboard-grid{display:grid;align-items:stretch;gap:var(--dana-dashboard-gap,14px);margin:0 0 var(--dana-dashboard-section-gap,14px)}
 .dana-dashboard-grid>.dana-dashboard-panel{min-width:0;height:100%;margin:0}
 .dana-dashboard-panel{overflow:hidden}
-.dana-dashboard-panel>:is(.gear-panel-header,.gear-panel-heading,.panel-heading){box-sizing:border-box;padding:var(--dana-dashboard-panel-header-y,15px) var(--dana-dashboard-panel-header-x,17px);border-bottom:1px solid #dfe9f1;background:linear-gradient(180deg,#f6fafc,#eff6fa)}
+.dana-dashboard-panel>:is(.gear-panel-header,.gear-panel-heading,.panel-heading){box-sizing:border-box;padding:var(--dana-dashboard-panel-header-y,15px) var(--dana-dashboard-panel-header-x,17px);border-bottom:1px solid #e6e8eb;background:linear-gradient(180deg,#f9f9fa,#f4f5f6)}
 .dana-dashboard-panel>:is(.gear-panel-header,.gear-panel-heading,.panel-heading) :is(h2,p){max-width:100%}
 .dana-dashboard-panel>.table-wrap{width:100%;min-width:0}
 /* === DANA DASHBOARD COMPONENT PRIMITIVES END === */
 
 
 /* Dana Apps master UI aliases. gear-* selectors remain compatibility aliases during migration. */
-.dana-page-header { position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;overflow:hidden;margin-bottom:22px;padding:18px 20px 19px;border:1px solid #d5e3ee;border-radius:14px;background:radial-gradient(circle at 92% 0,rgba(60,141,195,.105),transparent 15rem),linear-gradient(120deg,rgba(255,255,255,.99),rgba(240,247,252,.98));box-shadow:0 8px 24px rgba(26,67,99,.065)}
-.dana-page-header::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg,#287db8,#3a9a9a)}
+.dana-page-header { position:relative;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;overflow:hidden;margin-bottom:22px;padding:18px 20px 19px;border:1px solid #dfe1e5;border-radius:14px;background:radial-gradient(circle at 92% 0,rgba(211,105,23,.105),transparent 15rem),linear-gradient(120deg,rgba(255,255,255,.99),rgba(245,246,247,.98));box-shadow:0 8px 24px rgba(57,65,78,.065)}
+.dana-page-header::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:linear-gradient(180deg,#bc5d15,#3a9a9a)}
 .dana-page-header>*{position:relative;z-index:1;min-width:0}
-.dana-eyebrow{margin:0;color:#48708f;font-size:var(--gear-font-xs);font-weight:800;letter-spacing:.15em;text-transform:uppercase}
-.dana-page-title{margin:.25rem 0 0;color:#132238;font-size:28px;line-height:1.2;font-weight:780;letter-spacing:-.025em}
-.dana-page-description{max-width:58rem;margin:6px 0 0;color:#6c7a8c;font-size:var(--gear-font-md);line-height:1.55}
+.dana-eyebrow{margin:0;color:#656c79;font-size:var(--gear-font-xs);font-weight:800;letter-spacing:.15em;text-transform:uppercase}
+.dana-page-title{margin:.25rem 0 0;color:#1e2229;font-size:28px;line-height:1.2;font-weight:780;letter-spacing:-.025em}
+.dana-page-description{max-width:58rem;margin:6px 0 0;color:#717987;font-size:var(--gear-font-md);line-height:1.55}
 .dana-toolbar{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center}
 .dana-btn{min-height:42px;display:inline-flex;align-items:center;justify-content:center;gap:.45rem;border:1px solid transparent;border-radius:var(--dana-radius-control);padding:.68rem 1rem;font:inherit;font-size:var(--gear-font-sm);font-weight:760;text-decoration:none;cursor:pointer;box-shadow:none;transition:transform .12s ease,background .12s ease,border-color .12s ease,box-shadow .12s ease}
 .dana-btn:hover:not(:disabled){transform:translateY(-1px)} .dana-btn:disabled{cursor:not-allowed;opacity:.45}
-.dana-btn-primary{background:#1769aa;color:#fff;box-shadow:0 4px 10px rgba(23,105,170,.14)} .dana-btn-primary:hover:not(:disabled){background:#12598f}
-.dana-btn-secondary{border-color:var(--gear-border-strong);background:#fff;color:#334155}.dana-btn-secondary:hover:not(:disabled){background:#f8fafc}
-.dana-btn-success{border-color:#a7f3d0;background:#ecfdf5;color:#047857}.dana-btn-danger{border-color:#fecaca;background:#fff5f5;color:#b42318}.dana-btn-dark{background:#0f172a;color:#fff}
-.dana-icon-btn{display:inline-grid;min-width:42px;min-height:42px;place-items:center;border:1px solid var(--gear-border-strong);border-radius:var(--dana-radius-control);background:#fff;color:#334155;cursor:pointer}.dana-icon-btn-danger{color:#b42318;border-color:#fecaca;background:#fff5f5}
+.dana-btn-primary{background:#aa5413;color:#fff;box-shadow:0 4px 10px rgba(170,84,19,.14)} .dana-btn-primary:hover:not(:disabled){background:#aa5413}
+.dana-btn-secondary{border-color:var(--gear-border-strong);background:#fff;color:#39414e}.dana-btn-secondary:hover:not(:disabled){background:#f9fafa}
+.dana-btn-success{border-color:#a7f3d0;background:#ecfdf5;color:#047857}.dana-btn-danger{border-color:#fecaca;background:#fff5f5;color:#b42318}.dana-btn-dark{background:#15181d;color:#fff}
+.dana-icon-btn{display:inline-grid;min-width:42px;min-height:42px;place-items:center;border:1px solid var(--gear-border-strong);border-radius:var(--dana-radius-control);background:#fff;color:#39414e;cursor:pointer}.dana-icon-btn-danger{color:#b42318;border-color:#fecaca;background:#fff5f5}
 .dana-alert{display:flex;align-items:flex-start;gap:.65rem;border:1px solid;border-radius:var(--gear-radius-lg);padding:.78rem 1rem;font-size:var(--gear-font-md);font-weight:650}.dana-alert-info{border-color:#bfd7e9;background:#edf5fb;color:#2b72ad}.dana-alert-success{border-color:#a7f3d0;background:var(--gear-success-bg);color:var(--gear-success)}.dana-alert-warning{border-color:#fde68a;background:var(--gear-warning-bg);color:var(--gear-warning)}.dana-alert-danger{border-color:#fecaca;background:var(--gear-danger-bg);color:var(--gear-danger)}
-.dana-detail-grid{display:grid;gap:.75rem}.dana-detail{display:block;border:1px solid #dce7f0;border-radius:var(--gear-radius-md);background:linear-gradient(145deg,#f9fbfd,#f1f7fb);padding:.8rem .9rem}.dana-detail-label{display:block;color:#64748b;font-size:var(--gear-font-xs);font-weight:800;letter-spacing:.06em;text-transform:uppercase}.dana-detail-value{display:block;margin-top:.2rem;color:#1e293b;font-size:var(--gear-font-lg);font-weight:800}
-.dana-tabs{display:flex;align-items:center;gap:.35rem;overflow-x:auto;border-bottom:1px solid var(--gear-border);padding:0 .2rem}.dana-tab{display:inline-flex;min-height:42px;align-items:center;justify-content:center;border:0;border-bottom:3px solid transparent;padding:.6rem .85rem;background:transparent;color:#52667a;font:inherit;font-weight:750;text-decoration:none;cursor:pointer;white-space:nowrap}.dana-tab.is-active{border-bottom-color:#1769aa;color:#1769aa}
+.dana-detail-grid{display:grid;gap:.75rem}.dana-detail{display:block;border:1px solid #e4e6e9;border-radius:var(--gear-radius-md);background:linear-gradient(145deg,#fafbfb,#f5f6f7);padding:.8rem .9rem}.dana-detail-label{display:block;color:#6b7381;font-size:var(--gear-font-xs);font-weight:800;letter-spacing:.06em;text-transform:uppercase}.dana-detail-value{display:block;margin-top:.2rem;color:#242932;font-size:var(--gear-font-lg);font-weight:800}
+.dana-tabs{display:flex;align-items:center;gap:.35rem;overflow-x:auto;border-bottom:1px solid var(--gear-border);padding:0 .2rem}.dana-tab{display:inline-flex;min-height:42px;align-items:center;justify-content:center;border:0;border-bottom:3px solid transparent;padding:.6rem .85rem;background:transparent;color:#5e6470;font:inherit;font-weight:750;text-decoration:none;cursor:pointer;white-space:nowrap}.dana-tab.is-active{border-bottom-color:#aa5413;color:#aa5413}
 
-.dana-dialog-backdrop{position:fixed;inset:0;z-index:1250;display:grid;place-items:center;padding:20px;background:rgba(15,23,42,.46);backdrop-filter:blur(2px)}
-.dana-confirm-dialog{width:min(520px,100%);border:1px solid var(--gear-border);border-radius:var(--dana-radius-panel);padding:20px;background:#fff;box-shadow:0 22px 60px rgba(15,23,42,.22)}
-.dana-confirm-dialog h2{margin:0;color:#17283a;font-size:1.2rem}.dana-confirm-dialog p{margin:.7rem 0 0;color:#64748b;line-height:1.55}.dana-dialog-actions{display:flex;justify-content:flex-end;gap:.7rem;margin-top:1.25rem}
+.dana-dialog-backdrop{position:fixed;inset:0;z-index:1250;display:grid;place-items:center;padding:20px;background:rgba(21,24,29,.46);backdrop-filter:blur(2px)}
+.dana-confirm-dialog{width:min(520px,100%);border:1px solid var(--gear-border);border-radius:var(--dana-radius-panel);padding:20px;background:#fff;box-shadow:0 22px 60px rgba(21,24,29,.22)}
+.dana-confirm-dialog h2{margin:0;color:#22272f;font-size:1.2rem}.dana-confirm-dialog p{margin:.7rem 0 0;color:#6b7381;line-height:1.55}.dana-dialog-actions{display:flex;justify-content:flex-end;gap:.7rem;margin-top:1.25rem}
 @media (max-width:560px){.dana-dialog-actions{flex-direction:column-reverse}.dana-dialog-actions .dana-btn{width:100%}}
 
 /* DANA-APPS USERS THREE COLUMN MAX V70.0.7R8 - CSS ONLY */

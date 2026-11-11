@@ -8,9 +8,9 @@
 
 .scrap-summary-card,
 .scrap-search-panel {
-  border: 1px solid #d6e2ec;
+  border: 1px solid #dee0e4;
   border-radius: var(--gear-radius-lg);
-  background: linear-gradient(145deg, #fff, #f8fbfd);
+  background: linear-gradient(145deg, #fff, #fafbfb);
   box-shadow: var(--gear-shadow-panel);
 }
 
@@ -25,7 +25,7 @@
 
 .scrap-summary-card span,
 .scrap-search-panel > label {
-  color: #64748b;
+  color: #6b7381;
   font-size: var(--gear-font-xs);
   font-weight: 850;
   letter-spacing: .08em;
@@ -95,9 +95,9 @@
 }
 
 .scrap-history-panel {
-  border: 1px solid #d9e2ec;
+  border: 1px solid #dfe1e5;
   border-radius: var(--dana-radius-panel);
-  background: #f8fafc;
+  background: #f9fafa;
   padding: 1rem;
 }
 
@@ -107,7 +107,7 @@
   justify-content: space-between;
   gap: .75rem;
   padding-bottom: .85rem;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e6e7ea;
 }
 
 .scrap-history-heading > div {
@@ -120,7 +120,7 @@
 }
 
 .scrap-history-heading strong {
-  color: #172033;
+  color: #1c2027;
   font-size: var(--gear-font-md);
 }
 
@@ -153,7 +153,7 @@
   bottom: -.15rem;
   left: 7px;
   width: 2px;
-  background: #cbd5e1;
+  background: #d1d4d9;
 }
 
 .scrap-history-marker {
@@ -162,9 +162,9 @@
   width: 16px;
   height: 16px;
   margin-top: .15rem;
-  border: 4px solid #dbeafe;
+  border: 4px solid #e7e9eb;
   border-radius: var(--dana-radius-pill);
-  background: #2563eb;
+  background: #ad5410;
 }
 
 .scrap-history-event-danger .scrap-history-marker {
@@ -174,7 +174,7 @@
 
 .scrap-history-content {
   min-width: 0;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e6e7ea;
   border-radius: 10px;
   background: #fff;
   padding: .75rem .85rem;
@@ -193,7 +193,7 @@
 }
 
 .scrap-history-event-heading strong {
-  color: #1e293b;
+  color: #242932;
   font-size: var(--gear-font-md);
 }
 
@@ -212,18 +212,18 @@
 }
 
 .scrap-history-meta span {
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e6e7ea;
   border-radius: var(--dana-radius-pill);
   padding: .2rem .45rem;
-  background: #f8fafc;
-  color: #475569;
+  background: #f9fafa;
+  color: #4f545e;
   font-size: var(--gear-font-xs);
   font-weight: 700;
 }
 
 .scrap-history-content p {
   margin: .55rem 0 0;
-  color: #475569;
+  color: #4f545e;
   font-size: var(--gear-font-sm);
   line-height: 1.5;
 }

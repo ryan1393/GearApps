@@ -1,10 +1,10 @@
-/* Shared file-backed Dana / company mark for the Gear Apps shell.
-   Replace /assets/brand/dana-logo.svg to update every frontend together. */
+/* Shared file-backed MeshForge mark for the Gear Apps shell.
+   Replace /assets/brand/meshforge-mark.svg to update every frontend together. */
 .brand-mark.dana-diamond-mark {
   display: block;
-  width: 56px;
-  height: 38px;
-  flex: 0 0 56px;
+  width: 40px;
+  height: 48px;
+  flex: 0 0 40px;
   padding: 0;
   border: 0;
   border-radius: 0;

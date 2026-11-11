@@ -1,9 +1,9 @@
 <ng-container *ngIf="session.authState$ | async as user">
   <aside danaMobileNav [desktopMinWidth]="1024" #mobileNav="danaMobileNav" class="gear-sidebar" [class.mobile-open]="mobileNav.open" aria-label="Application navigation">
     <a (click)="mobileNav.close()" routerLink="/blades" class="brand-row">
-      <span class="brand-mark dana-diamond-mark"><img src="assets/brand/dana-logo.svg" alt="" class="dana-diamond-image" aria-hidden="true" /></span>
+      <span class="brand-mark dana-diamond-mark"><img src="assets/brand/meshforge-mark.svg" alt="" class="dana-diamond-image" aria-hidden="true" /></span>
       <span class="brand-copy">
-        <small>GEAR APPS</small>
+        <small>MESHFORGE</small>
         <strong>BLADE TRACKING</strong>
       </span>
     </a>
@@ -48,7 +48,7 @@
     </nav>
 
     <div class="sidebar-footer">
-      <div class="version">Gear Apps <span>v{{ appVersion }}</span></div>
+      <div class="version">MeshForge <span>v{{ appVersion }}</span></div>
       <div class="online-row"><span>Shared manufacturing workspace</span></div>
     </div>
   </aside>

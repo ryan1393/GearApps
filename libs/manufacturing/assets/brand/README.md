@@ -1,15 +1,44 @@
-# Gear Apps shared brand asset
+# MeshForge shared brand assets
 
-All three Gear Apps frontends use this folder.
+All Gear Apps frontends (Blade Tracking, Cutter Builder, Greenshed, Lapper) use this folder. The suite is
+branded **MeshForge** — "by Dana Gear Apps Suite", "Connected Manufacturing Platform".
 
-## Replace the Dana / company logo
+| File | Use |
+| --- | --- |
+| `meshforge-mark.svg` | Mark for dark backgrounds. Used by the sidebar and the login brand panel. |
+| `meshforge-mark-light.svg` | Mark for light backgrounds. Used by the mobile login card. |
+| `meshforge-mark-white.svg`, `meshforge-mark-black.svg` | Single-colour marks for engraving, print and overlays. |
+| `meshforge-icon.svg` | App icon: the mark on its charcoal rounded tile. Source of the favicons. |
+| `meshforge-logo.svg`, `meshforge-logo-light.svg` | Full lockup (icon, wordmark, tagline) for dark and light backgrounds. |
+| `../branding/meshforge-favicon.png` | 256 px browser-tab icon referenced by every `index.html`. |
+| `../branding/meshforge-icon-512.png`, `../branding/meshforge-logo*.png` | PNG renders for documents and installers. |
+| `dana-logo.svg` | Dana parent-company mark. No longer shown by the application shell. |
 
-Replace **`dana-logo.svg`** with the new approved SVG and keep the same filename. The shared shell, login screen, and any branded page header will use the replacement after the apps are rebuilt/restarted.
+The wordmark is outlined, so the SVGs have no font, image or web dependencies.
+
+## Colours
+
+| Role | Value |
+| --- | --- |
+| Charcoal background / sidebar | `#14171C` |
+| Charcoal tile / raised sidebar | `#232830` |
+| Forge orange (mark, accents on dark) | `#E48B43` |
+| Action orange (buttons and links on light, 4.9:1 on white) | `#B4581A` |
+| Steel grey | `#AEB6C2` |
+| Anvil white | `#F5F5F2` |
+
+The application palette lives in `libs/shared/dana-ui/src/styles` (`dana-core/tokens.css` and
+`gear-apps/foundation/tokens.css`). Informational (blue), success, danger and Greenshed machine-state colours
+are operational signals and are not part of the brand palette.
+
+## Replace the logo
+
+Replace **`meshforge-mark.svg`** (and `meshforge-mark-light.svg`) with the new approved SVG and keep the same
+filenames. The shared shell and login screens use the replacement after the apps are rebuilt/restarted.
 
 Recommended SVG requirements:
 - transparent background;
 - tight viewBox around the artwork;
-- horizontal or diamond mark works best;
 - no external font/image/web dependencies.
 
-Do not create separate logo copies under each app. This root asset is the single Gear Apps source of truth.
+Do not create separate logo copies under each app. This folder is the single Gear Apps source of truth.

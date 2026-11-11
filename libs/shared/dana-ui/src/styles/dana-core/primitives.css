@@ -81,7 +81,7 @@
   cursor: pointer;
 }
 
-.dana-btn:hover:not(:disabled) { background: #f8fafc; }
+.dana-btn:hover:not(:disabled) { background: #f9fafa; }
 .dana-btn:disabled { cursor: not-allowed; opacity: .5; }
 
 .dana-btn-primary {
@@ -107,7 +107,7 @@
   color: #fff;
 }
 
-.dana-btn-ghost { background: #f8fafc; }
+.dana-btn-ghost { background: #f9fafa; }
 
 .dana-icon-btn {
   display: inline-grid;
@@ -241,15 +241,15 @@
   text-decoration: none;
 }
 
-.dana-operation-card:hover { border-color: #c7d3e1; }
+.dana-operation-card:hover { border-color: #cfd2d7; }
 
 .dana-alert,
 .dana-note {
   padding: 12px 14px;
-  border: 1px solid #d5e4f7;
+  border: 1px solid #e1e3e6;
   border-radius: 9px;
-  background: #eef5ff;
-  color: #355779;
+  background: #f4f4f6;
+  color: #aa5413;
   font-size: 12px;
 }
 

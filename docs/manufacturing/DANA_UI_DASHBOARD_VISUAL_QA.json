@@ -3,7 +3,7 @@
     "requiredSourceBaseline":  "V70.0.3R1",
     "sharedUiVersion":  "0.2.0",
     "visualReference":  "Truck Log",
-    "previousCssSha256":  "4EB36CF826B40BD65F5CBBA8E579744A2A3B2B432DD424CB98AFC8EEE3249557",
-    "managedCssSha256":  "985B6CB6297EF6E412FFA2D2EB7A165889966B47FDA1DE63B3044F76C9435D68",
+    "previousCssSha256":  "510C9E515114949570B3BA8C7BFC439720E5EFC683229B5082DA7FBAEA4AF565",
+    "managedCssSha256":  "00B37D5B91A9246A03D24F69EDF4E103C8BF78D61035348A30452CF1AAA30E1A",
     "scope":  "Gear-only screen styles; no Angular template, route, backend, Compose, package or PowerShell changes"
 }

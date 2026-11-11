@@ -7,37 +7,37 @@
    remain valid during the visual migration. */
 
 :root {
-  --gear-text: var(--dana-text, #0f1f36);
-  --gear-heading: var(--dana-text, #0f1f36);
-  --gear-muted: var(--dana-muted, #6d7c91);
-  --gear-border: var(--dana-border, #dce4ee);
-  --gear-border-soft: #edf1f5;
-  --gear-page: var(--dana-page, #f4f7fb);
+  --gear-text: var(--dana-text, #1b1f25);
+  --gear-heading: var(--dana-text, #1b1f25);
+  --gear-muted: var(--dana-muted, #737b8a);
+  --gear-border: var(--dana-border, #e1e3e7);
+  --gear-border-soft: #f0f1f2;
+  --gear-page: var(--dana-page, #f6f7f8);
   --gear-surface: var(--dana-surface, #ffffff);
   --gear-success: var(--dana-success, #047857);
-  --gear-warning: var(--dana-warning, #b45309);
+  --gear-warning: var(--dana-warning, #8d6a07);
   --gear-danger: var(--dana-danger, #b42318);
-  --gear-accent: var(--dana-primary, #2457a6);
-  --gear-accent-hover: var(--dana-primary-dark, #173b73);
-  --gear-primary: var(--dana-primary, #2457a6);
-  --gear-primary-dark: var(--dana-primary-dark, #173b73);
-  --gear-sidebar: var(--dana-sidebar, #0b1d35);
-  --gear-sidebar-raised: var(--dana-sidebar-raised, #102a4d);
+  --gear-accent: var(--dana-primary, #aa5413);
+  --gear-accent-hover: var(--dana-primary-dark, #353d49);
+  --gear-primary: var(--dana-primary, #aa5413);
+  --gear-primary-dark: var(--dana-primary-dark, #353d49);
+  --gear-sidebar: var(--dana-sidebar, #191d23);
+  --gear-sidebar-raised: var(--dana-sidebar-raised, #252a33);
   --gear-sidebar-width: var(--dana-sidebar-width, 258px);
   --gear-topbar-height: var(--dana-topbar-height, 70px);
   --gear-radius-sm: var(--dana-radius-sm, 8px);
   --gear-radius-md: var(--dana-radius-md, 10px);
   --gear-radius-lg: var(--dana-radius-lg, 12px);
   --gear-radius-xl: var(--dana-radius-xl, 16px);
-  --gear-shadow-panel: var(--dana-shadow-panel, 0 1px 2px rgba(15,31,54,.05),0 6px 18px rgba(15,31,54,.04));
-  --gear-shadow-raised: var(--dana-shadow-raised, 0 8px 24px rgba(15,31,54,.12));
+  --gear-shadow-panel: var(--dana-shadow-panel, 0 1px 2px rgba(27,31,37,.05),0 6px 18px rgba(27,31,37,.04));
+  --gear-shadow-raised: var(--dana-shadow-raised, 0 8px 24px rgba(27,31,37,.12));
 }
 
 .gear-sidebar {
   width: var(--dana-sidebar-width, 258px) !important;
   background:
-    radial-gradient(circle at 12% 8%, rgba(76,130,200,.28), transparent 34%),
-    linear-gradient(180deg, var(--dana-sidebar-raised,#102a4d), var(--dana-sidebar,#0b1d35)) !important;
+    radial-gradient(circle at 12% 8%, rgba(202,100,22,.28), transparent 34%),
+    linear-gradient(180deg, var(--dana-sidebar-raised,#252a33), var(--dana-sidebar,#191d23)) !important;
   color: #fff;
 }
 
@@ -45,10 +45,10 @@
 .brand-mark { border-radius: 11px !important; }
 .brand-copy strong { color: #fff !important; font-size: 16px !important; font-weight: 800 !important; }
 .brand-copy small,
-.brand-copy span { color: #b9c7da !important; font-size: 12px !important; }
+.brand-copy span { color: #c2c6cc !important; font-size: 12px !important; }
 
 .nav-heading {
-  color: #7f96b4 !important;
+  color: #8e95a0 !important;
   font-size: 11px !important;
   letter-spacing: .1em !important;
 }
@@ -57,7 +57,7 @@
   margin: 3px 0 !important;
   padding: 11px 12px !important;
   border-radius: 10px !important;
-  color: #d9e4f1 !important;
+  color: #e1e3e6 !important;
   font-size: 14px !important;
   font-weight: 600 !important;
 }
@@ -66,27 +66,27 @@
 .side-link.active,
 .side-link.active-sub { color: #fff !important; }
 
-.sidebar-footer { color: #aabbd0 !important; font-size: 12px !important; }
+.sidebar-footer { color: #b5bac1 !important; font-size: 12px !important; }
 
 .gear-topbar {
   height: var(--dana-topbar-height, 70px) !important;
   padding-inline: 26px !important;
-  border-bottom-color: var(--dana-border,#dce4ee) !important;
+  border-bottom-color: var(--dana-border,#e1e3e7) !important;
   background: #fff !important;
   box-shadow: none !important;
 }
 
 .global-search input {
-  border-color: var(--dana-border,#dce4ee) !important;
+  border-color: var(--dana-border,#e1e3e7) !important;
   border-radius: 10px !important;
-  background: #f8fafc !important;
+  background: #f9fafa !important;
 }
 
 .avatar {
   width: 34px !important;
   height: 34px !important;
-  background: #dce8f7 !important;
-  color: var(--dana-primary-dark,#173b73) !important;
+  background: #e5e7ea !important;
+  color: var(--dana-primary-dark,#353d49) !important;
 }
 
 @media (min-width: 1024px) {
@@ -115,11 +115,11 @@ html body .gear-page-header {
 }
 html body .gear-page-header::before { display: none !important; }
 
-html body .gear-eyebrow { color: var(--dana-muted,#6d7c91) !important; }
+html body .gear-eyebrow { color: var(--dana-muted,#737b8a) !important; }
 
 html body .gear-page-title {
   margin: 0 !important;
-  color: var(--dana-text,#0f1f36) !important;
+  color: var(--dana-text,#1b1f25) !important;
   font-size: 28px !important;
   line-height: 1.2 !important;
   font-weight: 800 !important;
@@ -128,23 +128,23 @@ html body .gear-page-title {
 
 html body .gear-page-description {
   margin-top: 5px !important;
-  color: var(--dana-muted,#6d7c91) !important;
+  color: var(--dana-muted,#737b8a) !important;
   font-size: 14px !important;
 }
 
 html body .gear-panel,
 html body .data-panel,
 html body .inventory-panel {
-  border: 1px solid var(--dana-border,#dce4ee) !important;
+  border: 1px solid var(--dana-border,#e1e3e7) !important;
   border-radius: var(--dana-radius-lg,12px) !important;
   background: var(--dana-surface,#fff) !important;
-  box-shadow: var(--dana-shadow-panel,0 1px 2px rgba(15,31,54,.05),0 6px 18px rgba(15,31,54,.04)) !important;
+  box-shadow: var(--dana-shadow-panel,0 1px 2px rgba(27,31,37,.05),0 6px 18px rgba(27,31,37,.04)) !important;
 }
 
 html body .gear-panel-header,
 html body .data-panel .panel-heading {
   padding: 16px 18px !important;
-  border-bottom: 1px solid var(--dana-border,#dce4ee) !important;
+  border-bottom: 1px solid var(--dana-border,#e1e3e7) !important;
   background: #fff !important;
 }
 
@@ -166,14 +166,14 @@ html body .gear-btn {
 }
 
 html body .gear-btn-primary {
-  border-color: var(--dana-primary,#2457a6) !important;
-  background: var(--dana-primary,#2457a6) !important;
+  border-color: var(--dana-primary,#aa5413) !important;
+  background: var(--dana-primary,#aa5413) !important;
   color: #fff !important;
 }
 
 html body .gear-btn-primary:hover:not(:disabled) {
-  border-color: var(--dana-primary-dark,#173b73) !important;
-  background: var(--dana-primary-dark,#173b73) !important;
+  border-color: var(--dana-primary-dark,#353d49) !important;
+  background: var(--dana-primary-dark,#353d49) !important;
 }
 
 html body .gear-btn-success {
@@ -188,7 +188,7 @@ html body .gear-textarea,
 html body input.gear-input,
 html body select.gear-input,
 html body textarea.gear-input {
-  border-color: #cfd9e5 !important;
+  border-color: #d6d8dc !important;
   border-radius: 9px !important;
   background: #fff !important;
 }
@@ -200,9 +200,9 @@ html body table.gear-table thead th,
 html body .gear-table thead th,
 html body .dashboard-table thead th {
   padding: 11px 12px !important;
-  border-bottom: 1px solid var(--dana-border,#dce4ee) !important;
-  background: #fbfcfe !important;
-  color: var(--dana-muted,#6d7c91) !important;
+  border-bottom: 1px solid var(--dana-border,#e1e3e7) !important;
+  background: #fcfcfc !important;
+  color: var(--dana-muted,#737b8a) !important;
   font-size: 11px !important;
   font-weight: 800 !important;
   letter-spacing: .05em !important;
@@ -212,7 +212,7 @@ html body table.gear-table tbody td,
 html body .gear-table tbody td,
 html body .dashboard-table tbody td {
   padding: 13px 12px !important;
-  border-bottom-color: #edf1f5 !important;
+  border-bottom-color: #f0f1f2 !important;
 }
 
 html body .gear-badge,
@@ -229,10 +229,10 @@ html body .dashboard-kpi-card,
 html body .inventory-overview-kpi,
 html body .blade-location-summary-card,
 html body .gear-summary-card {
-  border: 1px solid var(--dana-border,#dce4ee) !important;
+  border: 1px solid var(--dana-border,#e1e3e7) !important;
   border-radius: var(--dana-radius-lg,12px) !important;
   background: #fff !important;
-  box-shadow: var(--dana-shadow-panel,0 1px 2px rgba(15,31,54,.05),0 6px 18px rgba(15,31,54,.04)) !important;
+  box-shadow: var(--dana-shadow-panel,0 1px 2px rgba(27,31,37,.05),0 6px 18px rgba(27,31,37,.04)) !important;
 }
 
 .app-content-shell.login-shell {
@@ -267,7 +267,7 @@ html body .gear-summary-card {
    Screen-only rules deliberately leave the existing print layout intact. */
 @media screen {
   html body .app-content-shell:not(.login-shell) {
-    background: var(--dana-page, #f4f7fb) !important;
+    background: var(--dana-page, #f6f7f8) !important;
   }
 
   html body .gear-sidebar .brand-copy {
@@ -285,54 +285,54 @@ html body .gear-summary-card {
   }
 
   html body .gear-topbar {
-    color: var(--dana-text, #0f1f36);
+    color: var(--dana-text, #1b1f25);
   }
 
   html body .gear-topbar .global-search {
     min-width: 0;
-    border-color: var(--dana-border, #dce4ee);
-    background: #f8fafc;
+    border-color: var(--dana-border, #e1e3e7);
+    background: #f9fafa;
     box-shadow: none;
   }
 
   html body .gear-topbar .global-search input {
-    color: var(--dana-text, #0f1f36);
-    caret-color: var(--dana-primary, #2457a6);
+    color: var(--dana-text, #1b1f25);
+    caret-color: var(--dana-primary, #aa5413);
   }
 
   html body .gear-topbar .global-search input::placeholder {
-    color: #475569;
+    color: #4f545e;
     opacity: 1;
   }
 
   html body .gear-topbar .user-copy strong {
-    color: var(--dana-text, #0f1f36);
+    color: var(--dana-text, #1b1f25);
     font-size: 13px;
     line-height: 1.4;
   }
 
   html body .gear-topbar .user-copy span,
   html body .gear-topbar .search-icon {
-    color: #475569;
+    color: #4f545e;
   }
 
   html body .gear-topbar .global-search button,
   html body .gear-topbar .menu-button,
   html body .gear-topbar .signout-button {
-    color: var(--dana-text, #0f1f36);
-    border-color: var(--dana-border, #dce4ee);
+    color: var(--dana-text, #1b1f25);
+    border-color: var(--dana-border, #e1e3e7);
     background: var(--dana-surface, #ffffff);
   }
 
   html body .gear-topbar .global-search button:hover,
   html body .gear-topbar .menu-button:hover,
   html body .gear-topbar .signout-button:hover {
-    color: var(--dana-primary-dark, #173b73);
-    background: #eef3f8;
+    color: var(--dana-primary-dark, #353d49);
+    background: #f1f2f4;
   }
 
   html body .gear-topbar :is(button, input):focus-visible {
-    outline: 2px solid var(--dana-primary, #2457a6);
+    outline: 2px solid var(--dana-primary, #aa5413);
     outline-offset: 2px;
   }
 
@@ -363,14 +363,14 @@ html body .gear-summary-card {
     .dashboard-activity-row span, .dashboard-activity-row time) {
     font-size: var(--dana-gear-dashboard-note-size, 12px) !important;
     line-height: 1.5;
-    color: #475569;
+    color: #4f545e;
   }
 
   html body .dashboard-page :is(.operation-copy strong, .kpi-card h3,
     .panel-heading h2) {
     font-size: var(--dana-gear-dashboard-title-size, 16px) !important;
     line-height: 1.35;
-    color: var(--dana-text, #0f1f36);
+    color: var(--dana-text, #1b1f25);
   }
 
   html body .dashboard-page .kpi-card strong {
@@ -386,7 +386,7 @@ html body .gear-summary-card {
 
   html body .dashboard-page :is(.gear-table, .dashboard-table, table[danaTable]) thead th {
     font-size: var(--dana-gear-dashboard-note-size, 12px) !important;
-    color: #475569 !important;
+    color: #4f545e !important;
     letter-spacing: .025em !important;
   }
 
@@ -400,16 +400,16 @@ html body .gear-summary-card {
   }
 
   /* BEGIN DANA-APPS TOPBAR CONTRAST V70.0.4R7 */
-  html body header.gear-topbar.gear-topbar { color:var(--dana-text,#0f1f36)!important; background:#fff!important; border-bottom:1px solid #c7d2e0!important; box-shadow:0 2px 6px rgba(15,31,54,.06)!important; }
-  html body header.gear-topbar.gear-topbar .global-search.global-search { min-width:0!important; border:1px solid #8191a5!important; border-radius:10px!important; background:#f3f6fa!important; box-shadow:none!important; }
-  html body header.gear-topbar.gear-topbar .global-search.global-search input { color:var(--dana-text,#0f1f36)!important; -webkit-text-fill-color:var(--dana-text,#0f1f36)!important; caret-color:var(--dana-primary,#2457a6)!important; background:transparent!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .global-search.global-search input::placeholder { color:#475569!important; -webkit-text-fill-color:#475569!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .global-search.global-search .search-icon { color:#475569!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .global-search.global-search button { border:1px solid var(--dana-primary,#2457a6)!important; background:var(--dana-primary,#2457a6)!important; color:#fff!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .topbar-user.topbar-user, html body header.gear-topbar.gear-topbar .user-copy.user-copy strong { color:var(--dana-text,#0f1f36)!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .user-copy.user-copy span { color:#475569!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .menu-button.menu-button, html body header.gear-topbar.gear-topbar .signout-button.signout-button { border:1px solid #8191a5!important; background:#f3f6fa!important; color:var(--dana-text,#0f1f36)!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .global-search.global-search:focus-within, html body header.gear-topbar.gear-topbar :is(button,input):focus-visible { outline:2px solid var(--dana-primary,#2457a6)!important; outline-offset:2px!important; }
+  html body header.gear-topbar.gear-topbar { color:var(--dana-text,#1b1f25)!important; background:#fff!important; border-bottom:1px solid #ced1d6!important; box-shadow:0 2px 6px rgba(27,31,37,.06)!important; }
+  html body header.gear-topbar.gear-topbar .global-search.global-search { min-width:0!important; border:1px solid #89909c!important; border-radius:10px!important; background:#f5f6f7!important; box-shadow:none!important; }
+  html body header.gear-topbar.gear-topbar .global-search.global-search input { color:var(--dana-text,#1b1f25)!important; -webkit-text-fill-color:var(--dana-text,#1b1f25)!important; caret-color:var(--dana-primary,#aa5413)!important; background:transparent!important; opacity:1!important; }
+  html body header.gear-topbar.gear-topbar .global-search.global-search input::placeholder { color:#4f545e!important; -webkit-text-fill-color:#4f545e!important; opacity:1!important; }
+  html body header.gear-topbar.gear-topbar .global-search.global-search .search-icon { color:#4f545e!important; opacity:1!important; }
+  html body header.gear-topbar.gear-topbar .global-search.global-search button { border:1px solid var(--dana-primary,#aa5413)!important; background:var(--dana-primary,#aa5413)!important; color:#fff!important; opacity:1!important; }
+  html body header.gear-topbar.gear-topbar .topbar-user.topbar-user, html body header.gear-topbar.gear-topbar .user-copy.user-copy strong { color:var(--dana-text,#1b1f25)!important; opacity:1!important; }
+  html body header.gear-topbar.gear-topbar .user-copy.user-copy span { color:#4f545e!important; opacity:1!important; }
+  html body header.gear-topbar.gear-topbar .menu-button.menu-button, html body header.gear-topbar.gear-topbar .signout-button.signout-button { border:1px solid #89909c!important; background:#f5f6f7!important; color:var(--dana-text,#1b1f25)!important; opacity:1!important; }
+  html body header.gear-topbar.gear-topbar .global-search.global-search:focus-within, html body header.gear-topbar.gear-topbar :is(button,input):focus-visible { outline:2px solid var(--dana-primary,#aa5413)!important; outline-offset:2px!important; }
   /* END DANA-APPS TOPBAR CONTRAST V70.0.4R7 */
 
 }
@@ -482,16 +482,16 @@ html body .gear-summary-card {
 
   html body .gear-admin-record-card {
     min-width: 0 !important;
-    border: 1px solid #cfd8e3 !important;
+    border: 1px solid #d5d7dc !important;
     border-radius: 10px !important;
     background: #ffffff !important;
-    box-shadow: 0 1px 2px rgba(15, 31, 54, .04) !important;
+    box-shadow: 0 1px 2px rgba(27, 31, 37, .04) !important;
     overflow: hidden !important;
   }
 
   html body .gear-admin-record-card:hover {
-    border-color: #aebdce !important;
-    box-shadow: 0 4px 12px rgba(15, 31, 54, .07) !important;
+    border-color: #b7bcc3 !important;
+    box-shadow: 0 4px 12px rgba(27, 31, 37, .07) !important;
   }
 
   html body .gear-admin-record-card-body {
@@ -513,7 +513,7 @@ html body .gear-summary-card {
 
   html body .gear-admin-record-title {
     min-width: 0 !important;
-    color: var(--dana-text, #0f1f36) !important;
+    color: var(--dana-text, #1b1f25) !important;
     font-size: 14px !important;
     font-weight: 700 !important;
     line-height: 1.3 !important;
@@ -539,7 +539,7 @@ html body .gear-summary-card {
   }
 
   html body .gear-admin-record-label {
-    color: #64748b !important;
+    color: #6b7381 !important;
     font-size: 10px !important;
     font-weight: 600 !important;
     line-height: 1.2 !important;
@@ -548,7 +548,7 @@ html body .gear-summary-card {
 
   html body .gear-admin-record-value {
     min-width: 0 !important;
-    color: #25354a !important;
+    color: #2e343f !important;
     font-size: 13px !important;
     font-weight: 500 !important;
     line-height: 1.35 !important;
@@ -556,7 +556,7 @@ html body .gear-summary-card {
   }
 
   html body .gear-admin-record-value-strong {
-    color: var(--dana-text, #0f1f36) !important;
+    color: var(--dana-text, #1b1f25) !important;
     font-weight: 650 !important;
   }
 
@@ -586,7 +586,7 @@ html body .gear-summary-card {
 
   html body .gear-admin-form .gear-field-help {
     margin-top: 5px !important;
-    color: #64748b !important;
+    color: #6b7381 !important;
     line-height: 1.45 !important;
   }
 }
@@ -674,7 +674,7 @@ html body .gear-summary-card {
     position: static !important;
     top: auto !important;
     padding: .9rem 1rem !important;
-    border: 1px solid #dfe7ee !important;
+    border: 1px solid #e4e6e9 !important;
     border-radius: 10px !important;
     background: #fff !important;
     overflow: visible !important;
@@ -967,7 +967,7 @@ html body .gear-summary-card {
     top: auto !important;
     min-width: 0 !important;
     padding: .58rem .70rem !important;
-    border: 1px solid #dfe7ee !important;
+    border: 1px solid #e4e6e9 !important;
     border-radius: 8px !important;
     background: #fff !important;
     overflow: visible !important;

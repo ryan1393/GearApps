@@ -40,9 +40,9 @@ table.dana-table thead th {
 table[danaTable] tbody td,
 table.dana-table tbody td {
   padding: var(--gear-table-cell-pad-y) var(--gear-table-cell-pad-x);
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #e6e7ea;
   border-bottom: 1px solid var(--gear-table-border);
-  color: #34485d;
+  color: #3e4756;
   line-height: var(--gear-line-normal);
   vertical-align: middle;
   white-space: normal;
@@ -55,7 +55,7 @@ table[danaTable] td small,
 table.dana-table td small {
   display: block;
   margin-top: 2px;
-  color: #8391a2;
+  color: #89909c;
   font-size: var(--gear-font-xs);
 }
 
@@ -63,7 +63,7 @@ table.dana-table td small {
 .dashboard-table tbody tr:nth-child(even) td,
 table[danaTable] tbody tr:nth-child(even) td,
 table.dana-table tbody tr:nth-child(even) td {
-  background: rgba(246, 250, 253, .72);
+  background: rgba(249, 249, 250, .72);
 }
 
 .gear-table tbody tr:hover td,
@@ -255,11 +255,11 @@ table.dana-table tbody tr:hover td {
 .gear-badge {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #cfe0ec;
+  border: 1px solid #dbdee2;
   border-radius: var(--dana-radius-pill);
   padding: 3px 7px;
-  background: #edf5fa;
-  color: #3f6683;
+  background: #f3f4f5;
+  color: #aa5413;
   font-size: var(--gear-font-xs);
   font-weight: 820;
   line-height: 1.1;
@@ -273,7 +273,7 @@ table.dana-table tbody tr:hover td {
 .build-link {
   border: 0;
   padding: 0;
-  color: #1769aa;
+  color: #aa5413;
   background: transparent;
   font: inherit;
   font-weight: 760;
@@ -282,7 +282,7 @@ table.dana-table tbody tr:hover td {
 }
 
 .build-link:hover {
-  color: #0f578e;
+  color: #aa5412;
   text-decoration: underline;
 }
 
@@ -290,14 +290,14 @@ table.dana-table tbody tr:hover td {
 /* Dashboard tables are aliases of the canonical shared table rules above. */
 /* Shared count badge family. */
 :where(.gear-count-badge,.count-chip,.gear-admin-list-header>span){display:inline-flex;min-width:28px;align-items:center;justify-content:center;border:1px solid var(--dana-count-border);border-radius:var(--dana-radius-pill);padding:4px 7px;background:var(--dana-count-bg);color:var(--dana-count-text);text-align:center;font-size:var(--gear-font-xs);font-weight:800;line-height:1.1}
-:where(.gear-count-badge-neutral,.scrap-history-count){border-color:#d7dee7;background:#e2e8f0;color:#475569!important}
+:where(.gear-count-badge-neutral,.scrap-history-count){border-color:#dbdde2;background:#e6e7ea;color:#4f545e!important}
 :where(.gear-count-badge-success,.green-chip){border-color:#a7f3d0;background:#ecfdf5;color:#047857}
 /* Shared metric-card family. */
-:where(.gear-metric-card,.inventory-overview-kpi,.blade-location-summary-card){min-width:0;padding:14px 15px;border:1px solid #d6e3ed;border-radius:var(--dana-radius-card);background:radial-gradient(circle at 100% 0,rgba(60,140,193,.06),transparent 7rem),linear-gradient(145deg,#fff,#f7fbfd);box-shadow:var(--gear-shadow-panel)}
+:where(.gear-metric-card,.inventory-overview-kpi,.blade-location-summary-card){min-width:0;padding:14px 15px;border:1px solid #dfe1e5;border-radius:var(--dana-radius-card);background:radial-gradient(circle at 100% 0,rgba(209,104,23,.06),transparent 7rem),linear-gradient(145deg,#fff,#fafafb);box-shadow:var(--gear-shadow-panel)}
 :where(.gear-metric-card,.inventory-overview-kpi,.blade-location-summary-card) span,:where(.gear-metric-card,.inventory-overview-kpi,.blade-location-summary-card) small{display:block}
-:where(.gear-metric-card,.inventory-overview-kpi,.blade-location-summary-card) span{color:#6f8095;font-size:var(--gear-font-xs);font-weight:800;letter-spacing:.08em}
-:where(.gear-metric-card,.inventory-overview-kpi,.blade-location-summary-card) strong{display:block;margin:.35rem 0;color:#102039;font-size:24px;line-height:1}
-:where(.gear-metric-card,.inventory-overview-kpi,.blade-location-summary-card) small{color:#718096;font-size:var(--gear-font-sm)}
+:where(.gear-metric-card,.inventory-overview-kpi,.blade-location-summary-card) span{color:#777f8d;font-size:var(--gear-font-xs);font-weight:800;letter-spacing:.08em}
+:where(.gear-metric-card,.inventory-overview-kpi,.blade-location-summary-card) strong{display:block;margin:.35rem 0;color:#1c2027;font-size:24px;line-height:1}
+:where(.gear-metric-card,.inventory-overview-kpi,.blade-location-summary-card) small{color:#777f8e;font-size:var(--gear-font-sm)}
 /* === DANA APPS SHARED DATA VOCABULARY END === */
 
 /* Dana summary metrics: canonical compact KPI/summary card used across inventory pages. */
@@ -316,12 +316,12 @@ table.dana-table tbody tr:hover td {
   min-width: 0;
   min-height: 92px;
   padding: 14px 15px;
-  border: 1px solid #d6e3ed;
+  border: 1px solid #dfe1e5;
   border-radius: var(--gear-radius-md);
   background:
-    radial-gradient(circle at 100% 0, rgba(60,140,193,.06), transparent 7rem),
-    linear-gradient(145deg, #fff, #f7fbfd);
-  color: #203750;
+    radial-gradient(circle at 100% 0, rgba(209,104,23,.06), transparent 7rem),
+    linear-gradient(145deg, #fff, #fafafb);
+  color: #2f3641;
   box-shadow: var(--gear-shadow-panel);
 }
 
@@ -342,7 +342,7 @@ button.dana-summary-card {
 .dana-summary-card > span,
 .inventory-overview-kpi > span,
 .blade-location-summary-card > span {
-  color: #6f8095;
+  color: #777f8d;
   font-size: var(--gear-font-xs);
   font-weight: 800;
   letter-spacing: .08em;
@@ -353,7 +353,7 @@ button.dana-summary-card {
 .blade-location-summary-card > strong {
   display: block;
   margin: .35rem 0;
-  color: #102039;
+  color: #1c2027;
   font-size: 24px;
   line-height: 1;
 }
@@ -361,7 +361,7 @@ button.dana-summary-card {
 .dana-summary-card > small,
 .inventory-overview-kpi > small,
 .blade-location-summary-card > small {
-  color: #718096;
+  color: #777f8e;
   font-size: var(--gear-font-sm);
 }
 

@@ -10,39 +10,39 @@
   --gear-sidebar-width: 272px;
   --gear-topbar-height: 68px;
 
-  --gear-navy-950: #061a2f;
-  --gear-navy-900: #071a30;
-  --gear-navy-800: #08233d;
-  --gear-blue-700: #0b5fc9;
-  --gear-blue-600: #1676e8;
-  --gear-blue-500: #2563eb;
+  --gear-navy-950: #16191f;
+  --gear-navy-900: #161a1f;
+  --gear-navy-800: #1e2229;
+  --gear-blue-700: #ae520b;
+  --gear-blue-600: #bf5d12;
+  --gear-blue-500: #ad5410;
 
-  --gear-heading: #132238;
-  --gear-text: #26384d;
-  --gear-muted: #68798d;
-  --gear-muted-soft: #8491a4;
+  --gear-heading: #1e2229;
+  --gear-text: #303743;
+  --gear-muted: #707886;
+  --gear-muted-soft: #89909d;
   --gear-text-muted: var(--gear-muted);
-  --gear-border: #d7e2ec;
-  --gear-border-soft: #e5edf3;
-  --gear-border-strong: #c5d3df;
-  --gear-page: #edf3f8;
-  --gear-page-top: #f7fafc;
-  --gear-page-accent: #e8f2f9;
+  --gear-border: #dee1e4;
+  --gear-border-soft: #ebecee;
+  --gear-border-strong: #ced1d6;
+  --gear-page: #f1f2f4;
+  --gear-page-top: #f9fafa;
+  --gear-page-accent: #eff1f2;
   --gear-bg-app: var(--gear-page);
   --gear-surface: #ffffff;
-  --gear-surface-muted: #f5f9fc;
+  --gear-surface-muted: #f8f8f9;
   --gear-surface-subtle: var(--gear-surface-muted);
-  --gear-surface-accent: #eef6fb;
-  --gear-accent: #1769aa;
-  --gear-accent-soft: #e6f1f9;
-  --gear-focus: #2b6cb0;
-  --gear-sidebar: #0a1d31;
-  --gear-sidebar-raised: #102a45;
-  --gear-sidebar-text: #e7eef7;
+  --gear-surface-accent: #f4f5f6;
+  --gear-accent: #b4581a;
+  --gear-accent-soft: #fbeee3;
+  --gear-focus: #aa5413;
+  --gear-sidebar: #14171c;
+  --gear-sidebar-raised: #232830;
+  --gear-sidebar-text: #ecedef;
 
   --gear-success: #047857;
   --gear-success-bg: #ecfdf5;
-  --gear-warning: #b45309;
+  --gear-warning: #8d6a07;
   --gear-warning-bg: #fffbeb;
   --gear-danger: #b42318;
   --gear-danger-bg: #fff5f5;
@@ -80,10 +80,10 @@
   --gear-radius-xl: 16px;
   --gear-radius-pill: 999px;
 
-  --gear-shadow-sm: 0 1px 2px rgba(15, 23, 42, .025);
-  --gear-shadow-panel: 0 1px 2px rgba(15, 23, 42, .04), 0 8px 24px rgba(20, 52, 80, .065);
-  --gear-shadow-raised: 0 14px 34px rgba(15, 23, 42, .12);
-  --gear-shadow-popover: 0 14px 34px rgba(15, 23, 42, .20);
+  --gear-shadow-sm: 0 1px 2px rgba(21, 24, 29, .025);
+  --gear-shadow-panel: 0 1px 2px rgba(21, 24, 29, .04), 0 8px 24px rgba(44, 50, 61, .065);
+  --gear-shadow-raised: 0 14px 34px rgba(21, 24, 29, .12);
+  --gear-shadow-popover: 0 14px 34px rgba(21, 24, 29, .20);
 
   --gear-panel-bg: var(--gear-surface);
   --gear-panel-border: var(--gear-border);
@@ -102,10 +102,10 @@
   --gear-table-cell-pad-y: .68rem;
   --gear-table-cell-pad-x: .95rem;
   --gear-table-header-gap: .42rem;
-  --gear-table-header-bg: linear-gradient(180deg, #eef5fa, #e8f1f7);
-  --gear-table-header-text: #4f687d;
-  --gear-table-border: #dfe6ee;
-  --gear-table-row-hover: #eef6fb;
+  --gear-table-header-bg: linear-gradient(180deg, #f3f4f5, #eff0f2);
+  --gear-table-header-text: #5f6671;
+  --gear-table-border: #e3e5e8;
+  --gear-table-row-hover: #f4f5f6;
 
   /* === DANA APPS SHARED SEMANTIC TOKENS START === */
   --dana-radius-control: var(--gear-radius-sm);
@@ -116,13 +116,13 @@
   --dana-section-gap: 1rem;
   --dana-panel-header-pad-y: var(--gear-panel-header-pad-y);
   --dana-panel-header-pad-x: var(--gear-panel-header-pad-x);
-  --dana-panel-header-border: #dfe9f1;
-  --dana-panel-header-bg: linear-gradient(180deg, #f7fafc, #eff6fa);
-  --dana-count-border: #d5e4f2;
-  --dana-count-bg: #f2f7fb;
-  --dana-count-text: #2c669a;
-  --dana-empty-border: #d4dee8;
-  --dana-empty-bg: #f9fbfd;
+  --dana-panel-header-border: #e6e8eb;
+  --dana-panel-header-bg: linear-gradient(180deg, #f9fafa, #f4f5f6);
+  --dana-count-border: #e0e2e6;
+  --dana-count-bg: #f6f6f7;
+  --dana-count-text: #aa5413;
+  --dana-empty-border: #dadde1;
+  --dana-empty-bg: #fafbfb;
   /* === DANA APPS SHARED SEMANTIC TOKENS END === */
 
   --dana-dashboard-gap: 14px;

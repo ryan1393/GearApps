@@ -85,7 +85,7 @@ assert(!legacyDirective.includes("this.action === 'create'"), 'Upsert toast logi
 
 const brandCss = read('libs/shared/dana-ui/src/styles/gear-apps/layout/brand.css');
 const responsiveCss = read('libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css');
-assert(/dana-diamond-mark[\s\S]*?width:\s*56px;[\s\S]*?height:\s*38px;/.test(brandCss), 'Normal Dana Diamond must remain 56x38.');
-assert(/dana-diamond-mark[\s\S]*?width:\s*64px;[\s\S]*?height:\s*44px;/.test(responsiveCss), 'Large-screen Dana Diamond must remain 64x44.');
+assert(/dana-diamond-mark[\s\S]*?width:\s*40px;[\s\S]*?height:\s*48px;/.test(brandCss), 'Normal MeshForge brand mark must remain 40x48.');
+assert(/dana-diamond-mark[\s\S]*?width:\s*46px;[\s\S]*?height:\s*56px;/.test(responsiveCss), 'Large-screen MeshForge brand mark must remain 46x56.');
 
 console.log('[PASS] Dana/Gear compatibility toast contract: shared Dana toast owns behavior, legacy Gear aliases remain intact, and all transaction wiring is preserved.');

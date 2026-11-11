@@ -8,7 +8,7 @@
   align-items: center;
   gap: 18px;
   padding: 12px 18px;
-  border-bottom: 1px solid #edf1f5;
+  border-bottom: 1px solid #f0f1f2;
 }
 .dana-action-row:last-child { border-bottom: 0; }
 .dana-action-main { flex: 1 1 240px; min-width: 0; }
@@ -33,26 +33,26 @@
   box-shadow: var(--dana-shadow-panel);
 }
 .dana-card[data-tone] { border-left-width: 4px; }
-.dana-card[data-tone="warning"] { border-color: #f4d7aa; border-left-color: #d99a2b; background: #fffcf6; }
+.dana-card[data-tone="warning"] { border-color: #f4d7aa; border-left-color: #cca025; background: #fffcf6; }
 .dana-card[data-tone="danger"] { border-color: #f1c7c3; border-left-color: #c8443a; background: #fffafa; }
 .dana-card[data-tone="success"] { border-left-color: var(--dana-success); }
 .dana-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .dana-card-eyebrow { display: block; color: var(--dana-muted); font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
 .dana-card-title { display: block; margin: 0; color: var(--dana-primary-dark); font-size: 26px; font-weight: 800; line-height: 1.1; }
 .dana-card-subtitle { display: block; color: var(--dana-text); font-size: 16px; font-weight: 800; }
-.dana-card-section { padding: 12px; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-md); background: #f8fafc; }
+.dana-card-section { padding: 12px; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-md); background: #f9fafa; }
 .dana-card-section[data-tone="success"] { border-color: #b7dfcf; background: var(--dana-success-soft); }
 .dana-card-section[data-tone="warning"] { border-color: #f4d7aa; background: var(--dana-warning-soft); }
 
 /* Progress toward a goal (for example required fields completed). */
-.dana-progress { width: 220px; height: 8px; overflow: hidden; border-radius: 999px; background: #e3e9f0; }
+.dana-progress { width: 220px; height: 8px; overflow: hidden; border-radius: 999px; background: #e7e8eb; }
 .dana-progress > span { display: block; height: 100%; border-radius: inherit; background: var(--dana-primary); transition: width .2s ease; }
 .dana-progress[data-tone="success"] > span { background: var(--dana-success); }
 
 /* Small rounded labels in a row (for example missing items). */
 .dana-chip-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
-.dana-chip { padding: 3px 8px; border-radius: 999px; background: var(--dana-neutral-soft); color: #4a5b70; font-size: 12px; font-weight: 700; }
-.dana-chip[data-tone="warning"] { background: var(--dana-warning-soft); color: #8a4b06; }
+.dana-chip { padding: 3px 8px; border-radius: 999px; background: var(--dana-neutral-soft); color: #545a64; font-size: 12px; font-weight: 700; }
+.dana-chip[data-tone="warning"] { background: var(--dana-warning-soft); color: #745605; }
 .dana-chip[data-tone="info"] { background: var(--dana-info-soft); color: var(--dana-info); }
 
 /* A status indicator that is also a button (for example system health in the topbar). */
@@ -65,7 +65,7 @@
   border: 1px solid var(--dana-border);
   border-radius: 999px;
   background: var(--dana-neutral-soft);
-  color: #4a5b70;
+  color: #545a64;
   font: inherit;
   font-size: 13px;
   font-weight: 700;

@@ -44,9 +44,9 @@ Greenshed brand -> Greenshed Dashboard
 ```
 
 After the combined dashboard row, navigation moves directly into the app-specific grouped sections such as OPERATIONS, INVENTORY, REFERENCE, SHARED APPS, and ADMINISTRATION. Do not reintroduce a redundant WORKSPACE heading solely to contain Dashboard.
-## Dana brand mark
+## MeshForge brand mark
 
-The shared application shell uses the Dana Diamond as the product brand mark in Blade Tracking, Cutter Builder, and Greenshed. The mark is a local shared file at `assets/brand/dana-logo.svg`, copied into every frontend build, so the shop-floor UI has no external image/network dependency. Keep `GEAR APPS` and the current application name beside the mark; do not restore the old `GA` placeholder badge or create app-local logo copies. Branding remains owned by the shared navigation-shell styles.
+The shared application shell uses the MeshForge mark (ring gear, drive pinion and anvil) as the product brand mark in Blade Tracking, Cutter Builder, Greenshed, and Lapper. The mark is a local shared file at `assets/brand/meshforge-mark.svg`, copied into every frontend build, so the shop-floor UI has no external image/network dependency. Keep `MESHFORGE` and the current application name beside the mark; do not restore the old `GA` placeholder badge or create app-local logo copies. Branding remains owned by the shared navigation-shell styles.
 
 
 ## Global toast notifications
@@ -64,13 +64,13 @@ info    -> blue
 
 Toasts auto-dismiss, can be manually dismissed, cap at four visible notices, and respect reduced-motion preference. Keep persistent/actionable workflow guidance inline when the operator still needs it to complete the current task; do not replace scan context, validation instructions, or result detail panels with transient notifications.
 
-## Dana brand mark sizing
+## MeshForge brand mark sizing
 
-The Dana Diamond remains the single shared local SVG brand asset at `assets/brand/dana-logo.svg`. Its shell footprint is intentionally modest but readable:
+The MeshForge mark is the single shared local SVG brand asset at `assets/brand/meshforge-mark.svg`. Its shell footprint is intentionally modest but readable:
 
 ```text
-normal/laptop: 56 x 38 px
-1500px+:       64 x 44 px
+normal/laptop: 40 x 48 px
+1500px+:       46 x 56 px
 ```
 
 Do not enlarge the rest of the brand row or alter the navigation hierarchy just to accommodate the mark.
@@ -84,12 +84,13 @@ Use the semantic `gear-glyph-*` classes from `libs/shared/ui-tailwind/src/styles
 
 All three frontend `project.json` files publish the root `assets/` folder to `/assets`, which also makes the brand asset consistent across Blade Tracking, Cutter Builder, Greenshed, Admin, and the shared login experience.
 
-### Replacing the Dana logo
+### Replacing the MeshForge logo
 
-Replace this one file and keep the same filename:
+Replace these files and keep the same filenames (see `libs/manufacturing/assets/brand/README.md` for the full set and the colour palette):
 
 ```text
-assets/brand/dana-logo.svg
+assets/brand/meshforge-mark.svg
+assets/brand/meshforge-mark-light.svg
 ```
 
 Use a transparent, self-contained SVG with a tight viewBox and no external web/font dependencies. Rebuild/restart the apps after replacement.
