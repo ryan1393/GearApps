@@ -4,8 +4,11 @@
 #
 # Run on the Docker host, in the release folder that holds compose.yml and .env
 # (~/dana-apps after Deploy-MeshForge):
-#   bash commands/CLEAR-OPERATIONAL-DATA.sh
+#   bash commands/CLEAR-OPERATIONAL-DATA.sh                              (asks about locations)
+#   bash commands/CLEAR-OPERATIONAL-DATA.sh --locations=keep-shelves     (keep shelf/layer/bin)
+#   bash commands/CLEAR-OPERATIONAL-DATA.sh --locations=delete-all       (delete every location)
 #
+# 0. Asks whether to keep the shelf/layer/bin locations or delete every location.
 # 1. Previews what is emptied, deleted and kept (nothing is changed).
 # 2. Asks for the exact phrase CLEAR DATA.
 # 3. Saves and verifies a full pg_dump backup in ~/dana-apps-backups (outside the release
@@ -32,6 +35,14 @@ BACKUP_DIR="${MESHFORGE_BACKUP_DIR:-$HOME/dana-apps-backups}"
 
 fail() { echo "[FAIL] $*" >&2; exit 1; }
 
+LOCATIONS=""
+for arg in "$@"; do
+  case "$arg" in
+    --locations=keep-shelves|--locations=delete-all) LOCATIONS="${arg#--locations=}" ;;
+    *) fail "Unknown option $arg. Use --locations=keep-shelves or --locations=delete-all." ;;
+  esac
+done
+
 [[ -f compose.yml ]] || fail "compose.yml not found in $ROOT."
 [[ -f "$ENV_FILE" ]] || fail ".env is missing in $ROOT."
 [[ -f "$SCRIPT" ]] || fail "$SCRIPT is missing. Copy the complete Dana Apps folder to this host."
@@ -57,7 +68,7 @@ run_clear() {
   compose run --rm --no-deps -T \
     -e MESHFORGE_CLEAR_FROM_LAUNCHER=1 \
     -v "$ROOT/$SCRIPT_DIR:/app/$SCRIPT_DIR" \
-    "$API_SERVICE" node "$SCRIPT" "$@" </dev/null
+    "$API_SERVICE" node "$SCRIPT" "--locations=$LOCATIONS" "$@" </dev/null
 }
 
 echo
@@ -67,23 +78,37 @@ echo "============================================================"
 echo
 echo "This EMPTIES blades, trays, containers, cutter builds, cutter events and"
 echo "history, coater shipments and Greenshed counts in the MeshForge database"
-echo "of this Docker host. It DELETES every location except the shelf/layer/bin"
-echo "bins (CGDR-A1A etc.) and COATER-STAGING."
+echo "of this Docker host, and any older table that points at them."
 echo
 echo "KEPT: users, departments, models, parts, part summaries, blade"
 echo "requirements, cutter body definitions, cutter bodies, roll masters,"
-echo "gearsets, machines, settings, label printers, shelf/layer/bin"
-echo "locations (now empty) and all Lapper data."
+echo "gearsets, machines, settings, label printers and all Lapper data."
 echo
 
 PG="$(container_of "$DB_SERVICE")"
 [[ -n "$PG" ]] || fail "$DB_SERVICE is not running. Start it with: docker compose up -d $DB_SERVICE"
+[[ -t 0 ]] || fail "Run this in an interactive terminal: it asks for confirmation. Nothing was deleted."
+
+if [[ -z "$LOCATIONS" ]]; then
+  echo "Locations:"
+  echo "  1) KEEP the shelf/layer/bin locations (CGDR-A1A etc.) and COATER-STAGING, empty;"
+  echo "     delete every other location   [default]"
+  echo "  2) DELETE ALL locations (make shelves again afterwards)"
+  read -r -p "Choose 1 or 2 [1]: " CHOICE
+  case "${CHOICE:-1}" in
+    1) LOCATIONS="keep-shelves" ;;
+    2) LOCATIONS="delete-all" ;;
+    *) echo "Cancelled. Nothing was deleted."; exit 1 ;;
+  esac
+  echo
+fi
+echo "Locations: $LOCATIONS"
+echo
 
 echo "[1/4] Preview (nothing is changed)..."
 run_clear || fail "Preview failed. Nothing was deleted."
 
 echo
-[[ -t 0 ]] || fail "Run this in an interactive terminal: it asks for confirmation. Nothing was deleted."
 read -r -p "Type CLEAR DATA to continue: " CONFIRM
 if [[ "$CONFIRM" != "CLEAR DATA" ]]; then
   echo "Cancelled. Nothing was deleted."
@@ -133,4 +158,3 @@ echo
 echo "Operational data cleared."
 echo "Row counts from just before the clear: $SCRIPT_DIR/work/pre-clear-operational-data-manifest.json"
 echo "Backup: $BACKUP"
-echo "Next: make trays and containers in Admin > Launch Setup."
