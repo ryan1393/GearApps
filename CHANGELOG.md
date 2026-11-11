@@ -31,6 +31,12 @@
     part used by a gearset; its status can still change.
   - As in the other apps, master data is for administrators only: the Lapper sidebar and dashboard
     show these links to admins.
+- **Lapper Read records every cycle, scanner or not.** A cycle gets the scanned serial when the
+  machine's scanner is online; with no scanner, an offline scanner or nothing scanned it is
+  recorded without a serial instead of being dropped. An offline scanner is pinged and its port
+  retried every 30 seconds in the background (it no longer stalls machine polling or floods the
+  log), and serials resume when it answers. Lapper > FANUC Variables shows each scanner as Online,
+  Offline (answers ping or not, last seen) or No scanner.
 - **Deploy keeps the collector current.** When the Lapper Read collector already runs on the host,
   the deploy rebuilds its image and restarts it with the release; before, it kept running the old
   image until it was rebuilt by hand. A host that never started the collector is left alone.

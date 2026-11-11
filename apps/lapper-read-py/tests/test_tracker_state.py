@@ -28,14 +28,14 @@ class TrackerTests(unittest.TestCase):
         self.assertEqual([c.serial for c in t.state.pending_cycles], ["D000000001"])
         self.assertEqual(t.state.pending_cycles[0].macros, {"m-rpm": "1800.5"})
 
-    def test_missing_scan_never_creates_a_substitute_serial(self):
-        t = CycleTracker(CycleState(was_in_cycle=False))
-        t.observe(machine(door=True, start=True, cycle=True), ScannerState(None, None), "m", capture, NOW)
-        t.observe(machine(), ScannerState(None, None), "m", capture, NOW)
-        self.assertEqual(t.state.pending_cycles, [])
+    def test_a_cycle_without_a_scan_is_recorded_without_a_serial_never_a_substitute(self):
+        t = CycleTracker(CycleState(was_in_cycle=False, scanner_serial="D000000007"))
+        t.observe(machine(door=True, start=True, cycle=True), ScannerState("D000000007", None), "m", capture, NOW)
+        t.observe(machine(), ScannerState("D000000007", None), "m", capture, NOW)
+        self.assertEqual([c.serial for c in t.state.pending_cycles], [None])
 
     def test_without_a_scanner_every_completed_cycle_is_kept_without_a_serial(self):
-        t = CycleTracker(CycleState(was_in_cycle=False), require_serial=False)
+        t = CycleTracker(CycleState(was_in_cycle=False))
         t.observe(machine(door=True, start=True, cycle=True, consec=7), ScannerState(None, None), "m", capture, NOW)
         t.observe(machine(consec=7), ScannerState(None, None), "m", capture, NOW)
         self.assertEqual([(c.serial, c.consec) for c in t.state.pending_cycles], [(None, 7)])

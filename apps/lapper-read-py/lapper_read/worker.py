@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from .api import GearAppsApi, utc_now
 from .fanuc import Fanuc
 from .scanner import Scanner
+from .scanner_monitor import ScannerMonitor
 from .state import CycleState, CycleStateStore, MachineState, ScannerState
 from .tracker import CycleTracker
 
@@ -26,9 +27,14 @@ class Telemetry:
 
 
 class Worker:
-    def __init__(self, settings, api: GearAppsApi, fanuc: Fanuc, scanner: Scanner | None, store: CycleStateStore):
+    def __init__(self, settings, api: GearAppsApi, fanuc: Fanuc, scanner: Scanner | None, store: CycleStateStore,
+                 scanner_monitor: ScannerMonitor | None = None):
         """`scanner` None: the machine has no scanner, so cycles are recorded without a serial."""
         self.settings, self.api, self.fanuc, self.scanner, self.store = settings, api, fanuc, scanner, store
+        self.scanner_monitor = scanner_monitor or (
+            ScannerMonitor(settings.scanner_ip, settings.scanner_input1_port, settings.io_timeout_ms / 1000)
+            if scanner else None
+        )
         self.stop_event = threading.Event()
         self._lock = threading.Lock()
         self._tracker = self._new_tracker(CycleState())
@@ -54,10 +60,12 @@ class Worker:
             "pending_runs": pending,
             "in_cycle_serial": active.serial if active else None,
             "serials": "scanned" if self.scanner else "none (no scanner)",
+            **(self.scanner_monitor.status() if self.scanner_monitor else {"scanner": "none"}),
         }
 
-    def _new_tracker(self, state: CycleState) -> CycleTracker:
-        return CycleTracker(state, require_serial=self.scanner is not None)
+    @staticmethod
+    def _new_tracker(state: CycleState) -> CycleTracker:
+        return CycleTracker(state)
 
     # -- lifecycle ----------------------------------------------------------
     def run(self) -> None:
@@ -68,6 +76,8 @@ class Worker:
                 return
             publisher = threading.Thread(target=self._publish_loop, name="publisher", daemon=True)
             publisher.start()
+            if self.scanner_monitor:
+                self.scanner_monitor.start()
             self._sample_loop()
             publisher.join(timeout=10)
         finally:
@@ -79,6 +89,8 @@ class Worker:
                         log.exception("Unable to flush the final cycle checkpoint")
             self.fanuc.close()
             self.fanuc.release_thread()
+            if self.scanner_monitor:
+                self.scanner_monitor.stop()
             if self.scanner:
                 self.scanner.close()
             self.store.release_lease()
@@ -129,7 +141,7 @@ class Worker:
     # -- sampling -------------------------------------------------------------
     def _sample_loop(self) -> None:
         s = self.settings
-        retry_scanner_after = 0.0
+        label = s.machine_number or s.machine_ip
         while not self.stop_event.is_set():
             try:
                 with self._lock:
@@ -139,21 +151,25 @@ class Worker:
                     previous = ScannerState(state.scanner_serial, state.queued_serial)
                 machine = self.fanuc.read_state()
                 scanner = previous
-                if self.scanner and time.monotonic() >= retry_scanner_after:
+                monitor = self.scanner_monitor
+                if self.scanner and monitor and monitor.should_read():
                     try:
                         scanner = self.scanner.read(previous)
-                        retry_scanner_after = 0.0
+                        if monitor.read_succeeded():
+                            log.info("[%s] Scanner %s is online again; cycles get scanned serials", label, s.scanner_ip)
                     except (OSError, TimeoutError) as error:
-                        retry_scanner_after = time.monotonic() + s.retry_delay_ms / 1000
-                        log.warning("Scanner unavailable; preserving its last known serials: %s", error)
+                        if monitor.read_failed(error):
+                            log.warning("[%s] Scanner %s is offline (%s); cycles are recorded without a serial and "
+                                        "the scanner is pinged and retried every %ds", label, s.scanner_ip, error,
+                                        int(monitor.check_interval_s))
                 with self._lock:
                     state = self._tracker.state
                     before = state.snapshot()
                     active_before = state.active_cycle
                     self._tracker.observe(machine, scanner, self.machine["id"], self.fanuc.capture_macros, utc_now())
                     if self.scanner and state.active_cycle is not active_before and state.active_cycle and not state.active_cycle.serial:
-                        log.warning("Cycle %s has no confirmed scanned serial; it will not be recorded under a substitute serial",
-                                    machine.consec)
+                        log.info("[%s] Cycle %s has no confirmed scanned serial; it is recorded without one",
+                                 label, machine.consec)
                     if state.snapshot() != before:
                         self._dirty = True
                         self._checkpoint()
@@ -167,8 +183,7 @@ class Worker:
                     break
             except Exception as error:  # noqa: BLE001
                 self.phase, self.last_error = "controller unavailable", str(error)
-                log.error("[%s] Machine polling failed; keeping the last confirmed state: %s",
-                          s.machine_number or s.machine_ip, error)
+                log.error("[%s] Machine polling failed; keeping the last confirmed state: %s", label, error)
                 if not self._sleep(s.retry_delay_ms):
                     break
 

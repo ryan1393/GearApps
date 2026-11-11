@@ -13,6 +13,10 @@ export interface CollectorMachine {
   phase: string | null;
   last_sample_at?: string | null;
   pending_runs?: number;
+  /** 'none' when no Active scanner is assigned; 'offline' scanners are pinged and retried. */
+  scanner?: 'online' | 'offline' | 'none' | null;
+  scanner_ping?: 'answers' | 'no answer' | 'unknown' | null;
+  scanner_last_seen?: string | null;
 }
 
 export interface CollectorStatus {

@@ -12,10 +12,12 @@ exactly one worker running for each machine that is:
 - **Active**, and
 - has a **FANUC controller IP** (Admin → Lapping Machines).
 
-A machine with an **Active scanner assigned** (Configuration → Scanners) records each run
-under its scanned serial. A machine without one still records every completed run (gearset,
-consec, time and changed macros) with **no serial**; assign a scanner later and new runs get
-serials. Saving a new machine starts its worker. Changing its controller IP, asset number or
+Every completed run is recorded (gearset, consec, time and changed macros). It gets the scanned
+serial when the machine has an **Active scanner assigned** (Configuration → Scanners) that is
+online; with no scanner, an offline scanner, or nothing scanned, it is recorded with **no serial**.
+An offline scanner is pinged and its port retried in the background every 30 seconds, so it never
+slows the machine polling; serials resume by themselves when it answers. The FANUC Variables page
+shows each scanner as Online, Offline (and whether it answers ping) or No scanner. Saving a new machine starts its worker. Changing its controller IP, asset number or
 scanner restarts the worker with the new settings. Making it Inactive, clearing the IP, or
 deleting it stops the worker. Each worker keeps its unsent runs under the
 machine's GearApps id, so they survive IP changes and restarts. A worker that fails is
@@ -36,8 +38,7 @@ Full detail, including IPs and errors, is at `http://<docker-host>:8090/status`.
    gearset on that machine are posted, so each run records what changed.
 5. **Live view**: keeps the scanner serials and Fanuc I/O on the Lapper live view current.
 
-On a machine with a scanner, a run without a confirmed scanned serial is never recorded
-under a substitute serial. Machines without a scanner record runs with no serial.
+A run is never recorded under a substitute serial: without a confirmed scan it has no serial.
 Unsent runs stay in `/data` and are retried after network or API outages and restarts.
 
 ## Requirements

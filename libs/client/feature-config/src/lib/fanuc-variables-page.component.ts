@@ -66,7 +66,7 @@ interface FanucRow {
         danaPageHeader
         eyebrow="LAPPER / CONFIGURATION"
         heading="Fanuc Variables"
-        description="Each Active lapper with a FANUC controller IP gets a Lapper Read worker automatically (without a scanner, its cycles are recorded without a serial). These are the signals it reports."
+        description="Each Active lapper with a FANUC controller IP gets a Lapper Read worker automatically (without an online scanner, its cycles are recorded without a serial). These are the signals it reports."
       >
         <div danaPageHeaderAction class="dana-toolbar">
           <button
@@ -104,6 +104,7 @@ interface FanucRow {
                 <th>Machine</th>
                 <th>Cell</th>
                 <th>Collector</th>
+                <th>Scanner</th>
                 @for (s of signals; track s.key) {
                   <th [attr.title]="s.label">{{ s.short }} {{ s.address }}</th>
                 }
@@ -128,6 +129,16 @@ interface FanucRow {
                       <gear-status-badge [tone]="c.tone" [text]="c.label" />
                       @if (c.detail) {
                         <div class="gear-muted lapper-collector-detail">{{ c.detail }}</div>
+                      }
+                    } @else {
+                      <span class="gear-muted">—</span>
+                    }
+                  </td>
+                  <td class="nowrap">
+                    @if (scannerFor(r.machine.id); as sc) {
+                      <gear-status-badge [tone]="sc.tone" [text]="sc.label" />
+                      @if (sc.detail) {
+                        <div class="gear-muted lapper-collector-detail">{{ sc.detail }}</div>
                       }
                     } @else {
                       <span class="gear-muted">—</span>
@@ -170,7 +181,7 @@ interface FanucRow {
                 </tr>
               } @empty {
                 <tr>
-                  <td danaTableEmpty colspan="7" class="empty-row">
+                  <td danaTableEmpty colspan="8" class="empty-row">
                     {{ loading() ? 'Loading machines…' : 'No machines configured yet.' }}
                   </td>
                 </tr>
@@ -279,6 +290,30 @@ export class FanucVariablesPageComponent implements OnInit {
       tone: 'warning',
       label: capitalise(m.phase ?? 'Starting'),
       detail: m.last_sample_at ? `Last read ${clock(m.last_sample_at)}` : '',
+    };
+  }
+
+  /** Scanner state reported by the collector; cycles are recorded either way, with or without a serial. */
+  protected scannerFor(
+    machineId: string,
+  ): { tone: 'success' | 'warning' | 'neutral'; label: string; detail: string } | null {
+    const m = this.collector()?.machines.find((x) => x.machine_id === machineId);
+    if (!m?.worker || !m.scanner) return null;
+    if (m.scanner === 'none')
+      return { tone: 'neutral', label: 'No scanner', detail: 'Cycles recorded without a serial' };
+    if (m.scanner === 'online')
+      return { tone: 'success', label: 'Online', detail: 'Cycles get the scanned serial' };
+    const ping =
+      m.scanner_ping === 'answers'
+        ? 'Answers ping, but its port is closed'
+        : m.scanner_ping === 'no answer'
+          ? 'No answer to ping'
+          : 'Not reachable';
+    const seen = m.scanner_last_seen ? ` · last seen ${clock(m.scanner_last_seen)}` : '';
+    return {
+      tone: 'warning',
+      label: 'Offline',
+      detail: `${ping}${seen} · cycles recorded without a serial`,
     };
   }
 
