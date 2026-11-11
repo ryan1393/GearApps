@@ -712,6 +712,11 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
       ...pick(data, ['description', 'type', 'builder', 'status']),
       machine_ip: data.ip ?? profile?.machine_ip ?? '',
       public_machine_id: master.id,
+      // Lapper Read's per-machine Argonaut endpoint; blank clears it back to the collector default.
+      ...(data.argonaut_url !== undefined ? { argonaut_url: text(data.argonaut_url).trim() || null } : {}),
+      ...(data.argonaut_location_id !== undefined
+        ? { argonaut_location_id: text(data.argonaut_location_id).trim() || null }
+        : {}),
     };
     if (!text(fields.machine_ip)) throw new BadRequestException('Machine IP address is required');
     if (profile)

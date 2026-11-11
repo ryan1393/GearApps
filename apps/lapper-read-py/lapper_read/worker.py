@@ -8,14 +8,18 @@ import threading
 import time
 from dataclasses import dataclass
 
+from . import argonaut as argo
 from .api import MeshForgeApi, utc_now
 from .fanuc import Fanuc, NoGearsetLoaded
 from .scanner import Scanner
 from .scanner_monitor import ScannerMonitor
-from .state import CycleState, CycleStateStore, MachineState, ScannerState
+from .state import ArgonautPost, CycleState, CycleStateStore, MachineState, ScannerState
 from .tracker import CycleTracker
 
 log = logging.getLogger("lapper_read")
+
+#: Oldest unsent Argonaut posts are dropped beyond this, so a long outage cannot grow the checkpoint forever.
+ARGONAUT_QUEUE_LIMIT = 1000
 
 
 @dataclass(frozen=True)
@@ -28,13 +32,23 @@ class Telemetry:
 
 class Worker:
     def __init__(self, settings, api: MeshForgeApi, fanuc: Fanuc, scanner: Scanner | None, store: CycleStateStore,
-                 scanner_monitor: ScannerMonitor | None = None):
+                 scanner_monitor: ScannerMonitor | None = None, argonaut: argo.ArgonautClient | None = None):
         """`scanner` None: the machine has no scanner, so cycles are recorded without a serial."""
         self.settings, self.api, self.fanuc, self.scanner, self.store = settings, api, fanuc, scanner, store
         self.scanner_monitor = scanner_monitor or (
             ScannerMonitor(settings.scanner_ip, settings.scanner_input1_port, settings.io_timeout_ms / 1000)
             if scanner else None
         )
+        self.argonaut = argonaut
+        if self.argonaut is None and getattr(settings, "argonaut_enabled", False):
+            self.argonaut = argo.ArgonautClient(
+                settings.argonaut_url, settings.argonaut_location_id, settings.argonaut_username,
+                settings.argonaut_password, settings.argonaut_timeout_s, settings.argonaut_verify_tls,
+                settings.argonaut_ca_file,
+            )
+        self._argonaut_retry_at = 0.0
+        self.argonaut_last_sent_at: str | None = None
+        self.argonaut_last_error: str | None = None
         self.stop_event = threading.Event()
         self._lock = threading.Lock()
         self._tracker = self._new_tracker(CycleState())
@@ -53,6 +67,12 @@ class Worker:
         with self._lock:
             pending = len(self._tracker.state.pending_cycles)
             active = self._tracker.state.active_cycle
+            argonaut_pending = len(self._tracker.state.argonaut_pending)
+        argonaut = {"argonaut": "off"}
+        if self.argonaut:
+            argonaut = {"argonaut": "on", "argonaut_pending": argonaut_pending,
+                        "argonaut_last_sent_at": self.argonaut_last_sent_at,
+                        "argonaut_last_error": self.argonaut_last_error}
         return {
             "phase": self.phase,
             "last_sample_at": self.last_sample_at,
@@ -61,6 +81,7 @@ class Worker:
             "in_cycle_serial": active.serial if active else None,
             "serials": "scanned" if self.scanner else "none (no scanner)",
             **(self.scanner_monitor.status() if self.scanner_monitor else {"scanner": "none"}),
+            **argonaut,
         }
 
     @staticmethod
@@ -72,6 +93,11 @@ class Worker:
         self.store.acquire_lease()
         try:
             self._tracker = self._new_tracker(self.store.load())
+            held = len(self._tracker.state.argonaut_pending)
+            if held and not self.argonaut:
+                log.warning("[%s] %d cycle(s) are waiting for Argonaut, which is now off for this machine; "
+                            "they are kept and sent if it is turned back on",
+                            self.settings.machine_number or self.settings.machine_ip, held)
             if not self._initialize():
                 return
             publisher = threading.Thread(target=self._publish_loop, name="publisher", daemon=True)
@@ -166,7 +192,15 @@ class Worker:
                     state = self._tracker.state
                     before = state.snapshot()
                     active_before = state.active_cycle
-                    self._tracker.observe(machine, scanner, self.machine["id"], self.fanuc.capture_macros, utc_now())
+                    capture_argonaut = (lambda: self.fanuc.capture_numbers(argo.MACROS)) if self.argonaut else None
+                    self._tracker.observe(machine, scanner, self.machine["id"], self.fanuc.capture_macros, utc_now(),
+                                          capture_argonaut)
+                    overflow = len(state.argonaut_pending) - ARGONAUT_QUEUE_LIMIT
+                    if overflow > 0:
+                        dropped = state.argonaut_pending[:overflow]
+                        del state.argonaut_pending[:overflow]
+                        log.error("[%s] Argonaut queue is full; dropped the oldest %d unsent cycle(s) (consec %s)",
+                                  label, overflow, ", ".join(str(p.consec) for p in dropped))
                     if self.scanner and state.active_cycle is not active_before and state.active_cycle and not state.active_cycle.serial:
                         log.info("[%s] Cycle %s has no confirmed scanned serial; it is recorded without one",
                                  label, machine.consec)
@@ -211,6 +245,7 @@ class Worker:
                     break
 
     def publish_once(self) -> None:
+        self.publish_argonaut_once()
         with self._lock:
             if self._dirty:
                 self._checkpoint()
@@ -240,6 +275,55 @@ class Worker:
             m = telemetry.machine
             self.api.patch_fanuc_variables(self.variables["id"], m.door_closed, m.start_cycle, m.in_cycle)
             self._saved = telemetry
+
+
+    def publish_argonaut_once(self) -> None:
+        """Sends the oldest queued cycle to Argonaut. Failures are logged and retried later, and never
+        raise, so MeshForge publishing carries on during an Argonaut outage."""
+        if self.argonaut is None or time.monotonic() < self._argonaut_retry_at:
+            return
+        with self._lock:
+            post: ArgonautPost | None = self._tracker.state.argonaut_pending[0] if self._tracker.state.argonaut_pending else None
+        if post is None:
+            return
+        label = self.settings.machine_number or self.settings.machine_ip
+        if not post.serial:
+            # Argonaut tracks parts by serial; a cycle without a scanned serial cannot be sent.
+            log.warning("[%s] Cycle %s has no scanned serial; not sent to Argonaut", label, post.consec)
+            self._finish_argonaut(post)
+            return
+        missing = [n for n, v in post.values.items() if v is None]
+        try:
+            self.argonaut.post(argo.build_payload(post.serial, post.part_number, post.consec, post.values,
+                                                  self.settings.argonaut_transaction_type_id))
+        except Exception as error:  # noqa: BLE001 - Argonaut must never stop MeshForge publishing
+            if not isinstance(error, argo.ArgonautError):
+                error = argo.ArgonautError(str(error))
+            self.argonaut_last_error = str(error)
+            if error.permanent:
+                log.error("[%s] Argonaut rejected cycle %s for serial %s; not retried: %s",
+                          label, post.consec, post.serial, error)
+                self._finish_argonaut(post)
+                return
+            with self._lock:
+                post.attempts += 1
+                self._dirty = True
+            delay = min(self.settings.retry_delay_ms / 1000 * 2 ** min(post.attempts, 6), 300)
+            self._argonaut_retry_at = time.monotonic() + delay
+            log.error("[%s] Argonaut post for cycle %s failed (attempt %d); retrying in %.0fs: %s",
+                      label, post.consec, post.attempts, delay, error)
+            return
+        self.argonaut_last_sent_at, self.argonaut_last_error = utc_now(), None
+        log.info("[%s] Sent cycle %s for serial %s (gearset %s) to Argonaut%s", label, post.consec, post.serial,
+                 post.part_number, f"; {len(missing)} macros unavailable, sent as 0" if missing else "")
+        self._finish_argonaut(post)
+
+    def _finish_argonaut(self, post: ArgonautPost) -> None:
+        with self._lock:
+            pending = self._tracker.state.argonaut_pending
+            pending[:] = [queued for queued in pending if queued is not post]
+            self._dirty = True
+            self._checkpoint()
 
 
 def heartbeat_age_s(path: str) -> float:

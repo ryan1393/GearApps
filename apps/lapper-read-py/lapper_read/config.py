@@ -40,6 +40,16 @@ class Settings:
     discover_interval_s: int = 30
     #: Supervisor: status/health HTTP port inside the container (0 disables it).
     status_port: int = 8080
+    #: Argonaut (Track and Trace): post each completed cycle's macros. Off unless enabled.
+    argonaut_enabled: bool = False
+    argonaut_url: str = ""
+    argonaut_location_id: str = ""
+    argonaut_username: str = ""
+    argonaut_password: str = ""
+    argonaut_transaction_type_id: int = 100
+    argonaut_verify_tls: bool = True
+    argonaut_ca_file: str = ""
+    argonaut_timeout_s: float = 10.0
 
     @property
     def state_file(self) -> str:
@@ -86,6 +96,12 @@ class Settings:
                 "Connect the Docker collector in Lapper > Configuration > Collector Tokens (MESHFORGE_API_TOKEN_FILE), "
                 "or set MESHFORGE_API_TOKEN, or MESHFORGE_API_EMAIL and MESHFORGE_API_PASSWORD."
             )
+        if self.argonaut_enabled:
+            target = urlparse(self.argonaut_url)
+            if target.scheme not in ("http", "https") or not target.netloc:
+                raise ConfigError("ARGONAUT_URL must be an http(s) URL when ARGONAUT_ENABLED is on.")
+            if self.argonaut_timeout_s <= 0:
+                raise ConfigError("ARGONAUT_TIMEOUT_S must be positive.")
         if not self.state_dir:
             raise ConfigError("LAPPER_STATE_DIR is required.")
         return self
@@ -101,6 +117,25 @@ def _int(env: dict[str, str], name: str, default: int) -> int:
         return int(raw) if raw else default
     except ValueError as error:
         raise ConfigError(f"{name} must be a whole number.") from error
+
+
+def _bool(env: dict[str, str], name: str, default: bool) -> bool:
+    raw = env.get(name, "").strip().lower()
+    if not raw:
+        return default
+    if raw in ("1", "true", "yes", "on"):
+        return True
+    if raw in ("0", "false", "no", "off"):
+        return False
+    raise ConfigError(f"{name} must be true or false.")
+
+
+def _float(env: dict[str, str], name: str, default: float) -> float:
+    raw = env.get(name, "").strip()
+    try:
+        return float(raw) if raw else default
+    except ValueError as error:
+        raise ConfigError(f"{name} must be a number.") from error
 
 
 def from_env(env: dict[str, str] | None = None, mode: str = "run") -> Settings:
@@ -125,4 +160,13 @@ def from_env(env: dict[str, str] | None = None, mode: str = "run") -> Settings:
         api_timeout_s=float(env.get("MESHFORGE_API_TIMEOUT_S", "10") or 10),
         discover_interval_s=_int(env, "LAPPER_DISCOVER_INTERVAL_S", 30),
         status_port=_int(env, "LAPPER_STATUS_PORT", 8080),
+        argonaut_enabled=_bool(env, "ARGONAUT_ENABLED", False),
+        argonaut_url=env.get("ARGONAUT_URL", "").strip(),
+        argonaut_location_id=env.get("ARGONAUT_LOCATION_ID", "").strip(),
+        argonaut_username=env.get("ARGONAUT_USERNAME", "").strip(),
+        argonaut_password=env.get("ARGONAUT_PASSWORD", ""),
+        argonaut_transaction_type_id=_int(env, "ARGONAUT_TRANSACTION_TYPE_ID", 100),
+        argonaut_verify_tls=_bool(env, "ARGONAUT_VERIFY_TLS", True),
+        argonaut_ca_file=env.get("ARGONAUT_CA_FILE", "").strip(),
+        argonaut_timeout_s=_float(env, "ARGONAUT_TIMEOUT_S", 10.0),
     ).validate(mode)

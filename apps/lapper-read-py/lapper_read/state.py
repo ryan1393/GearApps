@@ -44,12 +44,27 @@ class PendingCycle:
 
 
 @dataclass
+class ArgonautPost:
+    """A completed cycle waiting to be sent to Argonaut; kept apart from MeshForge's queue so an
+    Argonaut outage never holds up recording cycles."""
+
+    cycle_id: str
+    serial: str | None
+    part_number: int
+    consec: int
+    completed_at: str
+    values: dict[str, str | None] = field(default_factory=dict)  # macro number -> decimal text
+    attempts: int = 0
+
+
+@dataclass
 class CycleState:
     was_in_cycle: bool | None = None
     scanner_serial: str | None = None
     queued_serial: str | None = None
     active_cycle: PendingCycle | None = None
     pending_cycles: list[PendingCycle] = field(default_factory=list)
+    argonaut_pending: list[ArgonautPost] = field(default_factory=list)
 
     def snapshot(self) -> tuple:
         return (
@@ -59,6 +74,7 @@ class CycleState:
             None if self.active_cycle is None else self.active_cycle.id,
             None if self.active_cycle is None else self.active_cycle.serial,
             tuple((c.id, c.saved_cycle is not None) for c in self.pending_cycles),
+            tuple((p.cycle_id, p.attempts) for p in self.argonaut_pending),
         )
 
 
@@ -77,6 +93,17 @@ def _cycle(raw: dict[str, Any]) -> PendingCycle:
         return cycle
     except Exception as error:  # noqa: BLE001 - any malformed field invalidates the checkpoint
         raise InvalidCheckpoint(f"Invalid cycle record in checkpoint: {error}") from error
+
+
+def _argonaut(raw: dict[str, Any]) -> ArgonautPost:
+    try:
+        post = ArgonautPost(**raw)
+        for value in post.values.values():
+            if value is not None:
+                Decimal(value)
+        return post
+    except Exception as error:  # noqa: BLE001
+        raise InvalidCheckpoint(f"Invalid Argonaut record in checkpoint: {error}") from error
 
 
 class CycleStateStore:
@@ -123,6 +150,7 @@ class CycleStateStore:
             queued_serial=raw.get("queued_serial"),
             active_cycle=active,
             pending_cycles=pending,
+            argonaut_pending=[_argonaut(item) for item in raw.get("argonaut_pending") or []],
         )
 
     def save(self, state: CycleState) -> None:

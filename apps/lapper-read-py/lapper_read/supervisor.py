@@ -41,6 +41,9 @@ class MachineSpec:
     controller_ip: str
     scanner_ip: str  # "" when the machine has no Active scanner: cycles are recorded without a serial
     cell: str | None
+    #: Set in Admin > Lapping machines; "" uses the collector's ARGONAUT_URL / ARGONAUT_LOCATION_ID.
+    argonaut_url: str = ""
+    argonaut_location_id: str = ""
 
 
 def desired_machines(
@@ -66,7 +69,8 @@ def desired_machines(
         scanner_ip = ((scanner or {}).get("ip") or "").strip()
         if not _is_ip(scanner_ip) or str((scanner or {}).get("status", "active")).lower() != "active":
             scanner_ip = ""
-        wanted[mid] = MachineSpec(mid, m.get("number"), ip, scanner_ip, m.get("cell"))
+        wanted[mid] = MachineSpec(mid, m.get("number"), ip, scanner_ip, m.get("cell"),
+                                  (m.get("argonaut_url") or "").strip(), (m.get("argonaut_location_id") or "").strip())
     return wanted, skipped
 
 
@@ -90,6 +94,16 @@ def _problem(error: Exception) -> str:
     if isinstance(error, (OSError, ImportError)):
         return "FANUC library or state folder not usable"
     return "unexpected error"
+
+
+def with_machine_argonaut(settings, url: str, location_id: str):
+    """A machine's own Argonaut URL (Admin > Lapping machines) turns Argonaut on for that machine and
+    replaces the collector's ARGONAUT_URL; its location ID, when set, replaces ARGONAUT_LOCATION_ID.
+    Sign-in, TLS and timeout stay the collector's. Without a machine URL the collector default applies."""
+    if not url:
+        return settings
+    return replace(settings, argonaut_enabled=True, argonaut_url=url,
+                   argonaut_location_id=location_id or settings.argonaut_location_id)
 
 
 class _Slot:
@@ -141,6 +155,7 @@ class _Slot:
             "cell": self.spec.cell,
             "controller_ip": self.spec.controller_ip,
             "scanner_ip": self.spec.scanner_ip,
+            "argonaut_url": self.spec.argonaut_url or "(collector default)",
             "started_at": self.started_at,
             "restarts": self.restarts,
         }
@@ -166,8 +181,11 @@ class Supervisor:
     def _build_worker(self, spec: MachineSpec) -> Worker:
         from .focas import FocasTransport  # imported lazily so tests never need the library
 
-        s = replace(self.settings, machine_ip=spec.controller_ip, machine_number=spec.number,
-                    scanner_ip=spec.scanner_ip, state_key=spec.machine_id)
+        s = with_machine_argonaut(
+            replace(self.settings, machine_ip=spec.controller_ip, machine_number=spec.number,
+                    scanner_ip=spec.scanner_ip, state_key=spec.machine_id),
+            spec.argonaut_url, spec.argonaut_location_id,
+        )
         transport = FocasTransport(s.focas_library, s.focas_log, s.focas_port)
         fanuc = Fanuc(transport, s.machine_ip, s.io_timeout_ms, self.api)
         scanner = Scanner(s.scanner_ip, s.scanner_input1_port, s.io_timeout_ms / 1000) if s.scanner_ip else None

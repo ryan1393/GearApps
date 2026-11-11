@@ -103,6 +103,14 @@ class Fanuc:
                         len(missing), shown)
         return values
 
+    def capture_numbers(self, numbers) -> dict[str, str | None]:
+        """Reads macros by number (e.g. Argonaut's list); an unavailable macro is None."""
+        values: dict[str, str | None] = {}
+        for number in numbers:
+            value = self.macro(int(number))
+            values[str(number)] = None if value is None else str(value)
+        return values
+
     def persist_macros(self, cycle: dict, values: dict[str, Decimal], request_id: str) -> int:
         """Posts only macros that changed since the last run of this gearset on this machine."""
         key = (cycle["machine_id"], cycle["gearset_id"])

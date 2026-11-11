@@ -5,6 +5,7 @@ import { provideRouter, Router } from '@angular/router';
 import { FrontendFeatureAdminUsersComponent } from '../frontend-feature-admin-users/frontend-feature-admin-users.component';
 import { LappingGearsetsComponent } from './lapping-gearsets.component';
 import { LappingMachinesComponent } from './lapping-machines.component';
+import { ARGONAUT_URL_PATTERN } from './machine-options';
 
 describe('Lapping master data in Admin', () => {
   let http: HttpTestingController;
@@ -61,6 +62,29 @@ describe('Lapping master data in Admin', () => {
     const component = fixture.componentInstance as unknown as { unconfiguredNumbers: () => string[] };
     expect(component.unconfiguredNumbers()).toEqual(['01-094-002']);
     expect(fixture.nativeElement.textContent).toContain('10.0.0.1');
+  });
+
+  it('shows where each machine sends cycles to Argonaut', () => {
+    const fixture = TestBed.createComponent(LappingMachinesComponent);
+    fixture.detectChanges();
+    http.expectOne('/api/v1/machine').flush([
+      { id: 'm1', number: 'A', ip: '10.0.0.1', dept_id: '45', description: null, type: null, builder: null, cell: '1', status: 'active',
+        argonaut_url: 'https://10.0.0.9:3003/api/mes/trigger-transaction', argonaut_location_id: 'loc-1' },
+      { id: 'm2', number: 'B', ip: '10.0.0.2', dept_id: '45', description: null, type: null, builder: null, cell: '1', status: 'active' },
+    ]);
+    http.expectOne('/api/v1/scanner-detail').flush([]);
+    http.expectOne('/api/v1/department').flush([]);
+    fixture.detectChanges();
+    const text = fixture.nativeElement.textContent as string;
+    expect(text).toContain('10.0.0.9:3003');
+    expect(text).toContain('Default');
+  });
+
+  it('accepts only http(s) Argonaut addresses', () => {
+    expect(ARGONAUT_URL_PATTERN.test('https://10.16.81.71:3003/api/mes/trigger-transaction')).toBe(true);
+    expect(ARGONAUT_URL_PATTERN.test('http://argonaut/x?y=1')).toBe(true);
+    expect(ARGONAUT_URL_PATTERN.test('10.16.81.71:3003')).toBe(false);
+    expect(ARGONAUT_URL_PATTERN.test('ftp://host/x')).toBe(false);
   });
 
   it('opens the tab named in ?tab= and keeps the URL in step with the selected tab', async () => {

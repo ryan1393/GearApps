@@ -15,6 +15,7 @@ import { apiErrorMessage, MachinesApi } from '@meshforge/client/core';
 import { DialogComponent, SegmentedComponent } from '@meshforge/client/ui';
 import { Machine, ScannerDetail } from '@meshforge/shared/domain';
 import {
+  ARGONAUT_URL_PATTERN,
   IPV4_PATTERN,
   MACHINE_BUILDERS,
   MACHINE_CELLS,
@@ -134,6 +135,33 @@ import {
             }
           </select>
         </label>
+        <label class="gear-field dana-field-full">
+          Argonaut URL
+          <input
+            class="gear-input"
+            formControlName="argonaut_url"
+            placeholder="https://argonaut-host:3003/api/mes/trigger-transaction"
+            inputmode="url"
+          />
+          @if (invalid('argonaut_url')) {
+            <small class="gear-field-help" role="alert"
+              >Enter a full http:// or https:// address, or leave it empty.</small
+            >
+          } @else {
+            <small class="gear-field-help"
+              >Lapper Read sends this machine's finished cycles (scanned serial and macros) to this
+              Argonaut address. Leave empty to use the collector's default.</small
+            >
+          }
+        </label>
+        <label class="gear-field">
+          Argonaut location ID
+          <input
+            class="gear-input"
+            formControlName="argonaut_location_id"
+            placeholder="Collector default"
+          />
+        </label>
         <div class="gear-field">
           <span>Status</span>
           <gear-segmented formControlName="status" [options]="statuses" ariaLabel="Status" />
@@ -195,6 +223,12 @@ export class MachineFormDialogComponent {
     builder: new FormControl<string | null>(null),
     scanner_id: new FormControl<string | null>(null),
     status: new FormControl('Active', { nonNullable: true, validators: [Validators.required] }),
+    argonaut_url: new FormControl<string | null>(null, {
+      validators: [Validators.pattern(ARGONAUT_URL_PATTERN), Validators.maxLength(500)],
+    }),
+    argonaut_location_id: new FormControl<string | null>(null, {
+      validators: [Validators.maxLength(200)],
+    }),
   });
 
   constructor() {
@@ -221,7 +255,13 @@ export class MachineFormDialogComponent {
     }
     this.busy.set(true);
     this.error.set(null);
-    const { number, dept_id, ...editable } = this.form.getRawValue();
+    const { number, dept_id, argonaut_url, argonaut_location_id, ...rest } = this.form.getRawValue();
+    // Blank Argonaut fields are sent as null so the collector falls back to its default.
+    const editable = {
+      ...rest,
+      argonaut_url: argonaut_url?.trim() || null,
+      argonaut_location_id: argonaut_location_id?.trim() || null,
+    };
     const existing = this.machine();
     // The API keeps a machine in the department it was created in, so edits never send it.
     const req = existing
