@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- **Lapper Read: cycle time to Argonaut.** Each finished lapping cycle is timed from going into
+  cycle to coming out of it (Y3.2), and the seconds are sent to Argonaut as `floatData[0]`, which
+  was always 0. A cycle already running when the collector started sends 0. The Cycle Test Lab's
+  Send to Argonaut has a matching optional Cycle time field (`cycle_time_s`).
+- **Location part type comes from the barcode.** A shelf barcode's R or P now sets its part type:
+  GSR/GSP, CGRR/CGRP, CGDR/CGDP and CGFR/CGFP are RING or PINION whatever is chosen, on create,
+  edit and bulk shelf creation, so summary tags print the right part type. Admin shows the part
+  type read-only for these barcodes. On startup, existing locations whose part type disagrees with
+  their barcode are corrected once (logged); other locations keep the part type chosen for them.
+- **Trays go to their shelf automatically.** When exactly one shelf the tray may go to holds its
+  Summary and part type, it is selected for the operator: the destination in Move Tray, the bin
+  when Grinding uses a rough shelf, and an empty finished shelf in Receive Container (one tap,
+  Receive onto …). With two or more such shelves nothing is selected and the operator scans or
+  chooses one, as before. Nothing is moved until the operator confirms.
 - **Lapper Read: paste the Argonaut API per machine.** Admin > Lapping machines now has one
   **Argonaut API** field: paste the full address including `?locationId=…` and that machine's
   cycles are sent there as pasted. The separate location ID field is gone, and a `locationId` in

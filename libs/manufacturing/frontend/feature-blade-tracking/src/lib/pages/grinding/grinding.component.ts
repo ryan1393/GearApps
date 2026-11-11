@@ -1,6 +1,7 @@
 import { RouterLink } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { COATER_STAGING_LOCATION_SERIAL, isPendingGrindingStatus, parseCuttergrindRoughShelfTag, cuttergrindRoughShelfForPartType } from '@meshforge/manufacturing/shared/util-constants';
+import { autoShelfFor } from '../../shared/auto-shelf/auto-shelf';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -227,6 +228,7 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
         this.roughShelves = shelves.filter(shelf => Boolean(parseCuttergrindRoughShelfTag(shelf.serial_number))).sort((a,b) => a.serial_number.localeCompare(b.serial_number));
         this.shelvesLoading = false;
         if (!this.hasSelectedRoughShelf) this.roughShelfSerial = '';
+        this.autoSelectRoughShelf();
       },
       error: e => {
         if (request !== this.shelfRequestVersion) return;
@@ -246,6 +248,7 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
     }
     this.message = null;
     this.roughShelfSerial = serial;
+    this.roughShelfAutoSelected = false;
   }
 
   refreshContainers(): void {
@@ -288,6 +291,28 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
     this.useRoughShelf = useRoughShelf;
     if (!useRoughShelf) this.roughShelfSerial = '';
     this.message = null;
+    if (useRoughShelf) this.autoSelectRoughShelf();
+  }
+
+  /** The rough bin was picked automatically: the only one holding the tray's Summary and part type. */
+  roughShelfAutoSelected = false;
+  /**
+   * In rough-shelf mode, selects the bin by itself when exactly one rough bin for the tray's part
+   * type holds its Summary. With two or more the operator scans or chooses one.
+   */
+  private autoSelectRoughShelf(): void {
+    this.roughShelfAutoSelected = false;
+    const tray = this.tray;
+    if (!tray || !this.useRoughShelf || this.roughShelfSerial || this.shelvesLoading) return;
+    const { shelf, matches } = autoShelfFor(this.matchingRoughShelves, tray.summary?.number, tray.part_type?.code);
+    const holds = `Summary ${tray.summary?.number} ${tray.part_type?.code}`;
+    if (shelf) {
+      this.roughShelfSerial = shelf.serial_number;
+      this.roughShelfAutoSelected = true;
+      this.message = { tone: 'info', text: `${shelf.serial_number} selected automatically: the only rough shelf for ${holds}.` };
+    } else if (matches.length > 1) {
+      this.message = { tone: 'info', text: `${matches.length} rough shelves hold ${holds} (${matches.map((m) => m.serial_number).join(', ')}). Scan or choose one.` };
+    }
   }
 
   refreshPickers(): void {

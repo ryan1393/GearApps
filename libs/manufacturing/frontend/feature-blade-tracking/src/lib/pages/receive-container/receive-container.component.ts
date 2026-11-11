@@ -18,6 +18,7 @@ import {
 import { ScanMessage } from '../../models/scan-message';
 import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/option-picker.component';
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
+import { AutoShelfResult, autoShelfFor } from '../../shared/auto-shelf/auto-shelf';
 import { StationStatusComponent } from '../../shared/station-status/station-status.component';
 import { StationOperation } from '../operations-station/operations-station.operations';
 import { DanaPageHeaderComponent } from '@dana/ui';
@@ -71,6 +72,8 @@ export class ReceiveContainerComponent implements OnDestroy, StationOperation {
   get prompt(): string {
     if (this.busy) return 'Working…';
     if (!this.container) return 'Scan the returned container, or choose it from the list.';
+    const auto = this.pendingTray ? this.autoShelf.shelf : null;
+    if (this.pendingTray && auto) return `Put tray ${this.pendingTray.serial_number} on ${auto.serial_number} and tap Receive onto ${auto.serial_number}, or scan another ${this.shelfPrefix} shelf.`;
     if (this.pendingTray) return `Put tray ${this.pendingTray.serial_number} on an empty ${this.shelfPrefix} shelf and scan the shelf tag.`;
     if (this.receivingSet) return `Scan an empty tray for the ${this.bladeSet?.blades.length} blades in ${this.container.serial_number}.`;
     if (this.expected.length) return `Scan the next tray out of ${this.container.serial_number}: ${this.expected.length} still expected.`;
@@ -118,6 +121,16 @@ export class ReceiveContainerComponent implements OnDestroy, StationOperation {
         (location as any).active!==false && (location as any).enabled!==false &&
         Number((location as any).tray_count??0)===0;
     });
+  }
+  /** Summary of what is being received: the set's, or the selected tray's. */
+  get receivingSummary(): string | null { return this.bladeSet?.summary_number ?? this.pendingTray?.summary?.number ?? null; }
+  /**
+   * The empty finished shelf selected automatically: the only one holding the Summary and part type
+   * being received. With two or more the operator scans or chooses; either way nothing is received
+   * until the operator taps Receive or scans a shelf.
+   */
+  get autoShelf(): AutoShelfResult<ILocation> {
+    return autoShelfFor(this.eligibleFinishedShelves, this.receivingSummary, this.receivingPartType);
   }
   get filteredContainers(){const q=this.containerSearch.trim().toLowerCase();return q?this.availableContainers.filter(x=>x.serial_number.toLowerCase().includes(q)):this.availableContainers;} get filteredExpected(){const q=this.traySearch.trim().toLowerCase();return q?this.expected.filter(x=>x.tray.serial_number.toLowerCase().includes(q)):this.expected;}
   pickerError = '';
