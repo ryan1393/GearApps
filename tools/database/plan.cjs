@@ -6,7 +6,7 @@ const {
   migrationChecksum,
   GEARSET_COMPONENT_INTEGRITY_SQL,
   GEARSET_SCHEMA_SQL,
-} = require('@gearapps/shared/database');
+} = require('@meshforge/shared/database');
 const { LAPPER_POSTGRES_DDL } = require('../../libs/api/postgres/src/lib/schema.ts');
 const {
   LAPPER_HISTORY_INTEGRITY_SQL,

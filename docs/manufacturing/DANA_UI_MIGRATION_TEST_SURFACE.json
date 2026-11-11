@@ -257,7 +257,7 @@
     {
       "file": "tools/manufacturing/test-dana-apps-gear-premerge-readiness-contract.mjs",
       "migrationMarkers": [
-        "gear-apps.css",
+        "meshforge.css",
         "project.json",
         "package.json",
         "run-all-tests.ps1",
@@ -350,7 +350,7 @@
         "app-nav.component.html",
         "cutter-builder-nav.component.html",
         "greenshed-nav.component.html",
-        "gear-apps.css",
+        "meshforge.css",
         "project.json",
         "run-all-tests.ps1",
         "ui-tailwind/src/index.ts"
@@ -405,7 +405,7 @@
     {
       "file": "tools/manufacturing/test-dana-ui-ownership-adoption-contract.mjs",
       "migrationMarkers": [
-        "gear-apps.css",
+        "meshforge.css",
         "project.json"
       ],
       "exactClassChecks": 0,
@@ -416,7 +416,7 @@
     {
       "file": "tools/manufacturing/test-dana-ui-release-hardening-contract.mjs",
       "migrationMarkers": [
-        "gear-apps.css",
+        "meshforge.css",
         "gear-page"
       ],
       "exactClassChecks": 0,
@@ -529,7 +529,7 @@
     {
       "file": "tools/manufacturing/test-external-dana-ui-package-contract.mjs",
       "migrationMarkers": [
-        "gear-apps.css",
+        "meshforge.css",
         "project.json",
         "package.json",
         "package-lock.json",
@@ -745,7 +745,7 @@
         "app-nav.component.html",
         "cutter-builder-nav.component.html",
         "greenshed-nav.component.html",
-        "gear-apps.css",
+        "meshforge.css",
         "project.json"
       ],
       "exactClassChecks": 2,
@@ -814,7 +814,7 @@
     {
       "file": "tools/manufacturing/test-toast-notifications-contract.mjs",
       "migrationMarkers": [
-        "gear-apps.css",
+        "meshforge.css",
         "ui-tailwind/src/index.ts"
       ],
       "exactClassChecks": 0,
@@ -869,7 +869,7 @@
         "app-nav.component.html",
         "cutter-builder-nav.component.html",
         "greenshed-nav.component.html",
-        "gear-apps.css",
+        "meshforge.css",
         "gear-panel",
         "gear-table"
       ],
@@ -881,7 +881,7 @@
     {
       "file": "tools/manufacturing/test-ui-style-integrity-contract.mjs",
       "migrationMarkers": [
-        "gear-apps.css",
+        "meshforge.css",
         "package.json"
       ],
       "exactClassChecks": 0,
@@ -927,7 +927,7 @@
     {
       "file": "tools/manufacturing/test-workflow-surface-consolidation-contract.mjs",
       "migrationMarkers": [
-        "gear-apps.css",
+        "meshforge.css",
         "gear-panel",
         "gear-btn"
       ],

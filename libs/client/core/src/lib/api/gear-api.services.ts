@@ -23,7 +23,7 @@ import {
   UpdatePart,
   UpdateScannerDetail,
   UpdateSummary,
-} from '@gearapps/shared/domain';
+} from '@meshforge/shared/domain';
 import { Observable } from 'rxjs';
 import { CrudApi } from './crud-api';
 

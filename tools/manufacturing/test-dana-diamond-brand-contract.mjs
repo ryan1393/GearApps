@@ -65,7 +65,7 @@ if (fs.existsSync(contractPath(process.cwd(), oldLocalLogo))) {
 }
 
 const brandCss = fs.readFileSync(
-  contractPath(root, 'libs/shared/dana-ui/src/styles/gear-apps/layout/brand.css'),
+  contractPath(root, 'libs/shared/dana-ui/src/styles/meshforge/layout/brand.css'),
   'utf8',
 );
 for (const marker of [
@@ -78,7 +78,7 @@ for (const marker of [
 }
 
 const responsiveCss = fs.readFileSync(
-  contractPath(root, 'libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css'),
+  contractPath(root, 'libs/shared/dana-ui/src/styles/meshforge/foundation/responsive.css'),
   'utf8',
 );
 for (const marker of ['width: 46px', 'height: 56px']) {

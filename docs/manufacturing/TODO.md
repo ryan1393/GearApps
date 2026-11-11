@@ -4,7 +4,7 @@ This file tracks only remaining work. Completed setup/test/fake-data behavior is
 
 ## Before production use
 
-- [ ] Re-run `npm run test:gear-apps` on the target development laptop after the Blade Tracking strict-null build fix and confirm all four projects build.
+- [ ] Re-run `npm run test:meshforge` on the target development laptop after the Blade Tracking strict-null build fix and confirm all four projects build.
 - [ ] Confirm the 113-route non-mutating API probe passes against the target database.
 - [ ] Run the full workflow **preflight** with dedicated test records.
 - [ ] Run the mutating end-to-end workflow only after preflight passes and confirm the complete Blade Tracking → Cutter Builder → Green Shed lifecycle.
@@ -46,7 +46,7 @@ This file tracks only remaining work. Completed setup/test/fake-data behavior is
 - [x] Implement full-database Inventory Control Center browsing search for Trays, Containers, Locations, and Blades.
 - [x] Migrate all 23 frontend tables to the shared Dana table system with relationship-safe parent/detail grouping.
 - [x] Consolidate Cutter Builder and Greenshed workflow pages onto the shared workflow-layout primitives.
-- [ ] Run the V69.2 combined package on Windows and confirm the authoritative `npm run test:gear-apps` gate passes.
+- [ ] Run the V69.2 combined package on Windows and confirm the authoritative `npm run test:meshforge` gate passes.
 - [ ] Complete a final visual spot-check of Blade Tracking, Cutter Builder, Greenshed, and Admin after V69.2 is green.
 
 ## Production readiness

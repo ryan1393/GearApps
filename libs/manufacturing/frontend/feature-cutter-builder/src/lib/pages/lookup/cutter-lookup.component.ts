@@ -1,4 +1,4 @@
-import { GearLabelPrinterPickerComponent, GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 import { Subject, takeUntil } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -11,7 +11,7 @@ import {
   CutterBuilderApiService,
   cutterApiErrorText,
   downloadCutterCardArtifacts,
-} from '@gearapps/manufacturing/frontend/data-access-cutter-builder';
+} from '@meshforge/manufacturing/frontend/data-access-cutter-builder';
 import {
   DanaPageHeaderComponent,
   DanaTableDirective,

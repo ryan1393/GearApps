@@ -1,12 +1,12 @@
 import { instanceToPlain } from 'class-transformer';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
-import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { AbstractOrmEntity } from '@meshforge/manufacturing/server/util-common';
 import {
   PAGINATION_DEFAULT_LIMIT,
   PAGINATION_DEFAULT_ORDER,
   PAGINATION_DEFAULT_PER_PAGE,
-} from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-constants';
 import { Logger } from '@nestjs/common';
 
 import {

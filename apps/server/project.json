@@ -6,7 +6,7 @@
   "tags": [
     "type:app",
     "scope:server",
-    "domain:gear-apps"
+    "domain:meshforge"
   ],
   "targets": {
     "build": {

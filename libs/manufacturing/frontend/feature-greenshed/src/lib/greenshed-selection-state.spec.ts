@@ -2,11 +2,11 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { BehaviorSubject, of, Subject } from 'rxjs';
-import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 import {
   GreenshedApiService,
   GreenshedBuild,
-} from '@gearapps/manufacturing/frontend/data-access-greenshed';
+} from '@meshforge/manufacturing/frontend/data-access-greenshed';
 import { GreenshedMachinesComponent } from './pages/machines/greenshed-machines.component';
 import { GreenshedPullComponent } from './pages/pull/greenshed-pull.component';
 import { GreenshedCheckComponent } from './pages/check/greenshed-check.component';

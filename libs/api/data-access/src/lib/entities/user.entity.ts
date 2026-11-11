@@ -1,4 +1,4 @@
-import { User } from '@gearapps/shared/domain';
+import { User } from '@meshforge/shared/domain';
 import { EntitySchema } from 'typeorm';
 import { str, uuidPrimary } from './column-helpers';
 

@@ -2,13 +2,13 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
+import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
 import {
   CutterBuilderApiService,
   CutterDashboardData,
   cutterApiErrorText,
-} from '@gearapps/manufacturing/frontend/data-access-cutter-builder';
-import { canEditGearApp } from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/frontend/data-access-cutter-builder';
+import { canEditGearApp } from '@meshforge/manufacturing/shared/util-constants';
 import {
   DanaCountBadgeDirective,
   DanaDashboardGridComponent,

@@ -1,5 +1,5 @@
 import { Subject, takeUntil } from 'rxjs';
-import { cutterBodyBladeCapacity, cutterBodyMatchesRequirement } from '@gearapps/manufacturing/shared/util-constants';
+import { cutterBodyBladeCapacity, cutterBodyMatchesRequirement } from '@meshforge/manufacturing/shared/util-constants';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, inject } from '@angular/core';
@@ -12,10 +12,10 @@ import {
   CutterDashboardData,
   CutterTrayValidation,
   cutterApiErrorText,
-} from '@gearapps/manufacturing/frontend/data-access-cutter-builder';
-import { GearLabelPrinterPickerComponent, GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+} from '@meshforge/manufacturing/frontend/data-access-cutter-builder';
+import { GearLabelPrinterPickerComponent, GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 import { DanaPageHeaderComponent } from '@dana/ui';
-import { ITray } from '@gearapps/manufacturing/shared/util-types';
+import { ITray } from '@meshforge/manufacturing/shared/util-types';
 
 @Component({
   selector: 'gear-cutter-build',

@@ -7,7 +7,7 @@ const must = (ok, msg) => {
   if (!ok) throw new Error(msg);
 };
 
-const responsive = read('libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css');
+const responsive = read('libs/shared/dana-ui/src/styles/meshforge/foundation/responsive.css');
 const header = danaUiBundleText();
 const toolbar = danaUiBundleText();
 const detail = danaUiBundleText();

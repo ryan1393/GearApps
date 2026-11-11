@@ -8,10 +8,10 @@ import {
   DanaTableEmptyDirective,
   DanaTableShellDirective,
 } from '@dana/ui';
-import { GearsetsApi, loadable, PartsApi, SummariesApi, ToastService } from '@gearapps/client/core';
-import { StatusBadgeComponent } from '@gearapps/client/ui';
-import { getDanaAppUrl } from '@gearapps/manufacturing/shared/dana-app-config';
-import { Gearset, Part, Summary } from '@gearapps/shared/domain';
+import { GearsetsApi, loadable, PartsApi, SummariesApi, ToastService } from '@meshforge/client/core';
+import { StatusBadgeComponent } from '@meshforge/client/ui';
+import { getDanaAppUrl } from '@meshforge/manufacturing/shared/dana-app-config';
+import { Gearset, Part, Summary } from '@meshforge/shared/domain';
 import { GearsetFormDialogComponent } from './gearset-form-dialog.component';
 
 /**

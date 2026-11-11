@@ -1,6 +1,6 @@
 import { IsIn, IsInt, IsOptional, IsUUID, Max, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { BladeStatus, Uuid } from '@gearapps/manufacturing/shared/util-types';
+import { BladeStatus, Uuid } from '@meshforge/manufacturing/shared/util-types';
 
 export class CreateBladeBatchDto {
   @ApiProperty({ type: String, format: 'uuid' })

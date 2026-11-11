@@ -1,6 +1,6 @@
 @echo off
 cd /d "%~dp0.."
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\tools\manufacturing\setup-gear-apps.ps1" -CleanInstall
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\tools\manufacturing\setup-meshforge.ps1" -CleanInstall
 if errorlevel 1 (
     echo.
     echo MeshForge clean setup failed.

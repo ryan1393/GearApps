@@ -25,14 +25,14 @@ import {
   SummariesService,
   TypeOfChecksController,
   TypeOfChecksService,
-} from '@gearapps/api/feature-gear';
-import { ScannerClientService, ScannerController } from '@gearapps/api/feature-scanner';
+} from '@meshforge/api/feature-gear';
+import { ScannerClientService, ScannerController } from '@meshforge/api/feature-scanner';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { LapperWritePolicy, scannerConfig } from '@gearapps/api/core';
+import { LapperWritePolicy, scannerConfig } from '@meshforge/api/core';
 import { PostgresLapperCatalog } from './catalog';
 import { PostgresCollectorTokens } from './collector-tokens';
-import { COLLECTOR_TOKEN_RESOLVER } from '@gearapps/shared/domain';
+import { COLLECTOR_TOKEN_RESOLVER } from '@meshforge/shared/domain';
 import { PostgresLapperStore } from './postgres-lapper.store';
 import {
   PostgresCrudAdapter,

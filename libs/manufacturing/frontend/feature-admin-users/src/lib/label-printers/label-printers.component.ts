@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, Elem
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective } from '@dana/ui';
-import { GearToastService, LabelLanguage, LabelType } from '@gearapps/manufacturing/frontend/util-common';
+import { GearToastService, LabelLanguage, LabelType } from '@meshforge/manufacturing/frontend/util-common';
 
 import { adminApiErrorText } from '../admin-api.service';
 

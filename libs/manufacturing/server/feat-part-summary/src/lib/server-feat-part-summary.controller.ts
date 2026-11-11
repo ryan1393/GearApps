@@ -4,9 +4,9 @@ import {
   PaginationOptionsDto,
   PartSummaryDto,
   UpdatePartSummaryDto,
-} from '@gearapps/manufacturing/server/data-access';
-import { Auth, ReqUserId, UUIDParam } from '@gearapps/manufacturing/server/util-common';
-import { RoleType, Uuid } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/server/data-access';
+import { Auth, ReqUserId, UUIDParam } from '@meshforge/manufacturing/server/util-common';
+import { RoleType, Uuid } from '@meshforge/manufacturing/shared/util-types';
 import {
   Body,
   Controller,

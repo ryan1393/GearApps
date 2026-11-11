@@ -5,7 +5,7 @@
 From the MeshForge project root, run:
 
 ```powershell
-npm run test:gear-apps
+npm run test:meshforge
 ```
 
 Normal test mode is fully automatic. Do not type a cutter serial, machine, part number, tray, container, summary, pull reason, or test password. The harness creates or reuses dedicated `E2E-*` test fixtures and selects the required reference data itself.
@@ -34,14 +34,14 @@ Machine compatibility is also enforced by manufacturing department: PINION cutte
 ## Safe first run
 
 1. Open PowerShell in the extracted MeshForge project root.
-2. Run `commands\SETUP-GEAR-APPS.cmd` after a fresh extract or dependency/environment change.
-3. Run `commands\START-GEAR-APPS.cmd` and wait for the API and three applications to start.
-4. Run `npm run test:gear-apps` in another PowerShell terminal.
+2. Run `commands\SETUP-MESHFORGE.cmd` after a fresh extract or dependency/environment change.
+3. Run `commands\START-MESHFORGE.cmd` and wait for the API and three applications to start.
+4. Run `npm run test:meshforge` in another PowerShell terminal.
 5. Read the final test table. Every required row should show `PASS`. If a row fails, use the first failure as the starting point.
 
 ## Diagnostic modes
 
-The normal `npm run test:gear-apps` path is zero-input and executes the complete E2E workflow using dedicated test records. `-PreflightOnly` performs a deliberate non-mutating workflow preflight. `-NoAutoTestData` is for developer diagnostics with explicitly supplied fixture values and is not the normal test procedure.
+The normal `npm run test:meshforge` path is zero-input and executes the complete E2E workflow using dedicated test records. `-PreflightOnly` performs a deliberate non-mutating workflow preflight. `-NoAutoTestData` is for developer diagnostics with explicitly supplied fixture values and is not the normal test procedure.
 
 ## Part and machine terminology
 
@@ -83,7 +83,7 @@ The Cutter Builder build API accepts `cutter_body_identifier`, which may be the 
 
 ## Authenticated backend mutation suite
 
-The master command `npm run test:gear-apps` now runs a dedicated authenticated backend mutation suite before the full manufacturing workflow. It is zero-input in normal mode and creates/reuses only `E2E-*` test data.
+The master command `npm run test:meshforge` now runs a dedicated authenticated backend mutation suite before the full manufacturing workflow. It is zero-input in normal mode and creates/reuses only `E2E-*` test data.
 
 The suite exercises backend create/update/delete or intentional-rejection behavior for blades, trays, blade-tray assignments, blade batches, locations, location-tray assignments, containers, protected container-tray routes, part summaries, cutter blade requirements, parts, roll masters, and admin user mutations. Cutter-body MF â†’ Dana mutations remain covered by the dedicated cutter-body transition test, while grinding, coating, Cutter Builder, Green Shed setup/quality/pulls, and teardown remain covered by the full E2E workflow.
 

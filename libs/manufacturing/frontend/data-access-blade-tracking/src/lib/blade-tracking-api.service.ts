@@ -1,8 +1,8 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { catchError, defer, EMPTY, expand, forkJoin, map, Observable, of, reduce, throwError } from 'rxjs';
-import { LabelPrinterChoiceService } from '@gearapps/manufacturing/frontend/util-common';
-import { ContainerWorkflowEligibility, TrayWorkflowEligibility } from '@gearapps/manufacturing/shared/util-constants';
+import { LabelPrinterChoiceService } from '@meshforge/manufacturing/frontend/util-common';
+import { ContainerWorkflowEligibility, TrayWorkflowEligibility } from '@meshforge/manufacturing/shared/util-constants';
 import {
   BladeHistoryEvent,
   BladeStatus,
@@ -16,7 +16,7 @@ import {
   IPartSummary,
   ITray,
   IPartType,
-} from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-types';
 
 
 export type AssetTagKind = 'TRAY' | 'CONTAINER' | 'LOCATION';

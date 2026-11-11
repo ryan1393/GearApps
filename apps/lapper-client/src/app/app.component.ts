@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { GearToastHostComponent } from '@gearapps/manufacturing/frontend/util-common';
+import { GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { LapperNavComponent } from './layout/lapper-nav/lapper-nav.component';
 
 @Component({

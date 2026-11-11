@@ -19,7 +19,7 @@ The retired `Cuttergrind_Verified_Pull` workflow is not part of the current appl
 From the project root:
 
 ```powershell
-npm run setup:gear-apps
+npm run setup:meshforge
 ```
 
 The setup script:
@@ -35,17 +35,17 @@ The `.env` file is intentionally retained. Review its values before using a diff
 ## Start MeshForge
 
 ```powershell
-npm run start:gear-apps
+npm run start:meshforge
 ```
 
-You can also use `commands\START-GEAR-APPS.cmd`.
+You can also use `commands\START-MESHFORGE.cmd`.
 
 The startup script automatically unblocks project files, reads `SERVER_PORT` from `.env` (default `3333`), starts the API, waits for the health endpoint, and starts Blade Tracking, Cutter Builder, and Green Shed.
 
 ## Run all tests
 
 ```powershell
-npm run test:gear-apps
+npm run test:meshforge
 ```
 
 The master test runner performs the harness checks, builds/tests, API route coverage, read-only smoke checks, shelf convention checks, and full-workflow preflight/optional execution.
@@ -83,7 +83,7 @@ The provisioner creates or reuses only the data needed to exercise Blade Trackin
 
 The provisioner selects an enabled Summary/Part Type blade requirement if one is not supplied. It uses a PostgreSQL transaction and rolls back on failure. Existing conflicting locations are **not overwritten**.
 
-The master `npm run test:gear-apps` runner automatically provisions/reuses this data when required workflow inputs are missing. The generated coater container is also used automatically.
+The master `npm run test:meshforge` runner automatically provisions/reuses this data when required workflow inputs are missing. The generated coater container is also used automatically.
 
 To prevent automatic test-data creation:
 
@@ -121,10 +121,10 @@ The normal master runner executes the complete workflow against dedicated `E2E-*
 ## Useful commands
 
 ```powershell
-npm run setup:gear-apps
-npm run start:gear-apps
+npm run setup:meshforge
+npm run start:meshforge
 npm run test:blade-data
-npm run test:gear-apps
+npm run test:meshforge
 npm run test:fixtures
 ```
 
@@ -133,13 +133,13 @@ Import/export utilities are kept under `tools/manufacturing/`.
 ## Recommended clean-machine sequence
 
 ```powershell
-npm run setup:gear-apps
+npm run setup:meshforge
 npm run test:blade-data
-npm run test:gear-apps
-npm run start:gear-apps
+npm run test:meshforge
+npm run start:meshforge
 ```
 
-If `test:gear-apps` fails, use the first `[FAIL]` entry in the test summary as the starting point rather than rerunning later stages manually.
+If `test:meshforge` fails, use the first `[FAIL]` entry in the test summary as the starting point rather than rerunning later stages manually.
 
 
 ### Test-data database configuration
@@ -233,7 +233,7 @@ The master runner now includes a dedicated test for the unetched-to-etched cutte
 Safe/preflight mode:
 
 ```powershell
-npm run test:gear-apps
+npm run test:meshforge
 ```
 
 The MF-to-Dana test authenticates and verifies its harness without changing the database.
@@ -318,12 +318,12 @@ This keeps pre-etch and post-etch history attached to the same physical cutter w
 
 ## MeshForge Command Center
 
-Both `commands\SETUP-GEAR-APPS.cmd` and `commands\START-GEAR-APPS.cmd` now display the current MeshForge command list when they finish.
+Both `commands\SETUP-MESHFORGE.cmd` and `commands\START-MESHFORGE.cmd` now display the current MeshForge command list when they finish.
 
 You can display the same command list at any time with:
 
 ```powershell
-npm run commands:gear-apps
+npm run commands:meshforge
 ```
 
 Setup automatically runs the safe `validate:base-data` and `test:data-import` checks unless `-SkipDataValidation` is supplied. Setup does **not** automatically apply database imports.
@@ -331,13 +331,13 @@ Setup automatically runs the safe `validate:base-data` and `test:data-import` ch
 To make setup also perform the read-only fresh SQL Server + Excel import preflight:
 
 ```powershell
-.\tools\manufacturing\setup-gear-apps.ps1 -RunFreshImportPreflight
+.\tools\manufacturing\setup-meshforge.ps1 -RunFreshImportPreflight
 ```
 
 Startup does not run data validation by default because it is intended to launch quickly. To validate base/import contracts before starting:
 
 ```powershell
-.\tools\manufacturing\start-gear-apps.ps1 -ValidateData
+.\tools\manufacturing\start-meshforge.ps1 -ValidateData
 ```
 
 The destructive/apply migration command `npm run import:all-fresh:apply` is intentionally displayed but never run automatically by Setup or Start.
@@ -391,7 +391,7 @@ PowerShell variable names are case-insensitive. The previous workflow test accid
 
 ### Fully automatic master test
 
-`npm run test:gear-apps` requires no typed workflow inputs in normal mode. The harness creates/reuses dedicated E2E test account, cutter body, PINION/RING-compatible machine, matching part, trays, container, shelves and blades, and selects valid pull reasons automatically. It also provisions opposite-type part and machine fixtures so the compatibility rejection paths are tested.
+`npm run test:meshforge` requires no typed workflow inputs in normal mode. The harness creates/reuses dedicated E2E test account, cutter body, PINION/RING-compatible machine, matching part, trays, container, shelves and blades, and selects valid pull reasons automatically. It also provisions opposite-type part and machine fixtures so the compatibility rejection paths are tested.
 
 The test does not The automated workflow uses a dedicated E2E Green Shed machine and does not use production machines. Manual fixture values are reserved for explicit `-NoAutoTestData` diagnostics.
 
@@ -403,9 +403,9 @@ For the current run procedure and compatibility matrix, see `docs/manufacturing/
 
 ## Clean dependency installation
 
-Run `commands\SETUP-GEAR-APPS.cmd` once after extracting a new package. Setup deletes any previous `node_modules` and `.nx` cache, verifies npm's cache, installs exactly from `package-lock.json` with `npm ci`, and syntax-checks the installed Nx plugin worker before continuing.
+Run `commands\SETUP-MESHFORGE.cmd` once after extracting a new package. Setup deletes any previous `node_modules` and `.nx` cache, verifies npm's cache, installs exactly from `package-lock.json` with `npm ci`, and syntax-checks the installed Nx plugin worker before continuing.
 
-Do not copy `node_modules` between MeshForge folders. The launcher uses the official Nx setting `NX_ISOLATE_PLUGINS=false` together with `NX_DAEMON=false` for deterministic Windows startup. `commands\START-GEAR-APPS.cmd` also refuses to start if the Nx installation is missing or corrupted.
+Do not copy `node_modules` between MeshForge folders. The launcher uses the official Nx setting `NX_ISOLATE_PLUGINS=false` together with `NX_DAEMON=false` for deterministic Windows startup. `commands\START-MESHFORGE.cmd` also refuses to start if the Nx installation is missing or corrupted.
 
 ### npm/Husky warnings during Setup
 
@@ -419,13 +419,13 @@ Setup validates the installed Nx runtime in two direct ways: `node --check` on N
 
 ### Authenticated backend mutations
 
-No separate command is required in the normal test run. `npm run test:gear-apps` automatically provisions dedicated `E2E-*` backend-mutation fixtures, runs authenticated CRUD/negative/rollback/concurrency tests, performs safe cleanup, and then continues into the already-proven cutter-body and full manufacturing workflow tests. No production serials, machine numbers, part numbers, or credentials are entered manually.
+No separate command is required in the normal test run. `npm run test:meshforge` automatically provisions dedicated `E2E-*` backend-mutation fixtures, runs authenticated CRUD/negative/rollback/concurrency tests, performs safe cleanup, and then continues into the already-proven cutter-body and full manufacturing workflow tests. No production serials, machine numbers, part numbers, or credentials are entered manually.
 
 ### Faster dependency setup
 
-Use `commands\SETUP-GEAR-APPS.cmd` for normal setup. It validates an existing `node_modules`, then checks a shared MeshForge dependency cache keyed by the exact `package-lock.json` SHA-256, Node ABI, platform, and architecture. A verified cache is reused through a Windows junction, allowing later fresh folders with the same dependency lock to skip `npm ci`.
+Use `commands\SETUP-MESHFORGE.cmd` for normal setup. It validates an existing `node_modules`, then checks a shared MeshForge dependency cache keyed by the exact `package-lock.json` SHA-256, Node ABI, platform, and architecture. A verified cache is reused through a Windows junction, allowing later fresh folders with the same dependency lock to skip `npm ci`.
 
-If no valid cache exists, setup runs `npm ci --prefer-offline --no-audit --no-fund`, verifies Nx, and publishes the verified dependency tree for reuse. Use `CLEAN-commands\SETUP-GEAR-APPS.cmd` only for deliberate clean recovery.
+If no valid cache exists, setup runs `npm ci --prefer-offline --no-audit --no-fund`, verifies Nx, and publishes the verified dependency tree for reuse. Use `CLEAN-commands\SETUP-MESHFORGE.cmd` only for deliberate clean recovery.
 
 ### Admin screen
 
@@ -476,12 +476,12 @@ Destructive CLI form after reviewing the preflight:
 
 `npm run refresh:all-data:reset -- -Apply -YesReallyDeleteOldData`
 
-After the refresh completes, start the apps normally with `commands\START-GEAR-APPS.cmd` and sign in again.
+After the refresh completes, start the apps normally with `commands\START-MESHFORGE.cmd` and sign in again.
 
 
 ## Configure the IPL label printer
 
-Run `commands\CONFIGURE-GEAR-APPS-LABEL-PRINTER.cmd`, enter the printer IP address or hostname, and then restart `commands\START-GEAR-APPS.cmd`. The helper updates only the three `GEAR_LABEL_PRINTER_*` values in `.env` and does not send a test label. If no printer is configured, Print Tag still downloads a native `.prn` file.
+Run `commands\CONFIGURE-MESHFORGE-LABEL-PRINTER.cmd`, enter the printer IP address or hostname, and then restart `commands\START-MESHFORGE.cmd`. The helper updates only the three `GEAR_LABEL_PRINTER_*` values in `.env` and does not send a test label. If no printer is configured, Print Tag still downloads a native `.prn` file.
 
 
 ## Admin per-record asset tag printing

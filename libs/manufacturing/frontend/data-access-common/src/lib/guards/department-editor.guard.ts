@@ -1,10 +1,10 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
-import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
+import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
 import {
   canEditGearApp,
   GearAppKey,
-} from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-constants';
 
 const dashboardRoutes: Record<GearAppKey, string> = {
   BLADE_TRACKING: '/blades',

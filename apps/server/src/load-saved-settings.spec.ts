@@ -1,4 +1,4 @@
-import { encryptEnvironmentValue, environmentStartupState } from '@gearapps/manufacturing/server/util-common';
+import { encryptEnvironmentValue, environmentStartupState } from '@meshforge/manufacturing/server/util-common';
 
 import { applySavedEnvironmentSettings } from './load-saved-settings';
 

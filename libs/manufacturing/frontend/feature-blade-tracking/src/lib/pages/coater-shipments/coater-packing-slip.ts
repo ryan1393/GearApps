@@ -1,4 +1,4 @@
-import { CoaterPackingSlip } from '@gearapps/manufacturing/shared/util-types';
+import { CoaterPackingSlip } from '@meshforge/manufacturing/shared/util-types';
 
 const PATTERNS = [
   '212222','222122','222221','121223','121322','131222','122213','122312','132212','221213','221312','231212',

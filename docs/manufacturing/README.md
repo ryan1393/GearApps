@@ -158,7 +158,7 @@ out once; nothing else changes).
 | `npm test` | installed dependencies | Isolated unit/behavior and deployment/configuration tests |
 | `npm run test:contracts` | installed dependencies | Portable source contracts |
 | `npm run test:workflow` | API + **test** DB | 23-call end-to-end: grinding, coater shipment, build, setup, QC, changeover, teardown |
-| `npm run test:gear-apps` | Windows PowerShell, API + test DB | Original master suite (see note below) |
+| `npm run test:meshforge` | Windows PowerShell, API + test DB | Original master suite (see note below) |
 
 Note: `tools/manufacturing/test-full-workflow.ps1` predates numbered Cuttergrind shelves, coater shipments and
 Cutter Builder machines. `npm run test:workflow` is the current end-to-end path; the fixtures it
@@ -166,14 +166,14 @@ uses (`tools/manufacturing/test-data/ensure-workflow-test-fixtures.mjs`) were up
 
 ## Start
 
-After extracting the project, run `commands\SETUP-GEAR-APPS.cmd` once, then use `commands\START-GEAR-APPS.cmd` to start the API, Blade Tracking, Cutter Builder, and Green Shed.
+After extracting the project, run `commands\SETUP-MESHFORGE.cmd` once, then use `commands\START-MESHFORGE.cmd` to start the API, Blade Tracking, Cutter Builder, and Green Shed.
 
 ## Test
 
 Run the complete automatic test from the project root:
 
 ```powershell
-npm run test:gear-apps
+npm run test:meshforge
 ```
 
 The normal master test requires no typed workflow inputs. It provisions dedicated E2E test data automatically. See `docs/manufacturing/TESTING.md` for the complete run procedure and the PINION/RING compatibility tests.
@@ -252,7 +252,7 @@ Machines, Parts and Part Summaries links redirect there.
 
 The existing Users feature was retained as the admin route but rebuilt into the shared MeshForge administration workspace. Part Summary and Cutter Body creation reuse their existing backend APIs. Admin-only master-data endpoints were added for Models, Machines, and Department lookup, and an admin-only `POST /api/v1/users` route was added so the selected User/Admin role is preserved.
 
-For local development on a **test** database (its `.env` must contain `GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES`), `commands\START-GEAR-APPS.cmd` provisions:
+For local development on a **test** database (its `.env` must contain `GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES`), `commands\START-MESHFORGE.cmd` provisions:
 - Operator: `test@gearapps.local` / `GearApps-E2E-Only-2026!`
 - Admin: `admin@gearapps.local` / `GearApps-Admin-Only-2026!`
 
@@ -322,7 +322,7 @@ Each tag contains one Code 128 barcode plus the same identifier in human-readabl
 
 The shared label stock is 2.25 in web width with a 2.125 in x 0.625 in label and 0.125 in physical gap above/below. The IPL format uses a 431 x 127 dot label face at the existing Intermec 203 dpi coordinate family.
 
-The authenticated print endpoint is `POST /api/v1/asset-tags/print`. Run `commands\CONFIGURE-GEAR-APPS-LABEL-PRINTER.cmd` (or configure `GEAR_LABEL_PRINTER_HOST`) to send raw IPL directly to the industrial printer on `GEAR_LABEL_PRINTER_PORT` (default 9100). If no printer host is configured or the printer cannot be reached, the UI downloads the native `.prn` payload instead. No browser-rendered barcode is substituted.
+The authenticated print endpoint is `POST /api/v1/asset-tags/print`. Run `commands\CONFIGURE-MESHFORGE-LABEL-PRINTER.cmd` (or configure `GEAR_LABEL_PRINTER_HOST`) to send raw IPL directly to the industrial printer on `GEAR_LABEL_PRINTER_PORT` (default 9100). If no printer host is configured or the printer cannot be reached, the UI downloads the native `.prn` payload instead. No browser-rendered barcode is substituted.
 
 See `docs/manufacturing/printing/ASSET-TAG-IPL.md`. The current API manifest is **113 routes**.
 

@@ -80,7 +80,7 @@ Do not enlarge the rest of the brand row or alter the navigation hierarchy just 
 
 MeshForge uses one semantic SVG icon set under `assets/icons/` for the application sidebars, global search, dashboard KPI cards, and dashboard operation cards. Do not use random Unicode symbols for those surfaces and do not fork icons into app-local asset folders.
 
-Use the semantic `gear-glyph-*` classes from `libs/shared/ui-tailwind/src/styles/gear-apps/components/icons.css`. The icon name should describe the operator action or object, for example `move`, `container`, `receive`, `tray`, `intake`, `build-cutter`, `teardown`, `grinding`, `machine`, `quality-check`, `pull`, `shelf`, `location`, and `search`.
+Use the semantic `gear-glyph-*` classes from `libs/shared/ui-tailwind/src/styles/meshforge/components/icons.css`. The icon name should describe the operator action or object, for example `move`, `container`, `receive`, `tray`, `intake`, `build-cutter`, `teardown`, `grinding`, `machine`, `quality-check`, `pull`, `shelf`, `location`, and `search`.
 
 All three frontend `project.json` files publish the root `assets/` folder to `/assets`, which also makes the brand asset consistent across Blade Tracking, Cutter Builder, Greenshed, Admin, and the shared login experience.
 

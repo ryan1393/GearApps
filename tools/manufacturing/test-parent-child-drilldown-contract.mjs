@@ -15,7 +15,7 @@ const lookupHtmlPath = 'libs/manufacturing/frontend/feature-blade-tracking/src/l
 const locationsHtmlPath = 'libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/locations/blade-locations.component.html';
 const apiPath = 'libs/manufacturing/frontend/data-access-blade-tracking/src/lib/blade-tracking-api.service.ts';
 const containerServicePath = 'libs/manufacturing/server/feat-container/src/lib/server-feat-container.service.ts';
-const relationStylePath = 'libs/shared/dana-ui/src/styles/gear-apps/features/inventory-relations.css';
+const relationStylePath = 'libs/shared/dana-ui/src/styles/meshforge/features/inventory-relations.css';
 
 const trayTs = read(trayTsPath);
 const trayHtml = read(trayHtmlPath);

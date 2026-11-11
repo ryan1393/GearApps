@@ -7,7 +7,7 @@ import {
   readEnvironmentOverlay,
   recordEnvironmentStartupState,
   StoredEnvironmentSetting,
-} from '@gearapps/manufacturing/server/util-common';
+} from '@meshforge/manufacturing/server/util-common';
 import { Logger } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 

@@ -377,7 +377,7 @@ V70.0.8R61R23 in comments and patch folders, while `package.json` said `0.0.0` a
 
 ### Added
 
-- `GEAR_APPS_VERSION`, shown in all three sidebars, Swagger and `GET /api/v1/health/live`;
+- `MESHFORGE_VERSION`, shown in all three sidebars, Swagger and `GET /api/v1/health/live`;
   `npm run version:set` and `npm run test:version`. Docker images are tagged with the version.
 - `Deploy-GearApps.cmd` / `tools/deploy/deploy-remote.mjs`: backup before deploy, release kept for
   `--rollback`, `--check` preflight, refuses weak secrets and test-account opt-in, verifies the

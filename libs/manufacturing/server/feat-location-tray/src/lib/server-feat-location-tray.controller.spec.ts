@@ -1,12 +1,12 @@
 
-import { ServerUtilMailerService } from '@gearapps/manufacturing/server/util-mailer';
-import { mockMailerFactory } from '@gearapps/manufacturing/server/util-mailer/testing';
-import { mockRepoFactory } from '@gearapps/manufacturing/server/util-testing';
+import { ServerUtilMailerService } from '@meshforge/manufacturing/server/util-mailer';
+import { mockMailerFactory } from '@meshforge/manufacturing/server/util-mailer/testing';
+import { mockRepoFactory } from '@meshforge/manufacturing/server/util-testing';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ServerFeatLocationTrayService } from './server-feat-location-tray.service'
 import { ServerFeatLocationTrayController } from './server-feat-location-tray.controller';
-import { LocationTrayOrmEntity } from '@gearapps/manufacturing/server/data-access';
+import { LocationTrayOrmEntity } from '@meshforge/manufacturing/server/data-access';
 
 describe('ServerFeatLocationTrayController', () => {
   let controller: ServerFeatLocationTrayController;

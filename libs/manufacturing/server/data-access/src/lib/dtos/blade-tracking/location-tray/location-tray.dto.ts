@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { AbstractDto, AbstractDtoOptions } from '@gearapps/manufacturing/server/util-common';
-import { Uuid } from '@gearapps/manufacturing/shared/util-types';
+import { AbstractDto, AbstractDtoOptions } from '@meshforge/manufacturing/server/util-common';
+import { Uuid } from '@meshforge/manufacturing/shared/util-types';
 import { LocationTrayOrmEntity } from '../../../database/entities/blade-tracking/location-tray.orm-entity';
 
 

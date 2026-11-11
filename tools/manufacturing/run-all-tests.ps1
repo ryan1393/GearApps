@@ -108,7 +108,7 @@ function Assert-TestHarness {
 
     $requiredFiles = @(
         $RouteManifestPath,
-        (Join-Path $PSScriptRoot 'validate-gear-apps.ps1'),
+        (Join-Path $PSScriptRoot 'validate-meshforge.ps1'),
         (Join-Path $PSScriptRoot 'test-all-api-routes.ps1'),
         (Join-Path $PSScriptRoot 'smoke-test-api.ps1'),
         (Join-Path $PSScriptRoot 'test-shelf-location-conventions.ps1'),
@@ -400,7 +400,7 @@ try {
     }
 
     if (-not $SkipBuild) {
-        Invoke-ChildTest 'Build validation' "$PSScriptRoot\validate-gear-apps.ps1"
+        Invoke-ChildTest 'Build validation' "$PSScriptRoot\validate-meshforge.ps1"
     } else {
         Add-MasterResult 'Build validation' 'SKIP' '-SkipBuild supplied.'
     }

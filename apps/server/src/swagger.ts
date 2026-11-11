@@ -5,8 +5,8 @@ import {
   ENV_SERVER_HOST,
   ENV_SERVER_PORT,
   ENV_SWAGGER_JSON_FILE,
-  GEAR_APPS_VERSION,
-} from '@gearapps/manufacturing/shared/util-constants';
+  MESHFORGE_VERSION,
+} from '@meshforge/manufacturing/shared/util-constants';
 import { INestApplication, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -16,7 +16,7 @@ export function setupSwagger(app: INestApplication): void {
   const configService = app.get(ConfigService);
   const documentBuilder = new DocumentBuilder()
     .setTitle('Gear REST API')
-    .setVersion(GEAR_APPS_VERSION)
+    .setVersion(MESHFORGE_VERSION)
     .addServer('/')
     .addBearerAuth()
     .build();

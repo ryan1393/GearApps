@@ -1,10 +1,10 @@
-import { mockRepoFactory } from '@gearapps/manufacturing/server/util-testing';
+import { mockRepoFactory } from '@meshforge/manufacturing/server/util-testing';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import {
   BladeOrmEntity,
   BladeHistoryOrmEntity,
-} from '@gearapps/manufacturing/server/data-access';
+} from '@meshforge/manufacturing/server/data-access';
 
 import { ServerFeatBladeService } from './server-feat-blade.service';
 import { ServerFeatBladeController } from './server-feat-blade.controller';

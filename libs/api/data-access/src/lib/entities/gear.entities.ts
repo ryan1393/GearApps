@@ -11,7 +11,7 @@ import {
   ScannerDetail,
   Summary,
   TypeOfCheck,
-} from '@gearapps/shared/domain';
+} from '@meshforge/shared/domain';
 import { EntitySchema } from 'typeorm';
 import { bool, date, decimal, fk, int, manyToOne, num, str, uuidPrimary } from './column-helpers';
 

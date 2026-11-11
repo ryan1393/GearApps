@@ -1,10 +1,10 @@
-import { readGearAppsStyles } from './lib/read-gear-apps-styles.mjs';
+import { readMeshForgeStyles } from './lib/read-meshforge-styles.mjs';
 import {
   summarizeContextualSelectorDuplicates,
   summarizeSelectorDuplicates,
 } from './lib/css-selector-audit.mjs';
 
-const css = readGearAppsStyles();
+const css = readMeshForgeStyles();
 const raw = summarizeSelectorDuplicates(css);
 const contextual = summarizeContextualSelectorDuplicates(css);
 

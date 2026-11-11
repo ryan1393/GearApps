@@ -3,7 +3,7 @@ import {
   applySharedDatabaseIntegrity,
   GEAR_DATABASE_SCHEMA_LOCK,
   runDatabaseMigration,
-} from '@gearapps/shared/database';
+} from '@meshforge/shared/database';
 import { LAPPER_HISTORY_INTEGRITY_SQL } from './history-integrity';
 import { LAPPER_ARCHIVE_GUARD_SQL } from './archive-guard';
 import { COLLECTOR_TOKEN_PURPOSE_SQL, COLLECTOR_TOKENS_SQL } from './collector-tokens';

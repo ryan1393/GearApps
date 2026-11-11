@@ -1,5 +1,5 @@
-import { GEAR_APPS_VERSION } from '@gearapps/manufacturing/shared/util-constants';
-import { SkipAuth } from '@gearapps/manufacturing/server/util-common';
+import { MESHFORGE_VERSION } from '@meshforge/manufacturing/shared/util-constants';
+import { SkipAuth } from '@meshforge/manufacturing/server/util-common';
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import {
@@ -19,7 +19,7 @@ export class ServerFeatureHealthController {
   @Get('live')
   @SkipAuth()
   live() {
-    return { status: 'ok', service: 'gear-app-server', version: GEAR_APPS_VERSION };
+    return { status: 'ok', service: 'gear-app-server', version: MESHFORGE_VERSION };
   }
 
   @Get('ready')

@@ -19,7 +19,7 @@ for (const icon of requiredIcons) {
   }
 }
 
-const iconCssRel = 'libs/shared/dana-ui/src/styles/gear-apps/components/icons.css';
+const iconCssRel = 'libs/shared/dana-ui/src/styles/meshforge/components/icons.css';
 const iconCss = fs.readFileSync(contractPath(root, iconCssRel), 'utf8');
 if (!iconCss.includes('.gear-glyph')) throw new Error('Shared icon CSS base class is missing.');
 for (const icon of requiredIcons) {
@@ -28,8 +28,8 @@ for (const icon of requiredIcons) {
   }
 }
 
-const entry = fs.readFileSync(contractPath(root, 'libs/shared/dana-ui/src/styles/gear-apps.css'), 'utf8');
-if (!entry.includes("@import './gear-apps/components/icons.css';")) {
+const entry = fs.readFileSync(contractPath(root, 'libs/shared/dana-ui/src/styles/meshforge.css'), 'utf8');
+if (!entry.includes("@import './meshforge/components/icons.css';")) {
   throw new Error('MeshForge design-system entry point does not load shared icon CSS.');
 }
 

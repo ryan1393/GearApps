@@ -1,4 +1,4 @@
-import { BaseEntity } from '@gearapps/shared/domain';
+import { BaseEntity } from '@meshforge/shared/domain';
 
 /** Application service contract; controllers do not depend on an ORM repository. */
 export abstract class CrudService<T extends BaseEntity> {

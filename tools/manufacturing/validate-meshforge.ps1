@@ -19,7 +19,7 @@ $env:NX_ISOLATE_PLUGINS = 'false'
 # deleting the repo's shared .nx\workspace-data tree. VS Code/Nx processes may
 # legitimately hold that directory open, which previously caused EPERM and
 # aborted an otherwise-good release validation.
-$NxValidationRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("gear-apps-nx-validation-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
+$NxValidationRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("meshforge-nx-validation-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
 $env:NX_WORKSPACE_DATA_DIRECTORY = Join-Path $NxValidationRoot 'workspace-data'
 $env:NX_CACHE_DIRECTORY = Join-Path $NxValidationRoot 'cache'
 New-Item -ItemType Directory -Path $env:NX_WORKSPACE_DATA_DIRECTORY -Force | Out-Null

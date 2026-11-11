@@ -10,7 +10,7 @@
 All Angular frontends load exactly one MeshForge stylesheet from their Nx build configuration:
 
 ```text
-libs/shared/ui-tailwind/src/styles/gear-apps.css
+libs/shared/ui-tailwind/src/styles/meshforge.css
 ```
 
 That file is intentionally an **import-only entry point**. It owns module order but does not own declarations. Blade Tracking, Cutter Builder, Greenshed, Admin, and feature components must not import private modules directly.
@@ -21,8 +21,8 @@ The public entry point currently loads 22 ordered modules. The shared component 
 
 ```text
 libs/shared/ui-tailwind/src/styles/
-├── gear-apps.css
-└── gear-apps/
+├── meshforge.css
+└── meshforge/
     ├── foundation/
     │   ├── tokens.css
     │   ├── base.css
@@ -51,7 +51,7 @@ libs/shared/ui-tailwind/src/styles/
         └── typography.css
 ```
 
-`features/design-tokens.css` and `features/ui-cleanup.css` remain only as declaration-free retirement notes. They are not loaded by `gear-apps.css` and must not regain active ownership.
+`features/design-tokens.css` and `features/ui-cleanup.css` remain only as declaration-free retirement notes. They are not loaded by `meshforge.css` and must not regain active ownership.
 
 ## Ownership rules
 
@@ -146,7 +146,7 @@ npm run test:login-ui-consistency
 
 The modular style contract verifies:
 
-- `gear-apps.css` remains import-only;
+- `meshforge.css` remains import-only;
 - all 17 canonical modules exist in reviewed order;
 - retired override-only modules do not return;
 - applications load only the public entry point;
@@ -272,7 +272,7 @@ npm run test:location-identity-display
 Parent/child inventory relationships use a shared visual vocabulary from:
 
 ```text
-libs/shared/ui-tailwind/src/styles/gear-apps/features/inventory-relations.css
+libs/shared/ui-tailwind/src/styles/meshforge/features/inventory-relations.css
 ```
 
 Canonical classes include:
@@ -351,7 +351,7 @@ node tools/manufacturing/test-inventory-control-center-search-contract.mjs
 node tools/manufacturing/test-shared-table-migration-contract.mjs
 node tools/manufacturing/test-workflow-surface-consolidation-contract.mjs
 npm run audit:ui-styles
-npm run test:gear-apps
+npm run test:meshforge
 ```
 
 V69.2 must not be called a live baseline until the final Windows authoritative regression passes.

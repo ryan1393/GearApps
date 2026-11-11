@@ -1,10 +1,10 @@
-import { ServerFeatUserModule } from '@gearapps/manufacturing/server/feat-user';
-import { STRATEGY_JWT_ACCESS } from '@gearapps/manufacturing/server/util-common';
+import { ServerFeatUserModule } from '@meshforge/manufacturing/server/feat-user';
+import { STRATEGY_JWT_ACCESS } from '@meshforge/manufacturing/server/util-common';
 import {
   ENV_JWT_ACCESS_EXPIRATION_TIME,
   ENV_JWT_ACCESS_SECRET,
   ENV_SOCIAL_GOOGLE_ENABLED,
-} from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-constants';
 import { forwardRef, Module, Provider } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';

@@ -1,7 +1,7 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
-import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
-import { ICutterBody } from '@gearapps/manufacturing/shared/util-types';
+import { AbstractOrmEntity } from '@meshforge/manufacturing/server/util-common';
+import { ICutterBody } from '@meshforge/manufacturing/shared/util-types';
 import { CutterBodyDefinitionOrmEntity } from './cutter-body-definition.orm-entity';
 @Entity({ name: 'cutter_bodies' })
 export class CutterBodyOrmEntity extends AbstractOrmEntity {

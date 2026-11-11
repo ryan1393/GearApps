@@ -25,7 +25,7 @@ The Gear side consumes the frozen Dana master UI defined by `DANA_MASTER_UI_BASE
 Required order for all three Gear frontends:
 
 1. application/Tailwind entry
-2. `libs/shared/ui-tailwind/src/styles/gear-apps.css`
+2. `libs/shared/ui-tailwind/src/styles/meshforge.css`
 3. `libs/gear/ui/src/styles/gear-features.css`
 
 Dana shared UI owns reusable presentation and interaction primitives. Gear workflow presentation remains Gear-owned.
@@ -35,7 +35,7 @@ Dana shared UI owns reusable presentation and interaction primitives. Gear workf
 - Gear database/schema/data remain separate from Truck Log.
 - Gear business workflows remain unchanged during the repository merge.
 - Existing Gear ports and runtime behavior are preserved initially.
-- `npm run test:gear-apps` remains the authoritative Gear regression gate inside the future Dana Apps release gate.
+- `npm run test:meshforge` remains the authoritative Gear regression gate inside the future Dana Apps release gate.
 - No npm install is required for this readiness patch.
 - `package-lock.json` must remain unchanged.
 - Truck Log may consume Dana shared UI but does not take ownership of Gear workflow styles.

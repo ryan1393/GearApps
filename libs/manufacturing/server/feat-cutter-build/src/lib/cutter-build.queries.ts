@@ -8,8 +8,8 @@ import {
   CutterBuildOrmEntity,
   CutterEventOrmEntity,
   CutterTeardownOrmEntity,
-} from '@gearapps/manufacturing/server/data-access';
-import { DEPARTMENT_CUTTERGRIND } from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/server/data-access';
+import { DEPARTMENT_CUTTERGRIND } from '@meshforge/manufacturing/shared/util-constants';
 import { DataSource, IsNull } from 'typeorm';
 
 export function normalizeCutterSerial(

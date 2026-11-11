@@ -1,5 +1,5 @@
 /* Label printers chosen in Admin. Additive and idempotent: an existing table and its rows are left as they are. */
-import { STARTUP_SCHEMA_LOCK_SQL } from '@gearapps/manufacturing/shared/util-constants';
+import { STARTUP_SCHEMA_LOCK_SQL } from '@meshforge/manufacturing/shared/util-constants';
 
 interface SchemaQuery {
   query(sql: string, parameters?: unknown[]): Promise<unknown>;

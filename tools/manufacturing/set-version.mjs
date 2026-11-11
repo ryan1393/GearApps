@@ -27,7 +27,7 @@ export function setReleaseVersion(root, next) {
   };
   edit(
     'libs/shared/domain/src/lib/app-version.ts',
-    /(GEAR_APPS_VERSION\s*=\s*['"])[^'"]+(['"])/,
+    /(MESHFORGE_VERSION\s*=\s*['"])[^'"]+(['"])/,
     (_all, a, b) => a + next + b,
   );
   edit(

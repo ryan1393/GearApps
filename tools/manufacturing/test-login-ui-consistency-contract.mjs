@@ -1,6 +1,6 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
-import { readGearAppsStyles } from './lib/read-gear-apps-styles.mjs';
+import { readMeshForgeStyles } from './lib/read-meshforge-styles.mjs';
 
 for(const [app,nav] of [
   ['blade-tracking','gear-nav'],
@@ -19,7 +19,7 @@ for(const [app,nav] of [
 
 const login=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.html'),'utf8');
 const componentStyle=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.scss'),'utf8');
-const sharedStyle=readGearAppsStyles();
+const sharedStyle=readMeshForgeStyles();
 
 for(const marker of ['MESHFORGE','Connected Manufacturing Platform','Blade Tracking.','Cutter Builder.','Greenshed.','Sign in to MeshForge','Local accounts','>Operator<','>Admin<']){
   if(!login.includes(marker)) throw new Error(`Shared login missing ${marker}`);

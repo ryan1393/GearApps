@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 
 import { adminApiErrorText } from '../admin-api.service';
 

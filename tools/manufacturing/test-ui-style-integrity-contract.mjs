@@ -6,7 +6,7 @@ import { createRequire } from "node:module";
 const root=process.cwd();
 const req=createRequire(contractPath(root,"package.json"));
 const postcss=req("postcss");
-const entry=contractPath(root,"libs","shared","dana-ui","src","styles","gear-apps.css");
+const entry=contractPath(root,"libs","shared","dana-ui","src","styles","meshforge.css");
 
 if(!fs.existsSync(contractPath(process.cwd(), entry))) throw new Error("Missing shared MeshForge CSS entrypoint.");
 
@@ -16,7 +16,7 @@ const stripped=entryText
   .replace(/\/\/.*$/gm,"")
   .replace(/@import\s+[^;]+;/g,"")
   .trim();
-if(stripped) throw new Error("gear-apps.css must remain import-only.");
+if(stripped) throw new Error("meshforge.css must remain import-only.");
 
 function resolveImport(from,spec){
   if(!spec.startsWith(".")) return null;

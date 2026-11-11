@@ -1,8 +1,8 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
-import { readGearAppsStyles } from './lib/read-gear-apps-styles.mjs';
+import { readMeshForgeStyles } from './lib/read-meshforge-styles.mjs';
 
-const css=readGearAppsStyles();
+const css=readMeshForgeStyles();
 
 const navs=[
   'apps/blade-tracking/src/app/layout/app-nav/app-nav.component.html',

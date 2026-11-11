@@ -5,7 +5,7 @@ const swagger=fs.readFileSync(contractPath(process.cwd(), 'apps/server/src/swagg
 const auth=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/server/feat-auth/src/lib/server-feat-auth.service.ts'),'utf8');
 const login=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.ts'),'utf8');
 const loginHtml=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.html'),'utf8');
-const start=fs.readFileSync(contractPath(process.cwd(), 'tools/manufacturing/start-gear-apps.ps1'),'utf8');
+const start=fs.readFileSync(contractPath(process.cwd(), 'tools/manufacturing/start-meshforge.ps1'),'utf8');
 
 if(!swagger.includes(".addServer('/')")){
   throw new Error('Swagger must use same-origin root server.');

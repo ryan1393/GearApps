@@ -9,7 +9,7 @@ const must = (ok, message) => { if (!ok) throw new Error(message); };
 const canonicalRecord = (value) => Object.fromEntries(Object.entries(value ?? {}).sort(([a],[b]) => a.localeCompare(b)));
 const pkg = json('package.json');
 const lock = json('package-lock.json');
-must(pkg.name === '@gearapps/source', 'One root package must own GearApps and Lapper');
+must(pkg.name === '@meshforge/source', 'One root package must own GearApps and Lapper');
 must(pkg.packageManager === 'npm@11.9.0', 'The root npm toolchain must be 11.9.0');
 must(pkg.engines?.node === '24.22.1', 'The root Node toolchain must be 24.22.1');
 must(lock.name === pkg.name && lock.packages?.['']?.name === pkg.name, 'Lockfile root identity must match the unified package');
@@ -22,7 +22,7 @@ must(!nx.nxCloudAccessToken, 'Do not embed an Nx Cloud access token');
 const ignored = fs.existsSync(contractPath(process.cwd(), path.join(workspaceRoot,'.nxignore'))) ? fs.readFileSync(contractPath(process.cwd(), path.join(workspaceRoot,'.nxignore')),'utf8') : '';
 must(!/^\s*manufacturing\/(?:\*\*)?\s*$/m.test(ignored), 'Manufacturing projects must participate in the root graph');
 const aliases = json('tsconfig.base.json').compilerOptions?.paths ?? {};
-must(Object.keys(aliases).some(name => name.startsWith('@gearapps/manufacturing/')), 'Manufacturing source aliases must be rooted in the unified tsconfig');
+must(Object.keys(aliases).some(name => name.startsWith('@meshforge/manufacturing/')), 'Manufacturing source aliases must be rooted in the unified tsconfig');
 must(Object.keys(aliases).every(name => !name.startsWith('@libs/')), 'Retired @libs aliases must not return');
 const boundaries = read('eslint.config.mjs');
 must(boundaries.includes('@nx/enforce-module-boundaries'), 'Root lint must enforce Nx project boundaries');
@@ -46,7 +46,7 @@ for (const marker of ['dana-postgres:','gear-db-bootstrap:','gear-base-data-boot
 must(!/^\s*container_name\s*:/m.test(compose), 'Do not introduce global container-name collisions');
 must(!compose.includes('external:'), 'A fresh host must create its own namespaced Gear database volume');
 for (const nav of ['apps/blade-tracking/src/app/layout/app-nav/app-nav.component.ts','apps/cutter-builder/src/app/layout/cutter-builder-nav/cutter-builder-nav.component.ts','apps/greenshed/src/app/layout/greenshed-nav/greenshed-nav.component.ts']) {
-  must(read(nav).includes('@gearapps/manufacturing/shared/dana-app-config'), `${nav} lost shared navigation ownership`);
+  must(read(nav).includes('@meshforge/manufacturing/shared/dana-app-config'), `${nav} lost shared navigation ownership`);
 }
 const login = read('libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.ts');
 must(!login.includes('GearApps-E2E-Only-2026!') && !login.includes('GearApps-Admin-Only-2026!'), 'Do not embed fixture passwords in frontend bundles');

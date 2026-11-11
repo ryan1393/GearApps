@@ -2,9 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import {
   SeedModule,
   UserDatabaseSeedService,
-} from '@gearapps/manufacturing/server/data-access';
+} from '@meshforge/manufacturing/server/data-access';
 import { DataSource } from 'typeorm';
-import { withValidatedEmptyBootstrap } from '@gearapps/manufacturing/server/util-common';
+import { withValidatedEmptyBootstrap } from '@meshforge/manufacturing/server/util-common';
 
 const required = (name: string): string => {
   const value = process.env[name]?.trim();

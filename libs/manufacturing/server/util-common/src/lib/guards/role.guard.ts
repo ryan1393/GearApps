@@ -2,8 +2,8 @@ import {
   canEditGearApp,
   GearAppKey,
   GEAR_APP_EDITOR_DEPARTMENT_NAMES,
-} from '@gearapps/manufacturing/shared/util-constants';
-import { IRequestUserData } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-constants';
+import { IRequestUserData } from '@meshforge/manufacturing/shared/util-types';
 import {
   CanActivate,
   ExecutionContext,

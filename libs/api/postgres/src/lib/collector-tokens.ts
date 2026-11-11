@@ -1,4 +1,4 @@
-import { CollectorTokensService } from '@gearapps/api/feature-gear';
+import { CollectorTokensService } from '@meshforge/api/feature-gear';
 import {
   COLLECTOR_TOKEN_PREFIX,
   CollectorToken,
@@ -6,7 +6,7 @@ import {
   CollectorTokenUser,
   CreatedCollectorToken,
   DockerCollectorConnection,
-} from '@gearapps/shared/domain';
+} from '@meshforge/shared/domain';
 import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { mkdir, rename, rm, writeFile } from 'node:fs/promises';

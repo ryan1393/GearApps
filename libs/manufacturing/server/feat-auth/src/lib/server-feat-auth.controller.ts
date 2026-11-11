@@ -6,14 +6,14 @@ import {
   TokenResponseDto,
   UserDto,
   UserLoginDto,
-} from '@gearapps/manufacturing/server/data-access';
+} from '@meshforge/manufacturing/server/data-access';
 import {
   Auth,
   JwtRefreshTokenGuard,
   ReqUserId,
   SkipAuth,
-} from '@gearapps/manufacturing/server/util-common';
-import { IRequestUserData, RoleType, Uuid } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/server/util-common';
+import { IRequestUserData, RoleType, Uuid } from '@meshforge/manufacturing/shared/util-types';
 import {
   Body,
   Controller,

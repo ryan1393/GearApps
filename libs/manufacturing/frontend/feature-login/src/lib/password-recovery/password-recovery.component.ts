@@ -24,7 +24,7 @@ import {
   PASSWORD_MIN_NUMBER,
   PASSWORD_MIN_SYMBOL,
   PASSWORD_MIN_UPPERCASE,
-} from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-constants';
 
 function strongPassword(control: AbstractControl): ValidationErrors | null {
   const value = String(control.value ?? '');

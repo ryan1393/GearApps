@@ -3,7 +3,7 @@ import * as fs from 'node:fs';
 import { createTransport, SendMailOptions, Transporter } from 'nodemailer';
 import * as path from 'path';
 
-import { mailerConfig } from '@gearapps/manufacturing/server/util-common';
+import { mailerConfig } from '@meshforge/manufacturing/server/util-common';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 

@@ -1,8 +1,8 @@
 import { defer, EMPTY, expand, map, Observable, reduce } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { LabelPrinterChoiceService } from '@gearapps/manufacturing/frontend/util-common';
-import { ILocation, IPaginatedResponse, ITray } from '@gearapps/manufacturing/shared/util-types';
+import { LabelPrinterChoiceService } from '@meshforge/manufacturing/frontend/util-common';
+import { ILocation, IPaginatedResponse, ITray } from '@meshforge/manufacturing/shared/util-types';
 
 export interface CutterBody {
   id: string;

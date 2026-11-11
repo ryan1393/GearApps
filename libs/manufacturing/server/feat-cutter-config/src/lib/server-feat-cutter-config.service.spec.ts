@@ -4,8 +4,8 @@ import {
   CutterPartTypeOrmEntity,
   PartSummaryOrmEntity,
   TrayOrmEntity,
-} from '@gearapps/manufacturing/server/data-access';
-import { BladeStatus } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/server/data-access';
+import { BladeStatus } from '@meshforge/manufacturing/shared/util-types';
 import { ServerFeatCutterConfigService } from './server-feat-cutter-config.service';
 
 describe('ServerFeatCutterConfigService tray validation', () => {

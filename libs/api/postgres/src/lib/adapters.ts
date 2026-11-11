@@ -14,9 +14,9 @@ import {
   Macro,
   MacroLog,
   ScannerDetail,
-} from '@gearapps/shared/domain';
+} from '@meshforge/shared/domain';
 import { PostgresLapperStore } from './postgres-lapper.store';
-import { CrudService } from '@gearapps/api/core';
+import { CrudService } from '@meshforge/api/core';
 import { Resource, Row } from './catalog';
 
 const project = <T>(promise: Promise<unknown>): Promise<T> => promise as Promise<T>;

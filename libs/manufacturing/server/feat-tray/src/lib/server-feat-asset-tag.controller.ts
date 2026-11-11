@@ -1,5 +1,5 @@
-import { DepartmentAppEdit, Auth } from '@gearapps/manufacturing/server/util-common';
-import { RoleType } from '@gearapps/manufacturing/shared/util-types';
+import { DepartmentAppEdit, Auth } from '@meshforge/manufacturing/server/util-common';
+import { RoleType } from '@meshforge/manufacturing/shared/util-types';
 import { Body, Controller, HttpCode, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 

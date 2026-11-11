@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
-import { ScannerApi, ToastService } from '@gearapps/client/core';
+import { ScannerApi, ToastService } from '@meshforge/client/core';
 
 interface Cmd {
   label: string;

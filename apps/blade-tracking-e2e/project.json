@@ -24,7 +24,7 @@
     }
   },
   "tags": [
-    "domain:gear-apps"
+    "domain:meshforge"
   ],
   "implicitDependencies": [
     "blade-tracking"

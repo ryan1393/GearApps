@@ -12,72 +12,72 @@
       "domainMarkers": 6
     },
     {
-      "file": "src/styles/gear-apps/features/admin-core.css",
+      "file": "src/styles/meshforge/features/admin-core.css",
       "gearMarkers": 402,
       "domainMarkers": 1
     },
     {
-      "file": "src/styles/gear-apps/components/primitives.css",
+      "file": "src/styles/meshforge/components/primitives.css",
       "gearMarkers": 232,
       "domainMarkers": 38
     },
     {
-      "file": "src/styles/gear-apps/components/workflow-layout.css",
+      "file": "src/styles/meshforge/components/workflow-layout.css",
       "gearMarkers": 227,
       "domainMarkers": 0
     },
     {
-      "file": "src/styles/gear-apps/features/inventory-relations.css",
+      "file": "src/styles/meshforge/features/inventory-relations.css",
       "gearMarkers": 19,
       "domainMarkers": 102
     },
     {
-      "file": "src/styles/gear-apps/components/data-display.css",
+      "file": "src/styles/meshforge/components/data-display.css",
       "gearMarkers": 89,
       "domainMarkers": 30
     },
     {
-      "file": "src/styles/gear-apps/foundation/tokens.css",
+      "file": "src/styles/meshforge/foundation/tokens.css",
       "gearMarkers": 103,
       "domainMarkers": 0
     },
     {
-      "file": "src/styles/gear-apps/components/icons.css",
+      "file": "src/styles/meshforge/components/icons.css",
       "gearMarkers": 64,
       "domainMarkers": 0
     },
     {
-      "file": "src/styles/gear-apps/features/inventory-core.css",
+      "file": "src/styles/meshforge/features/inventory-core.css",
       "gearMarkers": 26,
       "domainMarkers": 37
     },
     {
-      "file": "src/styles/gear-apps/features/cutter-builder.css",
+      "file": "src/styles/meshforge/features/cutter-builder.css",
       "gearMarkers": 0,
       "domainMarkers": 62
     },
     {
-      "file": "src/styles/gear-apps/foundation/responsive.css",
+      "file": "src/styles/meshforge/foundation/responsive.css",
       "gearMarkers": 29,
       "domainMarkers": 22
     },
     {
-      "file": "src/styles/gear-apps/features/blade-dashboard.css",
+      "file": "src/styles/meshforge/features/blade-dashboard.css",
       "gearMarkers": 3,
       "domainMarkers": 24
     },
     {
-      "file": "src/styles/gear-apps/components/toast.css",
+      "file": "src/styles/meshforge/components/toast.css",
       "gearMarkers": 23,
       "domainMarkers": 0
     },
     {
-      "file": "src/styles/gear-apps/features/dashboard.css",
+      "file": "src/styles/meshforge/features/dashboard.css",
       "gearMarkers": 19,
       "domainMarkers": 0
     },
     {
-      "file": "src/styles/gear-apps/layout/navigation-shell.css",
+      "file": "src/styles/meshforge/layout/navigation-shell.css",
       "gearMarkers": 17,
       "domainMarkers": 2
     },
@@ -87,17 +87,17 @@
       "domainMarkers": 8
     },
     {
-      "file": "src/styles/gear-apps.css",
+      "file": "src/styles/meshforge.css",
       "gearMarkers": 17,
       "domainMarkers": 0
     },
     {
-      "file": "src/styles/gear-apps/features/scrap-blades.css",
+      "file": "src/styles/meshforge/features/scrap-blades.css",
       "gearMarkers": 15,
       "domainMarkers": 0
     },
     {
-      "file": "src/styles/gear-apps/features/typography.css",
+      "file": "src/styles/meshforge/features/typography.css",
       "gearMarkers": 12,
       "domainMarkers": 0
     },
@@ -107,7 +107,7 @@
       "domainMarkers": 0
     },
     {
-      "file": "src/styles/gear-apps/layout/app-shell.css",
+      "file": "src/styles/meshforge/layout/app-shell.css",
       "gearMarkers": 7,
       "domainMarkers": 3
     },
@@ -132,7 +132,7 @@
       "domainMarkers": 0
     },
     {
-      "file": "src/styles/gear-apps/foundation/base.css",
+      "file": "src/styles/meshforge/foundation/base.css",
       "gearMarkers": 4,
       "domainMarkers": 0
     },
@@ -152,7 +152,7 @@
       "domainMarkers": 0
     },
     {
-      "file": "src/styles/gear-apps/components/access-states.css",
+      "file": "src/styles/meshforge/components/access-states.css",
       "gearMarkers": 2,
       "domainMarkers": 0
     },

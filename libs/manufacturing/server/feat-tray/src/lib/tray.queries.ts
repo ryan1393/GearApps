@@ -5,7 +5,7 @@
 import {
   isPendingGrindingStatus,
   trayWorkflowEligibility,
-} from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-constants';
 import { In, IsNull, Not, Repository } from 'typeorm';
 import {
   BladeOrmEntity,
@@ -17,8 +17,8 @@ import {
   CutterBuildTrayOrmEntity,
   InventoryListQueryDto,
   TrayOrmEntity,
-} from '@gearapps/manufacturing/server/data-access';
-import { BladeStatus } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/server/data-access';
+import { BladeStatus } from '@meshforge/manufacturing/shared/util-types';
 
 export async function listTrays(
   trayRepo: Repository<TrayOrmEntity>,

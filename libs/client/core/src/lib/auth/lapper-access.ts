@@ -1,6 +1,6 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
+import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
 
 /**
  * What the signed-in user may do in Lapper. The API lets only GearApps

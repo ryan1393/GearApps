@@ -4,7 +4,7 @@ _Last updated: 2026-08-27 — V69.2 combined UI completion candidate_
 ## 1. CURRENT WORKING PROJECT / BASELINE
 
 - Active MeshForge workspace:
-  `C:\Users\ryan.thompson\Downloads\gear-appsv0.1`
+  `C:\Users\ryan.thompson\Downloads\meshforgev0.1`
 - MeshForge is a Windows-hosted Nx monorepo.
 - Frontends:
   - Blade Tracking — port 4200
@@ -13,17 +13,17 @@ _Last updated: 2026-08-27 — V69.2 combined UI completion candidate_
 - Shared NestJS API — port 3333.
 - Stack: Angular, NestJS, Nx, TypeScript, PostgreSQL target DB, SQL Server legacy source, Excel supplemental data, TypeORM, PowerShell/CMD local tooling.
 - Important root commands:
-  - `SETUP-GEAR-APPS.cmd`
-  - `START-GEAR-APPS.cmd`
+  - `SETUP-MESHFORGE.cmd`
+  - `START-MESHFORGE.cmd`
   - `RESET-AND-REFRESH-ALL-DATA.cmd`
-  - authoritative regression: `npm run test:gear-apps`
-- Current patch target is always `gear-appsv0.1`.
+  - authoritative regression: `npm run test:meshforge`
+- Current patch target is always `meshforgev0.1`.
 - Source-only patches do NOT run `npm install`.
 - If `package-lock.json` changes, setup/install is required.
 - Confirmed live Windows known-good baseline: **V69.0 Shared UI Foundation**.
   - deep scans passed;
   - focused UI contracts passed;
-  - authoritative `npm run test:gear-apps` passed;
+  - authoritative `npm run test:meshforge` passed;
   - MeshForge restarted successfully;
   - `package-lock.json` remained unchanged and no npm install was required.
 - Current source package under review: **V69.2 combined Inventory/Table/Workflow completion**.
@@ -57,7 +57,7 @@ These are now standing MeshForge rules.
 8. Generated PowerShell arrays must not contain a trailing comma before `)`.
 9. Future patch validation must inspect maintained contract expectations BEFORE mutation. Do not assume semantically equivalent markup will satisfy a strict contract.
 10. Do not execute every `tools\manufacturing\test-*.mjs` directly just because it exists.
-    - `npm run test:gear-apps` / `tools\manufacturing\run-all-tests.ps1` is the authoritative orchestration.
+    - `npm run test:meshforge` / `tools\manufacturing\run-all-tests.ps1` is the authoritative orchestration.
     - Some tests require fixtures, DB state, ordering, environment setup, or the normal harness.
     - Only contracts already proven independently runnable should be invoked directly.
 11. When a patch fails after modifying source, rollback must restore the whole patch batch, not leave a partially applied UI cleanup.
@@ -81,10 +81,10 @@ Primary goals:
 - maintain professional Dana enterprise visual language.
 
 Shared styling source:
-`libs\shared\ui-tailwind\src\styles\gear-apps.css`
+`libs\shared\ui-tailwind\src\styles\meshforge.css`
 
 Supporting shared style area:
-`libs\shared\ui-tailwind\src\styles\gear-apps\...`
+`libs\shared\ui-tailwind\src\styles\meshforge\...`
 
 Known design goals:
 - desktop 1500px+ shop-floor scale;
@@ -130,7 +130,7 @@ branding direction; older notes below that mention the Dana Diamond describe his
 - Shared table/filter rhythm is owned by `components/data-display.css`.
 - The old V53/V65 table override debt and retired V35.3 Admin marker were removed/consolidated.
 - Topbar and table sort/filter/close controls use shared semantic SVG icons instead of Unicode controls.
-- V69.0 deep scans, focused contracts, and authoritative `npm run test:gear-apps` passed on Windows.
+- V69.0 deep scans, focused contracts, and authoritative `npm run test:meshforge` passed on Windows.
 
 ### Implemented in the V69.2 combined candidate
 - Inventory Control Center has full-database server-side browsing search on Trays, Containers, Locations, and Blades.
@@ -186,7 +186,7 @@ A long sequence of V55–V67 patches exposed both real contract drift and mistak
 ### Key lessons from V55–V66
 - Several old tests were stale after style ownership was moved into modular shared CSS.
 - Duplicate-selector / style-source contracts exposed old selector debt.
-- `gear-apps.css` is intended to remain an import-only public entry point.
+- `meshforge.css` is intended to remain an import-only public entry point.
 - Style declarations belong in MeshForge style modules.
 - Historical contracts that no longer represent the maintained architecture should be archived/reconciled instead of repeatedly weakening new source to satisfy obsolete assumptions.
 
@@ -238,7 +238,7 @@ Standing rule:
 
 ### V67.1
 No-source-change baseline patch switched back to:
-`npm run test:gear-apps`
+`npm run test:meshforge`
 
 This exposed the REAL authoritative harness blocker:
 `tools\manufacturing\run-all-tests.ps1`
@@ -294,7 +294,7 @@ Current work is the combined V69.2 UI completion package:
 5. de-box Cutter Builder and Greenshed workflow pages through the shared workflow-layout module;
 6. run deep JSON, Node, PowerShell, CSS, template, and TypeScript checks;
 7. run the focused V69.2 contracts;
-8. run authoritative `npm run test:gear-apps`;
+8. run authoritative `npm run test:meshforge`;
 9. roll back the complete V69.2 source batch on any failure;
 10. only mark V69.2 as the new baseline after the live Windows authoritative regression passes.
 
@@ -306,7 +306,7 @@ The user requested no intermediate V69.1 command. V69.1 and V69.2 are therefore 
 
 The authoritative regression command is:
 
-`npm run test:gear-apps`
+`npm run test:meshforge`
 
 which calls the maintained test harness:
 
@@ -325,7 +325,7 @@ Current known useful standalone UI contracts include some of:
 - `test-angular-template-structure-contract.mjs`
 - `test-scrap-blade-history-contract.mjs`
 
-But the authoritative final gate remains `npm run test:gear-apps`.
+But the authoritative final gate remains `npm run test:meshforge`.
 
 ---
 
@@ -493,7 +493,7 @@ When a new MeshForge chat starts:
 - do not redo dashboard `danaTable`, Admin search, Dana branding, large-screen shell scaling, or the V69.0 token/icon cleanup;
 - preserve the combined V69.2 scope: Inventory Control Center search, 23/23 shared tables with relationship-safe grouping, and shared workflow-page consolidation;
 - deliver actual CMD/code artifacts, never pictures/mockups unless explicitly requested;
-- significant releases require exact source hashes, backups, full-batch rollback, deep scans, focused contracts, and authoritative `npm run test:gear-apps`;
+- significant releases require exact source hashes, backups, full-batch rollback, deep scans, focused contracts, and authoritative `npm run test:meshforge`;
 - do not claim V69.2 is green until its CMD passes on the Windows workspace.
 
 ---
@@ -503,7 +503,7 @@ When a new MeshForge chat starts:
 ### V68.4.1 — baseline recovery
 - Deep JSON, Node, and PowerShell scans passed.
 - Focused recovery contracts passed.
-- Authoritative `npm run test:gear-apps` passed.
+- Authoritative `npm run test:meshforge` passed.
 - Runtime E2E tray/container fixtures use canonical numeric `T...` / `C...` serials.
 - `package-lock.json` did not change; no npm install was required.
 
@@ -512,7 +512,7 @@ When a new MeshForge chat starts:
 - Dead/conflicting cleanup/token declaration sources retired.
 - Shared table/filter ownership consolidated.
 - Semantic SVG controls replaced old Unicode sort/search/close controls.
-- Deep scans, focused contracts, and authoritative `npm run test:gear-apps` passed live on Windows.
+- Deep scans, focused contracts, and authoritative `npm run test:meshforge` passed live on Windows.
 - MeshForge restarted successfully.
 - V69.0 is the current confirmed source baseline.
 
@@ -542,4 +542,4 @@ Static review status:
 
 Final status:
 - **PENDING LIVE WINDOWS CMD VALIDATION.**
-- The final package must pass focused contracts and authoritative `npm run test:gear-apps` before V69.2 becomes the new known-good baseline.
+- The final package must pass focused contracts and authoritative `npm run test:meshforge` before V69.2 becomes the new known-good baseline.

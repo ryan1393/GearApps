@@ -1,5 +1,5 @@
 import { Route } from '@angular/router';
-import { adminRoleGuard, authGuard } from '@gearapps/manufacturing/frontend/data-access-common';
+import { adminRoleGuard, authGuard } from '@meshforge/manufacturing/frontend/data-access-common';
 
 export const appRoutes: Route[] = [
   { path: '', pathMatch: 'full', redirectTo: 'greenshed' },
@@ -7,7 +7,7 @@ export const appRoutes: Route[] = [
     path: 'greenshed',
     canActivate: [authGuard],
     loadChildren: () =>
-      import('@gearapps/manufacturing/frontend/feature-greenshed').then(
+      import('@meshforge/manufacturing/frontend/feature-greenshed').then(
         (m) => m.frontendFeatureGreenshedRoutes,
       ),
   },
@@ -15,18 +15,18 @@ export const appRoutes: Route[] = [
     path: 'admin',
     canActivate: [authGuard, adminRoleGuard],
     loadChildren: () =>
-      import('@gearapps/manufacturing/frontend/feature-admin-users').then(
+      import('@meshforge/manufacturing/frontend/feature-admin-users').then(
         (m) => m.frontendFeatureAdminUsersRoutes,
       ),
   },
   {
     path: 'login',
     loadChildren: () =>
-      import('@gearapps/manufacturing/frontend/feature-login').then(
+      import('@meshforge/manufacturing/frontend/feature-login').then(
         (m) => m.frontendFeatureLoginRoutes,
       ),
   },
-  { path: 'forgot-password', loadChildren: () => import('@gearapps/manufacturing/frontend/feature-login').then(m => m.frontendForgotPasswordRoutes) },
-  { path: 'reset-password', loadChildren: () => import('@gearapps/manufacturing/frontend/feature-login').then(m => m.frontendResetPasswordRoutes) },
+  { path: 'forgot-password', loadChildren: () => import('@meshforge/manufacturing/frontend/feature-login').then(m => m.frontendForgotPasswordRoutes) },
+  { path: 'reset-password', loadChildren: () => import('@meshforge/manufacturing/frontend/feature-login').then(m => m.frontendResetPasswordRoutes) },
   { path: '**', redirectTo: 'greenshed' },
 ];

@@ -19,7 +19,7 @@ MeshForge V69.2.9 freezes the Dana shared UI as the master presentation foundati
 Each Gear frontend loads styles in this order:
 
 1. Application/Tailwind entry
-2. `libs/shared/ui-tailwind/src/styles/gear-apps.css`
+2. `libs/shared/ui-tailwind/src/styles/meshforge.css`
 3. `libs/gear/ui/src/styles/gear-features.css`
 
 ## Responsive platform rules

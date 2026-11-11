@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { BaseEntity } from '@gearapps/shared/domain';
+import { BaseEntity } from '@meshforge/shared/domain';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from './api-config';
 

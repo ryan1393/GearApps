@@ -7,7 +7,7 @@ const {
   compareOriginalProjection,
   runDatabaseMigration,
   SHARED_CORE_INTEGRITY_SQL,
-} = require('@gearapps/shared/database');
+} = require('@meshforge/shared/database');
 const { migrateLapperPostgres } = require('../../libs/api/postgres/src/lib/schema.ts');
 if (
   process.env.GEAR_APPS_ALLOW_TEST_ACCOUNTS !== 'YES' ||

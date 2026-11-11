@@ -2,7 +2,7 @@ import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
+import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
 import { jwtInterceptor } from './jwt.interceptor';
 
 describe('JWT credential boundaries and session recovery', () => {

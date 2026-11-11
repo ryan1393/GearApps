@@ -2,20 +2,20 @@ import { AdminMasterDataController } from './admin-master-data.controller';
 import { AdminMasterDataService } from './admin-master-data.service';
 import { EnvironmentSettingsController } from './environment-settings.controller';
 import { EnvironmentSettingsService } from './environment-settings.service';
-import { ServerFeatGreenshedModule } from '@gearapps/manufacturing/server/feat-greenshed';
-import { ServerFeatCutterBuildModule } from '@gearapps/manufacturing/server/feat-cutter-build';
-import { ServerFeatCutterConfigModule } from '@gearapps/manufacturing/server/feat-cutter-config';
-import { ServerFeatAuthModule } from '@gearapps/manufacturing/server/feat-auth';
-import { ServerFeatBladeModule } from '@gearapps/manufacturing/server/feat-blade';
-import { ServerFeatBladeTrayModule } from '@gearapps/manufacturing/server/feat-blade-tray';
-import { ServerFeatContainerModule } from '@gearapps/manufacturing/server/feat-container';
-import { ServerFeatContainerTrayModule } from '@gearapps/manufacturing/server/feat-container-tray';
-import { ServerFeatureHealthModule } from '@gearapps/manufacturing/server/feat-health';
-import { ServerFeatLocationModule } from '@gearapps/manufacturing/server/feat-location';
-import { ServerFeatLocationTrayModule } from '@gearapps/manufacturing/server/feat-location-tray';
-import { ServerFeatPartSummaryModule } from '@gearapps/manufacturing/server/feat-part-summary';
-import { ServerFeatTrayModule } from '@gearapps/manufacturing/server/feat-tray';
-import { ServerFeatUserModule } from '@gearapps/manufacturing/server/feat-user';
+import { ServerFeatGreenshedModule } from '@meshforge/manufacturing/server/feat-greenshed';
+import { ServerFeatCutterBuildModule } from '@meshforge/manufacturing/server/feat-cutter-build';
+import { ServerFeatCutterConfigModule } from '@meshforge/manufacturing/server/feat-cutter-config';
+import { ServerFeatAuthModule } from '@meshforge/manufacturing/server/feat-auth';
+import { ServerFeatBladeModule } from '@meshforge/manufacturing/server/feat-blade';
+import { ServerFeatBladeTrayModule } from '@meshforge/manufacturing/server/feat-blade-tray';
+import { ServerFeatContainerModule } from '@meshforge/manufacturing/server/feat-container';
+import { ServerFeatContainerTrayModule } from '@meshforge/manufacturing/server/feat-container-tray';
+import { ServerFeatureHealthModule } from '@meshforge/manufacturing/server/feat-health';
+import { ServerFeatLocationModule } from '@meshforge/manufacturing/server/feat-location';
+import { ServerFeatLocationTrayModule } from '@meshforge/manufacturing/server/feat-location-tray';
+import { ServerFeatPartSummaryModule } from '@meshforge/manufacturing/server/feat-part-summary';
+import { ServerFeatTrayModule } from '@meshforge/manufacturing/server/feat-tray';
+import { ServerFeatUserModule } from '@meshforge/manufacturing/server/feat-user';
 import {
   appConfig,
   dbConfig,
@@ -25,13 +25,13 @@ import {
   QueryFailedFilter,
   TypeormConfigService,
   validationSchema,
-} from '@gearapps/manufacturing/server/util-common';
-import { ServerUtilMailerModule } from '@gearapps/manufacturing/server/util-mailer';
+} from '@meshforge/manufacturing/server/util-common';
+import { ServerUtilMailerModule } from '@meshforge/manufacturing/server/util-mailer';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
-import { JwtAccessTokenGuard } from '@gearapps/manufacturing/server/util-common';
-import { PostgresLapperModule } from '@gearapps/api/postgres';
+import { JwtAccessTokenGuard } from '@meshforge/manufacturing/server/util-common';
+import { PostgresLapperModule } from '@meshforge/api/postgres';
 import { TerminusModule } from '@nestjs/terminus';
 import { TypeOrmModule } from '@nestjs/typeorm';
 

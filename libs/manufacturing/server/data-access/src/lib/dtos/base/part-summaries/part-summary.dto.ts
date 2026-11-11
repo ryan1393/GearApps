@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { AbstractDto, AbstractDtoOptions } from '@gearapps/manufacturing/server/util-common';
+import { AbstractDto, AbstractDtoOptions } from '@meshforge/manufacturing/server/util-common';
 import { PartSummaryOrmEntity } from '../../../database/entities/base/part-summary.orm-entity';
 
 export type PartSummaryDtoOptions = AbstractDtoOptions;

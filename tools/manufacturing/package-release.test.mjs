@@ -26,7 +26,7 @@ test('release keeps all applications, root dependency authority and shared UI', 
     'apps/server/src/main.ts',
     'apps/server/src/bootstrap-database.ts',
     'libs/shared/dana-ui/src/index.ts',
-    'libs/shared/dana-ui/src/styles/gear-apps.css',
+    'libs/shared/dana-ui/src/styles/meshforge.css',
   ]);
 });
 

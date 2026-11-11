@@ -4,12 +4,12 @@ import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@a
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { GearScannerFocusDirective, GearToastService } from '@gearapps/manufacturing/frontend/util-common';
+import { GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 import {
   GreenshedApiService, GreenshedBuild, GreenshedReferenceData,
   FREQUENCY_MEASUREMENT_FIELDS, CMM_MEASUREMENT_FIELDS,
   FrequencyMeasurements, CmmMeasurements, greenshedApiErrorText,
-} from '@gearapps/manufacturing/frontend/data-access-greenshed';
+} from '@meshforge/manufacturing/frontend/data-access-greenshed';
 import { DanaPageHeaderComponent } from '@dana/ui';
 
 @Component({

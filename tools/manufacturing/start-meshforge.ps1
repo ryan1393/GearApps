@@ -125,16 +125,16 @@ if (-not $NoReset) {
 
 $NxWorker = Join-Path $WorkspaceRoot 'node_modules\nx\dist\src\project-graph\plugins\isolation\plugin-worker.js'
 if (-not (Test-Path $NxWorker)) {
-    throw 'Nx dependencies are not installed. Run commands\SETUP-GEAR-APPS.cmd first.'
+    throw 'Nx dependencies are not installed. Run commands\SETUP-MESHFORGE.cmd first.'
 }
 & node --check $NxWorker *> $null
 if ($LASTEXITCODE -ne 0) {
-    throw 'The installed Nx plugin-worker file is corrupted. Run commands\SETUP-GEAR-APPS.cmd for a clean reinstall.'
+    throw 'The installed Nx plugin-worker file is corrupted. Run commands\SETUP-MESHFORGE.cmd for a clean reinstall.'
 }
 
 $NxVersionOutput = (& npx --no-install nx --version 2>&1 | Out-String).Trim()
 if ($LASTEXITCODE -ne 0 -or -not $NxVersionOutput) {
-    throw "Nx CLI could not execute from this installation. Run commands\SETUP-GEAR-APPS.cmd again. Output: $NxVersionOutput"
+    throw "Nx CLI could not execute from this installation. Run commands\SETUP-MESHFORGE.cmd again. Output: $NxVersionOutput"
 }
 Write-Host "[PASS] Nx installation ready: $NxVersionOutput" -ForegroundColor Green
 
@@ -205,5 +205,5 @@ Write-Host 'API, Blade Tracking, Cutter Builder, and Green Shed are running in s
 Write-Host 'Close those windows (or press Ctrl+C in each) to stop the programs.'
 Write-Host ''
 
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'show-gear-apps-commands.ps1') -Compact
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'show-meshforge-commands.ps1') -Compact
 

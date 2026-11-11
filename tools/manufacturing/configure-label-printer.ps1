@@ -43,5 +43,5 @@ Write-Host ''
 Write-Host '[PASS] MeshForge IPL label printer configured.' -ForegroundColor Green
 Write-Host "Printer: $HostName`:$Port" -ForegroundColor Cyan
 Write-Host 'No label was printed by this configuration command.' -ForegroundColor DarkGray
-Write-Host 'Restart commands\START-GEAR-APPS.cmd before using Print Tag.' -ForegroundColor Yellow
+Write-Host 'Restart commands\START-MESHFORGE.cmd before using Print Tag.' -ForegroundColor Yellow
 

@@ -1,7 +1,7 @@
 import { IsBoolean, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { ICreateTray } from '@gearapps/manufacturing/shared/util-types';
+import { ICreateTray } from '@meshforge/manufacturing/shared/util-types';
 
 export class CreateTrayDto implements ICreateTray {
   @ApiProperty({ type: String })

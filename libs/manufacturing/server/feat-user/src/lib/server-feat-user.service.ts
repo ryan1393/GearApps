@@ -7,12 +7,12 @@ import {
   PaginationOptionsDto,
   PaginationService,
   UserOrmEntity,
-} from '@gearapps/manufacturing/server/data-access';
+} from '@meshforge/manufacturing/server/data-access';
 import {
   IResetPasswordEmailContext,
   IVerifyEmailContext,
   ServerUtilMailerService,
-} from '@gearapps/manufacturing/server/util-mailer';
+} from '@meshforge/manufacturing/server/util-mailer';
 import {
   AuthProviderType,
   IForgotPasswordPayload,
@@ -22,7 +22,7 @@ import {
   IUserEntity,
   RoleType,
   Uuid,
-} from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-types';
 import {
   BadRequestException,
   ConflictException,

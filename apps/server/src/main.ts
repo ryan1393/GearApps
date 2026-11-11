@@ -1,9 +1,9 @@
-import { warnOnWeakJwtSecrets } from '@gearapps/manufacturing/server/util-common';
+import { warnOnWeakJwtSecrets } from '@meshforge/manufacturing/server/util-common';
 import {
   ENV_API_PREFIX,
   ENV_ENABLE_SWAGGER,
   ENV_SERVER_PORT,
-} from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-constants';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';

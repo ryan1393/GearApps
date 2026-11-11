@@ -167,7 +167,7 @@ function Remove-DirectoryRobust {
 
     throw @"
 Could not remove '$Path' after $Attempts attempts because Windows still has a file or folder open.
-Close any terminals/Explorer windows that are inside this MeshForge folder, then run commands\SETUP-GEAR-APPS.cmd again.
+Close any terminals/Explorer windows that are inside this MeshForge folder, then run commands\SETUP-MESHFORGE.cmd again.
 The setup script did not continue with a partial dependency tree.
 "@
 }
@@ -191,7 +191,7 @@ function Get-DependencyCachePath {
         if ($env:LOCALAPPDATA) {
             $cacheBase = Join-Path $env:LOCALAPPDATA 'GearApps\dependency-cache'
         } else {
-            $cacheBase = Join-Path $env:USERPROFILE '.gear-apps\dependency-cache'
+            $cacheBase = Join-Path $env:USERPROFILE '.meshforge\dependency-cache'
         }
     }
     return (Join-Path $cacheBase (Get-DependencyCacheKey))
@@ -430,7 +430,7 @@ Write-Host ''
 Write-Host '==============================================' -ForegroundColor Green
 Write-Host ' MeshForge setup completed successfully.' -ForegroundColor Green
 Write-Host '==============================================' -ForegroundColor Green
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'show-gear-apps-commands.ps1') -Compact
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'show-meshforge-commands.ps1') -Compact
 
 if ($RunTests) {
     Write-Host 'Running MeshForge test suite...' -ForegroundColor Cyan

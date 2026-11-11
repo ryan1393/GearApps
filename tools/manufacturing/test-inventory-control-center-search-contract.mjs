@@ -21,7 +21,7 @@ const locationService = read('libs/manufacturing/server/feat-location/src/lib/se
 const api = read('libs/manufacturing/frontend/data-access-blade-tracking/src/lib/blade-tracking-api.service.ts');
 const pageTs = read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/inventory-overview/inventory-overview.component.ts');
 const pageHtml = read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/inventory-overview/inventory-overview.component.html');
-const inventoryCss = read('libs/shared/dana-ui/src/styles/gear-apps/features/inventory-core.css');
+const inventoryCss = read('libs/shared/dana-ui/src/styles/meshforge/features/inventory-core.css');
 
 mustInclude(dto, [
   'export class InventoryListQueryDto extends PaginationOptionsDto',

@@ -5,7 +5,7 @@
  * exactly as it is and its mappings, seeds and per-run/per-shift ledger are preserved.
  * Created only when the DSF reader is switched on.
  */
-import { STARTUP_SCHEMA_LOCK_SQL } from '@gearapps/manufacturing/shared/util-constants';
+import { STARTUP_SCHEMA_LOCK_SQL } from '@meshforge/manufacturing/shared/util-constants';
 
 interface SchemaQuery {
   query(sql: string, parameters?: unknown[]): Promise<unknown>;

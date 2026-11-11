@@ -8,11 +8,11 @@ import {
   OnInit,
   } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@meshforge/manufacturing/frontend/util-common';
 import { Observable } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
+import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
 import {
   CuttergrindNumberedShelfTag,
   CuttergrindRoughShelfTag,
@@ -20,7 +20,7 @@ import {
   parseCuttergrindNumberedShelfTag,
   parseSummaryShelfTag,
   SummaryShelfTag,
-} from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-constants';
 import {
   AdminApiService,
   AdminLocationRow,

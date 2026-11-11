@@ -20,7 +20,7 @@ const testFiles=walk(path.join(root,'tools','manufacturing'))
 
 const migrationMarkers=[
   'app-nav.component.html','cutter-builder-nav.component.html','greenshed-nav.component.html',
-  'gear-apps.css','project.json','package.json','package-lock.json','run-all-tests.ps1',
+  'meshforge.css','project.json','package.json','package-lock.json','run-all-tests.ps1',
   'ui-tailwind/src/index.ts','brand-mark','side-link','nav-heading','gear-page',
   'gear-panel','gear-btn','gear-table','gear-sidebar','gear-topbar'
 ];

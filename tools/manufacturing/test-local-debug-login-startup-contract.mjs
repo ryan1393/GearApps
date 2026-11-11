@@ -4,7 +4,7 @@ import path from 'node:path';
 
 const root = process.cwd();
 const loginPath = contractPath(root, 'libs/manufacturing/frontend/feature-login/src/lib/frontend-feature-login/frontend-feature-login.component.ts');
-const startPath = contractPath(root, 'tools/manufacturing/start-gear-apps.ps1');
+const startPath = contractPath(root, 'tools/manufacturing/start-meshforge.ps1');
 const login = fs.readFileSync(contractPath(process.cwd(), loginPath), 'utf8');
 const start = fs.readFileSync(contractPath(process.cwd(), startPath), 'utf8');
 

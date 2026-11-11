@@ -5,8 +5,8 @@ import {
   PAGINATION_DEFAULT_LIMIT,
   PAGINATION_DEFAULT_PAGE,
   PAGINATION_DEFAULT_PER_PAGE,
-} from '@gearapps/manufacturing/shared/util-constants';
-import { IPaginationOptions, SortOrderType } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-constants';
+import { IPaginationOptions, SortOrderType } from '@meshforge/manufacturing/shared/util-types';
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 
 export class PaginationOptionsDto implements IPaginationOptions {

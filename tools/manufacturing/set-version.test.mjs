@@ -27,7 +27,7 @@ function fixture() {
   );
   put(
     'libs/shared/domain/src/lib/app-version.ts',
-    "export const GEAR_APPS_VERSION = '1.2.3';\n",
+    "export const MESHFORGE_VERSION = '1.2.3';\n",
   );
   put(
     'apps/lapper-read/Directory.Build.props',
@@ -71,7 +71,7 @@ test('version ownership updates package and lock versions without changing depen
     );
     assert.match(
       f.text('libs/shared/domain/src/lib/app-version.ts'),
-      /GEAR_APPS_VERSION = '1\.2\.4'/,
+      /MESHFORGE_VERSION = '1\.2\.4'/,
     );
     assert.equal(f.text('README.md'), '# GearApps 1.2.4\n');
     assert.equal(f.text('docs/manufacturing/README.md'), '# MeshForge 1.2.4\n');
@@ -111,7 +111,7 @@ test('missing collector version marker cannot change the release partially', () 
     assert.equal(f.read('package.json').version, '1.2.3');
     assert.match(
       f.text('libs/shared/domain/src/lib/app-version.ts'),
-      /GEAR_APPS_VERSION = '1\.2\.3'/,
+      /MESHFORGE_VERSION = '1\.2\.3'/,
     );
   } finally {
     fs.rmSync(f.root, { recursive: true, force: true });

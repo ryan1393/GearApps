@@ -1,6 +1,6 @@
-import { BladeStatus } from '@gearapps/manufacturing/shared/util-types';
+import { BladeStatus } from '@meshforge/manufacturing/shared/util-types';
 import { FindOptionsWhere, Repository } from 'typeorm';
-import { beginWorkflowJournal } from '@gearapps/manufacturing/server/data-access';
+import { beginWorkflowJournal } from '@meshforge/manufacturing/server/data-access';
 
 import {
   BladeTrayOrmEntity,
@@ -12,14 +12,14 @@ import {
   TrayOrmEntity,
   PaginationOptionsDto,
   PaginationService,
-} from '@gearapps/manufacturing/server/data-access';
+} from '@meshforge/manufacturing/server/data-access';
 import {
   ILocationTray,
   ILocationTrayEntity,
   IPaginatedResponse,
   Uuid,
-} from '@gearapps/manufacturing/shared/util-types';
-import { parseCuttergrindNumberedShelfTag, parseCuttergrindRoughShelfTag, parseSummaryShelfTag } from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-types';
+import { parseCuttergrindNumberedShelfTag, parseCuttergrindRoughShelfTag, parseSummaryShelfTag } from '@meshforge/manufacturing/shared/util-constants';
 import { ConflictException, Injectable, Logger, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 

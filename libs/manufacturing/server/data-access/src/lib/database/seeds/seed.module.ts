@@ -5,7 +5,7 @@ import {
   mailerConfig,
   TypeormConfigService,
   validationSchema,
-} from '@gearapps/manufacturing/server/util-common';
+} from '@meshforge/manufacturing/server/util-common';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';

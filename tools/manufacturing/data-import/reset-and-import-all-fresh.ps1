@@ -164,5 +164,5 @@ Write-Host 'Reusable trays                  : 300 (T0001 .. T0300)'
 Write-Host 'Reusable containers             : 100 (C0001 .. C0100)'
 Write-Host 'Mock inventory                  : SEEDED across locations / coater / Green Shed shelves'
 Write-Host ''
-Write-Host 'Now start MeshForge normally with commands\START-GEAR-APPS.cmd.' -ForegroundColor Cyan
+Write-Host 'Now start MeshForge normally with commands\START-MESHFORGE.cmd.' -ForegroundColor Cyan
 

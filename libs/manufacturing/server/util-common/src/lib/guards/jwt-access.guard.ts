@@ -14,7 +14,7 @@ import {
   COLLECTOR_TOKEN_RESOLVER,
   CollectorTokenResolver,
   collectorTokenAllows,
-} from '@gearapps/shared/domain';
+} from '@meshforge/shared/domain';
 
 import { SKIP_AUTH_KEY, STRATEGY_JWT_ACCESS } from '../constants';
 import { TokenExpiredException } from '../exceptions';

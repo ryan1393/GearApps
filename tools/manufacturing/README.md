@@ -6,8 +6,8 @@ Operational scripts and data utilities live in this folder.
 
 | Script | Purpose |
 | --- | --- |
-| `setup-gear-apps.ps1` | First-time/dependency setup |
-| `start-gear-apps.ps1` | Start API and all three applications |
+| `setup-meshforge.ps1` | First-time/dependency setup |
+| `start-meshforge.ps1` | Start API and all three applications |
 | `run-all-tests.ps1` | Master test runner |
 | `smoke-test-api.ps1` | Read-only API smoke checks |
 | `test-all-api-routes.ps1` | API route compatibility checks |

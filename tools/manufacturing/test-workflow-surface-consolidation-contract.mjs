@@ -4,11 +4,11 @@ import path from 'node:path';
 
 const root = process.cwd();
 const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8').replace(/^\uFEFF/, '');
-const entry = read('libs/shared/dana-ui/src/styles/gear-apps.css');
-const cssRel = 'libs/shared/dana-ui/src/styles/gear-apps/components/workflow-layout.css';
+const entry = read('libs/shared/dana-ui/src/styles/meshforge.css');
+const cssRel = 'libs/shared/dana-ui/src/styles/meshforge/components/workflow-layout.css';
 const css = read(cssRel);
 
-if (!entry.includes("@import './gear-apps/components/workflow-layout.css';")) {
+if (!entry.includes("@import './meshforge/components/workflow-layout.css';")) {
   throw new Error('Public MeshForge style graph is not loading workflow-layout.css.');
 }
 if (css.split(/\r?\n/).length > 520) throw new Error('workflow-layout.css exceeds the 520-line module ceiling.');
@@ -74,7 +74,7 @@ if (!pull.includes('GSR- + Summary for RING or GSP- + Summary for PINION')) {
 }
 if (!pull.includes('shelf.serial_number')) throw new Error('Greenshed Pull must display the scannable shelf serial.');
 
-const handoff = read('docs/manufacturing/GEAR-APPS-AI-CHAT-README.md');
+const handoff = read('docs/manufacturing/MESHFORGE-AI-CHAT-README.md');
 for (const marker of [
   'V69.2 COMBINED UI COMPLETION CANDIDATE',
   'full-database search for Inventory Control Center',

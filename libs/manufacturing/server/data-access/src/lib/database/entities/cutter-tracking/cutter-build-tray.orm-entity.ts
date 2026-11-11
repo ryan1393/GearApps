@@ -1,7 +1,7 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
-import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { AbstractOrmEntity } from '@meshforge/manufacturing/server/util-common';
 import { TrayOrmEntity } from '../blade-tracking/tray.orm-entity';
 import { CutterBuildOrmEntity } from './cutter-build.orm-entity';
 

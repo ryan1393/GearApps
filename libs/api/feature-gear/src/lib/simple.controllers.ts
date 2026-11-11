@@ -2,7 +2,7 @@
  * Entities with no custom queries: a service + controller each, built from the
  * generic CRUD base. Anything that needs bespoke endpoints lives in its own file.
  */
-import { LapperWritePolicy, CrudService, crudController } from '@gearapps/api/core';
+import { LapperWritePolicy, CrudService, crudController } from '@meshforge/api/core';
 import {
   CreateDepartmentDto,
   CreateGearsetMarriageDto,
@@ -19,8 +19,8 @@ import {
   UpdatePartDto,
   UpdateSummaryDto,
   UpdateTypeOfCheckDto,
-} from '@gearapps/api/data-access';
-import { Department, GearsetMarriage, Part, Summary, TypeOfCheck } from '@gearapps/shared/domain';
+} from '@meshforge/api/data-access';
+import { Department, GearsetMarriage, Part, Summary, TypeOfCheck } from '@meshforge/shared/domain';
 import { UseInterceptors, Controller, Injectable } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 // ---------- Departments ----------

@@ -10,11 +10,11 @@ import {
   PartSummaryOrmEntity,
   InventoryListQueryDto,
   PaginationService,
-} from '@gearapps/manufacturing/server/data-access';
+} from '@meshforge/manufacturing/server/data-access';
 import {
   ILocationEntity,
   Uuid,
-} from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-types';
 import {
   CuttergrindNumberedShelfTag,
   CuttergrindRoughShelfTag,
@@ -22,7 +22,7 @@ import {
   parseCuttergrindRoughShelfTag,
   parseSummaryShelfTag,
   SummaryShelfTag,
-} from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-constants';
 import {
   ConflictException,
   Injectable,

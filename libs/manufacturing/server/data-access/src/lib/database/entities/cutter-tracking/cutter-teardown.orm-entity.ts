@@ -1,8 +1,8 @@
 import { instanceToPlain } from 'class-transformer';
 import { Check, Column, Entity, Index, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 
-import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
-import { ICutterTeardown } from '@gearapps/manufacturing/shared/util-types';
+import { AbstractOrmEntity } from '@meshforge/manufacturing/server/util-common';
+import { ICutterTeardown } from '@meshforge/manufacturing/shared/util-types';
 import { TrayOrmEntity } from '../blade-tracking/tray.orm-entity';
 import { UserOrmEntity } from '../user.orm-entity';
 import { CutterBuildOrmEntity } from './cutter-build.orm-entity';

@@ -1,7 +1,7 @@
 // login-user.dto.ts
 import { IsEmail, IsString } from 'class-validator';
 
-import { IUserLogin } from '@gearapps/manufacturing/shared/util-types';
+import { IUserLogin } from '@meshforge/manufacturing/shared/util-types';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserLoginDto implements IUserLogin {
