@@ -17,3 +17,12 @@ In **Blade Tracking → Coater Shipments**, open a reviewed shipment and select 
 Download the Excel workbook or use **Email RPA** with the API’s existing SMTP configuration. A failed request can be retried explicitly. If delivery is unconfirmed, check with the recipient before sending a copy. Coater dispatch and RPA email are separate operator actions.
 
 Tray counts represent matched inner/outer sets. A tray count of 13 produces 13 inner blades and 13 outer blades on the RPA; two such trays produce 26 of each. The exporter preserves that count per side and does not divide it by two.
+
+## The Excel form
+
+The form is the workbook saved with the earliest imported request. It can be a file saved by Excel itself: part numbers stored as shared text, formulas with saved results and a calculation chain are all handled.
+
+- A line's inner and outer part must be a name the form can total: one of its part lines (`B32`, `B35`, ... `B47`) or a name one of its `SUMIF` totals counts. That is how a coating variant such as `1700-5000 Evo`, which shares a part number with another line, is accepted.
+- After the request is written into the form, every formula is recalculated and its result saved in the file, so quantities, amounts, the box count and the packing list are correct in mail previews, Protected View and on a phone, not only after Excel recalculates. Excel is also told to recalculate when the workbook opens.
+- The calculator covers what the form uses (arithmetic, comparisons, `SUM`, `SUMIF`, `IF`, `OR`, `AND`, `INT`, `ISBLANK`, `CONCAT`, `TODAY`, shared formulas). A formula using anything else keeps no saved result and is calculated by Excel on opening.
+
