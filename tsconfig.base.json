@@ -23,7 +23,6 @@
       "@meshforge/api/core": ["./libs/api/core/src/index.ts"],
       "@meshforge/api/data-access": ["./libs/api/data-access/src/index.ts"],
       "@meshforge/api/feature-gear": ["./libs/api/feature-gear/src/index.ts"],
-      "@meshforge/api/feature-cutter-tracking": ["./libs/api/feature-cutter-tracking/src/index.ts"],
       "@meshforge/api/feature-scanner": ["./libs/api/feature-scanner/src/index.ts"],
       "@meshforge/api/postgres": ["./libs/api/postgres/src/index.ts"],
       "@meshforge/client/core": ["./libs/client/core/src/index.ts"],
