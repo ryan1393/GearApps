@@ -1353,3 +1353,329 @@ html body .gear-summary-card {
   }
 }
 /* END GEAR KPI GRID GEOMETRY */
+
+/* BEGIN MESHFORGE POLISH PASS
+   One refinement layer over the shared shell, headings, controls and tables so every
+   MeshForge app reads as the same product. Colours and tokens are unchanged; this only
+   settles rhythm, weight and consistency. Loaded last so it needs no markup changes. */
+
+/* --- Type: one family, numerals that line up --- */
+html body :is(.gear-sidebar, .gear-topbar, .gear-page, .app-content-shell) {
+  font-family: var(--gear-font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+html body .gear-page :is(table, .kpi-card strong, .gear-count-badge, .count-chip) {
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Sidebar: every destination has the same shape; the current one is simply highlighted --- */
+html body .gear-sidebar .side-link .nav-current { display: none !important; }
+html body .gear-sidebar .side-link,
+html body .gear-sidebar .side-link.primary {
+  min-height: 40px !important;
+  margin: 2px 0 !important;
+  padding: 8px 12px !important;
+  border-radius: 9px !important;
+}
+html body .gear-sidebar .nav-heading { margin: 18px 10px 6px !important; }
+html body .gear-sidebar .sidebar-footer {
+  display: flex !important;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 19px !important;
+}
+html body .gear-sidebar .sidebar-footer .version { flex: 1 1 auto; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+html body .gear-sidebar .sidebar-footer .online-row { display: none !important; }
+
+/* --- Top bar: quieter search, legible account block --- */
+html body header.gear-topbar.gear-topbar .global-search.global-search {
+  border-color: var(--gear-border-strong) !important;
+  background: var(--gear-surface) !important;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+html body header.gear-topbar.gear-topbar .global-search.global-search:focus-within {
+  border-color: var(--dana-focus-border, #ed9959) !important;
+  box-shadow: var(--dana-focus-ring, 0 0 0 3px rgba(170, 84, 19, .12)) !important;
+}
+html body .gear-topbar .user-copy strong { font-size: 13px !important; font-weight: 600 !important; }
+html body .gear-topbar .user-copy span { font-size: 11.5px !important; color: var(--gear-muted) !important; }
+html body header.gear-topbar.gear-topbar .signout-button.signout-button {
+  min-height: 34px;
+  padding: 6px 12px !important;
+  border-color: var(--gear-border-strong) !important;
+  border-radius: 8px !important;
+  background: var(--gear-surface) !important;
+  color: var(--gear-text) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  transition: background-color .15s ease, border-color .15s ease;
+}
+html body header.gear-topbar.gear-topbar .signout-button.signout-button:hover { background: var(--gear-surface-accent) !important; border-color: #b9bdc4 !important; }
+
+/* --- Page identity: small eyebrow, confident title, calm description --- */
+html body .gear-page .gear-eyebrow {
+  margin: 0 0 4px !important;
+  font-size: 11.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: .09em !important;
+  line-height: 1.3 !important;
+}
+html body .gear-page .gear-page-title,
+html body .dashboard-page .dashboard-heading h1 {
+  font-family: var(--gear-font-sans) !important;
+  font-size: 26px !important;
+  font-weight: 700 !important;
+  letter-spacing: -.02em !important;
+  line-height: 1.2 !important;
+  color: var(--gear-heading) !important;
+}
+html body .gear-page .gear-page-description,
+html body .dashboard-page .dashboard-heading h1 + p {
+  margin-top: 6px !important;
+  max-width: 72ch !important;
+  font-size: 14.5px !important;
+  line-height: 1.5 !important;
+  color: var(--gear-muted) !important;
+}
+
+/* --- Buttons: one height, one weight, visible keyboard focus --- */
+html body .gear-page :is(.gear-btn, .date-chip) {
+  min-height: 40px;
+  font-weight: 600 !important;
+  transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, color .15s ease;
+}
+html body .gear-page .gear-btn-primary:disabled,
+html body .gear-page .gear-btn-primary[disabled] {
+  background: #e7c9b4 !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  opacity: 1 !important;
+  cursor: not-allowed;
+}
+html body :is(.gear-btn, .date-chip, .signout-button, .side-link, .operation-card, .menu-button, .dana-table-filter-trigger):focus-visible {
+  outline: 2px solid var(--dana-focus-border, #ed9959) !important;
+  outline-offset: 2px !important;
+}
+/* Row actions never dictate the row height. */
+html body .gear-page table :is(td, th) .gear-btn {
+  min-height: 32px !important;
+  padding: 5px 11px !important;
+  font-size: 13px !important;
+  border-radius: 8px !important;
+}
+
+/* --- Form controls: consistent chevron, checkbox and disabled treatment --- */
+html body .gear-page select:is(.gear-select, .gear-input, .dana-select) {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 38px !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23707886' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 13px center !important;
+  background-size: 16px 16px !important;
+}
+html body .gear-page input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--gear-accent);
+  cursor: pointer;
+}
+html body .gear-page :is(.gear-input, .gear-select):disabled {
+  background-color: var(--gear-surface-muted) !important;
+  color: var(--gear-muted-soft) !important;
+  cursor: not-allowed;
+}
+
+/* --- Tables: fill the panel, quiet column tools, calm rows --- */
+html body .dana-table-shell,
+html body .gear-page .table-wrap,
+html body .gear-page .running-table-wrap {
+  scrollbar-gutter: auto;
+}
+html body .gear-page table.gear-table { width: 100%; }
+html body .gear-page table.gear-table th .dana-table-header-tools {
+  opacity: .4;
+  transition: opacity .15s ease;
+}
+html body .gear-page table.gear-table th:is(:hover, :focus-within, .dana-table-sort-active, [aria-sort='ascending'], [aria-sort='descending']) .dana-table-header-tools,
+html body .gear-page table.gear-table th .dana-table-header-tools:has(.dana-table-filter-trigger-active, [aria-expanded='true']) {
+  opacity: 1;
+}
+
+/* --- Badges: neutral by default so the accent colour keeps its meaning --- */
+html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge) {
+  color: #4b5361 !important;
+  font-weight: 600 !important;
+  letter-spacing: .01em;
+}
+html body .gear-page :is(.gear-count-badge, .count-chip) {
+  color: #4b5361 !important;
+  font-weight: 700 !important;
+}
+
+/* Status tones, wherever a badge declares one. */
+html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge, .dana-status-badge)[data-tone='success'] { border-color: #b7e4d2 !important; background: var(--gear-success-bg) !important; color: var(--gear-success) !important; }
+html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge, .dana-status-badge)[data-tone='warning'] { border-color: #f1dfa3 !important; background: var(--gear-warning-bg) !important; color: var(--gear-warning) !important; }
+html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge, .dana-status-badge)[data-tone='danger'] { border-color: #f5c6c2 !important; background: var(--gear-danger-bg) !important; color: var(--gear-danger) !important; }
+html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge, .dana-status-badge)[data-tone='neutral'] { color: var(--gear-muted) !important; }
+
+/* --- Panel headers: the title flexes, the actions stay on one line --- */
+html body .gear-page .panel-row > div:first-child { flex: 1 1 0; min-width: 0; }
+html body .gear-page .panel-row > .dana-toolbar { flex: 0 0 auto; flex-wrap: nowrap; align-items: center; }
+@media (max-width: 760px) {
+  html body .gear-page .panel-row > .dana-toolbar { flex-wrap: wrap; }
+}
+
+/* --- Small consistency fixes --- */
+html body .gear-page .gear-printer-picker { margin-bottom: 14px; }
+html body .gear-page a.text-blue-700 { color: var(--gear-accent) !important; }
+html body .gear-page a.text-blue-700:hover { text-decoration: underline; }
+html body .gear-page .gear-panel :is(h2, h3).font-black { font-weight: 700 !important; }
+
+/* --- Workflow step markers: one style in every app --- */
+html body .gear-page .gear-workflow-step-number {
+  width: 2rem !important;
+  height: 2rem !important;
+  border: 1px solid color-mix(in srgb, var(--gear-accent) 28%, var(--gear-border));
+  background: var(--gear-accent-soft) !important;
+  color: var(--gear-accent) !important;
+  font-size: var(--gear-font-sm);
+  font-weight: var(--gear-weight-heavy);
+  box-shadow: none !important;
+}
+
+/* --- Sign-in headline: letters no longer collide --- */
+html body .login-brand-copy h1 { letter-spacing: -.025em !important; }
+
+/* --- Readability: ship the typeface, raise the small sizes, darken the quiet text ---
+   Inter was named in the font stack but never bundled, so each PC showed whatever it had
+   installed. It is now served from /assets/fonts (SIL Open Font License, see Inter-LICENSE.txt). */
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/assets/fonts/inter-latin-wght-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/assets/fonts/inter-latin-ext-wght-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+:root {
+  /* Quiet text still has to pass contrast on white and on the page grey. */
+  --gear-muted: #5a6270;
+  --gear-muted-soft: #687080;
+  --dana-muted: #5a6270;
+  --dana-placeholder: #7a8290;
+  --gear-table-header-text: #4f5663;
+  /* The floor for each role of text. Large shop-floor monitors scale these up below. */
+  --gear-read-body: 15px;
+  --gear-read-secondary: 13px;
+  --gear-read-micro: 12px;
+}
+@media (max-width: 1499.98px) {
+  :root { --gear-font-xs: 12px; --gear-font-sm: 13px; --gear-font-md: 15px; }
+}
+@media (min-width: 1500px) {
+  :root { --gear-read-body: 17px; --gear-read-secondary: 15px; --gear-read-micro: 13px; }
+}
+html body :is(.gear-sidebar, .gear-topbar, .gear-page, .login-page) {
+  /* Inter's clearer letterforms: I, l and 1 are told apart at a glance on serials. */
+  font-feature-settings: 'cv05', 'cv08', 'calt';
+}
+html body .gear-page { line-height: 1.5; }
+/* Body copy, table cells and controls. */
+/* :not(#_) lifts these above the older per-feature size rules without touching them.
+   The Running Machines wall board keeps its own scale. */
+html body .gear-page:not(.running-machines-page):not(#_) :is(td, .gear-input, .gear-select, .gear-textarea, select, input, textarea, .gear-field, .gear-btn:not([data-icon]), .date-chip:not([data-icon])) {
+  font-size: var(--gear-read-body) !important;
+}
+html body .gear-page:not(.running-machines-page):not(#_) table :is(td, th) .gear-btn:not([data-icon]) { font-size: var(--gear-read-secondary) !important; }
+/* Supporting sentences: descriptions, hints, sub-lines. */
+html body .gear-page:not(.running-machines-page):not(#_) :is(
+  small, .gear-field-help, .operation-copy small, .inventory-browser-status, .inventory-pagination span,
+  :is(.panel-heading, .gear-panel-heading, .gear-panel-header, .gear-workflow-section-header, .gear-workflow-table-heading, .kpi-card, .inventory-browser-copy, .activity-empty) p
+) {
+  font-size: var(--gear-read-secondary) !important;
+  line-height: 1.45 !important;
+  color: var(--gear-muted) !important;
+}
+/* Small capitals labels and chips. */
+html body .gear-page:not(.running-machines-page):not(#_) :is(th, .gear-admin-record-label, .dana-summary-card > span, .scrap-summary-card > span, .gear-badge, .gear-status-badge, .status-pill, .dana-status-badge, .gear-count-badge, .count-chip, .subheading-row :is(strong, a)) {
+  font-size: var(--gear-read-micro) !important;
+}
+html body .gear-page .gear-eyebrow { font-size: var(--gear-read-micro) !important; }
+html body .gear-page th { color: var(--gear-table-header-text) !important; }
+html body .gear-sidebar .nav-heading { font-size: 11px !important; color: #a3a9b3 !important; }
+html body .gear-sidebar .sidebar-footer :is(.version, .version span) { font-size: 12px !important; }
+html body .gear-topbar .avatar { font-size: 12px !important; }
+html body .gear-topbar .user-copy span { font-size: 12px !important; }
+
+/* --- Icon buttons: actions everyone recognises show an icon, with the label as a tooltip.
+   Add data-icon="…" and a title to the button; its text stays in the markup, so screen
+   readers and tests still read the label. --- */
+html body :is(.gear-page, .gear-topbar) [data-icon][data-icon],
+html body header.gear-topbar.gear-topbar .signout-button.signout-button[data-icon] {
+  position: relative;
+  display: inline-block !important;
+  vertical-align: middle;
+  flex: 0 0 auto;
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  overflow: hidden;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  white-space: nowrap;
+}
+html body :is(.gear-page, .gear-topbar) [data-icon][data-icon] * { font-size: 0 !important; }
+html body :is(.gear-page, .gear-topbar) [data-icon]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 18px;
+  height: 18px;
+  background-color: currentColor;
+  -webkit-mask: var(--gear-button-icon) center / contain no-repeat;
+  mask: var(--gear-button-icon) center / contain no-repeat;
+}
+html body header.gear-topbar.gear-topbar .signout-button.signout-button[data-icon] {
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  color: var(--gear-muted) !important;
+}
+html body header.gear-topbar.gear-topbar .signout-button.signout-button[data-icon]:hover { color: var(--gear-text) !important; }
+html body .gear-page table :is(td, th) [data-icon][data-icon] {
+  width: 32px !important;
+  min-width: 32px !important;
+  height: 32px !important;
+  min-height: 32px !important;
+}
+html body .gear-page table :is(td, th) [data-icon]::before { width: 16px; height: 16px; }
+html body .gear-page [data-icon='delete']:not(:disabled) { color: var(--gear-danger) !important; }
+[data-icon='signout'] { --gear-button-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpath d='m16 17 5-5-5-5'/%3E%3Cpath d='M21 12H9'/%3E%3C/svg%3E"); }
+[data-icon='refresh'] { --gear-button-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 1 1-2.64-6.36L21 8'/%3E%3Cpath d='M21 3v5h-5'/%3E%3C/svg%3E"); }
+[data-icon='edit'] { --gear-button-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/%3E%3Cpath d='m15 5 4 4'/%3E%3C/svg%3E"); }
+[data-icon='delete'] { --gear-button-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 6h18'/%3E%3Cpath d='M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6'/%3E%3Cpath d='M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'/%3E%3Cpath d='M10 11v6'/%3E%3Cpath d='M14 11v6'/%3E%3C/svg%3E"); }
+[data-icon='view'] { --gear-button-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z'/%3E%3Ccircle cx='12' cy='12' r='3'/%3E%3C/svg%3E"); }
+[data-icon='print'] { --gear-button-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9V2h12v7'/%3E%3Cpath d='M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2'/%3E%3Cpath d='M6 14h12v8H6z'/%3E%3C/svg%3E"); }
+[data-icon='prev'] { --gear-button-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m15 18-6-6 6-6'/%3E%3C/svg%3E"); }
+[data-icon='next'] { --gear-button-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m9 18 6-6-6-6'/%3E%3C/svg%3E"); }
+
+@media (prefers-reduced-motion: reduce) {
+  html body :is(.gear-btn, .date-chip, .signout-button, .global-search, .dana-table-header-tools) { transition: none !important; }
+}
+/* END MESHFORGE POLISH PASS */

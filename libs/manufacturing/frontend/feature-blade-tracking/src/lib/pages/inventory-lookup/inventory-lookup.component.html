@@ -26,7 +26,7 @@
       <div class="inventory-count">
         <strong>{{ t.blade_count }}</strong>
         <span>Blades</span>
-        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="printingTagSerial === t.serial_number" (click)="printTag('TRAY', t.id, t.serial_number)">
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="printingTagSerial === t.serial_number" (click)="printTag('TRAY', t.id, t.serial_number)" data-icon="print" title="Print tag">
           {{ printingTagSerial === t.serial_number ? 'Printing…' : 'Print Tag' }}
         </button>
       </div>
@@ -78,7 +78,7 @@
       </div>
       <div class="inventory-count">
         <span class="gear-badge">{{ c.enabled ? 'Enabled' : 'Disabled' }}</span>
-        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="printingTagSerial === c.serial_number" (click)="printTag('CONTAINER', c.id, c.serial_number)">
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="printingTagSerial === c.serial_number" (click)="printTag('CONTAINER', c.id, c.serial_number)" data-icon="print" title="Print tag">
           {{ printingTagSerial === c.serial_number ? 'Printing…' : 'Print Tag' }}
         </button>
       </div>
@@ -131,7 +131,7 @@
       </div>
       <div class="inventory-count">
         <span class="gear-badge">{{ l.location_type }}</span>
-        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="printingTagSerial === l.serial_number" (click)="printTag('LOCATION', l.id, l.serial_number)">
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="printingTagSerial === l.serial_number" (click)="printTag('LOCATION', l.id, l.serial_number)" data-icon="print" title="Print tag">
           {{ printingTagSerial === l.serial_number ? 'Printing…' : 'Print Tag' }}
         </button>
       </div>

@@ -5,7 +5,7 @@
       class="refresh-chip"
       (click)="refreshDashboard()"
       [disabled]="loading"
-    >
+     data-icon="refresh" title="Refresh">
       ↻
       <span>{{ loading ? 'Refreshing…' : 'Refresh Data' }}</span>
     </button>
@@ -88,7 +88,7 @@
       </label>
     </div>
     <div class="mt-3 flex flex-wrap gap-3 items-center">
-      <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!selectedSummaryId || availabilityLoading" (click)="refreshAvailability()">Refresh Availability</button>
+      <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!selectedSummaryId || availabilityLoading" (click)="refreshAvailability()" data-icon="refresh" title="Refresh Availability">Refresh Availability</button>
       <a *ngIf="canEdit" routerLink="body-shelves" class="text-sm font-bold text-blue-700">Record Empty Body Shelf</a>
       <span class="text-sm text-slate-500">Refreshes every 30 seconds while this page is visible.</span>
     </div>
@@ -150,9 +150,9 @@
         <div class="availability-tray-footer">
           <small>*Required is the tray’s saved blade-count requirement. A dash means it has not been recorded on that tray yet.</small>
           <nav *ngIf="trayPageCount > 1" class="availability-tray-pagination" aria-label="Matching tray pages">
-            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="trayPage <= 1" (click)="changeTrayPage(-1)">Previous</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="trayPage <= 1" (click)="changeTrayPage(-1)" data-icon="prev" title="Previous page">Previous</button>
             <span>Page {{trayPage}} of {{trayPageCount}}</span>
-            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="trayPage >= trayPageCount" (click)="changeTrayPage(1)">Next</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="trayPage >= trayPageCount" (click)="changeTrayPage(1)" data-icon="next" title="Next page">Next</button>
           </nav>
         </div>
       </ng-container>

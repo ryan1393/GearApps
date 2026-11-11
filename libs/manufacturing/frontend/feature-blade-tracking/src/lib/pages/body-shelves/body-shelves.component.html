@@ -8,16 +8,16 @@
       <label class="font-bold">Cutter Body Serial<input gearScannerFocus class="gear-input mt-1 w-full" name="body" [(ngModel)]="bodyIdentifier" (keydown.enter)="bodyScanned($event, shelfInput)" maxlength="120" placeholder="Scan Dana or manufacturer serial" autocomplete="off" required [disabled]="busy" /></label>
       <label class="font-bold">Shelf Serial<input #shelfInput [gearScannerFocus]="2" class="gear-input mt-1 w-full" name="shelf" [(ngModel)]="shelfSerial" maxlength="120" placeholder="Scan an existing shelf location" autocomplete="off" required [disabled]="busy" /></label>
     </div>
-    <button type="submit" class="mt-4 rounded-xl bg-slate-900 px-5 py-3 font-bold text-white disabled:opacity-50" [disabled]="busy || loading || !bodyIdentifier.trim() || !shelfSerial.trim()">Confirm Empty Body on Shelf</button>
+    <button type="submit" class="gear-btn gear-btn-primary mt-4" [disabled]="busy || loading || !bodyIdentifier.trim() || !shelfSerial.trim()">Confirm Empty Body on Shelf</button>
   </form>
   <section class="gear-panel p-5">
-    <div class="flex flex-wrap justify-between gap-3"><h2 class="text-lg font-black">Recorded Shelf Observations</h2><button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy || loading" (click)="refresh()">Refresh</button></div>
+    <div class="flex flex-wrap justify-between gap-3"><h2 class="text-lg font-black">Recorded Shelf Observations</h2><button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy || loading" (click)="refresh()" data-icon="refresh" title="Refresh">Refresh</button></div>
     <label class="mt-3 block text-sm font-bold">Search<input class="gear-input mt-1 w-full" [(ngModel)]="search" placeholder="Body, shelf, or status" /></label>
     <p *ngIf="error" role="alert" class="mt-3 text-red-700">{{error}}</p>
     <p *ngIf="loading" class="mt-3">Loading shelves…</p>
     <p class="my-3 text-sm text-slate-600">Only SHELVED bodies count as confirmed shelf stock. IN USE and RECHECK REQUIRED observations are excluded. A new build invalidates the old empty-body observation, even if that build is later canceled.</p>
     <div danaTableShell class="table-wrap"><table danaTable class="gear-table"><thead><tr><th>Body</th><th>Shelf</th><th>Blade Capacity</th><th>Status</th><th>Recorded</th><th>Action</th></tr></thead><tbody>
-      <tr *ngFor="let row of filteredRows"><td>{{row.body_serial}}</td><td>{{row.shelf_serial}}</td><td>{{row.blade_capacity ?? 'Unknown'}}</td><td>{{row.state.split('_').join(' ')}}</td><td>{{row.placed_at | date:'short'}}</td><td><button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy || loading" (click)="remove(row)">Remove</button></td></tr>
+      <tr *ngFor="let row of filteredRows"><td>{{row.body_serial}}</td><td>{{row.shelf_serial}}</td><td>{{row.blade_capacity ?? 'Unknown'}}</td><td>{{row.state.split('_').join(' ')}}</td><td>{{row.placed_at | date:'short'}}</td><td><button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy || loading" (click)="remove(row)" data-icon="delete" title="Remove">Remove</button></td></tr>
       <tr *ngIf="!loading && !filteredRows.length"><td colspan="6">No matching empty-body shelf observations. Record the actual shelf above; old build locations are not assumed to be current.</td></tr>
     </tbody></table></div>
   </section>

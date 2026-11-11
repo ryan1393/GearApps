@@ -14,7 +14,6 @@ import {
   DanaConfirmDialogComponent,
   DanaCountBadgeDirective,
   DanaPageHeaderComponent,
-  DanaPanelHeaderDirective,
   DanaTableDirective,
   DanaTableEmptyDirective,
   DanaTableShellDirective,
@@ -46,7 +45,6 @@ interface FanucRow {
     DanaConfirmDialogComponent,
     DanaCountBadgeDirective,
     DanaPageHeaderComponent,
-    DanaPanelHeaderDirective,
     DanaTableDirective,
     DanaTableEmptyDirective,
     DanaTableShellDirective,
@@ -61,7 +59,7 @@ interface FanucRow {
     }
   `,
   template: `
-    <div class="gear-page">
+    <div class="gear-page gear-workflow-page">
       <section
         danaPageHeader
         eyebrow="LAPPER / CONFIGURATION"
@@ -74,14 +72,14 @@ interface FanucRow {
             class="gear-btn gear-btn-secondary"
             (click)="reload()"
             [disabled]="loading()"
-          >
+           data-icon="refresh" title="Refresh">
             ↻ {{ loading() ? 'Refreshing…' : 'Refresh' }}
           </button>
         </div>
       </section>
 
-      <section class="gear-panel data-panel">
-        <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+      <section class="gear-workflow-table-panel">
+        <div class="gear-workflow-table-heading gear-workflow-status-row">
           <div>
             <h2>Machine I/O</h2>
             <p>

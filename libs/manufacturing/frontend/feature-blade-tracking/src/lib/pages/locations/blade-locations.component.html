@@ -1,6 +1,6 @@
 <section class="gear-page blade-locations-page">
   <header class="gear-page-header gear-section-heading blade-locations-heading" danaPageHeader eyebrow="BLADE TRACKING / LOCATIONS" heading="Blade Locations" description="See every tagged location, the trays physically assigned there, and the individual blades currently assigned to each tray.">
-  <button danaPageHeaderAction danaButton="secondary" type="button" (click)="refresh()" [disabled]="loading">
+  <button danaPageHeaderAction danaButton="secondary" type="button" (click)="refresh()" [disabled]="loading" data-icon="refresh" title="Refresh">
       ↻ Refresh
     </button>
 </header>
@@ -106,7 +106,7 @@
                   class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
                   [disabled]="printingTagSerial !== null"
                   (click)="printTag('LOCATION', location.id, location.serial_number)"
-                >
+                 data-icon="print" title="Print tag">
                   {{ printingTagSerial === location.serial_number ? 'Printing…' : 'Print Tag' }}
                 </button>
               </td>

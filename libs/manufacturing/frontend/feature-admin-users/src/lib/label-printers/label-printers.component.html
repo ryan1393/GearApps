@@ -4,7 +4,7 @@
       <h2 id="label-printers-title" class="text-xl font-black">Label Printers</h2>
       <p class="text-sm text-slate-600">Add each label printer by its network address and the language it speaks. The default printer is used by every Print button; a workstation next to its own printer can choose it on the print screen.</p>
     </div>
-    <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || saving">{{ loading ? 'Refreshing…' : '↻ Refresh' }}</button>
+    <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || saving" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : '↻ Refresh' }}</button>
   </div>
 
   <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert"><strong>Unable to continue.</strong><span>{{ error }}</span></div>
@@ -84,9 +84,9 @@
                   <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="testConnection(printer)" [disabled]="busyId !== null">{{ busyId === printer.id ? 'Working…' : 'Test Connection' }}</button>
                   <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" *ngIf="printer.label_type === 'ASSET_TAG'" (click)="printTestTag(printer)" [disabled]="busyId !== null || !printer.enabled">Print Test Tag</button>
                   <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" *ngIf="printer.enabled && !printer.is_default" (click)="makeDefault(printer)" [disabled]="busyId !== null">Make Default</button>
-                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="edit(printer)" [disabled]="busyId !== null">Edit</button>
+                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="edit(printer)" [disabled]="busyId !== null" data-icon="edit" title="Edit">Edit</button>
                   <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="setEnabled(printer, !printer.enabled)" [disabled]="busyId !== null">{{ printer.enabled ? 'Turn Off' : 'Turn On' }}</button>
-                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="confirmRemoveId = printer.id" [disabled]="busyId !== null">Remove</button>
+                  <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="confirmRemoveId = printer.id" [disabled]="busyId !== null" data-icon="delete" title="Remove">Remove</button>
                 </ng-container>
                 <ng-template #confirmRemove>
                   <span>Remove {{ printer.name }}?</span>

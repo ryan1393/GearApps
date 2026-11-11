@@ -12,7 +12,6 @@ import {
   DanaConfirmDialogComponent,
   DanaCountBadgeDirective,
   DanaPageHeaderComponent,
-  DanaPanelHeaderDirective,
   DanaTableDirective,
   DanaTableEmptyDirective,
   DanaTableShellDirective,
@@ -29,7 +28,6 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
     DanaConfirmDialogComponent,
     DanaCountBadgeDirective,
     DanaPageHeaderComponent,
-    DanaPanelHeaderDirective,
     DanaTableDirective,
     DanaTableEmptyDirective,
     DanaTableShellDirective,
@@ -54,7 +52,7 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
     }
   `,
   template: `
-    <div class="gear-page">
+    <div class="gear-page gear-workflow-page">
       <section
         danaPageHeader
         eyebrow="LAPPER / CONFIGURATION"
@@ -67,7 +65,7 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
             class="gear-btn gear-btn-secondary"
             (click)="reload()"
             [disabled]="tokens.loading()"
-          >
+           data-icon="refresh" title="Refresh">
             ↻ {{ tokens.loading() ? 'Refreshing…' : 'Refresh' }}
           </button>
           <button type="button" class="gear-btn gear-btn-primary" (click)="openCreate()">
@@ -76,8 +74,8 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
         </div>
       </section>
 
-      <section class="gear-panel data-panel">
-        <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+      <section class="gear-workflow-section">
+        <div class="gear-workflow-section-header gear-workflow-status-row">
           <div>
             <h2>Docker collector</h2>
             @if (docker.loading()) {
@@ -134,8 +132,8 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
         </div>
       </section>
 
-      <section class="gear-panel data-panel">
-        <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+      <section class="gear-workflow-table-panel">
+        <div class="gear-workflow-table-heading gear-workflow-status-row">
           <div>
             <h2>Tokens</h2>
             <p>{{ activeCount() }} active. The token itself is shown once, when it is created.</p>

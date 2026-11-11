@@ -62,7 +62,7 @@ import { MachineFormDialogComponent } from './machine-form-dialog.component';
             class="gear-btn gear-btn-secondary"
             (click)="reload()"
             [disabled]="machines.loading()"
-          >
+           data-icon="refresh" title="Refresh">
             ↻ {{ machines.loading() ? 'Refreshing…' : 'Refresh' }}
           </button>
           <button type="button" class="gear-btn gear-btn-primary" (click)="open(null)">
@@ -103,7 +103,7 @@ import { MachineFormDialogComponent } from './machine-form-dialog.component';
                       class="gear-btn gear-btn-secondary gear-btn-sm"
                       (click)="open(m)"
                       [attr.aria-label]="'Edit Lapping setup for ' + (m.number || m.ip)"
-                    >
+                     data-icon="edit" title="Edit">
                       Edit
                     </button>
                     <button
@@ -111,7 +111,7 @@ import { MachineFormDialogComponent } from './machine-form-dialog.component';
                       class="gear-btn gear-btn-danger gear-btn-sm"
                       (click)="pendingRemove.set(m)"
                       [attr.aria-label]="'Remove Lapping setup for ' + (m.number || m.ip)"
-                    >
+                     data-icon="delete" title="Remove">
                       Remove
                     </button>
                   </div>

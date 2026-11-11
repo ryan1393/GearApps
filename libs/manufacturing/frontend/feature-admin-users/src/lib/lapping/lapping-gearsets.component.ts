@@ -49,7 +49,7 @@ import { GearsetFormDialogComponent } from './gearset-form-dialog.component';
             class="gear-btn gear-btn-secondary"
             (click)="reload()"
             [disabled]="gearsets.loading()"
-          >
+           data-icon="refresh" title="Refresh">
             ↻ {{ gearsets.loading() ? 'Refreshing…' : 'Refresh' }}
           </button>
           <button type="button" class="gear-btn gear-btn-primary" (click)="open(null)">
@@ -99,7 +99,7 @@ import { GearsetFormDialogComponent } from './gearset-form-dialog.component';
                       class="gear-btn gear-btn-secondary gear-btn-sm"
                       (click)="open(g)"
                       [attr.aria-label]="'Edit ' + g.number"
-                    >
+                     data-icon="edit" title="Edit">
                       Edit
                     </button>
                     <button
@@ -107,7 +107,7 @@ import { GearsetFormDialogComponent } from './gearset-form-dialog.component';
                       class="gear-btn gear-btn-danger gear-btn-sm"
                       (click)="pendingDelete.set(g)"
                       [attr.aria-label]="'Delete ' + g.number"
-                    >
+                     data-icon="delete" title="Delete">
                       Delete
                     </button>
                   </div>

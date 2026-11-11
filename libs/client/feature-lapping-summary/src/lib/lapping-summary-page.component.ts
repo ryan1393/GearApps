@@ -29,7 +29,6 @@ import {
   DanaKpiGridDirective,
   DanaLoadingStateDirective,
   DanaPageHeaderComponent,
-  DanaPanelHeaderDirective,
 } from '@dana/ui';
 import {
   EmptyStateComponent,
@@ -65,7 +64,6 @@ import { SummaryGroupComponent } from './summary-group.component';
     DanaKpiGridDirective,
     DanaLoadingStateDirective,
     DanaPageHeaderComponent,
-    DanaPanelHeaderDirective,
     EmptyStateComponent,
     StatusBadgeComponent,
     ValueFieldComponent,

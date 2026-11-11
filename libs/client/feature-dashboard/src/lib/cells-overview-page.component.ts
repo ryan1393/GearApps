@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@a
 import { RouterLink } from '@angular/router';
 import {
   DanaCountBadgeDirective,
+  DanaDashboardPanelComponent,
   DanaKpiCardDirective,
   DanaKpiGridDirective,
   DanaOperationCardComponent,
@@ -22,6 +23,7 @@ import { groupByCell } from './cells';
   imports: [
     RouterLink,
     DanaCountBadgeDirective,
+    DanaDashboardPanelComponent,
     DanaKpiCardDirective,
     DanaKpiGridDirective,
     DanaOperationCardComponent,
@@ -50,7 +52,7 @@ import { groupByCell } from './cells';
           class="date-chip refresh-chip"
           (click)="reload()"
           [disabled]="machines.loading()"
-        >
+         data-icon="refresh" title="Refresh">
           ↻ <span>{{ machines.loading() ? 'Refreshing…' : 'Refresh' }}</span>
         </button>
       </section>
@@ -102,7 +104,7 @@ import { groupByCell } from './cells';
         </article>
       </section>
 
-      <section class="gear-panel operations-panel">
+      <section class="gear-panel operations-panel" danaDashboardPanel>
         <div class="gear-panel-heading panel-heading">
           <h2>Lapper Operations</h2>
           <p>Choose the workflow you need to perform.</p>
@@ -153,7 +155,7 @@ import { groupByCell } from './cells';
         </div>
       </section>
 
-      <section class="gear-panel operations-panel">
+      <section class="gear-panel operations-panel" danaDashboardPanel>
         <div class="gear-panel-heading panel-heading">
           <h2>Configuration</h2>
           <p>Scanners, macro variables and machine I/O the lappers report.</p>
@@ -189,7 +191,7 @@ import { groupByCell } from './cells';
         </div>
       </section>
 
-      <section class="gear-panel data-panel">
+      <section class="gear-panel data-panel" danaDashboardPanel>
         <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
           <div>
             <h2>Lapping Cells</h2>

@@ -16,7 +16,7 @@
     <p *ngIf="requirementLoading" class="mt-3 text-sm">Loading blade requirement…</p>
     <p *ngIf="quantityProblem" role="alert" class="mt-3 text-sm font-bold text-red-700">{{quantityProblem}}</p>
     <p *ngIf="trayFull" role="status" class="mt-3 text-sm font-bold">This tray is full ({{tray.blade_count}} / {{tray.required_blade_count}}). Next: record grinding for the new blades on the <a routerLink="/blades/grinding" class="text-blue-700">Grinding</a> screen.</p>
-    <button type="submit" class="mt-5 w-full rounded-xl bg-slate-900 px-5 py-3 font-black text-white disabled:opacity-50" [disabled]="!canAddBladeBatch">Add Blade Batch</button>
+    <button type="submit" class="gear-btn gear-btn-primary gear-workflow-submit mt-5" [disabled]="!canAddBladeBatch">Add Blade Batch</button>
   </form>
   <div *ngIf="refreshRequired" class="gear-panel px-4 py-3 text-sm text-red-700" role="alert">Tray {{selectedTraySerial}} could not be refreshed, so its current contents are unknown. <button type="button" class="gear-btn gear-btn-secondary" (click)="retryTray()" [disabled]="busy">Retry</button></div>
 </section>

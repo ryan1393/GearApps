@@ -11,7 +11,6 @@ import {
   DanaConfirmDialogComponent,
   DanaCountBadgeDirective,
   DanaPageHeaderComponent,
-  DanaPanelHeaderDirective,
   DanaTableDirective,
   DanaTableEmptyDirective,
   DanaTableShellDirective,
@@ -34,7 +33,6 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
     DanaConfirmDialogComponent,
     DanaCountBadgeDirective,
     DanaPageHeaderComponent,
-    DanaPanelHeaderDirective,
     DanaTableDirective,
     DanaTableEmptyDirective,
     DanaTableShellDirective,
@@ -43,7 +41,7 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="gear-page">
+    <div class="gear-page gear-workflow-page">
       <section
         danaPageHeader
         eyebrow="LAPPER / CONFIGURATION"
@@ -56,7 +54,7 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
             class="gear-btn gear-btn-secondary"
             (click)="reload()"
             [disabled]="scanners.loading()"
-          >
+           data-icon="refresh" title="Refresh">
             ↻ {{ scanners.loading() ? 'Refreshing…' : 'Refresh' }}
           </button>
           @if (access.canEditSetup()) {
@@ -67,8 +65,8 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
         </div>
       </section>
 
-      <section class="gear-panel data-panel">
-        <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+      <section class="gear-workflow-table-panel">
+        <div class="gear-workflow-table-heading gear-workflow-status-row">
           <div>
             <h2>All Scanners</h2>
             <p>{{ assignedCount() }} assigned to a machine · {{ activeCount() }} active.</p>
@@ -117,7 +115,7 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
                           class="gear-btn gear-btn-secondary gear-btn-sm"
                           (click)="openDialog(s)"
                           [attr.aria-label]="'Edit scanner ' + s.ip"
-                        >
+                         data-icon="edit" title="Edit">
                           Edit
                         </button>
                         <button
@@ -125,7 +123,7 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
                           class="gear-btn gear-btn-danger gear-btn-sm"
                           (click)="pendingDelete.set(s)"
                           [attr.aria-label]="'Delete scanner ' + s.ip"
-                        >
+                         data-icon="delete" title="Delete">
                           Delete
                         </button>
                       </div>

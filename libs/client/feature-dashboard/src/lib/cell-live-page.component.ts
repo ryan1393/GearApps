@@ -20,7 +20,7 @@ import { MachineLiveCardComponent } from './machine-live-card.component';
   imports: [RouterLink, DanaPageHeaderComponent, EmptyStateComponent, MachineLiveCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="gear-page">
+    <div class="gear-page gear-workflow-page">
       <section
         danaPageHeader
         eyebrow="LAPPER · LIVE VIEW"
@@ -52,8 +52,8 @@ import { MachineLiveCardComponent } from './machine-live-card.component';
       </section>
 
       @if (!all.loading() && !machines().length) {
-        <section class="gear-panel">
-          <div class="lapper-panel-body">
+        <section class="gear-workflow-section">
+          <div class="gear-workflow-section-body">
             <gear-empty-state [title]="'No machines in cell ' + cell()">
               <a class="gear-btn gear-btn-primary" routerLink="/dashboard">Back to cells</a>
             </gear-empty-state>

@@ -24,7 +24,7 @@
           class="rounded-xl bg-white px-4 py-2 text-sm font-black text-slate-900 disabled:opacity-50"
           [disabled]="printingTagSerial !== null"
           (click)="printTag('TRAY', d.tray.id, d.tray.serial_number)"
-        >
+         data-icon="print" title="Print tag">
           {{ printingTagSerial === d.tray.serial_number ? 'Printing…' : 'Print Tag' }}
         </button>
       </div>
