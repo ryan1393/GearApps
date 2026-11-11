@@ -286,7 +286,7 @@ The cross-app automatic E2E workflow intentionally runs as the dedicated Admin a
 
 For a clean replacement of old PostgreSQL application data, use `commands\RESET-AND-REFRESH-ALL-DATA.cmd`. Unlike the normal fresh importer, this workflow intentionally deletes existing target application rows after a fresh SQL Server/Excel source snapshot has successfully exported and validated. The PostgreSQL schema is preserved; SQL Server remains read-only. The workflow then imports fresh base/reference data, fresh cutter history, and recreates the local development accounts.
 
-To empty only the operational data (blades, trays, containers, locations, cutter builds and history) while keeping users, base data and cutter bodies, use `commands\CLEAR-OPERATIONAL-DATA.cmd` instead; see "Clear operational data, keep users and base data" in `START_AND_TEST_GUIDE.md`.
+To empty only the operational data (blades, trays, containers and their blade sets, locations other than the shelf/layer/bin bins, cutter builds and history) while keeping users, base data, cutter bodies and the shelf bins, use `commands\CLEAR-OPERATIONAL-DATA.cmd` instead; see "Clear operational data, keep users and base data" in `START_AND_TEST_GUIDE.md`.
 
 ### Full-reset system reference bootstrap
 
