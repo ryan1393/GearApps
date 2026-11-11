@@ -91,6 +91,33 @@ single worker without the supervisor.
 | `MESHFORGE_API_BASE_URL` | http://meshforge-server:3333 | Shared MeshForge API |
 | `MESHFORGE_API_TOKEN` | | Collector token (`glr_…`); replaces email and password |
 | `MESHFORGE_API_EMAIL` / `MESHFORGE_API_PASSWORD` | | Collector account, when no token is set |
+| `ARGONAUT_ENABLED` | false | Also send each finished cycle to Argonaut (see below) |
+| `ARGONAUT_URL` | | Argonaut `trigger-transaction` URL (required when enabled) |
+| `ARGONAUT_LOCATION_ID` | | Sent as `?locationId=` |
+| `ARGONAUT_USERNAME` / `ARGONAUT_PASSWORD` | | Basic sign-in; empty sends no Authorization header |
+| `ARGONAUT_TRANSACTION_TYPE_ID` | 100 | Track and Trace transaction type |
+| `ARGONAUT_VERIFY_TLS` | true | `false` accepts a self-signed certificate |
+| `ARGONAUT_CA_FILE` | | CA/certificate file to trust instead of turning verification off |
+| `ARGONAUT_TIMEOUT_S` | 10 | Request timeout |
+
+In Docker these are set from the `LAPPER_READ_ARGONAUT_*` entries in `.env`.
+
+## Argonaut
+
+Ported from the original C# Lapper Read. With `ARGONAUT_ENABLED=true`, when a cycle finishes
+(machine out of cycle and front door open) the worker reads Argonaut's FANUC macros once and
+posts them to `ARGONAUT_URL`: the scanned serial, gearset (`#10020`) as the part number, the
+cycle's consec as the sequence, 63 macros as `floatData` (after a leading 0) and `#10020`,
+`#10021`, `#10023`, `#10400`, `#10480` as `stringData`. A macro the controller does not answer
+is sent as 0, as before. The macro list is in `lapper_read/argonaut.py`.
+
+- Argonaut has its own queue in the machine's checkpoint, so an Argonaut outage never holds up
+  recording cycles in MeshForge. Failed posts are retried with a growing delay (up to 5
+  minutes) and survive restarts; at most 1000 unsent cycles are kept per machine.
+- A request Argonaut rejects as invalid (HTTP 4xx other than 401/403/408/429) is logged and not
+  retried. A cycle with no scanned serial is not sent.
+- `/status` shows `argonaut`, `argonaut_pending`, `argonaut_last_sent_at` and `argonaut_last_error`
+  for each machine.
 
 The container is healthy while the supervisor keeps reading the machine list.
 

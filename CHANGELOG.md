@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Lapper Read: optional Argonaut post.** The collector can again send each finished lapping
+  cycle to Argonaut (Track and Trace), as the original C# Lapper Read did: the same macros, serial,
+  gearset and consec, posted when the cycle ends. Off by default; turn it on with
+  `LAPPER_READ_ARGONAUT_ENABLED=true` in `.env` (URL, location, sign-in and certificate settings
+  beside it). Argonaut has its own retry queue, so an outage never delays recording cycles in
+  MeshForge.
 - **Launch Setup.** A new Admin tab for going live: a checklist of what still has to be set up,
   barcode tags in bulk for trays, containers and numbered shelves, and recording trays that are
   already ground or already coated on the shelf where they sit (see
