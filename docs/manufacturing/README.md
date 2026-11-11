@@ -190,7 +190,8 @@ The normal master test requires no typed workflow inputs. It provisions dedicate
 - RING builds run only on `GEAR CUTTING` machines.
 - Green Shed shelves: `GSR-<summary>` for RING and `GSP-<summary>` for PINION.
 - Cuttergrind shelves are physical shelf bins configured in Admin: rough `CGRR-A1A` / `CGRP-A1A` (required when completing grinding of a full tray), dull `CGDR-A1A` / `CGDP-A1A` and finished `CGFR-A1A` / `CGFP-A1A` (shelf letter, layer number, bin letter: shelf A, layer 1, bin A) (RING / PINION). Summary-derived `CGD?-<summary>` / `CGF?-<summary>` tags are legacy and are rejected for placement.
-- Coated trays reach the coater through a **Coater Shipment** (create, add containers, review, print, dispatch); loading a tray only marks it Packed for Coater.
+- After grinding, a full tray's blades go into an empty **coater container**: one complete set (one Summary and part type) per container, and the tray is emptied and reusable. The operator can instead leave the set in its tray. Either way the container (or tray) goes to the **`COATER-STAGING`** location by default, or to a scanned rough shelf bin. A set left in its tray is moved into a container later on **Load Container**. See [COATER_CONTAINERS.md](COATER_CONTAINERS.md).
+- Containers reach the coater through a **Coater Shipment** (create, add containers, review, print, dispatch); packing only marks the set packed, not sent. On **Receive From Coater** the set goes into any empty tray, which goes onto a finished shelf bin.
 - A cutter build records the Department 45 **Cutter Builder machine** that built it.
 - Empty trays with 0 blades do **not** require a physical location. They remain `EMPTY`, unassigned, and are operator-visible as **Available / Ready to Use** until selected for a workflow such as Cutter Builder teardown.
 - `Cuttergrind_Verified_Pull` is retired and is not part of current application logic or compatibility checks.

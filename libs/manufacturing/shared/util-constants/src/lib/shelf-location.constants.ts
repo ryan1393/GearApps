@@ -221,3 +221,20 @@ export function isExpectedSummaryShelfTag(
     buildSummaryShelfTag(kind, summaryNumber, partTypeCode)
   );
 }
+
+/**
+ * Where ground blades wait for the coater by default: a container packed at grinding (or a full
+ * tray left as is) is placed here unless the operator scans a rough shelf bin instead.
+ * Created automatically; nobody has to scan it.
+ */
+export const COATER_STAGING_LOCATION_SERIAL = 'COATER-STAGING' as const;
+export const LOCATION_TYPE_STAGING = 'STAGING' as const;
+
+export function isCoaterStagingLocation(serialNumber: string | null | undefined): boolean {
+  return (serialNumber ?? '').trim().toUpperCase() === COATER_STAGING_LOCATION_SERIAL;
+}
+
+/** The staging location as configured: its barcode and the Cuttergrind department. */
+export function isCoaterStagingPlacement(serialNumber: string | null | undefined, department: string | null | undefined): boolean {
+  return isCoaterStagingLocation(serialNumber) && department === DEPARTMENT_CUTTERGRIND;
+}

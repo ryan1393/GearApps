@@ -28,7 +28,7 @@ In **Blade Tracking → Coater Shipments**, open a reviewed shipment and select 
 
 Download the Excel workbook or use **Email RPA** with the API’s existing SMTP configuration. A failed request can be retried explicitly. If delivery is unconfirmed, check with the recipient before sending a copy. Coater dispatch and RPA email are separate operator actions.
 
-Tray counts represent matched inner/outer sets. A tray count of 13 produces 13 inner blades and 13 outer blades on the RPA; two such trays produce 26 of each. The exporter preserves that count per side and does not divide it by two.
+Tray counts represent matched inner/outer sets. A container holding one set counts as one tray. A tray count of 13 produces 13 inner blades and 13 outer blades on the RPA; two such trays (or containers) produce 26 of each. The exporter preserves that count per side and does not divide it by two.
 
 ## The Excel form
 

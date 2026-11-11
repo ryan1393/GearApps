@@ -4,6 +4,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
 import { dsfCutterCountsEnabled } from '@meshforge/manufacturing/server/util-common';
 import { STARTUP_SCHEMA_LOCK_SQL } from '@meshforge/manufacturing/shared/util-constants';
+import { CONTAINER_SET_SCHEMA } from './coater-container-set';
 
 export type ReversalApp = 'GREENSHED' | 'CUTTER_BUILDER' | 'BLADE_TRACKING';
 // Columns this module reads by name. Declared so strict index-signature checks
@@ -11,11 +12,11 @@ export type ReversalApp = 'GREENSHED' | 'CUTTER_BUILDER' | 'BLADE_TRACKING';
 type KnownColumn =
   | 'enabled' | 'deletedAt' | 'updatedAt' | 'updatedBy'
   | 'tray_id' | 'blade_id' | 'cutter_build_id' | 'location_id' | 'container_id'
-  | 'packed_at' | 'packed_from_location_id'
+  | 'packed_at' | 'packed_from_location_id' | 'container_set_id'
   | 'current_piece_count' | 'last_check_piece_count';
 type Row = { id: string } & { [K in KnownColumn]?: unknown } & Record<string, unknown>;
 type SnapshotTable =
-  | 'trays' | 'blades' | 'blade_tray' | 'location_tray' | 'container_tray'
+  | 'trays' | 'blades' | 'blade_tray' | 'location_tray' | 'container_tray' | 'container_sets' | 'container_set_blades'
   | 'tray_grinding_runs' | 'blade_history' | 'locations' | 'containers' | 'cutter_bodies'
   | 'cutter_builds' | 'cutter_build_blades' | 'cutter_build_trays' | 'cutter_events'
   | 'cutter_machine_runs' | 'cutter_build_locations' | 'cutter_teardowns'
@@ -25,6 +26,8 @@ export interface ReversalScope {
   app: ReversalApp;
   trayIds?: string[];
   bladeIds?: string[];
+  /** Containers whose blade set the operation packs or receives. */
+  containerIds?: string[];
   bodyIds?: string[];
   buildIds?: string[];
 }
@@ -37,7 +40,7 @@ interface JournalRow {
 interface JournalChange { table_name: string; row_id: string; before_row: Row | null; after_row: Row | null; }
 
 // Only these application tables can be restored. SQL identifiers never come from clients.
-const INVENTORY_TABLES = ['trays', 'blades', 'blade_tray', 'location_tray', 'container_tray', 'tray_grinding_runs', 'blade_history'];
+const INVENTORY_TABLES = ['trays', 'blades', 'blade_tray', 'location_tray', 'container_tray', 'container_sets', 'container_set_blades', 'tray_grinding_runs', 'blade_history'];
 const CUTTER_TABLES = ['cutter_builds', 'cutter_build_blades', 'cutter_build_trays', 'cutter_events', 'cutter_machine_runs', 'cutter_build_locations', 'cutter_teardowns', 'cutter_frequency_checks', 'cutter_cmm_checks'];
 const TABLES = [...INVENTORY_TABLES, ...CUTTER_TABLES];
 const READ_ONLY_TABLES = ['locations', 'containers', 'cutter_bodies'];
@@ -89,6 +92,8 @@ export class WorkflowJournalBootstrap implements OnModuleInit {
       await manager.query(STARTUP_SCHEMA_LOCK_SQL);
       await manager.query("SELECT pg_advisory_xact_lock(hashtext('dana-workflow-journal-v1'))");
       await manager.query(WORKFLOW_JOURNAL_SCHEMA);
+      // Capture triggers need every journaled table, whichever bootstrap runs first.
+      await manager.query(CONTAINER_SET_SCHEMA);
       for (const sql of WORKFLOW_CAPTURE_TRIGGERS) await manager.query(sql);
     });
   }
@@ -117,6 +122,11 @@ async function snapshot(manager: EntityManager, scope: ReversalScope): Promise<S
     trayIds = keys([...trayIds, ...bladeLinks.filter(r => r.enabled && !r.deletedAt).map(r => r.tray_id)]);
     const trayLinks = await rows(manager, 'blade_tray', [['tray_id', trayIds], ['blade_id', bladeIds]]);
     bladeIds = keys([...bladeIds, ...trayLinks.filter(r => r.enabled && !r.deletedAt && trayIds.includes(String(r.tray_id))).map(r => r.blade_id)]);
+    // A container's active blade set joins the scope, so receiving it can be undone as one change.
+    const containerIds = keys(scope.containerIds ?? []);
+    const containerSets = await rows(manager, 'container_sets', [['container_id', containerIds]]);
+    const containerSetBlades = await rows(manager, 'container_set_blades', [['container_set_id', keys(containerSets.filter(r => r.enabled && !r.deletedAt).map(r => r.id))]]);
+    bladeIds = keys([...bladeIds, ...containerSetBlades.filter(r => r.enabled && !r.deletedAt).map(r => r.blade_id)]);
     const buildLinks = await rows(manager, 'cutter_build_blades', [['blade_id', bladeIds], ['cutter_build_id', buildIds]]);
     const bodyBuilds = await rows(manager, 'cutter_builds', [['cutter_body_id', bodyIds]]);
     buildIds = keys([...buildIds, ...buildLinks.map(r => r.cutter_build_id), ...bodyBuilds.map(r => r.id)]);
@@ -125,10 +135,13 @@ async function snapshot(manager: EntityManager, scope: ReversalScope): Promise<S
     state.blade_tray = await rows(manager, 'blade_tray', [['tray_id', trayIds], ['blade_id', bladeIds]]);
     state.location_tray = await rows(manager, 'location_tray', [['tray_id', trayIds]]);
     state.container_tray = await rows(manager, 'container_tray', [['tray_id', trayIds]]);
+    state.container_set_blades = await rows(manager, 'container_set_blades', [['blade_id', bladeIds]]);
+    state.container_sets = await rows(manager, 'container_sets', [['id', keys(state.container_set_blades.map(r => r.container_set_id))], ['container_id', containerIds]]);
+    state.container_set_blades = await rows(manager, 'container_set_blades', [['blade_id', bladeIds], ['container_set_id', keys(state.container_sets.map(r => r.id))]]);
     state.tray_grinding_runs = await rows(manager, 'tray_grinding_runs', [['tray_id', trayIds]]);
     state.blade_history = await rows(manager, 'blade_history', [['tray_id', trayIds], ['blade_id', bladeIds]]);
-    state.locations = await rows(manager, 'locations', [['id', keys(state.location_tray.map(r => r.location_id))]]);
-    state.containers = await rows(manager, 'containers', [['id', keys(state.container_tray.map(r => r.container_id))]]);
+    state.locations = await rows(manager, 'locations', [['id', keys([...state.location_tray, ...state.container_sets].map(r => r.location_id))]]);
+    state.containers = await rows(manager, 'containers', [['id', keys([...state.container_tray, ...state.container_sets].map(r => r.container_id))]]);
     state.cutter_bodies = await rows(manager, 'cutter_bodies', [['id', bodyIds]]);
   }
   state.cutter_builds = await rows(manager, 'cutter_builds', [['id', buildIds]]);

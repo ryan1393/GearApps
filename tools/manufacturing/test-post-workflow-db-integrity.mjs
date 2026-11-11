@@ -107,6 +107,30 @@ const checks=[
     `,
   },
   {
+    name:'No blade is active in both a tray and a coater container set',
+    sql:`
+      select b.id,b.serial_number,bt.tray_id,cs.container_id
+        from blades b
+        join blade_tray bt on bt.blade_id=b.id and bt.enabled=true and bt."deletedAt" is null
+        join container_set_blades sb on sb.blade_id=b.id and sb.enabled=true and sb."deletedAt" is null
+        join container_sets cs on cs.id=sb.container_set_id
+    `,
+  },
+  {
+    name:'Every active coater container set is one complete set of one Summary and part type',
+    sql:`
+      select cs.id,cs.container_id,cs.required_blade_count,count(b.id)::int as blades
+        from container_sets cs
+        left join container_set_blades sb on sb.container_set_id=cs.id and sb.enabled=true and sb."deletedAt" is null
+        left join blades b on b.id=sb.blade_id
+       where cs.enabled=true and cs."deletedAt" is null
+       group by cs.id
+      having count(b.id) <> cs.required_blade_count
+          or bool_or(b.summary_id <> cs.summary_id or b.part_type_id <> cs.part_type_id)
+          or exists (select 1 from container_tray ct where ct.container_id=cs.container_id and ct.enabled=true)
+    `,
+  },
+  {
     name:'E2E machine has at most one active cutter run',
     sql:`
       select machine_number,count(*)::int as active_runs

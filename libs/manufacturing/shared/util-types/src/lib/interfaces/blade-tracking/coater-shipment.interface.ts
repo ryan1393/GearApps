@@ -5,6 +5,11 @@ export interface CoaterShipmentBlade {
   cycle: number;
 }
 export interface CoaterShipmentTray {
+  /**
+   * SET: one complete set moved out of its tray into the container (id is the set; serial is
+   * the tray it came from). TRAY, or absent in older manifests: a whole tray packed in the container.
+   */
+  kind?: 'TRAY' | 'SET';
   id: string;
   assignment_id: string;
   serial: string;
@@ -12,6 +17,7 @@ export interface CoaterShipmentTray {
   part_type: string;
   count: number;
   required: number | null;
+  /** Where it was packed from or waits: a rough shelf bin or COATER-STAGING. */
   rough_shelf: string;
   blades: CoaterShipmentBlade[];
 }

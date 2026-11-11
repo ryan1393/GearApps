@@ -1,5 +1,5 @@
 <section class="gear-page op-page">
-  <header class="gear-page-header" danaPageHeader eyebrow="COATER RECEIVING" heading="Receive Container" description="Scan the returned container, scan each tray out, then scan its part-specific Cuttergrind Finished shelf: CGFR-A1A for RING or CGFP-A1A for PINION (shelf letter, layer number, bin letter)."></header>
+  <header class="gear-page-header" danaPageHeader eyebrow="COATER RECEIVING" heading="Receive Container" description="Scan the returned container, then an empty tray for its set (or each tray packed whole), then the part-specific finished shelf: CGFR-A1A for RING or CGFP-A1A for PINION (shelf letter, layer number, bin letter)."></header>
   <div class="op-steps">
     <gear-station-status [message]="message" [prompt]="prompt" (dismiss)="message = null" />
 
@@ -11,12 +11,12 @@
       </gear-scan-panel>
     </div>
 
-    @if (container && (expected.length || pendingTray)) {
+    @if (container && (expected.length || pendingTray || receivingSet)) {
       <div class="gear-panel op-step">
-        <gear-scan-panel #trayScanner [step]="2" label="Scan Tray Out" changeText="Choose another tray"
+        <gear-scan-panel #trayScanner [step]="2" [label]="bladeSet ? 'Scan Empty Tray For The Set' : 'Scan Tray Out'" changeText="Choose another tray"
           [doneValue]="pendingTray?.serial_number ?? null" [disabled]="busy" (scanned)="scanTray($event)" (reopen)="cancelPendingTray()">
           <gear-option-picker placeholder="Choose tray…" [headers]="['Tray', 'Part', 'Blades']" [options]="trayOptions"
-            emptyText="Every expected tray is received." [disabled]="busy" (picked)="chooseTray($event)" />
+            [emptyText]="bladeSet ? 'Scan any empty tray.' : 'Every expected tray is received.'" [disabled]="busy" (picked)="chooseTray($event)" />
         </gear-scan-panel>
       </div>
     }
@@ -24,7 +24,7 @@
     @if (pendingTray) {
       <div class="gear-panel op-step">
         <gear-scan-panel #shelfScanner [step]="3" [label]="'Scan ' + shelfPrefix + ' Finished Shelf'"
-          [help]="'Tray ' + pendingTray.serial_number + ' (' + (pendingTray.part_type?.code || 'no part type') + ') is ready for cutter. Put it on an empty ' + shelfPrefix + ' shelf bin, such as ' + shelfPrefix + '-A1A (shelf, layer, bin).'"
+          [help]="'Tray ' + pendingTray.serial_number + ' (' + (receivingPartType || 'no part type') + ') is ready for cutter. Put it on an empty ' + shelfPrefix + ' shelf bin, such as ' + shelfPrefix + '-A1A (shelf, layer, bin).'"
           [disabled]="busy" (scanned)="scanShelf($event)">
           <gear-option-picker [placeholder]="'Choose empty ' + shelfPrefix + ' shelf…'" [headers]="['Shelf', 'Description']" [options]="shelfOptions"
             [emptyText]="'No empty ' + shelfPrefix + ' shelves are available. Free one up, or ask a supervisor.'" [disabled]="busy" (picked)="chooseShelf($event)" />
@@ -34,7 +34,7 @@
 
     @if (container) {
       <div class="op-primary">
-        <button type="button" class="gear-btn gear-btn-primary" (click)="finish()" [disabled]="busy || expected.length > 0 || !!pendingTray">Finish Receiving {{ container.serial_number }}</button>
+        <button type="button" class="gear-btn gear-btn-primary" (click)="finish()" [disabled]="busy || expected.length > 0 || !!pendingTray || receivingSet">Finish Receiving {{ container.serial_number }}</button>
         @if (finishBlockedReason) { <p class="op-blocked" role="status">{{ finishBlockedReason }}</p> }
       </div>
     }
@@ -53,10 +53,16 @@
       <div class="gear-panel op-card">
         <span class="op-card-eyebrow">Receiving</span>
         <span class="op-card-title">{{ container.serial_number }}</span>
-        <span class="text-lg font-bold">{{ received.length }} of {{ totalTrays }} trays received</span>
+        @if (bladeSet) {
+          <span class="text-lg font-bold">One set · {{ bladeSet.blades.length }} {{ bladeSet.part_type_code }} blades · Summary {{ bladeSet.summary_number || '—' }}</span>
+          <span>{{ setReceived ? 'Received into a tray.' : 'Waiting for an empty tray.' }}</span>
+        } @else {
+          <span class="text-lg font-bold">{{ received.length }} of {{ totalTrays }} trays received</span>
+        }
         <div class="op-progress" aria-hidden="true"><span [style.width.%]="totalTrays ? (received.length / totalTrays) * 100 : 0"></span></div>
       </div>
 
+      @if (!bladeSet) {
       <div class="gear-panel overflow-hidden">
         <div class="op-card"><span class="op-card-eyebrow">Expected ({{ expected.length }})</span></div>
         <ul class="op-list" aria-label="Trays still expected">
@@ -75,6 +81,7 @@
           }
         </ul>
       </div>
+      }
 
       <div class="gear-panel overflow-hidden">
         <div class="op-card"><span class="op-card-eyebrow">Received to shelf ({{ received.length }})</span></div>
@@ -89,6 +96,7 @@
     } @else {
       <div class="gear-panel op-card">
         <span class="op-card-eyebrow">Shelf rule</span>
+        <p>A container holds one set: put it into any empty tray.</p>
         <p>Coated RING trays go to an empty <strong>CGFR</strong> shelf bin such as <strong>CGFR-A1A</strong> (shelf, layer, bin); PINION trays to an empty <strong>CGFP</strong> bin.</p>
       </div>
     }

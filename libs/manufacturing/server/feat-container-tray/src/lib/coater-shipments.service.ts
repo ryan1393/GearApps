@@ -93,7 +93,8 @@ export class CoaterShipmentsService {
       const term='%'+query.trim().toUpperCase().replace(/[%_\\]/g,'\\$&')+'%';
       const candidates=await m.query(`SELECT c.id,c.serial_number FROM containers c
         WHERE c.enabled AND c."deletedAt" IS NULL AND c.serial_number ILIKE $1
-          AND EXISTS (SELECT 1 FROM container_tray ct WHERE ct.container_id=c.id AND ct.enabled)
+          AND (EXISTS (SELECT 1 FROM container_tray ct WHERE ct.container_id=c.id AND ct.enabled)
+            OR EXISTS (SELECT 1 FROM container_sets cs WHERE cs.container_id=c.id AND cs.enabled))
           AND NOT EXISTS (SELECT 1 FROM dana_coater_shipment_containers_v1 sc WHERE sc.container_id=c.id AND sc.reserved)
         ORDER BY c.serial_number LIMIT 100`,[term]);
       const result: CoaterAvailableContainer[]=[];
@@ -198,12 +199,14 @@ export class CoaterShipmentsService {
       if (!stage) throw new ConflictException('AT_COATER stage is not configured.');
       const manifest: CoaterManifest=row.manifest;
       for (const container of manifest.containers) for (const tray of container.trays) {
+        // A blade set has left its tray (the tray is already back in the empty pool).
+        const set = tray.kind === 'SET';
         await m.query(`INSERT INTO blade_history(id,blade_id,event_type,from_status,to_status,service_cycle,tray_id,container_id,notes,"createdBy","updatedBy")
           SELECT ids.id,ids.blade_id,'sent_to_coater','ready_for_coating','at_coater',ids.cycle,$4,$5,$6,$7,$7
           FROM unnest($1::uuid[],$2::uuid[],$3::int[]) AS ids(id,blade_id,cycle)`,
-          [tray.blades.map(()=>randomUUID()),tray.blades.map(b=>b.id),tray.blades.map(b=>b.cycle),tray.id,container.id,`Shipment ${row.number}, revision ${revision}`,user]);
+          [tray.blades.map(()=>randomUUID()),tray.blades.map(b=>b.id),tray.blades.map(b=>b.cycle),set ? null : tray.id,container.id,`Shipment ${row.number}, revision ${revision}`,user]);
         await m.query('UPDATE blades SET status=$2,"updatedAt"=clock_timestamp(),"updatedBy"=$3 WHERE id::text=ANY($1::text[])',[tray.blades.map(b=>b.id),'at_coater',user]);
-        await m.query('UPDATE trays SET current_stage_id=$2,"updatedAt"=clock_timestamp(),"updatedBy"=$3 WHERE id=$1',[tray.id,stage.id,user]);
+        if (!set) await m.query('UPDATE trays SET current_stage_id=$2,"updatedAt"=clock_timestamp(),"updatedBy"=$3 WHERE id=$1',[tray.id,stage.id,user]);
       }
       await m.query("UPDATE dana_coater_shipments_v1 SET status='DISPATCHED',dispatched_at=clock_timestamp(),dispatched_by=$2,updated_at=clock_timestamp() WHERE id=$1",[id,user]);
       await m.query('UPDATE dana_coater_shipment_containers_v1 SET reserved=false WHERE shipment_id=$1',[id]);

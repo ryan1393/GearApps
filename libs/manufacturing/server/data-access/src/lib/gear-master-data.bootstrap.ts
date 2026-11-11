@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { COATER_SHIPMENT_SCHEMA } from './coater-shipment.schema';
+import { COATER_STAGING_SEED, CONTAINER_SET_SCHEMA } from './coater-container-set';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -63,6 +64,8 @@ export class GearMasterDataBootstrap implements OnModuleInit {
       `);
       await manager.query(CUTTER_BODY_SHELF_SCHEMA);
       await manager.query(COATER_SHIPMENT_SCHEMA);
+      await manager.query(CONTAINER_SET_SCHEMA);
+      await manager.query(COATER_STAGING_SEED.sql, COATER_STAGING_SEED.params());
       await manager.query(`INSERT INTO tray_stages(id,code,name,description,sort_order,enabled)
         VALUES($1,'PACKED_FOR_COATER','Packed for Coater','Loaded in a container; awaiting shipment dispatch',35,true)
         ON CONFLICT(code) DO NOTHING`, [randomUUID()]);

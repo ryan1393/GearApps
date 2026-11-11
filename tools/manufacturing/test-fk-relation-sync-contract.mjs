@@ -11,9 +11,16 @@ const checks=[
     ],
   },
   {
+    // Loading a container moves the tray's set into it and empties the tray.
+    file:'libs/manufacturing/server/data-access/src/lib/coater-container-set.ts',
+    pairs:[
+      ['tray.current_stage_id = emptyStage.id;', 'tray.current_stage = emptyStage;'],
+    ],
+  },
+  {
     file:'libs/manufacturing/server/feat-container-tray/src/lib/server-feat-container-tray.service.ts',
     pairs:[
-      ['tray.current_stage_id = atCoaterStage.id;', 'tray.current_stage = atCoaterStage;'],
+      ['tray.current_stage_id = readyForCutterStage.id;', 'tray.current_stage = readyForCutterStage;'],
     ],
   },
   {
