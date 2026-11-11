@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSource, EntityManager } from 'typeorm';
+import { CYCLE_TIME_AVERAGE_OF } from '@meshforge/shared/domain';
 
 export type Row = Record<string, unknown>;
 export type Resource =
@@ -377,6 +378,7 @@ export class PostgresLapperCatalog {
       consec: c.consec,
       serial_number: c.serial_number,
       timestamp: c.occurred_at,
+      cycle_time_s: numberOrNull(c.cycle_time_s),
       machine_id: c.api_machine_id,
       machine: machineById.get(c.api_machine_id),
       gearset_id: c.api_gearset_id,
@@ -414,6 +416,13 @@ export class PostgresLapperCatalog {
     // The serial is matched as text typed by the user: escape the LIKE wildcards.
     if (wanted) query.andWhere("c.serial_number ILIKE :serial ESCAPE '\\'", { serial: '%' + wanted.replace(/[\\%_]/g, '\\$&') + '%' });
     const counted = await query.clone().select('COUNT(*)', 'total').orderBy().getRawOne<Row>();
+    // Average of the most recent timed cycles, whatever serial the list is filtered by.
+    const timed = await this.cycleQuery(this.db.manager, { machineId, gearsetId })
+      .andWhere('c.cycle_time_s IS NOT NULL')
+      .select('c.cycle_time_s', 'cycle_time_s')
+      .limit(CYCLE_TIME_AVERAGE_OF)
+      .getRawMany<Row>();
+    const times = timed.map((t) => Number(t.cycle_time_s)).filter(Number.isFinite);
     const rows = await query
       .addSelect('(SELECT COUNT(*) FROM lapper.macro_logs l WHERE l.machine_cycle_id=c.id)', 'changed_count')
       .offset((page - 1) * pageSize)
@@ -423,8 +432,13 @@ export class PostgresLapperCatalog {
       items: rows.map((c) => ({
         id: c.id, consec: c.consec, serial_number: c.serial_number, timestamp: c.occurred_at,
         machine_id: c.api_machine_id, gearset_id: c.api_gearset_id, changed_count: Number(c.changed_count),
+        cycle_time_s: numberOrNull(c.cycle_time_s),
       })),
       total: Number(counted?.total ?? 0), page, page_size: pageSize,
+      cycle_time: {
+        average_s: times.length ? Math.round((times.reduce((sum, t) => sum + t, 0) / times.length) * 1000) / 1000 : null,
+        average_of: times.length,
+      },
     };
   }
 

@@ -221,6 +221,8 @@ class WorkerArgonautTests(unittest.TestCase):
         # The cycle ran for about 0.2s between going into and out of cycle.
         self.assertGreater(body["floatData"][0], 0.1)
         self.assertLess(body["floatData"][0], 5)
+        # MeshForge records the same cycle time.
+        self.assertEqual(list(self.api.cycle_times.values()), [body["floatData"][0]])
         self.assertEqual(body["stringData"][0], "373")
         self.assertEqual(self.worker.status()["argonaut"], "on")
         self.assertEqual(self.worker.status()["argonaut_pending"], 0)
