@@ -136,31 +136,24 @@ import {
           </select>
         </label>
         <label class="gear-field dana-field-full">
-          Argonaut URL
+          Argonaut API
           <input
             class="gear-input"
             formControlName="argonaut_url"
-            placeholder="https://argonaut-host:3003/api/mes/trigger-transaction"
+            placeholder="https://argonaut-host:3003/api/mes/trigger-transaction?locationId=…"
             inputmode="url"
           />
           @if (invalid('argonaut_url')) {
             <small class="gear-field-help" role="alert"
-              >Enter a full http:// or https:// address, or leave it empty.</small
+              >Paste the full http:// or https:// address, or leave it empty.</small
             >
           } @else {
             <small class="gear-field-help"
-              >Lapper Read sends this machine's finished cycles (scanned serial and macros) to this
-              Argonaut address. Leave empty to use the collector's default.</small
+              >Paste the full Argonaut API address, including <code>?locationId=</code>. Lapper Read
+              sends this machine's finished cycles (scanned serial and macros) there. Leave empty to
+              not send, or to use the collector's default.</small
             >
           }
-        </label>
-        <label class="gear-field">
-          Argonaut location ID
-          <input
-            class="gear-input"
-            formControlName="argonaut_location_id"
-            placeholder="Collector default"
-          />
         </label>
         <div class="gear-field">
           <span>Status</span>
@@ -226,9 +219,6 @@ export class MachineFormDialogComponent {
     argonaut_url: new FormControl<string | null>(null, {
       validators: [Validators.pattern(ARGONAUT_URL_PATTERN), Validators.maxLength(500)],
     }),
-    argonaut_location_id: new FormControl<string | null>(null, {
-      validators: [Validators.maxLength(200)],
-    }),
   });
 
   constructor() {
@@ -255,13 +245,9 @@ export class MachineFormDialogComponent {
     }
     this.busy.set(true);
     this.error.set(null);
-    const { number, dept_id, argonaut_url, argonaut_location_id, ...rest } = this.form.getRawValue();
-    // Blank Argonaut fields are sent as null so the collector falls back to its default.
-    const editable = {
-      ...rest,
-      argonaut_url: argonaut_url?.trim() || null,
-      argonaut_location_id: argonaut_location_id?.trim() || null,
-    };
+    const { number, dept_id, argonaut_url, ...rest } = this.form.getRawValue();
+    // The pasted address carries its own locationId; a blank one is sent as null (collector default).
+    const editable = { ...rest, argonaut_url: argonaut_url?.trim() || null };
     const existing = this.machine();
     // The API keeps a machine in the department it was created in, so edits never send it.
     const req = existing

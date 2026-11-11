@@ -89,6 +89,12 @@ class ClientTests(unittest.TestCase):
         self.assertEqual(headers["Content-Type"], "application/json")
         self.assertEqual(body, {"request": {"sequence": 1}})
 
+    def test_a_pasted_url_keeps_its_own_location(self):
+        client = argo.ArgonautClient(self.url + "?locationId=pasted", "default-loc", timeout_s=2)
+        self.assertTrue(client.url.endswith("?locationId=pasted"))
+        client.post({})
+        self.assertEqual(self.received[0][0], "/api/mes/trigger-transaction?locationId=pasted")
+
     def test_http_errors_are_classified(self):
         client = argo.ArgonautClient(self.url, timeout_s=2)
         self.status = 400
