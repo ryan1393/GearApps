@@ -37,3 +37,5 @@ npm run clear:operational-data:apply  # stop the API first
 ```
 
 `clear-operational-data.mjs` empties blades, trays, containers, all locations, cutter builds and their history, coater shipments, Greenshed/DSF counts and the Cancel Last journal. Users, base/master data, cutter bodies, settings and the Lapper schema are kept. The `EMPTY` and `KEEP` lists at the top of the script are the source of truth; `test-clear-operational-data-contract.mjs` checks them. `commands\CLEAR-OPERATIONAL-DATA.cmd` previews and then asks for `CLEAR DATA`.
+
+For a database in Docker (no Node.js needed), `commands\CLEAR-OPERATIONAL-DATA-DOCKER.cmd` runs `Clear-OperationalData-Docker.ps1`: preview, `CLEAR DATA`, `pg_dump` backup, then `clear-operational-data.sql` inside the PostgreSQL container. That SQL file is generated from the same lists; regenerate it after changing them with `node tools/manufacturing/data-import/clear-operational-data.mjs --write-sql` (the contract test fails if it is stale).

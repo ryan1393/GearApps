@@ -23,6 +23,7 @@ if not exist ".env" (
 if not exist "node_modules\pg\package.json" (
   echo The project packages are not installed in this folder.
   echo Run commands\SETUP-MESHFORGE.cmd here first, or use your working MeshForge folder.
+  echo If the database runs in Docker, use commands\CLEAR-OPERATIONAL-DATA-DOCKER.cmd instead.
   echo Nothing was deleted.
   pause
   exit /b 1

@@ -490,6 +490,12 @@ Only the listed tables are truncated, in one transaction and without `CASCADE`: 
 
 Preview only: `npm run clear:operational-data`. Apply: `npm run clear:operational-data:apply`.
 
+**Database in Docker, or no Node.js 24 on this computer:** run `commands\CLEAR-OPERATIONAL-DATA-DOCKER.cmd` instead. It needs only Docker: it finds the running container with `postgres` in its name (or pass `-PgContainer NAME`), lists the same counts, asks for `CLEAR DATA`, saves a `pg_dump` backup to `tools/manufacturing/data-import/work/backups/`, and then runs `clear-operational-data.sql` with `psql` inside the container. On a Linux Docker host without PowerShell, run the same SQL directly (preview first, then add `-v apply=true`):
+
+```bash
+docker exec -i POSTGRES_CONTAINER psql -X -U DATABASE_USER -d MeshForge -v ON_ERROR_STOP=1 -f - < tools/manufacturing/data-import/clear-operational-data.sql
+```
+
 Afterwards make the shelves again in **Admin > Locations > Bulk shelf locations**, and trays and containers in **Admin > Launch Setup**.
 
 ## Configure the IPL label printer
