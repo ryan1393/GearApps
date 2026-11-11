@@ -53,7 +53,7 @@ export const EMPTY = [
 /** Tables that must keep every row. Checked before and after, inside the transaction. */
 export const KEEP = [
   'users', 'departments',
-  'models', 'parts', 'part_summaries', 'part_types', 'cutter_blade_requirements',
+  'models', 'parts', 'part_summaries', 'part_types', 'cutter_blade_requirements', 'cutter_summary_body_rules',
   'cutter_body_definitions', 'cutter_bodies', 'roll_masters', 'gearsets', 'machines',
   'cutter_build_statuses', 'cutter_event_types', 'cutter_pull_reasons',
   'cutter_check_results', 'tray_stages',

@@ -25,8 +25,8 @@ if (-not (Test-Path -LiteralPath $ManifestPath)) {
 
 $Routes = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
 
-if (@($Routes).Count -ne 114) {
-    throw "Expected 114 routes but manifest contains $(@($Routes).Count)."
+if (@($Routes).Count -ne 117) {
+    throw "Expected 117 routes but manifest contains $(@($Routes).Count)."
 }
 
 $Results = @()

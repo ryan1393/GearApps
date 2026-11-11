@@ -5,6 +5,7 @@ import { ApiEntity, IBaseEntity } from '../base-entity.interface';
 export interface ICutterBladeRequirementEntity extends IBaseEntity {
   summary_id: Uuid;
   part_type_id: Uuid;
+  /** Matched inner/outer blade sets (one set = 2 blades); Summary-based. */
   required_blade_count: number;
   enabled: boolean;
   summary?: IPartSummaryEntity;
@@ -33,7 +34,12 @@ export interface IValidateCutterTrayResult {
   tray_id: Uuid;
   tray_serial_number: string;
   grinding_complete: boolean;
+  /** Matched inner/outer blade sets. */
   required_blade_count: number;
+  /** The same requirement in total individual blades. */
+  required_total_blades?: number | null;
+  /** The Summary's configured Body Size Rule code, or null when not configured. */
+  summary_body_rule?: string | null;
   tray_declared_blade_count: number;
   active_blade_count: number;
   requirement_id: Uuid;
@@ -45,4 +51,30 @@ export interface IValidateCutterTrayResult {
   still_in_container: boolean;
   tray_stage_ready: boolean;
   reason?: string;
+}
+
+export interface ISummaryBodyRuleRequirement {
+  id: Uuid;
+  part_type_code: string;
+  /** Matched inner/outer blade sets. */
+  required_blade_count: number;
+  enabled: boolean;
+}
+
+/** A Summary's Body Size Rule and its Summary-based required quantity. */
+export interface ISummaryBodyRuleRow {
+  summary_id: Uuid;
+  summary_number: string;
+  summary_revision: string | null;
+  summary_enabled: boolean;
+  model_number: string | null;
+  configured_body_rule: string | null;
+  status: 'CONFIGURED' | 'DERIVED' | 'UNRESOLVED' | 'CONFLICT' | 'NO_REQUIREMENT';
+  effective_body_rule: string | null;
+  effective_body_rule_label: string | null;
+  required_blade_sets: number | null;
+  required_total_blades: number | null;
+  detail: string;
+  requirements: ISummaryBodyRuleRequirement[];
+  open_trays_with_other_quantity?: number;
 }

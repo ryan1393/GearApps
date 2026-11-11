@@ -6,7 +6,7 @@ import {
   TrayOrmEntity,
 } from '@meshforge/manufacturing/server/data-access';
 import { BladeStatus } from '@meshforge/manufacturing/shared/util-types';
-import { ServerFeatCutterConfigService } from './server-feat-cutter-config.service';
+import { ServerFeatCutterConfigService, toSummaryBodyRuleRow } from './server-feat-cutter-config.service';
 
 describe('ServerFeatCutterConfigService tray validation', () => {
   const requirement = {
@@ -34,6 +34,7 @@ describe('ServerFeatCutterConfigService tray validation', () => {
   }) => {
     const requirementRepo = {
       findOne: jest.fn().mockResolvedValue(requirement),
+      manager: { query: jest.fn().mockResolvedValue([]) },
     };
     const partTypeRepo = {
       find: jest.fn(),
@@ -291,5 +292,47 @@ describe('ServerFeatCutterConfigService gearset part guards', () => {
     const { service, partRepo } = createService(false);
     await service.updatePart('part-1', { teeth: 43 }, 'user-1');
     expect(partRepo.save).toHaveBeenCalledWith(expect.objectContaining({ teeth: 43 }));
+  });
+});
+
+describe('ServerFeatCutterConfigService blade requirement quantities', () => {
+  const service = () => {
+    const transaction = jest.fn();
+    const repo = { findOne: jest.fn().mockResolvedValue(null), manager: { transaction, query: jest.fn() } };
+    const ok = { findOne: jest.fn().mockResolvedValue({ id: 'x', enabled: true }) };
+    return { transaction, svc: new ServerFeatCutterConfigService(repo as never, ok as never, ok as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never) };
+  };
+
+  it.each([0, 12, 22, 26, 34, 38])('rejects %i: requirements are matched sets of an approved body rule', async (count) => {
+    const { svc, transaction } = service();
+    await expect(svc.createRequirement({ summary_id: 's', part_type_id: 'p', required_blade_count: count })).rejects.toThrow('matched inner/outer blade sets');
+    expect(transaction).not.toHaveBeenCalled();
+  });
+
+  it('rejects an unknown Body Size Rule before touching data', async () => {
+    const { svc, transaction } = service();
+    await expect(svc.setSummaryBodyRule('s', '105-STANDARD', 'u')).rejects.toThrow('Body Size Rule must be one of');
+    expect(transaction).not.toHaveBeenCalled();
+  });
+});
+
+describe('Summary body rule rows', () => {
+  const row = (body_rule: string | null, counts: number[]) => toSummaryBodyRuleRow({
+    summary_id: 's', summary_number: '30131', summary_revision: null, summary_enabled: true, model_number: '286', body_rule,
+    requirements: counts.map((c, i) => ({ id: `r${i}`, part_type_code: i ? 'RING' : 'PINION', required_blade_count: c, enabled: true })),
+  });
+
+  it('keeps 076 and special 105 distinct although both are 26 blades', () => {
+    expect(row('105-SPECIAL', [13, 13])).toMatchObject({ status: 'CONFIGURED', effective_body_rule: '105-SPECIAL', required_blade_sets: 13, required_total_blades: 26 });
+    expect(row('076', [13, 13])).toMatchObject({ status: 'CONFIGURED', effective_body_rule: '076', required_total_blades: 26 });
+    expect(row(null, [13, 13])).toMatchObject({ status: 'UNRESOLVED', effective_body_rule: null, required_total_blades: 26 });
+  });
+
+  it('derives 088 for 32209-style 17-set requirements without doubling', () => {
+    expect(row(null, [17, 17])).toMatchObject({ status: 'DERIVED', effective_body_rule: '088', required_blade_sets: 17, required_total_blades: 34 });
+  });
+
+  it('reports RING/PINION disagreement instead of picking one', () => {
+    expect(row(null, [19, 13])).toMatchObject({ status: 'CONFLICT', required_blade_sets: null });
   });
 });

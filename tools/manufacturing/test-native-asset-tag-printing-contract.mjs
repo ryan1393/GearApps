@@ -134,6 +134,6 @@ for(const marker of [
 
 const route=manifest.find((r)=>r.method==='POST' && r.path==='/api/v1/asset-tags/print');
 if(!route) throw new Error('Route manifest missing POST /api/v1/asset-tags/print');
-if(manifest.length!==114) throw new Error(`Expected 114 API routes with native asset tag printing; found ${manifest.length}`);
+if(manifest.length!==117) throw new Error(`Expected 117 API routes with native asset tag printing; found ${manifest.length}`);
 
 console.log('[PASS] Native asset-tag printing contract passed: database-backed serial identity, T/C zero-padding, 2.125 x 0.625 IPL stock, Code 128, Admin per-record Print Tag, authenticated transport, and PRN fallback.');

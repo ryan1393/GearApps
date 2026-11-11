@@ -40,6 +40,8 @@
     "test:fixtures": "nx run manufacturing-tools:test-fixtures",
     "test:blade-data": "nx run manufacturing-tools:test-blade-data",
     "validate:base-data": "nx run manufacturing-tools:validate-base-data",
+    "audit:cutter-blade-rules": "nx run manufacturing-tools:audit-cutter-blade-rules",
+    "apply:proposed-special-105": "nx run manufacturing-tools:apply-proposed-special-105",
     "test:cutter-dana": "nx run manufacturing-tools:test-cutter-dana",
     "export:base:fresh": "nx run manufacturing-tools:export-base-fresh",
     "export:cutter-history:fresh": "nx run manufacturing-tools:export-cutter-history-fresh",

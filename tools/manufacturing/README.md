@@ -46,6 +46,8 @@ npm run import:base-data
 
 The import adds 15 missing summaries, 216 blade requirements, and 120 unambiguous cutter-body/manufacturing-serial mappings. Duplicate cutter-body mappings stay in the workbook review sheet and are not imported.
 
+Blade requirements are matched inner/outer sets and every row states `Blade_Quantity_Unit` (`MATCHED_SETS` or `TOTAL_BLADES`); blank/zero rows are skipped, and a re-import never doubles a value. `npm run audit:cutter-blade-rules` reports the current database read-only; `npm run apply:proposed-special-105` is the opt-in for the four workbook-proposed 105 Special Summaries. See `../../docs/manufacturing/CUTTER_BODY_BLADE_RULES.md`.
+
 ## Cutter-body MF → Dana transition test
 
 `test-cutter-body-dana-assignment.ps1` verifies that an MF-only cutter can later receive a Dana S/N without changing its cutter-body UUID, both identifiers continue resolving the same body, and duplicate Dana assignment is blocked.

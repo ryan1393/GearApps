@@ -40,7 +40,7 @@
           <select [(ngModel)]="selectedCutterBodyId" name="selectedCutterBodyId" class="gear-input" (change)="selectAvailableCutterBody()" [disabled]="busy">
             <option value="">Choose available cutter body...</option>
             <option *ngFor="let body of availableCutterBodies" [value]="body.id">
-              {{ body.dana_serial_number || body.mf_serial_number }} · {{ cutterBodyRequiredBladeCount(body) || '?' }} blades
+              {{ body.dana_serial_number || body.mf_serial_number }} · {{ cutterBodyCapacityText(body) }}
             </option>
           </select>
         </label>
@@ -59,6 +59,10 @@
               <strong>{{ body.mf_serial_number || '—' }}</strong>
             </div>
             <div class="gear-workflow-detail">
+              <span class="gear-workflow-detail-label">Body Rule / Capacity</span>
+              <strong>{{ cutterBodyCapacityText(body) }}</strong>
+            </div>
+            <div class="gear-workflow-detail">
               <span class="gear-workflow-detail-label">Definition</span>
               <strong>{{ body.definition?.definition_code || body.description || '—' }}</strong>
             </div>
@@ -67,6 +71,7 @@
               <strong>{{ body.enabled ? 'Enabled' : 'Disabled' }}</strong>
             </div>
           </div>
+          <p *ngIf="cutterBodyRule(body).problem as problem" class="gear-workflow-help">{{ problem }}</p>
           <p *ngIf="!body.dana_serial_number" class="gear-workflow-help">
             Dana serial assignment belongs in <strong>Admin &gt; Cutter Bodies</strong>. Normal Cutter Builder does not administer etched serials.
           </p>
@@ -105,7 +110,7 @@
                   (change)="selectAvailableTray()" [disabled]="busy || !cutterBody">
             <option value="">Choose compatible ready tray...</option>
             <option *ngFor="let ready of compatibleReadyTrays" [value]="ready.tray_serial_number">
-              {{ ready.tray_serial_number }} · {{ ready.summary_number || 'No Summary' }} · {{ ready.part_type_code || 'No Part Type' }} · {{ ready.blade_count }} blades
+              {{ ready.tray_serial_number }} · {{ ready.summary_number || 'No Summary' }} · {{ ready.part_type_code || 'No Part Type' }} · {{ bladeSetText(ready.blade_count) }}
             </option>
           </select>
         </label>
@@ -125,7 +130,7 @@
             </div>
             <div class="gear-workflow-detail">
               <span class="gear-workflow-detail-label">Blade Count</span>
-              <strong>{{ selectedTray.blade_count }}</strong>
+              <strong>{{ bladeSetText(selectedTray.blade_count) }}</strong>
             </div>
             <div class="gear-workflow-detail">
               <span class="gear-workflow-detail-label">Stage</span>
@@ -138,10 +143,12 @@
           <span class="gear-workflow-kicker">Tray Validation</span>
           <div class="gear-workflow-selection-title">{{ validation.valid ? 'Ready for Cutter Builder' : 'Not Ready' }}</div>
           <p class="gear-workflow-help">
-            Required {{ validation.required_blade_count }} · Active {{ validation.active_blade_count }} ·
+            Required {{ bladeSetText(validation.required_blade_count) }} · Active {{ validation.active_blade_count }} sets ·
             Summary {{ validation.summary_matches ? 'match' : 'mismatch' }} ·
             Part Type {{ validation.part_type_matches ? 'match' : 'mismatch' }}
           </p>
+          <p *ngIf="bodyCompatibility?.warning as warning" class="gear-workflow-help"><strong>Body Size Rule:</strong> {{ warning }}</p>
+          <p *ngIf="bodyCompatibility?.summary_rule as rule" class="gear-workflow-help">Summary Body Size Rule: {{ rule.label }} · {{ rule.total_blades }} blades ({{ rule.blade_sets }} sets)</p>
         </div>
       </div>
     </section>

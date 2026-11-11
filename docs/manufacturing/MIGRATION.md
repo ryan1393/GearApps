@@ -74,7 +74,7 @@ tools/manufacturing/base-data/source/cutter-body-info-BASE-DATA-READY.xlsx
 The workbook is converted into the JSON files consumed by the normal base-data importer:
 
 - `summary_additions.json` — 15 summaries that were missing from the legacy summary export. They are inserted active/enabled and may be disabled later if confirmed obsolete.
-- `cutter_blade_requirements.json` — 216 unique Summary + Part Type blade-count requirements.
+- `cutter_blade_requirements.json` — 216 unique Summary + Part Type blade-count requirements, in matched inner/outer sets (`Blade_Quantity_Unit: MATCHED_SETS`; total blades are twice the value). See `CUTTER_BODY_BLADE_RULES.md`.
   A requirement with a blank `Summary_Rev` applies to **every** enabled revision of that Summary (blade counts are the same across revisions). An explicit revision, or `(blank)` for exactly the blank revision, limits it to that one.
 - `cutter_bodies.json` — 120 unambiguous cutter serial to manufacturing serial mappings.
 

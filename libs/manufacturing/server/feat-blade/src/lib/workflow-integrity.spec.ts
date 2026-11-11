@@ -115,11 +115,14 @@ describe('Manufacturing inventory integrity', () => {
   });
 
   it.each([
-    { serial: 'BODY064A', count: 19, family: 'RING', part: 'RING' },
-    { serial: 'BODY076A', count: 13, family: 'PINION', part: 'RING' },
-  ])('rejects incompatible body/tray capacity or family before saving: %j', async ({ serial, count, family, part }) => {
+    // Capacity comes only from the Dana S/N; an MF-only body is unresolved even if its MF serial looks like one.
+    { serial: 'CGRT064AAA', dana: 'CGRT064AAA', count: 19, family: 'RING', part: 'RING', reason: '064 Standard' },
+    { serial: 'CGRT076AAA', dana: 'CGRT076AAA', count: 13, family: 'PINION', part: 'RING', reason: 'blade family PINION' },
+    { serial: 'CGRT1058AA', dana: 'CGRT1058AA', count: 19, family: 'RING', part: 'RING', reason: '105 Special' },
+    { serial: 'CGRT105AAA', dana: null, count: 19, family: 'RING', part: 'RING', reason: 'No Dana S/N' },
+  ])('rejects incompatible body/tray capacity or family before saving: %j', async ({ serial, dana, count, family, part, reason }) => {
     const body = repository();
-    const query = { leftJoinAndSelect: jest.fn().mockReturnThis(), setLock: jest.fn().mockReturnThis(), where: jest.fn().mockReturnThis(), andWhere: jest.fn().mockReturnThis(), getMany: jest.fn().mockResolvedValue([{ id: 'body', mf_serial_number: serial, definition: { blade_family_name: family } }]) };
+    const query = { leftJoinAndSelect: jest.fn().mockReturnThis(), setLock: jest.fn().mockReturnThis(), where: jest.fn().mockReturnThis(), andWhere: jest.fn().mockReturnThis(), getMany: jest.fn().mockResolvedValue([{ id: 'body', dana_serial_number: dana, mf_serial_number: dana ? 'MF-1' : serial, definition: { blade_family_name: family } }]) };
     Object.assign(body, { createQueryBuilder: () => query });
     const build = repository();
     const { source } = environment([
@@ -130,7 +133,7 @@ describe('Manufacturing inventory integrity', () => {
       [CutterPartTypeOrmEntity, repository({ id: 'part-type', code: part })],
       [CutterBladeRequirementOrmEntity, repository({ required_blade_count: count })],
     ]);
-    await expect(new ServerFeatCutterBuildService(source).createBuild({ cutter_body_identifier: serial, tray_serial_number: 'T1', cutter_builder_machine_id: 'machine' }, 'operator')).rejects.toThrow('capacity or blade family');
+    await expect(new ServerFeatCutterBuildService(source).createBuild({ cutter_body_identifier: serial, tray_serial_number: 'T1', cutter_builder_machine_id: 'machine' }, 'operator')).rejects.toThrow(reason);
     expect(build.save).not.toHaveBeenCalled();
     expect(query.setLock).toHaveBeenCalledWith('pessimistic_write', undefined, ['body']);
   });

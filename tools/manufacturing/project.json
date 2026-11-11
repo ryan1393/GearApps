@@ -110,6 +110,22 @@
       },
       "cache": false
     },
+    "audit-cutter-blade-rules": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/manufacturing/base-data/audit-cutter-blade-rules.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "apply-proposed-special-105": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/manufacturing/base-data/audit-cutter-blade-rules.mjs --apply-proposed-special-105",
+        "cwd": "."
+      },
+      "cache": false
+    },
     "test-cutter-dana": {
       "executor": "nx:run-commands",
       "options": {
@@ -849,7 +865,7 @@
     "test-deployment": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node --test tools/manufacturing/base-data/bootstrap-policy.test.mjs tools/manufacturing/set-version.test.mjs tools/manufacturing/test-deployment-config.cjs tools/manufacturing/deploy/deploy-layout.test.mjs tools/manufacturing/deploy/deploy-verify.test.mjs tools/manufacturing/package-release.test.mjs tools/manufacturing/gear-merge-manifest.test.mjs",
+        "command": "node --test tools/manufacturing/base-data/bootstrap-policy.test.mjs tools/manufacturing/base-data/blade-requirement-plan.test.mjs tools/manufacturing/set-version.test.mjs tools/manufacturing/test-deployment-config.cjs tools/manufacturing/deploy/deploy-layout.test.mjs tools/manufacturing/deploy/deploy-verify.test.mjs tools/manufacturing/package-release.test.mjs tools/manufacturing/gear-merge-manifest.test.mjs",
         "cwd": "."
       },
       "cache": false
