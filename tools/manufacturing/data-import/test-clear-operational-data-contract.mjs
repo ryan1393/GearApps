@@ -9,6 +9,7 @@ import {
 const read = (relative) => fs.readFileSync(contractPath(process.cwd(), relative), 'utf8');
 const script = read('tools/manufacturing/data-import/clear-operational-data.mjs');
 const cmd = read('commands/CLEAR-OPERATIONAL-DATA.cmd');
+const sh = read('commands/CLEAR-OPERATIONAL-DATA.sh');
 const pkg = JSON.parse(read('package.json'));
 const project = JSON.parse(read('tools/manufacturing/project.json'));
 const fail = (message) => { throw new Error(message); };
@@ -100,6 +101,35 @@ if (!cmd.includes('Type CLEAR DATA to continue') || !cmd.includes(CONFIRM_FLAG))
   fail('The launcher must require the CLEAR DATA phrase before applying');
 }
 if (cmd.indexOf('clear-operational-data.mjs\r\n') > cmd.indexOf('Type CLEAR DATA')) fail('The launcher must preview before asking');
+// Linux Docker host launcher: preview, typed phrase, verified backup, then apply with the API stopped.
+const shAt = (marker) => {
+  const index = sh.indexOf(marker);
+  if (index < 0) fail(`CLEAR-OPERATIONAL-DATA.sh missing ${marker}`);
+  return index;
+};
+const shOrder = [
+  'run_clear || fail "Preview failed',
+  'read -r -p "Type CLEAR DATA to continue: "',
+  '[[ "$CONFIRM" != "CLEAR DATA" ]]',
+  'pg_dump -U',
+  "pg_restore --list",
+  'chmod 600 "$BACKUP"',
+  'compose stop "$API_SERVICE"',
+  'run_clear --apply "$CONFIRM_FLAG"',
+].map(shAt);
+if (shOrder.some((index, i) => i > 0 && index < shOrder[i - 1])) {
+  fail('CLEAR-OPERATIONAL-DATA.sh must preview, confirm, back up and stop the API before applying');
+}
+if (!sh.includes(`CONFIRM_FLAG="${CONFIRM_FLAG}"`)) fail('CLEAR-OPERATIONAL-DATA.sh must pass the confirm flag');
+for (const marker of [
+  'set -euo pipefail', 'umask 077', 'compose run --rm --no-deps -T', 'PROJECT="dana-apps"',
+  'BACKUP_DIR="${MESHFORGE_BACKUP_DIR:-$HOME/dana-apps-backups}"',
+  '-v "$ROOT/$SCRIPT_DIR:/app/$SCRIPT_DIR"', 'node "$SCRIPT" "$@" </dev/null',
+  'trap restart_api EXIT', 'SCRIPT="$SCRIPT_DIR/clear-operational-data.mjs"',
+  'SCRIPT_DIR="tools/manufacturing/data-import"',
+]) shAt(marker);
+if (!/^#!\/usr\/bin\/env bash\n/.test(sh) || sh.includes('\r')) fail('CLEAR-OPERATIONAL-DATA.sh must be a bash script with LF line endings');
+
 if (pkg.scripts['clear:operational-data'] !== 'nx run manufacturing-tools:clear-operational-data' ||
     pkg.scripts['clear:operational-data:apply'] !== 'nx run manufacturing-tools:clear-operational-data-apply') {
   fail('npm scripts must call the manufacturing-tools targets');

@@ -15,6 +15,7 @@ echo requirements, cutter body definitions, cutter bodies, roll masters,
 echo gearsets, machines, settings, label printers, shelf/layer/bin
 echo locations (now empty) and all Lapper data.
 echo.
+set MESHFORGE_CLEAR_FROM_LAUNCHER=1
 node tools\manufacturing\data-import\clear-operational-data.mjs
 if errorlevel 1 (
   echo.

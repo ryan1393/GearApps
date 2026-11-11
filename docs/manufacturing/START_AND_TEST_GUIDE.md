@@ -491,6 +491,8 @@ Only the listed tables are truncated, in one transaction and without `CASCADE`, 
 
 Preview only: `npm run clear:operational-data`. Apply: `npm run clear:operational-data:apply`.
 
+On the Linux Docker host, run `bash commands/CLEAR-OPERATIONAL-DATA.sh` from the release folder (`~/dana-apps`); it also backs up the database first; see "Clear operational data" in `DOCKER.md`.
+
 Afterwards make trays and containers again in **Admin > Launch Setup**, and any other locations you still need in **Admin > Locations**.
 
 ## Configure the IPL label printer

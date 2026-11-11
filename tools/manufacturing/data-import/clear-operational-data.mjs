@@ -161,8 +161,11 @@ async function main() {
 
     if (!apply) {
       console.log('\n[SAFE] Preview only. Nothing was deleted.');
-      console.log('To clear the data, stop the MeshForge API and run:');
-      console.log('  npm run clear:operational-data:apply');
+      // The launchers ask for confirmation next and run the apply step themselves.
+      if (!env.MESHFORGE_CLEAR_FROM_LAUNCHER) {
+        console.log('To clear the data, stop the MeshForge API and run:');
+        console.log('  npm run clear:operational-data:apply');
+      }
       return;
     }
     if (!confirmed) {
