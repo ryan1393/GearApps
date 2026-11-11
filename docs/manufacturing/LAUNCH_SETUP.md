@@ -14,9 +14,9 @@ Makes a run of numbered records and prints a tag for each one.
 |---|---|
 | Trays | `T0001`, `T0002`, ... |
 | Coater containers | `C0001`, ... |
-| Rough shelves | `CGRR-001` (ring), `CGRP-001` (pinion) |
-| Finished shelves | `CGFR-001`, `CGFP-001` |
-| Dull shelves | `CGDR-001`, `CGDP-001` |
+| Rough shelves | `CGRR-A1A` (ring), `CGRP-A1A` (pinion) (shelf letter, layer number, bin letter; made as a grid of shelves × layers × bins) |
+| Finished shelves | `CGFR-A1A`, `CGFP-A1A` (shelf letter, layer number, bin letter; made as a grid of shelves × layers × bins) |
+| Dull shelves | `CGDR-A1A`, `CGDP-A1A` (shelf letter, layer number, bin letter; made as a grid of shelves × layers × bins) |
 
 Choose the first number and how many (up to 100 at a time). A number that already exists is not created again; its tag is printed again, so a run can be repeated safely. With no tag printer set up, the tags that could not be printed come down as one file.
 
@@ -25,8 +25,8 @@ Choose the first number and how many (up to 100 at a time). A number that alread
 Records a tray that is already ground or already coated on the day the system starts, without replaying grinding and coater history that was never captured.
 
 - Scan the tray, choose its Summary and part type, say where it stands, and scan the shelf it is on.
-  - **Ground, waiting for the coater** goes on a numbered rough shelf (`CGRR-###` / `CGRP-###`).
-  - **Coated, ready for a cutter build** goes on a numbered finished shelf (`CGFR-###` / `CGFP-###`).
+  - **Ground, waiting for the coater** goes on a rough shelf bin (`CGRR-A1A` / `CGRP-A1A`: shelf, layer, bin).
+  - **Coated, ready for a cutter build** goes on a finished shelf bin (`CGFR-A1A` / `CGFP-A1A`: shelf, layer, bin).
 - The tray must exist, be empty and not be in a container or a cutter build. It is recorded with the full blade quantity its Summary requires, in the same state the normal workflow would leave it in, so it continues through coater loading or cutter building like any other tray.
 - Each entry is journaled. **Cancel Last** in Blade Tracking undoes it.
 

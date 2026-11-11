@@ -9,7 +9,8 @@ import { assertTestAccountsAllowed } from './test-account-guard.mjs';
 const { Client } = pg;
 
 const AUTO_TEST_EMAIL = 'test@meshforge.local';
-const E2E_CUTTERGRIND_SHELF_NUMBER = '990';
+// Cuttergrind shelves are shelf letter, layer, bin (CGRR-A1A); Z9Z keeps E2E clear of real bins.
+const E2E_CUTTERGRIND_BIN = 'Z9Z';
 const AUTO_TEST_PASSWORD = 'MeshForge-E2E-Only-2026!';
 
 function parseArgs(argv) {
@@ -843,26 +844,26 @@ async function main() {
         'GREENSHED',
         `Automated E2E Green Shed ${requirement.part_type_code} shelf for summary ${summaryNumber}`,
       ),
-      // Cuttergrind shelves are numbered (CGRR/CGRP rough, CGDR/CGDP dull, CGFR/CGFP
-      // finished). E2E uses shelf 990 so it never collides with a real shop shelf.
+      // Rough, dull and finished shelves are addressed by shelf/layer/bin (CGRR-A1A, CGDR-A1A,
+      // CGFR-A1A). E2E uses Z9Z to stay clear of real shelf bins.
       rough: await ensureShelf(
         client,
-        `CGR${requirement.part_type_code === 'RING' ? 'R' : 'P'}-${E2E_CUTTERGRIND_SHELF_NUMBER}`,
-        E2E_CUTTERGRIND_SHELF_NUMBER,
+        `CGR${requirement.part_type_code === 'RING' ? 'R' : 'P'}-${E2E_CUTTERGRIND_BIN}`,
+        E2E_CUTTERGRIND_BIN,
         'CUTTERGRIND',
         `Automated E2E Cuttergrind rough ${requirement.part_type_code} shelf`,
       ),
       dull: await ensureShelf(
         client,
-        `CGD${requirement.part_type_code === 'RING' ? 'R' : 'P'}-${E2E_CUTTERGRIND_SHELF_NUMBER}`,
-        E2E_CUTTERGRIND_SHELF_NUMBER,
+        `CGD${requirement.part_type_code === 'RING' ? 'R' : 'P'}-${E2E_CUTTERGRIND_BIN}`,
+        E2E_CUTTERGRIND_BIN,
         'CUTTERGRIND',
         `Automated E2E Cuttergrind dull ${requirement.part_type_code} shelf`,
       ),
       finished: await ensureShelf(
         client,
-        `CGF${requirement.part_type_code === 'RING' ? 'R' : 'P'}-${E2E_CUTTERGRIND_SHELF_NUMBER}`,
-        E2E_CUTTERGRIND_SHELF_NUMBER,
+        `CGF${requirement.part_type_code === 'RING' ? 'R' : 'P'}-${E2E_CUTTERGRIND_BIN}`,
+        E2E_CUTTERGRIND_BIN,
         'CUTTERGRIND',
         `Automated E2E Cuttergrind finished ${requirement.part_type_code} shelf`,
       ),

@@ -55,14 +55,14 @@ function setup(world: World = {}) {
 }
 
 const dto = (changes: Partial<OpeningInventoryDto> = {}): OpeningInventoryDto => ({
-  tray_serial_number: ' t0001 ', summary_id: SUMMARY, part_type_id: RING, stage: 'READY_FOR_COATING', shelf_serial_number: 'cgrr-001', ...changes,
+  tray_serial_number: ' t0001 ', summary_id: SUMMARY, part_type_id: RING, stage: 'READY_FOR_COATING', shelf_serial_number: 'cgrr-a1a', ...changes,
 });
 
 describe('Opening inventory', () => {
   it('records a ground tray exactly as completing grinding leaves it', async () => {
     const { service, saved } = setup();
     const result = await service.record(dto({ service_cycle: 2 }), USER);
-    expect(result).toMatchObject({ tray_serial_number: 'T0001', stage_code: 'READY_FOR_COATING', shelf_serial_number: 'CGRR-001', blade_count: 17 });
+    expect(result).toMatchObject({ tray_serial_number: 'T0001', stage_code: 'READY_FOR_COATING', shelf_serial_number: 'CGRR-A1A', blade_count: 17 });
     expect(saved.blades).toHaveLength(17);
     expect(saved.blades[0]).toMatchObject({ status: BladeStatus.READY_FOR_COATING, summary_id: SUMMARY, part_type_id: RING, service_cycle: 2 });
     expect(saved.assignments).toHaveLength(17);
@@ -74,17 +74,19 @@ describe('Opening inventory', () => {
 
   it('records a coated tray as returned from coating on a finished shelf', async () => {
     const { service, saved } = setup();
-    await service.record(dto({ stage: 'READY_FOR_CUTTER', shelf_serial_number: 'CGFR-012' }), USER);
+    await service.record(dto({ stage: 'READY_FOR_CUTTER', shelf_serial_number: 'CGFR-A1A' }), USER);
     expect(saved.blades[0]).toMatchObject({ status: BladeStatus.RETURNED_FROM_COATING });
     expect(saved.trays[0]).toMatchObject({ current_stage_id: 'stage-READY_FOR_CUTTER' });
   });
 
   it('only accepts the shelf the workflow would use for that stage and part type', async () => {
-    for (const shelf of ['CGFR-001', 'CGRP-001', 'CGRR-1', 'SHELF-A']) {
-      await expect(setup().service.record(dto({ shelf_serial_number: shelf }), USER)).rejects.toThrow('numbered CGRR-### shelf');
+    for (const shelf of ['CGFR-A1A', 'CGRP-A1A', 'CGRR-001', 'CGRR-1', 'SHELF-A']) {
+      await expect(setup().service.record(dto({ shelf_serial_number: shelf }), USER)).rejects.toThrow('such as CGRR-A1A');
     }
-    await expect(setup().service.record(dto({ stage: 'READY_FOR_CUTTER', shelf_serial_number: 'CGDR-001' }), USER))
-      .rejects.toThrow('numbered CGFR-### shelf');
+    for (const shelf of ['CGDR-A1A', 'CGFR-012']) {
+      await expect(setup().service.record(dto({ stage: 'READY_FOR_CUTTER', shelf_serial_number: shelf }), USER))
+        .rejects.toThrow('such as CGFR-A1A');
+    }
     await expect(setup({ shelf: null }).service.record(dto(), USER)).rejects.toThrow('missing, disabled, or not set up as a shelf');
   });
 

@@ -27,7 +27,7 @@ for (const marker of [
   '// The complete set has been consumed by Cutter Builder. The physical tray',
   'is empty and immediately reusable.',
   'if (returnedBladeCount > 0) {',
-  'Scan required dull shelf ${expectedDullShelfPrefix}-NNN.',
+  'Scan the required dull shelf ${expectedDullShelfPrefix}-<shelf><layer><bin>',
   'tray.summary_id = null;',
   'tray.part_type_id = null;',
   'tray.current_stage_id = emptyStage.id;',

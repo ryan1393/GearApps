@@ -90,7 +90,7 @@ export class ServerFeatLocationTrayService extends PaginationService<LocationTra
 
       const roughShelf = parseCuttergrindRoughShelfTag(location.serial_number);
       if (/^(CGRR|CGRP)/i.test(location.serial_number) && !roughShelf) {
-        throw new UnprocessableEntityException('Use an actual numbered rough shelf such as CGRR-001 or CGRP-001; unnumbered rough locations are legacy records only');
+        throw new UnprocessableEntityException('Use an actual rough shelf bin such as CGRR-A1A or CGRP-A1A (shelf, layer, bin); other rough locations are legacy records only');
       }
       const cuttergrindShelf = roughShelf ? null : parseCuttergrindNumberedShelfTag(location.serial_number);
       const summaryShelf = roughShelf || cuttergrindShelf ? null : parseSummaryShelfTag(location.serial_number);
