@@ -1,7 +1,7 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, Index } from 'typeorm';
-import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
-import { ICutterReference } from '@gearapps/manufacturing/shared/util-types';
+import { AbstractOrmEntity } from '@meshforge/manufacturing/server/util-common';
+import { ICutterReference } from '@meshforge/manufacturing/shared/util-types';
 @Entity({ name: 'cutter_build_statuses' })
 export class CutterBuildStatusOrmEntity extends AbstractOrmEntity {
   @Index({ unique: true }) @Column({ type: String }) code!: string;

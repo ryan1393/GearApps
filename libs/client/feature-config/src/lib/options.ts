@@ -1,5 +1,5 @@
-import { MACRO_FORMS } from '@gearapps/shared/domain';
-import { FORM_LABELS } from '@gearapps/client/feature-lapping-summary';
+import { MACRO_FORMS } from '@meshforge/shared/domain';
+import { FORM_LABELS } from '@meshforge/client/feature-lapping-summary';
 
 export const STATUS_OPTIONS = ['Active', 'Inactive'].map((s) => ({ label: s, value: s }));
 export const ON_OFF_OPTIONS = [

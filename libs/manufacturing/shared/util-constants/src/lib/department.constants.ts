@@ -1,5 +1,5 @@
 /**
- * Canonical department tags used by Gear Apps operational location records.
+ * Canonical department tags used by MeshForge operational location records.
  *
  * Cutter Builder is the application name. CUTTERGRIND is the physical/business
  * department tag used by Cuttergrind shelf/location workflows.

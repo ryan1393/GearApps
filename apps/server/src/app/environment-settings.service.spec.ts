@@ -1,4 +1,4 @@
-import { decryptEnvironmentValue, recordEnvironmentStartupState } from '@gearapps/manufacturing/server/util-common';
+import { decryptEnvironmentValue, recordEnvironmentStartupState } from '@meshforge/manufacturing/server/util-common';
 import { BadRequestException } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 

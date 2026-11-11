@@ -1,9 +1,9 @@
 import {
-  canEditGearApp,
-  GearAppKey,
-  GEAR_APP_EDITOR_DEPARTMENT_NAMES,
-} from '@gearapps/manufacturing/shared/util-constants';
-import { IRequestUserData } from '@gearapps/manufacturing/shared/util-types';
+  canEditMeshForgeApp,
+  MeshForgeAppKey,
+  MESHFORGE_APP_EDITOR_DEPARTMENT_NAMES,
+} from '@meshforge/manufacturing/shared/util-constants';
+import { IRequestUserData } from '@meshforge/manufacturing/shared/util-types';
 import {
   CanActivate,
   ExecutionContext,
@@ -13,7 +13,7 @@ import {
 import { Reflector } from '@nestjs/core';
 
 import {
-  GEAR_APP_EDIT_METADATA_KEY,
+  MESHFORGE_APP_EDIT_METADATA_KEY,
   ROLES_REQUEST_KEY,
   SKIP_AUTH_KEY,
 } from '../constants';
@@ -46,12 +46,12 @@ export class RolesGuard implements CanActivate {
       }
     }
 
-    const app = this.reflector.getAllAndOverride<GearAppKey>(
-      GEAR_APP_EDIT_METADATA_KEY,
+    const app = this.reflector.getAllAndOverride<MeshForgeAppKey>(
+      MESHFORGE_APP_EDIT_METADATA_KEY,
       [context.getHandler(), context.getClass()],
     );
 
-    if (app && user && !canEditGearApp(app, user.role, user.departmentCode)) {
+    if (app && user && !canEditMeshForgeApp(app, user.role, user.departmentCode)) {
       const department =
         user.departmentDescription ||
         user.departmentCode ||
@@ -59,7 +59,7 @@ export class RolesGuard implements CanActivate {
 
       throw new ForbiddenException(
         `View-only access: ${department} cannot perform transactions in ${app.replace(/_/g, ' ')}. ` +
-          `Editing is limited to ${GEAR_APP_EDITOR_DEPARTMENT_NAMES[app]}.`,
+          `Editing is limited to ${MESHFORGE_APP_EDITOR_DEPARTMENT_NAMES[app]}.`,
       );
     }
 

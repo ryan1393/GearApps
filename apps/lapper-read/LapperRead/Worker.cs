@@ -75,7 +75,7 @@ public sealed class Worker : BackgroundService
                     throw new IOException("API configuration contains a missing record ID.");
                 var scannerMachine = _scannerDetail.machine_id ?? _scannerDetail.machine?.id;
                 if (!string.Equals(scannerMachine, _machine.id, StringComparison.OrdinalIgnoreCase))
-                    throw new IOException("The configured scanner is not assigned to this machine in GearApps.");
+                    throw new IOException("The configured scanner is not assigned to this machine in MeshForge.");
                 await _fanuc.InitializeAsync(token);
                 return;
             }

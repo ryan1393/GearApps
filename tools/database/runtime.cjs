@@ -32,7 +32,7 @@ function databaseSource() {
     entities: [],
     synchronize: false,
     logging: false,
-    applicationName: 'gearapps-database-maintenance',
+    applicationName: 'meshforge-database-maintenance',
     connectTimeoutMS: 5000,
   });
 }

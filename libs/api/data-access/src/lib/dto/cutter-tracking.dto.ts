@@ -17,7 +17,7 @@ import {
   UpdateCutterLog,
   UpdatePullCutterReason,
   UpdateRetiredCutter,
-} from '@gearapps/shared/domain';
+} from '@meshforge/shared/domain';
 import { ApiProperty, ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {

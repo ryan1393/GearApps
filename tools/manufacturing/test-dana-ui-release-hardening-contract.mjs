@@ -5,9 +5,9 @@ import { readDanaUiSource } from './lib/dana-ui-source.mjs';
 const root=path.resolve(process.argv[2]||'.');
 const read=r=>fs.readFileSync(contractPath(root,r),'utf8').replace(/\r\n/g,'\n');
 const must=(c,m)=>{if(!c)throw new Error(m)};
-const entry=read('libs/shared/dana-ui/src/styles/gear-apps.css');
-const dash=read('libs/shared/dana-ui/src/styles/gear-apps/features/dashboard.css');
-const responsive=read('libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css');
+const entry=read('libs/shared/dana-ui/src/styles/meshforge.css');
+const dash=read('libs/shared/dana-ui/src/styles/meshforge/features/dashboard.css');
+const responsive=read('libs/shared/dana-ui/src/styles/meshforge/foundation/responsive.css');
 const op=readDanaUiSource(root, 'lib/components/navigation/dana-operation-card.component.ts');
 const grid=readDanaUiSource(root, 'lib/components/dashboard/dana-dashboard-grid.component.ts');
 const panel=readDanaUiSource(root, 'lib/components/dashboard/dana-dashboard-panel.component.ts');
@@ -40,5 +40,5 @@ must(count(allHtml,'danaKpiCard')===15,'Dana KPI-card coverage changed unexpecte
 // 4 Inventory Control Center + 4 Blade Locations + 4 Admin DSF Mappings.
 must(count(allHtml,'danaSummaryCard')===12,'Dana summary-card coverage changed unexpectedly.');
 must(summary.includes('Dana summary card contract'),'Summary-card regression contract missing.');
-must(!/\sstyle="/.test(allHtml),'Inline style attribute introduced into Gear Apps feature templates.');
+must(!/\sstyle="/.test(allHtml),'Inline style attribute introduced into MeshForge feature templates.');
 console.log('[PASS] Dana UI release-hardening contract: stabilized shared components, KPI/icon geometry, summary cards, page headers, loading semantics, and dangerous historical regressions are protected.');

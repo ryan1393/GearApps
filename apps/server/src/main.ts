@@ -1,9 +1,9 @@
-import { warnOnWeakJwtSecrets } from '@gearapps/manufacturing/server/util-common';
+import { warnOnWeakJwtSecrets } from '@meshforge/manufacturing/server/util-common';
 import {
   ENV_API_PREFIX,
   ENV_ENABLE_SWAGGER,
   ENV_SERVER_PORT,
-} from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-constants';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
@@ -11,9 +11,12 @@ import { NestFactory } from '@nestjs/core';
 import { setupSwagger } from './swagger';
 import * as Sentry from '@sentry/node';
 import { configureApi } from './configure-api';
+import { adoptLegacyDatabaseName } from './adopt-legacy-database';
 import { applySavedEnvironmentSettings } from './load-saved-settings';
 
 async function bootstrap() {
+  // A database from before the rename to MeshForge is renamed in place before anything connects.
+  await adoptLegacyDatabaseName();
   // Settings saved in Admin > Server Settings join the environment first. The application
   // module validates and reads the environment as it is imported, so it is loaded afterwards.
   await applySavedEnvironmentSettings();

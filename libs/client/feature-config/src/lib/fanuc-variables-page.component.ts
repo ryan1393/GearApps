@@ -27,9 +27,9 @@ import {
   loadable,
   MachinesApi,
   ToastService,
-} from '@gearapps/client/core';
-import { StatusBadgeComponent } from '@gearapps/client/ui';
-import { Machine, MachineFanucVariable } from '@gearapps/shared/domain';
+} from '@meshforge/client/core';
+import { StatusBadgeComponent } from '@meshforge/client/ui';
+import { Machine, MachineFanucVariable } from '@meshforge/shared/domain';
 import { FanucFormDialogComponent } from './fanuc-form-dialog.component';
 import { FANUC_SIGNALS } from './options';
 

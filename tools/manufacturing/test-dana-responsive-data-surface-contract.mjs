@@ -8,7 +8,7 @@ const must = (ok, msg) => {
 };
 
 const shell = danaUiBundleText();
-const responsive = read('libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css');
+const responsive = read('libs/shared/dana-ui/src/styles/meshforge/foundation/responsive.css');
 const runner = read('tools/manufacturing/run-all-tests.ps1');
 
 for (const marker of [

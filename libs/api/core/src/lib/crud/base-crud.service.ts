@@ -1,4 +1,4 @@
-import { BaseEntity } from '@gearapps/shared/domain';
+import { BaseEntity } from '@meshforge/shared/domain';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { DeepPartial, FindOptionsRelations, FindOptionsWhere, Repository } from 'typeorm';
 

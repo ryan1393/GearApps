@@ -46,9 +46,9 @@ SELECT (to_regclass('lapper.import_batches') IS NOT NULL) AS gear_has_import_tab
 \\else
   \\set gear_import_done false
 \\endif
-SELECT (to_regclass('gearapps_meta.schema_migrations') IS NOT NULL) AS gear_has_migrations \\gset
+SELECT (to_regclass('meshforge_meta.schema_migrations') IS NOT NULL) AS gear_has_migrations \\gset
 \\if :gear_has_migrations
-  SELECT EXISTS(SELECT 1 FROM gearapps_meta.schema_migrations WHERE version='20261109-lapper-history-integrity-v2') AS gear_cleanup_done \\gset
+  SELECT EXISTS(SELECT 1 FROM meshforge_meta.schema_migrations WHERE version='20261109-lapper-history-integrity-v2') AS gear_cleanup_done \\gset
 \\else
   \\set gear_cleanup_done false
 \\endif

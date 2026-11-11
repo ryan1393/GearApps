@@ -7,11 +7,11 @@ const read = (rel) => fs.readFileSync(contractPath(root, rel), 'utf8');
 const fail = (message) => { console.error(`[FAIL] ${message}`); process.exit(1); };
 const need = (text, marker, label) => { if (!text.includes(marker)) fail(`${label} missing marker: ${marker}`); };
 
-const tokensPath = 'libs/shared/dana-ui/src/styles/gear-apps/foundation/tokens.css';
-const primitivesPath = 'libs/shared/dana-ui/src/styles/gear-apps/components/primitives.css';
-const dataPath = 'libs/shared/dana-ui/src/styles/gear-apps/components/data-display.css';
-const relationsPath = 'libs/shared/dana-ui/src/styles/gear-apps/features/inventory-relations.css';
-const navPath = 'libs/shared/dana-ui/src/styles/gear-apps/layout/navigation-shell.css';
+const tokensPath = 'libs/shared/dana-ui/src/styles/meshforge/foundation/tokens.css';
+const primitivesPath = 'libs/shared/dana-ui/src/styles/meshforge/components/primitives.css';
+const dataPath = 'libs/shared/dana-ui/src/styles/meshforge/components/data-display.css';
+const relationsPath = 'libs/shared/dana-ui/src/styles/meshforge/features/inventory-relations.css';
+const navPath = 'libs/shared/dana-ui/src/styles/meshforge/layout/navigation-shell.css';
 
 const tokens = read(tokensPath);
 const primitives = read(primitivesPath);
@@ -60,7 +60,7 @@ if (relations.includes('font-size: 8px;') || relations.includes('font-size: 9px;
 
 // The body readability pass must not redesign the stable desktop shell.
 if (!nav.includes('--gear-sidebar-width') && !nav.includes('.gear-sidebar')) {
-  fail('Navigation shell no longer appears to be the established Gear Apps shell.');
+  fail('Navigation shell no longer appears to be the established MeshForge shell.');
 }
 
 const relationsLines = relations.split(/\r?\n/).length;

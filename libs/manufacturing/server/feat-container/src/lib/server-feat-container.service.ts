@@ -1,4 +1,4 @@
-import { containerWorkflowEligibility } from '@gearapps/manufacturing/shared/util-constants';
+import { containerWorkflowEligibility } from '@meshforge/manufacturing/shared/util-constants';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
 
 import {
@@ -9,13 +9,13 @@ import {
   CreateContainerDto,
   InventoryListQueryDto,
   PaginationService,
-} from '@gearapps/manufacturing/server/data-access';
+} from '@meshforge/manufacturing/server/data-access';
 import {
   IPaginatedResponse,
   IContainer,
   IContainerEntity,
   Uuid,
-} from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,

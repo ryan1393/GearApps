@@ -1,6 +1,6 @@
-import { WorkflowCancellationComponent } from '@gearapps/manufacturing/frontend/util-common';
+import { WorkflowCancellationComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { Route } from '@angular/router';
-import { departmentEditorGuard } from '@gearapps/manufacturing/frontend/data-access-common';
+import { departmentEditorGuard } from '@meshforge/manufacturing/frontend/data-access-common';
 import { GreenshedDashboardComponent } from './pages/dashboard/greenshed-dashboard.component';
 import { GreenshedSetupComponent } from './pages/setup/greenshed-setup.component';
 import { GreenshedCheckComponent } from './pages/check/greenshed-check.component';

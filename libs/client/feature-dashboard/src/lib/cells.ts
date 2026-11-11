@@ -1,4 +1,4 @@
-import { Machine } from '@gearapps/shared/domain';
+import { Machine } from '@meshforge/shared/domain';
 
 export interface Cell {
   id: string;

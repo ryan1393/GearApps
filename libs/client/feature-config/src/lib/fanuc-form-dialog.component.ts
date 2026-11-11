@@ -10,9 +10,9 @@ import {
   untracked,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { apiErrorMessage, FanucVariablesApi } from '@gearapps/client/core';
-import { DialogComponent, SegmentedComponent } from '@gearapps/client/ui';
-import { Machine, MachineFanucVariable } from '@gearapps/shared/domain';
+import { apiErrorMessage, FanucVariablesApi } from '@meshforge/client/core';
+import { DialogComponent, SegmentedComponent } from '@meshforge/client/ui';
+import { Machine, MachineFanucVariable } from '@meshforge/shared/domain';
 import { FANUC_SIGNALS, ON_OFF_OPTIONS } from './options';
 
 @Component({

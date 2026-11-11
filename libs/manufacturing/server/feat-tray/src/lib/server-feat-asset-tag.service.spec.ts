@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { AddressInfo, createServer, Server } from 'node:net';
 import { join } from 'node:path';
 
-import { CreateTrayDto } from '@gearapps/manufacturing/server/data-access';
+import { CreateTrayDto } from '@meshforge/manufacturing/server/data-access';
 import { BadRequestException } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';

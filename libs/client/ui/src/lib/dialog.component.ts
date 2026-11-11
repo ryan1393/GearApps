@@ -10,7 +10,7 @@ import {
 
 /**
  * General-purpose modal on the native <dialog>, dressed in Dana's confirm-dialog
- * surface so forms match every other Gear Apps dialog. Content goes in the body;
+ * surface so forms match every other MeshForge dialog. Content goes in the body;
  * put buttons in an element with `dialogActions`.
  */
 @Component({

@@ -1,8 +1,8 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
-import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
-import { ITray, ITrayEntity } from '@gearapps/manufacturing/shared/util-types';
+import { AbstractOrmEntity } from '@meshforge/manufacturing/server/util-common';
+import { ITray, ITrayEntity } from '@meshforge/manufacturing/shared/util-types';
 import { TrayDto, TrayDtoOptions } from '../../../dtos';
 import { PartSummaryOrmEntity } from '../base/part-summary.orm-entity';
 import { CutterPartTypeOrmEntity } from '../cutter-tracking/cutter-part-type.orm-entity';

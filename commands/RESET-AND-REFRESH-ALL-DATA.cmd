@@ -2,15 +2,15 @@
 cd /d "%~dp0.."
 echo.
 echo ============================================================
-echo  GEAR APPS - DELETE OLD DATA + FULL FRESH REFRESH
+echo  MESHFORGE - DELETE OLD DATA + FULL FRESH REFRESH
 echo ============================================================
 echo.
-echo This DELETES all existing Gear Apps application rows from the
+echo This DELETES all existing MeshForge application rows from the
 echo PostgreSQL target in .env, then reloads fresh SQL Server/Excel data.
 echo.
 echo SQL Server is READ-ONLY and will NOT be modified.
 echo.
-echo IMPORTANT: Close all Gear Apps API/server windows before continuing.
+echo IMPORTANT: Close all MeshForge API/server windows before continuing.
 echo.
 set /p CONFIRM=Type DELETE OLD DATA to continue: 
 if /I not "%CONFIRM%"=="DELETE OLD DATA" (

@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
-import { RoleType } from '@gearapps/manufacturing/shared/util-types';
+import { RoleType } from '@meshforge/manufacturing/shared/util-types';
 
 export class UpdateUserDto {
   @ApiPropertyOptional()

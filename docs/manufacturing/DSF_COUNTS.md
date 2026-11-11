@@ -1,12 +1,12 @@
 # DSF production counts (Digital Shop Floor / Ignition)
 
-Gear Apps can read piece counts for the cutting machines in Departments 132 (Pinion) and 152
+MeshForge can read piece counts for the cutting machines in Departments 132 (Pinion) and 152
 (Ring) from the DSF PostgreSQL database and, optionally, credit them to the cutter installed on
 each machine. It is off by default.
 
-The API **pulls** from DSF on a timer. Nothing pushes to Gear Apps, and Gear Apps never writes
+The API **pulls** from DSF on a timer. Nothing pushes to MeshForge, and MeshForge never writes
 to DSF: the DSF session is a read-only transaction running fixed `SELECT`s, and it is closed
-before any Gear Apps table is written.
+before any MeshForge table is written.
 
 ## Two switches
 
@@ -25,27 +25,27 @@ All in the root `.env` (template in `.env.example`): `DSF_DB_HOST`, `DSF_DB_PORT
 `disable`), optional `DSF_DB_SSL_CA_FILE` / `DSF_DB_SSL_CA_PEM`, and `DSF_COUNT_MACHINES`.
 
 - The reader stays off, with a warning in the API start-up log, if a setting is missing or
-  invalid. It also refuses to point at the Gear Apps database itself.
+  invalid. It also refuses to point at the MeshForge database itself.
 - The DSF login must be a restricted read-only role. If it is not, the reader refuses with
   `READ_ONLY_ROLE_REQUIRED` unless `DSF_PRIVILEGED_READER_ACK` carries the explicit
   acknowledgment text defined in `dsf-count.service.ts`, which is accepted for the recorded
   plant source only (`10.16.80.10` / `maindblocal`, login `dana_dsf_reader` or `whiteboard`).
   `whiteboard` is the DSF application's own login and can write to DSF, so with it the only
-  protection is the read-only session Gear Apps opens. Prefer a dedicated read-only role.
+  protection is the read-only session MeshForge opens. Prefer a dedicated read-only role.
 - The API process must run in UTC (the Docker default) for cutter crediting; cutter-run
   timestamps are stored without a zone and are read as UTC.
 - The working client port and SSL mode for the plant source have not been verified from this
   codebase. Admin > DSF Mappings shows the reason and driver code of the last failed read
   (for example `ECONNREFUSED`, `ETIMEDOUT`, `28P01`), which is how to find them.
 
-The first time the reader is enabled it creates four additive tables in the Gear Apps database:
+The first time the reader is enabled it creates four additive tables in the MeshForge database:
 `dana_dsf_machine_mapping_v1`, `dana_dsf_machine_mapping_audit_v1`,
 `dana_dsf_cutter_machine_state_v1` and `dana_dsf_cutter_run_shifts_v1`. They match the original
 DSF migrations, so a database that already has them keeps its mappings and ledger.
 
 ## Machine mapping
 
-Each Gear Apps machine is tied to one DSF source (whiteboard + mapping + operation + line).
+Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operation + line).
 
 - **Reference list.** The archived identities in `dsf-mappings.ts`. A reference mapping is used
   only for machine numbers listed in `DSF_COUNT_MACHINES`, and never when it is marked blocked.
@@ -61,7 +61,7 @@ longer matches, or another mapping on the same operation carried production, the
 ## What the numbers mean
 
 DSF holds timestamped events, each with a `part_count` increment; it is not one cumulative
-counter. Gear Apps sums the increments of RUN events (reason code 1 for the mapped operation).
+counter. MeshForge sums the increments of RUN events (reason code 1 for the mapped operation).
 
 | Number | Meaning |
 |---|---|

@@ -17,9 +17,9 @@ import {
   LapperAccess,
   ScannerApi,
   ScannerDetailsApi,
-} from '@gearapps/client/core';
-import { StatusBadgeComponent, ValueFieldComponent } from '@gearapps/client/ui';
-import { Machine, MachineFanucVariable, ScannerDetail } from '@gearapps/shared/domain';
+} from '@meshforge/client/core';
+import { StatusBadgeComponent, ValueFieldComponent } from '@meshforge/client/ui';
+import { Machine, MachineFanucVariable, ScannerDetail } from '@meshforge/shared/domain';
 import {
   catchError,
   exhaustMap,

@@ -2,10 +2,10 @@ import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 
 const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8').replace(/^\uFEFF/,'');
-const setup=read('tools/manufacturing/setup-gear-apps.ps1');
-const start=read('tools/manufacturing/start-gear-apps.ps1');
+const setup=read('tools/manufacturing/setup-meshforge.ps1');
+const start=read('tools/manufacturing/start-meshforge.ps1');
 const tests=read('tools/manufacturing/run-all-tests.ps1');
-const validate=read('tools/manufacturing/validate-gear-apps.ps1');
+const validate=read('tools/manufacturing/validate-meshforge.ps1');
 const assert=(c,m)=>{if(!c) throw new Error(m);};
 
 for(const [name,text] of [['setup',setup],['start',start],['tests',tests],['validate',validate]]){
@@ -35,7 +35,7 @@ assert(start.includes('node --check $NxWorker'),'Startup must reject corrupt Nx 
 
 assert(validate.includes("$env:NX_WORKSPACE_DATA_DIRECTORY"),'Validation must isolate Nx workspace-data from the repo .nx tree');
 assert(validate.includes("$env:NX_CACHE_DIRECTORY"),'Validation must isolate Nx cache from the repo .nx tree');
-assert(validate.includes('gear-apps-nx-validation-'),'Validation must use a unique temporary Nx validation root');
+assert(validate.includes('meshforge-nx-validation-'),'Validation must use a unique temporary Nx validation root');
 assert(!validate.includes("Invoke-NativeChecked '[1/5] Resetting Nx...'"),'Validation must not hard-fail on repo-wide nx reset');
 
 

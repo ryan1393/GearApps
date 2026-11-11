@@ -1,14 +1,14 @@
 import { instanceToPlain } from 'class-transformer';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 
-import { AbstractOrmEntity } from '@gearapps/manufacturing/server/util-common';
+import { AbstractOrmEntity } from '@meshforge/manufacturing/server/util-common';
 import {
   BladeHistoryEvent,
   BladeStatus,
   IBladeHistory,
   IBladeHistoryEntity,
   Uuid,
-} from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-types';
 import { UserOrmEntity } from '../user.orm-entity';
 import { BladeOrmEntity } from './blade.orm-entity';
 

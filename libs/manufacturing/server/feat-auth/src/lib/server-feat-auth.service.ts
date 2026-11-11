@@ -5,16 +5,16 @@ import {
   TokenResponseDto,
   UserLoginDto,
   UserOrmEntity,
-} from '@gearapps/manufacturing/server/data-access';
-import { ServerFeatUserService } from '@gearapps/manufacturing/server/feat-user';
-import { UserNotFoundException } from '@gearapps/manufacturing/server/util-common';
+} from '@meshforge/manufacturing/server/data-access';
+import { ServerFeatUserService } from '@meshforge/manufacturing/server/feat-user';
+import { UserNotFoundException } from '@meshforge/manufacturing/server/util-common';
 import {
   ENV_EMAIL_ENABLED,
   ENV_JWT_ACCESS_EXPIRATION_TIME,
   ENV_JWT_ACCESS_SECRET,
   ENV_JWT_REFRESH_EXPIRATION_TIME,
   ENV_JWT_REFRESH_SECRET,
-} from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-constants';
 import {
   AuthProviderType,
   IForgotPasswordPayload,
@@ -22,7 +22,7 @@ import {
   ISocialPayload,
   ITokenResponse,
   Uuid,
-} from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-types';
 import {
   ForbiddenException,
   Injectable,

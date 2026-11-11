@@ -7,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
-import { LoggingInterceptor } from '@gearapps/manufacturing/server/util-common';
-import { ENV_API_PREFIX } from '@gearapps/manufacturing/shared/util-constants';
+import { LoggingInterceptor } from '@meshforge/manufacturing/server/util-common';
+import { ENV_API_PREFIX } from '@meshforge/manufacturing/shared/util-constants';
 
 /** The HTTP contract used by the sole API entry point and its acceptance tests. */
 export function configureApi(app: INestApplication): void {

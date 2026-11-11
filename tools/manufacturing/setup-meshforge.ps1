@@ -19,11 +19,11 @@ $env:NX_ISOLATE_PLUGINS = 'false'
 $env:NX_CACHE_PROJECT_GRAPH = 'false'
 
 Write-Host ''
-Write-Host 'Unblocking downloaded Gear Apps files...' -ForegroundColor Yellow
+Write-Host 'Unblocking downloaded MeshForge files...' -ForegroundColor Yellow
 try {
     Get-ChildItem -LiteralPath $ProjectRoot -Recurse -File -ErrorAction Stop |
         Unblock-File -ErrorAction Stop
-    Write-Host '[PASS] Gear Apps files unblocked.' -ForegroundColor Green
+    Write-Host '[PASS] MeshForge files unblocked.' -ForegroundColor Green
 } catch {
     Write-Warning "Could not unblock every project file: $($_.Exception.Message)"
     Write-Warning 'Continuing because this launcher already uses ExecutionPolicy Bypass where required.'
@@ -48,17 +48,17 @@ function Invoke-Checked {
 
 Write-Host ''
 Write-Host '==============================================' -ForegroundColor Cyan
-Write-Host ' Gear Apps - Laptop Setup' -ForegroundColor Cyan
+Write-Host ' MeshForge - Laptop Setup' -ForegroundColor Cyan
 Write-Host '==============================================' -ForegroundColor Cyan
 Write-Host "Project: $ProjectRoot"
 Write-Host ''
 
 if (-not (Get-Command node -ErrorAction SilentlyContinue)) {
-    throw 'Node.js was not found in PATH. Install Node.js before running Gear Apps setup.'
+    throw 'Node.js was not found in PATH. Install Node.js before running MeshForge setup.'
 }
 
 if (-not (Get-Command npm -ErrorAction SilentlyContinue)) {
-    throw 'npm was not found in PATH. Install npm/Node.js before running Gear Apps setup.'
+    throw 'npm was not found in PATH. Install npm/Node.js before running MeshForge setup.'
 }
 
 $nodeVersion = (& node --version).Trim()
@@ -73,7 +73,7 @@ if ($nodeVersion -ne 'v24.22.1' -or $npmVersion -ne '11.9.0') {
 Write-Host '[PASS] Shared Node.js/npm versions match the root workspace.' -ForegroundColor Green
 
 if (-not (Test-Path (Join-Path $ProjectRoot 'package.json'))) {
-    throw 'package.json was not found. Run this script from the extracted Gear Apps project.'
+    throw 'package.json was not found. Run this script from the extracted MeshForge project.'
 }
 
 function Test-NxInstallIntegrity {
@@ -167,7 +167,7 @@ function Remove-DirectoryRobust {
 
     throw @"
 Could not remove '$Path' after $Attempts attempts because Windows still has a file or folder open.
-Close any terminals/Explorer windows that are inside this Gear Apps folder, then run commands\SETUP-GEAR-APPS.cmd again.
+Close any terminals/Explorer windows that are inside this MeshForge folder, then run commands\SETUP-MESHFORGE.cmd again.
 The setup script did not continue with a partial dependency tree.
 "@
 }
@@ -175,7 +175,7 @@ The setup script did not continue with a partial dependency tree.
 function Get-DependencyCacheKey {
     $lockFile = Join-Path $ProjectRoot 'package-lock.json'
     if (-not (Test-Path -LiteralPath $lockFile -PathType Leaf)) {
-        throw 'package-lock.json was not found. Gear Apps requires the lock file for deterministic setup.'
+        throw 'package-lock.json was not found. MeshForge requires the lock file for deterministic setup.'
     }
 
     $lockHash = (Get-FileHash -LiteralPath $lockFile -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -186,12 +186,12 @@ function Get-DependencyCacheKey {
 }
 
 function Get-DependencyCachePath {
-    $cacheBase = $env:GEAR_APPS_DEP_CACHE
+    $cacheBase = $env:MESHFORGE_DEP_CACHE
     if (-not $cacheBase) {
         if ($env:LOCALAPPDATA) {
-            $cacheBase = Join-Path $env:LOCALAPPDATA 'GearApps\dependency-cache'
+            $cacheBase = Join-Path $env:LOCALAPPDATA 'MeshForge\dependency-cache'
         } else {
-            $cacheBase = Join-Path $env:USERPROFILE '.gear-apps\dependency-cache'
+            $cacheBase = Join-Path $env:USERPROFILE '.meshforge\dependency-cache'
         }
     }
     return (Join-Path $cacheBase (Get-DependencyCacheKey))
@@ -258,7 +258,7 @@ function Try-UseSharedDependencyCache {
     # If it still fails integrity, quarantine it and rebuild once.
     Remove-ProjectNodeModules
     if (Test-Path -LiteralPath $cachePath) {
-        Write-Warning 'Removing invalid Gear Apps dependency cache.'
+        Write-Warning 'Removing invalid MeshForge dependency cache.'
         Remove-DirectoryRobust -Path $cachePath -Attempts 10
     }
     return $false
@@ -282,7 +282,7 @@ function Publish-SharedDependencyCache {
         }
         New-Item -ItemType Directory -Path $cachePath -Force | Out-Null
 
-        Write-Host "Caching this known-good dependency tree for future Gear Apps folders..." -ForegroundColor Cyan
+        Write-Host "Caching this known-good dependency tree for future MeshForge folders..." -ForegroundColor Cyan
         Move-Item -LiteralPath $projectNodeModules -Destination $cachedNodeModules -Force
         Set-Content -LiteralPath (Join-Path $cachePath 'cache-key.txt') -Value (Get-DependencyCacheKey) -Encoding UTF8
         New-NodeModulesJunction -TargetNodeModules $cachedNodeModules
@@ -334,7 +334,7 @@ function Install-CleanDependencies {
             throw 'npm ci failed while recovering the Nx installation.'
         }
         if (-not (Test-NxInstallIntegrity)) {
-            throw 'Nx is still invalid after a clean reinstall. Do not start Gear Apps from this folder.'
+            throw 'Nx is still invalid after a clean reinstall. Do not start MeshForge from this folder.'
         }
     }
 
@@ -393,7 +393,7 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 $requiredProjects = @(
-    'gear-app-server',
+    'meshforge-server',
     'blade-tracking',
     'cutter-builder',
     'greenshed'
@@ -428,15 +428,15 @@ if ($RunFreshImportPreflight) {
 
 Write-Host ''
 Write-Host '==============================================' -ForegroundColor Green
-Write-Host ' Gear Apps setup completed successfully.' -ForegroundColor Green
+Write-Host ' MeshForge setup completed successfully.' -ForegroundColor Green
 Write-Host '==============================================' -ForegroundColor Green
-& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'show-gear-apps-commands.ps1') -Compact
+& powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'show-meshforge-commands.ps1') -Compact
 
 if ($RunTests) {
-    Write-Host 'Running Gear Apps test suite...' -ForegroundColor Cyan
+    Write-Host 'Running MeshForge test suite...' -ForegroundColor Cyan
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot 'run-all-tests.ps1')
     if ($LASTEXITCODE -ne 0) {
-        throw "Gear Apps test suite failed with exit code $LASTEXITCODE."
+        throw "MeshForge test suite failed with exit code $LASTEXITCODE."
     }
 }
 

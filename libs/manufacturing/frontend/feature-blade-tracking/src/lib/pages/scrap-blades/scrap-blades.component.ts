@@ -8,8 +8,8 @@ import {
   BladeTrackingApiService,
   InventoryBladeRow,
   apiErrorText,
-} from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
-import { IPaginationMeta } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
+import { IPaginationMeta } from '@meshforge/manufacturing/shared/util-types';
 import {
   DanaPageHeaderComponent,
   DanaTableDirective,

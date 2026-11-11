@@ -1,10 +1,10 @@
-import { scannerConfig } from '@gearapps/api/core';
+import { scannerConfig } from '@meshforge/api/core';
 import {
   ScannerCommand,
   ScannerLog,
   ScannerLogEntry,
   ScannerSummary,
-} from '@gearapps/shared/domain';
+} from '@meshforge/shared/domain';
 import { BadGatewayException, Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';

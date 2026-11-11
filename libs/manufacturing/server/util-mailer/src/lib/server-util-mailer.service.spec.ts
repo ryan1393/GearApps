@@ -1,4 +1,4 @@
-import { mailerConfig } from '@gearapps/manufacturing/server/util-common';
+import { mailerConfig } from '@meshforge/manufacturing/server/util-common';
 import { Test } from '@nestjs/testing';
 
 import { ServerUtilMailerService } from './server-util-mailer.service';

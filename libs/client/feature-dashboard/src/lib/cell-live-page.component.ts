@@ -9,9 +9,9 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DanaPageHeaderComponent } from '@dana/ui';
-import { loadable, MachinesApi } from '@gearapps/client/core';
-import { EmptyStateComponent } from '@gearapps/client/ui';
-import { Machine } from '@gearapps/shared/domain';
+import { loadable, MachinesApi } from '@meshforge/client/core';
+import { EmptyStateComponent } from '@meshforge/client/ui';
+import { Machine } from '@meshforge/shared/domain';
 import { groupByCell } from './cells';
 import { MachineLiveCardComponent } from './machine-live-card.component';
 

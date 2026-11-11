@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { GearToastHostComponent } from '@gearapps/manufacturing/frontend/util-common';
+import { GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { LapperNavComponent } from './layout/lapper-nav/lapper-nav.component';
 
 @Component({
@@ -13,7 +13,7 @@ export class AppComponent {
   private readonly router = inject(Router);
   private readonly browserTitle = inject(Title);
 
-  /** Browser tab identity, matching the other Gear Apps: "<Page> | Lapper". */
+  /** Browser tab identity, matching the other MeshForge: "<Page> | Lapper". */
   private readonly pageTitles: ReadonlyArray<readonly [string, string]> = [
     ['/lapping-summaries', 'Lapping Summaries'],
     ['/scanners', 'Scanners'],

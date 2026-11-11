@@ -8,7 +8,7 @@
     "type:app",
     "scope:frontend",
     "framework:angular",
-    "domain:gear-apps"
+    "domain:meshforge"
   ],
   "targets": {
     "build": {

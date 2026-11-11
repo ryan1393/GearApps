@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { AbstractDto, AbstractDtoOptions } from '@gearapps/manufacturing/server/util-common';
+import { AbstractDto, AbstractDtoOptions } from '@meshforge/manufacturing/server/util-common';
 import { BladeTrayOrmEntity } from '../../../database/entities/blade-tracking/blade-tray.orm-entity';
-import { Uuid } from '@gearapps/manufacturing/shared/util-types';
+import { Uuid } from '@meshforge/manufacturing/shared/util-types';
 
 
 export type BladeTrayDtoOptions = AbstractDtoOptions;

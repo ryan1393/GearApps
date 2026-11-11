@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from '@gearapps/shared/domain';
+import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from '@meshforge/shared/domain';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from './api-config';
 

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { AuthSessionService, LOCAL_STORAGE_KEY_ACCESS_TOKEN } from '@gearapps/manufacturing/frontend/data-access-user';
+import { AuthSessionService, LOCAL_STORAGE_KEY_ACCESS_TOKEN } from '@meshforge/manufacturing/frontend/data-access-user';
 
 describe('Auth session JWT decoding', () => {
   beforeEach(() => {

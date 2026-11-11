@@ -3,7 +3,7 @@
  * lapping summary. Carried over 1:1 from the legacy forms so values land in
  * the same boxes operators are used to.
  */
-import { LappingSummaryRow } from '@gearapps/shared/domain';
+import { LappingSummaryRow } from '@meshforge/shared/domain';
 
 export type FieldKind = 'number' | 'flag' | 'text' | 'retract';
 

@@ -1,6 +1,6 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
-import { readGearAppsStyles } from './lib/read-gear-apps-styles.mjs';
+import { readMeshForgeStyles } from './lib/read-meshforge-styles.mjs';
 
 const read = (path) => fs.readFileSync(contractPath(process.cwd(), path), 'utf8').replace(/^\uFEFF/, '');
 
@@ -14,7 +14,7 @@ const bladeController = read('libs/manufacturing/server/feat-blade/src/lib/serve
 const bladeService = read('libs/manufacturing/server/feat-blade/src/lib/server-feat-blade.service.ts');
 const trayService = read('libs/manufacturing/server/feat-tray/src/lib/server-feat-tray.service.ts');
 const cutterBuildService = read('libs/manufacturing/server/feat-cutter-build/src/lib/server-feat-cutter-build.service.ts');
-const sharedStyles = readGearAppsStyles();
+const sharedStyles = readMeshForgeStyles();
 const manifest = JSON.parse(read('tools/manufacturing/api-route-manifest.json'));
 
 for (const marker of [
@@ -124,7 +124,7 @@ for (const marker of [
   '.scrap-history-timeline',
   '.scrap-history-event-danger',
 ]) {
-  if (!sharedStyles.includes(marker)) throw new Error(`Shared Gear Apps stylesheet missing ${marker}`);
+  if (!sharedStyles.includes(marker)) throw new Error(`Shared MeshForge stylesheet missing ${marker}`);
 }
 
 if (manifest.length !== 113) {

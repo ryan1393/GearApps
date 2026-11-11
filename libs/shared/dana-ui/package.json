@@ -1,7 +1,7 @@
 {
   "name": "@dana/ui",
   "version": "0.3.3",
-  "description": "Shared Dana UI for every GearApps frontend.",
+  "description": "Shared Dana UI for every MeshForge frontend.",
   "private": true,
   "sideEffects": [
     "**/*.css"

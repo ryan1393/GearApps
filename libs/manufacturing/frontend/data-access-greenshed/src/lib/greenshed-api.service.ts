@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { ILocation } from '@gearapps/manufacturing/shared/util-types';
+import { ILocation } from '@meshforge/manufacturing/shared/util-types';
 import { CmmMeasurements, FrequencyMeasurements } from './quality-measurements';
 
 export interface PartMasterRow {

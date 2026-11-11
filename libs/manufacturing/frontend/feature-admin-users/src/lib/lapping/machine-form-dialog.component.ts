@@ -11,9 +11,9 @@ import {
   untracked,
 } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { apiErrorMessage, MachinesApi } from '@gearapps/client/core';
-import { DialogComponent, SegmentedComponent } from '@gearapps/client/ui';
-import { Machine, ScannerDetail } from '@gearapps/shared/domain';
+import { apiErrorMessage, MachinesApi } from '@meshforge/client/core';
+import { DialogComponent, SegmentedComponent } from '@meshforge/client/ui';
+import { Machine, ScannerDetail } from '@meshforge/shared/domain';
 import {
   IPV4_PATTERN,
   MACHINE_BUILDERS,

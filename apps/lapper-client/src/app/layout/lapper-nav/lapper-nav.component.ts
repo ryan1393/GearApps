@@ -3,9 +3,9 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { DanaMobileNavDirective } from '@dana/ui';
-import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
-import { getDanaAppUrl } from '@gearapps/manufacturing/shared/dana-app-config';
-import { GEAR_APPS_VERSION } from '@gearapps/shared/domain';
+import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
+import { getDanaAppUrl } from '@meshforge/manufacturing/shared/dana-app-config';
+import { MESHFORGE_VERSION } from '@meshforge/shared/domain';
 
 @Component({
   selector: 'gear-lapper-nav',
@@ -14,7 +14,7 @@ import { GEAR_APPS_VERSION } from '@gearapps/shared/domain';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LapperNavComponent {
-  protected readonly appVersion = GEAR_APPS_VERSION;
+  protected readonly appVersion = MESHFORGE_VERSION;
   protected readonly session = inject(AuthSessionService);
   private readonly router = inject(Router);
   protected searchValue = '';

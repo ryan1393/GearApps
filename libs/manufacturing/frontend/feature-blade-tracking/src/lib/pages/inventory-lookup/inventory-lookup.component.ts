@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@meshforge/manufacturing/frontend/util-common';
 import {
   AssetTagKind,
   BladeTrackingApiService,
@@ -12,7 +12,7 @@ import {
   InventoryLookupResult,
   InventoryTrayRow,
   apiErrorText,
-} from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
+} from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
 import { ScanMessage } from '../../models/scan-message';
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import {

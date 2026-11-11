@@ -10,14 +10,14 @@ import {
   CreateBladeDto,
   PaginationService,
   TrayOrmEntity,
-} from '@gearapps/manufacturing/server/data-access';
+} from '@meshforge/manufacturing/server/data-access';
 import {
   BladeHistoryEvent,
   BladeStatus,
   IBladeEntity,
   SortOrderType,
   Uuid,
-} from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,

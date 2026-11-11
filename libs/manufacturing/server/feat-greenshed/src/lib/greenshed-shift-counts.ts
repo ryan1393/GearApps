@@ -1,5 +1,5 @@
 // DANA-R61R14-SHIFT-COUNTS-V1
-import { STARTUP_SCHEMA_LOCK_SQL } from '@gearapps/manufacturing/shared/util-constants';
+import { STARTUP_SCHEMA_LOCK_SQL } from '@meshforge/manufacturing/shared/util-constants';
 // Counts are recorded increases, grouped by machine and Eastern production shift.
 export interface ShiftQuery {
   query(sql: string, parameters?: unknown[]): Promise<unknown>;

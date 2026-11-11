@@ -1,6 +1,6 @@
 import { inject } from '@angular/core';
 import { Route, Router } from '@angular/router';
-import { adminRoleGuard, authGuard } from '@gearapps/manufacturing/frontend/data-access-common';
+import { adminRoleGuard, authGuard } from '@meshforge/manufacturing/frontend/data-access-common';
 
 /** Redirect an old Lapper page to its tab in the shared Admin screen. */
 const adminTab = (tab: string) => () =>
@@ -15,25 +15,25 @@ export const appRoutes: Route[] = [
       {
         path: 'dashboard',
         loadChildren: () =>
-          import('@gearapps/client/feature-dashboard').then((m) => m.dashboardRoutes),
+          import('@meshforge/client/feature-dashboard').then((m) => m.dashboardRoutes),
       },
       {
         path: 'lapping-summaries',
         loadChildren: () =>
-          import('@gearapps/client/feature-lapping-summary').then((m) => m.lappingSummaryRoutes),
+          import('@meshforge/client/feature-lapping-summary').then((m) => m.lappingSummaryRoutes),
       },
       {
         path: 'scanners',
-        loadChildren: () => import('@gearapps/client/feature-config').then((m) => m.scannersRoutes),
+        loadChildren: () => import('@meshforge/client/feature-config').then((m) => m.scannersRoutes),
       },
       {
         path: 'macros',
-        loadChildren: () => import('@gearapps/client/feature-config').then((m) => m.macrosRoutes),
+        loadChildren: () => import('@meshforge/client/feature-config').then((m) => m.macrosRoutes),
       },
       {
         path: 'fanuc-variables',
         loadChildren: () =>
-          import('@gearapps/client/feature-config').then((m) => m.fanucVariablesRoutes),
+          import('@meshforge/client/feature-config').then((m) => m.fanucVariablesRoutes),
       },
       // Bookmarks from the original Lapper app
       { path: 'cell-dashboard', redirectTo: 'dashboard' },
@@ -52,34 +52,34 @@ export const appRoutes: Route[] = [
     path: 'collector-tokens',
     canActivate: [authGuard, adminRoleGuard],
     loadChildren: () =>
-      import('@gearapps/client/feature-config').then((m) => m.collectorTokensRoutes),
+      import('@meshforge/client/feature-config').then((m) => m.collectorTokensRoutes),
   },
   {
     path: 'admin',
     canActivate: [authGuard, adminRoleGuard],
     loadChildren: () =>
-      import('@gearapps/manufacturing/frontend/feature-admin-users').then(
+      import('@meshforge/manufacturing/frontend/feature-admin-users').then(
         (m) => m.frontendFeatureAdminUsersRoutes,
       ),
   },
   {
     path: 'login',
     loadChildren: () =>
-      import('@gearapps/manufacturing/frontend/feature-login').then(
+      import('@meshforge/manufacturing/frontend/feature-login').then(
         (m) => m.frontendFeatureLoginRoutes,
       ),
   },
   {
     path: 'forgot-password',
     loadChildren: () =>
-      import('@gearapps/manufacturing/frontend/feature-login').then(
+      import('@meshforge/manufacturing/frontend/feature-login').then(
         (m) => m.frontendForgotPasswordRoutes,
       ),
   },
   {
     path: 'reset-password',
     loadChildren: () =>
-      import('@gearapps/manufacturing/frontend/feature-login').then(
+      import('@meshforge/manufacturing/frontend/feature-login').then(
         (m) => m.frontendResetPasswordRoutes,
       ),
   },

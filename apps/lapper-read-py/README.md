@@ -1,7 +1,7 @@
 # Lapper Read (Python, Docker)
 
 Collects lapping runs from a FANUC controller and its barcode scanner and publishes them
-to the GearApps API. It is a Python port of the Windows `apps/lapper-read` service and
+to the MeshForge API. It is a Python port of the Windows `apps/lapper-read` service and
 uses the same API endpoints, so the Lapper screens work unchanged.
 
 ## Workers follow the machines saved in Lapper
@@ -21,7 +21,7 @@ shows each scanner as Online, Offline (and whether it answers ping) or No scanne
 control (no program loaded, so #10020 or #10032 is 0) as No gearset loaded until a program runs. Saving a new machine starts its worker. Changing its controller IP, asset number or
 scanner restarts the worker with the new settings. Making it Inactive, clearing the IP, or
 deleting it stops the worker. Each worker keeps its unsent runs under the
-machine's GearApps id, so they survive IP changes and restarts. A worker that fails is
+machine's MeshForge id, so they survive IP changes and restarts. A worker that fails is
 rebuilt after a pause without touching the others.
 
 The Lapper **Fanuc Variables** page shows every machine's worker: Collecting (with the
@@ -50,7 +50,7 @@ Unsent runs stay in `/data` and are retried after network or API outages and res
 - Each lapper saved in Lapper as described above.
 - A **connected collector**: in Lapper, an admin opens Configuration → Collector Tokens and
   clicks **Connect Docker collector**. The API writes a new collector token to a private
-  volume shared only with this container (`/run/gearapps/collector/token`) and revokes the
+  volume shared only with this container (`/run/meshforge/collector/token`) and revokes the
   previous one; the collector reads it there and picks up a replacement by itself. The token
   never expires, can only send machine data, is never shown, and is revoked from the same page.
   `LAPPER_READ_API_TOKEN` (a pasted token) or an account's email and password still override it.
@@ -88,9 +88,9 @@ single worker without the supervisor.
 | `LAPPER_RETRY_DELAY_MS` | 5000 | Wait after a failure |
 | `LAPPER_IO_TIMEOUT_MS` | 3000 | Controller/scanner timeout |
 | `LAPPER_STATE_DIR` | /data | Checkpoint, heartbeat and FOCAS log |
-| `GEARAPPS_API_BASE_URL` | http://gear-app-server:3333 | Shared GearApps API |
-| `GEARAPPS_API_TOKEN` | | Collector token (`glr_…`); replaces email and password |
-| `GEARAPPS_API_EMAIL` / `GEARAPPS_API_PASSWORD` | | Collector account, when no token is set |
+| `MESHFORGE_API_BASE_URL` | http://meshforge-server:3333 | Shared MeshForge API |
+| `MESHFORGE_API_TOKEN` | | Collector token (`glr_…`); replaces email and password |
+| `MESHFORGE_API_EMAIL` / `MESHFORGE_API_PASSWORD` | | Collector account, when no token is set |
 
 The container is healthy while the supervisor keeps reading the machine list.
 

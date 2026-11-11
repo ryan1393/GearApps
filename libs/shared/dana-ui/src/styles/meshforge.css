@@ -1,0 +1,24 @@
+/* ============================================================
+   MESHFORGE DESIGN SYSTEM ENTRY POINT
+   Shared by Blade Tracking, Cutter Builder, Greenshed, and Admin.
+
+   Keep this file declarative: it only owns module load order.
+   Add or edit rules in the appropriate meshforge/ module.
+   ============================================================ */
+
+@import './meshforge/foundation/tokens.css';
+@import './meshforge/foundation/base.css';
+@import './meshforge/layout/app-shell.css';
+@import './meshforge/components/primitives.css';
+@import './meshforge/components/workflow-layout.css';
+@import './meshforge/components/data-display.css';
+@import './meshforge/components/icons.css';
+@import './meshforge/layout/navigation-shell.css';
+@import './meshforge/layout/brand.css';
+@import './meshforge/components/login.css';
+@import './meshforge/features/admin-core.css';
+@import './meshforge/components/access-states.css';
+@import './meshforge/features/dashboard.css';
+@import './meshforge/components/toast.css';
+@import './meshforge/foundation/responsive.css';
+@import './meshforge/features/typography.css';

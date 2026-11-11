@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { databaseSource } = require('./runtime.cjs');
-const { auditGearDatabase } = require('@gearapps/shared/database');
+const { auditGearDatabase } = require('@meshforge/shared/database');
 const { cleanupPlan } = require('./plan.cjs');
 async function main() {
   const command = process.argv[2] || 'audit';

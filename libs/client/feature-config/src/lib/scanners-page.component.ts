@@ -21,9 +21,9 @@ import {
   MachinesApi,
   ScannerDetailsApi,
   ToastService,
-} from '@gearapps/client/core';
-import { StatusBadgeComponent } from '@gearapps/client/ui';
-import { Machine, ScannerDetail } from '@gearapps/shared/domain';
+} from '@meshforge/client/core';
+import { StatusBadgeComponent } from '@meshforge/client/ui';
+import { Machine, ScannerDetail } from '@meshforge/shared/domain';
 import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
 
 @Component({

@@ -12,7 +12,7 @@ import {
   ENV_EMAIL_SECURE,
   ENV_EMAIL_TEMPLATE_DIR,
   ENV_EMAIL_USER,
-} from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-constants';
 import { registerAs } from '@nestjs/config';
 
 import { CONFIG_NAMESPACE_MAILER } from '../constants';

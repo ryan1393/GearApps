@@ -1,4 +1,4 @@
-import { beginWorkflowJournal } from '@gearapps/manufacturing/server/data-access';
+import { beginWorkflowJournal } from '@meshforge/manufacturing/server/data-access';
 import {
   BladeHistoryOrmEntity,
   BladeOrmEntity,
@@ -22,19 +22,19 @@ import {
   TrayOrmEntity,
   TrayStageOrmEntity,
   UserOrmEntity,
-} from '@gearapps/manufacturing/server/data-access';
+} from '@meshforge/manufacturing/server/data-access';
 import {
   DEPARTMENT_CUTTERGRIND,
   cutterBodyMatchesRequirement,
   parseCuttergrindNumberedShelfTag,
-} from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-constants';
 import {
   BladeHistoryEvent,
   BladeStatus,
   ICutterBuilderBuildResult,
   ICutterTeardownResult,
   Uuid,
-} from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,

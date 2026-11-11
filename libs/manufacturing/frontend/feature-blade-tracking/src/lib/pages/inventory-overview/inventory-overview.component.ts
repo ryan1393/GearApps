@@ -3,7 +3,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
-import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@gearapps/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@meshforge/manufacturing/frontend/util-common';
 
 import {
   AssetTagKind,
@@ -13,7 +13,7 @@ import {
   InventoryLocationRow,
   InventoryTrayRow,
   apiErrorText,
-} from '@gearapps/manufacturing/frontend/data-access-blade-tracking';
+} from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
 import {
   DanaPageHeaderComponent,
   DanaSummaryCardDirective,
@@ -22,7 +22,7 @@ import {
   DanaTableEmptyDirective,
   DanaTableShellDirective,
 } from '@dana/ui';
-import { IPaginationMeta } from '@gearapps/manufacturing/shared/util-types';
+import { IPaginationMeta } from '@meshforge/manufacturing/shared/util-types';
 
 type InventoryTab = 'trays' | 'containers' | 'locations' | 'blades';
 

@@ -3,12 +3,12 @@ import { COATER_SHIPMENT_SCHEMA } from './coater-shipment.schema';
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { STARTUP_SCHEMA_LOCK_SQL } from '@gearapps/manufacturing/shared/util-constants';
+import { STARTUP_SCHEMA_LOCK_SQL } from '@meshforge/manufacturing/shared/util-constants';
 import { CUTTER_BODY_SHELF_SCHEMA } from './cutter-body-shelf.schema';
-import { applySharedDatabaseIntegrity } from '@gearapps/shared/database';
+import { applySharedDatabaseIntegrity } from '@meshforge/shared/database';
 
 /**
- * Additive schema evolution for Gear Apps master-data features that must work
+ * Additive schema evolution for MeshForge master-data features that must work
  * against the existing production database with DATABASE_SYNCHRONIZE=false.
  * Every statement is idempotent. Existing rows and history are preserved.
  */

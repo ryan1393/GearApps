@@ -13,10 +13,10 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { apiErrorMessage, GearsetsApi } from '@gearapps/client/core';
-import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
-import { DialogComponent, SegmentedComponent } from '@gearapps/client/ui';
-import { Gearset, Part, Summary } from '@gearapps/shared/domain';
+import { apiErrorMessage, GearsetsApi } from '@meshforge/client/core';
+import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
+import { DialogComponent, SegmentedComponent } from '@meshforge/client/ui';
+import { Gearset, Part, Summary } from '@meshforge/shared/domain';
 import { STATUS_OPTIONS, toStatusOption } from './lapping-shared';
 
 @Component({

@@ -1,6 +1,6 @@
 // Read/write verification for a disposable TEST database only.
 // Run with injected DATABASE_* settings (or node --env-file=.env) and explicit
-// GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES. Changes are restored even if assertions fail.
+// MESHFORGE_ALLOW_TEST_ACCOUNTS=YES. Changes are restored even if assertions fail.
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

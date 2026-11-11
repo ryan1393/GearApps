@@ -6,9 +6,9 @@ import { createRequire } from "node:module";
 const root=process.cwd();
 const req=createRequire(contractPath(root,"package.json"));
 const postcss=req("postcss");
-const entry=contractPath(root,"libs","shared","dana-ui","src","styles","gear-apps.css");
+const entry=contractPath(root,"libs","shared","dana-ui","src","styles","meshforge.css");
 
-if(!fs.existsSync(contractPath(process.cwd(), entry))) throw new Error("Missing shared Gear Apps CSS entrypoint.");
+if(!fs.existsSync(contractPath(process.cwd(), entry))) throw new Error("Missing shared MeshForge CSS entrypoint.");
 
 const entryText=fs.readFileSync(contractPath(process.cwd(), entry),"utf8");
 const stripped=entryText
@@ -16,7 +16,7 @@ const stripped=entryText
   .replace(/\/\/.*$/gm,"")
   .replace(/@import\s+[^;]+;/g,"")
   .trim();
-if(stripped) throw new Error("gear-apps.css must remain import-only.");
+if(stripped) throw new Error("meshforge.css must remain import-only.");
 
 function resolveImport(from,spec){
   if(!spec.startsWith(".")) return null;
@@ -91,4 +91,4 @@ if(duplicateCount){
   and SAME at-rule context. Cross-module selector reuse remains visible to normal
   source review but is not a failure.
 */
-console.log(`[PASS] Gear Apps style integrity passed: ${modules.length} imported modules, zero same-file/same-context duplicate selectors, import-only entrypoint, <=520 lines/module.`);
+console.log(`[PASS] MeshForge style integrity passed: ${modules.length} imported modules, zero same-file/same-context duplicate selectors, import-only entrypoint, <=520 lines/module.`);

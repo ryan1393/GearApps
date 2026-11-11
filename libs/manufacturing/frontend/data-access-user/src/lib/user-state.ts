@@ -6,7 +6,7 @@ import {
   IJwtPayload,
   ITokenResponse,
   RefreshToken,
-} from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-types';
 
 import {
   LOCAL_STORAGE_KEY_ACCESS_TOKEN,

@@ -1,5 +1,5 @@
-import { Auth } from '@gearapps/manufacturing/server/util-common';
-import { RoleType, Uuid } from '@gearapps/manufacturing/shared/util-types';
+import { Auth } from '@meshforge/manufacturing/server/util-common';
+import { RoleType, Uuid } from '@meshforge/manufacturing/shared/util-types';
 import {
   Body,
   Controller,

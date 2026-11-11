@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
-import { ScannerApi, ToastService } from '@gearapps/client/core';
+import { ScannerApi, ToastService } from '@meshforge/client/core';
 
 interface Cmd {
   label: string;
   op: string;
-  /** Gear Apps button tone; secondary when omitted. */
+  /** MeshForge button tone; secondary when omitted. */
   cls?: string;
 }
 

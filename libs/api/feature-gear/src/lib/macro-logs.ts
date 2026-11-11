@@ -1,11 +1,11 @@
-import { LapperWritePolicy, CrudService, crudController } from '@gearapps/api/core';
+import { LapperWritePolicy, CrudService, crudController } from '@meshforge/api/core';
 import {
   CreateMacroLogDto,
   LappingSummaryRowDto,
   MacroLogDto,
   UpdateMacroLogDto,
-} from '@gearapps/api/data-access';
-import { LappingSummaryRow, MACRO_FORMS, MacroLog } from '@gearapps/shared/domain';
+} from '@meshforge/api/data-access';
+import { LappingSummaryRow, MACRO_FORMS, MacroLog } from '@meshforge/shared/domain';
 import {
   UseInterceptors,
   Controller,

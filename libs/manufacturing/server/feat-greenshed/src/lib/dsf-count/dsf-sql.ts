@@ -6,7 +6,7 @@ export const DANA_MACHINES_SQL = `SELECT m.id::text AS machine_id, btrim(m.machi
  AND m.machine_type='PRODUCTION' ORDER BY m.machine_number,m.id`;
 export const SOURCE_IDENTITY_SQL = `SELECT
  to_regclass('public.tbl_whiteboard_cycles_master') IS NOT NULL AS is_source,
- to_regclass('public.cutter_machine_runs') IS NULL AS not_gear_apps,
+ to_regclass('public.cutter_machine_runs') IS NULL AS not_meshforge,
  to_char(transaction_timestamp() AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS now_utc,
  current_setting('transaction_read_only')='on' AS read_only`;
 export const ROLE_CHECK_SQL = `WITH RECURSIVE wanted(oid) AS (

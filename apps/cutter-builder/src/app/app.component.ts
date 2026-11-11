@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { GearToastHostComponent } from '@gearapps/manufacturing/frontend/util-common';
+import { GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { CutterBuilderNavComponent } from './layout/cutter-builder-nav/cutter-builder-nav.component';
 
 @Component({
@@ -17,7 +17,7 @@ export class AppComponent {
 
   title = 'cutter-builder';
 
-  // Gear Apps browser tab identity v24
+  // MeshForge browser tab identity v24
   private readonly pageTitles: ReadonlyArray<readonly [string, string]> = [
       ['/cutter-builder/cancel-last', 'Cancel Last Build'],
       ['/cutter-builder/teardown', 'Tear Down Cutter'],

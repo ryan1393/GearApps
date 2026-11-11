@@ -38,7 +38,7 @@ public sealed class DatabaseCalls : IDatabaseCalls, IDisposable
     {
         _auth = null;
         if (string.IsNullOrWhiteSpace(_settings.Email) || string.IsNullOrWhiteSpace(_settings.Password))
-            throw new InvalidOperationException("Configure GearAppsApi:Email and GearAppsApi:Password before starting the service.");
+            throw new InvalidOperationException("Configure MeshForgeApi:Email and MeshForgeApi:Password before starting the service.");
         using var response = await _client.PostAsJsonAsync("api/v1/auth/email/login",
             new { email = _settings.Email, password = _settings.Password }, token);
         if (!response.IsSuccessStatusCode)

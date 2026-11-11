@@ -1,6 +1,6 @@
 param(
     [string]$SqlServer = "usftwplvsql01",
-    [string]$SqlDatabase = "GearAppsNew",
+    [string]$SqlDatabase = "MeshForgeNew",
     [switch]$Apply,
     [switch]$KeepFreshExports
 )
@@ -37,7 +37,7 @@ $SupplementalFiles = @(
 
 Write-Host ""
 Write-Host "################################################################" -ForegroundColor Cyan
-Write-Host " Gear Apps - FRESH SQL SERVER + EXCEL DATA IMPORT" -ForegroundColor Cyan
+Write-Host " MeshForge - FRESH SQL SERVER + EXCEL DATA IMPORT" -ForegroundColor Cyan
 Write-Host "################################################################" -ForegroundColor Cyan
 Write-Host "SQL Server source : $SqlServer / $SqlDatabase"
 Write-Host "PostgreSQL target : values from project .env"

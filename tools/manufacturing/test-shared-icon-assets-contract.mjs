@@ -15,11 +15,11 @@ for (const icon of requiredIcons) {
   if (!fs.existsSync(contractPath(process.cwd(), abs))) throw new Error(`Shared icon is missing: ${rel}`);
   const svg = fs.readFileSync(contractPath(process.cwd(), abs), 'utf8');
   if (!svg.includes('<svg') || !svg.includes('viewBox="0 0 24 24"')) {
-    throw new Error(`${rel} is not a normalized 24x24 Gear Apps SVG.`);
+    throw new Error(`${rel} is not a normalized 24x24 MeshForge SVG.`);
   }
 }
 
-const iconCssRel = 'libs/shared/dana-ui/src/styles/gear-apps/components/icons.css';
+const iconCssRel = 'libs/shared/dana-ui/src/styles/meshforge/components/icons.css';
 const iconCss = fs.readFileSync(contractPath(root, iconCssRel), 'utf8');
 if (!iconCss.includes('.gear-glyph')) throw new Error('Shared icon CSS base class is missing.');
 for (const icon of requiredIcons) {
@@ -28,9 +28,9 @@ for (const icon of requiredIcons) {
   }
 }
 
-const entry = fs.readFileSync(contractPath(root, 'libs/shared/dana-ui/src/styles/gear-apps.css'), 'utf8');
-if (!entry.includes("@import './gear-apps/components/icons.css';")) {
-  throw new Error('Gear Apps design-system entry point does not load shared icon CSS.');
+const entry = fs.readFileSync(contractPath(root, 'libs/shared/dana-ui/src/styles/meshforge.css'), 'utf8');
+if (!entry.includes("@import './meshforge/components/icons.css';")) {
+  throw new Error('MeshForge design-system entry point does not load shared icon CSS.');
 }
 
 const navs = [
@@ -105,4 +105,4 @@ if (!fs.existsSync(contractPath(root, 'libs/manufacturing/assets/icons/README.md
   throw new Error('Shared icon asset instructions are missing.');
 }
 
-console.log(`[PASS] Shared semantic icon contract passed with ${requiredIcons.length} centralized workflow icons across all Gear Apps frontends.`);
+console.log(`[PASS] Shared semantic icon contract passed with ${requiredIcons.length} centralized workflow icons across all MeshForge frontends.`);

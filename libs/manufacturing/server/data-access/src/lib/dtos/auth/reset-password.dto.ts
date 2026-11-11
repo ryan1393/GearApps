@@ -11,8 +11,8 @@ import {
   PASSWORD_MIN_NUMBER,
   PASSWORD_MIN_SYMBOL,
   PASSWORD_MIN_UPPERCASE,
-} from '@gearapps/manufacturing/shared/util-constants';
-import { IResetPasswordPayload } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-constants';
+import { IResetPasswordPayload } from '@meshforge/manufacturing/shared/util-types';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ResetPasswordDto implements IResetPasswordPayload {

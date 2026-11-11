@@ -12,7 +12,7 @@ Dana UI is shared by independent applications. Truck Log is the visual source of
 
 Truck Log must **not** depend on `gear-compat.css`.
 
-Gear Apps may import `gear-compat.css` explicitly while its templates migrate from legacy `gear-*` selectors to the Dana-neutral component/class vocabulary. The compatibility layer must never redefine the canonical Dana visual source of truth.
+MeshForge may import `gear-compat.css` explicitly while its templates migrate from legacy `gear-*` selectors to the Dana-neutral component/class vocabulary. The compatibility layer must never redefine the canonical Dana visual source of truth.
 
 ## Compatibility debt
 

@@ -3,10 +3,10 @@ param(
 )
 
 $rows = @(
-    [pscustomobject]@{ Command='npm run setup:gear-apps'; Purpose='Install dependencies, reset Nx, and verify the workspace.'; Safety='SAFE' },
-    [pscustomobject]@{ Command='npm run start:gear-apps'; Purpose='Start API, Blade Tracking, Cutter Builder, and Green Shed.'; Safety='SAFE' },
+    [pscustomobject]@{ Command='npm run setup:meshforge'; Purpose='Install dependencies, reset Nx, and verify the workspace.'; Safety='SAFE' },
+    [pscustomobject]@{ Command='npm run start:meshforge'; Purpose='Start API, Blade Tracking, Cutter Builder, and Green Shed.'; Safety='SAFE' },
     [pscustomobject]@{ Command='npm run configure:label-printer'; Purpose='Set the IPL serial-tag printer host/port in .env (does not print).'; Safety='SAFE' },
-    [pscustomobject]@{ Command='npm run test:gear-apps'; Purpose='Run the master Gear Apps test suite.'; Safety='SAFE by default' },
+    [pscustomobject]@{ Command='npm run test:meshforge'; Purpose='Run the master MeshForge test suite.'; Safety='SAFE by default' },
     [pscustomobject]@{ Command='npm run validate:base-data'; Purpose='Validate Excel-derived summary/blade/cutter reference data.'; Safety='SAFE' },
     [pscustomobject]@{ Command='npm run test:data-import'; Purpose='Validate the fresh SQL Server + Excel import contract.'; Safety='SAFE' },
     [pscustomobject]@{ Command='npm run test:blade-data'; Purpose='Create/verify dedicated Blade Tracking E2E data.'; Safety='TEST DATA' },
@@ -21,7 +21,7 @@ $rows = @(
 
 Write-Host ''
 Write-Host '============================================================' -ForegroundColor Cyan
-Write-Host ' Gear Apps Command Center' -ForegroundColor Cyan
+Write-Host ' MeshForge Command Center' -ForegroundColor Cyan
 Write-Host '============================================================' -ForegroundColor Cyan
 
 if ($Compact) {
@@ -35,12 +35,12 @@ if ($Compact) {
 
 Write-Host ''
 Write-Host 'Recommended fresh migration sequence:' -ForegroundColor Cyan
-Write-Host '  1. npm run setup:gear-apps'
+Write-Host '  1. npm run setup:meshforge'
 Write-Host '  2. npm run validate:base-data'
 Write-Host '  3. npm run test:data-import'
 Write-Host '  4. npm run import:all-fresh'
 Write-Host '  5. Review the fresh SQL/Excel preflight output'
 Write-Host '  6. npm run import:all-fresh:apply   <-- writes PostgreSQL' -ForegroundColor Yellow
-Write-Host '  7. npm run start:gear-apps'
-Write-Host '  8. npm run test:gear-apps'
+Write-Host '  7. npm run start:meshforge'
+Write-Host '  8. npm run test:meshforge'
 Write-Host ''

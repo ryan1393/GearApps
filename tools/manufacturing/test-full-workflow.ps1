@@ -1,6 +1,6 @@
 param(
     [string]$BaseUrl = "http://localhost:3333/api/v1",
-    [string]$Email = "test@gearapps.local",
+    [string]$Email = "test@meshforge.local",
     [string]$Password,
 
     [Parameter(Mandatory=$true)] [string]$TraySerialNumber,
@@ -162,7 +162,7 @@ function Get-ShelfTag([ValidateSet('GSR','GSP','CGDR','CGDP','CGFR','CGFP')] [st
 
 Write-Host ''
 Write-Host '============================================================'
-Write-Host ' Gear Apps FULL MUTATING WORKFLOW TEST'
+Write-Host ' MeshForge FULL MUTATING WORKFLOW TEST'
 Write-Host ' Blade Tracking -> Coater -> Cutter Builder -> Green Shed'
 Write-Host ' -> Changeover to Greenshed Shelf -> Re-setup -> Pull -> Cutter Builder Teardown'
 Write-Host '============================================================'
@@ -188,7 +188,7 @@ try {
     Invoke-RestMethod -Method Get -Uri "$BaseUrl/health" | Out-Null
     Add-Result 'Server health' 'PASS' $BaseUrl
 } catch {
-    Fail-Test 'Server health' 'API is not reachable. Start it with: npx nx serve gear-app-server'
+    Fail-Test 'Server health' 'API is not reachable. Start it with: npx nx serve meshforge-server'
 }
 
 # Login
@@ -590,13 +590,13 @@ $report = [pscustomobject]@{
     failed = $failed
     results = $Results
 }
-$reportPath = Join-Path (Get-Location) 'gearapps-full-workflow-results.json'
+$reportPath = Join-Path (Get-Location) 'meshforge-full-workflow-results.json'
 $report | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $reportPath -Encoding UTF8
 Write-Host "Report: $reportPath"
 
 if ($failed -eq 0) {
     Write-Host ''
-    Write-Host '[PASS] FULL GEAR APPS WORKFLOW COMPLETED SUCCESSFULLY' -ForegroundColor Green
+    Write-Host '[PASS] FULL MESHFORGE WORKFLOW COMPLETED SUCCESSFULLY' -ForegroundColor Green
     Write-Host "Build tested: $script:BuildNumber" -ForegroundColor Green
     exit 0
 }

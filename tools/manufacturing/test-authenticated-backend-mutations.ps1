@@ -193,7 +193,7 @@ function New-AssetSerial([ValidateSet('T','C')] [string]$Prefix){
 
 Write-Host ''
 Write-Host '=================================================================' -ForegroundColor Cyan
-Write-Host ' Gear Apps AUTHENTICATED BACKEND MUTATION TEST' -ForegroundColor Cyan
+Write-Host ' MeshForge AUTHENTICATED BACKEND MUTATION TEST' -ForegroundColor Cyan
 Write-Host ' Dedicated E2E records only - no production records are selected' -ForegroundColor Cyan
 Write-Host '=================================================================' -ForegroundColor Cyan
 Write-Host ''
@@ -238,7 +238,7 @@ Assert-True ($departments.Count -gt 0) 'Admin machine department fixture' 'At le
 $adminUserEmail=("e2e-admin-created-$RunToken@example.local").ToLower()
 $adminCreatedUser=Invoke-Api POST '/users' @{
     email=$adminUserEmail
-    password='GearApps1!'
+    password='MeshForge1!'
     firstName='E2E'
     lastName='Admin Created'
     role='admin'

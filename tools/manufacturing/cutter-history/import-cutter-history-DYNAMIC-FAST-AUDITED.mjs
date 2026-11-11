@@ -1155,7 +1155,7 @@ const migrationReportPath = path.resolve('./cutter-history-dynamic-migration-rep
 fs.writeFileSync(migrationReportPath, JSON.stringify(report, null, 2), 'utf8');
 console.log(`Dynamic migration report: ${migrationReportPath}`);
 
-console.log('\nGearApps cutter-history import plan');
+console.log('\nMeshForge cutter-history import plan');
 console.log('===================================');
 console.log(JSON.stringify(report, null, 2));
 
@@ -1244,7 +1244,7 @@ try {
   // snapshot. Physical cutter-body identity/reference rows are deliberately
   // preserved so Excel MF<->Dana mappings and definition links survive.
   //
-  // These newer Gear Apps association tables do not exist in the legacy source,
+  // These newer MeshForge association tables do not exist in the legacy source,
   // so stale/test rows must be cleared before cutter_builds can be refreshed.
   for (const table of [
     'cutter_cmm_checks',

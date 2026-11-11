@@ -13,15 +13,15 @@ import {
   DepartmentOrmEntity,
   UserOrmEntity,
   UserOrmEntitySubscriber,
-} from '@gearapps/manufacturing/server/data-access';
-import { ServerFeatUserService } from '@gearapps/manufacturing/server/feat-user';
-import { ServerUtilMailerService } from '@gearapps/manufacturing/server/util-mailer';
+} from '@meshforge/manufacturing/server/data-access';
+import { ServerFeatUserService } from '@meshforge/manufacturing/server/feat-user';
+import { ServerUtilMailerService } from '@meshforge/manufacturing/server/util-mailer';
 import {
   AuthProviderType,
   IJwtPayload,
   RoleType,
-} from '@gearapps/manufacturing/shared/util-types';
-import { canEditGearApp } from '@gearapps/manufacturing/shared/util-constants';
+} from '@meshforge/manufacturing/shared/util-types';
+import { canEditMeshForgeApp } from '@meshforge/manufacturing/shared/util-constants';
 import { ServerFeatAuthService } from './server-feat-auth.service';
 import { JwtAccessStrategy } from './strategies/jwt-access.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
@@ -165,10 +165,10 @@ describe('authentication security regressions', () => {
     );
     expect(identity.departmentCode).toBe('45');
     expect(
-      canEditGearApp('BLADE_TRACKING', identity.role, identity.departmentCode),
+      canEditMeshForgeApp('BLADE_TRACKING', identity.role, identity.departmentCode),
     ).toBe(true);
     expect(
-      canEditGearApp('GREENSHED', identity.role, identity.departmentCode),
+      canEditMeshForgeApp('GREENSHED', identity.role, identity.departmentCode),
     ).toBe(false);
   });
   it('matches legacy mixed-case email using an exact bound comparison', async () => {

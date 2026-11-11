@@ -1,10 +1,10 @@
-# GearApps 70.3.0 database integrity update
+# MeshForge 70.3.0 database integrity update
 
 Lapper, Lapper Read and the manufacturing applications use one PostgreSQL 16
 database. Public users, departments, machines, parts, summaries and gearset
 assemblies are the canonical masters. The `lapper` schema contains machine
 configuration, collector state and production history linked to those masters.
-Lapper Read collects through the authenticated shared GearApps API.
+Lapper Read collects through the authenticated shared MeshForge API.
 
 The private update package imports the supplied legacy Lapper history and then
 applies the integrity migrations in **one transaction**. It takes a fresh backup
@@ -13,19 +13,19 @@ are supplied privately and excluded from Git, source ZIPs and Docker contexts.
 
 ## Run on the database host
 
-Extract the complete private database-update ZIP. Stop the shared GearApps API
+Extract the complete private database-update ZIP. Stop the shared MeshForge API
 and collection for the maintenance window; leave PostgreSQL running. Keep the
 updated API stopped until this script succeeds. Preserve collector checkpoint files and the existing
 PostgreSQL volume. Identify the container with `docker ps`, then run:
 
 ```powershell
-./Apply-DatabaseCleanup.ps1 -PgContainer YOUR_POSTGRES_CONTAINER -Database GearApps
+./Apply-DatabaseCleanup.ps1 -PgContainer YOUR_POSTGRES_CONTAINER -Database MeshForge
 ```
 
 Or, on Linux:
 
 ```sh
-bash ./Apply-DatabaseCleanup.sh YOUR_POSTGRES_CONTAINER GearApps
+bash ./Apply-DatabaseCleanup.sh YOUR_POSTGRES_CONTAINER MeshForge
 ```
 
 An explicit database username can be passed with `-DatabaseUser` or as the third
@@ -44,19 +44,19 @@ The branch containing this update can be cloned explicitly:
 
 ```sh
 git clone --branch codex/lapper-postgres-70-3-0 --single-branch https://github.com/ryan1393/GearApps.git
-cd GearApps
+cd MeshForge
 ```
 
 The complete source ZIP in the private package is the other deployment option.
 Keep the host's existing `.env`; do not replace its credentials.
-The `GearApps-70.3.0-cleaned.dump` is a tested reference restore of the supplied
+The `MeshForge-70.3.0-cleaned.dump` is a tested reference restore of the supplied
 snapshot. Use the update script against an existing database to retain records
 added since that snapshot. A reference dump is not an incremental update.
 
 ## What changes
 
 - Shared schema changes use the existing manufacturing advisory lock and six
-  checksummed migration versions in `gearapps_meta.schema_migrations`. The unified
+  checksummed migration versions in `meshforge_meta.schema_migrations`. The unified
   API adds a fresh-install gearset schema migration while preserving the original
   five migration bodies and checksums. Concurrent
   startup and reruns apply each version once; changed installed SQL is rejected.
@@ -127,9 +127,9 @@ authorization. Never point them at production:
 
 ```sh
 # Pristine merged restore, database name ending in _integrity_test:
-GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES npm run test:database-integrity
+MESHFORGE_ALLOW_TEST_ACCOUNTS=YES npm run test:database-integrity
 # Separate restored copy, database name ending in _lapper_test:
-GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES npm run test:lapper-postgres
+MESHFORGE_ALLOW_TEST_ACCOUNTS=YES npm run test:lapper-postgres
 ```
 
 The integrity suite tests conflicting-history rollback, preservation of every

@@ -20,7 +20,7 @@ export interface LabelPrinterChoices {
   default_printer_name: string | null;
 }
 
-const storageKey = (labelType: LabelType): string => `gear-apps.label-printer.${labelType}`;
+const storageKey = (labelType: LabelType): string => `meshforge.label-printer.${labelType}`;
 
 /**
  * The printer this computer prints each kind of label to. The choice is kept in the browser,

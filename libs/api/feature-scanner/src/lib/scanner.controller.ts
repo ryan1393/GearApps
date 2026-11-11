@@ -1,7 +1,7 @@
-import { ErrorResponseDto, ScannerCommandDto } from '@gearapps/api/data-access';
-import { ScannerDetailsService } from '@gearapps/api/feature-gear';
-import { LapperWritePolicy, scannerConfig } from '@gearapps/api/core';
-import { ScannerCommand, ScannerLogEntry, ScannerSummary } from '@gearapps/shared/domain';
+import { ErrorResponseDto, ScannerCommandDto } from '@meshforge/api/data-access';
+import { ScannerDetailsService } from '@meshforge/api/feature-gear';
+import { LapperWritePolicy, scannerConfig } from '@meshforge/api/core';
+import { ScannerCommand, ScannerLogEntry, ScannerSummary } from '@meshforge/shared/domain';
 import {
   UseInterceptors,
   BadRequestException,

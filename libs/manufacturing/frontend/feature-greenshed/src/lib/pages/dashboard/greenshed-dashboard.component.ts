@@ -2,10 +2,10 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { GreenshedApiService, GreenshedDashboard, greenshedApiErrorText } from '@gearapps/manufacturing/frontend/data-access-greenshed';
+import { GreenshedApiService, GreenshedDashboard, greenshedApiErrorText } from '@meshforge/manufacturing/frontend/data-access-greenshed';
 
-import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
-import { canEditGearApp } from '@gearapps/manufacturing/shared/util-constants';
+import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
+import { canEditMeshForgeApp } from '@meshforge/manufacturing/shared/util-constants';
 import {
   DanaCountBadgeDirective,
   DanaDashboardPanelComponent,
@@ -48,7 +48,7 @@ export class GreenshedDashboardComponent implements OnInit {
   data:GreenshedDashboard|null=null; loading=true; error='';
   get canEdit(): boolean {
     const user = this.session.currentUser;
-    return canEditGearApp(
+    return canEditMeshForgeApp(
       'GREENSHED',
       user?.role,
       user?.departmentCode,

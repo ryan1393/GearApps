@@ -18,118 +18,118 @@
     "noFallthroughCasesInSwitch": true,
     "forceConsistentCasingInFileNames": true,
     "paths": {
-      "@gearapps/shared/domain": ["./libs/shared/domain/src/index.ts"],
-      "@gearapps/shared/database": ["./libs/shared/database/src/index.ts"],
-      "@gearapps/api/core": ["./libs/api/core/src/index.ts"],
-      "@gearapps/api/data-access": ["./libs/api/data-access/src/index.ts"],
-      "@gearapps/api/feature-gear": ["./libs/api/feature-gear/src/index.ts"],
-      "@gearapps/api/feature-cutter-tracking": ["./libs/api/feature-cutter-tracking/src/index.ts"],
-      "@gearapps/api/feature-scanner": ["./libs/api/feature-scanner/src/index.ts"],
-      "@gearapps/api/postgres": ["./libs/api/postgres/src/index.ts"],
-      "@gearapps/client/core": ["./libs/client/core/src/index.ts"],
-      "@gearapps/client/ui": ["./libs/client/ui/src/index.ts"],
-      "@gearapps/client/feature-dashboard": ["./libs/client/feature-dashboard/src/index.ts"],
-      "@gearapps/client/feature-config": ["./libs/client/feature-config/src/index.ts"],
-      "@gearapps/client/feature-lapping-summary": [
+      "@meshforge/shared/domain": ["./libs/shared/domain/src/index.ts"],
+      "@meshforge/shared/database": ["./libs/shared/database/src/index.ts"],
+      "@meshforge/api/core": ["./libs/api/core/src/index.ts"],
+      "@meshforge/api/data-access": ["./libs/api/data-access/src/index.ts"],
+      "@meshforge/api/feature-gear": ["./libs/api/feature-gear/src/index.ts"],
+      "@meshforge/api/feature-cutter-tracking": ["./libs/api/feature-cutter-tracking/src/index.ts"],
+      "@meshforge/api/feature-scanner": ["./libs/api/feature-scanner/src/index.ts"],
+      "@meshforge/api/postgres": ["./libs/api/postgres/src/index.ts"],
+      "@meshforge/client/core": ["./libs/client/core/src/index.ts"],
+      "@meshforge/client/ui": ["./libs/client/ui/src/index.ts"],
+      "@meshforge/client/feature-dashboard": ["./libs/client/feature-dashboard/src/index.ts"],
+      "@meshforge/client/feature-config": ["./libs/client/feature-config/src/index.ts"],
+      "@meshforge/client/feature-lapping-summary": [
         "./libs/client/feature-lapping-summary/src/index.ts"
       ],
-      "@gearapps/manufacturing/frontend/data-access-common": [
+      "@meshforge/manufacturing/frontend/data-access-common": [
         "./libs/manufacturing/frontend/data-access-common/src/index.ts"
       ],
-      "@gearapps/manufacturing/frontend/data-access-blade-tracking": [
+      "@meshforge/manufacturing/frontend/data-access-blade-tracking": [
         "./libs/manufacturing/frontend/data-access-blade-tracking/src/index.ts"
       ],
-      "@gearapps/manufacturing/frontend/data-access-cutter-builder": [
+      "@meshforge/manufacturing/frontend/data-access-cutter-builder": [
         "./libs/manufacturing/frontend/data-access-cutter-builder/src/index.ts"
       ],
-      "@gearapps/manufacturing/frontend/data-access-greenshed": [
+      "@meshforge/manufacturing/frontend/data-access-greenshed": [
         "./libs/manufacturing/frontend/data-access-greenshed/src/index.ts"
       ],
-      "@gearapps/manufacturing/frontend/data-access-user": [
+      "@meshforge/manufacturing/frontend/data-access-user": [
         "./libs/manufacturing/frontend/data-access-user/src/index.ts"
       ],
-      "@gearapps/manufacturing/frontend/feature-admin-users": [
+      "@meshforge/manufacturing/frontend/feature-admin-users": [
         "./libs/manufacturing/frontend/feature-admin-users/src/index.ts"
       ],
-      "@gearapps/manufacturing/frontend/feature-blade-tracking": [
+      "@meshforge/manufacturing/frontend/feature-blade-tracking": [
         "./libs/manufacturing/frontend/feature-blade-tracking/src/index.ts"
       ],
-      "@gearapps/manufacturing/frontend/feature-cutter-builder": [
+      "@meshforge/manufacturing/frontend/feature-cutter-builder": [
         "./libs/manufacturing/frontend/feature-cutter-builder/src/index.ts"
       ],
-      "@gearapps/manufacturing/frontend/feature-greenshed": [
+      "@meshforge/manufacturing/frontend/feature-greenshed": [
         "./libs/manufacturing/frontend/feature-greenshed/src/index.ts"
       ],
-      "@gearapps/manufacturing/frontend/feature-login": [
+      "@meshforge/manufacturing/frontend/feature-login": [
         "./libs/manufacturing/frontend/feature-login/src/index.ts"
       ],
-      "@gearapps/manufacturing/frontend/util-common": [
+      "@meshforge/manufacturing/frontend/util-common": [
         "./libs/manufacturing/frontend/util-common/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/data-access": [
+      "@meshforge/manufacturing/server/data-access": [
         "./libs/manufacturing/server/data-access/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-auth": [
+      "@meshforge/manufacturing/server/feat-auth": [
         "./libs/manufacturing/server/feat-auth/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-health": [
+      "@meshforge/manufacturing/server/feat-health": [
         "./libs/manufacturing/server/feat-health/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-user": [
+      "@meshforge/manufacturing/server/feat-user": [
         "./libs/manufacturing/server/feat-user/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/util-common": [
+      "@meshforge/manufacturing/server/util-common": [
         "./libs/manufacturing/server/util-common/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/util-mailer": [
+      "@meshforge/manufacturing/server/util-mailer": [
         "./libs/manufacturing/server/util-mailer/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/util-mailer/testing": [
+      "@meshforge/manufacturing/server/util-mailer/testing": [
         "./libs/manufacturing/server/util-mailer/src/testing/index.ts"
       ],
-      "@gearapps/manufacturing/server/util-testing": [
+      "@meshforge/manufacturing/server/util-testing": [
         "./libs/manufacturing/server/util-testing/src/index.ts"
       ],
-      "@gearapps/manufacturing/shared/util-constants": [
+      "@meshforge/manufacturing/shared/util-constants": [
         "./libs/manufacturing/shared/util-constants/src/index.ts"
       ],
-      "@gearapps/manufacturing/shared/util-types": [
+      "@meshforge/manufacturing/shared/util-types": [
         "./libs/manufacturing/shared/util-types/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-location": [
+      "@meshforge/manufacturing/server/feat-location": [
         "./libs/manufacturing/server/feat-location/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-tray": [
+      "@meshforge/manufacturing/server/feat-tray": [
         "./libs/manufacturing/server/feat-tray/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-container": [
+      "@meshforge/manufacturing/server/feat-container": [
         "./libs/manufacturing/server/feat-container/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-part-summary": [
+      "@meshforge/manufacturing/server/feat-part-summary": [
         "./libs/manufacturing/server/feat-part-summary/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-blade": [
+      "@meshforge/manufacturing/server/feat-blade": [
         "./libs/manufacturing/server/feat-blade/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-location-tray": [
+      "@meshforge/manufacturing/server/feat-location-tray": [
         "./libs/manufacturing/server/feat-location-tray/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-container-tray": [
+      "@meshforge/manufacturing/server/feat-container-tray": [
         "./libs/manufacturing/server/feat-container-tray/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-blade-tray": [
+      "@meshforge/manufacturing/server/feat-blade-tray": [
         "./libs/manufacturing/server/feat-blade-tray/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-cutter-config": [
+      "@meshforge/manufacturing/server/feat-cutter-config": [
         "./libs/manufacturing/server/feat-cutter-config/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-cutter-build": [
+      "@meshforge/manufacturing/server/feat-cutter-build": [
         "./libs/manufacturing/server/feat-cutter-build/src/index.ts"
       ],
-      "@gearapps/manufacturing/server/feat-greenshed": [
+      "@meshforge/manufacturing/server/feat-greenshed": [
         "./libs/manufacturing/server/feat-greenshed/src/index.ts"
       ],
-      "@gearapps/manufacturing/shared/dana-app-config": [
+      "@meshforge/manufacturing/shared/dana-app-config": [
         "./libs/manufacturing/shared/dana-app-config/src/index.ts"
       ],
       "@dana/ui": ["./libs/shared/dana-ui/src/index.ts"]

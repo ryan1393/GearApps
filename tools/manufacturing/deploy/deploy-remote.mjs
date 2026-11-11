@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Gear Apps remote deploy (replaces Dana-Apps-Native-Remote-Deploy.cmd).
+// MeshForge remote deploy (replaces Dana-Apps-Native-Remote-Deploy.cmd).
 //
 // Packs the shared repository root, copies it over SSH to the Linux Docker host behind the
 // active SSH Docker context, backs up the database, swaps the new source in (the
@@ -107,7 +107,7 @@ val(){ grep -E "^$1=" "$ENV" | tail -1 | cut -d= -f2- | tr -d '\\r"' ; }
 weak(){ v="$(val "$1")"; if [ "\${#v}" -lt 32 ] || printf '%s' "$v" | grep -qiE 'change|example|placeholder|replace|secret$|^x+$'; then echo "WEAK $1"; fi; }
 weak JWT_ACCESS_SECRET; weak JWT_REFRESH_SECRET
 p="$(val GEAR_DB_PASSWORD)"; [ "\${#p}" -ge 12 ] || echo "SHORTDB GEAR_DB_PASSWORD"
-grep -qE '^GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES' "$ENV" && echo "TEST_ACCOUNTS_ENABLED" || true
+grep -qE '^MESHFORGE_ALLOW_TEST_ACCOUNTS=YES' "$ENV" && echo "TEST_ACCOUNTS_ENABLED" || true
 echo ENV_OK`;
 
 // Finds Postgres by its compose labels, so it works whatever folder the release is in, and
@@ -119,10 +119,10 @@ if [ -z "$PG" ]; then
   echo '[SKIP] No running dana-postgres container (first install); nothing to back up.'; exit 0
 fi
 mkdir -p ${rq(BACKUP_DIR)}
-OUT=${rq(BACKUP_DIR)}/gearapps-${label}-$(date -u +%Y%m%dT%H%M%SZ).sql.gz
+OUT=${rq(BACKUP_DIR)}/meshforge-${label}-$(date -u +%Y%m%dT%H%M%SZ).sql.gz
 docker exec "$PG" sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" --no-owner' | gzip > "$OUT"
 [ "$(gzip -dc "$OUT" | head -c 4096 | grep -c 'PostgreSQL database dump')" -ge 1 ] || { echo "[FAIL] Backup $OUT looks empty." >&2; exit 43; }
-ls -1t ${rq(BACKUP_DIR)}/gearapps-*.sql.gz | tail -n +21 | xargs -r rm -f   # keep the newest 20
+ls -1t ${rq(BACKUP_DIR)}/meshforge-*.sql.gz | tail -n +21 | xargs -r rm -f   # keep the newest 20
 echo "[PASS] Database backed up to $OUT ($(du -h "$OUT" | cut -f1))"`;
 
 // Release folders: BASE (current), BASE.prev (last good), BASE.pending-prev (the release that
@@ -214,7 +214,7 @@ function localEnvCheck(text) {
     if (v.length < 32 || /change|example|placeholder|replace|secret$|^x+$/i.test(v)) out.push('WEAK ' + k);
   }
   if ((vals.GEAR_DB_PASSWORD ?? '').length < 12) out.push('SHORTDB GEAR_DB_PASSWORD');
-  if (vals.GEAR_APPS_ALLOW_TEST_ACCOUNTS === 'YES') out.push('TEST_ACCOUNTS_ENABLED');
+  if (vals.MESHFORGE_ALLOW_TEST_ACCOUNTS === 'YES') out.push('TEST_ACCOUNTS_ENABLED');
   return out.concat('ENV_OK').join('\n');
 }
 
@@ -260,10 +260,10 @@ async function verifyVersion(ctx, expected) {
   let seen = '';
   for (let i = 0; i < 10; i++) {
     // Look the container up on every attempt: one failed ssh call must not end the deploy.
-    const api = containerState(ctx, 'gear-app-server');
+    const api = containerState(ctx, 'meshforge-server');
     seen = api
       ? run('docker', ['--context', ctx.name, 'exec', api.id, 'node', '-e', probe], { capture: true, allowFail: true }).stdout.trim()
-      : 'gear-app-server container not found';
+      : 'meshforge-server container not found';
     if (seen === expected) return console.log(`[PASS] API reports version ${seen}.`);
     await sleep(3000);
   }
@@ -274,7 +274,7 @@ async function waitAll(ctx) {
   await waitFor(ctx, 'dana-postgres');
   await waitFor(ctx, 'gear-db-bootstrap', { oneShot: true, minutes: 10 });
   await waitFor(ctx, 'gear-base-data-bootstrap', { oneShot: true, minutes: 10 });
-  await waitFor(ctx, 'gear-app-server');
+  await waitFor(ctx, 'meshforge-server');
   // Older rollback releases predate the Lapper services.
   if (containerState(ctx, 'lapper-client')) await waitFor(ctx, 'lapper-client', { minutes: 6 });
   for (const ui of ['blade-tracking', 'cutter-builder', 'greenshed']) await waitFor(ctx, ui, { minutes: 6 });
@@ -283,14 +283,14 @@ async function waitAll(ctx) {
 function writeReport(lines) {
   const dir = path.join(ROOT, 'deploy-reports');
   fs.mkdirSync(dir, { recursive: true });
-  const file = path.join(dir, `GearApps-${VERSION}-${MODE}-${stamp()}.txt`);
+  const file = path.join(dir, `MeshForge-${VERSION}-${MODE}-${stamp()}.txt`);
   fs.writeFileSync(file, lines.join(os.EOL) + os.EOL);
   return file;
 }
 
 // ---------- main ----------
 async function main() {
-  console.log(`Gear Apps ${VERSION} - ${MODE}`);
+  console.log(`MeshForge ${VERSION} - ${MODE}`);
   for (const tool of ['ssh', 'scp', 'tar', 'docker']) {
     if (run(tool, tool === 'ssh' ? ['-V'] : ['--version'], { capture: true, allowFail: true }).status === 127) fail(`${tool} is not installed or not on PATH`);
   }
@@ -312,7 +312,7 @@ async function main() {
     console.log('[INFO] First install: the root .env will be uploaded.');
   }
   const weak = env.split(/\r?\n/).filter((l) => l.startsWith('WEAK '));
-  if (env.includes('TEST_ACCOUNTS_ENABLED')) fail('The .env being deployed sets GEAR_APPS_ALLOW_TEST_ACCOUNTS=YES. Remove it: production must never allow test accounts.');
+  if (env.includes('TEST_ACCOUNTS_ENABLED')) fail('The .env being deployed sets MESHFORGE_ALLOW_TEST_ACCOUNTS=YES. Remove it: production must never allow test accounts.');
   if (/^SHORTDB /m.test(env)) {
     console.warn('[WARN] GEAR_DB_PASSWORD is shorter than 12 characters. Postgres only reads it when the volume is first created,\n' +
       '       so change it inside Postgres first (ALTER USER ... PASSWORD ...), then in .env, then deploy.');
@@ -336,9 +336,9 @@ async function main() {
   if (MODE === 'rollback') {
     remote(ctx, rollbackSwapScript(REMOTE_ROOT, LEGACY_ROOT));
   } else {
-    const archive = path.join(os.tmpdir(), `gearapps-${VERSION}-${Date.now()}.tar.gz`);
-    const remoteUploadDir = remoteOut(ctx, 'umask 077; mktemp -d /tmp/gearapps-upload.XXXXXXXXXX').trim();
-    if (!/^\/tmp\/gearapps-upload\.[A-Za-z0-9]+$/.test(remoteUploadDir)) fail('Unable to create private remote upload staging directory');
+    const archive = path.join(os.tmpdir(), `meshforge-${VERSION}-${Date.now()}.tar.gz`);
+    const remoteUploadDir = remoteOut(ctx, 'umask 077; mktemp -d /tmp/meshforge-upload.XXXXXXXXXX').trim();
+    if (!/^\/tmp\/meshforge-upload\.[A-Za-z0-9]+$/.test(remoteUploadDir)) fail('Unable to create private remote upload staging directory');
     const remoteArchive = `${remoteUploadDir}/source.tar.gz`;
     const remoteEnv = `${remoteUploadDir}/environment`;
     try {
@@ -371,12 +371,12 @@ async function main() {
   if (MODE !== 'rollback') remote(ctx, finalizeScript(REMOTE_ROOT));
 
   const report = writeReport([
-    `GEAR APPS ${VERSION} ${MODE.toUpperCase()} - PASS`, '',
+    `MESHFORGE ${VERSION} ${MODE.toUpperCase()} - PASS`, '',
     `Docker context: ${ctx.name} (${ctx.target})`, `Release folder: ${REMOTE_ROOT}`, `Previous release: ${REMOTE_ROOT}.prev`,
     `Database backup: ${flag('--skip-backup') ? 'SKIPPED' : BACKUP_DIR}`, '',
     'compose down: NO', 'volumes deleted: NO', 'host root .env preserved: YES',
   ]);
-  console.log(`\n[PASS] Gear Apps ${MODE} complete. Report: ${report}`);
+  console.log(`\n[PASS] MeshForge ${MODE} complete. Report: ${report}`);
   console.log(`Blade Tracking: http://${ctx.host}:4200   Cutter Builder: http://${ctx.host}:4201   Greenshed: http://${ctx.host}:4202`);
 }
 

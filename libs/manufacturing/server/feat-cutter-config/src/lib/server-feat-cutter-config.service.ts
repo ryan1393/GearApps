@@ -8,8 +8,8 @@ import {
   PartOrmEntity,
   RollMasterOrmEntity,
   TrayOrmEntity,
-} from '@gearapps/manufacturing/server/data-access';
-import { BladeStatus, IValidateCutterTrayResult, Uuid } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/server/data-access';
+import { BladeStatus, IValidateCutterTrayResult, Uuid } from '@meshforge/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,

@@ -1,5 +1,5 @@
 {
-  "name": "@gearapps/source",
+  "name": "@meshforge/source",
   "version": "70.5.0",
   "license": "UNLICENSED",
   "private": true,
@@ -18,9 +18,9 @@
     "db:cleanup:bundle": "node tools/database/bundle.cjs",
     "test:database-integrity": "node --test tools/database/test-integrity.cjs",
     "serve:lapper-client": "nx serve lapper-client",
-    "setup:gear-apps": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/setup-gear-apps.ps1",
-    "start:gear-apps": "nx run manufacturing-tools:start-gear-apps",
-    "test:gear-apps": "nx run manufacturing-tools:test-gear-apps",
+    "setup:meshforge": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/manufacturing/setup-meshforge.ps1",
+    "start:meshforge": "nx run manufacturing-tools:start-meshforge",
+    "test:meshforge": "nx run manufacturing-tools:test-meshforge",
     "serve:blade-tracking": "nx serve blade-tracking",
     "serve:cutter-builder": "nx serve cutter-builder",
     "serve:greenshed": "nx serve greenshed",
@@ -47,7 +47,7 @@
     "import:all-fresh": "nx run manufacturing-tools:import-all-fresh",
     "import:all-fresh:apply": "nx run manufacturing-tools:import-all-fresh-apply",
     "test:data-import": "nx run manufacturing-tools:test-data-import",
-    "commands:gear-apps": "nx run manufacturing-tools:commands-gear-apps",
+    "commands:meshforge": "nx run manufacturing-tools:commands-meshforge",
     "test:legacy-log-dedupe": "nx run manufacturing-tools:test-legacy-log-dedupe",
     "test:legacy-null-mf": "nx run manufacturing-tools:test-legacy-null-mf",
     "test:workflow-harness": "nx run manufacturing-tools:test-workflow-harness",
@@ -108,8 +108,8 @@
     "test:dana-diamond-brand": "nx run manufacturing-tools:test-dana-diamond-brand",
     "test:shared-icon-assets": "nx run manufacturing-tools:test-shared-icon-assets",
     "test:toast-notifications": "nx run manufacturing-tools:test-toast-notifications",
-    "serve:gear-app-server": "nx serve gear-app-server",
-    "build:gear-app-server": "nx build gear-app-server",
+    "serve:meshforge-server": "nx serve meshforge-server",
+    "build:meshforge-server": "nx build meshforge-server",
     "test:dana-apps-premerge": "nx run manufacturing-tools:test-dana-apps-premerge",
     "test:native-asset-tags": "nx run manufacturing-tools:test-native-asset-tags",
     "configure:label-printer": "nx run manufacturing-tools:configure-label-printer",
@@ -132,7 +132,7 @@
     "test:release-regressions": "nx run manufacturing-tools:test-release-regressions",
     "test:ui": "nx test dana-ui",
     "package:release": "node tools/package-release.mjs",
-    "serve:api": "nx serve gear-app-server"
+    "serve:api": "nx serve meshforge-server"
   },
   "devDependencies": {
     "@angular-devkit/core": "20.3.42",

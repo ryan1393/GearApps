@@ -1,5 +1,5 @@
 // DANA-R61R14-COUNT-SERVICE
-import { beginWorkflowJournal, UserOrmEntity } from '@gearapps/manufacturing/server/data-access';
+import { beginWorkflowJournal, UserOrmEntity } from '@meshforge/manufacturing/server/data-access';
 import { initializeShiftTracking } from './greenshed-shift-counts';
 import { DataSource, In, IsNull } from 'typeorm';
 
@@ -17,13 +17,13 @@ import {
   PartOrmEntity,
   CutterPullReasonOrmEntity,
   LocationOrmEntity,
-} from '@gearapps/manufacturing/server/data-access';
+} from '@meshforge/manufacturing/server/data-access';
 import {
   buildSummaryShelfTag,
   normalizeSummaryNumber,
-} from '@gearapps/manufacturing/shared/util-constants';
-import { dsfCutterCountsEnabled } from '@gearapps/manufacturing/server/util-common';
-import { Uuid } from '@gearapps/manufacturing/shared/util-types';
+} from '@meshforge/manufacturing/shared/util-constants';
+import { dsfCutterCountsEnabled } from '@meshforge/manufacturing/server/util-common';
+import { Uuid } from '@meshforge/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,

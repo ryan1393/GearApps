@@ -10,7 +10,7 @@ const navs = [
   'apps/lapper-client/src/app/layout/lapper-nav/lapper-nav.component.html',
 ];
 
-// The suite is branded MeshForge ("by Dana Gear Apps Suite"). The shell keeps the
+// The suite is branded MeshForge. The shell keeps the
 // established brand-mark class names; only the shared file-backed asset changed.
 const sharedLogo = 'libs/manufacturing/assets/brand/meshforge-mark.svg';
 const sharedLogoPath = contractPath(root, sharedLogo);
@@ -65,7 +65,7 @@ if (fs.existsSync(contractPath(process.cwd(), oldLocalLogo))) {
 }
 
 const brandCss = fs.readFileSync(
-  contractPath(root, 'libs/shared/dana-ui/src/styles/gear-apps/layout/brand.css'),
+  contractPath(root, 'libs/shared/dana-ui/src/styles/meshforge/layout/brand.css'),
   'utf8',
 );
 for (const marker of [
@@ -78,7 +78,7 @@ for (const marker of [
 }
 
 const responsiveCss = fs.readFileSync(
-  contractPath(root, 'libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css'),
+  contractPath(root, 'libs/shared/dana-ui/src/styles/meshforge/foundation/responsive.css'),
   'utf8',
 );
 for (const marker of ['width: 46px', 'height: 56px']) {
@@ -89,4 +89,4 @@ if (!fs.existsSync(contractPath(root, 'libs/manufacturing/assets/brand/README.md
   throw new Error('Shared brand upload/replace instructions are missing.');
 }
 
-console.log('[PASS] Shared file-backed MeshForge branding contract passed across all Gear Apps frontends.');
+console.log('[PASS] Shared file-backed MeshForge branding contract passed across all MeshForge frontends.');

@@ -19,7 +19,7 @@ import {
   MachineCyclesApi,
   MachinesApi,
   MacroLogsApi,
-} from '@gearapps/client/core';
+} from '@meshforge/client/core';
 import {
   DanaComboboxColumn,
   DanaComboboxComponent,
@@ -34,8 +34,8 @@ import {
   EmptyStateComponent,
   StatusBadgeComponent,
   ValueFieldComponent,
-} from '@gearapps/client/ui';
-import { Gearset, LappingSummaryRow, Machine, MachineCycle } from '@gearapps/shared/domain';
+} from '@meshforge/client/ui';
+import { Gearset, LappingSummaryRow, Machine, MachineCycle } from '@meshforge/shared/domain';
 import { catchError, forkJoin, map, of, shareReplay, switchMap } from 'rxjs';
 import {
   fieldValue,

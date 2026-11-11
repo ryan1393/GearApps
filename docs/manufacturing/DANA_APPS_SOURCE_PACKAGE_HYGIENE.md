@@ -1,8 +1,8 @@
-> GearApps 70.3.0 uses one repository workspace. Run `npm run package:release` from the repository root to create `releases/GearApps-70.3.0.zip`. Both legacy PowerShell packaging entry points delegate to `tools/package-release.mjs` at the root and package the complete workspace. The earlier Dana Apps baseline and Robocopy staging notes below are retained as historical context; the current Node packager applies the source and sensitive-file policy directly to archive entries.
+> MeshForge 70.3.0 uses one repository workspace. Run `npm run package:release` from the repository root to create `releases/MeshForge-70.3.0.zip`. Both legacy PowerShell packaging entry points delegate to `tools/package-release.mjs` at the root and package the complete workspace. The earlier Dana Apps baseline and Robocopy staging notes below are retained as historical context; the current Node packager applies the source and sensitive-file policy directly to archive entries.
 
 # Dana Apps Source Package Hygiene
 
-Gear Apps V69.3.5 hardens the source-packaging rules that Dana Apps should carry forward.
+MeshForge V69.3.5 hardens the source-packaging rules that Dana Apps should carry forward.
 
 ## Why
 

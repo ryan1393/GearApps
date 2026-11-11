@@ -11,10 +11,10 @@ const packageJson = JSON.parse(read('package.json'));
 const baseline = read('docs/manufacturing/DANA_MASTER_UI_BASELINE.md');
 const readiness = read('docs/manufacturing/DANA_APPS_GEAR_PREMERGE_READINESS.md');
 const runner = read('tools/manufacturing/run-all-tests.ps1');
-const sharedStyles = read('libs/shared/dana-ui/src/styles/gear-apps.css');
+const sharedStyles = read('libs/shared/dana-ui/src/styles/meshforge.css');
 const gearStyles = read('libs/shared/dana-ui/src/styles/gear-compat-features.css');
 
-must(packageJson.scripts?.['test:gear-apps'], 'package.json is missing authoritative test:gear-apps script.');
+must(packageJson.scripts?.['test:meshforge'], 'package.json is missing authoritative test:meshforge script.');
 
 for (const p of [
   'apps/blade-tracking/project.json',
@@ -22,7 +22,7 @@ for (const p of [
   'apps/greenshed/project.json',
   'apps/server/project.json',
   'libs/shared/dana-ui/src/index.ts',
-  'libs/shared/dana-ui/src/styles/gear-apps.css',
+  'libs/shared/dana-ui/src/styles/meshforge.css',
   'libs/shared/dana-ui/src/styles/gear-compat-features.css',
   'tools/manufacturing/test-dana-master-ui-freeze-contract.mjs',
   'tools/manufacturing/test-dana-apps-premerge-contract.mjs',
@@ -32,8 +32,8 @@ for (const p of [
 
 const serverProject = JSON.parse(read('apps/server/project.json'));
 must(
-  serverProject.name === 'gear-app-server' || read('apps/server/project.json').includes('"gear-app-server"'),
-  'apps/server must remain the Gear backend Nx project (gear-app-server) during pre-merge.'
+  serverProject.name === 'meshforge-server' || read('apps/server/project.json').includes('"meshforge-server"'),
+  'apps/server must remain the Gear backend Nx project (meshforge-server) during pre-merge.'
 );
 
 for (const project of ['blade-tracking', 'cutter-builder', 'greenshed']) {
@@ -69,9 +69,9 @@ for (const marker of [
 }
 
 for (const marker of [
-  'Gear Apps V69.3.0R1 marks the Gear side as ready',
-  '`apps/server` (Nx project name remains `gear-app-server` for now)',
-  '`npm run test:gear-apps` remains the authoritative Gear regression gate',
+  'MeshForge V69.3.0R1 marks the Gear side as ready',
+  '`apps/server` (Nx project name remains `meshforge-server` for now)',
+  '`npm run test:meshforge` remains the authoritative Gear regression gate',
   'Gear database/schema/data remain separate from Truck Log',
   'The future monorepo may contain Truck Log paths',
 ]) {

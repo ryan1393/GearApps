@@ -1,7 +1,7 @@
 import { ServiceUnavailableException } from '@nestjs/common';
 import { TerminusModule, TypeOrmHealthIndicator } from '@nestjs/terminus';
 import { Test, TestingModule } from '@nestjs/testing';
-import { GEAR_APPS_VERSION } from '@gearapps/manufacturing/shared/util-constants';
+import { MESHFORGE_VERSION } from '@meshforge/manufacturing/shared/util-constants';
 import { ServerFeatureHealthController } from './server-feature-health.controller';
 
 describe('ServerFeatureHealthController', () => {
@@ -21,7 +21,7 @@ describe('ServerFeatureHealthController', () => {
   afterEach(async () => module.close());
 
   it('reports liveness without requiring a database connection', () => {
-    expect(controller.live()).toEqual({ status: 'ok', service: 'gear-app-server', version: GEAR_APPS_VERSION });
+    expect(controller.live()).toEqual({ status: 'ok', service: 'meshforge-server', version: MESHFORGE_VERSION });
     expect(pingCheck).not.toHaveBeenCalled();
   });
   it('checks database readiness through the public Terminus service', async () => {

@@ -30,14 +30,14 @@ for(const marker of [
 }
 
 for(const marker of [
-  'GEAR_APP_EDIT_METADATA_KEY',
-  'canEditGearApp(app, user.role, user.departmentCode)',
+  'MESHFORGE_APP_EDIT_METADATA_KEY',
+  'canEditMeshForgeApp(app, user.role, user.departmentCode)',
   'View-only access:',
-  'GEAR_APP_EDITOR_DEPARTMENT_NAMES[app]',
+  'MESHFORGE_APP_EDITOR_DEPARTMENT_NAMES[app]',
 ]){
   if(!roleGuard.includes(marker)) throw new Error(`RolesGuard missing department enforcement marker ${marker}`);
 }
-if(!decorator.includes('SetMetadata(GEAR_APP_EDIT_METADATA_KEY, app)')){
+if(!decorator.includes('SetMetadata(MESHFORGE_APP_EDIT_METADATA_KEY, app)')){
   throw new Error('DepartmentAppEdit must be metadata-only so RolesGuard enforces it after JWT auth.');
 }
 
@@ -49,8 +49,8 @@ for(const marker of ['departmentId','departmentCode','departmentDescription']){
 }
 
 for(const marker of [
-  "departmentEditorGuard(app: GearAppKey)",
-  "canEditGearApp(app, user.role, user.departmentCode)",
+  "departmentEditorGuard(app: MeshForgeAppKey)",
+  "canEditMeshForgeApp(app, user.role, user.departmentCode)",
   "queryParams: { viewOnly: '1' }",
   'adminRoleGuard',
 ]){

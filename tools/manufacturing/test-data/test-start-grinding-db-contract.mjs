@@ -14,7 +14,7 @@ const c=new Client({host:env.DATABASE_HOST,port:Number(env.DATABASE_PORT),user:e
 await c.connect();
 try{
   await c.query('begin');
-  const user=(await c.query(`select id from users where lower(email)=lower('test@gearapps.local') and active=true limit 1`)).rows[0];
+  const user=(await c.query(`select id from users where lower(email)=lower('test@meshforge.local') and active=true limit 1`)).rows[0];
   if(!user) throw new Error('Dedicated E2E user does not exist.');
   const tray=(await c.query(`
     select t.id

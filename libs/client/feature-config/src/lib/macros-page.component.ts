@@ -15,10 +15,10 @@ import {
   DanaTableEmptyDirective,
   DanaTableShellDirective,
 } from '@dana/ui';
-import { LapperAccess, loadable, MacrosApi, ToastService } from '@gearapps/client/core';
-import { summaryPlacement } from '@gearapps/client/feature-lapping-summary';
-import { StatusBadgeComponent } from '@gearapps/client/ui';
-import { Macro } from '@gearapps/shared/domain';
+import { LapperAccess, loadable, MacrosApi, ToastService } from '@meshforge/client/core';
+import { summaryPlacement } from '@meshforge/client/feature-lapping-summary';
+import { StatusBadgeComponent } from '@meshforge/client/ui';
+import { Macro } from '@meshforge/shared/domain';
 import { MacroFormDialogComponent } from './macro-form-dialog.component';
 import { MACRO_FORM_OPTIONS } from './options';
 

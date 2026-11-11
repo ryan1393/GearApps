@@ -12,7 +12,7 @@ import {
   CutterEventOrmEntity,
   CutterMachineRunOrmEntity,
   MachineOrmEntity,
-} from '@gearapps/manufacturing/server/data-access';
+} from '@meshforge/manufacturing/server/data-access';
 import {
   NotFoundException,
   UnprocessableEntityException,

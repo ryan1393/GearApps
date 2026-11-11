@@ -38,7 +38,7 @@ import {
   UpdateScannerSerialNumbers,
   UpdateSummary,
   UpdateTypeOfCheck,
-} from '@gearapps/shared/domain';
+} from '@meshforge/shared/domain';
 import { ApiProperty, ApiPropertyOptional, OmitType, PartialType, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {

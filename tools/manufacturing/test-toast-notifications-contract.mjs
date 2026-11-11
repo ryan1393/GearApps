@@ -11,8 +11,8 @@ const compatService = read('libs/manufacturing/frontend/util-common/src/lib/toas
 const compatHost = read('libs/manufacturing/frontend/util-common/src/lib/toast/gear-toast-host.component.ts');
 const danaService = readDanaUiSource(root, 'lib/components/feedback/dana-toast.service.ts');
 const danaHost = readDanaUiSource(root, 'lib/components/feedback/dana-toast-host.component.ts');
-const sharedCss = read('libs/shared/dana-ui/src/styles/gear-apps.css');
-const toastCss = read('libs/shared/dana-ui/src/styles/gear-apps/components/toast.css');
+const sharedCss = read('libs/shared/dana-ui/src/styles/meshforge.css');
+const toastCss = read('libs/shared/dana-ui/src/styles/meshforge/components/toast.css');
 const utilIndex = read('libs/manufacturing/frontend/util-common/src/index.ts');
 const danaIndex = readDanaUiSource(root, 'index.ts');
 
@@ -36,7 +36,7 @@ assert(danaHost.includes("selector: 'dana-toast-host, gear-toast-host'"), 'Dana 
 assert(danaHost.includes('aria-live="polite"'), 'Dana toast host must announce notifications accessibly.');
 assert(danaIndex.includes('DanaToastService') && danaIndex.includes('DanaToastHostComponent'), 'Dana UI barrel must export the toast API.');
 
-assert(sharedCss.includes("@import './gear-apps/components/toast.css';"), 'Gear compatibility stylesheet must continue importing toast CSS during migration.');
+assert(sharedCss.includes("@import './meshforge/components/toast.css';"), 'Gear compatibility stylesheet must continue importing toast CSS during migration.');
 assert(toastCss.includes('position: fixed;') && toastCss.includes('pointer-events: none;'), 'Toast stack must overlay without page reflow.');
 assert(utilIndex.includes("export * from './lib/toast';"), 'Toast compatibility API must be exported by frontend util-common.');
 
@@ -83,8 +83,8 @@ assert(!legacyDirective.includes("this.action === 'create'"), 'Upsert toast logi
   }
 }
 
-const brandCss = read('libs/shared/dana-ui/src/styles/gear-apps/layout/brand.css');
-const responsiveCss = read('libs/shared/dana-ui/src/styles/gear-apps/foundation/responsive.css');
+const brandCss = read('libs/shared/dana-ui/src/styles/meshforge/layout/brand.css');
+const responsiveCss = read('libs/shared/dana-ui/src/styles/meshforge/foundation/responsive.css');
 assert(/dana-diamond-mark[\s\S]*?width:\s*40px;[\s\S]*?height:\s*48px;/.test(brandCss), 'Normal MeshForge brand mark must remain 40x48.');
 assert(/dana-diamond-mark[\s\S]*?width:\s*46px;[\s\S]*?height:\s*56px;/.test(responsiveCss), 'Large-screen MeshForge brand mark must remain 46x56.');
 

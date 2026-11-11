@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { ScannerCommand, ScannerLogEntry, ScannerSummary } from '@gearapps/shared/domain';
+import { ScannerCommand, ScannerLogEntry, ScannerSummary } from '@meshforge/shared/domain';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from './api-config';
 

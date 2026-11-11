@@ -1,11 +1,11 @@
-/* Gear Apps side tables for DSF cutter counts. Never run against the DSF source.
+/* MeshForge side tables for DSF cutter counts. Never run against the DSF source.
  *
  * Additive and idempotent: the same definitions as the original DSF migrations
  * (cutter ledger V1, Admin machine mapping V2), so a database that already has them is left
  * exactly as it is and its mappings, seeds and per-run/per-shift ledger are preserved.
  * Created only when the DSF reader is switched on.
  */
-import { STARTUP_SCHEMA_LOCK_SQL } from '@gearapps/manufacturing/shared/util-constants';
+import { STARTUP_SCHEMA_LOCK_SQL } from '@meshforge/manufacturing/shared/util-constants';
 
 interface SchemaQuery {
   query(sql: string, parameters?: unknown[]): Promise<unknown>;
@@ -98,9 +98,9 @@ export async function ensureDsfCutterSchema(database: SchemaDatabase): Promise<v
     await manager.query(STARTUP_SCHEMA_LOCK_SQL);
     const guard = await manager.query(
       `SELECT to_regclass('public.machines') IS NOT NULL AND to_regclass('public.cutter_machine_runs') IS NOT NULL
-         AND to_regclass('public.tbl_whiteboard_cycles_master') IS NULL AS is_gear_apps`,
-    ) as Array<{ is_gear_apps: boolean }>;
-    if (guard[0]?.is_gear_apps !== true) throw new Error('DSF tables can only be created in the MeshForge database.');
+         AND to_regclass('public.tbl_whiteboard_cycles_master') IS NULL AS is_meshforge`,
+    ) as Array<{ is_meshforge: boolean }>;
+    if (guard[0]?.is_meshforge !== true) throw new Error('DSF tables can only be created in the MeshForge database.');
     for (const sql of DSF_CUTTER_SCHEMA_SQL) await manager.query(sql);
     const columns = await manager.query(
       `SELECT table_name, string_agg(column_name, ',' ORDER BY ordinal_position) AS columns

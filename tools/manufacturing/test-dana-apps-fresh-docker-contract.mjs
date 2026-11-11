@@ -19,7 +19,7 @@ const transfer = read('commands/TRANSFER-DANA-APPS-TO-DOCKER.cmd');
 
 must(!fs.existsSync(contractPath(root, 'docker-compose.yml')), 'compose.yml must be the only authoritative root Compose file.');
 must(compose.includes('name: dana-apps'), 'Compose project name must be dana-apps.');
-for (const service of ['dana-postgres:', 'gear-db-bootstrap:', 'gear-base-data-bootstrap:', 'gear-app-server:', 'blade-tracking:', 'cutter-builder:', 'greenshed:']) {
+for (const service of ['dana-postgres:', 'gear-db-bootstrap:', 'gear-base-data-bootstrap:', 'meshforge-server:', 'blade-tracking:', 'cutter-builder:', 'greenshed:']) {
   must(compose.includes(service), `Fresh-host Compose missing ${service}`);
 }
 must(!compose.includes('external:'), 'Fresh-host Gear volume must not require a pre-existing external Docker volume.');

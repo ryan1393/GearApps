@@ -8,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { EventSubscriber } from 'typeorm';
 
-import { AuthProviderType } from '@gearapps/manufacturing/shared/util-types';
+import { AuthProviderType } from '@meshforge/manufacturing/shared/util-types';
 import { BadRequestException, Logger } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 

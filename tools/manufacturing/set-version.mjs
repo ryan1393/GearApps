@@ -27,7 +27,7 @@ export function setReleaseVersion(root, next) {
   };
   edit(
     'libs/shared/domain/src/lib/app-version.ts',
-    /(GEAR_APPS_VERSION\s*=\s*['"])[^'"]+(['"])/,
+    /(MESHFORGE_VERSION\s*=\s*['"])[^'"]+(['"])/,
     (_all, a, b) => a + next + b,
   );
   edit(
@@ -42,7 +42,7 @@ export function setReleaseVersion(root, next) {
   );
   edit(
     'README.md',
-    /(# GearApps )\d+\.\d+\.\d+/,
+    /(# MeshForge )\d+\.\d+\.\d+/,
     (_all, prefix) => prefix + next,
   );
   edit(
@@ -52,7 +52,7 @@ export function setReleaseVersion(root, next) {
   );
   edit(
     'docs/manufacturing/README.md',
-    /(# Gear Apps )\d+\.\d+\.\d+/,
+    /(# MeshForge )\d+\.\d+\.\d+/,
     (_all, prefix) => prefix + next,
   );
   for (const [file, value] of staged)

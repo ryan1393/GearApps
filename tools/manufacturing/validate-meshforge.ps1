@@ -11,7 +11,7 @@ function Invoke-NativeChecked {
     }
 }
 
-Write-Host "=== Gear Apps validation ===" -ForegroundColor Cyan
+Write-Host "=== MeshForge validation ===" -ForegroundColor Cyan
 $env:NX_DAEMON = 'false'
 $env:NX_ISOLATE_PLUGINS = 'false'
 
@@ -19,7 +19,7 @@ $env:NX_ISOLATE_PLUGINS = 'false'
 # deleting the repo's shared .nx\workspace-data tree. VS Code/Nx processes may
 # legitimately hold that directory open, which previously caused EPERM and
 # aborted an otherwise-good release validation.
-$NxValidationRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("gear-apps-nx-validation-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
+$NxValidationRoot = Join-Path ([System.IO.Path]::GetTempPath()) ("meshforge-nx-validation-{0}-{1}" -f $PID, [guid]::NewGuid().ToString('N'))
 $env:NX_WORKSPACE_DATA_DIRECTORY = Join-Path $NxValidationRoot 'workspace-data'
 $env:NX_CACHE_DIRECTORY = Join-Path $NxValidationRoot 'cache'
 New-Item -ItemType Directory -Path $env:NX_WORKSPACE_DATA_DIRECTORY -Force | Out-Null
@@ -27,13 +27,13 @@ New-Item -ItemType Directory -Path $env:NX_CACHE_DIRECTORY -Force | Out-Null
 Write-Host "[NX] Isolated validation workspace: $NxValidationRoot" -ForegroundColor DarkGray
 
 try {
-    Invoke-NativeChecked '[1/4] Building server...' { npx nx build gear-app-server }
+    Invoke-NativeChecked '[1/4] Building server...' { npx nx build meshforge-server }
     Invoke-NativeChecked '[2/4] Building Blade Tracking...' { npx nx build blade-tracking }
     Invoke-NativeChecked '[3/4] Building Cutter Builder...' { npx nx build cutter-builder }
     Invoke-NativeChecked '[4/4] Building Green Shed...' { npx nx build greenshed }
 
     Write-Host ""
-    Write-Host '[PASS] All four Gear Apps projects built successfully using isolated Nx validation state.' -ForegroundColor Green
+    Write-Host '[PASS] All four MeshForge projects built successfully using isolated Nx validation state.' -ForegroundColor Green
     exit 0
 }
 finally {

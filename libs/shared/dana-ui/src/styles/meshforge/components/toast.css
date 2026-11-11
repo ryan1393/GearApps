@@ -1,4 +1,4 @@
-/* Gear Apps global toast notifications. Fixed overlay: no page reflow. */
+/* MeshForge global toast notifications. Fixed overlay: no page reflow. */
 .gear-toast-stack {
   position: fixed;
   top: calc(var(--gear-topbar-height) + 16px);
