@@ -16,6 +16,9 @@ export class CoaterShipmentsApiService {
   review(s: CoaterShipment) { return this.http.post<CoaterShipment>(`${this.url}/${s.id}/review`,{revision:s.revision}); }
   print(s: CoaterShipment) { return this.http.post<CoaterPackingSlip>(`${this.url}/${s.id}/print`,{revision:s.revision}); }
   labels(s: CoaterShipment) { return this.http.post<CoaterPackingSlip>(`${this.url}/${s.id}/labels`,{revision:s.revision}); }
+  prepareRpa(s: CoaterShipment, po: string) { return this.http.post<CoaterShipment>(`${this.url}/${s.id}/rpa`,{revision:s.revision,po:po.trim() || undefined}); }
+  rpaWorkbook(s: CoaterShipment) { return this.http.get(`${this.url}/${s.id}/rpa/${s.revision}/workbook`,{responseType:'blob'}); }
+  emailRpa(s: CoaterShipment) { return this.http.post<CoaterShipment>(`${this.url}/${s.id}/rpa/email`,{revision:s.revision}); }
   dispatch(s: CoaterShipment) { return this.http.post<CoaterShipment>(`${this.url}/${s.id}/dispatch`,{revision:s.revision,printed_and_checked:true}); }
   cancel(s: CoaterShipment,reason: string) { return this.http.post<CoaterShipment>(`${this.url}/${s.id}/cancel`,{revision:s.revision,reason}); }
 }

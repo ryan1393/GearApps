@@ -54,6 +54,29 @@
     <section *ngIf="confirmSend" class="gear-panel send-confirm" role="region" aria-label="Confirm shipment dispatch"><h3>Send {{s.number}} to Coater?</h3><p>{{s.manifest.totals.containers}} containers · {{s.manifest.totals.trays}} trays · {{s.manifest.totals.blades}} blades · {{s.destination}}</p><p>This records departure and locks the shipment. It cannot be undone with Cancel Last Transaction.</p><label class="check"><input type="checkbox" [(ngModel)]="checked" [disabled]="busy" /> I printed revision {{s.revision}} and checked it against the physical containers.</label><div class="actions"><button type="button" (click)="confirmSend=false" [disabled]="busy">Back</button><button class="primary" type="button" (click)="send()" [disabled]="!checked || !canSend">Confirm Send to Coater</button></div></section>
     <section *ngIf="cancelOpen" class="gear-panel cancel-panel"><label>Reason for canceling this draft<textarea [(ngModel)]="cancelReason" maxlength="1000" [disabled]="busy"></textarea></label><p>Containers stay packed. Canceling the draft releases them for another shipment.</p><button type="button" (click)="cancel()" [disabled]="!canEdit || !cancelReason.trim()">Confirm cancel draft</button></section>
     <section *ngIf="s.status==='DISPATCHED'" class="gear-panel dispatched"><h3>Shipment dispatched</h3><p>{{time(s.dispatched_at!)}} ET · {{s.dispatched_by}}. Contents are preserved as sent.</p><div class="actions"><button type="button" (click)="print()" [disabled]="!canPrint">Reprint packing slip</button><button type="button" (click)="print(true)" [disabled]="!canPrint">Reprint container labels</button><a routerLink="/blades/receive-container">Receive returned trays</a></div></section>
+    <ng-container *ngIf="s.rpa as rpa">
+      <section *ngIf="rpa.request || (rpa.configured && s.status !== 'CANCELED')" class="gear-panel details-panel" aria-label="Coater RPA">
+        <h3>RPA{{rpa.coater_name ? ' · ' + rpa.coater_name : ''}}</h3>
+        <ng-container *ngIf="rpa.request as request; else prepareRpaForm">
+          <p>RPA {{request.number}} · PO {{request.po}} · Email {{request.email_status.toLowerCase()}}</p>
+          <div class="actions">
+            <button type="button" (click)="downloadRpa()" [disabled]="busy">Download RPA workbook</button>
+            <button *ngIf="canEmailRpa && !confirmRpaEmail" type="button" (click)="confirmRpaEmail=true">{{request.email_status === 'FAILED' ? 'Retry RPA email' : 'Email RPA'}}</button>
+          </div>
+          <div *ngIf="confirmRpaEmail">
+            <p>Send RPA {{request.number}} to {{request.recipient_count}} saved {{request.recipient_count === 1 ? 'recipient' : 'recipients'}}?</p>
+            <div class="actions"><button type="button" [disabled]="busy" (click)="confirmRpaEmail=false">Back</button><button type="button" [disabled]="!canEmailRpa" (click)="emailRpa()">Confirm RPA email</button></div>
+          </div>
+          <p *ngIf="request.email_status === 'UNKNOWN'">Delivery is unconfirmed. Check with the recipient before sending the workbook again.</p>
+        </ng-container>
+        <ng-template #prepareRpaForm>
+          <label>Purchase order<input [(ngModel)]="rpaPo" [placeholder]="rpa.default_po ?? ''" maxlength="80" [disabled]="!canPrint" /></label>
+          <p *ngIf="rpa.default_po">Default PO {{rpa.default_po}}</p>
+          <p *ngIf="s.status === 'DRAFT' && !s.reviewed">Review this shipment to prepare its RPA.</p>
+          <button type="button" (click)="prepareRpa()" [disabled]="!canPrepareRpa">Prepare RPA</button>
+        </ng-template>
+      </section>
+    </ng-container>
     <details class="gear-panel audit"><summary>Shipment history ({{s.events.length}} {{s.events.length === 1 ? 'event' : 'events'}})</summary><ul><li *ngFor="let e of s.events"><strong>{{e.kind.split('_').join(' ')}}</strong> · Rev {{e.revision}} · {{time(e.at)}} ET · {{e.actor}}<p *ngIf="e.detail">{{e.detail}}</p></li></ul></details>
   </ng-container>
   <ng-template #shipmentList>

@@ -41,6 +41,18 @@ export class ServerUtilMailerService {
     }
   }
 
+  get enabled(): boolean {
+    return this.cfgService.enabled;
+  }
+
+  async sendAttachment(options: SendMailOptions): Promise<{ accepted?: string[]; rejected?: string[] }> {
+    if (!this.enabled) throw new Error('Email is disabled.');
+    return this.transporter.sendMail({
+      ...options,
+      from: options.from ?? `"${this.cfgService.defaultName}" <${this.cfgService.defaultEmail}>`,
+    });
+  }
+
   async sendMail({
     templatePath,
     context,

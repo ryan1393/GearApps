@@ -42,7 +42,21 @@ export interface CoaterShipment {
   reviewed: boolean;
   print_requested: boolean;
   changed: boolean;
+  rpa?: CoaterRpaState;
   events: Array<{ kind: string; revision: number; at: string; actor: string; detail: string }>;
+}
+
+export interface CoaterRpaState {
+  configured: boolean;
+  coater_name: string | null;
+  default_po: string | null;
+  email_enabled: boolean;
+  request: {
+    number: number;
+    po: string;
+    email_status: 'PENDING' | 'SENDING' | 'SENT' | 'FAILED' | 'UNKNOWN';
+    recipient_count: number;
+  } | null;
 }
 export interface CoaterAvailableContainer {
   id: string;
