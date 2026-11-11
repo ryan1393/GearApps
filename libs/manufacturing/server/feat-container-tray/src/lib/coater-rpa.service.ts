@@ -92,8 +92,9 @@ export class CoaterRpaService {
       const summary = tray.summary.trim().toUpperCase();
       const mapping = mappings.get(JSON.stringify([summary, tray.part_type]));
       if (!mapping) throw new ConflictException(`No RPA part mapping for ${summary} ${tray.part_type}.`);
-      const per_side = tray.count / 2;
-      if (!Number.isInteger(per_side) || per_side < 1) throw new ConflictException(`Tray ${tray.serial} does not have a complete inner and outer set.`);
+      // Tray quantities count matched sets: 13 means 13 inner AND 13 outer blades.
+      const per_side = tray.count;
+      if (!Number.isSafeInteger(per_side) || per_side < 1) throw new ConflictException(`Tray ${tray.serial} does not have a valid inner and outer set count.`);
       const key = JSON.stringify([summary, tray.part_type, per_side]);
       const line = lines.get(key);
       if (line) line.trays++;

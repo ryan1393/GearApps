@@ -34,4 +34,4 @@ Keep the normal workstation focused on scanning. Additional fields appear only w
 
 ## Existing work in this PR
 
-See [UI and Lapper improvements](UI_AND_LAPPER_IMPROVEMENTS.md) for implemented changes and verification. The current Cycle Test Lab validates configured Lapper macros and persists simulations; it is not yet the shared workflow-rule test engine described above. DSF supports all machine types and individual grinder history is implemented, but live plant connectivity still needs validation. RPA packing-to-Excel remains deferred until its workbook/template is identified.
+See [UI and Lapper improvements](UI_AND_LAPPER_IMPROVEMENTS.md) for implemented changes and verification. The current Cycle Test Lab validates configured Lapper macros and persists simulations; it is not yet the shared workflow-rule test engine described above. DSF supports all machine types and individual grinder history is implemented, but live plant connectivity still needs validation. The Coater RPA workbook workflow and import tool from PR #20 are integrated; the actual dump, workbook settings and saved recipients remain on the server.

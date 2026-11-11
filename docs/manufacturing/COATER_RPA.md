@@ -15,3 +15,5 @@ Omit `--container` if `pg_restore` and `psql` are installed locally. Add `--appl
 In **Blade Tracking → Coater Shipments**, open a reviewed shipment and select **Prepare RPA**. Enter a PO to override the configured default. The default expires at the end of its configured date in Indianapolis. The RPA uses the saved workbook layout and the part mappings for the shipment’s trays. Each shipment revision has one saved request.
 
 Download the Excel workbook or use **Email RPA** with the API’s existing SMTP configuration. A failed request can be retried explicitly. If delivery is unconfirmed, check with the recipient before sending a copy. Coater dispatch and RPA email are separate operator actions.
+
+Tray counts represent matched inner/outer sets. A tray count of 13 produces 13 inner blades and 13 outer blades on the RPA; two such trays produce 26 of each. The exporter preserves that count per side and does not divide it by two.
