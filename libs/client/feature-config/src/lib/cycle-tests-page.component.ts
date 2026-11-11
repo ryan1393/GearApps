@@ -177,6 +177,17 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
           />
           <small class="gear-field-help">A real cycle sends its consec number.</small>
         </label>
+        <label class="gear-field"
+          >Cycle time (seconds)<input
+            class="gear-input"
+            type="number"
+            name="cycleTime"
+            min="0"
+            step="any"
+            [(ngModel)]="cycleTime"
+          />
+          <small class="gear-field-help">Sent as floatData[0]. A real cycle sends the time the lapper was in cycle; empty sends 0.</small>
+        </label>
       </div>
       <details class="cycle-test-details">
         <summary>Argonaut macro values · {{ argonautFilled() }} of {{ argonautMacros.length }} entered, the rest are sent as 0</summary>
@@ -324,6 +335,7 @@ export class CycleTestsPageComponent implements OnInit {
   protected argonautUrl = '';
   protected argonautLocation = '';
   protected sequence: number | null = 1;
+  protected cycleTime: number | null = null;
   protected readonly argonautMacros = ARGONAUT_MACROS;
   protected readonly argonautBusy = signal(false);
   protected readonly argonautError = signal('');
@@ -376,7 +388,9 @@ export class CycleTestsPageComponent implements OnInit {
   }
   protected argonautReady(): boolean {
     const sequence = this.sequence;
-    return !!this.machineId && !!this.gearsetId && !!this.serial.trim() && typeof sequence === 'number' && Number.isInteger(sequence) && sequence >= 0;
+    const cycleTime = this.cycleTime;
+    const cycleTimeValid = cycleTime === null || cycleTime === undefined || (typeof cycleTime === 'number' && Number.isFinite(cycleTime) && cycleTime >= 0 && cycleTime <= 86400);
+    return !!this.machineId && !!this.gearsetId && !!this.serial.trim() && typeof sequence === 'number' && Number.isInteger(sequence) && sequence >= 0 && cycleTimeValid;
   }
   private argonautInput(): ArgonautTestInput {
     const values = Object.fromEntries(
@@ -386,6 +400,7 @@ export class CycleTestsPageComponent implements OnInit {
       machine_id: this.machineId, gearset_id: this.gearsetId, serial_number: this.serial.trim(), sequence: this.sequence ?? 0, values,
       ...(this.argonautUrl.trim() ? { url: this.argonautUrl.trim() } : {}),
       ...(this.argonautLocation.trim() ? { location_id: this.argonautLocation.trim() } : {}),
+      ...(typeof this.cycleTime === 'number' && Number.isFinite(this.cycleTime) ? { cycle_time_s: this.cycleTime } : {}),
     };
   }
   private previewRequest() {
