@@ -13,6 +13,10 @@ export interface CollectorMachine {
   phase: string | null;
   last_sample_at?: string | null;
   pending_runs?: number;
+  /** Times the worker has been restarted since the collector started. */
+  restarts?: number;
+  /** Why the worker last stopped, as a short category (set while it is restarting). */
+  problem?: string | null;
   /** 'none' when no Active scanner is assigned; 'offline' scanners are pinged and retried. */
   scanner?: 'online' | 'offline' | 'none' | null;
   scanner_ping?: 'answers' | 'no answer' | 'unknown' | null;
