@@ -1,6 +1,91 @@
 /* @dana/ui Gear compatibility: overrides Gear Apps applies on top of the Dana core while it
    migrates (formerly Gear's libs/gear/ui/src/styles/dana-ui-migration.css). Load LAST, after
    dana-ui.css. Temporary migration debt; Truck Log must not import it. */
+/* BEGIN MESHFORGE THEME FOR THE DANA CORE
+   The Dana core (dana-core/*.css) stays identical to its Truck Log visual source. These rules repeat
+   its selectors with only the colour declarations changed, so Gear Apps gets the MeshForge palette.
+   Informational blue, success and danger colours are intentionally not overridden. */
+:root { --dana-text:#303743; --dana-muted:#707886; --dana-border:#e3e5e8; --dana-page:#f6f7f8; --dana-warning:#8d6a07; --dana-primary:#b4581a; --dana-primary-dark:#232830; --dana-sidebar:#14171c; --dana-sidebar-raised:#232830; --dana-shadow-panel:0 1px 2px rgba(21, 24, 29, .035), 0 5px 18px rgba(21, 24, 29, .045); --dana-shadow-raised:0 12px 30px rgba(21, 24, 29, .10); --dana-neutral-soft:#f3f4f5; --dana-control-border:#d6d8dc; --dana-placeholder:#818996; --dana-focus-border:#ed9959; --dana-focus-ring:0 0 0 3px rgba(170,84,19,.12); }
+.dana-sidebar { background: radial-gradient(circle at 12% 8%,rgba(202,100,22,.28),transparent 34%), linear-gradient(180deg,var(--dana-sidebar-raised),var(--dana-sidebar)); }
+.dana-brand-copy span, .dana-brand-copy small { color: #c2c6cc; }
+.dana-nav-heading { color: #8e95a0; }
+.dana-side-link { color: #e1e3e6; }
+.dana-nav-dot { background: #ea8a41; }
+.dana-sidebar-footer { color: #b5bac1; }
+.dana-global-search input { background: #f9fafa; }
+.dana-avatar { background: #e5e7ea; }
+.dana-btn:hover:not(:disabled) { background: #f9fafa; }
+.dana-btn-ghost { background: #f9fafa; }
+.dana-operation-card:hover { border-color: #cfd2d7; }
+.dana-field input, .dana-field select, .dana-field textarea, .dana-input, .dana-select, .dana-textarea { border: 1px solid #d6d8dc; }
+.dana-field input:focus, .dana-field select:focus, .dana-field textarea:focus, .dana-input:focus, .dana-select:focus, .dana-textarea:focus { border-color: #ed9959; box-shadow: 0 0 0 3px rgba(170,84,19,.10); }
+.dana-section-title { color: #3b4352; }
+table[danaTable] th, table.dana-table th { background: #fcfcfc; }
+table[danaTable] td, table.dana-table td { border-bottom: 1px solid #f0f1f2; }
+table[danaTable] tbody tr:hover td, table.dana-table tbody tr:hover td { background: #fdfdfd; }
+.dana-status-badge, [danaStatusBadge], .dana-count-badge, [danaCountBadge] { background: #f2f3f5; color: #aa5413; }
+.dana-loading-state, [danaLoadingState], .dana-empty-state, [danaEmptyState] { border: 1px dashed #cfd2d7; background: #f9fafa; }
+.dana-dialog-backdrop { background: rgba(27,31,37,.46); }
+.dana-toast-close:hover { background: #f5f6f7; }
+:where(dialog.dana-confirm-dialog)::backdrop { background: rgba(27,31,37,.46); }
+.dana-combobox-input:disabled { background: #f5f6f7; }
+.dana-combobox-toggle:hover, .dana-combobox-clear:hover { background: #f3f4f5; }
+.dana-combobox-head { background: #fcfcfc; }
+.dana-combobox-option.is-active { background: #f2f3f5; }
+.dana-combobox-option.is-selected { background: #f6f7f8; }
+.dana-combobox-option.is-active.is-selected { background: #ecedf0; }
+.dana-action-row { border-bottom: 1px solid #f0f1f2; }
+.dana-card[data-tone="warning"] { border-left-color: #cca025; }
+.dana-card-section { background: #f9fafa; }
+.dana-progress { background: #e7e8eb; }
+.dana-chip { color: #545a64; }
+.dana-chip[data-tone="warning"] { color: #745605; }
+.dana-pill-button { color: #545a64; }
+.login-page { background:#f1f2f4; color:#1c2027; }
+.login-brand-panel { background:radial-gradient(circle at 18% 12%,rgba(214,101,14,.28),transparent 28rem),linear-gradient(145deg,#1a1e24 0%,#262b34 55%,#303742 100%); }
+.login-suite { color:#c5c9cf; }
+.login-eyebrow { color:#f59d5b; }
+.login-brand-copy p { color:#cbcfd4; }
+.login-status { color:#c3c7cd; }
+.login-card { border:1px solid #e1e3e7; box-shadow:0 22px 60px rgba(38,43,53,.12); }
+.login-mobile-brand { color:#262b34; }
+.login-kicker { color:#b75b14; }
+.login-card-heading h2 { color:#1c2027; }
+.login-card-heading p { color:#6e7684; }
+.local-test-card { border:1px solid #e4e6e9; background:#f8f9f9; color:#3d4554; }
+.local-test-card span { color:#6b7381; }
+.local-test-card button { color:#aa5413; }
+.field-label { color:#38404d; }
+.password-help { color:#9ca2ac; }
+.field-input { border:1px solid #d2d5da; color:#1c2027; }
+.field-input::placeholder { color:#a0a6b0; }
+.field-input:focus { border-color:#c76316; box-shadow:0 0 0 3px rgba(199,99,22,.14); }
+.login-submit { background:linear-gradient(180deg,#b4581a,#964511); box-shadow:0 9px 20px rgba(57,65,79,.18); }
+.login-submit:hover { background:linear-gradient(180deg,#aa5413,#aa5413); }
+.login-footer { border-top:1px solid #eff0f2; color:#89909d; }
+.login-notice { color:#4f545e; }
+.login-operator-link a { color:#aa5413; }
+.login-submit:focus-visible,.login-operator-link a:focus-visible { outline:3px solid #c76316; }
+.login-footer a:focus-visible { outline:3px solid #c76316; }
+@media screen {
+  .dana-wall { --dana-wall-text: #2a2f39; --dana-wall-muted: #585e69; --dana-wall-border: #d2d5da; --dana-wall-accent: #424b5b; background: #f0f1f3; }
+  .dana-wall-status[data-tone="warning"] { border-color: #886b19; color: #594713; }
+  .dana-wall-note { color: #594713; }
+  .dana-wall-card { border-left: 6px solid #707886; }
+  .dana-wall-card[data-tone="warning"] { border-left-color: #9e770a; }
+  .dana-wall-card.is-compact { border-left-color: #a98520; }
+  .dana-wall-card.is-summary { border-left-color: #676f7c; }
+  .dana-wall-badge { border: 1px solid #b6bbc2; }
+  .dana-wall-badge[data-tone="warning"] { color: #71560c; }
+  .dana-wall-status-text { color: #6f540b; }
+  .dana-wall-facts { border-top: 1px solid #e5e6e9; }
+  .dana-wall-table th { background: #e5e7ea; color: #353c49; }
+  .dana-wall-table tr[data-tone="warning"] td:first-child { box-shadow: inset 5px 0 #9e770a; }
+  .dana-wall-table td > [data-tone="warning"] { color: #71560c; }
+}
+.login-mobile-mark { width: 28px; height: 34px; }
+/* END MESHFORGE THEME FOR THE DANA CORE */
+
 /* Dana Apps -> @dana/ui 0.2 migration bridge.
    Truck Log is the visual source of truth.
    Existing Gear HTML/classes stay unchanged so established behavior and tests

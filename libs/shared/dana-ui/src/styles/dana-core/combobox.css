@@ -34,7 +34,7 @@
 }
 
 .dana-combobox-input:disabled {
-  background: #f5f6f7;
+  background: #f4f6f9;
   color: var(--dana-muted);
   cursor: not-allowed;
 }
@@ -59,7 +59,7 @@
 .dana-combobox-toggle { right: 6px; }
 .dana-combobox-clear { right: 34px; font-size: 18px; line-height: 1; }
 .dana-combobox-toggle:hover,
-.dana-combobox-clear:hover { background: #f3f4f5; color: var(--dana-text); }
+.dana-combobox-clear:hover { background: #f1f4f8; color: var(--dana-text); }
 
 .dana-combobox-toggle span {
   width: 8px;
@@ -99,7 +99,7 @@
 .dana-combobox-head {
   min-height: 34px;
   border-bottom: 1px solid var(--dana-border);
-  background: #fcfcfc;
+  background: #fbfcfe;
   color: var(--dana-muted);
   font-size: 11px;
   font-weight: 800;
@@ -134,9 +134,9 @@
 }
 
 .dana-combobox-option > span:first-child { font-weight: 700; }
-.dana-combobox-option.is-active { background: #f2f3f5; }
-.dana-combobox-option.is-selected { border-left-color: var(--dana-primary); background: #f6f7f8; }
-.dana-combobox-option.is-active.is-selected { background: #ecedf0; }
+.dana-combobox-option.is-active { background: #eef4fb; }
+.dana-combobox-option.is-selected { border-left-color: var(--dana-primary); background: #f3f7fd; }
+.dana-combobox-option.is-active.is-selected { background: #e6eefa; }
 .dana-combobox .is-end { text-align: right; justify-self: end; }
 
 .dana-combobox-empty {

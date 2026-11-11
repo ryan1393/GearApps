@@ -38,8 +38,8 @@
   width:100%; min-height:39px; border:0; padding:0 7px; text-align:left; color:white;
   background:#353c49; font-size:1.15rem; font-weight:700; cursor:pointer;
 }
-.machine-number-button.machine-running { background:linear-gradient(180deg,#b45914,#ab5411); }
-.machine-number-button.machine-empty { background:#39414e; }
+.machine-number-button.machine-running { background:linear-gradient(180deg,#147aa8,#0f6c9a); }
+.machine-number-button.machine-empty { background:#334155; }
 .machine-number-button:hover { filter:brightness(1.08); }
 .machine-open td:not(.machine-cell):not(.last-check-cell) { background:#f4f5f6 !important; color:#9ca2ac; }
 .last-check-cell { text-align:center; padding:0 !important; font-weight:800; }

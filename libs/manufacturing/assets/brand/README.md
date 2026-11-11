@@ -27,9 +27,11 @@ The wordmark is outlined, so the SVGs have no font, image or web dependencies.
 | Steel grey | `#AEB6C2` |
 | Anvil white | `#F5F5F2` |
 
-The application palette lives in `libs/shared/dana-ui/src/styles` (`dana-core/tokens.css` and
-`gear-apps/foundation/tokens.css`). Informational (blue), success, danger and Greenshed machine-state colours
-are operational signals and are not part of the brand palette.
+The application palette lives in the Gear layer of `libs/shared/dana-ui/src/styles`: the `gear-apps/` modules
+(tokens in `gear-apps/foundation/tokens.css`) and the "MeshForge theme for the Dana core" block at the top of
+`gear-compat-overrides.css`. The Dana core (`dana-core/*.css`) is shared with other Dana apps and keeps its
+own colours; do not recolour it. Informational (blue), success, danger and Greenshed machine-state colours are
+operational signals and are not part of the brand palette.
 
 ## Replace the logo
 

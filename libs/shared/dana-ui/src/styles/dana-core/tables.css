@@ -18,7 +18,7 @@ table[danaTable] th,
 table.dana-table th {
   padding: 11px 12px;
   border-bottom: 1px solid var(--dana-border);
-  background: #fcfcfc;
+  background: #fbfcfe;
   color: var(--dana-muted);
   text-align: left;
   font-size: 11px;
@@ -31,7 +31,7 @@ table.dana-table th {
 table[danaTable] td,
 table.dana-table td {
   padding: 13px 12px;
-  border-bottom: 1px solid #f0f1f2;
+  border-bottom: 1px solid #edf1f5;
   vertical-align: middle;
 }
 
@@ -39,7 +39,7 @@ table[danaTable] tbody tr:last-child td,
 table.dana-table tbody tr:last-child td { border-bottom: 0; }
 
 table[danaTable] tbody tr:hover td,
-table.dana-table tbody tr:hover td { background: #fdfdfd; }
+table.dana-table tbody tr:hover td { background: #fbfdff; }
 
 .dana-status-badge,
 [danaStatusBadge],
@@ -50,8 +50,8 @@ table.dana-table tbody tr:hover td { background: #fdfdfd; }
   gap: 6px;
   border-radius: 999px;
   padding: 5px 8px;
-  background: #f2f3f5;
-  color: #aa5413;
+  background: #eef4fb;
+  color: #28558d;
   font-size: 11px;
   font-weight: 800;
 }

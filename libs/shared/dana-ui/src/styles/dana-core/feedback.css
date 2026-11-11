@@ -4,9 +4,9 @@
 .dana-empty-state,
 [danaEmptyState] {
   padding: 16px;
-  border: 1px dashed #cfd2d7;
+  border: 1px dashed #c6d3e2;
   border-radius: 12px;
-  background: #f9fafa;
+  background: #f8fafc;
   color: var(--dana-muted);
   font-size: 13px;
 }
@@ -18,7 +18,7 @@
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(27,31,37,.46);
+  background: rgba(15,31,54,.46);
 }
 
 .dana-confirm-dialog {
@@ -105,7 +105,7 @@
   cursor: pointer;
 }
 
-.dana-toast-close:hover { background: #f5f6f7; }
+.dana-toast-close:hover { background: #f3f6f9; }
 
 :where(dialog.dana-confirm-dialog) { max-width: calc(100vw - 40px); max-height: calc(100vh - 40px); overflow: auto; }
-:where(dialog.dana-confirm-dialog)::backdrop { background: rgba(27,31,37,.46); }
+:where(dialog.dana-confirm-dialog)::backdrop { background: rgba(15,31,54,.46); }

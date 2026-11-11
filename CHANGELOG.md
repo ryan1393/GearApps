@@ -22,8 +22,9 @@
   sidebar, login and password-recovery screens show the MeshForge mark and name, and browser tabs
   use the MeshForge icon. Logo files (mark, icon, lockup; dark, light and single-colour; SVG and
   PNG) are in `libs/manufacturing/assets/brand` and `branding`.
-  - The shared styles are recoloured from Dana blue/navy to charcoal with orange actions. Every
-    colour keeps its previous contrast against its background. Warning amber moved to a yellower
+  - The Gear Apps styles are recoloured from Dana blue/navy to charcoal with orange actions. The
+    shared Dana core is unchanged; its colours are overridden from the Gear layer
+    (`gear-compat-overrides.css`). Every colour keeps its previous contrast against its background. Warning amber moved to a yellower
     gold so it stays distinct from the orange actions.
   - Not recoloured: informational blue, success, danger, the Greenshed running-machines state
     colours, and colours set in TypeScript or with Tailwind utility classes.
