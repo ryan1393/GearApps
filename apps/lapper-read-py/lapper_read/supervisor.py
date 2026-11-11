@@ -21,6 +21,7 @@ import json
 import logging
 import os
 import threading
+import urllib.parse
 from dataclasses import dataclass, field, replace
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Callable
@@ -29,7 +30,7 @@ from .api import MeshForgeApi, utc_now
 from .fanuc import Fanuc
 from .scanner import Scanner
 from .state import CycleStateStore, InvalidCheckpoint
-from .worker import Worker
+from .worker import MacroReadError, Worker
 
 log = logging.getLogger("lapper_read.supervisor")
 
@@ -340,6 +341,35 @@ class Supervisor:
         ]
         return {"last_discovery": self._last_discovery, "machines": machines}
 
+    #: Macro numbers one request may read (Argonaut's 68 plus the active Admin > Macros).
+    MAX_MACRO_READ = 500
+
+    def read_macros(self, machine_id: str, query: str, authorization: str) -> tuple[int, dict]:
+        """GET /machines/<id>/macros?numbers=… for MeshForge's Cycle Test Lab: the controller's
+        current values. Only a caller holding this collector's own token (the API) may ask."""
+        token = authorization[7:].strip() if authorization.startswith("Bearer ") else ""
+        checker = getattr(self.api, "is_collector_token", None)
+        if not token or checker is None or not checker(token):
+            return 401, {"message": "Reading macros needs this collector's token. Connect the Docker collector "
+                                    "in Admin > Collector Tokens."}
+        raw = urllib.parse.parse_qs(query).get("numbers", [""])[0]
+        try:
+            numbers = sorted({int(n) for n in raw.split(",") if n.strip()})
+        except ValueError:
+            return 400, {"message": "numbers must be comma-separated macro numbers"}
+        if not numbers or len(numbers) > self.MAX_MACRO_READ or any(n < 0 or n > 99999 for n in numbers):
+            return 400, {"message": f"Ask for 1 to {self.MAX_MACRO_READ} macro numbers between 0 and 99999."}
+        slot = self._slots.get(machine_id)
+        if slot is None or slot.worker is None:
+            reason = self._skipped.get(machine_id, (None, "not one of the machines this collector reads"))[1]
+            return 404, {"message": f"No collector worker for this machine: {reason}."}
+        try:
+            values = slot.worker.read_macros(numbers)
+        except MacroReadError as error:
+            return 503, {"message": f"Machine {slot.spec.number or machine_id}: {error}"}
+        log.info("[%s] Read %d macros for the Cycle Test Lab", slot.spec.number or slot.spec.controller_ip, len(values))
+        return 200, {"machine_id": machine_id, "read_at": utc_now(), "values": values}
+
     def _heartbeat(self) -> None:
         os.makedirs(self.settings.state_dir, exist_ok=True)
         with open(supervisor_heartbeat(self.settings), "w", encoding="utf-8") as handle:
@@ -355,8 +385,12 @@ class Supervisor:
                 pass
 
             def do_GET(self):  # noqa: N802
-                path = self.path.split("?")[0]
-                if path == "/machines":  # the slice the Lapper UI reads through its proxy
+                path, _, query = self.path.partition("?")
+                parts = path.strip("/").split("/")
+                if len(parts) == 3 and parts[0] == "machines" and parts[2] == "macros":
+                    code, payload = supervisor.read_macros(urllib.parse.unquote(parts[1]), query,
+                                                           self.headers.get("Authorization", ""))
+                elif path == "/machines":  # the slice the Lapper UI reads through its proxy
                     payload, code = supervisor.summary(), 200
                 elif path in ("/", "/status"):  # full detail, for operators on the plant network
                     payload, code = supervisor.status(), 200

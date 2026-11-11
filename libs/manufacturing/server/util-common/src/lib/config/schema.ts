@@ -209,6 +209,8 @@ export const validationSchema = Joi.object({
   LAPPER_READ_ARGONAUT_PASSWORD: Joi.string().allow('').optional(),
   LAPPER_READ_ARGONAUT_TRANSACTION_TYPE_ID: Joi.number().integer().min(0).max(2147483647).empty('').default(100),
   LAPPER_READ_ARGONAUT_VERIFY_TLS: Joi.boolean().empty('').default(true),
+  // Where the API reaches Lapper Read's status server to read live macro values (Cycle Test Lab).
+  LAPPER_READ_STATUS_URL: Joi.string().uri({ scheme: ['http', 'https'] }).empty('').default('http://lapper-read:8080'),
 
   // DSF (Digital Shop Floor) production counts. All optional and off by default. Only the
   // shape is checked here; the DSF reader validates the combination and stays off, with a

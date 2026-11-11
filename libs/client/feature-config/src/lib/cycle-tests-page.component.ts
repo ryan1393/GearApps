@@ -17,6 +17,7 @@ import {
   ArgonautPayload,
   ArgonautTestInput,
   ArgonautTestResult,
+  ControllerMacroValues,
   CycleTestRun,
   Gearset,
   Machine,
@@ -72,6 +73,32 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
             required
         /></label>
       </div>
+      <div class="cycle-test-read">
+        <button
+          type="button"
+          class="gear-btn gear-btn-secondary"
+          (click)="readFromMachine()"
+          [disabled]="reading() || !machineId"
+        >
+          {{ reading() ? 'Reading the controller…' : 'Read values from machine' }}
+        </button>
+        <span class="gear-muted"
+          >Fills the macros below and the Argonaut macros with the controller's current values, read by Lapper
+          Read. Nothing is written to the machine.</span
+        >
+      </div>
+      @if (readError()) {
+        <p class="gear-alert gear-alert-danger" role="alert">{{ readError() }}</p>
+      }
+      @if (lastRead(); as read) {
+        <p class="gear-muted" role="status">
+          Read {{ readCount(read) }} of {{ readTotal(read) }} macros from {{ machineLabel(read.machine_id) }} at
+          {{ read.read_at | date: 'mediumTime' }}.
+          @if (readTotal(read) - readCount(read); as unanswered) {
+            {{ unanswered }} did not answer and were left blank (Argonaut gets 0).
+          }
+        </p>
+      }
       <h3 class="cycle-test-heading">Active macro values</h3>
       @if (!macros.loading() && !activeMacros().length) {
         <p class="gear-muted">No active macros yet. Add them in Admin > Macros.</p>
@@ -265,6 +292,8 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
     .cycle-test-values { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: .5rem; margin-top: .75rem; }
     .cycle-test-value { display: grid; gap: .125rem; padding: .5rem .75rem; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-md); background: var(--dana-surface); }
     .cycle-test-value[data-state='fail'] { border-color: var(--dana-danger); background: var(--dana-danger-soft); }
+    .cycle-test-read { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; margin-top: 1rem; }
+    .cycle-test-read .gear-muted { flex: 1 1 18rem; }
     .cycle-test-title { margin: 0; font-size: 1.125rem; }
     .cycle-test-intro { margin: .25rem 0 1rem; max-width: 48rem; }
     .cycle-test-details { margin-top: 1rem; }
@@ -300,6 +329,31 @@ export class CycleTestsPageComponent implements OnInit {
   protected readonly argonautError = signal('');
   protected readonly argonautPreview = signal<{ url: string; payload: ArgonautPayload } | null>(null);
   protected readonly argonautResult = signal<ArgonautTestResult | null>(null);
+  protected readonly reading = signal(false);
+  protected readonly readError = signal('');
+  protected readonly lastRead = signal<ControllerMacroValues | null>(null);
+  protected readCount(read: ControllerMacroValues): number {
+    return Object.values(read.values).filter((v) => v !== null).length;
+  }
+  protected readTotal(read: ControllerMacroValues): number {
+    return Object.keys(read.values).length;
+  }
+  /** Replaces the entered values with the controller's; macros it did not answer are cleared. */
+  protected readFromMachine() {
+    if (this.reading() || !this.machineId) return;
+    this.reading.set(true); this.readError.set(''); this.lastRead.set(null);
+    this.http.post<ControllerMacroValues>('/api/v1/admin/cycle-tests/controller-values', { machine_id: this.machineId })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (read) => {
+          this.values = { ...this.values, ...read.values };
+          this.argonautPreview.set(null);
+          this.reading.set(false);
+          this.lastRead.set(read);
+        },
+        error: (error) => { this.reading.set(false); this.readError.set(apiErrorMessage(error)); },
+      });
+  }
   protected readonly activeMacros = computed(() => this.macros.value().filter((m) => m.status === 1));
   protected readonly limitText = macroLimitText;
   /** Saved runs keep IDs; show the names people know. */

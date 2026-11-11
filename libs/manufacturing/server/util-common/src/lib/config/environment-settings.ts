@@ -170,6 +170,7 @@ export const ENVIRONMENT_SETTING_GROUPS: readonly EnvironmentSettingGroup[] = [
       text('LAPPER_READ_ARGONAUT_USERNAME', 'Argonaut user', 'Basic sign-in sent with every Argonaut transaction. User and password both empty sign in as the original C# Lapper Read did (user / pw).'),
       secret('LAPPER_READ_ARGONAUT_PASSWORD', 'Argonaut password'),
       number('LAPPER_READ_ARGONAUT_TRANSACTION_TYPE_ID', 'Argonaut transaction type', 'Track and Trace transaction type, normally 100.'),
+      text('LAPPER_READ_STATUS_URL', 'Lapper Read status address', 'Where the API asks the collector for live macro values (Cycle Test Lab > Read values from machine). In Docker: http://lapper-read:8080.'),
       flag('LAPPER_READ_ARGONAUT_VERIFY_TLS', 'Verify the Argonaut certificate', 'Off accepts a self-signed certificate, as the original C# Lapper Read did.'),
     ],
   },

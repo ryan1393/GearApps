@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hmac
 import json
 import logging
 import os
@@ -44,6 +45,12 @@ class MeshForgeApi:
         self._collector_token = token or self._read_token_file()
         self._token: str | None = self._collector_token
         self._auth_lock = threading.Lock()
+
+    def is_collector_token(self, presented: str) -> bool:
+        """Whether `presented` is the collector token this collector signs in with. The API sends it
+        to ask for live macro values, so only MeshForge (which issued the token) can ask."""
+        current = self._read_token_file() if self._token_file else self._collector_token
+        return bool(current and presented) and hmac.compare_digest(current.encode(), presented.encode())
 
     def _read_token_file(self) -> str | None:
         if not self._token_file:
