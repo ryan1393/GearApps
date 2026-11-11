@@ -8,6 +8,10 @@ export class CreateCoaterShipmentDto {
 export class CoaterRevisionDto {
   @IsInt() @Min(1) revision!: number;
 }
+
+export class PrepareCoaterRpaDto extends CoaterRevisionDto {
+  @IsOptional() @IsString() @MaxLength(80) po?: string;
+}
 export class CoaterContainerDto extends CoaterRevisionDto {
   @IsString() @MinLength(1) @MaxLength(80) serial!: string;
 }

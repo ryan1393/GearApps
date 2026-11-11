@@ -5,12 +5,13 @@ import { DataSource, EntityManager } from 'typeorm';
 import { CoaterManifest, CoaterShipment, CoaterPackingSlip, CoaterShipmentList, CoaterAvailableContainer } from '@meshforge/manufacturing/shared/util-types';
 import { lockCoaterInventory } from '@meshforge/manufacturing/server/data-access';
 import { coaterContentHash, readCoaterManifest } from './coater-manifest';
+import { CoaterRpaService } from './coater-rpa.service';
 
 const dateText = (date: any): string => new Date(date).toISOString();
 
 @Injectable()
 export class CoaterShipmentsService {
-  constructor(@InjectDataSource() private readonly source: DataSource) {}
+  constructor(@InjectDataSource() private readonly source: DataSource, private readonly rpa: CoaterRpaService) {}
 
   private async transaction<T>(work: (manager: EntityManager) => Promise<T>): Promise<T> {
     return this.source.transaction(async manager => {
@@ -51,7 +52,7 @@ export class CoaterShipmentsService {
     const manifest = live ?? row.manifest;
     const changed = row.status === 'DRAFT' && coaterContentHash(row.destination,row.notes,manifest) !== row.content_hash;
     const events = await manager.query('SELECT kind,revision,at,actor,detail FROM dana_coater_shipment_events_v1 WHERE shipment_id=$1 ORDER BY at,id', [row.id]);
-    return { id: row.id, number: row.number, status: row.status, revision: row.revision, destination: row.destination, notes: row.notes, created_at: dateText(row.created_at), created_by: events.find((e: any) => e.kind==='STARTED')?.actor ?? await this.actor(manager,row.created_by), dispatched_at: row.dispatched_at ? dateText(row.dispatched_at) : null, dispatched_by: row.dispatched_by ? (events.find((e: any) => e.kind==='DISPATCHED')?.actor ?? await this.actor(manager,row.dispatched_by)) : null, manifest, changed, reviewed: !changed && row.reviewed_revision === row.revision, print_requested: !changed && row.printed_revision === row.revision, events: events.map((e: any) => ({...e,at:dateText(e.at)})) };
+    return { id: row.id, number: row.number, status: row.status, revision: row.revision, destination: row.destination, notes: row.notes, created_at: dateText(row.created_at), created_by: events.find((e: any) => e.kind==='STARTED')?.actor ?? await this.actor(manager,row.created_by), dispatched_at: row.dispatched_at ? dateText(row.dispatched_at) : null, dispatched_by: row.dispatched_by ? (events.find((e: any) => e.kind==='DISPATCHED')?.actor ?? await this.actor(manager,row.dispatched_by)) : null, manifest, changed, reviewed: !changed && row.reviewed_revision === row.revision, print_requested: !changed && row.printed_revision === row.revision, events: events.map((e: any) => ({...e,at:dateText(e.at)})), rpa: await this.rpa.state(manager,row.id,row.revision) };
   }
   private async saveRevision(manager: EntityManager, row: any, user: string, kind: string, detail: string) {
     const manifest = await readCoaterManifest(manager,await this.ids(manager,row.id));
@@ -158,6 +159,19 @@ export class CoaterShipmentsService {
     const manifest=await readCoaterManifest(m,await this.ids(m,row.id));
     if (manifest.issues.length) throw new ConflictException(manifest.issues.join(' '));
     if (row.reviewed_revision!==revision || coaterContentHash(row.destination,row.notes,manifest)!==row.content_hash) throw new ConflictException('Contents changed or were not reviewed. Refresh, review and print the current revision.');
+  }
+
+  async prepareRpa(id: string, revision: number, po: string | undefined, user: string) {
+    return this.transaction(async manager => {
+      const row = await this.row(manager,id);
+      if (row.status === 'DRAFT') await this.verifyReviewed(manager,row,revision);
+      else if (row.status !== 'DISPATCHED' || row.revision !== revision) {
+        throw new ConflictException('Refresh the active shipment revision before preparing an RPA.');
+      }
+      const number = await this.rpa.prepare(manager,row,po,user);
+      if (number !== null) await this.event(manager,row,'RPA_PREPARED',user,`RPA ${number} prepared.`);
+      return this.view(manager,row);
+    });
   }
   async print(id: string, revision: number, user: string): Promise<CoaterPackingSlip> {
     return this.transaction(async m => {

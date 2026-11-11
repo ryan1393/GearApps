@@ -27,6 +27,8 @@ export class CoaterShipmentsComponent implements OnDestroy {
   error = ''; notice = ''; listError = '';
   confirmSend = false; checked = false; cancelOpen = false; cancelReason = '';
   undoSerial = '';
+  rpaPo = '';
+  confirmRpaEmail = false;
   private requestId = createCoaterRequestId();
   private listVersion = 0;
   constructor() { this.refreshList(); }
@@ -47,7 +49,9 @@ export class CoaterShipmentsComponent implements OnDestroy {
   search() { this.page=1;this.refreshList(); }
   paginate(delta: number) { this.page+=delta;this.refreshList(); }
   private accept(s: CoaterShipment) {
+    if (s.id !== this.active?.id || s.revision !== this.active?.revision) this.rpaPo = '';
     this.active=s;this.destination=s.destination;this.notes=s.notes;this.stale=false;
+    this.confirmRpaEmail=false;
     this.confirmSend=false;this.checked=false;this.cancelOpen=false;this.cancelReason='';
     if(s.status==='DRAFT') this.refreshAvailable(); else this.availableContainers=[];
   }
@@ -112,6 +116,49 @@ export class CoaterShipmentsComponent implements OnDestroy {
     },error:e=>{popup.close();this.busy=false;this.stale=true;this.error=apiErrorText(e,'Could not prepare the slip. Refresh before printing again.');}});
   }
   askSend() { if(this.canSend){this.checked=false;this.confirmSend=true;this.cancelOpen=false;} }
+  get canPrepareRpa() {
+    const shipment = this.active;
+    return !!shipment?.rpa?.configured && !shipment.rpa.request && this.canPrint &&
+      !!(this.rpaPo.trim() || shipment.rpa.default_po);
+  }
+  prepareRpa() {
+    if (this.active && this.canPrepareRpa) {
+      this.act(this.api.prepareRpa(this.active,this.rpaPo),'RPA workbook prepared.',undefined,() => undefined);
+    }
+  }
+  downloadRpa() {
+    const shipment = this.active;
+    const request = shipment?.rpa?.request;
+    if (!shipment || !request || this.busy) return;
+    this.busy = true;
+    this.error = '';
+    this.api.rpaWorkbook(shipment).pipe(takeUntil(this.destroy$)).subscribe({
+      next: workbook => {
+        const url = URL.createObjectURL(workbook);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `RPA-${request.number}.xlsx`;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        this.busy = false;
+      },
+      error: error => {
+        this.error = apiErrorText(error,'Could not download the RPA workbook.');
+        this.busy = false;
+      },
+    });
+  }
+  get canEmailRpa() {
+    const shipment = this.active;
+    const request = shipment?.rpa?.request;
+    return !!request && !!shipment?.rpa?.email_enabled && request.recipient_count > 0 &&
+      shipment?.status !== 'CANCELED' && ['PENDING','FAILED'].includes(request.email_status) && !this.busy && !this.stale;
+  }
+  emailRpa() {
+    if (this.active && this.confirmRpaEmail && this.canEmailRpa) {
+      this.act(this.api.emailRpa(this.active),'RPA email status updated.',undefined,() => undefined);
+    }
+  }
   send() { if(this.active && this.canSend && this.confirmSend && this.checked)this.act(this.api.dispatch(this.active),'Shipment sent to the coater. Contents are locked.',()=>this.undoSerial=''); }
   cancel() { if(this.active && this.canEdit && this.cancelReason.trim())this.act(this.api.cancel(this.active,this.cancelReason),'Draft canceled. Containers remain packed and available for another shipment.',()=>this.undoSerial=''); }
 }
