@@ -4,8 +4,8 @@ import {
   MachineCycleDto,
   UpdateMachineCycleDto,
 } from '@meshforge/api/data-access';
-import { LapperProduction, MachineCycle } from '@meshforge/shared/domain';
-import { UseInterceptors, Controller, Get, Injectable, Param, ParseUUIDPipe } from '@nestjs/common';
+import { CycleHistoryPage, LapperProduction, MachineCycle } from '@meshforge/shared/domain';
+import { UseInterceptors, Controller, Get, Injectable, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 @Injectable()
 export abstract class MachineCyclesService extends CrudService<MachineCycle> {
@@ -13,6 +13,7 @@ export abstract class MachineCyclesService extends CrudService<MachineCycle> {
   abstract findByMachine(machineId: string): Promise<MachineCycle[]>;
   abstract production(): Promise<LapperProduction>;
   abstract history(machineId: string, gearsetId: string): Promise<MachineCycle[]>;
+  abstract historyPage(machineId: string, gearsetId: string, page: number, pageSize: number, serial?: string): Promise<CycleHistoryPage>;
   abstract findLatest(machineId: string, gearsetId: string): Promise<MachineCycle>;
 }
 @UseInterceptors(LapperWritePolicy)
@@ -55,6 +56,17 @@ export class MachineCyclesController extends crudController<MachineCycle>({
   history(@Param('machineId', ParseUUIDPipe) machineId: string,
     @Param('gearsetId', ParseUUIDPipe) gearsetId: string): Promise<MachineCycle[]> {
     return this.service.history(machineId, gearsetId);
+  }
+  @Get('history-page/:machineId/:gearsetId')
+  @ApiOperation({ summary: 'One page of the cycles for a machine and gearset, newest first' })
+  historyPage(@Param('machineId', ParseUUIDPipe) machineId: string,
+    @Param('gearsetId', ParseUUIDPipe) gearsetId: string,
+    @Query('page') page?: string, @Query('pageSize') pageSize?: string, @Query('serial') serial?: string): Promise<CycleHistoryPage> {
+    const whole = (value: string | undefined, fallback: number, max: number) => {
+      const parsed = Number(value);
+      return Number.isInteger(parsed) && parsed >= 1 ? Math.min(parsed, max) : fallback;
+    };
+    return this.service.historyPage(machineId, gearsetId, whole(page, 1, 1_000_000), whole(pageSize, 15, 100), serial?.slice(0, 160));
   }
   @Get('latest/:machineId/:gearsetId')
   @ApiOperation({ summary: 'Most recent cycle for a machine + gearset' })

@@ -1,294 +1,266 @@
-<div class="gear-page gear-workflow-page">
+<div class="gear-page gear-workflow-page lapper-summary" [class.is-ready]="ready()">
   <section
     danaPageHeader
     eyebrow="LAPPER / OPERATIONS"
     heading="Lapping Summaries"
-    description="Latest machine parameters recorded for a gearset on a lapper. Each picker narrows to combinations that have actually run."
+    [description]="ready() ? '' : 'What a lapper recorded for a gearset: its cycles, what changed in each, and the values in use.'"
   >
     <div danaPageHeaderAction class="dana-toolbar">
-      <button
-        type="button"
-        class="gear-btn gear-btn-secondary"
-        (click)="refresh()"
-        [disabled]="!ready() || rows.loading()"
-       data-icon="refresh" title="Refresh">
+      <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="!ready() || rows.loading()" data-icon="refresh" title="Refresh">
         ↻ {{ rows.loading() ? 'Refreshing…' : 'Refresh' }}
       </button>
-      <button
-        type="button"
-        class="gear-btn gear-btn-secondary"
-        (click)="clear()"
-        [disabled]="!machineId() && !gearsetId()"
-      >
-        Clear
-      </button>
+      <button type="button" class="gear-btn gear-btn-secondary" (click)="clear()" [disabled]="!machineId() && !gearsetId()">Clear</button>
     </div>
   </section>
-  @if (machineId(); as selectedMachine) { <gear-machine-dsf-count [machineId]="selectedMachine" /> }
 
-  <section class="gear-workflow-section lapper-picker">
-    <div class="gear-workflow-section-header">
-      <div>
-        <h2>Select a Run</h2>
-        <p>Pick either one first — the other list narrows to what has run with it.</p>
+  <section class="gear-panel lapper-picker">
+    @if (searchMiss(); as miss) {
+      <div class="gear-alert gear-alert-danger" role="status">No gearset or machine matches “{{ miss }}”.</div>
+    }
+    <div class="lapper-picker-fields">
+      <div class="gear-field">
+        <span>Gearset</span>
+        <dana-combobox
+          ariaLabel="Gearset"
+          placeholder="Search gearsets by number…"
+          [options]="gearsetOptions.value()"
+          [columns]="gearsetColumns"
+          [keyOf]="idOf"
+          [textOf]="gearsetText"
+          [loading]="gearsetOptions.loading()"
+          emptyText="No gearset matches"
+          [ngModel]="gearsetId() ?? ''"
+          (ngModelChange)="selectGearset($event)"
+        ></dana-combobox>
+      </div>
+      <div class="gear-field">
+        <span>Machine</span>
+        <dana-combobox
+          ariaLabel="Machine"
+          placeholder="Search machines by asset ID, cell or IP…"
+          [options]="machineOptions.value()"
+          [columns]="machineColumns"
+          [keyOf]="idOf"
+          [textOf]="machineText"
+          [loading]="machineOptions.loading()"
+          emptyText="No machine matches"
+          [ngModel]="machineId() ?? ''"
+          (ngModelChange)="selectMachine($event)"
+        ></dana-combobox>
       </div>
     </div>
-    <div class="gear-workflow-section-body">
-      @if (searchMiss(); as miss) {
-        <div class="gear-alert gear-alert-danger" role="status">
-          No gearset or machine matches “{{ miss }}”.
-        </div>
-      }
-      <div class="gear-form-grid">
-        <div class="gear-field">
-          <span>Gearset</span>
-          <dana-combobox
-            ariaLabel="Gearset"
-            placeholder="Search gearsets by number…"
-            [options]="gearsetOptions.value()"
-            [columns]="gearsetColumns"
-            [keyOf]="idOf"
-            [textOf]="gearsetText"
-            [loading]="gearsetOptions.loading()"
-            emptyText="No gearset matches"
-            [ngModel]="gearsetId() ?? ''"
-            (ngModelChange)="selectGearset($event)"
-          ></dana-combobox>
-        </div>
-        <div class="gear-field">
-          <span>Machine</span>
-          <dana-combobox
-            ariaLabel="Machine"
-            placeholder="Search machines by asset ID, cell or IP…"
-            [options]="machineOptions.value()"
-            [columns]="machineColumns"
-            [keyOf]="idOf"
-            [textOf]="machineText"
-            [loading]="machineOptions.loading()"
-            emptyText="No machine matches"
-            [ngModel]="machineId() ?? ''"
-            (ngModelChange)="selectMachine($event)"
-          ></dana-combobox>
-        </div>
-      </div>
-    </div>
+    @if (ready()) {
+      <dl class="lapper-facts">
+        <div><dt>Gearset</dt><dd class="mono">{{ gearset()?.number }}{{ gearset()?.rev ? ' · rev ' + gearset()?.rev : '' }}</dd></div>
+        <div><dt>Pinion / Ring</dt><dd class="mono">{{ gearset()?.pinion?.number ?? '—' }} / {{ gearset()?.ring?.number ?? '—' }}</dd></div>
+        <div><dt>Ratio</dt><dd>{{ gearset()?.ratio !== null && gearset()?.ratio !== undefined ? (gearset()!.ratio | number: '1.2-4') : '—' }}</dd></div>
+        <div><dt>Machine</dt><dd class="mono">{{ machine()?.number ?? machine()?.ip }}{{ machine()?.cell ? ' · cell ' + machine()?.cell : '' }}</dd></div>
+        <div><dt>Showing</dt><dd>
+          @if (selected(); as c) {
+            Cycle {{ c.consec }} · {{ c.timestamp | date: 'MMM d, HH:mm' }}
+            <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="showLatest()">Back to latest</button>
+          } @else {
+            Latest{{ cycle() ? ' · ' + (cycle()!.timestamp | date: 'MMM d, HH:mm') : '' }}
+          }
+        </dd></div>
+        <div><dt>Limits</dt><dd>
+          @if (outOfLimit().length) {
+            <span class="dana-status-badge" data-tone="danger">{{ outOfLimit().length }} outside limits</span>
+          } @else if (limitedCount()) {
+            <span class="dana-status-badge" data-tone="success">{{ limitedCount() }} in range</span>
+          } @else {
+            <span class="gear-muted">None set</span>
+          }
+        </dd></div>
+        <div><dt>DSF count</dt><dd><gear-machine-dsf-count [machineId]="machineId()!" /></dd></div>
+      </dl>
+    }
   </section>
 
   @if (!ready()) {
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-body">
-        <gear-empty-state
-          title="Choose a gearset and a machine"
-          hint="The summary shows the parameters from the latest recorded cycle of that combination."
-        />
-      </div>
-    </section>
-  } @else if (rows.loading() && !hasData()) {
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-body" danaLoadingState>Loading macro data…</div>
-    </section>
-  } @else if (!hasData()) {
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-body">
-        <gear-empty-state
-          title="No macro data recorded"
-          hint="This machine has no logged cycles for the selected gearset yet."
-        />
-      </div>
+    <section class="gear-panel lapper-pane">
+      <gear-empty-state title="Choose a gearset and a machine" hint="Pick either one first. The other list narrows to what has run with it." />
     </section>
   } @else {
-    <section danaKpiGrid class="kpi-grid">
-      <article danaKpiCard class="kpi-card">
-        <div class="kpi-icon blue">
-          <span class="gear-glyph gear-glyph-gearset" aria-hidden="true"></span>
+    <div class="lapper-columns">
+      <!-- Cycles -->
+      <section class="gear-panel lapper-pane" aria-label="Cycle history">
+        <div class="lapper-pane-heading">
+          <h2>Cycles</h2>
+          <span danaCountBadge class="gear-count-badge count-chip">{{ history.value()?.total ?? 0 }}</span>
         </div>
-        <div>
-          <strong class="mono">{{ gearset()?.number }}</strong>
-          <h3>Gearset</h3>
-          <p>
-            {{ gearset()?.rev ? 'Rev ' + gearset()?.rev : 'No revision' }} ·
-            {{ gearset()?.status || 'Unknown' }}
-          </p>
-        </div>
-      </article>
-      <article danaKpiCard class="kpi-card">
-        <div class="kpi-icon purple">
-          <span class="gear-glyph gear-glyph-lapping" aria-hidden="true"></span>
-        </div>
-        <div>
-          <strong>{{
-            gearset()?.ratio !== null && gearset()?.ratio !== undefined
-              ? (gearset()!.ratio | number: '1.2-4')
-              : '—'
-          }}</strong>
-          <h3>Ratio</h3>
-          <p class="mono">
-            {{ gearset()?.pinion?.number ?? '—' }} / {{ gearset()?.ring?.number ?? '—' }}
-          </p>
-        </div>
-      </article>
-      <article danaKpiCard class="kpi-card">
-        <div class="kpi-icon teal">
-          <span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span>
-        </div>
-        <div>
-          <strong class="mono">{{ machine()?.number ?? machine()?.ip }}</strong>
-          <h3>Machine</h3>
-          <p>{{ machine()?.cell ? 'Cell ' + machine()?.cell + ' · ' : '' }}{{ machine()?.ip }}</p>
-        </div>
-      </article>
-      <article danaKpiCard class="kpi-card">
-        <div class="kpi-icon green">
-          <span class="gear-glyph gear-glyph-available" aria-hidden="true"></span>
-        </div>
-        <div>
-          <strong>{{ cycle() ? (cycle()!.timestamp | date: 'MMM d, HH:mm') : '—' }}</strong>
-          <h3>Last Cycle</h3>
-          <p>
-            Serial {{ cycle()?.serial_number || '—' }} · Consec
-            {{ consec() ?? cycle()?.consec ?? '—' }}
-          </p>
-        </div>
-      </article>
-    </section>
-
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header">
-        <div>
-          <h2>Gearset Data</h2>
-          <p>Macros #10020–#10029</p>
-        </div>
-      </div>
-      <div class="gear-workflow-section-body">
-        <div danaDetailGrid>
-          <gear-value-field label="Description" [value]="gearset()?.summary?.model" type="text" />
-          <gear-value-field label="Pinion" [value]="gearset()?.pinion?.number" type="text" />
-          <gear-value-field label="Ring" [value]="gearset()?.ring?.number" type="text" />
-          @for (f of gearsetFields; track f.label) {
-            <gear-value-field [label]="f.label" [value]="valueOf(gearData(), f)" />
-          }
-        </div>
-      </div>
-    </section>
-
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header">
-        <div>
-          <h2>General Data</h2>
-          <p>Meshing, time settings, runout, retract, spin-off and acceleration.</p>
-        </div>
-      </div>
-      <div class="gear-workflow-section-body">
-        <div class="lapper-groups">
-          @for (g of generalGroups; track g.title) {
-            <gear-summary-group
-              [group]="g"
-              [rows]="generalData()"
-              [columns]="g.fields.length === 1 ? 1 : 2"
-            />
-          }
-        </div>
-      </div>
-    </section>
-
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header">
-        <div>
-          <h2>Meshing Position</h2>
-          <p>Arbor length, mesh / load / correction-start positions and mounting tolerance.</p>
-        </div>
-      </div>
-      <div class="gear-workflow-section-body">
-        <div class="lapper-mesh">
-          <div class="lapper-groups">
-            @for (g of meshGroups; track g.title) {
-              <gear-summary-group [group]="g" [rows]="meshData()" [columns]="g.fields.length" />
-            }
-          </div>
-          <figure class="lapper-mesh-figure">
-            <img
-              src="assets/mesh-axes.png"
-              alt="V, H and J axis directions on the lapping machine"
-            />
-            <figcaption class="gear-muted">Axis directions: V [X] · H [Y] · J [Z]</figcaption>
-          </figure>
-        </div>
-      </div>
-    </section>
-
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header gear-workflow-status-row">
-        <div>
-          <h2>Lapping Paths</h2>
-          <p>Only paths with an active pass are shown.</p>
-        </div>
-        <span danaCountBadge class="gear-count-badge count-chip"
-          >{{ activePaths().length }} / {{ paths().length }}</span
-        >
-      </div>
-      <div class="gear-workflow-section-body">
-        @if (inactivePaths().length) {
-          <ul class="dana-chip-list" aria-label="Inactive paths">
-            @for (p of inactivePaths(); track p.form) {
-              <li class="dana-chip">{{ p.label }} · inactive</li>
-            }
-          </ul>
+        <label class="gear-field lapper-serial-filter">Find a serial number
+          <input class="gear-input" type="search" [ngModel]="serialSearch()" (ngModelChange)="searchSerial($event)" placeholder="Part of a serial…" />
+        </label>
+        @if (history.error()) {
+          <p class="gear-alert gear-alert-danger" role="alert">Could not load the cycles. Refresh to retry.</p>
         }
-        @if (!activePaths().length) {
-          <gear-empty-state
-            title="No active lapping paths"
-            hint="None of the path forms report an active pass for this combination."
-          />
-        } @else {
-          <div class="lapper-paths">
-            @for (p of activePaths(); track p.form) {
-              <article class="dana-card" data-tone="success">
-                <div class="dana-card-header">
-                  <span class="dana-card-title">{{ p.label }}</span>
-                  <gear-status-badge status="Active" />
-                </div>
-                <div class="lapper-groups lapper-groups--tight">
-                  @for (g of pathGroups; track g.title) {
-                    <gear-summary-group [group]="g" [rows]="p.rows" [columns]="2" />
+        <div danaTableShell class="table-wrap">
+          <table danaTable class="gear-table lapper-cycles-table">
+            <thead>
+              <tr>
+                <th data-dana-table-static>Time</th>
+                <th data-dana-table-static>Serial</th>
+                <th data-dana-table-static>Cycle</th>
+                <th data-dana-table-static title="Values this cycle changed">Chg</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of history.value()?.items ?? []; track c.id) {
+                <tr class="lapper-cycle-row" [class.is-selected]="selected()?.id === c.id" (click)="selectCycle(c)">
+                  <td>
+                    <button type="button" class="lapper-cycle-button" [attr.aria-pressed]="selected()?.id === c.id" (click)="selectCycle(c); $event.stopPropagation()">
+                      {{ c.timestamp | date: 'MMM d, HH:mm' }}
+                    </button>
+                  </td>
+                  <td class="mono">{{ c.serial_number || '—' }}</td>
+                  <td>{{ c.consec }}</td>
+                  <td>
+                    @if (c.changed_count) {
+                      <strong class="lapper-changed-count">{{ c.changed_count }}</strong>
+                    } @else {
+                      <span class="gear-muted">0</span>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td danaTableEmpty colspan="4" class="empty-row">{{ history.loading() ? 'Loading cycles…' : serialSearch() ? 'No cycle has that serial.' : 'No cycles recorded yet.' }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <nav class="lapper-pager" aria-label="Cycle pages">
+          <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="goToPage(page() - 1)" [disabled]="page() <= 1 || history.loading()">‹ Newer</button>
+          <span>Page {{ page() }} of {{ pageCount() }}</span>
+          <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="goToPage(page() + 1)" [disabled]="page() >= pageCount() || history.loading()">Older ›</button>
+        </nav>
+      </section>
+
+      <!-- Values -->
+      <section class="gear-panel lapper-pane" aria-label="Recorded values">
+        <div danaTabs class="lapper-tabs">
+          @for (t of tabs; track t.id) {
+            <button type="button" danaTab [active]="tab() === t.id" (click)="tab.set(t.id)">{{ t.label }}</button>
+          }
+        </div>
+
+        @if (tab() === 'changes') {
+          <p class="gear-muted lapper-tab-note">
+            @if (selected(); as c) {
+              What cycle {{ c.consec }} changed. A value is recorded only when it differs from the cycle before.
+            } @else {
+              The most recent changes, newest cycle first. Select a cycle on the left to see only its changes.
+            }
+          </p>
+          @if (changes.error()) {
+            <p class="gear-alert gear-alert-danger" role="alert">Could not load the changes. Refresh to retry.</p>
+          }
+          @for (group of changeGroups(); track group.id) {
+            <article class="lapper-change-group">
+              <header>
+                <strong>Cycle {{ group.consec }}</strong>
+                <span class="gear-muted">{{ group.timestamp | date: 'MMM d, HH:mm' }} · {{ group.serial_number || 'no serial' }}</span>
+                @if (group.first.length) {
+                  <span class="gear-muted">· {{ group.first.length }} first reading{{ group.first.length === 1 ? '' : 's' }}</span>
+                }
+              </header>
+              @if (group.changed.length) {
+                <div class="lapper-change-list">
+                  @for (change of group.changed; track change.macro_id) {
+                    <div class="lapper-change" [class.is-alert]="changeAlert(change)">
+                      <span class="lapper-change-name">#{{ change.number }} · {{ change.name }}</span>
+                      <span class="lapper-change-values">
+                        <span class="gear-muted">{{ change.previous_value | number: '1.0-4' }}</span>
+                        <span aria-hidden="true">→</span><span class="lapper-visually-hidden">changed to</span>
+                        <strong>{{ change.value | number: '1.0-4' }}</strong>{{ change.unit ? ' ' + change.unit : '' }}
+                        <span class="gear-muted">({{ deltaText(change) }})</span>
+                      </span>
+                      @if (changeAlert(change); as alert) {
+                        <span class="dana-status-badge" data-tone="danger">{{ alert }}</span>
+                      }
+                    </div>
                   }
                 </div>
-              </article>
-            }
-          </div>
+              }
+            </article>
+          } @empty {
+            <gear-empty-state
+              [title]="changes.loading() ? 'Loading changes…' : selected() ? 'Nothing changed in this cycle' : 'No changes recorded yet'"
+              hint="Every value was the same as in the cycle before."
+            />
+          }
         }
-      </div>
-    </section>
-  }
-  @if (ready()) {
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header"><h2>Cycle history</h2><p>Most recent 200 cycles for this machine and gearset. Select a cycle to inspect its recorded values.</p></div>
-      <div class="gear-workflow-section-body">
-        <label class="gear-field">Filter serial number<input class="gear-input" [ngModel]="serialSearch()" (ngModelChange)="serialSearch.set($event)" /></label>
-        @if (history.error()) { <p class="gear-alert gear-alert-danger" role="alert">Could not load cycle history. Refresh to retry.</p> }
-        @for (c of visibleHistory(); track c.id) {
-          <button type="button" class="gear-btn gear-btn-secondary cycle-history-row" [attr.aria-pressed]="cycle()?.id === c.id" (click)="selectCycle(c)">
-            <strong>{{ c.serial_number || 'No serial' }}</strong><span>{{ c.timestamp | date:'medium' }}</span><span>Cycle {{ c.consec }}</span>
-          </button>
-        } @empty { <p>{{ history.loading() ? 'Loading history…' : 'No matching cycles.' }}</p> }
-      </div>
-    </section>
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header gear-workflow-status-row">
-        <div><h2>Configured macro values</h2><p>All recorded variables, including macros added in Admin. Selecting a historical cycle shows only values from that cycle.</p></div>
-        @if (outOfLimit().length) {
-          <span class="dana-status-badge" data-tone="danger">{{ outOfLimit().length }} outside limits</span>
-        } @else if (limitedCount()) {
-          <span class="dana-status-badge" data-tone="success">All {{ limitedCount() }} limited values in range</span>
+
+        @if (tab() === 'summary') {
+          @if (rows.loading() && !hasData()) {
+            <div danaLoadingState>Loading values…</div>
+          } @else if (!hasData()) {
+            <gear-empty-state title="No values recorded" hint="This machine has no recorded cycles for the selected gearset yet." />
+          } @else {
+            <h3 class="lapper-section-title">Gearset data</h3>
+            <div class="lapper-dense">
+              <gear-value-field label="Description" [value]="gearset()?.summary?.model" type="text" [compact]="true" />
+              @for (f of gearsetFields; track f.label) {
+                <gear-value-field [label]="f.label" [value]="valueOf(gearData(), f)" [compact]="true" />
+              }
+            </div>
+            <h3 class="lapper-section-title">General data</h3>
+            <div class="lapper-groups">
+              @for (g of generalGroups; track g.title) {
+                <gear-summary-group [group]="g" [rows]="generalData()" [columns]="g.fields.length === 1 ? 1 : 2" />
+              }
+            </div>
+            <h3 class="lapper-section-title">Meshing position</h3>
+            <div class="lapper-groups">
+              @for (g of meshGroups; track g.title) {
+                <gear-summary-group [group]="g" [rows]="meshData()" [columns]="g.fields.length" />
+              }
+            </div>
+          }
         }
-      </div>
-      <div class="gear-workflow-section-body">
-        @for (group of configuredGroups(); track group[0]) {
-          <h3>{{ group[0] || 'Other variables' }}</h3>
-          <div class="gear-form-grid">
-            @for (row of group[1]; track row.id) { <gear-value-field [label]="'#' + row.number + ' · ' + row.name" [value]="row.value" [unit]="row.unit ?? undefined" [alert]="limitAlert(row)" /> }
-          </div>
+
+        @if (tab() === 'paths') {
+          @if (inactivePaths().length) {
+            <ul class="dana-chip-list" aria-label="Inactive paths">
+              @for (p of inactivePaths(); track p.form) {
+                <li class="dana-chip">{{ p.label }} · inactive</li>
+              }
+            </ul>
+          }
+          @if (!activePaths().length) {
+            <gear-empty-state title="No active lapping paths" hint="None of the path forms report an active pass for this combination." />
+          } @else {
+            <div class="lapper-paths">
+              @for (p of activePaths(); track p.form) {
+                <article class="dana-card" data-tone="success">
+                  <div class="dana-card-header">
+                    <span class="dana-card-title">{{ p.label }}</span>
+                    <gear-status-badge status="Active" />
+                  </div>
+                  <div class="lapper-groups lapper-groups--tight">
+                    @for (g of pathGroups; track g.title) {
+                      <gear-summary-group [group]="g" [rows]="p.rows" [columns]="2" />
+                    }
+                  </div>
+                </article>
+              }
+            </div>
+          }
         }
-      </div>
-    </section>
+
+        @if (tab() === 'all') {
+          @for (group of configuredGroups(); track group[0]) {
+            <h3 class="lapper-section-title">{{ group[0] || 'Other variables' }}</h3>
+            <div class="lapper-dense">
+              @for (row of group[1]; track row.id) {
+                <gear-value-field [label]="'#' + row.number + ' · ' + row.name" [value]="row.value" [unit]="row.unit ?? undefined" [alert]="limitAlert(row)" [compact]="true" />
+              }
+            </div>
+          } @empty {
+            <gear-empty-state title="No values recorded" hint="This machine has no recorded cycles for the selected gearset yet." />
+          }
+        }
+      </section>
+    </div>
   }
 </div>

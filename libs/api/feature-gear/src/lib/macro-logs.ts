@@ -5,7 +5,7 @@ import {
   MacroLogDto,
   UpdateMacroLogDto,
 } from '@meshforge/api/data-access';
-import { LappingSummaryRow, MACRO_FORMS, MacroLog } from '@meshforge/shared/domain';
+import { LappingChange, LappingSummaryRow, MACRO_FORMS, MacroLog } from '@meshforge/shared/domain';
 import {
   UseInterceptors,
   Controller,
@@ -28,7 +28,10 @@ export abstract class MacroLogsService extends CrudService<MacroLog> {
     gearsetId: string,
     form?: string,
     cycleId?: string,
+    upToCycleId?: string,
   ): Promise<LappingSummaryRow[]>;
+  /** Recently recorded macro values beside the values they replaced, newest first. */
+  abstract changes(machineId: string, gearsetId: string, limit: number, cycleId?: string): Promise<LappingChange[]>;
 }
 @UseInterceptors(LapperWritePolicy)
 @Controller({ path: 'macro-log', version: '1' })
@@ -55,8 +58,20 @@ export class MacroLogsController extends crudController<MacroLog>({
     @Query('form')
     form?: string,
     @Query('cycleId', new ParseUUIDPipe({ optional: true })) cycleId?: string,
+    @Query('upTo', new ParseUUIDPipe({ optional: true })) upToCycleId?: string,
   ): Promise<LappingSummaryRow[]> {
-    return this.service.lappingSummary(machineId, gearsetId, form, cycleId);
+    return this.service.lappingSummary(machineId, gearsetId, form, cycleId, upToCycleId);
+  }
+  @Get('changes/:machineId/:gearsetId')
+  @ApiOperation({ summary: 'Recently recorded macro values beside the values they replaced' })
+  changes(
+    @Param('machineId', ParseUUIDPipe) machineId: string,
+    @Param('gearsetId', ParseUUIDPipe) gearsetId: string,
+    @Query('limit') limit?: string,
+    @Query('cycleId', new ParseUUIDPipe({ optional: true })) cycleId?: string,
+  ): Promise<LappingChange[]> {
+    const wanted = Number(limit);
+    return this.service.changes(machineId, gearsetId, Number.isInteger(wanted) && wanted >= 1 ? Math.min(wanted, 2000) : 500, cycleId);
   }
   /** Legacy routes kept for compatibility with the original client/collectors. */
   @Get(':machineId/:gearsetId/:form')

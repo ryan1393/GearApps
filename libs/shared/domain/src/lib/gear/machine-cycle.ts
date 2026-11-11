@@ -18,6 +18,24 @@ export type CreateMachineCycle = Pick<
 >;
 export type UpdateMachineCycle = Partial<Omit<MachineCycle, 'id' | 'machine' | 'gearset'>>;
 
+/** One row of the cycle history table. */
+export interface CycleHistoryRow {
+  id: string;
+  machine_id: string;
+  gearset_id: string;
+  serial_number: string | null;
+  consec: number;
+  timestamp: Date | string;
+  /** Macro values recorded with this cycle. Only values that changed are recorded. */
+  changed_count: number;
+}
+export interface CycleHistoryPage {
+  items: CycleHistoryRow[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
 /** One lapper's production, for the dashboard's machine-by-machine table. */
 export interface LapperMachineProduction {
   machine_id: string;

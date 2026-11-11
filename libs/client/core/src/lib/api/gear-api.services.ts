@@ -6,8 +6,10 @@ import {
   CreatePart,
   CreateScannerDetail,
   CreateSummary,
+  CycleHistoryPage,
   Department,
   Gearset,
+  LappingChange,
   LappingSummaryRow,
   LapperProduction,
   Machine,
@@ -94,6 +96,11 @@ export class MachineCyclesApi extends CrudApi<MachineCycle, CreateMachineCycle> 
   history(machineId: string, gearsetId: string): Observable<MachineCycle[]> {
     return this.http.get<MachineCycle[]>(`${this.url}/history/${machineId}/${gearsetId}`);
   }
+  historyPage(machineId: string, gearsetId: string, page: number, pageSize: number, serial?: string): Observable<CycleHistoryPage> {
+    return this.http.get<CycleHistoryPage>(`${this.url}/history-page/${machineId}/${gearsetId}`, {
+      params: { page, pageSize, ...(serial?.trim() ? { serial: serial.trim() } : {}) },
+    });
+  }
   latest(machineId: string, gearsetId: string): Observable<MachineCycle> {
     return this.http.get<MachineCycle>(`${this.url}/latest/${machineId}/${gearsetId}`);
   }
@@ -121,15 +128,22 @@ export class MacroLogsApi extends CrudApi<MacroLog> {
   constructor() {
     super('macro-log');
   }
+  /** Recently recorded macro values beside the values they replaced, newest first. */
+  changes(machineId: string, gearsetId: string, cycleId?: string, limit = 500): Observable<LappingChange[]> {
+    return this.http.get<LappingChange[]>(`${this.url}/changes/${machineId}/${gearsetId}`, {
+      params: { limit, ...(cycleId ? { cycleId } : {}) },
+    });
+  }
   /** Latest value of each macro for a machine + gearset, optionally one form group. */
   lappingSummary(
     machineId: string,
     gearsetId: string,
     form?: MacroForm,
     cycleId?: string,
+    upToCycleId?: string,
   ): Observable<LappingSummaryRow[]> {
     return this.http.get<LappingSummaryRow[]>(`${this.url}/summary/${machineId}/${gearsetId}`, {
-      params: { ...(form ? { form } : {}), ...(cycleId ? { cycleId } : {}) },
+      params: { ...(form ? { form } : {}), ...(cycleId ? { cycleId } : {}), ...(upToCycleId ? { upTo: upToCycleId } : {}) },
     });
   }
 }

@@ -25,11 +25,13 @@ import {
   DanaComboboxColumn,
   DanaComboboxComponent,
   DanaCountBadgeDirective,
-  DanaDetailGridDirective,
-  DanaKpiCardDirective,
-  DanaKpiGridDirective,
   DanaLoadingStateDirective,
   DanaPageHeaderComponent,
+  DanaTabDirective,
+  DanaTableDirective,
+  DanaTableEmptyDirective,
+  DanaTableShellDirective,
+  DanaTabsDirective,
 } from '@dana/ui';
 import {
   EmptyStateComponent,
@@ -37,7 +39,10 @@ import {
   ValueFieldComponent,
 } from '@meshforge/client/ui';
 import {
+  CycleHistoryPage,
+  CycleHistoryRow,
   Gearset,
+  LappingChange,
   LappingSummaryRow,
   Machine,
   MachineCycle,
@@ -61,17 +66,20 @@ import { SummaryGroupComponent } from './summary-group.component';
 
 @Component({
   selector: 'gear-lapping-summary-page',
-  imports: [MachineDsfCountComponent,
+  imports: [
+    MachineDsfCountComponent,
     FormsModule,
     DatePipe,
     DecimalPipe,
     DanaComboboxComponent,
     DanaCountBadgeDirective,
-    DanaDetailGridDirective,
-    DanaKpiCardDirective,
-    DanaKpiGridDirective,
     DanaLoadingStateDirective,
     DanaPageHeaderComponent,
+    DanaTabDirective,
+    DanaTableDirective,
+    DanaTableEmptyDirective,
+    DanaTableShellDirective,
+    DanaTabsDirective,
     EmptyStateComponent,
     StatusBadgeComponent,
     ValueFieldComponent,
@@ -108,10 +116,32 @@ export class LappingSummaryPageComponent implements OnInit {
 
   // Data
   protected readonly rows = loadable<LappingSummaryRow[]>([]);
-  protected readonly history = loadable<MachineCycle[]>([]);
+  protected readonly history = loadable<CycleHistoryPage | null>(null);
+  protected readonly changes = loadable<LappingChange[]>([]);
   protected readonly serialSearch = signal('');
-  protected readonly visibleHistory = computed(() => this.history.value().filter(c =>
-    !this.serialSearch().trim() || (c.serial_number ?? '').toLowerCase().includes(this.serialSearch().trim().toLowerCase())));
+  protected readonly page = signal(1);
+  protected readonly pageSize = 15;
+  protected readonly pageCount = computed(() => Math.max(1, Math.ceil((this.history.value()?.total ?? 0) / this.pageSize)));
+  /** The cycle picked in the table. Null shows the latest values. */
+  protected readonly selected = signal<CycleHistoryRow | null>(null);
+  protected readonly tabs = [
+    { id: 'changes', label: 'Changes' },
+    { id: 'summary', label: 'Summary' },
+    { id: 'paths', label: 'Lapping paths' },
+    { id: 'all', label: 'All values' },
+  ] as const;
+  protected readonly tab = signal<'changes' | 'summary' | 'paths' | 'all'>('changes');
+  /** Changes grouped by cycle, newest first; first readings are counted, not listed. */
+  protected readonly changeGroups = computed(() => {
+    const groups = new Map<string, { id: string; consec: number; timestamp: Date | string; serial_number: string | null; changed: LappingChange[]; first: LappingChange[] }>();
+    for (const change of this.changes.value()) {
+      let group = groups.get(change.machine_cycle_id);
+      if (!group) groups.set(change.machine_cycle_id, group = { id: change.machine_cycle_id, consec: change.consec, timestamp: change.timestamp, serial_number: change.serial_number, changed: [], first: [] });
+      (change.previous_value === null ? group.first : group.changed).push(change);
+    }
+    return [...groups.values()];
+  });
+  private serialTimer: ReturnType<typeof setTimeout> | undefined;
   protected readonly configuredGroups = computed(() => Array.from(this.byForm().entries()));
   /** Recorded values checked against the limits set for their macro in Admin > Macros. */
   protected readonly limitedCount = computed(
@@ -162,7 +192,9 @@ export class LappingSummaryPageComponent implements OnInit {
         if (m && g) this.load(m, g);
         else {
           this.requestVersion++;
-          this.history.set([]);
+          this.history.set(null);
+          this.changes.set([]);
+          this.selected.set(null);
           this.rows.set([]);
           this.cycle.set(null);
         }
@@ -261,17 +293,57 @@ export class LappingSummaryPageComponent implements OnInit {
   protected readonly machineText = (m: Machine) =>
     `${m.number ?? m.ip}${m.cell ? ` · Cell ${m.cell}` : ''}`;
 
-  protected selectCycle(cycle: MachineCycle) {
+  protected selectCycle(cycle: CycleHistoryRow) {
+    const machineId = this.machineId(), gearsetId = this.gearsetId();
+    if (!machineId || !gearsetId) return;
     this.requestVersion++;
-    this.cycle.set(cycle);
-    this.rows.load(this.macroLogsApi.lappingSummary(cycle.machine_id, cycle.gearset_id, undefined, cycle.id));
+    this.selected.set(cycle);
+    // The values as they stood when this cycle finished, and what the cycle itself changed.
+    this.rows.load(this.macroLogsApi.lappingSummary(machineId, gearsetId, undefined, undefined, cycle.id));
+    this.changes.load(this.macroLogsApi.changes(machineId, gearsetId, cycle.id));
+  }
+
+  protected showLatest() {
+    const machineId = this.machineId(), gearsetId = this.gearsetId();
+    if (!machineId || !gearsetId) return;
+    this.selected.set(null);
+    this.rows.load(this.macroLogsApi.lappingSummary(machineId, gearsetId));
+    this.changes.load(this.macroLogsApi.changes(machineId, gearsetId));
+  }
+
+  protected goToPage(page: number) {
+    const machineId = this.machineId(), gearsetId = this.gearsetId();
+    if (!machineId || !gearsetId) return;
+    this.page.set(Math.min(Math.max(1, page), this.pageCount()));
+    this.history.load(this.cyclesApi.historyPage(machineId, gearsetId, this.page(), this.pageSize, this.serialSearch()));
+  }
+
+  /** Search the whole history on the server, a moment after typing stops. */
+  protected searchSerial(text: string) {
+    this.serialSearch.set(text);
+    clearTimeout(this.serialTimer);
+    this.serialTimer = setTimeout(() => { this.page.set(1); this.goToPage(1); }, 300);
+  }
+
+  protected deltaText(change: LappingChange): string {
+    const delta = change.value - (change.previous_value ?? 0);
+    const rounded = Math.round(delta * 10000) / 10000;
+    return (rounded > 0 ? '+' : '') + rounded;
+  }
+
+  protected changeAlert(change: LappingChange): string | null {
+    const state = macroLimitState(change.value, change);
+    return state === 'ok' ? null : `${state === 'low' ? 'Below' : 'Above'} limit of ${macroLimitText(change)}`;
   }
 
   private load(machineId: string, gearsetId: string) {
     const version = ++this.requestVersion;
     this.cycle.set(null);
-    this.history.load(this.cyclesApi.history(machineId, gearsetId));
+    this.selected.set(null);
+    this.page.set(1);
+    this.history.load(this.cyclesApi.historyPage(machineId, gearsetId, 1, this.pageSize, this.serialSearch()));
     this.rows.load(this.macroLogsApi.lappingSummary(machineId, gearsetId));
+    this.changes.load(this.macroLogsApi.changes(machineId, gearsetId));
     this.cyclesApi
       .latest(machineId, gearsetId)
       .pipe(catchError(() => of(null)), takeUntilDestroyed(this.destroyRef))
