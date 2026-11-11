@@ -336,3 +336,90 @@ describe('Summary body rule rows', () => {
     expect(row(null, [19, 13])).toMatchObject({ status: 'CONFLICT', required_blade_sets: null });
   });
 });
+
+describe('Body-aware tray validation and the compatibility matrix', () => {
+  const definition = (code: string, enabled = true) => ({
+    definition_id: `def-${code}`, definition_code: code, cutter_head_code: 'C', supplier_code: 'G', hand_code: code.charAt(2),
+    blade_family_code: 'T', blade_family_name: 'TRI-AC', size_code: code.slice(4), definition_enabled: enabled,
+  });
+  const bodyRow = (dana: string | null, mf: string, code: string | null, extra: object = {}) => ({
+    id: `body-${dana ?? mf}`, dana_serial_number: dana, mf_serial_number: mf, enabled: true, open_build: false,
+    ...(code ? definition(code) : { definition_id: null }), ...extra,
+  });
+
+  const createService = (opts: { sets: number; partType: string; rule: string | null; bodies: object[] }) => {
+    const query = jest.fn(async (sql: string) => {
+      if (sql.includes('cutter_summary_body_rules')) return opts.rule ? [{ body_rule: opts.rule }] : [];
+      if (sql.includes('FROM public.cutter_bodies')) return opts.bodies;
+      return [];
+    });
+    const requirement = { id: 'req', summary_id: 's1', part_type_id: 'pt', required_blade_count: opts.sets, enabled: true, part_type: { code: opts.partType } };
+    const tray = {
+      id: 't1', serial_number: 'TRAY-1', summary_id: 's1', part_type_id: 'pt', grinding_completed_at: new Date(),
+      current_stage: { code: 'READY_FOR_CUTTER' }, required_blade_count: opts.sets, blade_count: opts.sets, enabled: true,
+    };
+    const blades = Array.from({ length: opts.sets }, (_, i) => ({ blade: { id: `b${i}`, enabled: true, summary_id: 's1', part_type_id: 'pt', status: BladeStatus.RETURNED_FROM_COATING } }));
+    const none = { findOne: jest.fn().mockResolvedValue(null) };
+    return new ServerFeatCutterConfigService(
+      { findOne: jest.fn().mockResolvedValue(requirement), manager: { query } } as never,
+      {} as never, {} as never, {} as never, {} as never,
+      { findOne: jest.fn().mockResolvedValue(tray) } as never,
+      { find: jest.fn().mockResolvedValue(blades) } as never,
+      none as never, none as never,
+    );
+  };
+  const validate = (svc: ServerFeatCutterConfigService, body: string) =>
+    svc.validateTray({ summary_id: 's1', part_type_id: 'pt', tray_serial_number: 'TRAY-1', cutter_body_identifier: body });
+
+  it('accepts a permitted body for the Summary + Part Type', async () => {
+    const svc = createService({ sets: 13, partType: 'PINION', rule: '076', bodies: [bodyRow('CGLT076AAA', '8612', 'CGLT076')] });
+    await expect(validate(svc, 'cglt076aaa')).resolves.toMatchObject({ valid: true, body_compatible: true, body_rule: '076', body_available: true });
+  });
+
+  it('rejects a body whose capacity matches but whose rule does not (105 Special vs 076)', async () => {
+    const svc = createService({ sets: 13, partType: 'RING', rule: '076', bodies: [bodyRow('CGRT1058AA', '78', 'CGRT105')] });
+    const result = await validate(svc, 'CGRT1058AA');
+    expect(result).toMatchObject({ valid: false, body_compatible: false, body_rule: '105-SPECIAL' });
+    expect(result.reason).toContain('076 Standard');
+  });
+
+  it('accepts an unetched MF-only body through its linked non-105 definition', async () => {
+    const svc = createService({ sets: 17, partType: 'RING', rule: null, bodies: [bodyRow(null, 'A777', 'CGRT088')] });
+    await expect(validate(svc, 'A777')).resolves.toMatchObject({ valid: true, body_compatible: true, body_rule: '088' });
+  });
+
+  it('keeps compatibility apart from availability', async () => {
+    const svc = createService({ sets: 19, partType: 'RING', rule: null, bodies: [bodyRow('CGRT105AAB', 'A1', 'CGRT105', { open_build: true })] });
+    const result = await validate(svc, 'CGRT105AAB');
+    expect(result).toMatchObject({ valid: false, body_compatible: true, body_available: false });
+    expect(result.reason).toContain('open build');
+  });
+
+  it('refuses an ambiguous manufacturer serial instead of picking a body', async () => {
+    const svc = createService({ sets: 13, partType: 'RING', rule: '076', bodies: [bodyRow('CGRT076AAA', '615', 'CGRT076'), bodyRow('CGRT076AAS', '615', 'CGRT076')] });
+    const result = await validate(svc, '615');
+    expect(result).toMatchObject({ valid: false, body_compatible: false });
+    expect(result.body_reason).toContain('multiple cutter bodies');
+  });
+
+  it('serves the Summary + Part Type matrix from configured data', async () => {
+    const query = jest.fn(async (sql: string) => {
+      if (sql.includes('FROM public.cutter_body_definitions')) {
+        return ['CGRT076', 'CGLT076', 'CGRT105', 'CGLT105'].map((c) => ({ ...definition(c), id: `def-${c}`, enabled: true }));
+      }
+      return [
+        { summary_id: 'a', summary_number: '30538', summary_revision: '', summary_enabled: true, model_number: null, hos: 'RH', body_rule: null,
+          requirements: [{ part_type_code: 'PINION', required_blade_count: 19, enabled: true }, { part_type_code: 'RING', required_blade_count: 19, enabled: true }] },
+        { summary_id: 'b', summary_number: '30131', summary_revision: '', summary_enabled: true, model_number: '286', hos: 'LH', body_rule: null,
+          requirements: [{ part_type_code: 'RING', required_blade_count: '13', enabled: true }] },
+      ];
+    });
+    const svc = new ServerFeatCutterConfigService({ manager: { query } } as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never, {} as never);
+    const rows = await svc.listBodyCompatibilityMatrix(null);
+    expect(rows.map((r) => [r.summary_number, r.part_type_code, r.body_rule, r.required_total_blades, r.evidence, r.permitted_definitions.map((d) => d.definition_code).join(',')])).toEqual([
+      ['30538', 'PINION', '105', 38, 'SUPPORTED', 'CGLT105,CGRT105'],
+      ['30538', 'RING', '105', 38, 'SUPPORTED', 'CGLT105,CGRT105'],
+      ['30131', 'RING', null, 26, 'UNRESOLVED', ''],
+    ]);
+  });
+});

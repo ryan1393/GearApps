@@ -8,6 +8,7 @@ import {
   IsString,
   IsUUID,
   MaxLength,
+  ValidateIf,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -33,6 +34,14 @@ export class CreateCutterBodyDto {
   @IsString()
   @MaxLength(500)
   description?: string;
+
+  @ApiPropertyOptional({
+    format: 'uuid', nullable: true,
+    description: 'Cutter body definition (body type). Gives an unetched body (MF S/N only) its 064/076/088 rule; a 105 still needs its Dana S/N.',
+  })
+  @IsOptional()
+  @IsUUID()
+  definition_id?: string | null;
 }
 
 
@@ -122,6 +131,9 @@ export class CreateCutterTeardownDto {
 
 export class UpdateCutterBodyDto {
   @IsOptional() @IsString() @MaxLength(100) dana_serial_number?: string | null;
+  /** Body definition (type); null unlinks it. */
+  @ApiPropertyOptional({ format: 'uuid', nullable: true })
+  @ValidateIf((_, value) => value !== null && value !== undefined) @IsUUID() definition_id?: string | null;
   @IsOptional() @IsString() @MaxLength(100) mf_serial_number?: string | null;
   @IsOptional() @IsString() @MaxLength(500) description?: string | null;
   @IsOptional() @IsBoolean() enabled?: boolean;

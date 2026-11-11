@@ -123,8 +123,9 @@ export class CutterBuildComponent implements OnDestroy {
 
   /** "105 Standard · 38 blades (19 sets)" or the reason it is unresolved. */
   cutterBodyCapacityText(body: CutterBody | null = this.cutterBody): string {
-    const rule = resolveCutterBodyRule(body).rule;
-    return rule ? `${rule.label} · ${rule.total_blades} blades (${rule.blade_sets} sets)` : 'Blade capacity unresolved';
+    const { rule, source } = resolveCutterBodyRule(body);
+    const from = source === 'DEFINITION' ? ' · from body definition (not etched)' : '';
+    return rule ? `${rule.label} · ${rule.total_blades} blades (${rule.blade_sets} sets)${from}` : 'Blade capacity unresolved';
   }
 
   bladeSetText(sets: number | null | undefined): string {
@@ -155,6 +156,8 @@ export class CutterBuildComponent implements OnDestroy {
         this.cutterBody?.enabled &&
         this.tray &&
         this.trayValidation?.valid &&
+        this.trayValidation.body_compatible !== false &&
+        this.trayValidation.body_available !== false &&
         this.traySerial.trim().toUpperCase() === this.tray.serial_number.toUpperCase() &&
         [this.cutterBody.dana_serial_number, this.cutterBody.mf_serial_number].some(serial => serial?.toUpperCase() === this.cutterBodySerial.trim().toUpperCase()) &&
         cutterBodyMatchesRequirement(this.cutterBody, this.trayValidation.required_blade_count, this.tray.part_type?.code ?? '', this.trayValidation.summary_body_rule ?? null) &&
@@ -329,17 +332,22 @@ export class CutterBuildComponent implements OnDestroy {
 
   private validateTray(tray: ITray, version: number): void {
     try {
-      this.api.validateTray(tray).pipe(takeUntil(this.destroyed$)).subscribe({
+      const bodySerial = this.cutterBody?.dana_serial_number || this.cutterBody?.mf_serial_number || null;
+      this.api.validateTray(tray, bodySerial).pipe(takeUntil(this.destroyed$)).subscribe({
         next: (validation) => {
           if (version !== this.scanVersion) return;
           this.busy = false;
           this.trayValidation = validation;
+          // The API's answer for this body wins; the shared rule is the fallback for an older API.
           const compatibility = this.cutterBody
             ? evaluateCutterBodyCompatibility(this.cutterBody, validation.required_blade_count, tray.part_type?.code ?? '', validation.summary_body_rule ?? null)
             : null;
-          if (compatibility && !compatibility.compatible) {
+          const bodyReason = validation.body_compatible === false
+            ? validation.body_reason
+            : validation.body_compatible === undefined && compatibility && !compatibility.compatible ? compatibility.reason : null;
+          if (bodyReason) {
             this.trayValidation = null;
-            this.error = `This tray does not match the selected Cutter Body: ${compatibility.reason}`;
+            this.error = `This tray does not match the selected Cutter Body: ${bodyReason}`;
           } else if (!validation.valid) {
             this.error = validation.reason || 'This tray is not ready for Cutter Builder.';
           }

@@ -75,7 +75,7 @@ test('packaged base data declares its unit and keeps the established quantities'
 
 test('JS Dana S/N decoder agrees with the TypeScript authority', async (t) => {
   const major = Number(process.versions.node.split('.')[0]);
-  if (major < 23) { t.skip('needs Node type stripping (project Node is 24)'); return; }
+  if (!process.features?.typescript && major < 23) { t.skip('needs Node type stripping (project Node is 24)'); return; }
   const { decodeDanaSerial } = await import('./blade-requirement-plan.mjs');
   const ts = await import(path.join(root, 'libs/manufacturing/shared/util-constants/src/lib/cutter-body-compatibility.constants.ts'));
   const samples = ['CGRT064AAA', 'CGLT076AAA', 'CGRT088AAA', 'CGRT105AAA', 'CGRT1058AA', 'CGRT105A8A', 'CGRT0768AA', ' cgrt1058aa ',
@@ -85,4 +85,45 @@ test('JS Dana S/N decoder agrees with the TypeScript authority', async (t) => {
     assert.equal(a.valid, b.valid, String(s));
     if (a.valid) assert.equal(a.rule, b.rule.code, String(s));
   }
+});
+
+test('JS permitted-definition matrix agrees with the TypeScript authority', async (t) => {
+  if (!process.features?.typescript && Number(process.versions.node.split('.')[0]) < 23) { t.skip('needs Node type stripping (project Node is 24)'); return; }
+  const { buildBodyMatrix } = await import('./blade-requirement-plan.mjs');
+  const ts = await import(path.join(root, 'libs/manufacturing/shared/util-constants/src/lib/cutter-body-compatibility.constants.ts'));
+  const definitions = JSON.parse(fs.readFileSync(path.join(here, 'data/cutter_body_definitions.json'), 'utf8').replace(/^﻿/, ''))
+    .map((d) => ({ id: d.Definition_Code, definition_code: d.Definition_Code, size_code: d.Size_Code, hand_code: d.Hand_Code,
+      blade_family_code: d.Blade_Family_Code, blade_family_name: d.Blade_Family_Name, enabled: d.Enabled !== false }));
+  definitions.push({ id: 'X', definition_code: 'CGRR088', size_code: '88', blade_family_name: 'RING', enabled: true });
+  definitions.push({ id: 'Y', definition_code: 'CGLT064', size_code: '064', blade_family_name: 'TRI-AC', enabled: false });
+  const cases = [[null, [19, 19]], [null, [17, 17]], [null, [13, 13]], ['076', [13, 13]], ['105-SPECIAL', [13, 13]], ['105', [13, 13]], [null, [19, 13]], ['064', [11]], [null, [11, 11]]];
+  for (const [rule, counts] of cases) {
+    const parts = counts.map((sets, i) => ({ part_type: i ? 'RING' : 'PINION', sets, enabled: true }));
+    const js = buildBodyMatrix([{ summary: 'S', body_rule: rule, requirements: parts }], definitions);
+    const fromTs = ts.buildCutterBodyCompatibilityMatrix([{ summary_id: 's', summary_number: 'S', summary_revision: '', configured_body_rule: rule,
+      requirements: parts.map((p) => ({ part_type_code: p.part_type, required_blade_count: p.sets, enabled: true })) }], definitions);
+    assert.deepEqual(js.map((r) => [r.part_type, r.body_rule, r.evidence, r.permitted.join(',')]),
+      fromTs.map((r) => [r.part_type_code, r.body_rule, r.evidence, r.permitted_definitions.map((d) => d.definition_code).join(',')]), `${rule} ${counts}`);
+  }
+});
+
+test('base-data matrix: 105 Summaries permit both 105 definitions, 26-blade Summaries stay unresolved', async () => {
+  const { buildBodyMatrix } = await import('./blade-requirement-plan.mjs');
+  const definitions = JSON.parse(fs.readFileSync(path.join(here, 'data/cutter_body_definitions.json'), 'utf8').replace(/^﻿/, ''))
+    .map((d) => ({ definition_code: d.Definition_Code, size_code: d.Size_Code, blade_family_name: d.Blade_Family_Name, enabled: d.Enabled !== false }));
+  const rows = buildBodyMatrix([
+    { summary: '30538', hos: 'RH', requirements: [{ part_type: 'RING', sets: 19 }, { part_type: 'PINION', sets: 19 }] },
+    { summary: '30131', requirements: [{ part_type: 'RING', sets: 13 }] },
+    { summary: '30131b', body_rule: '105-SPECIAL', requirements: [{ part_type: 'RING', sets: 13 }] },
+    { summary: '1052', body_rule: '076', requirements: [{ part_type: 'PINION', sets: 13 }] },
+    { summary: 'small', requirements: [{ part_type: 'RING', sets: 11 }] },
+  ], definitions);
+  assert.deepEqual(rows.map((r) => [r.summary, r.part_type, r.body_rule, r.total_blades, r.evidence, r.permitted.join(',')]), [
+    ['30538', 'RING', '105', 38, 'SUPPORTED', 'CGLT105,CGRT105'],
+    ['30538', 'PINION', '105', 38, 'SUPPORTED', 'CGLT105,CGRT105'],
+    ['30131', 'RING', null, 26, 'UNRESOLVED', ''],
+    ['30131b', 'RING', '105-SPECIAL', 26, 'CONFIGURED', 'CGLT105,CGRT105'],
+    ['1052', 'PINION', '076', 26, 'CONFIGURED', 'CGLT076,CGRT076'],
+    ['small', 'RING', '064', 22, 'UNRESOLVED', ''], // no 064 definition is configured
+  ]);
 });

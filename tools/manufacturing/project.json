@@ -126,6 +126,14 @@
       },
       "cache": false
     },
+    "report-cutter-body-matrix": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/manufacturing/base-data/report-cutter-body-matrix.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
     "test-cutter-dana": {
       "executor": "nx:run-commands",
       "options": {

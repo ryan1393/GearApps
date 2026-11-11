@@ -120,6 +120,30 @@ describe('Cutter workflow selection safety', () => {
       expect(component.bodyCompatibility?.reason).toContain('Body Size Rule is not set');
     }
   });
+  it('sends the body to tray validation and obeys the API body answer', () => {
+    api['validateTray'].mockReturnValue(of({ valid: false, required_blade_count: 13, body_compatible: false, body_reason: 'This Summary uses 076 Standard; cutter body CGRT1058AA is 105 Special (8th Dana S/N character 8)' }));
+    const component = cutter(); component.cutterBody = { ...body, dana_serial_number: 'CGRT1058AA' } as CutterBody;
+    component.cutterBodySerial = 'CGRT1058AA'; component.traySerial = 'TRAY-A';
+    component.scanTray();
+    expect(api['validateTray']).toHaveBeenCalledWith(expect.anything(), 'CGRT1058AA');
+    expect(component.trayValidation).toBeNull();
+    expect(component.error).toContain('076 Standard');
+  });
+  it('does not build with a compatible body that the API reports as unavailable', () => {
+    const component = special105ReadyToBuild('105-SPECIAL', { ...body, dana_serial_number: 'CGRT1058AA' } as CutterBody);
+    expect(component.canBuild).toBe(true);
+    component.trayValidation = { ...component.trayValidation, body_compatible: true, body_available: false } as CutterTrayValidation;
+    expect(component.canBuild).toBe(false);
+  });
+  it('builds an unetched body from its linked 076 definition, but never guesses a 105', () => {
+    const definition = (code: string) => ({ definition_code: code, cutter_head_code: 'C', supplier_code: 'G', hand_code: code.charAt(2), blade_family_code: 'T',
+      blade_family_name: 'TRI-AC', size_code: code.slice(4), supplier_name: 'Gleason', hand_name: 'RIGHT', size_description: null, enabled: true });
+    const mfOnly076 = { ...body, dana_serial_number: null, mf_serial_number: 'A777', definition: definition('CGRT076') } as CutterBody;
+    expect(special105ReadyToBuild('076', mfOnly076).canBuild).toBe(true);
+    expect(cutter().cutterBodyCapacityText(mfOnly076)).toBe('076 Standard · 26 blades (13 sets) · from body definition (not etched)');
+    const mfOnly105 = { ...body, dana_serial_number: null, mf_serial_number: '78', definition: definition('CGRT105') } as CutterBody;
+    expect(special105ReadyToBuild('105-SPECIAL', mfOnly105).canBuild).toBe(false);
+  });
   it('never takes capacity from the MF serial', () => {
     const component = special105ReadyToBuild(null, { ...body, dana_serial_number: null, mf_serial_number: 'CGRT1058AA' } as CutterBody);
     expect(component.canBuild).toBe(false);

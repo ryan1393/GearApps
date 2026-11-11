@@ -39,8 +39,8 @@
           Select Available Cutter Body
           <select [(ngModel)]="selectedCutterBodyId" name="selectedCutterBodyId" class="gear-input" (change)="selectAvailableCutterBody()" [disabled]="busy">
             <option value="">Choose available cutter body...</option>
-            <option *ngFor="let body of availableCutterBodies" [value]="body.id">
-              {{ body.dana_serial_number || body.mf_serial_number }} · {{ cutterBodyCapacityText(body) }}
+            <option *ngFor="let body of availableCutterBodies" [value]="body.id" [disabled]="!cutterBodyRule(body).rule">
+              {{ body.dana_serial_number || body.mf_serial_number }}{{ body.definition?.definition_code ? ' · ' + body.definition?.definition_code : '' }} · {{ cutterBodyCapacityText(body) }}
             </option>
           </select>
         </label>
@@ -73,7 +73,7 @@
           </div>
           <p *ngIf="cutterBodyRule(body).problem as problem" class="gear-workflow-help">{{ problem }}</p>
           <p *ngIf="!body.dana_serial_number" class="gear-workflow-help">
-            Dana serial assignment belongs in <strong>Admin &gt; Cutter Bodies</strong>. Normal Cutter Builder does not administer etched serials.
+            Unetched body: its body rule comes from its definition in <strong>Admin &gt; Cutter Bodies</strong> (a 105 body needs its Dana S/N to tell Standard from Special). Dana serial assignment belongs there too; Cutter Builder does not administer etched serials.
           </p>
         </div>
       </div>
@@ -148,6 +148,8 @@
             Part Type {{ validation.part_type_matches ? 'match' : 'mismatch' }}
           </p>
           <p *ngIf="bodyCompatibility?.warning as warning" class="gear-workflow-help"><strong>Body Size Rule:</strong> {{ warning }}</p>
+          <p *ngIf="validation.body_compatible === true" class="gear-workflow-help"><strong>Cutter Body:</strong> permitted for this Summary and Part Type ({{ validation.body_rule }})</p>
+          <p *ngIf="validation.body_available === false" class="gear-workflow-help"><strong>Cutter Body:</strong> {{ validation.body_availability_reason }}</p>
           <p *ngIf="bodyCompatibility?.summary_rule as rule" class="gear-workflow-help">Summary Body Size Rule: {{ rule.label }} · {{ rule.total_blades }} blades ({{ rule.blade_sets }} sets)</p>
         </div>
       </div>
