@@ -1,0 +1,186 @@
+/*
+ * Blade operations workstation (touchscreen).
+ * Unencapsulated on purpose: these rules compact the embedded operation pages.
+ * Everything is scoped under .ops-station.
+ */
+/* !important beats the shared `html body .gear-page` width/padding overrides in @dana/ui. */
+html body .gear-page.ops-station {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 14px 18px 18px !important;
+}
+
+/* Operation tabs: one row of large touch targets. */
+.ops-station .ops-station-tabs {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  flex: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ops-station .ops-station-tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+  min-height: 64px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 2px solid var(--dana-control-border, #d6d9de);
+  border-radius: 12px;
+  background: var(--dana-surface, #fff);
+  color: var(--dana-text, #14171c);
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ops-station .ops-station-tab .gear-glyph {
+  flex: none;
+}
+
+.ops-station .ops-station-tab.is-active {
+  border-color: var(--dana-primary, #c76316);
+  background: var(--dana-primary, #c76316);
+  color: var(--dana-surface, #fff);
+}
+
+.ops-station .ops-station-tab:active {
+  transform: scale(.98);
+}
+
+.ops-station .ops-station-tab:focus-visible {
+  outline: 3px solid var(--dana-focus-border, #2d9193);
+  outline-offset: 2px;
+}
+
+/* The embedded operation page: no page header (the tab names it) and no page padding. */
+.ops-station .ops-station-work .gear-page {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.ops-station .ops-station-work .gear-page > header {
+  display: none !important;
+}
+
+.ops-station .ops-station-work .gear-page > * {
+  margin: 0 0 12px !important;
+  break-inside: avoid;
+}
+
+/* Scan steps already sit in a panel; drop the scan panel's own padding. */
+.ops-station .ops-station-work gear-scan-panel > div {
+  padding: 4px 0 !important;
+}
+
+/* Touch-sized controls. */
+.ops-station .ops-station-work :is(.gear-input, .gear-select, select, input:not([type='checkbox']):not([type='radio']), textarea) {
+  min-height: 52px;
+  font-size: 1.05rem;
+}
+
+.ops-station .ops-station-work :is(button, .gear-btn, summary) {
+  min-height: 48px;
+  touch-action: manipulation;
+}
+
+/* Coater Shipments form rows wrap inside a column instead of overflowing it. */
+.ops-station .ops-station-work :is(.start-panel, .details-panel) {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)) !important;
+}
+
+/* Pickers open in place instead of floating, so they are never cut off at the screen edge. */
+.ops-station .ops-station-work details > div.absolute {
+  position: static !important;
+  max-height: 240px !important;
+}
+
+/* Long lists and history tables scroll inside their own box, never the page. */
+.ops-station .ops-station-work :is([danaTableShell], .table-wrap) {
+  max-height: 38vh;
+  overflow: auto;
+}
+
+/*
+ * Desktop/touch workstation: the station fills the screen below the top bar and the page does not
+ * scroll. Panels flow down one column and then into the next, so a workflow's steps sit side by side.
+ */
+@media (min-width: 1024px) {
+  .gear-page.ops-station {
+    height: calc(100dvh - var(--dana-topbar-height, var(--gear-topbar-height)));
+    overflow: hidden;
+  }
+
+  .ops-station .ops-station-work {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  .ops-station .ops-station-work > * {
+    display: block;
+    height: 100%;
+  }
+
+  .ops-station .ops-station-work .gear-page {
+    display: block !important;
+    height: 100%;
+    columns: 3 380px;
+    column-gap: 16px;
+    column-fill: auto;
+  }
+}
+
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .ops-station .ops-station-tab {
+    flex-direction: column;
+    gap: 4px;
+    font-size: .92rem;
+  }
+
+  .ops-station .ops-station-work .gear-page {
+    columns: 2 360px;
+  }
+}
+
+/* Phones and small tablets keep a normal scrolling page. */
+@media (max-width: 1023px) {
+  html body .gear-page.ops-station {
+    padding: 12px !important;
+  }
+
+  .ops-station .ops-station-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media print {
+  .gear-page.ops-station {
+    height: auto;
+    overflow: visible;
+  }
+
+  .ops-station .ops-station-tabs {
+    display: none;
+  }
+
+  .ops-station .ops-station-work .gear-page {
+    columns: auto;
+    height: auto;
+  }
+}

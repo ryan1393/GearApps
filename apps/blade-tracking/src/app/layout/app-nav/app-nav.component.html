@@ -15,12 +15,7 @@
 
       <ng-container *ngIf="canEdit(user)">
         <div class="nav-heading">OPERATIONS</div>
-        <a (click)="mobileNav.close()" routerLink="/blades/intake" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-intake" aria-hidden="true"></span></span><span>Blade Intake</span></a>
-        <a (click)="mobileNav.close()" routerLink="/blades/grinding" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Grinding</span></a>
-        <a (click)="mobileNav.close()" routerLink="/blades/load-container" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-container" aria-hidden="true"></span></span><span>Load Coater Container</span></a>
-        <a (click)="mobileNav.close()" routerLink="/blades/coater-shipments" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-container" aria-hidden="true"></span></span><span>Coater Shipments</span></a>
-        <a (click)="mobileNav.close()" routerLink="/blades/receive-container" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-receive" aria-hidden="true"></span></span><span>Receive From Coater</span></a>
-        <a (click)="mobileNav.close()" routerLink="/blades/internal-movement" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-move" aria-hidden="true"></span></span><span>Internal Movement</span></a>
+        <a (click)="mobileNav.close()" routerLink="/blades/operations" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Operations Station</span></a>
 
         <div class="nav-heading">INVENTORY</div>
         <a (click)="mobileNav.close()" routerLink="/blades/body-shelves" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-location" aria-hidden="true"></span></span><span>Empty Body Shelves</span></a>

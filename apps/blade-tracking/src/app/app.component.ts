@@ -21,17 +21,12 @@ export class AppComponent {
   // MeshForge browser tab identity v24
   private readonly pageTitles: ReadonlyArray<readonly [string, string]> = [
       ['/blades/cancel-last', 'Cancel Last Tray Transaction'],
-      ['/blades/internal-movement', 'Internal Movement'],
-      ['/blades/coater-shipments', 'Coater Shipments'],
-      ['/blades/load-container', 'Load Coater Container'],
-      ['/blades/receive-container', 'Receive From Coater'],
+      ['/blades/operations', 'Operations Station'],
       ['/blades/tray-contents', 'Tray Contents'],
       ['/blades/all-inventory', 'Inventory Control Center'],
       ['/blades/scrap-blades', 'Scrap / Discarded'],
       ['/blades/inventory', 'Find Inventory'],
       ['/blades/locations', 'Blade Locations'],
-      ['/blades/intake', 'Blade Intake'],
-      ['/blades/grinding', 'Grinding'],
       ['/blades/body-shelves', 'Empty Body Shelves'],
       ['/admin', 'Admin'],
       ['/login', 'Sign In'],
