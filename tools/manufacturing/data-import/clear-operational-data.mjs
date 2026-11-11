@@ -3,16 +3,21 @@
 //
 // Emptied: blades, trays, containers and the blade sets packed in them, cutter builds and
 // their events, checks, teardowns and machine runs, coater shipments, Greenshed/DSF counts
-// and the Cancel Last journal.
-// Locations: shelf/layer/bin locations (CGDR-A1A and the other Cuttergrind shelf bins) and
-// COATER-STAGING are kept, empty; every other location is deleted.
+// and the Cancel Last journal; and any other table that points at those, directly or through
+// another table (tables left by older releases, e.g. dana_coater_set_blades_v147). Such a table
+// on the KEEP list or outside the public schema stops the run before anything is deleted.
+// Locations (--locations=):
+//   keep-shelves (default)  shelf/layer/bin locations (CGDR-A1A and the other Cuttergrind
+//                           shelf bins) and COATER-STAGING are kept, empty; the rest are deleted.
+//   delete-all              every location is deleted (the API recreates COATER-STAGING when
+//                           it next starts).
 // Kept: users, departments, models, parts, part summaries, blade requirements, cutter
 // body definitions, cutter bodies, roll masters, gearsets, machines, lookup lists,
 // server settings, label printers, Coater RPA setup, DSF machine mappings and all Lapper data.
 //
-// Only the tables named in EMPTY are truncated, without CASCADE: if a kept table still
-// referenced one of them, PostgreSQL refuses and nothing is deleted. Locations are then
-// deleted row by row, so a kept table still pointing at one also stops the run.
+// Tables are truncated without CASCADE in one transaction, and locations are then deleted row
+// by row: if anything not being emptied still points at them, PostgreSQL refuses and nothing is
+// deleted. The preview lists those blockers first.
 import fs from 'node:fs';
 import path from 'node:path';
 import pg from 'pg';
@@ -58,8 +63,25 @@ export const KEEP = [
   'dana_greenshed_shift_tracking',
 ];
 
-/** Partly cleared: only the locations that are not shelf/layer/bin bins are deleted. */
+/** Cleared row by row, as --locations= chooses; never truncated. */
 export const LOCATIONS_TABLE = 'locations';
+
+/** --locations= choices. keep-shelves is the default. */
+export const LOCATION_MODES = {
+  'keep-shelves': 'keep the shelf/layer/bin locations and COATER-STAGING (empty), delete the rest',
+  'delete-all': 'delete every location',
+};
+export const DEFAULT_LOCATION_MODE = 'keep-shelves';
+
+/** The --locations= value from the command line; throws on an unknown one. */
+export function parseLocationMode(argv) {
+  const arg = argv.find((value) => value.startsWith('--locations='));
+  const mode = arg ? arg.slice('--locations='.length) : DEFAULT_LOCATION_MODE;
+  if (!Object.hasOwn(LOCATION_MODES, mode)) {
+    throw new Error(`Unknown --locations=${mode}. Use ${Object.keys(LOCATION_MODES).map((m) => `--locations=${m}`).join(' or ')}.`);
+  }
+  return mode;
+}
 
 /**
  * Shelf/layer/bin tags made by Admin > Locations > Bulk shelf locations: prefix, shelf letter,
@@ -73,6 +95,41 @@ export const KEPT_LOCATION_SERIALS = ['COATER-STAGING'];
 
 const KEPT_LOCATION_WHERE = 'upper(serial_number) ~ $1 OR upper(serial_number) = ANY($2::text[])';
 const keptLocationParams = [KEPT_SHELF_LOCATION_PATTERN, KEPT_LOCATION_SERIALS];
+
+/** Which locations survive in each mode: SQL over public.locations, with bound parameters. */
+function keptLocations(mode) {
+  return mode === 'delete-all'
+    ? { where: 'false', params: [] }
+    : { where: KEPT_LOCATION_WHERE, params: keptLocationParams };
+}
+
+/**
+ * Every table that points at one of `names` (public schema), directly or through another
+ * table, read from the database's own foreign keys. The named tables are not included.
+ */
+const DEPENDENTS_SQL = `
+  WITH RECURSIVE deps(rel) AS (
+    SELECT c.oid FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE n.nspname = 'public' AND c.relname = ANY($1::text[])
+    UNION
+    SELECT con.conrelid FROM pg_constraint con JOIN deps d ON con.confrelid = d.rel
+     WHERE con.contype = 'f'
+  )
+  SELECT n.nspname AS schema, c.relname AS table
+    FROM deps JOIN pg_class c ON c.oid = deps.rel JOIN pg_namespace n ON n.oid = c.relnamespace
+   WHERE NOT (n.nspname = 'public' AND c.relname = ANY($1::text[]))
+   ORDER BY 1, 2`;
+
+/** Foreign keys from other tables to public.locations (single-column, as MeshForge's are). */
+const LOCATION_REFERENCES_SQL = `
+  SELECT n.nspname AS schema, c.relname AS table, a.attname AS column, fa.attname AS ref
+    FROM pg_constraint con
+    JOIN pg_class c ON c.oid = con.conrelid JOIN pg_namespace n ON n.oid = c.relnamespace
+    JOIN pg_attribute a ON a.attrelid = con.conrelid AND a.attnum = con.conkey[1]
+    JOIN pg_attribute fa ON fa.attrelid = con.confrelid AND fa.attnum = con.confkey[1]
+   WHERE con.contype = 'f' AND con.confrelid = 'public.locations'::regclass
+     AND con.conrelid <> 'public.locations'::regclass
+   ORDER BY 1, 2, 3`;
 
 export const CONFIRM_FLAG = '--yes-delete-operational-data';
 
@@ -103,14 +160,33 @@ async function countRows(client, tables) {
   return counts;
 }
 
-async function countLocations(client) {
+async function countLocations(client, mode) {
+  const { where, params } = keptLocations(mode);
   const { rows } = await client.query(
-    `SELECT COUNT(*) FILTER (WHERE ${KEPT_LOCATION_WHERE})::bigint AS kept,
-            COUNT(*) FILTER (WHERE NOT (${KEPT_LOCATION_WHERE}))::bigint AS deleted
+    `SELECT COUNT(*) FILTER (WHERE ${where})::bigint AS kept,
+            COUNT(*) FILTER (WHERE NOT (${where}))::bigint AS deleted
        FROM public.locations`,
-    keptLocationParams,
+    params,
   );
   return { kept: Number(rows[0]?.kept ?? 0), deleted: Number(rows[0]?.deleted ?? 0) };
+}
+
+/** Rows outside the emptied tables that point at a location about to be deleted. */
+async function locationBlockers(client, mode, emptied) {
+  const { where, params } = keptLocations(mode);
+  const { rows: references } = await client.query(LOCATION_REFERENCES_SQL);
+  const blockers = [];
+  for (const ref of references) {
+    if (ref.schema === 'public' && emptied.includes(ref.table)) continue;
+    const { rows } = await client.query(
+      `SELECT COUNT(*)::bigint AS count FROM ${quoteIdent(ref.schema)}.${quoteIdent(ref.table)} x
+        WHERE x.${quoteIdent(ref.column)} IN (SELECT l.${quoteIdent(ref.ref)} FROM public.locations l WHERE NOT (${where}))`,
+      params,
+    );
+    const count = Number(rows[0]?.count ?? 0);
+    if (count) blockers.push({ name: `${ref.schema}.${ref.table}.${ref.column}`, count });
+  }
+  return blockers;
 }
 
 function printCounts(title, counts) {
@@ -122,6 +198,7 @@ function printCounts(title, counts) {
 async function main() {
   const apply = process.argv.includes('--apply');
   const confirmed = process.argv.includes(CONFIRM_FLAG);
+  const locationMode = parseLocationMode(process.argv.slice(2));
   const env = { ...loadDotEnv(path.resolve(root, '.env')), ...process.env };
   for (const key of ['DATABASE_HOST', 'DATABASE_PORT', 'DATABASE_USERNAME', 'DATABASE_PASSWORD', 'DATABASE_NAME']) {
     if (!env[key]) throw new Error(`Missing ${key} in project .env/environment.`);
@@ -141,30 +218,54 @@ async function main() {
     const present = new Set(rows.map((row) => row.tablename));
     const empty = EMPTY.filter((table) => present.has(table));
     const keep = KEEP.filter((table) => present.has(table));
-    const other = [...present]
-      .filter((table) => !EMPTY.includes(table) && !KEEP.includes(table) && table !== LOCATIONS_TABLE).sort();
     for (const required of ['users', 'locations', 'trays']) {
       if (!present.has(required)) throw new Error(`Table ${required} is missing: this is not a MeshForge database.`);
     }
 
+    // Tables not on the lists (e.g. left by older releases) that point at the emptied ones
+    // cannot keep their rows: they are emptied too, unless they must be kept.
+    const { rows: dependents } = await client.query(DEPENDENTS_SQL, [empty]);
+    const refused = dependents.filter((dep) => dep.schema !== 'public' || KEEP.includes(dep.table) || dep.table === LOCATIONS_TABLE);
+    const alsoEmpty = dependents.filter((dep) => !refused.includes(dep)).map((dep) => dep.table);
+    const targets = [...empty, ...alsoEmpty];
+    const other = [...present]
+      .filter((table) => !targets.includes(table) && !KEEP.includes(table) && table !== LOCATIONS_TABLE).sort();
+
     console.log(`[TARGET] ${env.DATABASE_HOST}:${env.DATABASE_PORT}/${env.DATABASE_NAME}`);
     const before = await countRows(client, empty);
+    const alsoBefore = await countRows(client, alsoEmpty);
     const keptBefore = await countRows(client, keep);
-    const locationsBefore = await countLocations(client);
+    const locationsBefore = await countLocations(client, locationMode);
+    const blockers = await locationBlockers(client, locationMode, targets);
     printCounts('\nWill be EMPTIED (rows now):', before);
-    console.log('\nLocations:');
+    if (alsoEmpty.length) printCounts('\nAlso EMPTIED: not on the lists, but they point at the tables above (rows now):', alsoBefore);
+    console.log(`\nLocations (--locations=${locationMode}: ${LOCATION_MODES[locationMode]}):`);
     console.log(`  deleted: ${locationsBefore.deleted}`);
-    console.log(`  kept, emptied (shelf/layer/bin bins and COATER-STAGING): ${locationsBefore.kept}`);
+    if (locationMode === 'delete-all') console.log('  kept: 0 (the API recreates COATER-STAGING when it next starts)');
+    else console.log(`  kept, emptied (shelf/layer/bin bins and COATER-STAGING): ${locationsBefore.kept}`);
     printCounts('\nWill be KEPT (rows now):', keptBefore);
     if (other.length) console.log(`\nNot touched (not on either list): ${other.join(', ')}`);
     console.log('Not touched: every table in the lapper schema.');
+
+    const problems = [];
+    if (refused.length) {
+      problems.push(`These kept tables point at operational data, so it cannot be emptied: ${refused.map((dep) => `${dep.schema}.${dep.table}`).join(', ')}.`);
+    }
+    if (blockers.length) {
+      problems.push(`These rows point at locations that would be deleted: ${blockers.map((b) => `${b.name} (${b.count})`).join(', ')}.` +
+        (locationMode === 'delete-all' ? ' Use --locations=keep-shelves, or clear those rows first.' : ' Clear those rows first.'));
+    }
+    if (problems.length) {
+      for (const problem of problems) console.error(`\n[STOP] ${problem}`);
+      throw new Error('The clear cannot run on this database as it is. Nothing was deleted.');
+    }
 
     if (!apply) {
       console.log('\n[SAFE] Preview only. Nothing was deleted.');
       // The launchers ask for confirmation next and run the apply step themselves.
       if (!env.MESHFORGE_CLEAR_FROM_LAUNCHER) {
         console.log('To clear the data, stop the MeshForge API and run:');
-        console.log('  npm run clear:operational-data:apply');
+        console.log(`  npm run clear:operational-data:apply${locationMode === DEFAULT_LOCATION_MODE ? '' : ` -- --locations=${locationMode}`}`);
       }
       return;
     }
@@ -182,6 +283,8 @@ async function main() {
       database_host: env.DATABASE_HOST,
       database_name: env.DATABASE_NAME,
       emptied: Object.fromEntries(before),
+      also_emptied: Object.fromEntries(alsoBefore),
+      location_mode: locationMode,
       locations: locationsBefore,
       kept: Object.fromEntries(keptBefore),
       note: 'Counts only. The cleared rows were not backed up by this command.',
@@ -192,11 +295,12 @@ async function main() {
     try {
       // A running API holds locks on these tables: fail fast rather than wait behind it.
       await client.query(`SET LOCAL lock_timeout = '10s'`);
-      await client.query(`TRUNCATE TABLE ${empty.map((table) => `public.${quoteIdent(table)}`).join(', ')} RESTART IDENTITY`);
-      const left = [...(await countRows(client, empty))].filter(([, count]) => count !== 0);
+      await client.query(`TRUNCATE TABLE ${targets.map((table) => `public.${quoteIdent(table)}`).join(', ')} RESTART IDENTITY`);
+      const left = [...(await countRows(client, targets))].filter(([, count]) => count !== 0);
       if (left.length) throw new Error(`Rows remain in ${left.map(([table]) => table).join(', ')}.`);
-      await client.query(`DELETE FROM public.locations WHERE NOT (${KEPT_LOCATION_WHERE})`, keptLocationParams);
-      const locationsAfter = await countLocations(client);
+      const kept = keptLocations(locationMode);
+      await client.query(`DELETE FROM public.locations WHERE NOT (${kept.where})`, kept.params);
+      const locationsAfter = await countLocations(client, locationMode);
       if (locationsAfter.deleted !== 0 || locationsAfter.kept !== locationsBefore.kept) {
         throw new Error(`Locations did not clear as expected: ${JSON.stringify(locationsAfter)}.`);
       }
@@ -211,9 +315,14 @@ async function main() {
       throw error;
     }
 
-    console.log(`[PASS] Emptied ${empty.length} tables. Deleted ${locationsBefore.deleted} locations; kept ${locationsBefore.kept} shelf/layer/bin and staging locations.`);
+    console.log(`[PASS] Emptied ${targets.length} tables${alsoEmpty.length ? ` (also ${alsoEmpty.join(', ')})` : ''}.`);
+    console.log(locationMode === 'delete-all'
+      ? `Deleted all ${locationsBefore.deleted} locations.`
+      : `Deleted ${locationsBefore.deleted} locations; kept ${locationsBefore.kept} shelf/layer/bin and staging locations.`);
     console.log(`Users and base data kept: ${keep.length} tables unchanged.`);
-    console.log('Next: start MeshForge, then make trays and containers in Admin > Launch Setup.');
+    console.log(locationMode === 'delete-all'
+      ? 'Next: start MeshForge, make shelves in Admin > Locations > Bulk shelf locations, then trays and containers in Admin > Launch Setup.'
+      : 'Next: start MeshForge, then make trays and containers in Admin > Launch Setup.');
   } finally {
     await client.end();
   }
