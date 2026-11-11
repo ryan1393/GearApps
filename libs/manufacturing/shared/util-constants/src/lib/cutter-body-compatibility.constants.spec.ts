@@ -88,11 +88,17 @@ describe('body compatibility', () => {
     expect(evaluateCutterBodyCompatibility(std105, 13, 'PINION').compatible).toBe(false);
   });
 
-  it('keeps both 26-blade rules usable and flags an unresolved Summary', () => {
+  it('blocks both 26-blade bodies until the Summary Body Size Rule is set', () => {
     const a = evaluateCutterBodyCompatibility(std076, 13, 'RING');
     const b = evaluateCutterBodyCompatibility(special105, 13, 'RING');
-    expect([a.compatible, b.compatible]).toEqual([true, true]);
-    expect(a.warning).toContain('unresolved');
+    expect([a.compatible, b.compatible]).toEqual([false, false]);
+    expect(a.reason).toContain('Body Size Rule is not set');
+    expect(b.reason).toContain('076 Standard or 105 Special');
+  });
+
+  it('keeps existing 076 and special-105 mappings usable once configured', () => {
+    expect(evaluateCutterBodyCompatibility(std076, 13, 'RING', '076').compatible).toBe(true);
+    expect(evaluateCutterBodyCompatibility(special105, 13, 'RING', '105-SPECIAL').compatible).toBe(true);
   });
 
   it('does not let equal quantities bypass a configured Summary rule', () => {

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { BadRequestException, ConflictException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
-import { cutterBodyMatchesRequirement, classifyTrayAvailabilityStage, resolveCutterBodyRule } from '@meshforge/manufacturing/shared/util-constants';
+import { cutterBodyMatchesRequirement, cutterBodyRulesForBladeSets, classifyTrayAvailabilityStage, resolveCutterBodyRule } from '@meshforge/manufacturing/shared/util-constants';
 import { readSummaryBodyRule } from '@meshforge/manufacturing/server/data-access';
 
 interface AvailabilityTrayRow {
@@ -150,6 +150,8 @@ export async function readInventoryAvailability(manager: EntityManager, summaryI
     shelved_cutter_bodies: { total: withIds.size+emptyIds.size, with_blades: withIds.size, empty: emptyIds.size },
     notes: [
       ...(!requirements.length ? ['No enabled blade requirement is configured for this selection; empty-body availability cannot be matched.'] : []),
+      ...(!summaryRule && requirements.some(req => cutterBodyRulesForBladeSets(Number(req.required_blade_count)).length > 1)
+        ? ['This Summary\'s Body Size Rule is not set (26 blades fits 076 Standard or 105 Special), so no empty body is counted for it. Set the rule in Admin > Part Summaries.'] : []),
       ...(eligible.some(body => resolveCutterBodyRule(bodyModel(body)).rule===null) ? ['Some recorded empty bodies have a missing, malformed or conflicting Dana S/N and are excluded.'] : []),
       'Empty bodies require a current shelf observation. After a build or cancellation, record their actual shelf again. Shared compatible bodies are counted once in this selection.',
     ],

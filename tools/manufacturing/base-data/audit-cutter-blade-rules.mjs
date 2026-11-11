@@ -59,7 +59,7 @@ function summaryState(configured, quantities) {
   if (sets === undefined) return { status: 'NO_REQUIREMENT' };
   if (!APPROVED_BODY_RULES.some((r) => r.total_blades / BLADES_PER_MATCHED_SET === sets)) return { status: 'CONFLICT', detail: `${sets} sets is not an approved quantity` };
   const rule = uniqueRuleForSets(sets);
-  return rule ? { status: 'DERIVED', rule } : { status: 'UNRESOLVED', detail: `${blades(sets)} fits 076 Standard or 105 Special` };
+  return rule ? { status: 'DERIVED', rule } : { status: 'UNRESOLVED', detail: `${blades(sets)} fits 076 Standard or 105 Special; Cutter Builder is blocked until the rule is set` };
 }
 
 async function main() {

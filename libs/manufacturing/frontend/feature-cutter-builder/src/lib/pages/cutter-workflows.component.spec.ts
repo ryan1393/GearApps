@@ -113,10 +113,12 @@ describe('Cutter workflow selection safety', () => {
     expect(special105ReadyToBuild('076', std076).canBuild).toBe(true);
     expect(special105ReadyToBuild('076', special).canBuild).toBe(false);
   });
-  it('allows either 26-blade body for an unresolved Summary but shows the warning', () => {
-    const component = special105ReadyToBuild(null, { ...body, dana_serial_number: 'CGRT076AAA' } as CutterBody);
-    expect(component.canBuild).toBe(true);
-    expect(component.bodyCompatibility?.warning).toContain('unresolved');
+  it('blocks either 26-blade body until the Summary Body Size Rule is set', () => {
+    for (const dana of ['CGRT076AAA', 'CGRT1058AA']) {
+      const component = special105ReadyToBuild(null, { ...body, dana_serial_number: dana } as CutterBody);
+      expect(component.canBuild).toBe(false);
+      expect(component.bodyCompatibility?.reason).toContain('Body Size Rule is not set');
+    }
   });
   it('never takes capacity from the MF serial', () => {
     const component = special105ReadyToBuild(null, { ...body, dana_serial_number: null, mf_serial_number: 'CGRT1058AA' } as CutterBody);

@@ -60,8 +60,8 @@ Admin > Part Summaries shows each Summary's Body Size Rule and its Required Blad
   hold another quantity.
 - **From quantity** — no rule configured and the quantity fits one rule (22, 34 or 38 blades).
 - **Unresolved** — 26 blades fits both 076 Standard and 105 Special. A 26 is never turned into a
-  body rule on its own. Cutter Builder accepts either body for such a Summary and shows a warning
-  until an administrator sets the rule.
+  body rule on its own. Cutter Builder refuses to build such a Summary with either body, and
+  inventory availability counts no empty body for it, until an administrator sets the rule.
 
 With a configured rule, Cutter Builder requires that exact body rule: equal quantities do not make
 076 Standard and 105 Special interchangeable. The API enforces this; the screen only mirrors it.

@@ -27,7 +27,8 @@
   - New **Summary Body Size Rule** (Admin > Part Summaries, table `cutter_summary_body_rules`,
     migration `20261111-cutter-summary-body-rules-v1`, nothing backfilled). It controls the
     Summary-based Required Blades for RING and PINION and keeps 076 Standard and 105 Special
-    apart although both are 26 blades. 26-blade Summaries without a rule are left unresolved.
+    apart although both are 26 blades. 26-blade Summaries without a rule are left unresolved and
+    Cutter Builder refuses to build them until the rule is set.
   - Requirement API accepts only approved set counts and keeps RING/PINION of a Summary equal.
     New endpoints `GET /api/v1/cutter-config/summary-body-rules`,
     `PUT|DELETE /api/v1/cutter-config/summary-body-rules/:summaryId`.

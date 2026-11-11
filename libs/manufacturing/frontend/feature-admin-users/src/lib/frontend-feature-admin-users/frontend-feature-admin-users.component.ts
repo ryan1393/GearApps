@@ -329,7 +329,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     switch (row.status) {
       case 'CONFIGURED': return row.effective_body_rule_label ?? row.configured_body_rule ?? '—';
       case 'DERIVED': return `${row.effective_body_rule_label} (from quantity)`;
-      case 'UNRESOLVED': return `Unresolved — ${row.detail}`;
+      case 'UNRESOLVED': return `Unresolved — ${row.detail}. Cutter Builder is blocked until a rule is set.`;
       case 'CONFLICT': return `Conflict — ${row.detail}`;
       default: return 'No blade requirement';
     }

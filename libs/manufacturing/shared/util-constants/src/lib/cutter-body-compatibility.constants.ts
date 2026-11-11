@@ -183,7 +183,7 @@ export interface CutterBodyCompatibility {
   compatible: boolean;
   /** Why the body cannot be used. */
   reason: string | null;
-  /** Compatible, but something the operator must confirm (unresolved Summary body rule). */
+  /** Reserved for advisories that do not block; unresolved rules now block. */
   warning: string | null;
   body_rule: CutterBodyRule | null;
   summary_rule: CutterBodyRule | null;
@@ -195,7 +195,8 @@ export interface CutterBodyCompatibility {
  * - A configured Summary Body Size Rule is matched exactly; equal quantities
  *   do not make 076 Standard and 105 Special interchangeable.
  * - Without a configured rule, the quantity identifies the rule when it is
- *   unique; 13 sets / 26 blades is ambiguous and is accepted with a warning.
+ *   unique; 13 sets / 26 blades is ambiguous and is refused until the
+ *   Summary's Body Size Rule is set.
  * Handedness is deliberately not checked here: it belongs to Summary + Part Type.
  */
 export function evaluateCutterBodyCompatibility(
@@ -231,10 +232,11 @@ export function evaluateCutterBodyCompatibility(
   if (!requirementRules.some((r) => r.code === bodyRule.code)) {
     return fail(`Cutter body ${resolution.decoded?.serial} is ${bodyRule.label} (${formatBladeSetQuantity(bodyRule.blade_sets)}); the requirement is ${formatBladeSetQuantity(requiredSets)}`, bodyRule, null);
   }
-  const warning = requirementRules.length > 1
-    ? `This Summary's Body Size Rule is unresolved: ${formatBladeSetQuantity(requiredSets)} fits ${requirementRules.map((r) => r.label).join(' or ')}. Confirm the body, and set the rule in Admin > Part Summaries.`
-    : null;
-  return { compatible: true, reason: null, warning, body_rule: bodyRule, summary_rule: null };
+  if (requirementRules.length > 1) {
+    // 26 blades fits 076 Standard and 105 Special: the quantity alone never picks the body.
+    return fail(`This Summary's Body Size Rule is not set: ${formatBladeSetQuantity(requiredSets)} fits ${requirementRules.map((r) => r.label).join(' or ')}. Set the rule in Admin > Part Summaries before building.`, bodyRule, null);
+  }
+  return { compatible: true, reason: null, warning: null, body_rule: bodyRule, summary_rule: null };
 }
 
 export function cutterBodyMatchesRequirement(
