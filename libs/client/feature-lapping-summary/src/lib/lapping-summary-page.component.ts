@@ -1,5 +1,5 @@
 import { MachineDsfCountComponent } from '@meshforge/manufacturing/frontend/util-common';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -15,6 +15,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, ParamMap } from '@angular/router';
 import {
+  FanucVariablesApi,
   GearsetsApi,
   loadable,
   MachineCyclesApi,
@@ -35,6 +36,7 @@ import {
 } from '@dana/ui';
 import {
   EmptyStateComponent,
+  LiveCycleTimerComponent,
   StatusBadgeComponent,
   ValueFieldComponent,
 } from '@meshforge/client/ui';
@@ -47,10 +49,11 @@ import {
   LappingSummaryRow,
   Machine,
   MachineCycle,
+  MachineFanucVariable,
   macroLimitState,
   macroLimitText,
 } from '@meshforge/shared/domain';
-import { catchError, forkJoin, map, of, shareReplay, switchMap } from 'rxjs';
+import { catchError, forkJoin, fromEvent, interval, map, merge, of, shareReplay, startWith, switchMap } from 'rxjs';
 import {
   fieldValue,
   findByName,
@@ -85,6 +88,7 @@ import { SummaryGroupComponent } from './summary-group.component';
     StatusBadgeComponent,
     ValueFieldComponent,
     SummaryGroupComponent,
+    LiveCycleTimerComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './lapping-summary-page.component.html',
@@ -95,6 +99,8 @@ export class LappingSummaryPageComponent implements OnInit {
   private readonly gearsetsApi = inject(GearsetsApi);
   private readonly cyclesApi = inject(MachineCyclesApi);
   private readonly macroLogsApi = inject(MacroLogsApi);
+  private readonly fanucApi = inject(FanucVariablesApi);
+  private readonly doc = inject(DOCUMENT);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -158,6 +164,9 @@ export class LappingSummaryPageComponent implements OnInit {
   private requestVersion = 0;
   protected readonly cycle = signal<MachineCycle | null>(null);
   protected readonly formatCycleTime = formatCycleTime;
+  /** The selected machine's live I/O, polled while the page is visible, for the running timer. */
+  protected readonly live = signal<MachineFanucVariable | null>(null);
+  protected readonly liveAt = signal(Date.now());
   /** The selected cycle's time, or the latest cycle's when none is selected. */
   protected readonly shownCycleTime = computed(() => {
     const selected = this.selected();
@@ -193,6 +202,7 @@ export class LappingSummaryPageComponent implements OnInit {
   );
 
   constructor() {
+    this.watchLiveCycle();
     // Load the summary whenever both selections are present.
     effect(() => {
       const m = this.machineId();
@@ -208,6 +218,28 @@ export class LappingSummaryPageComponent implements OnInit {
           this.cycle.set(null);
         }
       });
+    });
+  }
+
+  /** Polls the selected machine's live I/O every few seconds while the tab is visible. */
+  private watchLiveCycle() {
+    const visible$ = merge(fromEvent(this.doc, 'visibilitychange'), of(null)).pipe(
+      map(() => this.doc.visibilityState === 'visible'),
+    );
+    effect((onCleanup) => {
+      const machineId = this.machineId();
+      untracked(() => this.live.set(null));
+      if (!machineId) return;
+      const sub = visible$
+        .pipe(
+          switchMap((visible) => (visible ? interval(5000).pipe(startWith(0)) : of())),
+          switchMap(() => this.fanucApi.byMachine(machineId).pipe(catchError(() => of(null)))),
+        )
+        .subscribe((snapshot) => {
+          this.live.set(snapshot);
+          this.liveAt.set(Date.now());
+        });
+      onCleanup(() => sub.unsubscribe());
     });
   }
 

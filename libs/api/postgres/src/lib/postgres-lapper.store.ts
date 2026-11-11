@@ -360,6 +360,21 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
           ? null
           : (await this.catalog.legacyMachine(text(data.machine_id), manager)).id;
     }
+    // Bound parameters for the SQL expressions in `values`.
+    const parameters: Row = {};
+    if (kind === 'machine-fanuc-variable') {
+      // Every write is a report from the collector (or an admin): the server stamps when, and turns
+      // the elapsed seconds into a start time on its own clock.
+      values.reported_at = () => 'clock_timestamp()';
+      if (data.cycle_elapsed_s !== undefined) {
+        if (data.cycle_elapsed_s === null) values.in_cycle_since = null;
+        else {
+          parameters.cycleElapsed = Number(data.cycle_elapsed_s);
+          values.in_cycle_since = () =>
+            'clock_timestamp() - make_interval(secs => CAST(:cycleElapsed AS double precision))';
+        }
+      }
+    }
     if (kind === 'machine-fanuc-variable' && !exists) {
       const machine = await this.catalog.legacyMachine(text(data.machine_id), manager);
       values.machine_id = machine.id;
@@ -373,6 +388,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
         .insert()
         .into(table)
         .values({ id: rowId, ...defaults, ...values })
+        .setParameters(parameters)
         .orIgnore()
         .execute();
       const saved = await manager
@@ -390,6 +406,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
         .update(table)
         .set(values)
         .where('id=:id', { id: rowId })
+        .setParameters(parameters)
         .execute();
     else if (upsert || !id)
       await manager
@@ -397,6 +414,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
         .insert()
         .into(table)
         .values({ id: rowId, ...values })
+        .setParameters(parameters)
         .execute();
     else throw new NotFoundException('Record not found');
     return rowId;

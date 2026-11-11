@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **Live cycle timer.** While a lapper is in cycle, Lapper Dashboard's machine cards (Machine I/O >
+  Cycle time) and Lapping Summaries (Machine now) count up how long the cycle has been running,
+  every second. Between cycles they show Not in cycle; when the collector started mid-cycle, In
+  cycle · time unknown. When Lapper Read has not reported a machine for 90 seconds they show
+  No update for … instead, so a stopped collector never leaves a timer running. Lapper Read now
+  sends each machine's I/O at least every 30 seconds, with how long the current cycle has run
+  (`cycle_elapsed_s`, measured on its own clock); the API turns it into a start time on the
+  database clock, and reads return `cycle_elapsed_s` and `reported_age_s` as of the read, so the
+  browser's, collector's and database's clocks never have to agree. New nullable columns
+  `lapper.machine_fanuc_variables.in_cycle_since` and `reported_at` (migration
+  `20261111-lapper-live-cycle-v1`); `cycle_elapsed_s` is optional on the machine I/O update, so
+  older collectors keep working (they get no timer). An upgraded collector talking to an API that
+  is not upgraded stops sending the field. Also fixes the Lapping Summaries Cycle time header,
+  which broke into single letters when a machine and gearset had no cycles.
+
 - **Cycle time in Lapping Summaries.** Lapper Read now also records each cycle's time (seconds in
   cycle, Y3.2) in MeshForge, not only in Argonaut. Lapping Summaries shows it in a Cycle time
   column (minutes:seconds, such as 2:04.3; exact seconds on hover) and at the top: the latest

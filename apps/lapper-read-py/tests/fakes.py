@@ -37,6 +37,7 @@ class FakeApi:
     def __init__(self):
         self.calls: list[tuple] = []
         self.cycle_times: dict[str, float | None] = {}
+        self.io_reports: list[tuple] = []
         self.cycles: dict[str, dict] = {}  # idempotency key -> saved cycle
         self.macro_logs: dict[str, tuple] = {}  # idempotency key -> (cycle, macro, value)
         self.fail_cycle = 0
@@ -85,6 +86,7 @@ class FakeApi:
 
     def patch_fanuc_variables(self, *args):
         self.calls.append(("io",) + args)
+        self.io_reports.append(args)
         return {"id": "vars-1"}
 
 

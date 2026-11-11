@@ -19,7 +19,7 @@ import {
   ScannerApi,
   ScannerDetailsApi,
 } from '@meshforge/client/core';
-import { StatusBadgeComponent, ValueFieldComponent } from '@meshforge/client/ui';
+import { LiveCycleTimerComponent, StatusBadgeComponent, ValueFieldComponent } from '@meshforge/client/ui';
 import { Machine, MachineFanucVariable, ScannerDetail } from '@meshforge/shared/domain';
 import {
   catchError,
@@ -42,7 +42,7 @@ import { ScannerControlsComponent } from './scanner-controls.component';
  */
 @Component({
   selector: 'gear-machine-live-card',
-  imports: [MachineDsfCountComponent,StatusBadgeComponent, ValueFieldComponent, ScannerControlsComponent],
+  imports: [MachineDsfCountComponent, StatusBadgeComponent, ValueFieldComponent, ScannerControlsComponent, LiveCycleTimerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <article class="dana-card" [attr.data-tone]="fanuc()?.y03_2_stack_inCycle ? 'success' : null">
@@ -128,6 +128,12 @@ import { ScannerControlsComponent } from './scanner-controls.component';
                 type="flag"
                 [compact]="true"
               />
+              <div class="dana-detail is-compact">
+                <span class="dana-detail-label">Cycle time</span>
+                <span class="dana-detail-value"
+                  ><gear-live-cycle-timer [snapshot]="fanuc()" [receivedAt]="fanucAt()"
+                /></span>
+              </div>
             </div>
             @if (fanucError()) {
               <p class="gear-field-help">No I/O snapshot recorded for this machine yet.</p>
@@ -230,6 +236,8 @@ export class MachineLiveCardComponent implements OnDestroy {
 
   protected readonly scanner = signal<ScannerDetail | null>(null);
   protected readonly fanuc = signal<MachineFanucVariable | null>(null);
+  /** When the snapshot above was received, for the running cycle timer. */
+  protected readonly fanucAt = signal(Date.now());
   protected readonly imageUrl = signal<string | null>(null);
   protected readonly imageError = signal(false);
   protected readonly fanucError = signal(false);
@@ -283,6 +291,7 @@ export class MachineLiveCardComponent implements OnDestroy {
           }
           if (scanner) this.scanner.set(scanner);
           this.fanuc.set(fanuc);
+          this.fanucAt.set(Date.now());
           this.fanucError.set(fanuc === null);
           this.lastUpdate.set(new Date().toLocaleTimeString());
         });

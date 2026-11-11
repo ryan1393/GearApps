@@ -45,7 +45,20 @@ class MeshForgeApi:
         self._collector_token = token or self._read_token_file()
         self._token: str | None = self._collector_token
         self._auth_lock = threading.Lock()
-        self._warned_no_cycle_time = False
+        #: Optional fields this MeshForge API was found not to know; they are no longer sent.
+        self._unsupported: set[str] = set()
+
+    def _drop_if_unsupported(self, error: "ApiError", field: str, body: dict) -> bool:
+        """True (and `field` removed from `body`) when the API rejected `field` as unknown: an API
+        from before it answers 422 "property <field> should not exist" during validation, before it
+        stores anything. Any other rejection, including a value out of range, is not this."""
+        if field not in body or error.status not in (400, 422) or f"property {field} should not exist" not in str(error):
+            return False
+        del body[field]
+        if field not in self._unsupported:
+            self._unsupported.add(field)
+            log.warning("The MeshForge API does not know %s yet; it is not sent until the API is upgraded", field)
+        return True
 
     def is_collector_token(self, presented: str) -> bool:
         """Whether `presented` is the collector token this collector signs in with. The API sends it
@@ -187,22 +200,15 @@ class MeshForgeApi:
             "serial_number": serial, "machine_id": machine_id, "gearset_id": gearset_id,
             "consec": consec, "timestamp": completed_at,
         }
-        if cycle_time_s is not None:
+        if cycle_time_s is not None and "cycle_time_s" not in self._unsupported:
             body["cycle_time_s"] = cycle_time_s
         try:
             return self._required(self.request("POST", "/api/v1/machine-cycle", body, idempotency_key=key),
                                   "machine cycle")
         except ApiError as error:
-            # An API from before cycle times rejects the unknown field during validation (HTTP 422,
-            # "property cycle_time_s should not exist"), before it records anything, so the cycle is
-            # sent again without it under the same key.
-            if "cycle_time_s" not in body or error.status not in (400, 422) or "cycle_time_s" not in str(error):
+            # Nothing was recorded, so the cycle is sent again without the field under the same key.
+            if not self._drop_if_unsupported(error, "cycle_time_s", body):
                 raise
-            if not self._warned_no_cycle_time:
-                self._warned_no_cycle_time = True
-                log.warning("The MeshForge API does not store cycle times yet; cycles are recorded without "
-                            "them until it is upgraded (Argonaut still gets them)")
-            del body["cycle_time_s"]
             return self._required(self.request("POST", "/api/v1/machine-cycle", body, idempotency_key=key),
                                   "machine cycle")
 
@@ -221,10 +227,22 @@ class MeshForgeApi:
             "sn_procces": process, "sn_queue": queue, "sn_scanner": scanner,
         }), "scanner serial update")
 
-    def patch_fanuc_variables(self, variables_id: str, door_closed: bool, start_cycle: bool, in_cycle: bool) -> dict:
-        return self._required(self.request("PATCH", f"/api/v1/machine-fanuc-variable/{variables_id}", {
+    def patch_fanuc_variables(self, variables_id: str, door_closed: bool, start_cycle: bool, in_cycle: bool,
+                              cycle_elapsed_s: float | None = None) -> dict:
+        """cycle_elapsed_s: seconds the current cycle has run, on this collector's clock (the API
+        turns it into a start time on its own). None clears it: not in cycle, or start not seen."""
+        path = f"/api/v1/machine-fanuc-variable/{variables_id}"
+        body: dict[str, Any] = {
             "x06_7_frt_dr_closed": door_closed, "x01_2_start_cycle": start_cycle, "y03_2_stack_inCycle": in_cycle,
-        }), "machine I/O update")
+        }
+        if "cycle_elapsed_s" not in self._unsupported:
+            body["cycle_elapsed_s"] = cycle_elapsed_s
+        try:
+            return self._required(self.request("PATCH", path, body), "machine I/O update")
+        except ApiError as error:
+            if not self._drop_if_unsupported(error, "cycle_elapsed_s", body):
+                raise
+            return self._required(self.request("PATCH", path, body), "machine I/O update")
 
     @staticmethod
     def _required(payload: Any, what: str) -> dict:

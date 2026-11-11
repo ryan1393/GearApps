@@ -122,6 +122,12 @@ is sent as 0, as before. The macro list is in `lapper_read/argonaut.py`.
   when unknown), shown in Lapper > Lapping Summaries. An API from before cycle times answers 422
   for the unknown field; the cycle is then sent again without it, under the same Idempotency-Key,
   and a warning is logged once.
+- **Live cycle timer:** each machine's I/O is reported to MeshForge whenever it changes and at least
+  every 30 seconds, with `cycle_elapsed_s`, the seconds the current cycle has run on this
+  collector's clock (null when not in cycle, or when the cycle was already running when the
+  collector started). Lapper Dashboard and Lapping Summaries count up from it; a machine not
+  reported for 90 seconds shows as stale. An API that does not know the field (422 "property …
+  should not exist") is sent the I/O without it from then on.
 
 - **Per machine:** in Admin > Lapping machines, paste each machine's full **Argonaut API**
   address, including `?locationId=…`. A machine with an address sends to it exactly as pasted,

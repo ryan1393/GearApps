@@ -149,6 +149,13 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
       ALTER TABLE lapper.machine_cycles ADD CONSTRAINT ck_lapper_cycle_time
         CHECK (cycle_time_s IS NULL OR (cycle_time_s >= 0 AND cycle_time_s <= 86400));
     `);
+    // The live cycle timer: when the machine's current cycle started (database clock, derived from
+    // the seconds Lapper Read reports, so no two clocks have to agree) and when the collector last
+    // reported, so a stopped collector shows as stale instead of a timer that never ends.
+    await runDatabaseMigration(manager, '20261111-lapper-live-cycle-v1', `
+      ALTER TABLE lapper.machine_fanuc_variables ADD COLUMN IF NOT EXISTS in_cycle_since timestamptz;
+      ALTER TABLE lapper.machine_fanuc_variables ADD COLUMN IF NOT EXISTS reported_at timestamptz;
+    `);
   });
 }
 

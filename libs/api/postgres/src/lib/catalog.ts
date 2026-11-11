@@ -258,13 +258,27 @@ export class PostgresLapperCatalog {
         manager
           .createQueryBuilder()
           .select('v.*')
+          // Ages on the database clock, the same clock that stamped them, so no other clock matters.
+          .addSelect('EXTRACT(EPOCH FROM clock_timestamp() - v.in_cycle_since)', 'cycle_elapsed_s')
+          .addSelect('EXTRACT(EPOCH FROM clock_timestamp() - v.reported_at)', 'reported_age_s')
           .from('lapper.machine_fanuc_variables', 'v')
           .getRawMany<Row>(),
       () => this.machines(manager, false),
     );
     return rows.map((v) => {
+      // Internal timestamps: callers get the ages below instead.
+      delete v.in_cycle_since;
+      delete v.reported_at;
       const machine = machines.find((m) => m.legacy_id === v.machine_id);
-      return { ...v, machine_id: machine?.id ?? v.machine_id, machine };
+      const elapsed = numberOrNull(v.cycle_elapsed_s);
+      return {
+        ...v,
+        // Only while the machine says it is in cycle; never negative from a just-written start.
+        cycle_elapsed_s: v['y03_2_stack_inCycle'] && elapsed !== null ? Math.max(0, Math.round(elapsed * 1000) / 1000) : null,
+        reported_age_s: numberOrNull(v.reported_age_s) === null ? null : Math.max(0, Math.round(Number(v.reported_age_s) * 10) / 10),
+        machine_id: machine?.id ?? v.machine_id,
+        machine,
+      };
     });
   }
 

@@ -105,10 +105,14 @@ class FakeServer(BaseHTTPRequestHandler):
             return self._reply(404, {"message": "missing"})
         if self.path.startswith("/api/v1/gearset/number/500"):
             return self._reply(500, {"message": "boom"})
-        if FakeServer.old_api and self.path == "/api/v1/machine-cycle" and "cycle_time_s" in (body or {}):
-            # The real API's ValidationPipe answers 422 (errorHttpStatusCode in configure-api.ts).
-            return self._reply(422, {"message": ["property cycle_time_s should not exist"],
-                                     "error": "Unprocessable Entity", "statusCode": 422})
+        for field in ("cycle_time_s", "cycle_elapsed_s"):
+            if FakeServer.old_api and field in (body or {}):
+                # The real API's ValidationPipe answers 422 (errorHttpStatusCode in configure-api.ts).
+                return self._reply(422, {"message": [f"property {field} should not exist"],
+                                         "error": "Unprocessable Entity", "statusCode": 422})
+            if (body or {}).get(field) == 999999:
+                return self._reply(422, {"message": [f"{field} must not be greater than 86400"],
+                                         "error": "Unprocessable Entity", "statusCode": 422})
         return self._reply(201 if self.command == "POST" else 200, {"id": "x1", **(body or {})})
 
     do_GET = do_POST = do_PATCH = _handle
@@ -212,6 +216,33 @@ class ApiTests(unittest.TestCase):
         self.assertIn("cycle_time_s", writes[0][4])
         self.assertNotIn("cycle_time_s", writes[1][4])
         self.assertEqual({k: v for k, v in writes[0][4].items() if k != "cycle_time_s"}, writes[1][4])
+
+    def test_machine_io_carries_the_running_cycle_time_and_null_when_none(self):
+        FakeServer.tokens = iter(["t"])
+        self.api.patch_fanuc_variables("v1", True, False, True, 83.5)
+        self.assertEqual(FakeServer.log[-1][4]["cycle_elapsed_s"], 83.5)
+        self.api.patch_fanuc_variables("v1", False, False, False)
+        self.assertIn("cycle_elapsed_s", FakeServer.log[-1][4])
+        self.assertIsNone(FakeServer.log[-1][4]["cycle_elapsed_s"])
+
+    def test_an_api_without_the_live_timer_gets_machine_io_without_it_from_then_on(self):
+        FakeServer.tokens = iter(["t"])
+        FakeServer.old_api = True
+        self.api.patch_fanuc_variables("v1", True, False, True, 83.5)
+        self.api.patch_fanuc_variables("v1", True, False, True, 84.5)
+        writes = [e for e in FakeServer.log if e[1] == "/api/v1/machine-fanuc-variable/v1"]
+        # Rejected once, then sent without the field; the next report leaves it out straight away.
+        self.assertEqual(["cycle_elapsed_s" in w[4] for w in writes], [True, False, False])
+
+    def test_a_value_out_of_range_is_an_error_not_a_missing_field(self):
+        FakeServer.tokens = iter(["t"])
+        with self.assertRaises(ApiError):
+            self.api.patch_fanuc_variables("v1", True, False, True, 999999)
+        with self.assertRaises(ApiError):
+            self.api.post_cycle("SN-1", 1, "m", "g", "2026-11-10T03:00:00Z", "k9", 999999)
+        # The fields are still sent afterwards: the API knows them.
+        self.api.patch_fanuc_variables("v1", True, False, True, 10)
+        self.assertEqual(FakeServer.log[-1][4]["cycle_elapsed_s"], 10)
 
     def test_machine_lookup_disambiguates_a_shared_ip_by_asset_number(self):
         FakeServer.tokens = iter(["t"])

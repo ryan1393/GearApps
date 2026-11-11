@@ -41,7 +41,7 @@
 .lapper-cycles-table td:nth-child(3),
 .lapper-cycles-table td:nth-child(4) { white-space: nowrap !important; }
 /* "Cycle time" may stack over two lines, leaving the serial room for a full Dana serial. */
-.lapper-cycles-table th:nth-child(4) { white-space: normal !important; }
+.lapper-cycles-table th:nth-child(4) { white-space: normal !important; overflow-wrap: normal !important; word-break: keep-all; }
 .lapper-cycles-table td:nth-child(2) { overflow-wrap: anywhere; }
 /* Every column but the serial shrinks to its content, so the serial gets the rest. */
 .lapper-cycles-table th:not(:nth-child(2)) { width: 1%; }

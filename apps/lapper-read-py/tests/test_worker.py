@@ -188,3 +188,53 @@ class WorkerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class LiveCycleTimerTests(unittest.TestCase):
+    """Machine I/O reports carry how long the current cycle has run, for the live timer."""
+
+    setUp, tearDown = WorkerTests.setUp, WorkerTests.tearDown
+    _worker, _start, _wait = WorkerTests._worker, WorkerTests._start, WorkerTests._wait
+
+    def test_reports_the_running_cycle_time_and_clears_it_when_the_cycle_ends(self):
+        thread = self._start(self.worker)
+        self._wait(lambda: self.worker.phase == "collecting")
+        time.sleep(0.25)  # out of cycle first, so the start of the cycle is seen
+        self.transport.set_state(door=True, start=True, cycle=True)
+        self._wait(lambda: any(r[3] for r in self.api.io_reports))
+        in_cycle = [r for r in self.api.io_reports if r[3]][0]
+        self.assertIsNotNone(in_cycle[4])
+        self.assertGreaterEqual(in_cycle[4], 0)
+        self.assertLess(in_cycle[4], 5)
+        self.transport.set_state(door=False, start=False, cycle=False)
+        self._wait(lambda: not self.api.io_reports[-1][3])
+        self.assertIsNone(self.api.io_reports[-1][4])
+        self.worker.stop()
+        thread.join(3)
+
+    def test_a_cycle_running_when_the_collector_starts_has_no_running_time(self):
+        self.transport.set_state(door=True, start=False, cycle=True)
+        thread = self._start(self.worker)
+        self._wait(lambda: any(r[3] for r in self.api.io_reports))
+        self.assertIsNone([r for r in self.api.io_reports if r[3]][0][4])
+        self.worker.stop()
+        thread.join(3)
+
+    def test_machine_io_is_reported_again_while_nothing_changes(self):
+        from lapper_read import worker as worker_module
+        original = worker_module.LIVE_REPORT_INTERVAL_S
+        worker_module.LIVE_REPORT_INTERVAL_S = 0.05
+        self.addCleanup(setattr, worker_module, "LIVE_REPORT_INTERVAL_S", original)
+        thread = self._start(self.worker)
+        self._wait(lambda: len(self.api.io_reports) >= 3)
+        self.assertEqual(len({r[1:4] for r in self.api.io_reports}), 1)  # the same state, repeated
+        serial_patches = [c for c in self.api.calls if c[0] == "serials"]
+        self.assertLessEqual(len(serial_patches), 1)  # serials are not repeated by the heartbeat
+        self.worker.stop()
+        thread.join(3)
+
+    def test_elapsed_time_is_unknown_without_a_start_or_beyond_a_day(self):
+        from lapper_read.worker import cycle_elapsed_s
+        self.assertIsNone(cycle_elapsed_s(None, "2026-11-11T10:00:00.000Z"))
+        self.assertEqual(cycle_elapsed_s("2026-11-11T10:00:00.000Z", "2026-11-11T10:01:23.500Z"), 83.5)
+        self.assertIsNone(cycle_elapsed_s("2026-11-10T09:00:00.000Z", "2026-11-11T10:00:00.000Z"))
