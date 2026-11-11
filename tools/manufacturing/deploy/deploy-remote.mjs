@@ -134,6 +134,9 @@ BASE=${rq(root)}; NEXT="$BASE.next"; PEND="$BASE.pending-prev"; LEGACY=${rq(lega
 mkdir -p "$(dirname "$BASE")"
 rm -rf "$NEXT"; mkdir -p "$NEXT"
 tar -xzf ${rq(archive)} -C "$NEXT"
+# The release is packed on Windows, whose tar keeps no Unix execute bits: make the shipped
+# shell scripts (commands/*.sh and the tools) runnable as ./script.sh again.
+find "$NEXT" -type f -name '*.sh' -exec chmod u+x {} +
 SOURCE_ENV=''
 for TREE in "$BASE" "$PEND" "$LEGACY"; do
   if [ ! -f "$TREE/compose.yml" ] && [ -f "$TREE/manufacturing/compose.yml" ]; then CANDIDATE="$TREE/manufacturing/.env"
