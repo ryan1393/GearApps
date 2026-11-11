@@ -14,7 +14,7 @@ import {
 export class CreateLocationDto implements ICreateLocation {
   @ApiProperty({
     type: String,
-    description: 'Unique barcode / scanner value. Summary shelf tags use GSR-<summary>/GSP-<summary> for Green Shed Cuttergrind shelves are CGRR-###/CGRP-### (rough), CGDR-A1A/CGDP-A1A (dull: shelf letter, layer number, bin letter) and CGFR-###/CGFP-### (finished).',
+    description: 'Unique barcode / scanner value. Summary shelf tags use GSR-<summary>/GSP-<summary> for Green Shed. Cuttergrind shelves are CGRR-###/CGRP-### (rough), CGDR-A1A/CGDP-A1A (dull) and CGFR-A1A/CGFP-A1A (finished), where A1A is shelf letter, layer number, bin letter.',
   })
   @IsString()
   serial_number!: string;

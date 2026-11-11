@@ -100,7 +100,7 @@ export function cuttergrindRoughShelfForPartType(
   return partType === 'RING' ? 'CGRR' : partType === 'PINION' ? 'CGRP' : null;
 }
 
-/** Where a dull shelf tag sits: shelf A, layer 1, bin A for CGDR-A1A. */
+/** Where a dull or finished shelf tag sits: shelf A, layer 1, bin A for CGDR-A1A / CGFR-A1A. */
 export interface CuttergrindShelfPosition {
   shelf: string;
   layer: number;
@@ -109,22 +109,23 @@ export interface CuttergrindShelfPosition {
 
 export interface CuttergrindNumberedShelfTag {
   serialNumber: string;
-  /** What follows the prefix: A1A for dull shelves, 001 for finished shelves. */
+  /** What follows the prefix: shelf letter, layer number, bin letter, such as A1A. */
   shelfNumber: string;
   department: typeof DEPARTMENT_CUTTERGRIND;
   locationType: typeof LOCATION_TYPE_SHELF;
   kind: 'CUTTERGRIND_DULL' | 'CUTTERGRIND_FINISHED';
   partTypeCode: SummaryShelfPartType;
-  /** Dull shelves only. */
-  position: CuttergrindShelfPosition | null;
+  position: CuttergrindShelfPosition;
 }
 
-/** Dull shelves are addressed by shelf letter, layer number and bin letter: CGDR-A1A. */
-export const CUTTERGRIND_DULL_SHELF_PATTERN = /^(CGDR|CGDP)-([A-Z])([1-9])([A-Z])$/;
-/** Finished shelves keep a three-digit physical shelf number: CGFR-001. */
-export const CUTTERGRIND_FINISHED_SHELF_PATTERN = /^(CGFR|CGFP)-(\d{3})$/;
+/**
+ * Dull (CGDR/CGDP) and finished (CGFR/CGFP) shelves are addressed by shelf letter, layer
+ * number and bin letter: CGDR-A1A is RING dull, shelf A, layer 1, bin A.
+ */
+export const CUTTERGRIND_BIN_SHELF_PATTERN = /^(CGDR|CGDP|CGFR|CGFP)-([A-Z])([1-9])([A-Z])$/;
 
-export function buildCuttergrindDullShelfTag(
+export function buildCuttergrindShelfTag(
+  kind: CuttergrindNumberedShelfTag['kind'],
   partTypeCode: string | null | undefined,
   shelf: string,
   layer: number,
@@ -132,8 +133,9 @@ export function buildCuttergrindDullShelfTag(
 ): string | null {
   const partType = normalizeSummaryShelfPartType(partTypeCode);
   if (!partType) return null;
-  const serial = `${partType === 'RING' ? 'CGDR' : 'CGDP'}-${shelf.trim().toUpperCase()}${layer}${bin.trim().toUpperCase()}`;
-  return CUTTERGRIND_DULL_SHELF_PATTERN.test(serial) ? serial : null;
+  const prefix = `CG${kind === 'CUTTERGRIND_DULL' ? 'D' : 'F'}${partType === 'RING' ? 'R' : 'P'}`;
+  const serial = `${prefix}-${shelf.trim().toUpperCase()}${layer}${bin.trim().toUpperCase()}`;
+  return CUTTERGRIND_BIN_SHELF_PATTERN.test(serial) ? serial : null;
 }
 
 export function describeCuttergrindShelfPosition(position: CuttergrindShelfPosition): string {
@@ -144,28 +146,17 @@ export function parseCuttergrindNumberedShelfTag(
   value: string,
 ): CuttergrindNumberedShelfTag | null {
   const serialNumber = value.trim().toUpperCase();
-  const dull = CUTTERGRIND_DULL_SHELF_PATTERN.exec(serialNumber);
-  if (dull) {
-    return {
-      serialNumber,
-      shelfNumber: `${dull[2]}${dull[3]}${dull[4]}`,
-      department: DEPARTMENT_CUTTERGRIND,
-      locationType: LOCATION_TYPE_SHELF,
-      kind: 'CUTTERGRIND_DULL',
-      partTypeCode: dull[1] === 'CGDR' ? 'RING' : 'PINION',
-      position: { shelf: dull[2], layer: Number(dull[3]), bin: dull[4] },
-    };
-  }
-  const finished = CUTTERGRIND_FINISHED_SHELF_PATTERN.exec(serialNumber);
-  if (!finished) return null;
+  const match = CUTTERGRIND_BIN_SHELF_PATTERN.exec(serialNumber);
+  if (!match) return null;
+  const [, prefix, shelf, layer, bin] = match;
   return {
     serialNumber,
-    shelfNumber: finished[2],
+    shelfNumber: `${shelf}${layer}${bin}`,
     department: DEPARTMENT_CUTTERGRIND,
     locationType: LOCATION_TYPE_SHELF,
-    kind: 'CUTTERGRIND_FINISHED',
-    partTypeCode: finished[1] === 'CGFR' ? 'RING' : 'PINION',
-    position: null,
+    kind: prefix === 'CGDR' || prefix === 'CGDP' ? 'CUTTERGRIND_DULL' : 'CUTTERGRIND_FINISHED',
+    partTypeCode: prefix === 'CGDR' || prefix === 'CGFR' ? 'RING' : 'PINION',
+    position: { shelf, layer: Number(layer), bin },
   };
 }
 

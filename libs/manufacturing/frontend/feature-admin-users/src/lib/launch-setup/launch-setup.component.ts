@@ -37,7 +37,7 @@ interface TagKind {
   /** Barcodes follow fixed rules: a prefix, then digits (three exactly for numbered shelves). */
   prefix: string;
   digits?: number;
-  /** Dull shelves are addressed by shelf letter, layer number and bin letter (CGDR-A1A). */
+  /** Dull and finished shelves are addressed by shelf letter, layer number and bin letter (CGDR-A1A). */
   grid?: boolean;
   description?: string;
 }
@@ -51,8 +51,8 @@ const TAG_KINDS: TagKind[] = [
   { id: 'container', label: 'Coater containers (C####)', kind: 'CONTAINER', prefix: 'C' },
   { id: 'cgrr', label: 'Rough shelves, ring (CGRR-###)', kind: 'LOCATION', prefix: 'CGRR-', digits: 3, description: 'Cuttergrind rough RING shelf' },
   { id: 'cgrp', label: 'Rough shelves, pinion (CGRP-###)', kind: 'LOCATION', prefix: 'CGRP-', digits: 3, description: 'Cuttergrind rough PINION shelf' },
-  { id: 'cgfr', label: 'Finished shelves, ring (CGFR-###)', kind: 'LOCATION', prefix: 'CGFR-', digits: 3, description: 'Cuttergrind finished RING shelf' },
-  { id: 'cgfp', label: 'Finished shelves, pinion (CGFP-###)', kind: 'LOCATION', prefix: 'CGFP-', digits: 3, description: 'Cuttergrind finished PINION shelf' },
+  { id: 'cgfr', label: 'Finished shelves, ring (CGFR-A1A)', kind: 'LOCATION', prefix: 'CGFR-', grid: true, description: 'Cuttergrind finished RING shelf' },
+  { id: 'cgfp', label: 'Finished shelves, pinion (CGFP-A1A)', kind: 'LOCATION', prefix: 'CGFP-', grid: true, description: 'Cuttergrind finished PINION shelf' },
   { id: 'cgdr', label: 'Dull shelves, ring (CGDR-A1A)', kind: 'LOCATION', prefix: 'CGDR-', grid: true, description: 'Cuttergrind dull RING shelf' },
   { id: 'cgdp', label: 'Dull shelves, pinion (CGDP-A1A)', kind: 'LOCATION', prefix: 'CGDP-', grid: true, description: 'Cuttergrind dull PINION shelf' },
 ];
@@ -92,7 +92,7 @@ export class LaunchSetupComponent implements OnInit {
   tagFirst = 1;
   tagCount = 10;
   tagDigits = 4;
-  // Dull shelf grid: shelves A to B, each with layers 1..n, each layer with bins A..
+  // Dull/finished shelf grid: shelves A to B, each with layers 1..n, each layer with bins A..
   gridShelfFrom = 'A';
   gridShelfTo = 'A';
   gridLayers = 4;
@@ -146,7 +146,7 @@ export class LaunchSetupComponent implements OnInit {
       row('Cutter builder machines', setup.cutter_builder_machines, 'Add each build station as a machine of type Cutter Builder.', 'machines'),
       row('Production machines', setup.production_machines, 'The cutting machines Greenshed runs cutters on.', 'machines'),
       row('Rough shelves (CGRR / CGRP)', setup.shelves.rough, 'Numbered shelves for trays that are ground and waiting for the coater.', 'locations'),
-      row('Finished shelves (CGFR / CGFP)', setup.shelves.finished, 'Numbered shelves for coated trays waiting for a cutter build.', 'locations'),
+      row('Finished shelves (CGFR / CGFP)', setup.shelves.finished, 'Shelf bins (CGFR-A1A) for coated trays waiting for a cutter build.', 'locations'),
       row('Dull shelves (CGDR / CGDP)', setup.shelves.dull, 'Where torn-down trays wait for grinding.', 'locations'),
       row('Greenshed shelves (GSR / GSP)', setup.shelves.greenshed, 'Where built cutters wait for a machine.', 'locations'),
       row('Trays', setup.trays, 'Every physical tray needs a record and a barcode tag.', 'trays'),
@@ -218,7 +218,7 @@ export class LaunchSetupComponent implements OnInit {
     const entry = this.opening;
     if (!entry.tray.trim()) { this.openingError = 'Scan or type the tray barcode.'; return; }
     if (!entry.summary_id || !entry.part_type_id) { this.openingError = 'Choose the Summary and part type of the blades in the tray.'; return; }
-    if (!entry.shelf.trim()) { this.openingError = `Scan the ${this.openingStageShelf}-### shelf the tray is on.`; return; }
+    if (!entry.shelf.trim()) { this.openingError = `Scan the ${this.openingStageShelf} shelf the tray is on.`; return; }
     this.openingBusy = true; this.openingError = ''; this.cdr.markForCheck();
     this.http.post<{ tray_serial_number: string; summary_number: string; part_type_code: string; stage_name: string; shelf_serial_number: string; blade_count: number }>(
       '/api/v1/bladeTrays/opening-inventory', {

@@ -63,7 +63,7 @@ export class AdminMasterDataService {
     ]);
     const shelves: Array<{ kind: string; count: string }> = await this.dataSource.query(`SELECT CASE
         WHEN serial_number ~ '^CGR[RP]-[0-9]{3}$' THEN 'rough'
-        WHEN serial_number ~ '^CGF[RP]-[0-9]{3}$' THEN 'finished'
+        WHEN serial_number ~ '^CGF[RP]-[A-Z][1-9][A-Z]$' THEN 'finished'
         WHEN serial_number ~ '^CGD[RP]-[A-Z][1-9][A-Z]$' THEN 'dull'
         WHEN serial_number ~ '^GS[RP]-' THEN 'greenshed'
         ELSE 'other' END AS kind, count(*) AS count

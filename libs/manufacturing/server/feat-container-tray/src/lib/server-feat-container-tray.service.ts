@@ -300,7 +300,7 @@ export class ServerFeatContainerTrayService extends PaginationService<ContainerT
           numberedShelf.partTypeCode !== partTypeCode || shelfLocation.location_type !== 'SHELF' ||
           shelfLocation.department !== DEPARTMENT_CUTTERGRIND) {
         throw new UnprocessableEntityException(
-          `Finished coated ${partTypeCode} trays must be received to a numbered ${partTypeCode === 'RING' ? 'CGFR' : 'CGFP'} shelf`,
+          `Finished coated ${partTypeCode} trays must be received to a ${partTypeCode === 'RING' ? 'CGFR' : 'CGFP'} shelf such as ${partTypeCode === 'RING' ? 'CGFR' : 'CGFP'}-A1A (shelf, layer, bin)`,
         );
       }
       if (!readyForCutterStage) {

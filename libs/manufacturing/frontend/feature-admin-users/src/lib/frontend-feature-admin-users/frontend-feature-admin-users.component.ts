@@ -702,7 +702,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   }
 
   locationShelfDisplay(shelf: CuttergrindRoughShelfTag | CuttergrindNumberedShelfTag | SummaryShelfTag): string {
-    if ('position' in shelf && shelf.position) return describeCuttergrindShelfPosition(shelf.position);
+    if ('position' in shelf) return describeCuttergrindShelfPosition(shelf.position);
     return 'shelfNumber' in shelf
       ? `Shelf ${shelf.shelfNumber}`
       : `Summary ${shelf.summaryNumber}`;

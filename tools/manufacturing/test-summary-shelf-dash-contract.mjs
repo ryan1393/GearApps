@@ -11,10 +11,10 @@ const adminHtml = read('libs/manufacturing/frontend/feature-admin-users/src/lib/
 const migration = read('tools/manufacturing/data-import/migrate-summary-shelf-tags.mjs');
 
 // Green Shed shelves are per-summary (GSR-/GSP-<summary>). Cuttergrind shelves became
-// physical shelves (dull CGDR-A1A = shelf, layer, bin; finished CGFR-001) parsed by parseCuttergrindNumberedShelfTag.
+// physical shelf bins (CGDR-A1A / CGFR-A1A = shelf, layer, bin) parsed by parseCuttergrindNumberedShelfTag.
 const currentTags = ['GSR-', 'GSP-'];
 for (const prefix of currentTags) if (!shelf.includes(`prefix: '${prefix}'`)) throw new Error(`Shared parser missing ${prefix}`);
-if (!shelf.includes('export function parseCuttergrindNumberedShelfTag') || !shelf.includes('(CGDR|CGDP)-([A-Z])([1-9])([A-Z])') || !shelf.includes('(CGFR|CGFP)-(\\d{3})')) throw new Error('Shared parser missing numbered Cuttergrind shelves');
+if (!shelf.includes('export function parseCuttergrindNumberedShelfTag') || !shelf.includes('(CGDR|CGDP|CGFR|CGFP)-([A-Z])([1-9])([A-Z])')) throw new Error('Shared parser missing numbered Cuttergrind shelves');
 for (const marker of [
   "return `${partType === 'RING' ? 'GSR' : 'GSP'}-${summary}`;",
   "return `${partType === 'RING' ? 'CGDR' : 'CGDP'}-${summary}`;",
