@@ -8,6 +8,11 @@
 > bin C. Layers run 1–9 and shelves and bins A–Z. Older numbered `CGRR-###`/`CGDR-###`/`CGFR-###`
 > (and pinion) tags are no longer accepted for placements; relabel those shelves (Admin > Launch Setup makes a
 > whole shelf of bin tags at once).
+>
+> **Admin > Locations > Bulk shelf locations** makes every bin of one shelf at once: choose CGDR,
+> CGDP, CGFR or CGFP (or rough CGRR/CGRP), the shelf letter, which layers (1–9) and how many bins
+> each layer has (1–26, lettered A onward). Existing barcodes are left as they are.
+>
 > The `CGD?-<summary>` / `CGF?-<summary>` tags described below are legacy and are rejected for new
 > placements. Green Shed shelves remain `GSR-<summary>` / `GSP-<summary>`.
 

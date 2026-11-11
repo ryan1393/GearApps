@@ -191,8 +191,8 @@ function Assert-TestHarness {
 
     $manifest = Get-Content -LiteralPath $RouteManifestPath -Raw | ConvertFrom-Json
     $manifestRoutes = if ($null -ne $manifest.routes) { @($manifest.routes) } else { @($manifest) }
-    if ($manifestRoutes.Count -ne 113) {
-        throw "Route manifest must contain 113 routes; found $($manifestRoutes.Count)."
+    if ($manifestRoutes.Count -ne 114) {
+        throw "Route manifest must contain 114 routes; found $($manifestRoutes.Count)."
     }
 
     $contracts = @(
@@ -264,7 +264,7 @@ function Assert-TestHarness {
         }
     }
 
-    Write-Host "[PASS] Test scripts, PowerShell syntax, parameter contracts, and 113-route manifest are valid." -ForegroundColor Green
+    Write-Host "[PASS] Test scripts, PowerShell syntax, parameter contracts, and 114-route manifest are valid." -ForegroundColor Green
 }
 
 function Test-ApiReady {
@@ -390,7 +390,7 @@ try {
     Assert-TestHarness
 
     if ($HarnessOnly) {
-        Add-MasterResult 'Test harness self-check' 'PASS' 'Scripts, named parameters, and 113-route manifest validated.'
+        Add-MasterResult 'Test harness self-check' 'PASS' 'Scripts, named parameters, and 114-route manifest validated.'
         Write-Host ''
         Write-Host '[PASS] TEST HARNESS SELF-CHECK PASSED.' -ForegroundColor Green
         exit 0
@@ -968,7 +968,7 @@ try {
 
     Start-MeshForgeApi
 
-    Invoke-ChildTest '113-route runtime probe' "$PSScriptRoot\test-all-api-routes.ps1" @{
+    Invoke-ChildTest '114-route runtime probe' "$PSScriptRoot\test-all-api-routes.ps1" @{
         ServerRoot = $ServerRoot
         Email      = $Email
         Password     = $Password

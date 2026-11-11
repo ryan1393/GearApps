@@ -146,6 +146,39 @@ export function buildCuttergrindShelfTag(
   return pattern.test(serial) ? serial : null;
 }
 
+/** Barcode prefixes of Cuttergrind shelf bins that can be made in bulk. */
+export const CUTTERGRIND_SHELF_PREFIXES = ['CGDR', 'CGDP', 'CGFR', 'CGFP', 'CGRR', 'CGRP'] as const;
+export type CuttergrindShelfPrefix = (typeof CUTTERGRIND_SHELF_PREFIXES)[number];
+export const CUTTERGRIND_SHELF_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+export const CUTTERGRIND_SHELF_MAX_LAYER = 9;
+export const CUTTERGRIND_SHELF_MAX_BINS = CUTTERGRIND_SHELF_LETTERS.length;
+
+/** What a prefix holds: CGDR is "Dull, ring". */
+export function describeCuttergrindShelfPrefix(prefix: CuttergrindShelfPrefix): string {
+  const stage = prefix[2] === 'D' ? 'Dull' : prefix[2] === 'F' ? 'Finished' : 'Rough';
+  return `${stage}, ${prefix[3] === 'R' ? 'ring' : 'pinion'}`;
+}
+
+/**
+ * Every bin barcode for one shelf: each chosen layer gets bins A onward.
+ * CGDR, shelf A, layers [1, 2], 3 bins makes CGDR-A1A, CGDR-A1B, CGDR-A1C, CGDR-A2A, CGDR-A2B, CGDR-A2C.
+ * Returns an empty list when the shelf, a layer or the bin count is out of range.
+ */
+export function cuttergrindShelfBinSerials(
+  prefix: CuttergrindShelfPrefix,
+  shelf: string,
+  layers: readonly number[],
+  bins: number,
+): string[] {
+  const letter = shelf.trim().toUpperCase();
+  if (!CUTTERGRIND_SHELF_PREFIXES.includes(prefix) || letter.length !== 1 || !CUTTERGRIND_SHELF_LETTERS.includes(letter)) return [];
+  if (!Number.isInteger(bins) || bins < 1 || bins > CUTTERGRIND_SHELF_MAX_BINS) return [];
+  const sorted = [...new Set(layers)].sort((a, b) => a - b);
+  if (!sorted.length || sorted.some(layer => !Number.isInteger(layer) || layer < 1 || layer > CUTTERGRIND_SHELF_MAX_LAYER)) return [];
+  return sorted.flatMap(layer =>
+    Array.from({ length: bins }, (_, bin) => `${prefix}-${letter}${layer}${CUTTERGRIND_SHELF_LETTERS[bin]}`));
+}
+
 export function describeCuttergrindShelfPosition(position: CuttergrindShelfPosition): string {
   return `Shelf ${position.shelf}, layer ${position.layer}, bin ${position.bin}`;
 }

@@ -28,3 +28,12 @@ Apply order:
 SQL Server is read-only.
 
 The working snapshots are intentionally retained for audit and are excluded from Git by `.gitignore`.
+
+## Clear operational data (keep users and base data)
+
+```powershell
+npm run clear:operational-data        # preview: counts of what is emptied and kept
+npm run clear:operational-data:apply  # stop the API first
+```
+
+`clear-operational-data.mjs` empties blades, trays, containers, all locations, cutter builds and their history, coater shipments, Greenshed/DSF counts and the Cancel Last journal. Users, base/master data, cutter bodies, settings and the Lapper schema are kept. The `EMPTY` and `KEEP` lists at the top of the script are the source of truth; `test-clear-operational-data-contract.mjs` checks them. `commands\CLEAR-OPERATIONAL-DATA.cmd` previews and then asks for `CLEAR DATA`.

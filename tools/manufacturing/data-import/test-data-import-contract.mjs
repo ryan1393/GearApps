@@ -198,7 +198,7 @@ for (const script of [
 
 const manifest = json('tools/manufacturing/api-route-manifest.json');
 const routes = Array.isArray(manifest) ? manifest : manifest.routes;
-assert(routes.length === 113, `Expected 113 API routes; found ${routes.length}`);
+assert(routes.length === 114, `Expected 114 API routes; found ${routes.length}`);
 
 console.log('[PASS] Fresh all-data import contract validated.');
 console.log({
@@ -211,7 +211,7 @@ console.log({
 
 const routeProbe = read('tools/manufacturing/test-all-api-routes.ps1');
 assert(
-  routeProbe.includes('Count -ne 113') &&
+  routeProbe.includes('Count -ne 114') &&
     !routeProbe.includes('Count -ne 103'),
-  'Runtime API route probe is not synchronized to the 113-route manifest',
+  'Runtime API route probe is not synchronized to the 114-route manifest',
 );

@@ -2,6 +2,8 @@ import { EntityManager, FindOptionsWhere, In, Repository } from 'typeorm';
 
 import {
   BladeTrayOrmEntity,
+  BulkCreateShelfLocationsDto,
+  BulkShelfLocationsResultDto,
   CreateLocationDto,
   CutterBladeRequirementOrmEntity,
   CutterBuildLocationOrmEntity,
@@ -17,8 +19,10 @@ import {
   Uuid,
 } from '@meshforge/manufacturing/shared/util-types';
 import {
+  cuttergrindShelfBinSerials,
   CuttergrindNumberedShelfTag,
   CuttergrindRoughShelfTag,
+  describeCuttergrindShelfPrefix,
   parseCuttergrindNumberedShelfTag,
   parseCuttergrindRoughShelfTag,
   parseSummaryShelfTag,
@@ -105,6 +109,58 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
       }),
     );
     return this.locationRepo.findOneOrFail({ where: { id: saved.id }, relations: LOCATION_CONTENTS });
+  }
+
+  /**
+   * Makes every bin of one Cuttergrind shelf: each chosen layer gets bins A onward
+   * (CGDR-A1A, CGDR-A1B, ...). Missing barcodes are created in one transaction; a barcode
+   * that already exists is left exactly as it is and reported as existing.
+   */
+  async bulkCreateShelfLocations(dto: BulkCreateShelfLocationsDto, userId: Uuid): Promise<BulkShelfLocationsResultDto> {
+    const serials = cuttergrindShelfBinSerials(dto.prefix, dto.shelf, dto.layers, dto.bins);
+    if (!serials.length) {
+      throw new UnprocessableEntityException('Choose a shelf letter A to Z, layers 1 to 9 and 1 to 26 bins.');
+    }
+    const kind = describeCuttergrindShelfPrefix(dto.prefix).toLowerCase().replace(',', '');
+
+    return this.locationRepo.manager.transaction(async (manager) => {
+      const repo = manager.getRepository(LocationOrmEntity);
+      const before = new Set(
+        (await repo.find({ where: { serial_number: In(serials) }, select: { id: true } })).map(({ id }) => id),
+      );
+      const rows = serials.map((serial) => {
+        const tag = parseCuttergrindNumberedShelfTag(serial) ?? parseCuttergrindRoughShelfTag(serial);
+        if (!tag) throw new UnprocessableEntityException(`${serial} is not a shelf bin barcode`);
+        return {
+          serial_number: serial,
+          number: tag.shelfNumber,
+          description: `Cuttergrind ${kind} shelf, shelf ${tag.position.shelf}, layer ${tag.position.layer}, bin ${tag.position.bin}`,
+          department: tag.department,
+          location_type: tag.locationType,
+          enabled: true,
+          createdBy: userId,
+          updatedBy: userId,
+        };
+      });
+      // The unique barcode index settles any race with another admin making the same bins.
+      await repo.createQueryBuilder().insert().into(LocationOrmEntity).values(rows).orIgnore().execute();
+
+      const saved = await repo.find({ where: { serial_number: In(serials) } });
+      const bySerial = new Map(saved.map((location) => [location.serial_number, location]));
+      const locations = serials.map((serial) => {
+        const location = bySerial.get(serial);
+        if (!location) throw new ConflictException(`${serial} could not be created`);
+        return {
+          id: location.id,
+          serial_number: serial,
+          state: before.has(location.id) ? 'existing' as const : 'created' as const,
+          enabled: location.enabled,
+        };
+      });
+      const created = locations.filter(({ state }) => state === 'created').length;
+      this.logger.log(`Bulk shelf ${dto.prefix}-${dto.shelf.toUpperCase()}: ${created} created, ${locations.length - created} already existed`);
+      return { created, existing: locations.length - created, locations };
+    });
   }
 
   async getLocation(locationId: Uuid) {

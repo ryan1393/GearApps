@@ -470,10 +470,34 @@
       },
       "cache": false
     },
+    "clear-operational-data": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/data-import/clear-operational-data.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "clear-operational-data-apply": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/data-import/clear-operational-data.mjs --apply --yes-delete-operational-data",
+        "cwd": "."
+      },
+      "cache": false
+    },
     "test-full-data-reset-contract": {
       "executor": "nx:run-commands",
       "options": {
         "command": "node ./tools/manufacturing/data-import/test-full-data-reset-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-clear-operational-data-contract": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node ./tools/manufacturing/data-import/test-clear-operational-data-contract.mjs",
         "cwd": "."
       },
       "cache": false

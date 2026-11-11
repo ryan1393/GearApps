@@ -560,6 +560,13 @@
     "has_parameters": false
   },
   {
+    "method": "POST",
+    "path": "/api/v1/locations/bulk-shelves",
+    "controller": "ServerFeatLocationController",
+    "source": "libs/manufacturing/server/feat-location/src/lib/server-feat-location.controller.ts",
+    "has_parameters": false
+  },
+  {
     "method": "DELETE",
     "path": "/api/v1/locations/:id",
     "controller": "ServerFeatLocationController",

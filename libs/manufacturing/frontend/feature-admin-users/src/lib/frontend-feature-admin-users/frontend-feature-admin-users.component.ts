@@ -47,6 +47,7 @@ import { LabelPrintersComponent } from '../label-printers/label-printers.compone
 import { ServerSettingsComponent } from '../server-settings/server-settings.component';
 import { CoaterRpaSetupComponent } from '../coater-rpa/coater-rpa-setup.component';
 import { LaunchSetupComponent } from '../launch-setup/launch-setup.component';
+import { BulkLocationsComponent } from '../bulk-locations/bulk-locations.component';
 import { LappingGearsetsComponent } from '../lapping/lapping-gearsets.component';
 import { LappingMachinesComponent } from '../lapping/lapping-machines.component';
 import {
@@ -64,7 +65,7 @@ const isAdminTab = (value: unknown): value is AdminTab => ADMIN_TABS.includes(va
 @Component({
   selector: 'gear-admin-users-page',
   standalone: true,
-  imports: [CoaterRpaSetupComponent, LaunchSetupComponent, DanaToneDirective, MachineDsfCountComponent,CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent, CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, ServerSettingsComponent, GearLabelPrinterPickerComponent, LappingGearsetsComponent, LappingMachinesComponent],
+  imports: [CoaterRpaSetupComponent, LaunchSetupComponent, BulkLocationsComponent, DanaToneDirective, MachineDsfCountComponent,CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent, CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, ServerSettingsComponent, GearLabelPrinterPickerComponent, LappingGearsetsComponent, LappingMachinesComponent],
   templateUrl: './frontend-feature-admin-users.component.html',
   styleUrls: ['./frontend-feature-admin-users.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -1019,6 +1020,11 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       },
       error: (error) => this.handleLoadError(error),
     });
+  }
+
+  /** The bulk shelf panel made locations: show them in the list. */
+  reloadLocations(): void {
+    this.loadLocations();
   }
 
   private loadLocations(

@@ -16,6 +16,7 @@ _Last updated: 2026-08-27 — V69.2 combined UI completion candidate_
   - `SETUP-MESHFORGE.cmd`
   - `START-MESHFORGE.cmd`
   - `RESET-AND-REFRESH-ALL-DATA.cmd`
+  - `CLEAR-OPERATIONAL-DATA.cmd` (empties operational data, keeps users and base data)
   - authoritative regression: `npm run test:meshforge`
 - Current patch target is always `meshforgev0.1`.
 - Source-only patches do NOT run `npm install`.
