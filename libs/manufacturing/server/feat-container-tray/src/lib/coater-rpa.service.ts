@@ -21,7 +21,7 @@ export class CoaterRpaService {
     const [config] = await manager.query(`SELECT coater_display_name,
       CASE WHEN default_po_enabled AND default_po_expires_on >= (CURRENT_TIMESTAMP AT TIME ZONE 'America/Indiana/Indianapolis')::date
         THEN default_po END AS default_po,
-      EXISTS (SELECT 1 FROM dana_rpa_requests_v1) AS has_template
+      (EXISTS (SELECT 1 FROM dana_rpa_template_v1) OR EXISTS (SELECT 1 FROM dana_rpa_requests_v1)) AS has_template
       FROM dana_rpa_settings_v1 WHERE id=1`);
     const [request] = await manager.query(`SELECT ${requestFields} FROM dana_rpa_requests_v1 r
       WHERE r.shipment_id=$1 AND r.revision=$2`, [shipmentId, revision]);
@@ -51,8 +51,11 @@ export class CoaterRpaService {
     const [settings] = await manager.query(`SELECT *, default_po_expires_on::text AS expires_on,
       (CURRENT_TIMESTAMP AT TIME ZONE 'America/Indiana/Indianapolis')::date::text AS today
       FROM dana_rpa_settings_v1 WHERE id=1 FOR UPDATE`);
-    const [template] = await manager.query('SELECT document FROM dana_rpa_requests_v1 ORDER BY number LIMIT 1');
-    if (!settings || !template) throw new ConflictException('Import the saved RPA settings and Excel form before preparing requests.');
+    // The form uploaded in Admin > Coater RPA, or else the workbook of the earliest imported request.
+    const [template] = await manager.query(`SELECT document FROM (
+      SELECT document, 0 AS source, 0 AS number FROM dana_rpa_template_v1
+      UNION ALL SELECT document, 1, number FROM dana_rpa_requests_v1) forms ORDER BY source, number LIMIT 1`);
+    if (!settings || !template) throw new ConflictException('Set up the RPA form and settings in Admin > Coater RPA before preparing requests.');
 
     const override = manualPo?.trim();
     const defaultValid = settings.default_po_enabled && settings.expires_on >= settings.today;

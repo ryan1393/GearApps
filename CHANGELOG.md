@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Admin > Coater RPA.** A new Admin tab sets up RPA requests without a database dump: upload the
+  Excel request form (checked before it is saved), edit the coater name, next number, prices,
+  recipients and default PO, and map each Summary to the form's part numbers. The first time, the
+  settings and mappings are suggested from the uploaded form. New admin-only endpoints under
+  `/api/v1/admin/coater-rpa`; new table `dana_rpa_template_v1` (created on API start). An
+  uploaded form is used in place of the one from an imported request.
+- **Faster Docker builds.** Every image now starts with the same lines, so Docker installs the
+  build dependencies once instead of once per image, and a release that only changes the version
+  number no longer reinstalls them. The web images and the API build stage no longer install a
+  compiler or run install scripts; only the API's runtime dependencies do. CI cancels a run that
+  a newer push to the same pull request has replaced.
 - **Coater RPA works with the form as Excel saves it.** Preparing a request failed with "The RPA
   form has no part line" when the saved form came straight from Excel, because Excel stores the
   part numbers as shared text. That is fixed, and coating variants named only by the form's

@@ -130,6 +130,81 @@ function recalculateOnOpen(files: Record<string, Uint8Array>): void {
   files[path] = strToU8(updated);
 }
 
+export interface RpaWorkbookInfo {
+  /** The request number, PO, prices and coater written in the form, as starting values. */
+  number: number | null;
+  po: string | null;
+  unit_price: number | null;
+  insurance_unit: number | null;
+  coater_name: string | null;
+  /** Every part name a request line may use with this form. */
+  parts: string[];
+  /** The order lines the form holds, as starting part mappings. */
+  lines: Array<Pick<RpaLine, 'summary' | 'part_type' | 'outer_part' | 'inner_part'>>;
+}
+
+const inputCells = ['P2', 'R2', 'P3', 'K9', 'H5', 'K8', 'S3', 'I50'];
+/** An uploaded workbook may not expand to more than this, however small the file is. */
+const MAX_UNPACKED_BYTES = 40 * 1024 * 1024;
+
+/**
+ * Check that an uploaded workbook is an RPA form this code can fill, and read what it holds.
+ * Throws an Error whose message can be shown to the administrator.
+ */
+export function inspectRpaWorkbook(template: Buffer): RpaWorkbookInfo {
+  let files: Record<string, Uint8Array>;
+  let unpacked = 0;
+  try {
+    files = unzipSync(template, { filter: file => {
+      unpacked += file.originalSize;
+      if (unpacked > MAX_UNPACKED_BYTES) throw new Error('too large');
+      return true;
+    } });
+  } catch {
+    throw new Error('This file is not an Excel workbook (.xlsx), or it is too large.');
+  }
+  if (Object.keys(files).some(name => /vbaProject/i.test(name))) {
+    throw new Error('Workbooks with macros are not accepted. Save the form as .xlsx without macros.');
+  }
+  if (!files[worksheet]) throw new Error('The workbook has no first worksheet to use as the RPA form.');
+  const sheet = strFromU8(files[worksheet]);
+  const strings = sharedStrings(files);
+  const values = new Map<string, CellValue>();
+  for (const match of sheet.matchAll(cells)) values.set(match[2] + match[3], cellValue(match[1], match[4], strings));
+  const missing = inputCells.filter(address => !values.has(address));
+  if (missing.length) throw new Error(`This is not the RPA form: cell ${missing.join(', ')} is missing.`);
+  const rows = new Set(Array.from(sheet.matchAll(/<row\b[^>]*\br="(\d+)"/g), match => Number(match[1])));
+  if (Array.from({ length: 29 }, (_, i) => i + 11).some(row => !rows.has(row))) {
+    throw new Error('This is not the RPA form: order rows 11 to 39 are missing.');
+  }
+  const parts = [...formParts(sheet, strings)].sort();
+  if (!parts.length) throw new Error('This is not the RPA form: no part numbers were found in cells B32 to B47.');
+
+  const text = (address: string) => {
+    const value = values.get(address);
+    return value === null || value === undefined || String(value).trim() === '' ? null : String(value).trim();
+  };
+  const number = (address: string) => {
+    const value = Number(values.get(address));
+    return values.get(address) !== null && Number.isFinite(value) ? value : null;
+  };
+  const lines: RpaWorkbookInfo['lines'] = [];
+  for (let row = 11; row <= 39; row++) {
+    const summary = text('P' + row), side = text('Q' + row)?.toUpperCase(), outer = text('T' + row), inner = text('W' + row);
+    if (!summary || !outer || !inner || (side !== 'G' && side !== 'P')) continue;
+    lines.push({ summary: summary.toUpperCase(), part_type: side === 'G' ? 'RING' : 'PINION', outer_part: outer, inner_part: inner });
+  }
+  try {
+    // Prove the form can be filled before it is saved.
+    fillRpaWorkbook(template, { number: 1, po: 'CHECK', date: '2026-01-01', unitPrice: 1, insuranceUnit: 1,
+      lines: [{ summary: 'CHECK', part_type: 'RING', trays: 1, per_side: 1, outer_part: parts[0], inner_part: parts[0] }] });
+  } catch (error) {
+    throw new Error(error instanceof Error ? error.message : 'The form could not be filled.');
+  }
+  return { number: number('P2'), po: text('R2'), unit_price: number('S3'), insurance_unit: number('I50'),
+    coater_name: text('C7'), parts, lines };
+}
+
 /** Populate the original Excel form saved with the imported request. */
 export function fillRpaWorkbook(template: Buffer, request: {
   number: number;

@@ -1,5 +1,5 @@
 import { strFromU8, strToU8, unzipSync, zipSync } from 'fflate';
-import { fillRpaWorkbook } from './coater-rpa-workbook';
+import { fillRpaWorkbook, inspectRpaWorkbook } from './coater-rpa-workbook';
 
 const sheet = 'xl/worksheets/sheet1.xml';
 const template = Buffer.from(zipSync({
@@ -106,6 +106,53 @@ describe('fillRpaWorkbook', () => {
       expect(strFromU8(workbook['[Content_Types].xml'])).not.toContain('calcChain');
       expect(strFromU8(workbook['xl/workbook.xml'])).toContain('<calcPr calcId="191029" fullCalcOnLoad="1"/>');
       expect(strFromU8(workbook[sheet])).toContain('<c r="K8" t="inlineStr"><is><t xml:space="preserve">DN-85-01001</t></is></c>');
+    });
+  });
+
+  describe('inspectRpaWorkbook', () => {
+    /** A complete form: every input cell, order rows 11 to 39, two part lines and one saved order line. */
+    const form = (options: { without?: string; extra?: Record<string, Uint8Array> } = {}) => {
+      const rows: Record<number, string> = {
+        2: '<c r="P2"><v>9748</v></c><c r="R2"><v>7100163446</v></c>',
+        3: '<c r="P3"><v>46294</v></c><c r="S3"><v>5.89</v></c><c r="V3"><f>SUMIF($T$11:$U$39,"=PART-A Evo",$V$11:$V$39)</f><v>0</v></c>',
+        5: '<c r="H5" t="str"><f>_xlfn.CONCAT("DN-85-",0,P2)</f><v>DN-85-09748</v></c>',
+        7: '<c r="C7" t="s"><v>2</v></c>',
+        8: '<c r="K8" t="str"><f>H5</f><v>DN-85-09748</v></c>',
+        9: '<c r="K9"><f>TODAY()</f><v>46302</v></c>',
+        11: '<c r="P11"><v>30526</v></c><c r="Q11" t="inlineStr"><is><t>G</t></is></c><c r="T11" t="s"><v>0</v></c><c r="W11" t="s"><v>1</v></c>',
+        32: '<c r="B32" t="s"><v>0</v></c>', 35: '<c r="B35" t="s"><v>1</v></c>',
+        50: '<c r="I50"><v>50</v></c>',
+      };
+      for (let row = 12; row <= 39; row++) rows[row] ??= `<c r="P${row}"/>`;
+      const xml = Object.entries(rows).map(([row, content]) => `<row r="${row}">${content}</row>`).join('')
+        .replace(options.without ? new RegExp(`<c r="${options.without}"[^>]*?(?:/>|>.*?</c>)`) : /$^/, '');
+      return Buffer.from(zipSync({
+        [sheet]: strToU8(`<worksheet><sheetData>${xml}</sheetData></worksheet>`),
+        'xl/sharedStrings.xml': strToU8('<sst><si><t>PART-A</t></si><si><t>PART-B</t></si><si><t>Example Coating, Inc.</t></si></sst>'),
+        ...options.extra,
+      }));
+    };
+
+    it('reads the starting values, part names and order lines of a usable form', () => {
+      expect(inspectRpaWorkbook(form())).toEqual({
+        number: 9748, po: '7100163446', unit_price: 5.89, insurance_unit: 50, coater_name: 'Example Coating, Inc.',
+        parts: ['PART-A', 'PART-A Evo', 'PART-B'],
+        lines: [{ summary: '30526', part_type: 'RING', outer_part: 'PART-A', inner_part: 'PART-B' }],
+      });
+    });
+
+    it('explains why a file is not a usable form', () => {
+      expect(() => inspectRpaWorkbook(Buffer.from('not a workbook'))).toThrow('not an Excel workbook');
+      expect(() => inspectRpaWorkbook(Buffer.from(zipSync({ 'xl/worksheets/sheet2.xml': strToU8('<worksheet/>') })))).toThrow('no first worksheet');
+      expect(() => inspectRpaWorkbook(form({ without: 'S3' }))).toThrow('cell S3 is missing');
+      expect(() => inspectRpaWorkbook(form({ without: 'B32' }).subarray(0))).not.toThrow(); // one part line is enough
+      expect(() => inspectRpaWorkbook(form({ extra: { 'xl/vbaProject.bin': strToU8('macro') } }))).toThrow('macros are not accepted');
+    });
+
+    it('refuses a form without all 29 order rows', () => {
+      const short = Buffer.from(zipSync({ [sheet]: strToU8(strFromU8(unzipSync(form())[sheet]).replace(/<row r="39">.*?<\/row>/, '')) ,
+        'xl/sharedStrings.xml': unzipSync(form())['xl/sharedStrings.xml'] }));
+      expect(() => inspectRpaWorkbook(short)).toThrow('order rows 11 to 39 are missing');
     });
   });
 });

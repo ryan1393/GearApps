@@ -1,6 +1,18 @@
 # Coater RPA
 
-Start the MeshForge API once to create the RPA tables. Keep `gearapps-current.dump` on the database host or on the machine running the import. The dump holds the saved Excel form, recipient lists, purchase order, part mappings, numbering, and historical requests.
+## Set up in Admin
+
+**Admin > Coater RPA** holds everything a request needs. A server with no earlier RPA history is set up here, without a database dump.
+
+1. **Excel form.** Upload the RPA request workbook (.xlsx, up to 2 MB, no macros). It is checked before it is saved: it must have the form's cells, order rows 11 to 39 and its part lines, and a trial fill must succeed. **Download Current Form** returns the stored file. Replacing the form does not change requests that were already prepared.
+2. **Request settings.** Coater name, next RPA number, unit price, insurance value per piece, email recipients (To and CC) and an optional default PO with its expiry date. The first time, these start from the values in the uploaded form; check them and save. The next number cannot be set at or below a number already issued.
+3. **Part mappings.** Each Summary and part type sent to the coater needs the outer and inner blade part number it uses on the form. **Add From Form** saves the form's own order lines as mappings; add the rest by hand. A mapping can only name a part the form can total.
+
+The status row shows what is still missing. Requests can be prepared when the form, the settings and at least one mapping are in place. Only administrators can open this page.
+
+## Import from an earlier database
+
+A server that already issued RPAs can bring its history across instead. Start the MeshForge API once to create the RPA tables. Keep `gearapps-current.dump` on the database host or on the machine running the import. The dump holds the saved Excel form, recipient lists, purchase order, part mappings, numbering, and historical requests. A form uploaded in Admin is used in place of the imported one.
 
 From the repository root, preview the import against the intended database.
 
@@ -20,7 +32,7 @@ Tray counts represent matched inner/outer sets. A tray count of 13 produces 13 i
 
 ## The Excel form
 
-The form is the workbook saved with the earliest imported request. It can be a file saved by Excel itself: part numbers stored as shared text, formulas with saved results and a calculation chain are all handled.
+The form is the workbook uploaded in Admin > Coater RPA, or else the one saved with the earliest imported request. It can be a file saved by Excel itself: part numbers stored as shared text, formulas with saved results and a calculation chain are all handled.
 
 - A line's inner and outer part must be a name the form can total: one of its part lines (`B32`, `B35`, ... `B47`) or a name one of its `SUMIF` totals counts. That is how a coating variant such as `1700-5000 Evo`, which shares a part number with another line, is accepted.
 - After the request is written into the form, every formula is recalculated and its result saved in the file, so quantities, amounts, the box count and the packing list are correct in mail previews, Protected View and on a phone, not only after Excel recalculates. Excel is also told to recalculate when the workbook opens.
