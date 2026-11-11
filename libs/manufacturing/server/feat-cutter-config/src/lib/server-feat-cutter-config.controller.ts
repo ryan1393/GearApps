@@ -15,6 +15,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import {
   CreateCutterBladeRequirementDto,
+  CutterBodyCompatibilityQueryDto,
   SetSummaryBodyRuleDto,
   UpdateCutterBladeRequirementDto,
   ValidateCutterTrayDto,
@@ -88,6 +89,12 @@ export class ServerFeatCutterConfigController {
   @Auth([RoleType.ADMIN])
   clearSummaryBodyRule(@Param('summaryId', new ParseUUIDPipe()) summaryId: Uuid) {
     return this.service.clearSummaryBodyRule(summaryId);
+  }
+
+  @Get('body-compatibility')
+  @Auth([RoleType.ADMIN, RoleType.USER])
+  listBodyCompatibility(@Query() query: CutterBodyCompatibilityQueryDto) {
+    return this.service.listBodyCompatibilityMatrix(query.summary_id ?? null);
   }
 
   @Post('validate-tray')

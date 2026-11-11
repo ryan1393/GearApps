@@ -174,6 +174,10 @@
               <span class="gear-admin-record-label">Required Blades (read-only)</span>
               <span class="gear-admin-record-value">{{ summaryRequiredBladesText(summary) }}</span>
             </div>
+            <div class="gear-admin-record-field gear-admin-record-field-wide" data-gear-summary-permitted-bodies>
+              <span class="gear-admin-record-label">Permitted Cutter Body Types (RING and PINION)</span>
+              <span class="gear-admin-record-value">{{ summaryPermittedBodiesText(summary) }}</span>
+            </div>
           </div>
           <div *ngIf="summaryBodyRule(summary)" class="gear-admin-inline-edit gear-admin-record-inline-action">
             <span class="gear-admin-record-label">Set Body Size Rule (controls Required Blades for RING and PINION)</span>
@@ -849,6 +853,13 @@
       <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingCutterBodyId ? 'Edit Cutter Body' : 'Create Cutter Body' }}</span></div>
       <label class="gear-field">MF / Manufacturer Serial<input class="gear-input" [(ngModel)]="cutterBodyForm.mf_serial_number" name="cutterMfSerial" /></label>
       <label class="gear-field">Dana Serial (if already etched)<input class="gear-input" [(ngModel)]="cutterBodyForm.dana_serial_number" name="cutterDanaSerial" /></label>
+      <label class="gear-field">Body Definition (type)
+        <select class="gear-select" [(ngModel)]="cutterBodyForm.definition_id" name="cutterDefinition">
+          <option value="">Not linked</option>
+          <option *ngFor="let d of cutterBodyDefinitions" [value]="d.id">{{ d.definition_code }} · {{ d.hand_name }} · {{ d.blade_family_name }} · {{ d.size_code }}{{ d.enabled ? '' : ' (disabled)' }}</option>
+        </select>
+        <small class="gear-field-help">An unetched body uses its definition for 064/076/088. A 105 body needs its Dana S/N (8th character 8 = 105 Special). A Dana S/N must agree with the definition.</small>
+      </label>
       <label class="gear-field">Description<textarea class="gear-textarea" [(ngModel)]="cutterBodyForm.description" name="cutterDescription"></textarea></label>
       <div class="gear-admin-form-actions">
         <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">{{ editingCutterBodyId ? 'Save Cutter Body' : 'Create Cutter Body' }}</button>
@@ -895,9 +906,13 @@
                 <div class="gear-admin-record-field"><span class="gear-admin-record-label">Body Size</span><span class="gear-admin-record-value mono">{{ d.size_code }}</span></div>
                 <div class="gear-admin-record-field"><span class="gear-admin-record-label">8th Character</span><span class="gear-admin-record-value mono">{{ d.special_character }}</span></div>
               </ng-container>
+              <div class="gear-admin-record-field" data-gear-cutter-body-definition>
+                <span class="gear-admin-record-label">Definition</span>
+                <span class="gear-admin-record-value mono">{{ body.definition?.definition_code || 'Not linked' }}{{ body.definition?.enabled === false ? ' (disabled)' : '' }}</span>
+              </div>
               <div class="gear-admin-record-field" data-gear-cutter-body-rule>
                 <span class="gear-admin-record-label">Body Rule</span>
-                <span class="gear-admin-record-value">{{ decoded.rule?.label || 'Unresolved' }}</span>
+                <span class="gear-admin-record-value">{{ decoded.rule?.label || 'Unresolved' }}{{ decoded.source === 'DEFINITION' ? ' (from definition, not etched)' : '' }}</span>
               </div>
               <div class="gear-admin-record-field" data-gear-cutter-body-required-blades>
                 <span class="gear-admin-record-label">Required Blades (read-only)</span>

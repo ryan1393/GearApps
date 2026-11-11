@@ -118,6 +118,10 @@ is sent as 0, as before. The macro list is in `lapper_read/argonaut.py`.
   longer). A cycle whose start or end fell while the collector was down or restarting, or while
   the controller did not answer, sends 0, as the original collector always did, rather than a
   wrong time. It is kept with the queued post, so a retry sends the same value.
+- **The same cycle time in MeshForge:** each recorded cycle carries it as `cycle_time_s` (omitted
+  when unknown), shown in Lapper > Lapping Summaries. An API from before cycle times answers 422
+  for the unknown field; the cycle is then sent again without it, under the same Idempotency-Key,
+  and a warning is logged once.
 
 - **Per machine:** in Admin > Lapping machines, paste each machine's full **Argonaut API**
   address, including `?locationId=…`. A machine with an address sends to it exactly as pasted,

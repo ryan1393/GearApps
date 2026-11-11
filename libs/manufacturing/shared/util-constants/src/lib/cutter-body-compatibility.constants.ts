@@ -116,12 +116,16 @@ export function decodeDanaCutterSerial(value: string | null | undefined): DanaSe
 }
 
 export interface CutterBodyDefinitionCodes {
+  id?: string | null;
+  definition_code?: string | null;
   cutter_head_code?: string | null;
   supplier_code?: string | null;
   hand_code?: string | null;
   blade_family_code?: string | null;
   blade_family_name?: string | null;
   size_code?: string | null;
+  /** A disabled definition is a body type that may not be loaded; false only when explicitly disabled. */
+  enabled?: boolean | null;
 }
 export interface BladeCapacityBody {
   dana_serial_number?: string | null;
@@ -134,6 +138,11 @@ export interface CutterBodyRuleResolution {
   rule: CutterBodyRule | null;
   decoded: DecodedDanaSerial | null;
   problem: string | null;
+  /**
+   * Where the rule came from: the Dana S/N, or (only for an unetched body that has no
+   * Dana S/N at all) its explicitly linked body definition. Null when unresolved.
+   */
+  source: 'DANA_SERIAL' | 'DEFINITION' | null;
 }
 
 /** Digits-only sizes keep their leading zeros ("76" → "076"); anything else is compared as written. */
@@ -142,28 +151,72 @@ const normalizeSizeCode = (value: string | null | undefined): string => {
   return /^\d{1,3}$/.test(text) ? text.padStart(3, '0') : text;
 };
 
-/** Resolve a physical body's rule from its Dana S/N, cross-checked against its linked definition. */
-export function resolveCutterBodyRule(body: BladeCapacityBody | null | undefined): CutterBodyRuleResolution {
-  if (!body) return { rule: null, decoded: null, problem: 'No cutter body selected' };
-  const decoded = decodeDanaCutterSerial(body.dana_serial_number);
-  if (!decoded.valid) return { rule: null, decoded: null, problem: decoded.reason };
-  const definition = body.definition;
-  if (definition) {
-    const checks: Array<[string, string, string | null | undefined]> = [
-      ['body size', decoded.size_code, definition.size_code == null ? null : normalizeSizeCode(definition.size_code)],
-      ['hand', decoded.hand_code, definition.hand_code],
-      ['blade family', decoded.blade_family_code, definition.blade_family_code],
-      ['supplier', decoded.supplier_code, definition.supplier_code],
-      ['cutter head', decoded.cutter_head_code, definition.cutter_head_code],
-    ];
-    for (const [name, fromSerial, fromDefinition] of checks) {
-      const expected = String(fromDefinition ?? '').trim().toUpperCase();
-      if (expected && expected !== fromSerial) {
-        return { rule: null, decoded, problem: `Dana S/N ${decoded.serial} ${name} "${fromSerial}" conflicts with its body definition "${expected}"` };
-      }
+/** Definition code for messages: "CGRT076", or the size when no code is loaded. */
+const definitionName = (definition: CutterBodyDefinitionCodes): string =>
+  String(definition.definition_code ?? '').trim().toUpperCase() || `size ${normalizeSizeCode(definition.size_code) || 'unknown'}`;
+
+/**
+ * The problem with a Dana S/N against a linked definition, or null when it fits.
+ * Used to resolve a body and to refuse a bad Dana S/N when it is entered.
+ */
+export function danaSerialDefinitionConflict(decoded: DecodedDanaSerial, definition: CutterBodyDefinitionCodes | null | undefined): string | null {
+  if (!definition) return null;
+  const checks: Array<[string, string, string | null | undefined]> = [
+    ['body size', decoded.size_code, definition.size_code == null ? null : normalizeSizeCode(definition.size_code)],
+    ['hand', decoded.hand_code, definition.hand_code],
+    ['blade family', decoded.blade_family_code, definition.blade_family_code],
+    ['supplier', decoded.supplier_code, definition.supplier_code],
+    ['cutter head', decoded.cutter_head_code, definition.cutter_head_code],
+  ];
+  for (const [name, fromSerial, fromDefinition] of checks) {
+    const expected = String(fromDefinition ?? '').trim().toUpperCase();
+    if (expected && expected !== fromSerial) {
+      return `Dana S/N ${decoded.serial} ${name} "${fromSerial}" conflicts with its body definition "${expected}"`;
     }
   }
-  return { rule: decoded.rule, decoded, problem: null };
+  return null;
+}
+
+/**
+ * Resolve a physical body's rule.
+ * - Etched body: from the Dana S/N by position, cross-checked against its linked definition.
+ *   A malformed or conflicting Dana S/N is unresolved; it never falls back to the definition.
+ * - Unetched body (no Dana S/N at all, MF S/N only): from its explicitly linked definition,
+ *   except a 105 definition, whose Standard/Special variant is only known from the 8th
+ *   Dana S/N character. The MF serial is never decoded.
+ */
+export function resolveCutterBodyRule(body: BladeCapacityBody | null | undefined): CutterBodyRuleResolution {
+  const unresolved = (problem: string, decoded: DecodedDanaSerial | null = null): CutterBodyRuleResolution =>
+    ({ rule: null, decoded, problem, source: null });
+  if (!body) return unresolved('No cutter body selected');
+  const definition = body.definition ?? null;
+  if (!normalizeDanaSerial(body.dana_serial_number)) {
+    if (!definition) return unresolved('No Dana S/N is assigned and no body definition is linked');
+    const size = normalizeSizeCode(definition.size_code);
+    if (!CUTTER_BODY_SIZE_CODES.includes(size)) {
+      return unresolved(`No Dana S/N is assigned and body definition ${definitionName(definition)} has no supported body size`);
+    }
+    if (size === '105') {
+      return unresolved(`No Dana S/N is assigned: body definition ${definitionName(definition)} is a 105 body, and 105 Standard (38 blades) or 105 Special (26 blades) is read only from the 8th Dana S/N character. Assign the Dana S/N in Admin > Cutter Bodies.`);
+    }
+    return { rule: cutterBodyRuleByCode(size), decoded: null, problem: null, source: 'DEFINITION' };
+  }
+  const decoded = decodeDanaCutterSerial(body.dana_serial_number);
+  if (!decoded.valid) return unresolved(decoded.reason);
+  const conflict = danaSerialDefinitionConflict(decoded, definition);
+  if (conflict) return unresolved(conflict, decoded);
+  return { rule: decoded.rule, decoded, problem: null, source: 'DANA_SERIAL' };
+}
+
+/**
+ * Check a Dana S/N an administrator is entering. Blank is allowed (an unetched body);
+ * anything else must decode and fit the linked definition. Returns the problem or null.
+ */
+export function danaSerialEntryProblem(value: string | null | undefined, definition: CutterBodyDefinitionCodes | null | undefined): string | null {
+  if (!normalizeDanaSerial(value)) return null;
+  const decoded = decodeDanaCutterSerial(value);
+  if (!decoded.valid) return `${decoded.reason}. A Dana S/N is 4 letters (head, supplier, hand, blade family), a body size of 064/076/088/105 and the rest of the mark, e.g. CGRT076AAA.`;
+  return danaSerialDefinitionConflict(decoded, definition);
 }
 
 /** Stored-unit capacity (matched sets) of a physical body, or null when unresolved. */
@@ -197,7 +250,10 @@ export interface CutterBodyCompatibility {
  * - Without a configured rule, the quantity identifies the rule when it is
  *   unique; 13 sets / 26 blades is ambiguous and is refused until the
  *   Summary's Body Size Rule is set.
- * Handedness is deliberately not checked here: it belongs to Summary + Part Type.
+ * - A body whose linked definition is disabled is not a permitted type.
+ * Handedness, supplier and Tri-ac/Pent-ac family are deliberately not restrictions: no
+ * approved rule ties them to a Summary or Part Type (they are only cross-checked between
+ * a body's Dana S/N and its own definition).
  */
 export function evaluateCutterBodyCompatibility(
   body: BladeCapacityBody | null | undefined,
@@ -219,6 +275,10 @@ export function evaluateCutterBodyCompatibility(
   const resolution = resolveCutterBodyRule(body);
   if (!resolution.rule) return fail(`Cutter body rule is unresolved: ${resolution.problem}`, null, summaryRule);
   const bodyRule = resolution.rule;
+  const bodyName = resolution.decoded?.serial ?? (body?.mf_serial_number ? `MF ${normalizeDanaSerial(body.mf_serial_number)}` : 'this body');
+  if (body?.definition && body.definition.enabled === false) {
+    return fail(`Cutter body type ${definitionName(body.definition)} is disabled in Admin; ${bodyName} cannot be loaded`, bodyRule, summaryRule);
+  }
   const family = body?.definition?.blade_family_name?.trim().toUpperCase();
   const partType = String(partTypeCode ?? '').trim().toUpperCase();
   if (family && ['RING', 'PINION'].includes(family) && family !== partType) {
@@ -227,10 +287,10 @@ export function evaluateCutterBodyCompatibility(
   if (summaryRule) {
     return bodyRule.code === summaryRule.code
       ? { compatible: true, reason: null, warning: null, body_rule: bodyRule, summary_rule: summaryRule }
-      : fail(`This Summary uses ${summaryRule.label}; cutter body ${resolution.decoded?.serial} is ${bodyRule.label}`, bodyRule, summaryRule);
+      : fail(`This Summary uses ${summaryRule.label}; cutter body ${bodyName} is ${bodyRule.label}`, bodyRule, summaryRule);
   }
   if (!requirementRules.some((r) => r.code === bodyRule.code)) {
-    return fail(`Cutter body ${resolution.decoded?.serial} is ${bodyRule.label} (${formatBladeSetQuantity(bodyRule.blade_sets)}); the requirement is ${formatBladeSetQuantity(requiredSets)}`, bodyRule, null);
+    return fail(`Cutter body ${bodyName} is ${bodyRule.label} (${formatBladeSetQuantity(bodyRule.blade_sets)}); the requirement is ${formatBladeSetQuantity(requiredSets)}`, bodyRule, null);
   }
   if (requirementRules.length > 1) {
     // 26 blades fits 076 Standard and 105 Special: the quantity alone never picks the body.
@@ -280,4 +340,134 @@ export function summaryBodyRuleState(configuredRuleCode: string | null | undefin
   if (candidates.length === 1) return { status: 'DERIVED', effective_rule: candidates[0], blade_sets: sets, detail: candidates[0].label };
   if (!candidates.length) return { status: 'CONFLICT', effective_rule: null, blade_sets: sets, detail: `${sets} sets is not an approved rule quantity` };
   return { status: 'UNRESOLVED', effective_rule: null, blade_sets: sets, detail: `${formatBladeSetQuantity(sets)} fits ${candidates.map((r) => r.label).join(' or ')}` };
+}
+
+/** A cutter-body definition (body type) a Summary + Part Type requirement may be loaded into. */
+export interface PermittedCutterBodyDefinition {
+  definition_id: string | null;
+  definition_code: string;
+  hand_code: string | null;
+  blade_family_code: string | null;
+  size_code: string;
+  body_rule: CutterBodyRuleCode;
+  /** Per-body condition that still applies, e.g. the 8th Dana S/N character for 105 bodies. */
+  condition: string | null;
+}
+
+/** Physical-body condition a definition of this size still needs for the rule, or null. */
+function bodyConditionForRule(rule: CutterBodyRule): string | null {
+  if (rule.code === '105') return 'Dana S/N 8th character is not 8 (an unetched 105 body cannot be confirmed)';
+  if (rule.code === '105-SPECIAL') return 'Dana S/N 8th character is 8 (an unetched 105 body cannot be confirmed)';
+  return null;
+}
+
+/**
+ * Body definitions that blades for this rule and Part Type can be loaded into: every
+ * enabled definition of the rule's body size. Hand, supplier and Tri-ac/Pent-ac family are
+ * not restricted (no approved rule ties them to a Summary or Part Type). The one legacy
+ * check kept is a definition whose blade family is literally named RING or PINION, which
+ * only takes that Part Type, exactly as evaluateCutterBodyCompatibility does.
+ */
+export function permittedCutterBodyDefinitions(
+  rule: CutterBodyRule | null | undefined,
+  partTypeCode: string | null | undefined,
+  definitions: readonly CutterBodyDefinitionCodes[],
+): PermittedCutterBodyDefinition[] {
+  if (!rule) return [];
+  const partType = String(partTypeCode ?? '').trim().toUpperCase();
+  return definitions
+    .filter((d) => d.enabled !== false && normalizeSizeCode(d.size_code) === rule.size_code)
+    .filter((d) => {
+      const family = String(d.blade_family_name ?? '').trim().toUpperCase();
+      return !['RING', 'PINION'].includes(family) || family === partType;
+    })
+    .map((d) => ({
+      definition_id: d.id ?? null,
+      definition_code: String(d.definition_code ?? '').trim().toUpperCase() || definitionName(d),
+      hand_code: d.hand_code?.trim().toUpperCase() || null,
+      blade_family_code: d.blade_family_code?.trim().toUpperCase() || null,
+      size_code: rule.size_code,
+      body_rule: rule.code,
+      condition: bodyConditionForRule(rule),
+    }))
+    .sort((a, b) => a.definition_code.localeCompare(b.definition_code));
+}
+
+export type CutterBodyMatrixEvidence = 'CONFIGURED' | 'SUPPORTED' | 'UNRESOLVED' | 'CONFLICTING' | 'DISABLED';
+
+export interface CutterBodyMatrixSummaryInput {
+  summary_id: string;
+  summary_number: string;
+  summary_revision: string | null;
+  summary_enabled?: boolean;
+  model_number?: string | null;
+  /** Summary-level Hand of Spiral (part_summaries.hos). There is no per-Part-Type HOS column. */
+  hos?: string | null;
+  configured_body_rule: string | null;
+  requirements: Array<{ part_type_code: string; required_blade_count: number; enabled: boolean }>;
+}
+
+/** One row of "for this Summary and Part Type, which body definitions can these blades go into?". */
+export interface CutterBodyMatrixRow {
+  summary_id: string;
+  summary_number: string;
+  summary_revision: string | null;
+  model_number: string | null;
+  hos: string | null;
+  part_type_code: string;
+  required_blade_sets: number;
+  required_total_blades: number | null;
+  body_rule: CutterBodyRuleCode | null;
+  body_rule_label: string | null;
+  body_rule_source: 'CONFIGURED' | 'QUANTITY' | null;
+  permitted_definitions: PermittedCutterBodyDefinition[];
+  evidence: CutterBodyMatrixEvidence;
+  detail: string;
+}
+
+/**
+ * The Summary + Part Type → permitted body-definition matrix, from the same rules the
+ * Cutter Builder build, tray validation and availability use. Unresolved and conflicting
+ * rows permit nothing and say why; nothing is guessed from a quantity.
+ */
+export function buildCutterBodyCompatibilityMatrix(
+  summaries: readonly CutterBodyMatrixSummaryInput[],
+  definitions: readonly CutterBodyDefinitionCodes[],
+): CutterBodyMatrixRow[] {
+  const rows: CutterBodyMatrixRow[] = [];
+  for (const summary of summaries) {
+    const state = summaryBodyRuleState(summary.configured_body_rule, summary.requirements.map((r) => Number(r.required_blade_count)));
+    for (const requirement of summary.requirements) {
+      const sets = Number(requirement.required_blade_count);
+      const base = {
+        summary_id: summary.summary_id, summary_number: summary.summary_number, summary_revision: summary.summary_revision,
+        model_number: summary.model_number ?? null, hos: summary.hos ?? null,
+        part_type_code: String(requirement.part_type_code ?? '').trim().toUpperCase(),
+        required_blade_sets: sets, required_total_blades: totalBladesForSets(sets),
+      };
+      const disabled = summary.summary_enabled === false ? 'Summary is disabled' : !requirement.enabled ? 'Blade requirement is disabled' : null;
+      const rule = state.status === 'CONFIGURED' || state.status === 'DERIVED' ? state.effective_rule : null;
+      const permitted = disabled ? [] : permittedCutterBodyDefinitions(rule, base.part_type_code, definitions);
+      const evidence: CutterBodyMatrixEvidence = disabled ? 'DISABLED'
+        : state.status === 'CONFIGURED' ? 'CONFIGURED'
+          : state.status === 'DERIVED' ? 'SUPPORTED'
+            : state.status === 'UNRESOLVED' ? 'UNRESOLVED' : 'CONFLICTING';
+      const detail = disabled ?? (rule && !permitted.length
+        ? `${rule.label}: no enabled body definition of size ${rule.size_code}`
+        : state.status === 'CONFIGURED' ? `Configured Body Size Rule ${state.detail}`
+          : state.status === 'DERIVED' ? `${state.detail}: the only rule for ${formatBladeSetQuantity(sets)}`
+            : state.status === 'UNRESOLVED' ? `${state.detail}; set the Body Size Rule in Admin > Part Summaries`
+              : state.detail);
+      rows.push({
+        ...base,
+        body_rule: rule?.code ?? null,
+        body_rule_label: rule?.label ?? null,
+        body_rule_source: state.status === 'CONFIGURED' ? 'CONFIGURED' : state.status === 'DERIVED' ? 'QUANTITY' : null,
+        permitted_definitions: permitted,
+        evidence: rule && !permitted.length && !disabled ? 'UNRESOLVED' : evidence,
+        detail,
+      });
+    }
+  }
+  return rows;
 }

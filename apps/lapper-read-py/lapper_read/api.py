@@ -45,6 +45,7 @@ class MeshForgeApi:
         self._collector_token = token or self._read_token_file()
         self._token: str | None = self._collector_token
         self._auth_lock = threading.Lock()
+        self._warned_no_cycle_time = False
 
     def is_collector_token(self, presented: str) -> bool:
         """Whether `presented` is the collector token this collector signs in with. The API sends it
@@ -178,13 +179,32 @@ class MeshForgeApi:
         return self._required(found, "gearset")
 
     def post_cycle(self, serial: str | None, consec: int, machine_id: str, gearset_id: str,
-                   completed_at: str, key: str) -> dict:
-        """serial None: a machine without a scanner (the API stores serial_number as null)."""
+                   completed_at: str, key: str, cycle_time_s: float | None = None) -> dict:
+        """serial None: a machine without a scanner (the API stores serial_number as null).
+        cycle_time_s None: not measured, and not sent."""
         serial = serial.strip() if serial and serial.strip() else None
-        return self._required(self.request("POST", "/api/v1/machine-cycle", {
+        body: dict[str, Any] = {
             "serial_number": serial, "machine_id": machine_id, "gearset_id": gearset_id,
             "consec": consec, "timestamp": completed_at,
-        }, idempotency_key=key), "machine cycle")
+        }
+        if cycle_time_s is not None:
+            body["cycle_time_s"] = cycle_time_s
+        try:
+            return self._required(self.request("POST", "/api/v1/machine-cycle", body, idempotency_key=key),
+                                  "machine cycle")
+        except ApiError as error:
+            # An API from before cycle times rejects the unknown field during validation (HTTP 422,
+            # "property cycle_time_s should not exist"), before it records anything, so the cycle is
+            # sent again without it under the same key.
+            if "cycle_time_s" not in body or error.status not in (400, 422) or "cycle_time_s" not in str(error):
+                raise
+            if not self._warned_no_cycle_time:
+                self._warned_no_cycle_time = True
+                log.warning("The MeshForge API does not store cycle times yet; cycles are recorded without "
+                            "them until it is upgraded (Argonaut still gets them)")
+            del body["cycle_time_s"]
+            return self._required(self.request("POST", "/api/v1/machine-cycle", body, idempotency_key=key),
+                                  "machine cycle")
 
     def post_macro_log(self, cycle_id: str, macro_id: str, value: Decimal, key: str) -> dict:
         return self._required(self.request("POST", "/api/v1/macro-log", {

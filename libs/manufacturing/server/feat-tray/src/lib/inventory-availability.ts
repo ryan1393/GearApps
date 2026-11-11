@@ -14,6 +14,7 @@ interface AvailabilityTrayRow {
 
 interface BodyRow {
   id: string; dana_serial_number: string | null; mf_serial_number: string | null;
+  definition_id: string | null; definition_code: string | null; definition_enabled: boolean | null;
   blade_family_name: string | null; size_code: string | null; hand_code: string | null;
   blade_family_code: string | null; supplier_code: string | null; cutter_head_code: string | null; shelf_serial: string; last_increment: number;
   build_increment_at_placement: number; placement_id: string; placed_at: string;
@@ -21,14 +22,16 @@ interface BodyRow {
 }
 const serialOf = (body: {dana_serial_number: string | null; mf_serial_number: string | null}) => body.dana_serial_number || body.mf_serial_number || '';
 // Only definition columns that were actually joined are passed; a body without a definition has none.
-const bodyModel = (body: BodyRow) => ({ ...body, definition: {
+const bodyModel = (body: BodyRow) => ({ ...body, definition: body.definition_id ? {
+  id: body.definition_id, definition_code: body.definition_code, enabled: body.definition_enabled,
   blade_family_name: body.blade_family_name, size_code: body.size_code, hand_code: body.hand_code,
   blade_family_code: body.blade_family_code, supplier_code: body.supplier_code, cutter_head_code: body.cutter_head_code,
-} });
+} : null });
 // Deliberately includes canceled/deleted build increments: a build invalidates the
 // previous physical observation. Old build shelf rows NEVER represent empty bodies.
 export const EMPTY_BODY_SHELVES_SQL = `
   SELECT body.id, body.dana_serial_number, body.mf_serial_number, body.enabled,
+         d.id AS definition_id, d.definition_code, d.enabled AS definition_enabled,
          d.blade_family_name, d.size_code, d.hand_code, d.blade_family_code, d.supplier_code, d.cutter_head_code,
          p.id AS placement_id, p.placed_at, p.build_increment_at_placement,
          l.serial_number AS shelf_serial, (l.enabled AND l."deletedAt" IS NULL AND l.location_type='SHELF') AS location_enabled,
@@ -62,6 +65,7 @@ export async function listEmptyBodyShelves(manager: EntityManager) {
       blade_capacity: resolved.rule?.blade_sets ?? null,
       blade_capacity_total_blades: resolved.rule?.total_blades ?? null,
       body_rule: resolved.rule?.code ?? null, body_rule_problem: resolved.problem,
+      body_rule_source: resolved.source, definition_code: body.definition_code,
       state: shelfObservationState(body),
     };
   });
@@ -152,7 +156,8 @@ export async function readInventoryAvailability(manager: EntityManager, summaryI
       ...(!requirements.length ? ['No enabled blade requirement is configured for this selection; empty-body availability cannot be matched.'] : []),
       ...(!summaryRule && requirements.some(req => cutterBodyRulesForBladeSets(Number(req.required_blade_count)).length > 1)
         ? ['This Summary\'s Body Size Rule is not set (26 blades fits 076 Standard or 105 Special), so no empty body is counted for it. Set the rule in Admin > Part Summaries.'] : []),
-      ...(eligible.some(body => resolveCutterBodyRule(bodyModel(body)).rule===null) ? ['Some recorded empty bodies have a missing, malformed or conflicting Dana S/N and are excluded.'] : []),
+      ...(eligible.some(body => resolveCutterBodyRule(bodyModel(body)).rule===null) ? ['Some recorded empty bodies are excluded: a malformed or conflicting Dana S/N, an unetched 105 body (Standard or Special needs the Dana S/N), or no Dana S/N and no body definition.'] : []),
+      ...(eligible.some(body => body.definition_id && body.definition_enabled === false) ? ['Some recorded empty bodies are excluded because their body definition is disabled.'] : []),
       'Empty bodies require a current shelf observation. After a build or cancellation, record their actual shelf again. Shared compatible bodies are counted once in this selection.',
     ],
   };

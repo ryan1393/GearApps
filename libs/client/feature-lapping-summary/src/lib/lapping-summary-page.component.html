@@ -63,6 +63,12 @@
             Latest{{ cycle() ? ' · ' + (cycle()!.timestamp | date: 'MMM d, HH:mm') : '' }}
           }
         </dd></div>
+        <div data-testid="lapping-cycle-time"><dt>Cycle time</dt><dd>
+          <span class="mono" [attr.title]="shownCycleTime() !== null ? (shownCycleTime()! | number: '1.0-3') + ' s' : 'Not measured for this cycle'">{{ formatCycleTime(shownCycleTime()) }}</span>
+          @if (averageCycleTime()?.average_of) {
+            <span class="gear-muted"> · avg {{ formatCycleTime(averageCycleTime()!.average_s) }} of last {{ averageCycleTime()!.average_of }}</span>
+          }
+        </dd></div>
         <div><dt>Limits</dt><dd>
           @if (outOfLimit().length) {
             <span class="dana-status-badge" data-tone="danger">{{ outOfLimit().length }} outside limits</span>
@@ -101,7 +107,8 @@
               <tr>
                 <th data-dana-table-static>Time</th>
                 <th data-dana-table-static>Serial</th>
-                <th data-dana-table-static>Cycle</th>
+                <th data-dana-table-static title="Cycle number (consec)">#</th>
+                <th data-dana-table-static title="Time in cycle, minutes:seconds">Cycle time</th>
                 <th data-dana-table-static title="Values this cycle changed">Chg</th>
               </tr>
             </thead>
@@ -115,6 +122,9 @@
                   </td>
                   <td class="mono">{{ c.serial_number || '—' }}</td>
                   <td>{{ c.consec }}</td>
+                  <td class="mono" [attr.title]="c.cycle_time_s !== null ? (c.cycle_time_s | number: '1.0-3') + ' s' : 'Not measured'">
+                    @if (c.cycle_time_s !== null) { {{ formatCycleTime(c.cycle_time_s) }} } @else { <span class="gear-muted">—</span> }
+                  </td>
                   <td>
                     @if (c.changed_count) {
                       <strong class="lapper-changed-count">{{ c.changed_count }}</strong>
@@ -124,7 +134,7 @@
                   </td>
                 </tr>
               } @empty {
-                <tr><td danaTableEmpty colspan="4" class="empty-row">{{ history.loading() ? 'Loading cycles…' : serialSearch() ? 'No cycle has that serial.' : 'No cycles recorded yet.' }}</td></tr>
+                <tr><td danaTableEmpty colspan="5" class="empty-row">{{ history.loading() ? 'Loading cycles…' : serialSearch() ? 'No cycle has that serial.' : 'No cycles recorded yet.' }}</td></tr>
               }
             </tbody>
           </table>

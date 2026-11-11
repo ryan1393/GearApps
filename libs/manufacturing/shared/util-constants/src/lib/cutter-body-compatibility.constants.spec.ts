@@ -1,5 +1,9 @@
 import {
   CUTTER_BODY_RULES,
+  buildCutterBodyCompatibilityMatrix,
+  cutterBodyRuleByCode,
+  danaSerialEntryProblem,
+  permittedCutterBodyDefinitions,
   cutterBodyBladeSets,
   cutterBodyTotalBlades,
   decodeDanaCutterSerial,
@@ -10,7 +14,7 @@ import {
   summaryBodyRuleState,
 } from './cutter-body-compatibility.constants';
 
-const body = (dana: string | null, mf: string | null = 'A12345', definition: Record<string, string> | null = null) =>
+const body = (dana: string | null, mf: string | null = 'A12345', definition: Record<string, string | boolean> | null = null) =>
   ({ dana_serial_number: dana, mf_serial_number: mf, definition });
 
 describe('approved cutter-body rules', () => {
@@ -141,5 +145,131 @@ describe('Summary-based requirement state', () => {
     expect(formatBladeSetQuantity(null)).toBe('Unknown');
     expect(isApprovedBladeSetCount(13)).toBe(true);
     expect(isApprovedBladeSetCount(26)).toBe(false);
+  });
+});
+
+// The six definitions in tools/manufacturing/base-data/data/cutter_body_definitions.json.
+const DEFINITIONS = ['CGRT076', 'CGLT076', 'CGRT088', 'CGLT088', 'CGRT105', 'CGLT105'].map((code) => ({
+  id: `def-${code}`, definition_code: code, cutter_head_code: 'C', supplier_code: 'G', hand_code: code.charAt(2),
+  blade_family_code: 'T', blade_family_name: 'TRI-AC', size_code: code.slice(4), enabled: true,
+}));
+const def = (code: string) => DEFINITIONS.find((d) => d.definition_code === code) as unknown as Record<string, string | boolean>;
+
+describe('unetched (MF-only) bodies', () => {
+  it('use their explicitly linked non-105 definition', () => {
+    const resolved = resolveCutterBodyRule(body(null, '8612', def('CGLT076')));
+    expect(resolved).toMatchObject({ rule: { code: '076', total_blades: 26 }, source: 'DEFINITION', problem: null });
+    expect(resolveCutterBodyRule(body(null, 'A1', def('CGRT088'))).rule?.code).toBe('088');
+    expect(evaluateCutterBodyCompatibility(body(null, '8612', def('CGLT076')), 13, 'PINION', '076').compatible).toBe(true);
+    expect(evaluateCutterBodyCompatibility(body(null, 'A1', def('CGRT088')), 17, 'RING').compatible).toBe(true);
+  });
+  it('never guess Standard or Special for a 105 definition', () => {
+    const resolved = resolveCutterBodyRule(body(null, '78', def('CGRT105')));
+    expect(resolved.rule).toBeNull();
+    expect(resolved.problem).toContain('8th Dana S/N character');
+    expect(evaluateCutterBodyCompatibility(body(null, '78', def('CGRT105')), 19, 'RING').compatible).toBe(false);
+    expect(evaluateCutterBodyCompatibility(body(null, '78', def('CGRT105')), 13, 'RING', '105-SPECIAL').compatible).toBe(false);
+  });
+  it('ignore an 8 in the MF serial and never decode it', () => {
+    expect(resolveCutterBodyRule(body(null, 'CGRT1058AA', def('CGRT076'))).rule?.code).toBe('076');
+    expect(resolveCutterBodyRule(body(null, 'CGRT1058AA')).rule).toBeNull();
+  });
+  it('do not fall back to the definition when a Dana S/N is present but malformed', () => {
+    for (const serial of ['CGRT-076AA', 'CGRT07', 'CGRT099AAA']) {
+      expect(resolveCutterBodyRule(body(serial, 'A1', def('CGRT076'))).rule).toBeNull();
+    }
+  });
+  it('keep the decoded Dana S/N once it is assigned to the same body', () => {
+    expect(resolveCutterBodyRule(body('CGLT076AAA', '8612', def('CGLT076')))).toMatchObject({ source: 'DANA_SERIAL', rule: { code: '076' } });
+  });
+});
+
+describe('Dana S/N entry check', () => {
+  it('allows blank (unetched) and valid serials that fit the definition', () => {
+    expect(danaSerialEntryProblem('', def('CGRT105'))).toBeNull();
+    expect(danaSerialEntryProblem(null, null)).toBeNull();
+    expect(danaSerialEntryProblem('cgrt1058ad', def('CGRT105'))).toBeNull();
+    expect(danaSerialEntryProblem('CGRT076AAA', null)).toBeNull();
+  });
+  it('refuses malformed serials and serials that contradict the definition', () => {
+    expect(danaSerialEntryProblem('CGRT-1058A', null)).toContain('letters and digits');
+    expect(danaSerialEntryProblem('CGRT10', null)).toContain('shorter than 8');
+    expect(danaSerialEntryProblem('CGLT076AAA', def('CGRT076'))).toContain('hand');
+    expect(danaSerialEntryProblem('CGRT088AAA', def('CGRT076'))).toContain('body size');
+  });
+});
+
+describe('body types', () => {
+  it('reject a body whose definition is disabled even when capacity matches', () => {
+    const disabled = { ...def('CGRT076'), enabled: false };
+    const result = evaluateCutterBodyCompatibility(body('CGRT076AAA', 'A1', disabled), 13, 'RING', '076');
+    expect(result.compatible).toBe(false);
+    expect(result.reason).toContain('disabled');
+  });
+  it('reject an incompatible body although its blade capacity is the same', () => {
+    // 076 Standard and 105 Special are both 26 blades / 13 sets.
+    expect(evaluateCutterBodyCompatibility(body('CGRT1058AA', 'A1', def('CGRT105')), 13, 'RING', '076').compatible).toBe(false);
+    expect(evaluateCutterBodyCompatibility(body('CGRT076AAA', 'A1', def('CGRT076')), 13, 'RING', '105-SPECIAL').compatible).toBe(false);
+  });
+  it('keep the legacy RING/PINION blade-family restriction and add no hand restriction', () => {
+    const ringOnly = { ...def('CGRT088'), blade_family_name: 'RING' };
+    expect(evaluateCutterBodyCompatibility(body('CGRT088AAA', 'A1', ringOnly), 17, 'PINION').compatible).toBe(false);
+    expect(evaluateCutterBodyCompatibility(body('CGRT088AAA', 'A1', ringOnly), 17, 'RING').compatible).toBe(true);
+    expect(evaluateCutterBodyCompatibility(body('CGLT088AAA', 'A1', def('CGLT088')), 17, 'RING').compatible).toBe(true);
+    expect(evaluateCutterBodyCompatibility(body('CGRT088AAA', 'A1', def('CGRT088')), 17, 'PINION').compatible).toBe(true);
+  });
+});
+
+describe('Summary + Part Type permitted body definitions', () => {
+  it('lists every enabled definition of the rule size, both hands', () => {
+    expect(permittedCutterBodyDefinitions(cutterBodyRuleByCode('076'), 'RING', DEFINITIONS).map((d) => d.definition_code)).toEqual(['CGLT076', 'CGRT076']);
+    const special = permittedCutterBodyDefinitions(cutterBodyRuleByCode('105-SPECIAL'), 'PINION', DEFINITIONS);
+    expect(special.map((d) => [d.definition_code, d.body_rule])).toEqual([['CGLT105', '105-SPECIAL'], ['CGRT105', '105-SPECIAL']]);
+    expect(special[0].condition).toContain('8th character is 8');
+    expect(permittedCutterBodyDefinitions(cutterBodyRuleByCode('064'), 'RING', DEFINITIONS)).toEqual([]);
+    expect(permittedCutterBodyDefinitions(null, 'RING', DEFINITIONS)).toEqual([]);
+    expect(permittedCutterBodyDefinitions(cutterBodyRuleByCode('076'), 'RING', DEFINITIONS.map((d) => ({ ...d, enabled: d.hand_code === 'L' }))).map((d) => d.definition_code)).toEqual(['CGLT076']);
+  });
+
+  const summary = (number: string, sets: number, rule: string | null = null, extra: Partial<{ hos: string; model_number: string; ringEnabled: boolean }> = {}) => ({
+    summary_id: `s-${number}`, summary_number: number, summary_revision: '', model_number: extra.model_number ?? null, hos: extra.hos ?? null,
+    configured_body_rule: rule,
+    requirements: [{ part_type_code: 'PINION', required_blade_count: sets, enabled: true }, { part_type_code: 'RING', required_blade_count: sets, enabled: extra.ringEnabled ?? true }],
+  });
+
+  it('builds the matrix with configured, supported, unresolved and conflicting rows', () => {
+    const rows = buildCutterBodyCompatibilityMatrix([
+      summary('30538', 19, null, { hos: 'RH' }), summary('32209', 17), summary('30131', 13, null, { model_number: '286' }),
+      summary('30132', 13, '105-SPECIAL', { model_number: '286' }), summary('1052', 13, '076'), summary('X', 13, '105'),
+      summary('Y', 17, null, { ringEnabled: false }),
+    ], DEFINITIONS);
+    const row = (n: string, pt: string) => rows.find((r) => r.summary_number === n && r.part_type_code === pt);
+    expect(row('30538', 'PINION')).toMatchObject({ body_rule: '105', required_total_blades: 38, evidence: 'SUPPORTED', hos: 'RH' });
+    expect(row('30538', 'PINION')?.permitted_definitions.map((d) => d.definition_code)).toEqual(['CGLT105', 'CGRT105']);
+    expect(row('32209', 'RING')).toMatchObject({ body_rule: '088', required_total_blades: 34, evidence: 'SUPPORTED' });
+    expect(row('30131', 'RING')).toMatchObject({ body_rule: null, evidence: 'UNRESOLVED', permitted_definitions: [] });
+    expect(row('30132', 'RING')).toMatchObject({ body_rule: '105-SPECIAL', required_total_blades: 26, evidence: 'CONFIGURED' });
+    expect(row('1052', 'PINION')?.permitted_definitions.map((d) => d.definition_code)).toEqual(['CGLT076', 'CGRT076']);
+    expect(row('X', 'RING')).toMatchObject({ evidence: 'CONFLICTING', permitted_definitions: [] });
+    expect(row('Y', 'RING')).toMatchObject({ evidence: 'DISABLED', permitted_definitions: [] });
+    expect(row('Y', 'PINION')).toMatchObject({ evidence: 'SUPPORTED', body_rule: '088' });
+  });
+
+  it('agrees with the build check: a body is accepted exactly when its definition is permitted and its rule matches', () => {
+    const bodies = [
+      body('CGRT076AAA', 'A1', def('CGRT076')), body('CGLT076AAB', 'A2', def('CGLT076')), body('CGRT1058AA', '78', def('CGRT105')),
+      body('CGLT105AAA', 'A3', def('CGLT105')), body('CGRT088AAA', 'A4', def('CGRT088')), body(null, '8612', def('CGLT076')),
+    ];
+    for (const s of [summary('A', 13, '076'), summary('B', 13, '105-SPECIAL'), summary('C', 19), summary('D', 17), summary('E', 13)]) {
+      for (const row of buildCutterBodyCompatibilityMatrix([s], DEFINITIONS)) {
+        for (const b of bodies) {
+          const accepted = evaluateCutterBodyCompatibility(b, row.required_blade_sets, row.part_type_code, s.configured_body_rule).compatible;
+          const listed = row.permitted_definitions.some((d) => d.definition_code === b.definition?.['definition_code']) &&
+            resolveCutterBodyRule(b).rule?.code === row.body_rule;
+          expect([s.summary_number, row.part_type_code, b.dana_serial_number ?? b.mf_serial_number, accepted])
+            .toEqual([s.summary_number, row.part_type_code, b.dana_serial_number ?? b.mf_serial_number, listed]);
+        }
+      }
+    }
   });
 });

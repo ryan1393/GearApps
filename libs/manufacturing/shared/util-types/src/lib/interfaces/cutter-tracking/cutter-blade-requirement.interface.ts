@@ -27,6 +27,8 @@ export interface IValidateCutterTrayRequest {
   summary_id: Uuid;
   part_type_id: Uuid;
   tray_serial_number: string;
+  /** Dana S/N (or MF S/N of an unetched body); adds body compatibility to the answer. */
+  cutter_body_identifier?: string;
 }
 
 export interface IValidateCutterTrayResult {
@@ -50,6 +52,15 @@ export interface IValidateCutterTrayResult {
   already_assigned_to_build: boolean;
   still_in_container: boolean;
   tray_stage_ready: boolean;
+  /** Present only when cutter_body_identifier was sent. */
+  cutter_body_id?: Uuid | null;
+  /** Type compatibility: the shared body rule check for this Summary + Part Type. */
+  body_compatible?: boolean;
+  body_rule?: string | null;
+  body_reason?: string | null;
+  /** Physical availability (no open build), kept apart from type compatibility. */
+  body_available?: boolean;
+  body_availability_reason?: string | null;
   reason?: string;
 }
 
@@ -75,6 +86,8 @@ export interface ISummaryBodyRuleRow {
   required_blade_sets: number | null;
   required_total_blades: number | null;
   detail: string;
+  /** Codes of the enabled body definitions this Summary's blades may be loaded into (empty when unresolved). */
+  permitted_body_definitions?: string[];
   requirements: ISummaryBodyRuleRequirement[];
   open_trays_with_other_quantity?: number;
 }
