@@ -54,6 +54,11 @@ export class GearMasterDataBootstrap implements OnModuleInit {
         CREATE INDEX IF NOT EXISTS ix_cutter_builds_builder_machine
           ON public.cutter_builds (cutter_builder_machine_id);
 
+        -- What a location holds, for its summary tag. Optional; existing locations stay blank.
+        ALTER TABLE public.locations
+          ADD COLUMN IF NOT EXISTS summary_id uuid REFERENCES public.part_summaries(id),
+          ADD COLUMN IF NOT EXISTS part_type_id uuid REFERENCES public.part_types(id);
+
 
       `);
       await manager.query(CUTTER_BODY_SHELF_SCHEMA);

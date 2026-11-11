@@ -1,6 +1,10 @@
 import { IsIn, IsOptional, IsUUID } from 'class-validator';
 
-export const ASSET_TAG_KINDS = ['TRAY', 'CONTAINER', 'LOCATION'] as const;
+/**
+ * LOCATION_SUMMARY is a location's summary tag: its barcode is the Summary and part type kept
+ * there, such as 1.955FC-RING, rather than the location's own serial.
+ */
+export const ASSET_TAG_KINDS = ['TRAY', 'CONTAINER', 'LOCATION', 'LOCATION_SUMMARY'] as const;
 export type AssetTagKind = (typeof ASSET_TAG_KINDS)[number];
 
 export class PrintAssetTagDto {

@@ -9,7 +9,8 @@ export interface PagedResponse<T> {
   meta?: { hasNextPage?: boolean; page?: number; totalPages?: number; totalItems?: number };
 }
 
-export type AssetTagKind = 'TRAY' | 'CONTAINER' | 'LOCATION';
+/** LOCATION_SUMMARY: a location's summary tag, whose barcode is its Summary and part type. */
+export type AssetTagKind = 'TRAY' | 'CONTAINER' | 'LOCATION' | 'LOCATION_SUMMARY';
 
 export interface AssetTagPrintResult {
   kind: AssetTagKind;
@@ -144,6 +145,11 @@ export interface AdminLocationRow {
   enabled: boolean;
   tray_count: number;
   blade_count: number;
+  /** What the location holds, printed on its summary tag. */
+  summary_id?: string | null;
+  summary?: { id: string; number: string; revision?: string } | null;
+  part_type_id?: string | null;
+  part_type?: { id: string; code: string } | null;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -371,6 +377,8 @@ export class AdminApiService {
     department: string | null;
     location_type: string;
     enabled: boolean;
+    summary_id?: string | null;
+    part_type_id?: string | null;
   }) {
     return this.http.post<AdminLocationRow>('/api/v1/locations', input);
   }
@@ -384,6 +392,8 @@ export class AdminApiService {
       department: string | null;
       location_type: string;
       enabled: boolean;
+      summary_id: string | null;
+      part_type_id: string | null;
     }>,
   ) {
     return this.http.patch<AdminLocationRow>(

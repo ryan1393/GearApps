@@ -19,10 +19,11 @@ import {
 } from '@meshforge/manufacturing/shared/util-types';
 
 
-
 /** Shown to operators when the server cannot list workflow rows (its version is older than this app's). */
 export const WORKFLOW_LIST_OUTDATED = 'The list could not be loaded because the server needs an update. Scanning still works; please tell your supervisor.';
-export type AssetTagKind = 'TRAY' | 'CONTAINER' | 'LOCATION';
+
+/** LOCATION_SUMMARY: a location's summary tag, whose barcode is its Summary and part type. */
+export type AssetTagKind = 'TRAY' | 'CONTAINER' | 'LOCATION' | 'LOCATION_SUMMARY';
 
 export interface AssetTagPrintResult {
   kind: AssetTagKind;

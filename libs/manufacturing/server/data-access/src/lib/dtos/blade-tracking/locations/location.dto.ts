@@ -28,6 +28,12 @@ export class LocationDto extends AbstractDto {
   @ApiProperty()
   enabled!: boolean;
 
+  @ApiPropertyOptional({ type: String, format: 'uuid', nullable: true })
+  summary_id!: string | null;
+
+  @ApiPropertyOptional({ type: String, format: 'uuid', nullable: true })
+  part_type_id!: string | null;
+
   constructor(
     location: LocationOrmEntity,
     opts?: LocationDtoOptions,
@@ -40,5 +46,7 @@ export class LocationDto extends AbstractDto {
     this.department = location.department;
     this.location_type = location.location_type;
     this.enabled = location.enabled;
+    this.summary_id = location.summary_id ?? null;
+    this.part_type_id = location.part_type_id ?? null;
   }
 }

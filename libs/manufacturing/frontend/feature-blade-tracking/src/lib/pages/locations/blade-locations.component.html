@@ -85,6 +85,9 @@
               <td>
                 <strong class="mono">{{ location.serial_number }}</strong>
                 <small>{{ location.description || 'No description' }} · #{{ location.number }}</small>
+                <small *ngIf="location.summary || location.part_type">
+                  Summary {{ location.summary?.number || '—' }} · {{ location.part_type?.code || 'No part type' }}
+                </small>
               </td>
               <td>
                 <strong>{{ location.department || 'Shared / Internal' }}</strong>
@@ -108,6 +111,16 @@
                   (click)="printTag('LOCATION', location.id, location.serial_number)"
                  data-icon="print" title="Print tag">
                   {{ printingTagSerial === location.serial_number ? 'Printing…' : 'Print Tag' }}
+                </button>
+                <button
+                  *ngIf="summaryTag(location) as summary"
+                  type="button"
+                  class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
+                  [disabled]="printingTagSerial !== null"
+                  (click)="printTag('LOCATION_SUMMARY', location.id, summary)"
+                  data-icon="print"
+                  [title]="'Print a tag reading ' + summary">
+                  {{ printingTagSerial === summary ? 'Printing…' : 'Print Summary Tag' }}
                 </button>
               </td>
               <td>

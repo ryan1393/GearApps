@@ -2,6 +2,7 @@ import {
   IsBoolean,
   IsOptional,
   IsString,
+  IsUUID,
 } from 'class-validator';
 
 import { ICreateLocation } from '@meshforge/manufacturing/shared/util-types';
@@ -47,4 +48,24 @@ export class CreateLocationDto implements ICreateLocation {
   })
   @IsBoolean()
   enabled!: boolean;
+
+  @ApiPropertyOptional({
+    type: String,
+    format: 'uuid',
+    nullable: true,
+    description: 'The Summary kept at this location, printed on its summary tag. Null clears it. Set automatically for GSR-/GSP- summary shelf tags.',
+  })
+  @IsOptional()
+  @IsUUID()
+  summary_id?: string | null;
+
+  @ApiPropertyOptional({
+    type: String,
+    format: 'uuid',
+    nullable: true,
+    description: 'The part type kept at this location, printed on its summary tag. Null clears it. Set automatically for GSR-/GSP- summary shelf tags.',
+  })
+  @IsOptional()
+  @IsUUID()
+  part_type_id?: string | null;
 }

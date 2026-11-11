@@ -5,7 +5,10 @@ MeshForge prints two kinds of label straight to network label printers:
 | Label | Stock | Printed from |
 | --- | --- | --- |
 | Tray, container and location tags | 2.125 x 0.625 in | every **Print Tag** button |
+| Location summary tags | 2.125 x 0.625 in (tag stock) | **Print Summary Tag** on Admin > Locations and Blade Tracking > Locations |
 | Cutter Build card | 4 x 6.5 in | **Print Cutter Card** on Build Cutter and Build Lookup |
+
+A location summary tag has the same layout as the other tags, but its barcode and text are the Summary and part type set on the location, for example `1.955FC-RING`. Set them in the location's Summary and Part Type fields in Admin > Locations; Green Shed summary shelves (`GSR-`/`GSP-`) take them from their barcode. The location's own tag is unchanged.
 
 Coater packing slips (Letter) and coater container labels (4 x 6) are ordinary browser prints and use whatever printer the browser offers.
 
