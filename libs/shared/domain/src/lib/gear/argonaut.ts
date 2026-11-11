@@ -17,6 +17,13 @@ export const ARGONAUT_FLOAT_MACROS: readonly number[] = [
 export const ARGONAUT_STRING_MACROS: readonly number[] = [10020, 10021, 10023, 10400, 10480];
 export const ARGONAUT_MACROS: readonly number[] = [...ARGONAUT_FLOAT_MACROS, ...ARGONAUT_STRING_MACROS];
 export const ARGONAUT_DEFAULT_TRANSACTION_TYPE_ID = 100;
+/**
+ * The Basic sign-in the original C# Lapper Read sent on every request
+ * (`Authorization: Basic dXNlcjpwdw==`). Used when no Argonaut user or password is configured;
+ * keep it in step with ORIGINAL_USERNAME / ORIGINAL_PASSWORD in `lapper_read/config.py`.
+ */
+export const ARGONAUT_DEFAULT_USERNAME = 'user';
+export const ARGONAUT_DEFAULT_PASSWORD = 'pw';
 
 export interface ArgonautPayload {
   request: {
@@ -69,6 +76,19 @@ export function argonautAddress(url: string, locationId?: string | null): string
   const location = locationId?.trim();
   if (!location || hasLocation) return url.trim();
   return url.trim() + (url.includes('?') ? '&' : '?') + new URLSearchParams({ locationId: location }).toString();
+}
+
+/**
+ * Argonaut settings from Admin > Server Settings (or .env), as Lapper Read reads them from
+ * GET /api/v1/lapper-read/argonaut. The sign-in is already resolved (never empty).
+ */
+export interface ArgonautCollectorSettings {
+  url: string;
+  location_id: string;
+  username: string;
+  password: string;
+  transaction_type_id: number;
+  verify_tls: boolean;
 }
 
 /** Cycle Test Lab: send one test transaction to Argonaut. */

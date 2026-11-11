@@ -36,7 +36,6 @@ export interface EnvironmentSettingGroup {
 const STARTUP = 'The API needs this before it can read saved settings. Change it in the server environment (.env).';
 const SIGNING = 'This secret signs every login and protects saved passwords. Change it in the server environment (.env).';
 const SERVER_FILE = 'This names a file or folder on the server. Change it in the server environment (.env).';
-const COLLECTOR = 'The Lapper Read collector reads this from the same .env. Change it in the server environment (.env) so the API and the collector stay the same.';
 const API_PATH = 'Every client and collector calls the API at this path. Change it in the server environment (.env).';
 
 const text = (key: string, label: string, help?: string, extra: Partial<EnvironmentSettingDefinition> = {}): EnvironmentSettingDefinition =>
@@ -165,12 +164,13 @@ export const ENVIRONMENT_SETTING_GROUPS: readonly EnvironmentSettingGroup[] = [
         'Set by Docker Compose. Lapper > Collector Tokens > Connect Docker collector writes the collector\'s token here.',
         { locked: SERVER_FILE },
       ),
-      text('LAPPER_READ_ARGONAUT_URL', 'Argonaut address', 'trigger-transaction URL used when a machine has none in Admin > Lapping machines.', { locked: COLLECTOR }),
-      text('LAPPER_READ_ARGONAUT_LOCATION_ID', 'Argonaut location ID', undefined, { locked: COLLECTOR }),
-      text('LAPPER_READ_ARGONAUT_USERNAME', 'Argonaut user', 'Empty sends no sign-in.', { locked: COLLECTOR }),
-      secret('LAPPER_READ_ARGONAUT_PASSWORD', 'Argonaut password', undefined, { locked: COLLECTOR }),
-      number('LAPPER_READ_ARGONAUT_TRANSACTION_TYPE_ID', 'Argonaut transaction type', 'Track and Trace transaction type, normally 100.', { locked: COLLECTOR }),
-      flag('LAPPER_READ_ARGONAUT_VERIFY_TLS', 'Verify the Argonaut certificate', 'Off accepts a self-signed certificate.', { locked: COLLECTOR }),
+      // Lapper Read reads these from the API (GET /api/v1/lapper-read/argonaut) on each machine check.
+      text('LAPPER_READ_ARGONAUT_URL', 'Argonaut address', 'trigger-transaction URL used when a machine has none in Admin > Lapping machines. Lapper Read uses it while LAPPER_READ_ARGONAUT_ENABLED is true.'),
+      text('LAPPER_READ_ARGONAUT_LOCATION_ID', 'Argonaut location ID', 'Used when the machine and the address have none.'),
+      text('LAPPER_READ_ARGONAUT_USERNAME', 'Argonaut user', 'Basic sign-in sent with every Argonaut transaction. User and password both empty sign in as the original C# Lapper Read did (user / pw).'),
+      secret('LAPPER_READ_ARGONAUT_PASSWORD', 'Argonaut password'),
+      number('LAPPER_READ_ARGONAUT_TRANSACTION_TYPE_ID', 'Argonaut transaction type', 'Track and Trace transaction type, normally 100.'),
+      flag('LAPPER_READ_ARGONAUT_VERIFY_TLS', 'Verify the Argonaut certificate', 'Off accepts a self-signed certificate, as the original C# Lapper Read did.'),
     ],
   },
   {

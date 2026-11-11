@@ -132,6 +132,15 @@ class ConfigTests(unittest.TestCase):
         self.assertFalse(settings.argonaut_verify_tls)
         self.assertEqual(settings.argonaut_transaction_type_id, 100)
 
+    def test_signs_in_like_the_original_collector_unless_configured(self):
+        settings = from_env(self.base, mode="supervise")
+        self.assertEqual((settings.argonaut_username, settings.argonaut_password), ("user", "pw"))
+        client = argo.ArgonautClient("http://argo/x", username=settings.argonaut_username,
+                                     password=settings.argonaut_password)
+        self.assertEqual(client._auth, "Basic dXNlcjpwdw==")
+        mine = from_env({**self.base, "ARGONAUT_USERNAME": " mes ", "ARGONAUT_PASSWORD": "secret"}, mode="supervise")
+        self.assertEqual((mine.argonaut_username, mine.argonaut_password), ("mes", "secret"))
+
     def test_bad_boolean_is_rejected(self):
         with self.assertRaises(ConfigError):
             from_env({**self.base, "ARGONAUT_ENABLED": "maybe"}, mode="supervise")

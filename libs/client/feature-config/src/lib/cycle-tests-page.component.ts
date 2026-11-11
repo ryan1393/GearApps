@@ -122,7 +122,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
           <small class="gear-field-help">{{
             selectedMachine()?.argonaut_url
               ? "Empty uses this machine's saved address."
-              : 'Empty uses the saved address from Admin > Lapping machines, then LAPPER_READ_ARGONAUT_URL.'
+              : 'Empty uses the address in Admin > Server Settings > Lapping and scanners.'
           }}</small>
         </label>
         <label class="gear-field"
@@ -134,7 +134,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
             [placeholder]="selectedMachine()?.argonaut_location_id || ''"
           />
           <small class="gear-field-help"
-            >Empty uses the machine's, then LAPPER_READ_ARGONAUT_LOCATION_ID. An address that already has
+            >Empty uses the machine's, then Server Settings'. Sign-in comes from Server Settings. An address that already has
             ?locationId= is sent as entered.</small
           >
         </label>

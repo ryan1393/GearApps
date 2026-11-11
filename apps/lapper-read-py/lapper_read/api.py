@@ -125,6 +125,17 @@ class MeshForgeApi:
         return payload
 
     # -- endpoints (the same ones the C# worker uses) ---------------------
+    def argonaut_settings(self) -> dict | None:
+        """Argonaut address, sign-in and certificate check from MeshForge Admin > Server Settings.
+        None when this API is older or the collector signs in with an account that may not read them."""
+        try:
+            found = self.request("GET", "/api/v1/lapper-read/argonaut", allow_404=True)
+        except ApiError as error:
+            if error.status == 403:
+                return None
+            raise
+        return found if isinstance(found, dict) else None
+
     def machine_by_ip(self, ip: str, number: str | None) -> dict:
         path = "/api/v1/machine/ip/" + urllib.parse.quote(ip, safe="")
         if number:
