@@ -304,7 +304,6 @@
             <label class="gear-field">Current Quantity<input class="gear-input" type="number" min="0" step="1" [(ngModel)]="rollMasterEdit(part).current_quantity" [name]="'roll-current-' + part.id" /></label>
             <label class="gear-field">Minimum Quantity<input class="gear-input" type="number" min="0" step="1" [(ngModel)]="rollMasterEdit(part).minimum_quantity" [name]="'roll-min-' + part.id" /></label>
           </div>
-          <div *ngIf="rollMasterLow(part)" class="gear-alert gear-alert-danger mt-3"><strong>Low Roll Master quantity.</strong><span>Current quantity is at or below this part's minimum.</span></div>
           <div class="gear-admin-actions gear-admin-record-actions">
             <button type="button" class="gear-btn gear-btn-primary" [disabled]="busy" (click)="saveRollMaster(part)">Save Quantity</button>
             <button *ngIf="rollMasterRecord(part) as rollMaster" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleRollMasterEnabled(part)">{{ rollMaster.enabled ? 'Disable' : 'Enable' }}</button>
