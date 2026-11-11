@@ -67,6 +67,27 @@ class WorkerTests(unittest.TestCase):
             self.scanner.state = ScannerState(None, None)
         self.transport.set_state(door=False, start=False, cycle=False)
 
+    def test_cycle_test_lab_reads_live_macros_on_the_sampling_thread(self):
+        threads = []
+        read = self.transport.read_macro
+
+        def recording(handle, number):
+            threads.append(threading.current_thread())
+            return read(handle, number)
+
+        self.transport.read_macro = recording
+        thread = self._start(self.worker)
+        self._wait(lambda: self.worker.phase == "collecting")
+        self.transport.macros[10039] = Decimal("1.25")
+        values = self.worker.read_macros([10020, 10039, 12345], timeout_s=5)
+        self.assertEqual(values, {"10020": "373", "10039": "1.25", "12345": None})
+        self.assertEqual({t.name for t in threads}, {thread.name})  # FOCAS used by one thread only
+        self.worker.stop()
+        thread.join(timeout=5)
+        from lapper_read.worker import MacroReadError
+        with self.assertRaises(MacroReadError):
+            self.worker.read_macros([10020], timeout_s=0.2)
+
     def test_a_cycle_is_published_with_its_serial_and_changed_macros(self):
         thread = self._start(self.worker)
         self._run_one_cycle()
