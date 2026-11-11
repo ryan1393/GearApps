@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Coater RPA works with the form as Excel saves it.** Preparing a request failed with "The RPA
+  form has no part line" when the saved form came straight from Excel, because Excel stores the
+  part numbers as shared text. That is fixed, and coating variants named only by the form's
+  totals (for example `1700-5000 Evo`) are accepted.
+  - The form's formulas are recalculated when a request is prepared and the results are saved in
+    the workbook. Before, the totals, amounts, box count and packing list kept the previous
+    request's numbers until someone recalculated the file in Excel.
+  - The workbook no longer carries a calculation chain that pointed at cells which are now plain
+    values (Excel reported such a file as damaged), and Excel recalculates it on opening.
 - **Status pills are coloured the same everywhere.** Active and Enabled are green, Inactive and
   Disabled red, waiting and review states amber, in-process states blue. Before, most Admin record
   cards and the Blade Tracking inventory pills were plain grey. One rule in Dana UI (`danaTone`)
