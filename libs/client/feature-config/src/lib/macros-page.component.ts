@@ -57,7 +57,7 @@ interface MacroRow extends Macro {
             class="gear-btn gear-btn-secondary"
             (click)="reload()"
             [disabled]="macros.loading()"
-          >
+           data-icon="refresh" title="Refresh">
             ↻ {{ macros.loading() ? 'Refreshing…' : 'Refresh' }}
           </button>
           @if (access.canEditSetup()) {
@@ -147,7 +147,7 @@ interface MacroRow extends Macro {
                           class="gear-btn gear-btn-secondary gear-btn-sm"
                           (click)="openDialog(m)"
                           [attr.aria-label]="'Edit macro ' + m.number"
-                        >
+                         data-icon="edit" title="Edit">
                           Edit
                         </button>
                         <button
@@ -155,7 +155,7 @@ interface MacroRow extends Macro {
                           class="gear-btn gear-btn-danger gear-btn-sm"
                           (click)="pendingDelete.set(m)"
                           [attr.aria-label]="'Delete macro ' + m.number"
-                        >
+                         data-icon="delete" title="Delete">
                           Delete
                         </button>
                       </div>

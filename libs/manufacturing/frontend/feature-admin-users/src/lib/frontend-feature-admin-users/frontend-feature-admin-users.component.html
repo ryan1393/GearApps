@@ -100,7 +100,7 @@
             </div>
           </div>
           <div class="gear-admin-actions gear-admin-record-actions">
-            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditUser(user)">Edit</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditUser(user)" data-icon="edit" title="Edit">Edit</button>
             <button *ngIf="!isSelf(user.id)" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleUserEnabled(user)">{{ user.active ? 'Disable' : 'Enable' }}</button>
             <span *ngIf="isSelf(user.id)" class="gear-badge">You</span>
           </div>
@@ -171,7 +171,7 @@
             </div>
           </div>
           <div class="gear-admin-actions gear-admin-record-actions">
-            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditPartSummary(summary)">Edit</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditPartSummary(summary)" data-icon="edit" title="Edit">Edit</button>
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="togglePartSummaryEnabled(summary)">{{ summary.enabled ? 'Disable' : 'Enable' }}</button>
           </div>
         </div>
@@ -272,7 +272,7 @@
             </div>
           </div>
           <div class="gear-admin-actions gear-admin-record-actions">
-            <button *ngIf="!isGearsetPart(part)" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditPart(part)">Edit</button>
+            <button *ngIf="!isGearsetPart(part)" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditPart(part)" data-icon="edit" title="Edit">Edit</button>
             <button *ngIf="isGearsetPart(part)" type="button" class="gear-btn gear-btn-secondary" (click)="setTab('gearsets')">Open in Gearsets</button>
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="togglePartEnabled(part)">{{ part.enabled ? 'Disable' : 'Enable' }}</button>
           </div>
@@ -427,7 +427,7 @@
             </div>
           </div>
           <div class="gear-admin-actions gear-admin-record-actions">
-            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditMachine(machine)">Edit</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditMachine(machine)" data-icon="edit" title="Edit">Edit</button>
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleMachineEnabled(machine)">{{ machine.enabled ? 'Disable' : 'Enable' }}</button>
           </div>
         </div>
@@ -516,7 +516,7 @@
               class="gear-btn gear-btn-secondary"
               [disabled]="busy || !tray.enabled || printingTagId === tray.id"
               (click)="printTag('TRAY', tray.id, tray.serial_number)"
-            >
+             data-icon="print" title="Print tag">
               {{ printingTagId === tray.id ? 'Printing…' : 'Print Tag' }}
             </button>
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleTrayEnabled(tray)">{{ tray.enabled ? 'Disable' : 'Enable' }}</button>
@@ -593,7 +593,7 @@
               class="gear-btn gear-btn-secondary"
               [disabled]="busy || !container.enabled || printingTagId === container.id"
               (click)="printTag('CONTAINER', container.id, container.serial_number)"
-            >
+             data-icon="print" title="Print tag">
               {{ printingTagId === container.id ? 'Printing…' : 'Print Tag' }}
             </button>
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleContainerEnabled(container)">{{ container.enabled ? 'Disable' : 'Enable' }}</button>
@@ -754,10 +754,10 @@
               class="gear-btn gear-btn-secondary"
               [disabled]="busy || !location.enabled || printingTagId === location.id"
               (click)="printTag('LOCATION', location.id, location.serial_number)"
-            >
+             data-icon="print" title="Print tag">
               {{ printingTagId === location.id ? 'Printing…' : 'Print Tag' }}
             </button>
-            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditLocation(location)">Edit</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditLocation(location)" data-icon="edit" title="Edit">Edit</button>
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleLocationEnabled(location)">
               {{ location.enabled ? 'Disable' : 'Enable' }}
             </button>
@@ -818,7 +818,7 @@
           </div>
 
           <div class="gear-admin-actions gear-admin-record-actions">
-            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditCutterBody(body)">Edit</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditCutterBody(body)" data-icon="edit" title="Edit">Edit</button>
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleCutterBodyEnabled(body)">{{ body.enabled ? 'Disable' : 'Enable' }}</button>
           </div>
 

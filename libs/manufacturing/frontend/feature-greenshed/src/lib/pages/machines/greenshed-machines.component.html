@@ -13,7 +13,7 @@
         <button type="button" [class.active]="activeFilter === 'INACTIVE'" [attr.aria-pressed]="activeFilter === 'INACTIVE'" (click)="setActiveFilter('INACTIVE')">Inactive</button>
         <button type="button" [class.active]="activeFilter === 'ALL'" [attr.aria-pressed]="activeFilter === 'ALL'" (click)="setActiveFilter('ALL')">All</button>
       </div>
-      <button type="button" (click)="refresh()" [disabled]="busy" class="running-refresh">
+      <button type="button" (click)="refresh()" [disabled]="busy" class="running-refresh" data-icon="refresh" title="Refresh">
         {{ busy ? 'Refreshing…' : 'Refresh' }}
       </button>
       <div *ngIf="board" class="last-refresh">

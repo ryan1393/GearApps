@@ -18,7 +18,7 @@
     </div>
   </div>
 
-  <button *ngIf="selectedTraySerial && !busy" type="button" class="gear-btn gear-btn-secondary" (click)="retryTray()">↻ Refresh tray {{ selectedTraySerial }}</button>
+  <button *ngIf="selectedTraySerial && !busy" type="button" class="gear-btn gear-btn-secondary" (click)="retryTray()" data-icon="refresh" title="Refresh tray">↻ Refresh tray {{ selectedTraySerial }}</button>
 
   <section *ngIf="tray" class="gear-panel p-5">
     <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
@@ -52,7 +52,7 @@
         <p *ngIf="shelvesLoading" class="mt-2 text-sm" role="status">Loading numbered rough shelves…</p>
         <p *ngIf="shelvesError" class="mt-2 text-sm text-red-700" role="alert">{{ shelvesError }}</p>
         <p *ngIf="!shelvesLoading && !shelvesError && !matchingRoughShelves.length" class="mt-2 text-sm">No matching numbered shelves. Add your actual {{ expectedShelfPrefix }}-001, {{ expectedShelfPrefix }}-002, and other shelf tags in Admin → Locations, then refresh shelves here.</p>
-        <button type="button" class="gear-btn gear-btn-secondary mt-2" [disabled]="busy || shelvesLoading" (click)="refreshShelves()">↻ Refresh shelves</button>
+        <button type="button" class="gear-btn gear-btn-secondary mt-2" [disabled]="busy || shelvesLoading" (click)="refreshShelves()" data-icon="refresh" title="Refresh shelves">↻ Refresh shelves</button>
         <p *ngIf="hasSelectedRoughShelf" class="mt-3 text-sm font-bold">Complete Grinding records this tray on {{ roughShelfSerial }}. Place it on that physical shelf.</p>
       </ng-container>
       <p *ngIf="requiredBlades !== null && previouslyReadyCount + returnedAfterGrinding < requiredBlades" class="mt-2 text-sm">Short trays need replacement blades and another grinding pass; no ready-for-coating shelf is assigned.</p>

@@ -72,7 +72,7 @@ interface FanucRow {
             class="gear-btn gear-btn-secondary"
             (click)="reload()"
             [disabled]="loading()"
-          >
+           data-icon="refresh" title="Refresh">
             ↻ {{ loading() ? 'Refreshing…' : 'Refresh' }}
           </button>
         </div>

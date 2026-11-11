@@ -65,7 +65,7 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
             class="gear-btn gear-btn-secondary"
             (click)="reload()"
             [disabled]="tokens.loading()"
-          >
+           data-icon="refresh" title="Refresh">
             ↻ {{ tokens.loading() ? 'Refreshing…' : 'Refresh' }}
           </button>
           <button type="button" class="gear-btn gear-btn-primary" (click)="openCreate()">

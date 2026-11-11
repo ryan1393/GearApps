@@ -1,11 +1,11 @@
 <section class="gear-page shipments-page">
   <header danaPageHeader eyebrow="COATER SHIPPING" heading="Coater Shipments" description="Scan packed containers, print one packing slip, then send the shipment."></header>
-  <div *ngIf="error" class="shipment-alert error" role="alert">{{error}} <button *ngIf="stale" type="button" (click)="refresh()" [disabled]="busy">Refresh shipment</button></div>
+  <div *ngIf="error" class="shipment-alert error" role="alert">{{error}} <button *ngIf="stale" type="button" (click)="refresh()" [disabled]="busy" data-icon="refresh" title="Refresh shipment">Refresh shipment</button></div>
   <div *ngIf="notice" class="shipment-alert" role="status" aria-live="polite">{{notice}}</div>
   <ng-container *ngIf="active as s; else shipmentList">
     <div class="shipment-heading gear-panel">
       <div><div class="eyebrow">{{s.status}} · REVISION {{s.revision}}</div><h2>{{s.number}}</h2><p>Started {{time(s.created_at)}} ET · {{s.created_by}}</p></div>
-      <div class="actions"><button type="button" (click)="refresh()" [disabled]="busy">Refresh</button><button type="button" (click)="close()" [disabled]="busy">Back to shipments</button></div>
+      <div class="actions"><button type="button" (click)="refresh()" [disabled]="busy" data-icon="refresh" title="Refresh">Refresh</button><button type="button" (click)="close()" [disabled]="busy">Back to shipments</button></div>
     </div>
     <div class="shipment-totals" aria-label="Shipment totals"><div><strong>{{s.manifest.totals.containers}}</strong><span>Containers</span></div><div><strong>{{s.manifest.totals.trays}}</strong><span>Trays</span></div><div><strong>{{s.manifest.totals.blades}}</strong><span>Blades</span></div></div>
     <div class="gear-panel details-panel">
@@ -22,7 +22,7 @@
       <div class="picker-divider"><span>OR SELECT AN AVAILABLE CONTAINER</span></div>
       <div class="available-tools">
         <input [(ngModel)]="availableQuery" (keyup.enter)="refreshAvailable()" placeholder="Search available containers" aria-label="Search available containers" maxlength="80" [disabled]="!canEdit || dirty" />
-        <button type="button" (click)="refreshAvailable()" [disabled]="!canEdit || dirty || availableLoading">{{availableLoading ? 'Loading…' : 'Refresh available'}}</button>
+        <button type="button" (click)="refreshAvailable()" [disabled]="!canEdit || dirty || availableLoading" data-icon="refresh" title="Refresh">{{availableLoading ? 'Loading…' : 'Refresh available'}}</button>
       </div>
       <div class="available-select-row">
         <label for="available-container">Available containers
@@ -41,7 +41,7 @@
     <div *ngIf="s.manifest.issues.length" class="shipment-alert error"><strong>Not ready to send</strong><ul><li *ngFor="let issue of s.manifest.issues">{{issue}}</li></ul></div>
     <section *ngIf="s.manifest.summary.length" class="gear-panel summary-panel"><h3>Summary breakdown</h3><div class="table-wrap"><table><thead><tr><th>Part Summary</th><th>Part Type</th><th>Trays</th><th>Blades</th></tr></thead><tbody><tr *ngFor="let row of s.manifest.summary"><td>{{row.summary}}</td><td>{{row.part_type}}</td><td>{{row.trays}}</td><td>{{row.blades}}</td></tr></tbody></table></div></section>
     <section *ngFor="let c of s.manifest.containers" class="gear-panel container-panel">
-      <div class="container-heading"><h3>{{c.serial}} <span class="status" [class.blocked]="c.issues.length">{{s.status==='DISPATCHED' ? 'SENT' : c.issues.length ? 'BLOCKED' : 'READY'}}</span></h3><button *ngIf="s.status==='DRAFT'" type="button" (click)="remove(c)" [disabled]="!canEdit || dirty" [attr.aria-label]="'Remove '+c.serial">Remove</button></div>
+      <div class="container-heading"><h3>{{c.serial}} <span class="status" [class.blocked]="c.issues.length">{{s.status==='DISPATCHED' ? 'SENT' : c.issues.length ? 'BLOCKED' : 'READY'}}</span></h3><button *ngIf="s.status==='DRAFT'" type="button" (click)="remove(c)" [disabled]="!canEdit || dirty" [attr.aria-label]="'Remove '+c.serial" data-icon="delete" title="Remove">Remove</button></div>
       <div class="table-wrap"><table><thead><tr><th>Tray</th><th>Summary</th><th>Type</th><th>Blades / required</th><th>Packed from</th></tr></thead><tbody><tr *ngFor="let t of c.trays"><td><strong>{{t.serial}}</strong><details><summary>Blade IDs</summary><span *ngFor="let blade of t.blades" class="blade-id">{{blade.serial}}</span></details></td><td>{{t.summary}}</td><td>{{t.part_type}}</td><td>{{t.count}} / {{t.required ?? '—'}}</td><td>{{t.rough_shelf}}</td></tr></tbody></table></div>
     </section>
     <div *ngIf="s.status==='DRAFT'" class="gear-panel workflow-actions">
@@ -59,10 +59,10 @@
   <ng-template #shipmentList>
     <form class="gear-panel start-panel" (ngSubmit)="start()"><h2>Start a shipment</h2><label>Coater / destination<input name="destination" [(ngModel)]="destination" maxlength="120" [disabled]="busy" required /></label><label>Notes (optional)<input name="notes" [(ngModel)]="notes" maxlength="1000" [disabled]="busy" /></label><button class="primary" type="submit" [disabled]="busy || !destination.trim()">{{busy ? 'Starting…' : 'Start Shipment'}}</button><p>Load trays into containers first. A partially filled container is allowed when every loaded tray is ready.</p></form>
     <div class="gear-panel list-panel"><div class="tabs"><button type="button" [class.selected]="tab==='open'" [attr.aria-pressed]="tab==='open'" (click)="changeTab('open')" [disabled]="busy">Open shipments</button><button type="button" [class.selected]="tab==='history'" [attr.aria-pressed]="tab==='history'" (click)="changeTab('history')" [disabled]="busy">History</button></div>
-      <form class="search-row" (ngSubmit)="search()"><input name="query" [(ngModel)]="query" maxlength="80" placeholder="Shipment, container or Summary" aria-label="Search shipments" /><button type="submit" [disabled]="busy || loadingList">Search</button><button type="button" (click)="refreshList()" [disabled]="busy || loadingList">Refresh</button></form>
+      <form class="search-row" (ngSubmit)="search()"><input name="query" [(ngModel)]="query" maxlength="80" placeholder="Shipment, container or Summary" aria-label="Search shipments" /><button type="submit" [disabled]="busy || loadingList">Search</button><button type="button" (click)="refreshList()" [disabled]="busy || loadingList" data-icon="refresh" title="Refresh">Refresh</button></form>
       <p *ngIf="listError" role="alert" class="shipment-alert error">{{listError}}</p><p *ngIf="loadingList" role="status">Loading shipments…</p>
       <div class="table-wrap" *ngIf="!loadingList"><table><thead><tr><th>Shipment</th><th>Destination</th><th>Status</th><th>Containers / trays / blades</th><th>Created (ET)</th></tr></thead><tbody><tr *ngFor="let row of list.rows"><td><button type="button" (click)="open(row.id)" [disabled]="busy">{{row.number}}</button></td><td>{{row.destination}}</td><td>{{row.status}}</td><td>{{row.totals.containers}} / {{row.totals.trays}} / {{row.totals.blades}}</td><td>{{time(row.created_at)}}</td></tr></tbody></table><p *ngIf="!list.rows.length" class="empty">No matching shipments.</p></div>
-      <div class="pagination"><button type="button" (click)="paginate(-1)" [disabled]="busy || loadingList || page===1">Previous</button><span>Page {{page}} · {{list.total}} shipments</span><button type="button" (click)="paginate(1)" [disabled]="busy || loadingList || page*25>=list.total">Next</button></div>
+      <div class="pagination"><button type="button" (click)="paginate(-1)" [disabled]="busy || loadingList || page===1" data-icon="prev" title="Previous page">Previous</button><span>Page {{page}} · {{list.total}} shipments</span><button type="button" (click)="paginate(1)" [disabled]="busy || loadingList || page*25>=list.total" data-icon="next" title="Next page">Next</button></div>
     </div>
   </ng-template>
 </section>

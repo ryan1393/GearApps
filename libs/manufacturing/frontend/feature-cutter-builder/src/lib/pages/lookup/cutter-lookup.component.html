@@ -68,7 +68,7 @@
             <td>{{ row.summary_number }}</td>
             <td><span class="status-pill">{{ row.status_code }}</span></td>
             <td>{{ row.built_at | date:'MMM d, y' }}</td>
-            <td><button type="button" (click)="openCard(row.build_number)" class="gear-btn gear-btn-secondary gear-btn-sm">View</button></td>
+            <td><button type="button" (click)="openCard(row.build_number)" class="gear-btn gear-btn-secondary gear-btn-sm" data-icon="view" title="View">View</button></td>
           </tr>
           <tr *ngIf="!busy && results.length === 0">
             <td danaTableEmpty colspan="7" class="empty-row">No cutter builds match this search.</td>

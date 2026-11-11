@@ -4,7 +4,7 @@
       <h2 id="server-settings-title" class="text-xl font-black">Server Settings</h2>
       <p class="text-sm text-slate-600">Every API setting from the server environment file (.env). A value saved here is used in place of the server value the next time the API starts. Locked settings can only be changed on the server.</p>
     </div>
-    <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || saving || restarting">{{ loading ? 'Refreshing…' : '↻ Refresh' }}</button>
+    <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || saving || restarting" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : '↻ Refresh' }}</button>
   </div>
 
   <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert"><strong>Unable to continue.</strong><span>{{ error }}</span></div>

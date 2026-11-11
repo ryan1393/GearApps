@@ -1,6 +1,6 @@
 <section class="gear-page scrap-blades-page">
   <header class="gear-page-header gear-section-heading scrap-blades-heading" danaPageHeader eyebrow="BLADE TRACKING / HISTORY" heading="Scrap / Discarded Blades" description="Browse every blade currently recorded as scrapped and open the complete lifecycle history for any blade.">
-  <button danaPageHeaderAction type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading">
+  <button danaPageHeaderAction type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading" data-icon="refresh" title="Refresh">
       ↻ Refresh
     </button>
 </header>
@@ -153,8 +153,8 @@
     <div *ngIf="meta as page" class="inventory-pagination">
       <span>Page {{ page.page }} of {{ page.totalPages }} · {{ page.totalItems }} scrapped blades</span>
       <div>
-        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!page.hasPreviousPage || loading" (click)="loadPage(page.page - 1)">← Previous</button>
-        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!page.hasNextPage || loading" (click)="loadPage(page.page + 1)">Next →</button>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!page.hasPreviousPage || loading" (click)="loadPage(page.page - 1)" data-icon="prev" title="Previous page">← Previous</button>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!page.hasNextPage || loading" (click)="loadPage(page.page + 1)" data-icon="next" title="Next page">Next →</button>
       </div>
     </div>
   </section>

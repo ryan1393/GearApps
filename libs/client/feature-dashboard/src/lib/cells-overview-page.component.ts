@@ -52,7 +52,7 @@ import { groupByCell } from './cells';
           class="date-chip refresh-chip"
           (click)="reload()"
           [disabled]="machines.loading()"
-        >
+         data-icon="refresh" title="Refresh">
           ↻ <span>{{ machines.loading() ? 'Refreshing…' : 'Refresh' }}</span>
         </button>
       </section>

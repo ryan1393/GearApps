@@ -54,7 +54,7 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
             class="gear-btn gear-btn-secondary"
             (click)="reload()"
             [disabled]="scanners.loading()"
-          >
+           data-icon="refresh" title="Refresh">
             ↻ {{ scanners.loading() ? 'Refreshing…' : 'Refresh' }}
           </button>
           @if (access.canEditSetup()) {
@@ -115,7 +115,7 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
                           class="gear-btn gear-btn-secondary gear-btn-sm"
                           (click)="openDialog(s)"
                           [attr.aria-label]="'Edit scanner ' + s.ip"
-                        >
+                         data-icon="edit" title="Edit">
                           Edit
                         </button>
                         <button
@@ -123,7 +123,7 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
                           class="gear-btn gear-btn-danger gear-btn-sm"
                           (click)="pendingDelete.set(s)"
                           [attr.aria-label]="'Delete scanner ' + s.ip"
-                        >
+                         data-icon="delete" title="Delete">
                           Delete
                         </button>
                       </div>

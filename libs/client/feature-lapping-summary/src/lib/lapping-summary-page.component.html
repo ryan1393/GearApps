@@ -11,7 +11,7 @@
         class="gear-btn gear-btn-secondary"
         (click)="refresh()"
         [disabled]="!ready() || rows.loading()"
-      >
+       data-icon="refresh" title="Refresh">
         ↻ {{ rows.loading() ? 'Refreshing…' : 'Refresh' }}
       </button>
       <button
