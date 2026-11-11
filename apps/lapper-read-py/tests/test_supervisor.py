@@ -133,6 +133,16 @@ class SupervisorTests(unittest.TestCase):
         self.fail_next = False
         self._wait(lambda: self.supervisor.status()["workers"][0]["restarts"] >= 1)
 
+    def test_a_restarting_worker_reports_why_without_raw_error_text(self):
+        self.fail_next = True
+        self.api.machines = [machine("m1")]
+        self.supervisor.discover_once()
+        self._wait(lambda: self.supervisor.summary()["machines"][0]["phase"] == "restarting")
+        row = self.supervisor.summary()["machines"][0]
+        self.assertGreaterEqual(row["restarts"], 1)
+        self.assertIn(row["problem"], ("unexpected error", "FANUC library or state folder not usable"))
+        self.assertNotIn("last_error", row)
+
     def test_state_file_follows_the_machine_id_not_the_ip(self):
         from dataclasses import replace
         s = replace(self.settings, machine_ip="10.16.81.15", state_key="9d9e0c7d-uuid")

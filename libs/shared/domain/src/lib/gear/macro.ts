@@ -101,3 +101,21 @@ export function macroLimitText(limits: Pick<Macro, 'min_value' | 'max_value' | '
   if (typeof max === 'number') return `at most ${max}${unit}`;
   return null;
 }
+
+/** A macro value that was recorded with a cycle, beside the value it replaced. */
+export interface LappingChange {
+  machine_cycle_id: string;
+  timestamp: Date | string;
+  serial_number: string | null;
+  consec: number;
+  macro_id: string;
+  number: number;
+  name: string;
+  used_form: string | null;
+  unit?: string | null;
+  min_value?: number | null;
+  max_value?: number | null;
+  value: number;
+  /** Null when this is the first value ever recorded for the macro on this machine and gearset. */
+  previous_value: number | null;
+}

@@ -103,6 +103,23 @@ export async function auditGearDatabase(source: DataSource): Promise<DatabaseAud
       WHERE active AND "deletedAt" IS NULL AND nullif(btrim(v),'') IS NOT NULL)
       SELECT count(*)::int AS count FROM(SELECT identifier FROM identifiers GROUP BY identifier HAVING count(DISTINCT id)>1)t`,
     );
+    // The same record entered twice, differing only in case or spacing.
+    await check(
+      'duplicate_models',
+      'error',
+      `SELECT count(*)::int AS count FROM(SELECT model_number,upper(btrim(coalesce(model_type,''))) FROM public.models GROUP BY 1,2 HAVING count(*)>1)t`,
+    );
+    await check(
+      'models_sharing_a_number',
+      'review',
+      `SELECT count(*)::int AS count FROM(SELECT model_number FROM public.models WHERE enabled AND model_number IS NOT NULL GROUP BY 1 HAVING count(*)>1)t`,
+    );
+    for (const table of ['trays', 'containers', 'locations'])
+      await check(
+        `duplicate_${table}_serials`,
+        'error',
+        `SELECT count(*)::int AS count FROM(SELECT upper(btrim(serial_number)) FROM public.${identifier(table)} GROUP BY 1 HAVING count(*)>1)t`,
+      );
     await check(
       'tray_count_mismatches',
       'error',
@@ -193,6 +210,16 @@ export async function auditGearDatabase(source: DataSource): Promise<DatabaseAud
         'active_macro_number_duplicates',
         'error',
         `SELECT count(*)::int AS count FROM(SELECT number FROM lapper.macros WHERE status=1 GROUP BY 1 HAVING count(*)>1)t`,
+      );
+      await check(
+        'duplicate_lapper_gearset_numbers',
+        'review',
+        `SELECT count(*)::int AS count FROM(SELECT lower(btrim(number)) FROM lapper.gearsets GROUP BY 1 HAVING count(*)>1)t`,
+      );
+      await check(
+        'duplicate_scanner_addresses',
+        'review',
+        `SELECT count(*)::int AS count FROM(SELECT ip FROM lapper.scanners WHERE nullif(btrim(ip),'') IS NOT NULL GROUP BY 1 HAVING count(*)>1)t`,
       );
       await check(
         'shared_machine_addresses',

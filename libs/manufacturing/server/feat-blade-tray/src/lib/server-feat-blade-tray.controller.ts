@@ -22,13 +22,14 @@ import {
 } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiParam, ApiTags } from '@nestjs/swagger';
 import { ServerFeatBladeTrayService } from './server-feat-blade-tray.service';
+import { OpeningInventoryDto, OpeningInventoryService } from './opening-inventory.service';
 
 
 @Controller({ path: 'bladeTrays', version: '1' })
 @ApiTags('BladeTrays')
 export class ServerFeatBladeTrayController {
   private readonly logger = new Logger(ServerFeatBladeTrayController.name);
-  constructor(private bladeTrayService: ServerFeatBladeTrayService) { }
+  constructor(private bladeTrayService: ServerFeatBladeTrayService, private openingInventory: OpeningInventoryService) { }
 
   @Post('batch')
   @DepartmentAppEdit('BLADE_TRACKING')
@@ -38,6 +39,14 @@ export class ServerFeatBladeTrayController {
     @ReqUserId() userId: Uuid,
   ) {
     return this.bladeTrayService.createBladeBatch(dto, userId);
+  }
+
+  /** Go-live only: record a tray that is already ground or coated, as found on the floor. */
+  @Post('opening-inventory')
+  @DepartmentAppEdit('BLADE_TRACKING')
+  @Auth([RoleType.ADMIN])
+  recordOpeningInventory(@Body() dto: OpeningInventoryDto, @ReqUserId() userId: Uuid) {
+    return this.openingInventory.record(dto, userId);
   }
 
   @Post('')

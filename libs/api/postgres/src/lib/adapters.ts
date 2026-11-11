@@ -9,6 +9,8 @@ import {
   Gearset,
   LappingSummaryRow,
   LapperProduction,
+  LappingChange,
+  CycleHistoryPage,
   Machine,
   MachineCycle,
   MachineFanucVariable,
@@ -98,6 +100,9 @@ export class PostgresCycles extends PostgresCrudAdapter<MachineCycle> {
   history(machineId: string, gearsetId: string): Promise<MachineCycle[]> {
     return project(this.store.catalog.cycles({ machineId, gearsetId, limit: 200 }));
   }
+  historyPage(machineId: string, gearsetId: string, page: number, pageSize: number, serial?: string): Promise<CycleHistoryPage> {
+    return project(this.store.catalog.historyPage(machineId, gearsetId, page, pageSize, serial));
+  }
   async findLatest(machineId: string, gearsetId: string): Promise<MachineCycle> {
     const rows = await this.store.catalog.cycles({ machineId, gearsetId, latest: true });
     if (!rows.length) throw new NotFoundException('No cycles recorded for that machine/gearset');
@@ -109,8 +114,11 @@ export class PostgresLogs extends PostgresCrudAdapter<MacroLog> {
   constructor(store: PostgresLapperStore) {
     super(store, 'macro-log');
   }
-  lappingSummary(machine: string, gearset: string, form?: string, cycleId?: string): Promise<LappingSummaryRow[]> {
-    return project(this.store.catalog.summary(machine, gearset, form, cycleId));
+  lappingSummary(machine: string, gearset: string, form?: string, cycleId?: string, upToCycleId?: string): Promise<LappingSummaryRow[]> {
+    return project(this.store.catalog.summary(machine, gearset, form, cycleId, upToCycleId));
+  }
+  changes(machine: string, gearset: string, limit: number, cycleId?: string): Promise<LappingChange[]> {
+    return project(this.store.catalog.changes(machine, gearset, limit, cycleId));
   }
 }
 @Injectable()

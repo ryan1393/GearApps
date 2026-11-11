@@ -74,10 +74,19 @@ class StoreTests(unittest.TestCase):
         with self.assertRaises(InvalidCheckpoint):
             CycleStateStore(self.path).load()
 
-    def test_pending_cycle_without_serial_is_rejected(self):
+    def test_pending_cycle_without_serial_survives_a_restart(self):
+        # A machine with no scanner records cycles without a serial. Rejecting one here left
+        # its worker restarting forever after the collector was restarted.
         with open(self.path, "w") as handle:
             json.dump({"pending_cycles": [{"machine_id": "m", "part_number": 1, "consec": 1,
                                            "started_at": NOW, "completed_at": NOW, "serial": None}]}, handle)
+        restored = CycleStateStore(self.path).load()
+        self.assertIsNone(restored.pending_cycles[0].serial)
+
+    def test_pending_cycle_without_completion_time_is_rejected(self):
+        with open(self.path, "w") as handle:
+            json.dump({"pending_cycles": [{"machine_id": "m", "part_number": 1, "consec": 1,
+                                           "started_at": NOW, "completed_at": None, "serial": "D1"}]}, handle)
         with self.assertRaises(InvalidCheckpoint):
             CycleStateStore(self.path).load()
 

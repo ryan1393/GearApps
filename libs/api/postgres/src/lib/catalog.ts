@@ -405,7 +405,63 @@ export class PostgresLapperCatalog {
     }));
   }
 
-  async summary(machineId: string, gearsetId: string, form?: string, cycleId?: string): Promise<Row[]> {
+  /** One page of a machine and gearset's cycles, newest first, optionally filtered by serial. */
+  async historyPage(machineId: string, gearsetId: string, page: number, pageSize: number, serial?: string) {
+    const query = this.cycleQuery(this.db.manager, { machineId, gearsetId });
+    const wanted = serial?.trim();
+    // The serial is matched as text typed by the user: escape the LIKE wildcards.
+    if (wanted) query.andWhere("c.serial_number ILIKE :serial ESCAPE '\\'", { serial: '%' + wanted.replace(/[\\%_]/g, '\\$&') + '%' });
+    const counted = await query.clone().select('COUNT(*)', 'total').orderBy().getRawOne<Row>();
+    const rows = await query
+      .addSelect('(SELECT COUNT(*) FROM lapper.macro_logs l WHERE l.machine_cycle_id=c.id)', 'changed_count')
+      .offset((page - 1) * pageSize)
+      .limit(pageSize)
+      .getRawMany<Row>();
+    return {
+      items: rows.map((c) => ({
+        id: c.id, consec: c.consec, serial_number: c.serial_number, timestamp: c.occurred_at,
+        machine_id: c.api_machine_id, gearset_id: c.api_gearset_id, changed_count: Number(c.changed_count),
+      })),
+      total: Number(counted?.total ?? 0), page, page_size: pageSize,
+    };
+  }
+
+  /**
+   * The most recent recorded macro values for a machine and gearset, each beside the value it
+   * replaced. The collector records a macro only when it changes, so every row is a change
+   * (or, with no previous value, the first reading).
+   */
+  async changes(machineId: string, gearsetId: string, limit: number, cycleId?: string): Promise<Row[]> {
+    const rows = await this.db.query(
+      `SELECT * FROM (
+         SELECT c.id AS machine_cycle_id, COALESCE(c.recorded_at, c.timestamp AT TIME ZONE $3) AS timestamp,
+                c.serial_number, c.consec, m.id AS macro_id, m.number, m.name, m.used_form, m.unit,
+                m.min_value, m.max_value, l.value,
+                LAG(l.value) OVER (PARTITION BY m.id
+                  ORDER BY COALESCE(c.recorded_at, c.timestamp AT TIME ZONE $3), c.id, l.id) AS previous_value
+           FROM lapper.macro_logs l
+           JOIN lapper.machine_cycles c ON c.id = l.machine_cycle_id
+           JOIN lapper.machines lm ON lm.id = c.machine_id
+           JOIN lapper.gearsets g ON g.id = c.gearset_id
+           JOIN lapper.macros m ON m.id = l.macro_id
+          WHERE (lm.id = $1 OR lm.public_machine_id = $1) AND (g.id = $2 OR ${resolvedGearset} = $2)
+       ) recorded
+       WHERE previous_value IS DISTINCT FROM value AND ($5::uuid IS NULL OR machine_cycle_id = $5::uuid)
+       ORDER BY timestamp DESC, machine_cycle_id DESC, number
+       LIMIT $4`,
+      [machineId, gearsetId, this.timeZone, limit, cycleId ?? null],
+    );
+    return rows.map((row: Row) => ({
+      ...row, value: Number(row.value), previous_value: numberOrNull(row.previous_value),
+      min_value: numberOrNull(row.min_value), max_value: numberOrNull(row.max_value),
+    }));
+  }
+
+  /**
+   * Latest value of each macro. With cycleId only that cycle's own records; with upToCycleId the
+   * values as they stood when that cycle finished.
+   */
+  async summary(machineId: string, gearsetId: string, form?: string, cycleId?: string, upToCycleId?: string): Promise<Row[]> {
     const ranked = this.db
       .createQueryBuilder()
       .select('l.id', 'id')
@@ -437,6 +493,12 @@ export class PostgresLapperCatalog {
       .setParameter('zone', this.timeZone);
     if (form) ranked.andWhere('m.used_form=:form', { form });
     if (cycleId) ranked.andWhere('c.id=:cycleId', { cycleId });
+    if (upToCycleId)
+      ranked.andWhere(
+        `(COALESCE(c.recorded_at,c.timestamp AT TIME ZONE :zone), c.id) <= (SELECT COALESCE(u.recorded_at,u.timestamp AT TIME ZONE :zone), u.id
+           FROM lapper.machine_cycles u WHERE u.id=:upToCycleId)`,
+        { upToCycleId },
+      );
     const rows = await this.db
       .createQueryBuilder()
       .select('*')

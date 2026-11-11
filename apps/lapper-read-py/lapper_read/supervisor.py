@@ -28,7 +28,7 @@ from typing import Callable
 from .api import MeshForgeApi, utc_now
 from .fanuc import Fanuc
 from .scanner import Scanner
-from .state import CycleStateStore
+from .state import CycleStateStore, InvalidCheckpoint
 from .worker import Worker
 
 log = logging.getLogger("lapper_read.supervisor")
@@ -81,6 +81,17 @@ def _is_ip(value: str) -> bool:
 WorkerFactory = Callable[[MachineSpec], Worker]
 
 
+def _problem(error: Exception) -> str:
+    """A short category for why a worker stopped. The full text goes to the log and /status only."""
+    if isinstance(error, InvalidCheckpoint):
+        return "saved cycle file unreadable"
+    if "already owns" in str(error):
+        return "another collector is running for this machine"
+    if isinstance(error, (OSError, ImportError)):
+        return "FANUC library or state folder not usable"
+    return "unexpected error"
+
+
 class _Slot:
     def __init__(self, spec: MachineSpec, factory: WorkerFactory, retry_s: float):
         self.spec, self._factory, self._retry_s = spec, factory, retry_s
@@ -88,6 +99,10 @@ class _Slot:
         self.worker: Worker | None = None
         self.started_at = utc_now()
         self.restarts = 0
+        # Why the worker last stopped, as a category the Lapper UI may show (never raw error text).
+        self.problem: str | None = None
+        self.failed = False
+        self.last_error: str | None = None
         self.thread = threading.Thread(target=self._loop, name=f"worker-{spec.number or spec.machine_id}", daemon=True)
 
     def _loop(self) -> None:
@@ -98,9 +113,13 @@ class _Slot:
                 self.worker = self._factory(self.spec)
                 if self.stopping.is_set():
                     break
+                self.failed = False
                 self.worker.run()
             except Exception as error:  # noqa: BLE001
                 self.restarts += 1
+                self.failed = True
+                self.problem = _problem(error)
+                self.last_error = str(error)
                 log.error("[%s] Worker stopped unexpectedly; restarting in %.0fs: %s",
                           self.spec.number or self.spec.controller_ip, self._retry_s, error)
                 if self.worker is not None:
@@ -125,7 +144,11 @@ class _Slot:
             "started_at": self.started_at,
             "restarts": self.restarts,
         }
-        return {**base, **(self.worker.status() if self.worker else {"phase": "starting"})}
+        status = {**base, **(self.worker.status() if self.worker else {"phase": "starting"})}
+        if self.failed:
+            # Also covers a worker that could not even be built, which has no status of its own.
+            status.update(phase="restarting", problem=self.problem, last_error=self.last_error)
+        return status
 
 
 class Supervisor:
@@ -222,6 +245,8 @@ class Supervisor:
                 "phase": status.get("phase"),
                 "last_sample_at": status.get("last_sample_at"),
                 "pending_runs": status.get("pending_runs", 0),
+                "restarts": status.get("restarts", 0),
+                "problem": status.get("problem"),
                 # online / offline / none, the ICMP ping result and when it last answered.
                 "scanner": status.get("scanner"),
                 "scanner_ping": status.get("scanner_ping"),

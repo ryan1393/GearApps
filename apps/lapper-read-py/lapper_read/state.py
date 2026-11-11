@@ -113,8 +113,9 @@ class CycleStateStore:
         if not isinstance(raw, dict) or not isinstance(raw.get("pending_cycles"), list):
             raise InvalidCheckpoint("The cycle checkpoint has no pending cycle list.")
         pending = [_cycle(item) for item in raw["pending_cycles"]]
-        if any(not c.serial or not c.completed_at for c in pending):
-            raise InvalidCheckpoint("A pending cycle in the checkpoint has no serial or completion time.")
+        # A cycle with no serial is valid: machines without a scanner record every cycle that way.
+        if any(not c.completed_at for c in pending):
+            raise InvalidCheckpoint("A pending cycle in the checkpoint has no completion time.")
         active = _cycle(raw["active_cycle"]) if raw.get("active_cycle") else None
         return CycleState(
             was_in_cycle=raw.get("was_in_cycle"),

@@ -276,11 +276,18 @@ export class FanucVariablesPageComponent implements OnInit {
       };
     if (!m.worker)
       return { tone: 'neutral', label: 'No worker', detail: capitalise(m.phase ?? '') };
+    // The collector is running and watching the control; there is just no program to record yet.
     if (m.phase === 'no gearset loaded')
       return {
-        tone: 'neutral',
-        label: 'No gearset loaded',
-        detail: `Connected and idle · checked ${clock(m.last_sample_at)} · collects once a program is loaded`,
+        tone: 'success',
+        label: 'Collecting',
+        detail: `No gearset loaded · checked ${clock(m.last_sample_at)} · cycles are recorded once a program is loaded`,
+      };
+    if (m.phase === 'restarting')
+      return {
+        tone: 'warning',
+        label: 'Restarting',
+        detail: `${capitalise(m.problem ?? 'The worker stopped')} · retried ${m.restarts ?? 1} time${m.restarts === 1 ? '' : 's'} · see the collector log`,
       };
     if (m.phase === 'collecting') {
       const waiting = m.pending_runs ? ` · ${m.pending_runs} runs waiting to send` : '';

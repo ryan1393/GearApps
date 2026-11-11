@@ -26,6 +26,8 @@ Lapper macros can carry a minimum, a maximum and a unit (Admin > Macros). Lappin
 
 A fresh installation now has the Lapping department (181), and the Lapper time zone is sent to PostgreSQL under its canonical name, so `America/Indianapolis` works on hosts whose PostgreSQL does not install the old alias names.
 
+Lapping Summaries is laid out to fit one screen: a paged cycle table with a serial search beside tabs for Changes, Summary, Lapping paths and All values. Changes lists what each cycle changed. See [Launch Setup](manufacturing/LAUNCH_SETUP.md) for the go-live checklist, bulk barcode tags and opening inventory.
+
 ## Verification
 
 - Full `npm run build`: all current targets passed; the separate fresh-database bootstrap target also passed. Both an existing database upgrade and a newly bootstrapped PostgreSQL database contain the grinder attribution columns.
