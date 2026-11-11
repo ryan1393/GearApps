@@ -2,7 +2,6 @@ export * from './lib/api/api-config';
 export * from './lib/api/crud-api';
 export * from './lib/api/gear-api.services';
 export * from './lib/api/scanner-api.service';
-export * from './lib/layout/layout.service';
 export * from './lib/util/api-error';
 export * from './lib/util/toast.service';
 export * from './lib/util/resource';

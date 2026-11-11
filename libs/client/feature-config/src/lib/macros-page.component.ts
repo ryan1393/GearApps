@@ -11,7 +11,6 @@ import {
   DanaConfirmDialogComponent,
   DanaCountBadgeDirective,
   DanaPageHeaderComponent,
-  DanaPanelHeaderDirective,
   DanaTableDirective,
   DanaTableEmptyDirective,
   DanaTableShellDirective,
@@ -37,7 +36,6 @@ interface MacroRow extends Macro {
     DanaConfirmDialogComponent,
     DanaCountBadgeDirective,
     DanaPageHeaderComponent,
-    DanaPanelHeaderDirective,
     DanaTableDirective,
     DanaTableEmptyDirective,
     DanaTableShellDirective,
@@ -46,7 +44,7 @@ interface MacroRow extends Macro {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="gear-page">
+    <div class="gear-page gear-workflow-page">
       <section
         danaPageHeader
         eyebrow="LAPPER / CONFIGURATION"
@@ -70,8 +68,8 @@ interface MacroRow extends Macro {
         </div>
       </section>
 
-      <section class="gear-panel data-panel">
-        <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+      <section class="gear-workflow-table-panel">
+        <div class="gear-workflow-table-heading gear-workflow-status-row">
           <div>
             <h2>All Macros</h2>
             <p>
@@ -81,7 +79,7 @@ interface MacroRow extends Macro {
           </div>
           <span danaCountBadge class="gear-count-badge count-chip">{{ visible().length }}</span>
         </div>
-        <div class="lapper-panel-body gear-form-grid lapper-macro-filters">
+        <div class="gear-workflow-section-body gear-form-grid">
           <label class="gear-field">
             Search
             <input
@@ -196,11 +194,6 @@ interface MacroRow extends Macro {
       (confirm)="deleteConfirmed()"
       (cancel)="pendingDelete.set(null)"
     />
-  `,
-  styles: `
-    .lapper-macro-filters {
-      padding-bottom: 6px;
-    }
   `,
 })
 export class MacrosPageComponent implements OnInit {

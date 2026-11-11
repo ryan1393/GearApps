@@ -157,24 +157,6 @@
     </form>
 
     <div class="topbar-user">
-      <div class="lapper-text-size" role="group" aria-label="Text size">
-        <button
-          type="button"
-          (click)="layout.bumpScale(-1)"
-          [disabled]="layout.textScale() <= SCALE_MIN"
-          aria-label="Smaller text"
-        >
-          A−
-        </button>
-        <button
-          type="button"
-          (click)="layout.bumpScale(1)"
-          [disabled]="layout.textScale() >= SCALE_MAX"
-          aria-label="Larger text"
-        >
-          A+
-        </button>
-      </div>
       <div class="avatar">{{ initials(user.email) }}</div>
       <div class="user-copy">
         <strong>{{ user.email }}</strong

@@ -3,7 +3,6 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { DanaMobileNavDirective } from '@dana/ui';
-import { LayoutService, SCALE_MAX, SCALE_MIN } from '@gearapps/client/core';
 import { AuthSessionService } from '@gearapps/manufacturing/frontend/data-access-user';
 import { getDanaAppUrl } from '@gearapps/manufacturing/shared/dana-app-config';
 import { GEAR_APPS_VERSION } from '@gearapps/shared/domain';
@@ -12,15 +11,11 @@ import { GEAR_APPS_VERSION } from '@gearapps/shared/domain';
   selector: 'gear-lapper-nav',
   imports: [AsyncPipe, FormsModule, RouterLink, RouterLinkActive, DanaMobileNavDirective],
   templateUrl: './lapper-nav.component.html',
-  styleUrl: './lapper-nav.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LapperNavComponent {
   protected readonly appVersion = GEAR_APPS_VERSION;
   protected readonly session = inject(AuthSessionService);
-  protected readonly layout = inject(LayoutService);
-  protected readonly SCALE_MIN = SCALE_MIN;
-  protected readonly SCALE_MAX = SCALE_MAX;
   private readonly router = inject(Router);
   protected searchValue = '';
 

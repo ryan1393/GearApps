@@ -17,16 +17,6 @@
   white-space: nowrap;
 }
 
-/* Padded body for panels that hold forms, detail grids or empty states. */
-.lapper-panel-body {
-  padding: 18px;
-}
-
-/* Vertical rhythm between stacked page sections. */
-.gear-page > :is(.gear-panel, .kpi-grid) {
-  margin-bottom: 16px;
-}
-
 .gear-table td.nowrap {
   white-space: nowrap;
 }
