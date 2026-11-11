@@ -20,9 +20,9 @@ describe('Cutter workflow selection safety', () => {
     api = { getDashboard: jest.fn(() => of({ ready_for_cutter: [], pulled_builds: [] })), listCutterBodies: jest.fn(() => of([])),
       listCutterBuilderMachines: jest.fn(() => of([])), getSelectionTrays: jest.fn(() => of([])), getSelectionLocations: jest.fn(() => of([])),
       scanTray: jest.fn(() => of(tray)), scanCutterBody: jest.fn(() => of(body)), scanLocation: jest.fn(),
-      searchBuilds: jest.fn(() => of([])), validateTray: jest.fn(), getCard: jest.fn(() => of(build)), teardownBuild: jest.fn(), createBuild: jest.fn() };
+      searchBuilds: jest.fn(() => of([])), validateTray: jest.fn(), getCard: jest.fn(() => of(build)), teardownBuild: jest.fn(), createBuild: jest.fn(), printCard: jest.fn() };
     TestBed.configureTestingModule({ providers: [{ provide: CutterBuilderApiService, useValue: api },
-      { provide: GearToastService, useValue: { success: jest.fn(), error: jest.fn() } },
+      { provide: GearToastService, useValue: { success: jest.fn(), error: jest.fn(), warning: jest.fn() } },
       { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: () => null } } } }] });
   });
   function teardown() { return TestBed.runInInjectionContext(() => new CutterTeardownComponent()); }
@@ -64,6 +64,33 @@ describe('Cutter workflow selection safety', () => {
       already_assigned_to_build: false, still_in_container: false } as CutterTrayValidation;
     expect(component.canBuild).toBe(false); component.trayValidation.required_blade_count = 11;
     expect(component.canBuild).toBe(true);
+  });
+  function readyToBuild() {
+    const component = cutter(); component.cutterBody = body; component.cutterBodySerial = 'BODY064';
+    component.tray = tray; component.traySerial = 'TRAY-A'; component.selectedCutterBuilderMachineId = 'machine';
+    component.availableCutterBuilderMachines = [{ id: 'machine' }] as typeof component.availableCutterBuilderMachines;
+    component.trayValidation = { valid: true, required_blade_count: 11, blades_ready_for_cutter: true, tray_stage_ready: true,
+      already_assigned_to_build: false, still_in_container: false } as CutterTrayValidation;
+    api['createBuild'].mockReturnValue(of({ build, blade_ids: [], tray_released: true }));
+    return component;
+  }
+  it('prints the cutter card automatically once the build is created', () => {
+    api['printCard'].mockReturnValue(of({ build_number: 'BUILD-A', printed: true, printer_configured: true, printer_name: 'Card 1' }));
+    const component = readyToBuild(); component.build();
+    expect(api['printCard']).toHaveBeenCalledWith('BUILD-A'); expect(component.printing).toBe(false);
+  });
+  it('does not print a card when the build fails', () => {
+    const component = readyToBuild(); api['createBuild'].mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409 })));
+    component.build(); expect(api['printCard']).not.toHaveBeenCalled();
+  });
+  it('falls back to browser print after the card renders when no card printer is set up', () => {
+    jest.useFakeTimers();
+    try {
+      api['printCard'].mockReturnValue(of({ build_number: 'BUILD-A', printed: false, printer_configured: false, printer_name: null }));
+      const component = readyToBuild(); const browserPrint = jest.spyOn(component, 'browserPrint').mockImplementation(() => undefined);
+      component.build(); expect(browserPrint).not.toHaveBeenCalled();
+      jest.runAllTimers(); expect(browserPrint).toHaveBeenCalledTimes(1);
+    } finally { jest.useRealTimers(); }
   });
   it('rejects a scanned tray whose server validation is valid but body capacity is wrong', () => {
     api['validateTray'].mockReturnValue(of({ valid: true, required_blade_count: 19 }));

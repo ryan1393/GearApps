@@ -244,6 +244,8 @@ export class CutterBuildComponent implements OnDestroy {
             `Build ${result.build.build_number} created with ${result.build.blade_count} blades.`,
             'Cutter build complete',
           );
+          // The card goes to the card printer as soon as the build exists; Print Cutter Card reprints it.
+          this.print();
         },
         error: (err: HttpErrorResponse) => {
           this.busy = false;
@@ -255,7 +257,10 @@ export class CutterBuildComponent implements OnDestroy {
 
   printing = false;
 
-  /** Sends the new card to the card printer; with no card printer set up, opens the browser print as before. */
+  /**
+   * Sends the new card to the card printer. Runs by itself once a build is created and again from
+   * Print Cutter Card. With no card printer set up, opens the browser print as before.
+   */
   print(): void {
     const buildNumber = this.result?.build.build_number;
     if (!buildNumber || this.printing) return;
@@ -265,11 +270,12 @@ export class CutterBuildComponent implements OnDestroy {
         this.printing = false;
         if (outcome.printed) this.toast.success(`Cutter card ${outcome.build_number} sent to ${outcome.printer_name}.`, 'Card sent to printer');
         else if (outcome.printer_configured) this.toast.warning(`${outcome.printer_name} did not print the card. ${outcome.failure_reason ?? ''} Select Print Cutter Card to try again, or use Browser Print.`, 'Card not printed');
-        else this.browserPrint();
+        // Wait for the card to be on screen before the browser prints the page.
+        else if (this.result?.build.build_number === buildNumber) setTimeout(() => this.browserPrint());
       },
       error: (err: HttpErrorResponse) => {
         this.printing = false;
-        this.toast.error(cutterApiErrorText(err, 'Could not print the Cutter Card.'), 'Card not printed');
+        this.toast.error(cutterApiErrorText(err, 'Could not print the Cutter Card.') + ' Select Print Cutter Card to try again.', 'Card not printed');
       },
     });
   }
