@@ -8,7 +8,7 @@
       <label class="font-bold">Cutter Body Serial<input gearScannerFocus class="gear-input mt-1 w-full" name="body" [(ngModel)]="bodyIdentifier" (keydown.enter)="bodyScanned($event, shelfInput)" maxlength="120" placeholder="Scan Dana or manufacturer serial" autocomplete="off" required [disabled]="busy" /></label>
       <label class="font-bold">Shelf Serial<input #shelfInput [gearScannerFocus]="2" class="gear-input mt-1 w-full" name="shelf" [(ngModel)]="shelfSerial" maxlength="120" placeholder="Scan an existing shelf location" autocomplete="off" required [disabled]="busy" /></label>
     </div>
-    <button type="submit" class="mt-4 rounded-xl bg-slate-900 px-5 py-3 font-bold text-white disabled:opacity-50" [disabled]="busy || loading || !bodyIdentifier.trim() || !shelfSerial.trim()">Confirm Empty Body on Shelf</button>
+    <button type="submit" class="gear-btn gear-btn-primary mt-4" [disabled]="busy || loading || !bodyIdentifier.trim() || !shelfSerial.trim()">Confirm Empty Body on Shelf</button>
   </form>
   <section class="gear-panel p-5">
     <div class="flex flex-wrap justify-between gap-3"><h2 class="text-lg font-black">Recorded Shelf Observations</h2><button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy || loading" (click)="refresh()">Refresh</button></div>

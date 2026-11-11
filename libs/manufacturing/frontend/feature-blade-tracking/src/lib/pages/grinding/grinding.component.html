@@ -69,7 +69,7 @@
         <p class="mt-2 text-sm">Next: <a routerLink="/blades/load-container" class="font-bold text-blue-700">pack shelved trays into a coater container</a>.</p>
       </ng-template>
     </div>
-    <button *ngIf="tray.workflow_eligibility?.grinding" type="button" class="mt-5 w-full rounded-xl bg-slate-900 px-5 py-3 font-black text-white disabled:opacity-50" [disabled]="!canRecordGrinding" (click)="recordGrinding()">{{ waitingToStart ? 'Start Grinding' : 'Complete Grinding / Record Scrap' }}</button>
+    <button *ngIf="tray.workflow_eligibility?.grinding" type="button" class="gear-btn gear-btn-primary gear-workflow-submit mt-5" [disabled]="!canRecordGrinding" (click)="recordGrinding()">{{ waitingToStart ? 'Start Grinding' : 'Complete Grinding / Record Scrap' }}</button>
   </section>
 
   <section *ngIf="tray" class="gear-panel overflow-hidden">

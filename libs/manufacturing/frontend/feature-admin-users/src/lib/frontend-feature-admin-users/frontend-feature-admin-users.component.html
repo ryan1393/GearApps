@@ -87,7 +87,7 @@
         <div class="gear-admin-record-card-body">
           <div class="gear-admin-record-heading">
             <strong class="gear-admin-record-title">{{ user.fullName || user.email }}</strong>
-            <span class="gear-badge">{{ user.active ? 'Active' : 'Inactive' }} · {{ user.role }}</span>
+            <span class="gear-badge" [attr.data-tone]="user.active ? 'success' : 'neutral'">{{ user.active ? 'Active' : 'Inactive' }} · {{ user.role }}</span>
           </div>
           <div class="gear-admin-record-meta">
             <div class="gear-admin-record-field gear-admin-record-field-wide">
