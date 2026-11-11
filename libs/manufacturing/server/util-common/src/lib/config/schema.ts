@@ -201,6 +201,14 @@ export const validationSchema = Joi.object({
   SCANNER_FTP_IMAGE_FILE: Joi.string().default('scanner-current.jpg'),
   // Set by compose: where Lapper > Collector Tokens hands the Docker collector its token.
   LAPPER_READ_TOKEN_FILE: Joi.string().allow('').optional(),
+  // Lapper Read's Argonaut settings, shared from the same .env. The API reads them only for the
+  // Cycle Test Lab's test transaction; the collector still decides whether real cycles are sent.
+  LAPPER_READ_ARGONAUT_URL: Joi.string().allow('').optional(),
+  LAPPER_READ_ARGONAUT_LOCATION_ID: Joi.string().allow('').optional(),
+  LAPPER_READ_ARGONAUT_USERNAME: Joi.string().allow('').optional(),
+  LAPPER_READ_ARGONAUT_PASSWORD: Joi.string().allow('').optional(),
+  LAPPER_READ_ARGONAUT_TRANSACTION_TYPE_ID: Joi.number().integer().min(0).max(2147483647).empty('').default(100),
+  LAPPER_READ_ARGONAUT_VERIFY_TLS: Joi.boolean().empty('').default(true),
 
   // DSF (Digital Shop Floor) production counts. All optional and off by default. Only the
   // shape is checked here; the DSF reader validates the combination and stays off, with a

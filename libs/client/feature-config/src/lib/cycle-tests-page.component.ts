@@ -13,6 +13,10 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { apiErrorMessage, GearsetsApi, MachinesApi, MacrosApi, loadable } from '@meshforge/client/core';
 import {
+  ARGONAUT_MACROS,
+  ArgonautPayload,
+  ArgonautTestInput,
+  ArgonautTestResult,
   CycleTestRun,
   Gearset,
   Machine,
@@ -99,6 +103,105 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
         </button>
       </div>
     </form>
+    <form class="gear-panel cycle-test-panel" (ngSubmit)="sendToArgonaut()">
+      <h2 class="cycle-test-title">Send to Argonaut</h2>
+      <p class="gear-muted cycle-test-intro">
+        Sends one real Track and Trace transaction for the machine, gearset and serial number above, built
+        exactly as Lapper Read sends a finished cycle. Argonaut records it, so point it at a test location.
+        Nothing is saved in MeshForge.
+      </p>
+      <div class="gear-form-grid">
+        <label class="gear-field"
+          >Argonaut address<input
+            class="gear-input"
+            name="argonautUrl"
+            [(ngModel)]="argonautUrl"
+            maxlength="2000"
+            [placeholder]="selectedMachine()?.argonaut_url || 'https://argonaut:3003/api/mes/trigger-transaction'"
+          />
+          <small class="gear-field-help">{{
+            selectedMachine()?.argonaut_url
+              ? "Empty uses this machine's saved address."
+              : 'Empty uses the saved address from Admin > Lapping machines, then LAPPER_READ_ARGONAUT_URL.'
+          }}</small>
+        </label>
+        <label class="gear-field"
+          >Location ID<input
+            class="gear-input"
+            name="argonautLocation"
+            [(ngModel)]="argonautLocation"
+            maxlength="200"
+            [placeholder]="selectedMachine()?.argonaut_location_id || ''"
+          />
+          <small class="gear-field-help"
+            >Empty uses the machine's, then LAPPER_READ_ARGONAUT_LOCATION_ID. An address that already has
+            ?locationId= is sent as entered.</small
+          >
+        </label>
+        <label class="gear-field"
+          >Sequence<input
+            class="gear-input"
+            type="number"
+            name="sequence"
+            min="0"
+            step="1"
+            [(ngModel)]="sequence"
+            required
+          />
+          <small class="gear-field-help">A real cycle sends its consec number.</small>
+        </label>
+      </div>
+      <details class="cycle-test-details">
+        <summary>Argonaut macro values · {{ argonautFilled() }} of {{ argonautMacros.length }} entered, the rest are sent as 0</summary>
+        <p class="gear-muted">#10020 defaults to the gearset number.</p>
+        <div class="cycle-test-macro-grid">
+          @for (n of argonautMacros; track n) {
+            <label class="gear-field"
+              >#{{ n }}<input class="gear-input" type="number" step="any" [name]="'argonaut-' + n" [(ngModel)]="values[n]"
+            /></label>
+          }
+        </div>
+      </details>
+      @if (argonautError()) {
+        <p class="gear-alert gear-alert-danger" role="alert">{{ argonautError() }}</p>
+      }
+      @if (argonautPreview(); as preview) {
+        <div class="cycle-test-argonaut-box">
+          <strong>Request preview</strong>
+          <span class="gear-muted">POST {{ preview.url }}</span>
+          <pre class="cycle-test-json">{{ preview.payload | json }}</pre>
+        </div>
+      }
+      <div class="gear-admin-form-actions">
+        <button
+          class="gear-btn gear-btn-secondary"
+          type="button"
+          (click)="previewArgonaut()"
+          [disabled]="argonautBusy() || !argonautReady()"
+        >
+          Preview request
+        </button>
+        <button class="gear-btn gear-btn-primary" type="submit" [disabled]="argonautBusy() || !argonautReady()">
+          {{ argonautBusy() ? 'Sending…' : 'Send to Argonaut' }}
+        </button>
+      </div>
+      @if (argonautResult(); as r) {
+        <div class="cycle-test-argonaut-box" role="status">
+          <span class="dana-status-badge" [danaTone]="r.ok ? 'pass' : 'fail'"
+            >Argonaut · {{ r.ok ? 'Accepted' : 'Not accepted' }}</span
+          >
+          <span>{{ r.message }}</span>
+          <span class="gear-muted">Sent to {{ r.url }} · {{ r.sent_at | date: 'medium' }}</span>
+          @if (r.response) {
+            <pre class="cycle-test-json">{{ r.response }}</pre>
+          }
+          <details class="cycle-test-details">
+            <summary>Request sent</summary>
+            <pre class="cycle-test-json">{{ r.payload | json }}</pre>
+          </details>
+        </div>
+      }
+    </form>
     <section class="gear-panel cycle-test-panel">
       <div class="cycle-test-history-heading">
         <div>
@@ -162,6 +265,14 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
     .cycle-test-values { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: .5rem; margin-top: .75rem; }
     .cycle-test-value { display: grid; gap: .125rem; padding: .5rem .75rem; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-md); background: var(--dana-surface); }
     .cycle-test-value[data-state='fail'] { border-color: var(--dana-danger); background: var(--dana-danger-soft); }
+    .cycle-test-title { margin: 0; font-size: 1.125rem; }
+    .cycle-test-intro { margin: .25rem 0 1rem; max-width: 48rem; }
+    .cycle-test-details { margin-top: 1rem; }
+    .cycle-test-details summary { cursor: pointer; font-weight: 600; }
+    .cycle-test-macro-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr)); gap: .5rem; margin-top: .5rem; }
+    .cycle-test-argonaut-box { display: grid; gap: .375rem; margin-top: 1rem; padding: .75rem; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-md); overflow-wrap: anywhere; }
+    .cycle-test-argonaut-box .dana-status-badge { justify-self: start; }
+    .cycle-test-json { margin: 0; max-height: 20rem; overflow: auto; padding: .5rem; font-size: .75rem; white-space: pre-wrap; background: var(--dana-surface); border-radius: var(--dana-radius-md); }
     .cycle-test-value-label { font-size: .75rem; font-weight: 700; color: var(--dana-muted); }
   `,
 })
@@ -181,6 +292,14 @@ export class CycleTestsPageComponent implements OnInit {
   protected gearsetId = '';
   protected serial = '';
   protected values: Record<string, number | null> = {};
+  protected argonautUrl = '';
+  protected argonautLocation = '';
+  protected sequence: number | null = 1;
+  protected readonly argonautMacros = ARGONAUT_MACROS;
+  protected readonly argonautBusy = signal(false);
+  protected readonly argonautError = signal('');
+  protected readonly argonautPreview = signal<{ url: string; payload: ArgonautPayload } | null>(null);
+  protected readonly argonautResult = signal<ArgonautTestResult | null>(null);
   protected readonly activeMacros = computed(() => this.macros.value().filter((m) => m.status === 1));
   protected readonly limitText = macroLimitText;
   /** Saved runs keep IDs; show the names people know. */
@@ -194,6 +313,60 @@ export class CycleTestsPageComponent implements OnInit {
   }
   protected valueState(macro: CycleTestRun['result']['macros'][number]): 'ok' | 'fail' {
     return macro.value === null || macroLimitState(macro.value, macro) !== 'ok' ? 'fail' : 'ok';
+  }
+  protected selectedMachine(): Machine | undefined {
+    return this.machines.value().find((m) => m.id === this.machineId);
+  }
+  protected argonautFilled(): number {
+    return ARGONAUT_MACROS.filter((n) => typeof this.values[n] === 'number').length;
+  }
+  protected argonautReady(): boolean {
+    const sequence = this.sequence;
+    return !!this.machineId && !!this.gearsetId && !!this.serial.trim() && typeof sequence === 'number' && Number.isInteger(sequence) && sequence >= 0;
+  }
+  private argonautInput(): ArgonautTestInput {
+    const values = Object.fromEntries(
+      Object.entries(this.values).filter((entry): entry is [string, number] => typeof entry[1] === 'number' && Number.isFinite(entry[1])),
+    );
+    return {
+      machine_id: this.machineId, gearset_id: this.gearsetId, serial_number: this.serial.trim(), sequence: this.sequence ?? 0, values,
+      ...(this.argonautUrl.trim() ? { url: this.argonautUrl.trim() } : {}),
+      ...(this.argonautLocation.trim() ? { location_id: this.argonautLocation.trim() } : {}),
+    };
+  }
+  private previewRequest() {
+    return this.http.post<{ url: string; payload: ArgonautPayload }>('/api/v1/admin/cycle-tests/argonaut/preview', this.argonautInput())
+      .pipe(takeUntilDestroyed(this.destroyRef));
+  }
+  protected previewArgonaut() {
+    if (this.argonautBusy() || !this.argonautReady()) return;
+    this.argonautBusy.set(true); this.argonautError.set(''); this.argonautResult.set(null);
+    this.previewRequest().subscribe({
+      next: (preview) => { this.argonautBusy.set(false); this.argonautPreview.set(preview); },
+      error: (error) => { this.argonautBusy.set(false); this.argonautPreview.set(null); this.argonautError.set(apiErrorMessage(error)); },
+    });
+  }
+  /** Shows the exact address and serial first: Argonaut records every transaction it accepts. */
+  protected sendToArgonaut() {
+    if (this.argonautBusy() || !this.argonautReady()) return;
+    this.argonautBusy.set(true); this.argonautError.set(''); this.argonautResult.set(null);
+    this.previewRequest().subscribe({
+      next: (preview) => {
+        this.argonautPreview.set(preview);
+        const r = preview.payload.request;
+        if (!globalThis.confirm(`Send a test transaction to Argonaut?\n\nAddress: ${preview.url}\nSerial: ${r.serialNumber}\nPart number: ${r.partNumber}\nSequence: ${r.sequence}\n\nArgonaut records it as a real transaction.`)) {
+          this.argonautBusy.set(false);
+          return;
+        }
+        this.http.post<ArgonautTestResult>('/api/v1/admin/cycle-tests/argonaut', this.argonautInput())
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: (result) => { this.argonautBusy.set(false); this.argonautPreview.set(null); this.argonautResult.set(result); },
+            error: (error) => { this.argonautBusy.set(false); this.argonautError.set(apiErrorMessage(error)); },
+          });
+      },
+      error: (error) => { this.argonautBusy.set(false); this.argonautError.set(apiErrorMessage(error)); },
+    });
   }
   ngOnInit() { this.reload(); }
   protected reload() {

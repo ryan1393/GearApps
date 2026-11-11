@@ -36,6 +36,7 @@ export interface EnvironmentSettingGroup {
 const STARTUP = 'The API needs this before it can read saved settings. Change it in the server environment (.env).';
 const SIGNING = 'This secret signs every login and protects saved passwords. Change it in the server environment (.env).';
 const SERVER_FILE = 'This names a file or folder on the server. Change it in the server environment (.env).';
+const COLLECTOR = 'The Lapper Read collector reads this from the same .env. Change it in the server environment (.env) so the API and the collector stay the same.';
 const API_PATH = 'Every client and collector calls the API at this path. Change it in the server environment (.env).';
 
 const text = (key: string, label: string, help?: string, extra: Partial<EnvironmentSettingDefinition> = {}): EnvironmentSettingDefinition =>
@@ -147,7 +148,7 @@ export const ENVIRONMENT_SETTING_GROUPS: readonly EnvironmentSettingGroup[] = [
   {
     id: 'lapping',
     title: 'Lapping and scanners',
-    description: 'Lapper time zone and the scanner connections.',
+    description: 'Lapper time zone, the scanner connections and Argonaut.',
     settings: [
       text('LAPPER_TIME_ZONE', 'Lapper time zone', 'An IANA zone, for example America/Indianapolis.'),
       text('SCANNER_DEFAULT_HOST', 'Default scanner address'),
@@ -164,6 +165,12 @@ export const ENVIRONMENT_SETTING_GROUPS: readonly EnvironmentSettingGroup[] = [
         'Set by Docker Compose. Lapper > Collector Tokens > Connect Docker collector writes the collector\'s token here.',
         { locked: SERVER_FILE },
       ),
+      text('LAPPER_READ_ARGONAUT_URL', 'Argonaut address', 'trigger-transaction URL used when a machine has none in Admin > Lapping machines.', { locked: COLLECTOR }),
+      text('LAPPER_READ_ARGONAUT_LOCATION_ID', 'Argonaut location ID', undefined, { locked: COLLECTOR }),
+      text('LAPPER_READ_ARGONAUT_USERNAME', 'Argonaut user', 'Empty sends no sign-in.', { locked: COLLECTOR }),
+      secret('LAPPER_READ_ARGONAUT_PASSWORD', 'Argonaut password', undefined, { locked: COLLECTOR }),
+      number('LAPPER_READ_ARGONAUT_TRANSACTION_TYPE_ID', 'Argonaut transaction type', 'Track and Trace transaction type, normally 100.', { locked: COLLECTOR }),
+      flag('LAPPER_READ_ARGONAUT_VERIFY_TLS', 'Verify the Argonaut certificate', 'Off accepts a self-signed certificate.', { locked: COLLECTOR }),
     ],
   },
   {

@@ -23,4 +23,5 @@ export * from './lib/cutter-tracking/retired-cutter';
 
 export * from './lib/app-version';
 
+export * from './lib/gear/argonaut';
 export * from './lib/gear/cycle-test';
