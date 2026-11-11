@@ -679,7 +679,7 @@
           <select class="gear-select" [(ngModel)]="locationForm.summary_id" name="locationSummary" [disabled]="locationContentsFromBarcode">
             <option value="">None</option>
             <option *ngFor="let summary of locationSummaryChoices" [value]="summary.id">
-              {{ summary.number }}<ng-container *ngIf="summary.revision"> rev {{ summary.revision }}</ng-container>
+              {{ summary.number }}
             </option>
           </select>
         </label>
