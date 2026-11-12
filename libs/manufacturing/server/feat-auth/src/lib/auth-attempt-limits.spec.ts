@@ -50,11 +50,16 @@ describe('AuthAttemptLimits', () => {
     expect(await statusOf(limits.signIn('10.0.1.1', 'a@example.test', response, right))).toBe(200);
   });
 
-  it('allows 30 sign-in attempts per address in 5 minutes', async () => {
+  it('allows 30 wrong passwords per address in 5 minutes', async () => {
     for (let i = 0; i < 30; i++)
-      expect(await statusOf(limits.signIn('192.0.2.1', `user${i}@example.test`, response, right))).toBe(200);
+      expect(await statusOf(limits.signIn('192.0.2.1', `user${i}@example.test`, response, wrong))).toBe(401);
     expect(await statusOf(limits.signIn('192.0.2.1', 'new@example.test', response, right))).toBe(429);
     expect(await statusOf(limits.signIn('192.0.2.2', 'new@example.test', response, right))).toBe(200);
+  });
+
+  it('never counts successful sign-ins against a shared terminal', async () => {
+    for (let i = 0; i < 100; i++)
+      expect(await statusOf(limits.signIn('192.0.2.9', `operator${i}@example.test`, response, right))).toBe(200);
   });
 
   it('allows 3 forgot-password requests per email and 20 per address an hour', () => {

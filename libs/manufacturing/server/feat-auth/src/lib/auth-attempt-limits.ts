@@ -19,8 +19,9 @@ const resetMessage = (wait: string) => `Too many password reset requests. Wait $
 
 /**
  * Limits on the sign-in and password endpoints, kept in the API's memory:
- * - sign-in: 30 attempts per client address per 5 minutes, and 10 wrong passwords per
- *   email per 15 minutes (a successful sign-in clears that email's count only);
+ * - sign-in: 30 wrong passwords per client address per 5 minutes, and 10 per email per
+ *   15 minutes. Successful sign-ins never count, so a shared shop-floor terminal can sign in
+ *   any number of people; a success clears that email's count only;
  * - forgot password: 3 requests per email and 20 per address per hour;
  * - reset password and email verification codes: 10 attempts per address per 15 minutes.
  */
@@ -33,19 +34,22 @@ export class AuthAttemptLimits {
   readonly codePerAddress = new RateLimiter({ limit: 10, windowMs: 15 * MINUTE });
 
   /**
-   * Runs one password sign-in under the limits. Only a wrong email or password (401) counts
-   * against the email; success clears it.
+   * Runs one password sign-in under the limits. Only a wrong email or password (401) counts,
+   * against both the email and the client address; success clears the email's count.
    */
   async signIn<T>(address: string, email: unknown, response: ResponseHeaders, attempt: () => Promise<T>): Promise<T> {
     const key = normalizedEmail(email);
     assertWithinLimit(this.loginFailuresPerEmail.peek(key), signInMessage, response);
-    assertWithinLimit(this.loginPerAddress.hit(address), signInMessage, response);
+    assertWithinLimit(this.loginPerAddress.peek(address), signInMessage, response);
     try {
       const result = await attempt();
       this.loginFailuresPerEmail.reset(key);
       return result;
     } catch (error) {
-      if (error instanceof UnauthorizedException) this.loginFailuresPerEmail.hit(key);
+      if (error instanceof UnauthorizedException) {
+        this.loginFailuresPerEmail.hit(key);
+        this.loginPerAddress.hit(address);
+      }
       throw error;
     }
   }
