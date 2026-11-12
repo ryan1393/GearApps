@@ -100,4 +100,21 @@ describe('FrontendFeatureLoginComponent', () => {
     expect(fixture.componentInstance.submitting).toBe(false);
     expect(fixture.componentInstance.badgeUid).toBe('');
   });
+
+  it('shows the server\'s wait message when sign-in is rate limited', () => {
+    login.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 429, error: { message: 'Too many sign-in attempts. Wait 15 minutes, then try again.' } })));
+    fixture.componentInstance.loginForm.setValue({ email: 'operator@example.com', password: 'Password1!' });
+    fixture.componentInstance.login();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain('Too many sign-in attempts. Wait 15 minutes');
+  });
+
+  it('shows why an administrator badge is refused', () => {
+    loginBadge.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 403, error: { message: 'Administrators sign in with email and password.' } })));
+    fixture.componentInstance.badgeUid = 'CARD-123';
+    fixture.componentInstance.loginBadge();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain('Administrators sign in with email and password.');
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('#badge-uid'));
+  });
 });

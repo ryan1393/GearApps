@@ -55,6 +55,15 @@ describe('PasswordRecoveryComponent', () => {
     expect(component.success).toBe(true);
     expect(component.form.controls.email.value).toBe('');
   });
+  it('shows the wait the server asks for when too many requests were made', () => {
+    create('forgot');
+    component.form.controls.email.setValue('operator@example.com');
+    component.submit();
+    http.expectOne('/api/v1/auth/email/forgot-password')
+      .flush({ message: 'Too many attempts. Wait 15 minutes, then try again.' }, { status: 429, statusText: 'Too Many Requests', headers: { 'Retry-After': '900' } });
+    expect(component.error).toBe('Too many attempts. Wait 15 minutes, then try again.');
+    expect(component.submitting).toBe(false);
+  });
   it('replaces the forgot form with guidance when the server cannot send reset email', () => {
     create('forgot', code, false);
     expect(component.resetByEmailAvailable).toBe(false);

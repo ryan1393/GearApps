@@ -149,8 +149,11 @@ export class PasswordRecoveryComponent {
       error: (error: HttpErrorResponse) => {
         if (generation !== this.generation) return;
         this.submitting = false;
-        this.error =
-          mode === 'forgot'
+        const serverMessage = typeof error.error?.message === 'string' ? error.error.message : '';
+        this.error = error.status === 429 && serverMessage
+          // Too many attempts: the server says how long to wait.
+          ? serverMessage
+          : mode === 'forgot'
             ? 'Could not send the request right now. Please try again.'
             : error.status === 400 || error.status === 422
               ? 'The reset link is invalid or expired, or the account details do not match. Request a new link and try again.'

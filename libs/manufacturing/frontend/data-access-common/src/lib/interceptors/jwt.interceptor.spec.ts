@@ -61,6 +61,17 @@ describe('JWT credential boundaries and session renewal', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
+  it.each(['/api/v1/auth/email/login', '/api/v1/auth/badge/login', '/api/v1/trays'])('treats a 429 from %s as a rate limit, not a session failure', (url) => {
+    const errors: number[] = [];
+    http.post(url, {}).subscribe({ error: e => errors.push(e.status) });
+    backend.expectOne(url).flush({ message: 'Too many sign-in attempts. Wait 15 minutes, then try again.' },
+      { status: 429, statusText: 'Too Many Requests', headers: { 'Retry-After': '900' } });
+    backend.expectNone('/api/v1/auth/refresh');
+    expect(errors).toEqual([429]);
+    expect(session.accessToken).toBe(oldAccess);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
   it('renews an expired session once and sends the request again', () => {
     const received: unknown[] = [];
     http.get('/api/v1/trays').subscribe(body => received.push(body));
