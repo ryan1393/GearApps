@@ -1,6 +1,6 @@
 # DSF production counts (Digital Shop Floor / Ignition)
 
-MeshForge reads current-shift DSF piece counts for machines across all departments, including individual grinders and cutter builders. Lapper machines (every machine with a Lapper profile in `lapper.machines`) are left out: they get no DSF count, cannot be mapped to a DSF source, and show no DSF badge in the Lapper app. Machine DSF Counts is available in all four apps, with counts beside selected machines and in Admin. Optional cutter crediting applies only to production cutting machines in Departments 132/152. The integration is off by default.
+MeshForge reads current-shift DSF piece counts for machines across all departments, including individual grinders and cutter builders. Lapper machines (every machine with a Lapper profile in `lapper.machines`) are left out: they get no DSF count, cannot be mapped to a DSF source, and the Lapper app has no DSF badge or Machine DSF Counts page. Machine DSF Counts is available in Blade Tracking, Cutter Builder and Greenshed, with counts beside selected machines and in Admin. Optional cutter crediting applies only to production cutting machines in Departments 132/152. The integration is off by default.
 
 The API **pulls** from DSF on a timer. Nothing pushes to MeshForge, and MeshForge never writes
 to DSF: the DSF session is a read-only transaction running fixed `SELECT`s, and it is closed

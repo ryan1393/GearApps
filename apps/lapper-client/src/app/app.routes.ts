@@ -1,4 +1,3 @@
-import { MachineCountsComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { inject } from '@angular/core';
 import { Route, Router } from '@angular/router';
 import { adminRoleGuard, authGuard } from '@meshforge/manufacturing/frontend/data-access-common';
@@ -8,7 +7,6 @@ const adminTab = (tab: string) => () =>
   inject(Router).createUrlTree(['/admin'], { queryParams: { tab } });
 
 export const appRoutes: Route[] = [
-  { path: 'machine-counts', canActivate: [authGuard], component: MachineCountsComponent },
   { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
   {
     path: '',
