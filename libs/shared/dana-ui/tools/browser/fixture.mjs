@@ -29,6 +29,7 @@ class Fixture {
   headerTabindex = 7;
   headerSort = 'other';
   saveBlocked = true;
+  loads = [2, 1];
   columns = [{ label: 'Name', value: row => row }];
   options = ['Alpha', 'Beta'];
   cancel() { this.cancelCount++; this.open = false; }
@@ -66,7 +67,7 @@ Component({
       <thead *ngIf="!alternateHeader"><tr><th [attr.data-dana-table-static]="staticHeader ? '' : null"
         [attr.aria-label]="headerLabel" [attr.tabindex]="headerTabindex" [attr.aria-sort]="headerSort">Name <button id="header-action" type="button" (click)="headerActionCount = headerActionCount + 1">Refresh</button></th><th>Load</th></tr></thead>
       <thead *ngIf="alternateHeader"><tr><th>Replacement</th><th>Count</th></tr></thead>
-      <tbody><tr><td>Beta</td><td>2</td></tr><tr><td>Alpha <span>{{ rowSuffix }}</span><button id="row-action" type="button">Inspect</button></td><td>1</td></tr></tbody>
+      <tbody><tr><td>Beta</td><td>{{ loads[0] }}</td></tr><tr><td>Alpha <span>{{ rowSuffix }}</span><button id="row-action" type="button">Inspect</button></td><td>{{ loads[1] }}</td></tr></tbody>
     </table>
     <table *ngIf="showSecondTable" danaTable id="table2"><thead><tr><th>Other</th></tr></thead><tbody></tbody></table>
     <button id="drawer-opener" type="button" (click)="drawer.toggle()">Open navigation</button>

@@ -98,10 +98,24 @@ try {
   });
   await page.locator('#direct input').press('Escape');
 
+  // Document/window listeners exist only while a filter popover is open.
+  const cdp = await page.context().newCDPSession(page);
+  const listenerTypes = async expression => {
+    const { result } = await cdp.send('Runtime.evaluate', { expression });
+    const { listeners } = await cdp.send('DOMDebugger.getEventListeners', { objectId: result.objectId });
+    return listeners.map(listener => listener.type);
+  };
+  const popoverListeners = async () => {
+    const types = [...await listenerTypes('document'), ...await listenerTypes('window')];
+    return types.filter(type => ['keydown', 'scroll', 'resize'].includes(type)).length;
+  };
+  const listenersWhileClosed = await popoverListeners();
+
   // Use the generated filter to filter real rows, then close with Escape and restore focus.
   assert.equal(await page.locator('.dana-table-filter-popover').count(), 2);
   const trigger = page.locator('#table .dana-table-filter-trigger').first();
   await trigger.click();
+  assert.equal(await popoverListeners(), listenersWhileClosed + 3, 'an open filter listens for Escape, scroll and resize');
   const popover = page.locator('.dana-table-filter-popover:visible');
   assert.equal(await popover.evaluate(el => getComputedStyle(el).position), 'fixed');
   const search = popover.locator('input');
@@ -111,6 +125,7 @@ try {
   await search.press('Escape');
   assert.equal(await popover.count(), 0);
   assert.equal(await trigger.evaluate(el => el === document.activeElement), true);
+  assert.equal(await popoverListeners(), listenersWhileClosed, 'closing the filter removes its document/window listeners');
   assert.equal(await page.locator('#table th').first().getAttribute('role'), null, 'native column-header semantics retained');
   // Application controls in a header retain their click/keyboard behavior without sorting.
   await page.locator('#header-action').click();
@@ -119,6 +134,30 @@ try {
   assert.equal(await page.locator('#table th').first().getAttribute('aria-sort'), 'none');
   await page.locator('#table th').last().click();
   assert.equal(await page.locator('#table th').last().getAttribute('aria-sort'), 'ascending');
+
+  // Sortable headers render a real button with the header text; the header keeps its own name.
+  const firstRowName = () => page.evaluate(() => document.querySelector('#table tbody tr td').firstChild.textContent.trim());
+  const loadHeader = page.locator('#table th').last();
+  assert.equal(await loadHeader.getAttribute('aria-label'), null);
+  assert.equal(await loadHeader.getAttribute('tabindex'), null);
+  const loadSort = page.getByRole('button', { name: 'Load', exact: true });
+  assert.equal(await loadSort.evaluate(el => el.matches('th > button.dana-table-sort-button[type="button"]')), true);
+  assert.equal(await page.locator('#table th').first().locator('.dana-table-sort-button #header-action').count(), 0,
+    'application header controls are never nested in the sort button');
+  await loadSort.focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await loadHeader.getAttribute('aria-sort'), 'descending');
+  assert.equal(await firstRowName(), 'Beta');
+  await page.keyboard.press('Space');
+  assert.equal(await loadHeader.getAttribute('aria-sort'), 'ascending');
+  assert.equal(await firstRowName(), 'Alpha');
+  // A live body update keeps the existing header controls and re-sorts after its short pause.
+  await page.evaluate(() => { window.sortButtonBefore = document.querySelector('#table th:last-child .dana-table-sort-button'); });
+  await page.evaluate(() => { window.fixture.instance.loads = [0, 1]; window.fixture.changeDetectorRef.detectChanges(); });
+  await page.waitForFunction(() => document.querySelector('#table tbody tr td').firstChild.textContent.trim() === 'Beta');
+  assert.equal(await page.evaluate(() => window.sortButtonBefore === document.querySelector('#table th:last-child .dana-table-sort-button')), true);
+  await page.evaluate(() => { window.fixture.instance.loads = [2, 1]; window.fixture.changeDetectorRef.detectChanges(); });
+  await page.waitForFunction(() => document.querySelector('#table tbody tr td').firstChild.textContent.trim() === 'Alpha');
 
   // Reapplying an established order on a live cell update preserves a row control's focus.
   await page.locator('#row-action').focus();
@@ -167,6 +206,7 @@ try {
   // Every header popup must be removed, whether or not one is open at destruction.
   await page.evaluate(() => { window.fixture.instance.showTable = false; window.fixture.changeDetectorRef.detectChanges(); });
   assert.equal(await page.locator('.dana-table-filter-popover').count(), 0);
+  assert.equal(await popoverListeners(), listenersWhileClosed, 'tables with closed filters add no document/window listeners');
   await page.evaluate(() => { window.fixture.instance.showTable = true; window.fixture.changeDetectorRef.detectChanges(); });
   await page.waitForFunction(() => document.querySelectorAll('.dana-table-filter-popover').length === 2);
   await page.locator('#table .dana-table-filter-trigger').first().click();

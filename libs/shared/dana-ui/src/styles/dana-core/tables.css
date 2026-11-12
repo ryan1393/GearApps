@@ -85,6 +85,35 @@ td[danaTableEmpty] {
   outline: 1px solid var(--dana-focus-border);
   outline-offset: -2px;
 }
+/* Sortable header text sits in a real button that keeps the header's typography. */
+.dana-table-sort-button {
+  display: inline;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+.dana-table-sort-button:focus-visible {
+  outline: 2px solid var(--dana-focus-color, var(--dana-primary));
+  outline-offset: 2px;
+}
+/* Used only when a header's text belongs to application controls. */
+.dana-table-sort-button-empty {
+  width: 1.5rem;
+  height: 1.5rem;
+  vertical-align: middle;
+}
 :where(.dana-table-header-tools) {
   display: inline-flex;
   align-items: center;

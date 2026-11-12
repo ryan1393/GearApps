@@ -40,3 +40,7 @@ Without the directive, use the same helper class and wire it yourself:
 ```
 
 Keep the reason short and actionable. A disabled button is skipped by the Tab key, so put anything essential in visible text, not only in the description.
+
+## Sortable tables
+
+`danaTable` moves each sortable header's own text into a real `<button type="button" class="dana-table-sort-button">` and keeps `aria-sort` on the `<th>`; it does not rename the header or make the cell itself focusable. Controls the application puts in a header stay outside that button. Header controls are rebuilt only when the header row changes; body edits are coalesced for 50 ms before rows are re-sorted and re-filtered. Document and window listeners exist only while a filter popover is open.
