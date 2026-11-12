@@ -40,7 +40,10 @@
         </button>
         <p *ngIf="filteredSources.length === 0">No eligible DSF sources match this department and search.</p>
       </div>
-      <ng-template #sourceWaiting><p role="status">Waiting for the DSF source list. It arrives with the next successful DSF read; then choose Refresh Status.</p></ng-template>
+      <ng-template #sourceWaiting>
+        <p *ngIf="sourceListProblem as problem; else sourceListPending" role="alert">{{ problem }}</p>
+        <ng-template #sourceListPending><p role="status">Waiting for the DSF source list. It arrives with the next successful DSF read; then choose Refresh Status.</p></ng-template>
+      </ng-template>
 
       <p *ngIf="selectedSource as option"><strong>Selected:</strong> {{ option.whiteboard_name }} · {{ option.line_name }}</p>
       <div class="gear-admin-actions">

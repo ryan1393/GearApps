@@ -1,4 +1,4 @@
-import { DSF_PRIVILEGED_ACK, dsfAccountPolicy, readDsfConfig } from './dsf-count.service';
+import { DSF_PRIVILEGED_ACK, dsfAccountPolicy, dsfFailureCode, readDsfConfig } from './dsf-count.service';
 import { DsfRefusal } from './dsf-core';
 
 const base = {
@@ -55,5 +55,36 @@ describe('DSF connection settings', () => {
     const whiteboardAcknowledged = readDsfConfig({ ...whiteboardEnv, DSF_PRIVILEGED_READER_ACK: DSF_PRIVILEGED_ACK });
     expect(whiteboardAcknowledged.valid).toBe(true);
     expect(dsfAccountPolicy(whiteboardAcknowledged, whiteboard, privileged)).toBe('USER_APPROVED_PRIVILEGED_ACCOUNT_APP_READ_ONLY');
+  });
+
+  it('names the setting that keeps an enabled reader off, never its value', () => {
+    const problem = (changes: NodeJS.ProcessEnv) => readDsfConfig({ ...base, ...changes }).problem;
+    expect(readDsfConfig(base).problem).toBeUndefined();
+    expect(readDsfConfig({}).problem).toBeUndefined();
+    expect(problem({ DSF_DB_HOST: '' })).toContain('DSF_DB_HOST');
+    expect(problem({ DSF_DB_NAME: ' ' })).toContain('DSF_DB_NAME');
+    expect(problem({ DSF_DB_USER: '' })).toContain('DSF_DB_USER');
+    expect(problem({ DSF_DB_PASSWORD: '' })).toContain('DSF_DB_PASSWORD');
+    expect(problem({ DSF_DB_PORT: 'abc' })).toContain('DSF_DB_PORT');
+    expect(problem({ DSF_DB_SSL_MODE: 'prefer' })).toContain('DSF_DB_SSL_MODE');
+    expect(problem({ DSF_COUNT_INTERVAL_SECONDS: '5' })).toContain('DSF_COUNT_INTERVAL_SECONDS');
+    expect(problem({ DSF_COUNT_MACHINES: '516,516' })).toContain('DSF_COUNT_MACHINES');
+    expect(problem({ DSF_PRIVILEGED_READER_ACK: 'yes' })).toContain('DSF_PRIVILEGED_READER_ACK');
+    expect(problem({ DSF_DB_HOST: 'dana-postgres', DSF_DB_NAME: 'MeshForge' })).toContain('MeshForge database');
+    expect(problem({ DSF_DB_PASSWORD_FILE: '/no/such/dsf-password' })).toContain('DSF_DB_PASSWORD_FILE');
+    const missingFile = readDsfConfig({ ...base, DSF_DB_PASSWORD: '', DSF_DB_PASSWORD_FILE: '/no/such/dsf-password' });
+    expect(missingFile).toMatchObject({ valid: false, problem: 'DSF_DB_PASSWORD_FILE could not be read by the API process.' });
+    expect(problem({ DSF_DB_SSL_MODE: 'verify-full', DSF_DB_SSL_CA_PEM: 'not a certificate' })).toContain('DSF_DB_SSL_CA_PEM');
+    expect(problem({ DSF_DB_PASSWORD: 'hunter2-secret', DSF_DB_PORT: 'x' })).not.toContain('hunter2');
+  });
+
+  it('gives a short code for connection failures, including those pg reports without one', () => {
+    expect(dsfFailureCode(Object.assign(new Error('connect ECONNREFUSED 10.16.80.10:5432'), { code: 'ECONNREFUSED' }))).toBe('ECONNREFUSED');
+    expect(dsfFailureCode(Object.assign(new Error('password authentication failed'), { code: '28P01' }))).toBe('28P01');
+    expect(dsfFailureCode(new Error('The server does not support SSL connections'))).toBe('SSL_NOT_SUPPORTED');
+    expect(dsfFailureCode(new Error('timeout expired'))).toBe('CONNECT_TIMEOUT');
+    expect(dsfFailureCode(new Error('Connection terminated unexpectedly'))).toBe('CONNECTION_TERMINATED');
+    expect(dsfFailureCode(Object.assign(new Error('x'), { code: 'not a safe code; DROP' }))).toBeNull();
+    expect(dsfFailureCode(null)).toBeNull();
   });
 });
