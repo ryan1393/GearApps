@@ -26,7 +26,8 @@ class ScriptedScanner(threading.Thread):
         self.port = self.server.getsockname()[1]
 
     def run(self):
-        conn, _ = self.server.accept()
+        with self.server:
+            conn, _ = self.server.accept()
         with conn:
             buffer = b""
             for reply in self.replies:
@@ -56,12 +57,33 @@ class ScannerTests(unittest.TestCase):
         self.assertEqual(state, ScannerState("D123456789", None))
         self.assertEqual(fake.commands, ["INCHK,1", "AMON", "LON01"])
 
-    def test_empty_input_moves_the_scanned_serial_to_the_queue(self):
-        fake = ScriptedScanner([[b"OK,INCHK,OFF\r"]])
+    def test_input_1_triggers_once_and_queues_the_serial_on_release(self):
+        serial = "D123456789"
+        fake = ScriptedScanner([
+            [b"OK,INCHK,OFF\r"], [b"OK,AMON\r"],
+            [b"OK,INCHK,ON\r"], [b"OK,AMON\r"], [b"OK,LON01\r", f"{serial}\r".encode("ascii")],
+            [b"OK,INCHK,ON\r"], [b"OK,AMOFF\r"],
+            [b"OK,INCHK,OFF\r"],
+        ])
         fake.start()
         scanner = Scanner("127.0.0.1", fake.port, 2)
-        self.assertEqual(scanner.read(ScannerState("D123456789", None)), ScannerState(None, "D123456789"))
-        scanner.close()
+        self.addCleanup(scanner.close)
+
+        idle = scanner.read(ScannerState(None, None))
+        scanned = scanner.read(idle)
+        held = scanner.read(scanned)
+        released = scanner.read(held)
+
+        self.assertEqual(idle, ScannerState(None, None))
+        self.assertEqual(scanned, ScannerState(serial, None))
+        self.assertEqual(held, scanned)
+        self.assertEqual(released, ScannerState(None, serial))
+        self.assertEqual(fake.commands, [
+            "INCHK,1", "AMON",
+            "INCHK,1", "AMON", "LON01",
+            "INCHK,1", "AMOFF",
+            "INCHK,1",
+        ])
 
     def test_timeout_drops_the_connection_so_the_next_poll_reconnects(self):
         fake = ScriptedScanner([[]])  # never answers

@@ -194,6 +194,7 @@ export const validationSchema = Joi.object({
   SCANNER_DEFAULT_HOST: Joi.string().allow('').optional(),
   SCANNER_ALLOW_INSECURE_TLS: Joi.boolean().default(true),
   SCANNER_TIMEOUT_MS: Joi.number().integer().min(1).default(4000),
+  LAPPER_READ_SCANNER_PORT: Joi.number().port().min(1).empty('').default(9004),
   SCANNER_FTP_HOST: Joi.string().allow('').optional(),
   SCANNER_FTP_USER: Joi.string().allow('').optional(),
   SCANNER_FTP_PASSWORD: Joi.string().allow('').optional(),
