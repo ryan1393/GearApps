@@ -59,6 +59,7 @@ export class AppNavComponent {
       'BLADE_TRACKING',
       user.role,
       user.departmentCode,
+      user.permissions,
     );
   }
 

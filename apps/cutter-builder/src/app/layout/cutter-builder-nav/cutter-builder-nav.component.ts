@@ -47,6 +47,7 @@ export class CutterBuilderNavComponent {
       'CUTTER_BUILDER',
       user.role,
       user.departmentCode,
+      user.permissions,
     );
   }
 

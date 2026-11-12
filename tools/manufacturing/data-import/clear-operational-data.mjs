@@ -54,6 +54,7 @@ export const EMPTY = [
 /** Tables that must keep every row. Checked before and after, inside the transaction. */
 export const KEEP = [
   'users', 'departments',
+  'meshforge_roles', 'meshforge_user_roles', 'meshforge_badges', 'meshforge_access_audit',
   'models', 'parts', 'part_summaries', 'part_types', 'cutter_blade_requirements', 'cutter_summary_body_rules',
   'part_summary_part_type_blades',
   'cutter_body_definitions', 'cutter_bodies', 'roll_masters', 'gearsets', 'machines',

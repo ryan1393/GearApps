@@ -62,6 +62,15 @@ export class AuthSessionService {
     );
   }
 
+  loginBadge(uid: string): Observable<ITokenResponse> {
+    return this.http.post<ITokenResponse>('/api/v1/auth/badge/login', { uid }).pipe(
+      tap(({ accessToken, refreshToken }) => {
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+      }),
+    );
+  }
+
   logout(): void {
     this.accessToken = null;
     this.refreshToken = null;

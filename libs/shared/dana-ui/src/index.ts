@@ -48,3 +48,6 @@ export { DanaStackDirective } from './lib/components/layout/dana-stack.directive
 
 export { DanaComboboxComponent } from './lib/components/forms/dana-combobox.component';
 export type { DanaComboboxColumn } from './lib/components/forms/dana-combobox.component';
+export { DanaThemeService, DanaThemeToggleComponent } from './lib/components/actions/dana-theme-toggle.component';
+export type { DanaTheme } from './lib/components/actions/dana-theme-toggle.component';
+export { DanaHelpComponent } from './lib/components/feedback/dana-help.component';

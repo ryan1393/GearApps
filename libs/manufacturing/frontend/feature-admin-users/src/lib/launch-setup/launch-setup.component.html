@@ -2,7 +2,7 @@
   <div class="gear-panel launch-panel launch-lead">
     <div>
       <h2 id="launch-title">Launch Setup</h2>
-      <p class="gear-muted">Getting the floor into the system for the first day: what still has to be set up, barcode tags in bulk, and the trays that are already ground or coated.</p>
+      <p class="gear-muted">Set up floor records, print barcode tags, and record existing inventory.</p>
     </div>
     <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : '↻ Refresh' }}</button>
   </div>
@@ -141,6 +141,8 @@
       </table>
     </div>
   </form>
+
+  <gear-bulk-opening [summaries]="summaries" [partTypes]="partTypes" (recorded)="refresh()" />
 
   <!-- 4. What is recorded -->
   <div class="gear-panel launch-panel" *ngIf="status as current">

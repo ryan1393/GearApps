@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { DanaThemeToggleComponent } from '@dana/ui';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
@@ -6,7 +7,7 @@ import { CutterBuilderNavComponent } from './layout/cutter-builder-nav/cutter-bu
 
 @Component({
   standalone: true,
-  imports: [RouterOutlet, CutterBuilderNavComponent, GearToastHostComponent],
+  imports: [DanaThemeToggleComponent, RouterOutlet, CutterBuilderNavComponent, GearToastHostComponent],
   selector: 'gear-cutter-builder-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],

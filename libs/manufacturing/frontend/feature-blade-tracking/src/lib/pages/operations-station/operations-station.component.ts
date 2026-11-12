@@ -1,3 +1,5 @@
+import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
+import { canUseMeshForgeAction } from '@meshforge/manufacturing/shared/util-constants';
 import { Component, ElementRef, ViewChild, ViewEncapsulation, computed, effect, inject, signal, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -56,14 +58,26 @@ export class OperationsStationComponent {
   @ViewChild(ReceiveContainerComponent) private receiveContainer?: StationOperation;
   @ViewChild(InternalMovementComponent) private internalMovement?: StationOperation;
 
+  private readonly session = inject(AuthSessionService);
+  private readonly identity = toSignal(this.session.authState$, { initialValue: this.session.currentUser });
   readonly operations = BLADE_OPERATIONS;
+  allowed(key: BladeOperationKey): boolean {
+    const actions: Record<BladeOperationKey, readonly string[]> = {
+      intake: ['bladeTrays:createBladeBatch'], grinding: ['trays:startGrinding', 'trays:completeGrinding'],
+      'load-container': ['containerTrays:createContainerTray'],
+      'coater-shipments': ['create', 'update', 'add', 'remove', 'review', 'print', 'prepareRpa', 'emailRpa', 'dispatch', 'labels', 'cancel'].map(action => 'coater-shipments:' + action),
+      'receive-container': ['containerTrays:unloadTrayFromContainer'], 'internal-movement': ['locationTrays:createLocationTray'],
+    };
+    return actions[key].some(action => canUseMeshForgeAction(this.identity(), action));
+  }
   private readonly requested = toSignal(this.route.queryParamMap.pipe(map((params) => params.get('op'))), {
     initialValue: this.route.snapshot.queryParamMap.get('op'),
   });
 
   readonly active = computed<BladeOperationKey>(() => {
     const requested = this.requested();
-    return isBladeOperation(requested) ? requested : (lastOperation() ?? 'intake');
+    const preferred = isBladeOperation(requested) ? requested : (lastOperation() ?? 'intake');
+    return this.allowed(preferred) ? preferred : (BLADE_OPERATIONS.find(row => this.allowed(row.key))?.key ?? 'intake');
   });
   readonly activeOperation = computed(() => BLADE_OPERATIONS.find((operation) => operation.key === this.active()) ?? BLADE_OPERATIONS[0]);
 
@@ -71,12 +85,13 @@ export class OperationsStationComponent {
   readonly visited = signal<ReadonlySet<BladeOperationKey>>(new Set());
   /** Tabs this workstation has chosen not to show. The open operation is always shown. */
   readonly hidden = signal<ReadonlySet<BladeOperationKey>>(storedHiddenTabs());
-  readonly shownOperations = computed(() => BLADE_OPERATIONS.filter((operation) => !this.hidden().has(operation.key) || operation.key === this.active()));
+  readonly shownOperations = computed(() => BLADE_OPERATIONS.filter((operation) => this.allowed(operation.key) && (!this.hidden().has(operation.key) || operation.key === this.active())));
   settingsOpen = false;
 
   constructor() {
     effect(() => {
       const key = this.active();
+      if (!this.allowed(key)) return;
       remember(key);
       untracked(() => this.open(key));
     });

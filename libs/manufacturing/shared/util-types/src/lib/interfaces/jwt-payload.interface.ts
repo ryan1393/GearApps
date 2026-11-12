@@ -10,6 +10,9 @@ export interface IJwtPayload {
 
   role: RoleType;
 
+  /** Null/absent preserves legacy access; an empty list denies custom-role actions. */
+  permissions?: string[] | null;
+
   departmentId: string | null;
 
   departmentCode: string | null;

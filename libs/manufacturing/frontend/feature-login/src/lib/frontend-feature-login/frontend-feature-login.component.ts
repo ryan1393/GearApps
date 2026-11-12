@@ -39,6 +39,7 @@ export class FrontendFeatureLoginComponent {
     ['localhost', '127.0.0.1'].includes(window.location.hostname);
   readonly localTestEmail = 'test@meshforge.local';
   readonly localAdminEmail = 'admin@meshforge.local';
+  badgeUid = '';
   loginError = '';
   submitting = false;
 
@@ -101,6 +102,27 @@ export class FrontendFeatureLoginComponent {
       this.loginForm.markAllAsTouched();
       this.loginError = 'Enter a valid email address and password.';
     }
+  }
+
+  loginBadge(): void {
+    if (this.submitting) return;
+    const uid = this.badgeUid;
+    this.badgeUid = '';
+    this.loginError = '';
+    if (!/^[!-~]{1,128}$/.test(uid)) { this.loginError = 'Scan a card UID, then press Enter.'; return; }
+    this.submitting = true;
+    this.session.loginBadge(uid).subscribe({
+      next: () => {
+        this.submitting = false;
+        const redirect = this.route.snapshot.queryParamMap.get(REDIRECT_URL_QUERY_PARAM);
+        void this.router.navigateByUrl(redirect || '/');
+      },
+      error: (error: HttpErrorResponse) => {
+        this.submitting = false;
+        this.loginError = typeof error.error?.message === 'string' ? error.error.message : 'Badge sign-in failed. Use your email and password.';
+        this.cdr.markForCheck();
+      },
+    });
   }
 
   useLocalAdminLogin(): void {

@@ -1,3 +1,6 @@
+import { BadgeAccessService, BadgeLoginController, BadgeManagementController } from './badge-access';
+import { AccessManagementController, AccessManagementService, CustomRoleGuard } from './access-management';
+import { DiscoveryModule } from '@nestjs/core';
 import { AdminMasterDataController } from './admin-master-data.controller';
 import { AdminMasterDataService } from './admin-master-data.service';
 import { EnvironmentSettingsController } from './environment-settings.controller';
@@ -58,8 +61,8 @@ const featureModules = [
 ];
 
 @Module({
-  controllers: [CycleTestsController, AdminMasterDataController, EnvironmentSettingsController, LapperReadSettingsController],
-  imports: [
+  controllers: [BadgeLoginController, BadgeManagementController, AccessManagementController, CycleTestsController, AdminMasterDataController, EnvironmentSettingsController, LapperReadSettingsController],
+  imports: [DiscoveryModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
@@ -72,13 +75,14 @@ const featureModules = [
     ...featureModules,
     PostgresLapperModule,
   ],
-  providers: [
+  providers: [BadgeAccessService, AccessManagementService,
     CycleTestsService,
     ArgonautTestService,
     ControllerValuesService,
     AdminMasterDataService,
     EnvironmentSettingsService,
     { provide: APP_GUARD, useClass: JwtAccessTokenGuard },
+    { provide: APP_GUARD, useClass: CustomRoleGuard },
     { provide: APP_FILTER, useClass: EntityNotFoundFilter },
     { provide: APP_FILTER, useClass: QueryFailedFilter },
   ],

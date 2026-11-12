@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { DanaThemeToggleComponent } from '@dana/ui';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
@@ -6,7 +7,7 @@ import { GreenshedNavComponent } from './layout/greenshed-nav/greenshed-nav.comp
 
 @Component({
   standalone: true,
-  imports: [RouterOutlet, GreenshedNavComponent, GearToastHostComponent],
+  imports: [DanaThemeToggleComponent, RouterOutlet, GreenshedNavComponent, GearToastHostComponent],
   selector: 'gear-greenshed-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],

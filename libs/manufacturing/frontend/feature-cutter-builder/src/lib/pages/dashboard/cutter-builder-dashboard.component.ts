@@ -47,6 +47,7 @@ export class CutterBuilderDashboardComponent implements OnInit {
       'CUTTER_BUILDER',
       user?.role,
       user?.departmentCode,
+      user?.permissions,
     );
   }
 
