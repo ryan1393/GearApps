@@ -8,6 +8,7 @@ database/truck-log/migrations/
   0004_packing_slip_watcher_routes.sql   SAP packing-slip watcher routes 1-8 (edited in Administration > Printing) and their audit history
   0005_print_workflow_recovery.sql   driver print workflow recovery
   0006_station_roles.sql   station types become roles: adds DOCK (CK65 dock handheld) and MANAGEMENT (view only)
+  0007_station_rename.sql   stations can be renamed; the station audit log records RENAMED
 ```
 
 `tools/truck-log/migrate.mjs` runs at every server start (from `docker/truck-log/server-entrypoint.sh`), before the API:

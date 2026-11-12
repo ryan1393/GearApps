@@ -171,6 +171,11 @@ export class TruckLogStationAccess {
     return this.http.post<StationPairingResult>(STATIONS, { name: trimmed, kind }).pipe(timeout(20000));
   }
 
+  renameStation(id: string, name: string): Observable<StationRecord> {
+    const trimmed = name.trim().slice(0, STATION_NAME_MAX);
+    return this.http.patch<StationRecord>(`${STATIONS}/${encodeURIComponent(id)}`, { name: trimmed }).pipe(timeout(20000));
+  }
+
   newPairingCode(id: string): Observable<StationPairingResult> {
     return this.http.post<StationPairingResult>(`${STATIONS}/${encodeURIComponent(id)}/pairing-code`, {}).pipe(timeout(20000));
   }

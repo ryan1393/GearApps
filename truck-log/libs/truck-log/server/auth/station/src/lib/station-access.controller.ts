@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Header, HttpCode, Param, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, Header, HttpCode, Param, Post, Req, Res, Patch } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { TruckLogAdminService } from '@truck-log/server/auth/admin';
 import type { StationPairingResult, StationRecord, StationSession } from '@truck-log/shared/contracts';
@@ -79,6 +79,13 @@ export class StationsAdminController {
   async create(@Req() req: Request, @Body() body: unknown): Promise<StationPairingResult> {
     const actor = await this.actor(req, 'create');
     return this.stations.safe(() => this.stations.create(body, actor));
+  }
+
+  @Patch(':id')
+  @Header('Cache-Control', 'no-store')
+  async rename(@Req() req: Request, @Param('id') id: string, @Body() body: unknown): Promise<StationRecord> {
+    const actor = await this.actor(req, 'rename');
+    return this.stations.safe(() => this.stations.rename(id, body, actor));
   }
 
   @Post(':id/pairing-code')

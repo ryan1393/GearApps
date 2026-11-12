@@ -49,20 +49,20 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
     <span class="dana-muted dana-nowrap" aria-hidden="true">{{integrationUpdated}}</span>
     </section>
 
-    <section class="dana-panel" aria-labelledby="expedite-recovery-title" *ngIf="connectionRecoveryNeeded || recoveryBusy || recoveryMessage || recoveryError">
-      <div class="dana-panel-header"><div><h2 id="expedite-recovery-title">Recover Expedite connection</h2><small>Keep the previous verified batch while reconnecting</small></div></div>
-      <div class="dana-panel-body tl-stack">
-        <p>{{connectionRecoveryDetail}}</p>
-        <p class="dana-alert dana-alert-warning" *ngIf="recoveryLoginRequired">Open Settings &amp; Login to check the saved Expedite login. If RXO requests MFA, approval or an interactive sign-in, complete it with your administrator before recovering again.</p>
-        <p class="dana-alert dana-alert-warning" *ngIf="recoveryWait as wait"><b>{{wait.title}}</b> {{wait.detail}} <time [attr.datetime]="wait.until">{{wait.resumeLabel}}</time> <span aria-live="off">({{wait.remaining}} remaining)</span>.</p>
-        <p class="dana-alert dana-alert-danger" role="alert" *ngIf="recoveryError">{{recoveryError}}</p>
-        <p class="dana-alert dana-alert-success" role="status" *ngIf="recoveryMessage">{{recoveryMessage}}</p>
+    <!-- Recovery notice: one compact strip, shown only while recovery can help (see showRecoveryPanel). -->
+    <section class="dana-alert dana-alert-warning tl-rxo-recovery" aria-labelledby="expedite-recovery-title" *ngIf="showRecoveryPanel">
+      <div class="tl-rxo-recovery-row">
+        <p><b id="expedite-recovery-title">{{recoveryBusy || recoveryMessage ? 'RXO Expedite connection recovery.' : 'RXO Expedite connection needs recovery.'}}</b> {{connectionRecoveryDetail}}</p>
         <div class="dana-actions" *ngIf="adminAuth.canWrite(); else recoveryAdminSignIn">
-          <button class="dana-btn dana-btn-primary" type="button" [disabled]="recoveryBusy || scanRunning || scan.active || scan.requesting || !recoveryAvailable" [attr.aria-busy]="recoveryBusy" (click)="recoverConnection()">{{recoveryBusy ? 'Requesting recovery…' : 'Recover connection'}}</button>
-          <button class="dana-btn" type="button" [disabled]="recoveryBusy" (click)="openRecoverySettings()">Settings &amp; Login</button>
+          <button class="dana-btn dana-btn-sm dana-btn-primary" type="button" [disabled]="recoveryBusy || scanRunning || scan.active || scan.requesting || !recoveryAvailable" [attr.aria-busy]="recoveryBusy" (click)="recoverConnection()">{{recoveryBusy ? 'Requesting recovery…' : 'Recover connection'}}</button>
+          <button class="dana-btn dana-btn-sm" type="button" [disabled]="recoveryBusy" (click)="openRecoverySettings()">Settings &amp; Login</button>
         </div>
-        <ng-template #recoveryAdminSignIn><a class="dana-btn dana-btn-primary" routerLink="/admin/login" [queryParams]="{ returnTo: '/rxo-expedite' }">Sign in as administrator to recover</a></ng-template>
+        <ng-template #recoveryAdminSignIn><a class="dana-btn dana-btn-sm dana-btn-primary" routerLink="/admin/login" [queryParams]="{ returnTo: '/rxo-expedite' }">Sign in to recover</a></ng-template>
       </div>
+      <p class="tl-rxo-recovery-note" *ngIf="recoveryLoginRequired">Open Settings &amp; Login to check the saved Expedite login. If RXO requests MFA, approval or an interactive sign-in, complete it with your administrator before recovering again.</p>
+      <p class="tl-rxo-recovery-note" *ngIf="recoveryWait as wait"><b>{{wait.title}}</b> {{wait.detail}} <time [attr.datetime]="wait.until">{{wait.resumeLabel}}</time> <span aria-live="off">({{wait.remaining}} remaining)</span>.</p>
+      <p class="tl-rxo-recovery-note dana-field-error" role="alert" *ngIf="recoveryError">{{recoveryError}}</p>
+      <p class="tl-rxo-recovery-note" role="status" *ngIf="recoveryMessage">{{recoveryMessage}}</p>
     </section>
 
     <div class="dana-alert dana-alert-danger" *ngIf="pageError">
@@ -228,6 +228,17 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
     const reason = this.status?.recovery?.reason;
     return !!this.status && ((!!reason && reason !== 'READY') || this.recoveryLoginRequired || this.recoveryCooldownActive || this.authenticationNeedsReview
       || /STOPPED|STOPPING/.test(this.schedulerState));
+  }
+  /**
+   * The recovery strip appears only while it can help: a recovery is running or failed, the login
+   * needs attention, or the integration is not healthy and a recovery is needed. Once Expedite data
+   * is current again it disappears, including when the server still reports a recovery reason
+   * (for example a helper that cannot verify the worker) while everything else works.
+   */
+  get showRecoveryPanel(): boolean {
+    if (this.recoveryBusy || this.recoveryError || this.recoveryLoginRequired) return true;
+    if (this.integrationState === 'healthy') return false;
+    return this.connectionRecoveryNeeded || !!this.recoveryMessage;
   }
   get recoveryLoginRequired() {
     const info = this.status?.recovery;

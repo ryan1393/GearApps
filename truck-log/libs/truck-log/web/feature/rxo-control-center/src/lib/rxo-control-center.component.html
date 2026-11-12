@@ -24,20 +24,20 @@
     <span class="dana-muted dana-nowrap" aria-hidden="true">{{view.integrationUpdated}}</span>
   </section>
 
-  <section class="dana-panel" aria-labelledby="rxo-recovery-title" *ngIf="connectionRecoveryNeeded || recoveryBusy || recoveryMessage || recoveryError">
-    <div class="dana-panel-header"><div><h2 id="rxo-recovery-title">Recover RXO connection</h2><small>Keep the previous verified data while reconnecting</small></div></div>
-    <div class="dana-panel-body tl-stack">
-      <p>{{connectionRecoveryDetail}}</p>
-      <p class="dana-alert dana-alert-warning" *ngIf="recoveryLoginRequired">Open Settings &amp; Login to check the saved RXO login. If RXO requests MFA, approval or an interactive sign-in, complete it with your administrator before recovering again.</p>
-      <p class="dana-alert dana-alert-warning" *ngIf="recoveryWait as wait"><b>{{wait.title}}</b> {{wait.detail}} <time [attr.datetime]="wait.until">{{wait.resumeLabel}}</time> <span aria-live="off">({{wait.remaining}} remaining)</span>.</p>
-      <p class="dana-alert dana-alert-danger" role="alert" *ngIf="recoveryError">{{recoveryError}}</p>
-      <p class="dana-alert dana-alert-success" role="status" *ngIf="recoveryMessage">{{recoveryMessage}}</p>
+  <!-- Recovery notice: one compact strip, shown only while recovery can help (see showRecoveryPanel). -->
+  <section class="dana-alert dana-alert-warning tl-rxo-recovery" aria-labelledby="rxo-recovery-title" *ngIf="showRecoveryPanel">
+    <div class="tl-rxo-recovery-row">
+      <p><b id="rxo-recovery-title">{{recoveryBusy || recoveryMessage ? 'RXO connection recovery.' : 'RXO connection needs recovery.'}}</b> {{connectionRecoveryDetail}}</p>
       <div class="dana-actions" *ngIf="adminAuth.canWrite(); else recoveryAdminSignIn">
-        <button class="dana-btn dana-btn-primary" type="button" [disabled]="recoveryBusy || busy || view.scanRunning || !recoveryAvailable" [attr.aria-busy]="recoveryBusy" (click)="recoverConnection()">{{recoveryBusy ? 'Requesting recovery…' : 'Recover connection'}}</button>
-        <button class="dana-btn" type="button" [disabled]="recoveryBusy" (click)="openRecoverySettings()">Settings &amp; Login</button>
+        <button class="dana-btn dana-btn-sm dana-btn-primary" type="button" [disabled]="recoveryBusy || busy || view.scanRunning || !recoveryAvailable" [attr.aria-busy]="recoveryBusy" (click)="recoverConnection()">{{recoveryBusy ? 'Requesting recovery…' : 'Recover connection'}}</button>
+        <button class="dana-btn dana-btn-sm" type="button" [disabled]="recoveryBusy" (click)="openRecoverySettings()">Settings &amp; Login</button>
       </div>
-      <ng-template #recoveryAdminSignIn><a class="dana-btn dana-btn-primary" routerLink="/admin/login" [queryParams]="{ returnTo: '/rxo' }">Sign in as administrator to recover</a></ng-template>
+      <ng-template #recoveryAdminSignIn><a class="dana-btn dana-btn-sm dana-btn-primary" routerLink="/admin/login" [queryParams]="{ returnTo: '/rxo' }">Sign in to recover</a></ng-template>
     </div>
+    <p class="tl-rxo-recovery-note" *ngIf="recoveryLoginRequired">Open Settings &amp; Login to check the saved RXO login. If RXO requests MFA, approval or an interactive sign-in, complete it with your administrator before recovering again.</p>
+    <p class="tl-rxo-recovery-note" *ngIf="recoveryWait as wait"><b>{{wait.title}}</b> {{wait.detail}} <time [attr.datetime]="wait.until">{{wait.resumeLabel}}</time> <span aria-live="off">({{wait.remaining}} remaining)</span>.</p>
+    <p class="tl-rxo-recovery-note dana-field-error" role="alert" *ngIf="recoveryError">{{recoveryError}}</p>
+    <p class="tl-rxo-recovery-note" role="status" *ngIf="recoveryMessage">{{recoveryMessage}}</p>
   </section>
 
   <div class="dana-alert dana-alert-danger" *ngIf="control && !control.controlAvailable">

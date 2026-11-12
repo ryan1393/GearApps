@@ -98,6 +98,7 @@ export function clockTime(iso: string | null | undefined): string {
             <td><span class="dana-status-badge" [attr.data-tone]="station.status === 'ACTIVE' ? 'success' : (station.status === 'REVOKED' ? 'danger' : 'warning')">{{statusLabel(station)}}</span></td>
             <td>
               <div class="dana-table-actions">
+                <button type="button" class="dana-btn dana-btn-sm" [disabled]="busy || !auth.canWrite() || station.status === 'REVOKED'" (click)="beginEdit(station)">Edit</button>
                 <button type="button" class="dana-btn dana-btn-sm" [disabled]="busy || !auth.canWrite()" (click)="newCode(station)">New pairing code</button>
                 <button type="button" class="dana-btn dana-btn-sm dana-btn-warning" [disabled]="busy || !auth.canWrite() || station.status === 'REVOKED'" (click)="revokeTarget = station">Revoke</button>
               </div>
@@ -108,6 +109,21 @@ export function clockTime(iso: string | null | undefined): string {
     </div>
     <div class="dana-empty-state" *ngIf="!stations.length && !loading && loaded">No stations yet. Add the first guard PC, dock handheld or TV above.</div>
   </section>
+  </div>
+
+  <div class="dana-dialog-backdrop" *ngIf="editTarget as target" (click)="cancelEdit()">
+    <form class="dana-dialog" tlDialog="tl-edit-station-title" [tlDialogEscape]="!busy" (tlDialogClose)="cancelEdit()" (click)="$event.stopPropagation()" (ngSubmit)="saveEdit(target)" autocomplete="off">
+      <div class="dana-dialog-header"><h2 id="tl-edit-station-title">Edit station</h2>
+      <p>{{kindLabel(target.kind)}}. Renaming keeps its pairing: the station stays signed in.</p></div>
+      <div class="dana-dialog-body"><label class="dana-field">Name
+        <input class="dana-input" name="editStationName" [(ngModel)]="editName" [attr.maxlength]="nameMax" required autofocus>
+      </label>
+      <p class="dana-field-error" role="alert" *ngIf="editError">{{editError}}</p></div>
+      <div class="dana-dialog-actions">
+        <button type="button" class="dana-btn" [disabled]="busy" (click)="cancelEdit()">Cancel</button>
+        <button type="submit" class="dana-btn dana-btn-primary" [disabled]="busy || !editName.trim() || editName.trim() === target.name">{{busy ? 'Saving…' : 'Save'}}</button>
+      </div>
+    </form>
   </div>
 
   <div class="dana-dialog-backdrop" *ngIf="revokeTarget as target" (click)="revokeTarget = null">
@@ -133,6 +149,9 @@ export class StationsAdminComponent implements OnInit, OnDestroy {
   newKind: StationKind = StationKinds.GUARD;
   pairing: StationPairingResult | null = null;
   revokeTarget: StationRecord | null = null;
+  editTarget: StationRecord | null = null;
+  editName = '';
+  editError = '';
   busy = false;
   creating = false;
   loading = false;
@@ -200,6 +219,34 @@ export class StationsAdminComponent implements OnInit, OnDestroy {
     this.access.newPairingCode(station.id).subscribe({
       next: (result) => { this.busy = false; this.showPairing(result); },
       error: (e) => { this.busy = false; this.error = stationErrorMessage(e, 'A new pairing code was not issued.'); },
+    });
+  }
+
+  beginEdit(station: StationRecord) {
+    if (this.busy || !this.auth.canWrite() || station.status === 'REVOKED') return;
+    this.editTarget = station;
+    this.editName = station.name;
+    this.editError = '';
+  }
+
+  cancelEdit() {
+    if (this.busy) return;
+    this.editTarget = null;
+    this.editError = '';
+  }
+
+  saveEdit(station: StationRecord) {
+    const name = this.editName.trim();
+    if (this.busy || !this.auth.canWrite() || !name || name === station.name) return;
+    this.busy = true; this.editError = '';
+    this.access.renameStation(station.id, name).subscribe({
+      next: (updated) => {
+        this.busy = false; this.editTarget = null;
+        this.upsert(updated);
+        if (this.pairing?.station.id === updated.id) this.pairing = { ...this.pairing, station: updated };
+        this.toast.success(`${station.name} is now ${updated.name}.`, 'Station renamed');
+      },
+      error: (e) => { this.busy = false; this.editError = stationErrorMessage(e, 'The station was not renamed.'); },
     });
   }
 

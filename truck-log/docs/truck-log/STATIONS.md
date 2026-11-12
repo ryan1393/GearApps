@@ -34,6 +34,7 @@ The station name is recorded in visit history for check-ins, dock-complete, uplo
 
 ## Replace or remove a station
 
+- **Edit** renames the station. It stays paired and signed in; the new name shows on that browser the next time it loads Truck Log. Names must stay unique.
 - **New pairing code** signs that station out immediately and issues a fresh code. Use it when a PC is rebuilt, its browser data is cleared, or the station moves.
 - **Revoke** signs the station out for good. The name can then be reused.
 

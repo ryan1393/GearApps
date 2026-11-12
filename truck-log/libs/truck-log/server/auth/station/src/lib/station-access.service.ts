@@ -110,6 +110,27 @@ export class StationAccessService {
     }
   }
 
+  /** Rename a station. Its pairing, kind and sign-in are unchanged; a paired browser keeps working. */
+  async rename(id: string, input: unknown, actor: string): Promise<StationRecord> {
+    const body = (typeof input === 'object' && input ? input : {}) as { name?: unknown };
+    const name = stationName(body.name);
+    try {
+      return await this.db.transaction(async (q) => {
+        const rows = returnedRows<StationRow>(await q.query(
+          `UPDATE public.truck_log_stations SET name = $2 WHERE id = $1 AND revoked_at IS NULL RETURNING ${COLUMNS}`,
+          [stationId(id), name]));
+        if (rows.length !== 1) stationFail(404, 'STATION_NOT_FOUND', 'That station does not exist or was revoked.');
+        await this.event(q, rows[0].id, 'RENAMED', actor, null);
+        // Paired browsers show their station name: drop cached identities so they see the new one.
+        this.cache.clear();
+        return record(rows[0]);
+      });
+    } catch (error) {
+      if ((error as { code?: string })?.code === '23505') stationFail(409, 'STATION_NAME_TAKEN', 'A station with that name already exists.');
+      throw error;
+    }
+  }
+
   /** New pairing code; the station is signed out until it pairs again. */
   async reissue(id: string, actor: string): Promise<StationPairingResult> {
     const code = newPairingCode();

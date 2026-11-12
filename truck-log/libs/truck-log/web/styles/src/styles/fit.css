@@ -113,6 +113,10 @@ table.dana-table td { padding: 9px 12px; }
   .tl-rxo-data-body > .dana-table-shell { flex: 1 1 auto; min-height: 180px; max-height: none; overflow: auto; }
   .tl-rxo-data-body > .tl-pagination { justify-content: center; }
 
+  /* RXO pages: the data tables never shrink below a usable height (several rows). When the
+     notices and summary above leave less room than that, the page scrolls instead of squeezing
+     the table down to one row. */
+  :is(#rxo-panel-data, #rxo-expedite-panel-data).tl-fill { min-height: min(460px, 70dvh); }
   /* RXO pages: summaries stay short so the active tab gets the height. */
   /* Data tab status counts: a slim strip of "label  count" tiles above the table. */
   .dana-page .tl-rxo-status-summary { grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 8px; }
