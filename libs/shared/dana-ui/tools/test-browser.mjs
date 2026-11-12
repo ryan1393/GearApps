@@ -42,6 +42,22 @@ try {
   assert.equal(await page.locator('[danaDashboardGrid]').evaluate(el => getComputedStyle(el).display), 'grid');
   assert.equal(await page.locator('[danaDashboardPanel]').evaluate(el => getComputedStyle(el).borderTopWidth), '1px');
 
+  // With no active tab, the first tab is still a Tab stop; otherwise the active tab is the only one.
+  const tabIndexes = () => page.evaluate(() => ['#tab-a', '#tab-b'].map(id => document.querySelector(id).getAttribute('tabindex')));
+  await page.waitForFunction(() => document.querySelector('#tab-a').getAttribute('tabindex') === '0');
+  assert.deepEqual(await tabIndexes(), ['0', '-1']);
+  await page.evaluate(() => { window.fixture.instance.activeTab = 'b'; window.fixture.changeDetectorRef.detectChanges(); });
+  await page.waitForFunction(() => document.querySelector('#tab-b').getAttribute('tabindex') === '0');
+  assert.deepEqual(await tabIndexes(), ['-1', '0']);
+  await page.evaluate(() => { window.fixture.instance.activeTab = ''; window.fixture.changeDetectorRef.detectChanges(); });
+  await page.waitForFunction(() => document.querySelector('#tab-a').getAttribute('tabindex') === '0');
+  assert.deepEqual(await tabIndexes(), ['0', '-1']);
+
+  // Danger alerts interrupt; other tones are polite status messages.
+  assert.equal(await page.locator('#alert').getAttribute('role'), 'status');
+  await page.evaluate(() => { window.fixture.instance.alertTone = 'danger'; window.fixture.changeDetectorRef.detectChanges(); });
+  assert.equal(await page.locator('#alert').getAttribute('role'), 'alert');
+
   // Disabled actions are neutral and readable, and say why while they stay disabled.
   const save = page.locator('#save');
   assert.equal(await save.evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(236, 238, 241)');
@@ -283,11 +299,11 @@ try {
   await infoToast.waitFor({ state: 'detached' });
   assert.equal(await errorToast.count(), 1, 'errors stay until dismissed');
   await errorToast.locator('button').click();
-  assert.equal(await errorToast.count(), 0);
+  await errorToast.waitFor({ state: 'detached' });
   await page.evaluate(() => window.toast.error('Scan rejected'));
   await errorToast.waitFor();
   await page.evaluate(() => window.toast.dismiss(window.toast['noticesSubject'].value[0].id));
-  assert.equal(await errorToast.count(), 0);
+  await errorToast.waitFor({ state: 'detached' });
 
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.locator('[danaKpiGrid]').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 1);

@@ -8,7 +8,8 @@ import {
   DanaComboboxComponent, DanaConfirmDialogComponent, DanaTableDirective,
   DanaKpiGridDirective, DanaKpiCardDirective, DanaOperationGridDirective,
   DanaOperationCardComponent, DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaMobileNavDirective,
-  DanaButtonDirective, DanaToastHostComponent, DanaToastService,
+  DanaButtonDirective, DanaToastHostComponent, DanaToastService, DanaTabsDirective, DanaTabDirective,
+  DanaAlertDirective,
 } from '../../../../../dist/libs/shared/dana-ui/fesm2022/dana-ui.mjs';
 
 class Fixture {
@@ -30,6 +31,8 @@ class Fixture {
   headerSort = 'other';
   saveBlocked = true;
   loads = [2, 1];
+  activeTab = '';
+  alertTone = 'info';
   columns = [{ label: 'Name', value: row => row }];
   options = ['Alpha', 'Beta'];
   cancel() { this.cancelCount++; this.open = false; }
@@ -39,12 +42,15 @@ Component({
   imports: [CommonModule, FormsModule, ReactiveFormsModule, DanaComboboxComponent,
     DanaConfirmDialogComponent, DanaTableDirective, DanaKpiGridDirective,
     DanaKpiCardDirective, DanaOperationGridDirective, DanaOperationCardComponent,
-    DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaMobileNavDirective, DanaButtonDirective, DanaToastHostComponent],
+    DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaMobileNavDirective, DanaButtonDirective, DanaToastHostComponent, DanaTabsDirective,
+    DanaTabDirective, DanaAlertDirective],
   template: `
     <a class="dana-skip-link" id="skip-link" href="#fixture-main">Skip to content</a>
     <nav danaMobileNav #defaultNav="danaMobileNav"><button id="default-nav-toggle" (click)="defaultNav.toggle()">{{ defaultNav.open }}</button></nav>
     <nav danaMobileNav [desktopMinWidth]="1024" #gearNav="danaMobileNav"><button id="gear-nav-toggle" (click)="gearNav.toggle()">{{ gearNav.open }}</button></nav>
     <button id="launch" (click)="open = true">Open confirmation</button>
+    <div danaTabs id="tabs" aria-label="Views"><button danaTab type="button" id="tab-a" [active]="activeTab === 'a'">First view</button><button danaTab type="button" id="tab-b" [active]="activeTab === 'b'">Second view</button></div>
+    <div id="alert" [danaAlert]="alertTone">Alert text</div>
     <div id="save-row"><button id="save" type="button" danaButton="primary" [disabled]="saveBlocked" danaDisabledReason="Scan a tray first.">Save</button></div>
     <button id="background">Background action</button>
     <dana-confirm-dialog *ngIf="showDialog" [open]="open" title="Delete entry?" message="Confirm this action."
