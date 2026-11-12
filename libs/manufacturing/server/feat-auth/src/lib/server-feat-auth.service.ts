@@ -1,3 +1,6 @@
+import { InjectDataSource } from '@nestjs/typeorm';
+import { Optional } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomUUID } from 'node:crypto';
 
@@ -40,6 +43,7 @@ export class ServerFeatAuthService {
     private jwtService: JwtService,
     private userService: ServerFeatUserService,
     private configService: ConfigService,
+    @Optional() @InjectDataSource() private readonly source?: DataSource,
   ) {}
 
   /** Emailed password reset needs outgoing mail; without it the forgot-password form can only fail silently. */
@@ -48,7 +52,11 @@ export class ServerFeatAuthService {
   }
 
   async generateAccessToken(data: UserOrmEntity): Promise<string> {
+    const assigned = this.source ? await this.source.query(
+      `SELECT r.permissions,r.enabled FROM meshforge_user_roles u JOIN meshforge_roles r ON r.id=u.role_id WHERE u.user_id=$1`, [data.id],
+    ) : [];
     const payload = {
+      permissions: assigned.length ? (assigned[0].enabled ? assigned[0].permissions : []) : null,
       email: data.email,
       role: data.role,
       departmentId: data.departmentId,

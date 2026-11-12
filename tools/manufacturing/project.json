@@ -901,6 +901,14 @@
         "cwd": "."
       },
       "cache": false
+    },
+    "test-access-workflows": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --env-file=.env tools/manufacturing/test-access-workflows.mjs --browser",
+        "cwd": "."
+      },
+      "cache": false
     }
   }
 }

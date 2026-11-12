@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { DanaThemeToggleComponent } from '@dana/ui';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
@@ -7,7 +8,7 @@ import { AppNavComponent } from './layout/app-nav/app-nav.component';
 
 @Component({
   standalone: true,
-  imports: [RouterOutlet, AppNavComponent, GearToastHostComponent],
+  imports: [DanaThemeToggleComponent, RouterOutlet, AppNavComponent, GearToastHostComponent],
   selector: 'gear-blade-tracking-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],

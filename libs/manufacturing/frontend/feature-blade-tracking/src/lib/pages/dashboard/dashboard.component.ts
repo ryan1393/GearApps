@@ -120,6 +120,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'BLADE_TRACKING',
       user?.role,
       user?.departmentCode,
+      user?.permissions,
     );
   }
 

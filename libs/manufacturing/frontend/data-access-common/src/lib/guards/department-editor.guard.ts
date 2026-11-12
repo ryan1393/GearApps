@@ -27,7 +27,9 @@ export function departmentEditorGuard(app: MeshForgeAppKey): CanActivateFn {
       return router.createUrlTree(['/login']);
     }
 
-    return canEditMeshForgeApp(app, user.role, user.departmentCode)
+    const departmentAllowed = canEditMeshForgeApp(app, user.role, user.departmentCode);
+    const roleAllowed = canEditMeshForgeApp(app, user.role, user.departmentCode, user.permissions);
+    return departmentAllowed && roleAllowed
       ? true
       : router.createUrlTree([dashboardRoutes[app]], {
           queryParams: { viewOnly: '1' },

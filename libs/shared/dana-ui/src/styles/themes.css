@@ -1,0 +1,305 @@
+/* Shared semantic theme layer. Loaded after the legacy compatibility palette. */
+:root {
+  --dana-help-surface: var(--dana-surface);
+  --dana-theme-accent: var(--dana-primary);
+}
+.dana-theme-picker {
+  position: fixed;
+  right: 1rem;
+  bottom: 0.65rem;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--dana-border);
+  border-radius: var(--dana-radius-sm);
+  background: var(--dana-surface);
+  color: var(--dana-text);
+  font-size: 14px;
+  box-shadow: var(--dana-shadow-panel);
+}
+.dana-theme-picker select {
+  min-height: 36px;
+  background: var(--dana-surface);
+  color: var(--dana-text);
+  border: 1px solid var(--dana-border);
+  border-radius: 4px;
+}
+.dana-help {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  margin-inline: 0.25rem;
+}
+.dana-help summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--dana-border);
+  border-radius: 50%;
+  background: var(--dana-surface);
+  color: var(--dana-primary);
+  cursor: pointer;
+  font-weight: 800;
+  list-style: none;
+}
+.dana-help summary::-webkit-details-marker {
+  display: none;
+}
+.dana-help-content {
+  position: absolute;
+  z-index: 95;
+  inset-inline-end: 0;
+  width: min(28rem, 75vw);
+  padding: 1rem;
+  background: var(--dana-help-surface);
+  border: 1px solid var(--dana-border);
+  border-radius: var(--dana-radius-md);
+  color: var(--dana-text);
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: var(--dana-shadow-raised);
+}
+@media screen and (max-width: 600px) {
+  .dana-help[open] {
+    display: block;
+  }
+  .dana-help-content {
+    position: static;
+    width: 100%;
+    max-width: calc(100vw - 3rem);
+    margin-block-start: 0.5rem;
+  }
+}
+html:root[data-dana-theme='dark'] {
+  --dana-text: #e5eaf1;
+  --dana-muted: #b0bbca;
+  --dana-border: #485465;
+  --dana-page: #131a23;
+  --dana-surface: #202a37;
+  --dana-primary: #ffb27c;
+  --dana-primary-dark: #653113;
+  --dana-control-border: #627186;
+  --dana-placeholder: #a7b3c3;
+  --dana-neutral-soft: #2b3747;
+  --dana-info: #a5ceff;
+  --dana-info-soft: #223a54;
+  --dana-success: #82e0b0;
+  --dana-success-soft: #183d30;
+  --dana-warning: #ffcf7b;
+  --dana-warning-soft: #49381d;
+  --dana-danger: #ffb4ab;
+  --dana-danger-soft: #4b292c;
+  --dana-focus-border: #ffb27c;
+  --gear-heading: var(--dana-text);
+  --gear-text: var(--dana-text);
+  --gear-muted: var(--dana-muted);
+  --gear-muted-soft: var(--dana-muted);
+  --gear-page: var(--dana-page);
+  --gear-page-top: var(--dana-page);
+  --gear-page-accent: var(--dana-page);
+  --gear-surface: var(--dana-surface);
+  --gear-surface-muted: #263241;
+  --gear-surface-accent: #2b3747;
+  --gear-border: var(--dana-border);
+  --gear-border-soft: #364252;
+  --gear-border-strong: var(--dana-control-border);
+  --gear-success: var(--dana-success);
+  --gear-success-bg: var(--dana-success-soft);
+  --gear-warning: var(--dana-warning);
+  --gear-warning-bg: var(--dana-warning-soft);
+  --gear-danger: var(--dana-danger);
+  --gear-danger-bg: var(--dana-danger-soft);
+  --gear-accent: var(--dana-primary);
+  --gear-accent-soft: #49301e;
+  --gear-focus: var(--dana-primary);
+  --gear-control-bg: var(--dana-surface);
+  --gear-control-border: var(--dana-control-border);
+  --gear-table-header-bg: #293545;
+  --gear-table-header-text: var(--dana-muted);
+  --gear-table-border: var(--dana-border);
+  --gear-table-row-hover: #2d3b4d;
+  --dana-panel-header-bg: #293545;
+  --dana-panel-header-border: var(--dana-border);
+  --dana-count-bg: #293545;
+  --dana-count-border: var(--dana-border);
+  --dana-count-text: var(--dana-primary);
+  --dana-empty-bg: var(--dana-surface);
+  --dana-empty-border: var(--dana-border);
+  --dana-wall-text: var(--dana-text);
+  --dana-wall-muted: var(--dana-muted);
+  --dana-wall-border: var(--dana-border);
+}
+/* Legacy screens still have fixed light surfaces. Keep overrides scoped and semantic. */
+html:root[data-dana-theme='dark']
+  body
+  :is(.app-content-shell, .gear-page, .login-page, .dana-wall) {
+  background: var(--dana-page) !important;
+  color: var(--dana-text) !important;
+}
+html:root[data-dana-theme='dark']
+  body
+  :is(
+    .gear-panel,
+    .dana-panel,
+    .dana-card,
+    .gear-topbar,
+    .login-card,
+    .local-test-card,
+    .operation-card,
+    .kpi-card,
+    .gear-admin-record-card,
+    .gear-admin-sections,
+    .dana-combobox-popup,
+    .dana-combobox-head,
+    .dana-confirm-dialog,
+    .dana-toast,
+    .gear-toast,
+    .dana-table-filter-popover,
+    .gear-modal,
+    .gear-dialog,
+    .dana-wall-card,
+    dialog
+  ) {
+  background: var(--dana-surface) !important;
+  color: var(--dana-text) !important;
+  border-color: var(--dana-border) !important;
+}
+html:root[data-dana-theme='dark']
+  body
+  :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    .field-label,
+    .login-mobile-brand,
+    .gear-admin-record-title,
+    .gear-admin-record-value,
+    .dana-section-title,
+    .dana-summary-card strong,
+    .kpi-card strong,
+    .user-copy strong
+  ) {
+  color: var(--dana-text) !important;
+}
+html:root[data-dana-theme='dark']
+  body
+  :is(
+    .gear-muted,
+    .gear-field-help,
+    .login-card-heading p,
+    .gear-admin-record-label,
+    .gear-page-description,
+    .user-copy span,
+    .dana-page-description
+  ) {
+  color: var(--dana-muted) !important;
+}
+html:root[data-dana-theme='dark']
+  body
+  :is(
+    input,
+    select,
+    textarea,
+    .dana-combobox-input,
+    .dana-combobox-option,
+    .global-search,
+    .dana-global-search
+  ) {
+  background: var(--dana-surface) !important;
+  color: var(--dana-text) !important;
+  border-color: var(--dana-control-border) !important;
+}
+html:root[data-dana-theme='dark'] body :is(input, textarea)::placeholder {
+  color: var(--dana-placeholder) !important;
+}
+html:root[data-dana-theme='dark']
+  body
+  :is(table[danaTable], .gear-table, .dana-wall-table)
+  :is(th, td) {
+  background: var(--dana-surface) !important;
+  color: var(--dana-text) !important;
+  border-color: var(--dana-border) !important;
+}
+html:root[data-dana-theme='dark'] body :is(table[danaTable], .gear-table, .dana-wall-table) th {
+  background: var(--gear-table-header-bg) !important;
+}
+html:root[data-dana-theme='dark'] body :is(table[danaTable], .gear-table) tbody tr:hover td {
+  background: var(--gear-table-row-hover) !important;
+}
+html:root[data-dana-theme='dark']
+  body
+  :is(
+    .gear-btn-secondary,
+    .dana-btn-ghost,
+    .signout-button,
+    .gear-admin-tabs button,
+    .gear-badge,
+    .status-pill,
+    .dana-status-badge,
+    .gear-count-badge,
+    .dana-count-badge
+  ) {
+  background: var(--dana-neutral-soft) !important;
+  color: var(--dana-text) !important;
+  border-color: var(--dana-border) !important;
+}
+html:root[data-dana-theme='dark'] body :is([data-tone='success'], .gear-alert-success) {
+  color: var(--dana-success) !important;
+  background: var(--dana-success-soft) !important;
+}
+html:root[data-dana-theme='dark'] body :is([data-tone='warning'], .gear-alert-warning) {
+  color: var(--dana-warning) !important;
+  background: var(--dana-warning-soft) !important;
+}
+html:root[data-dana-theme='dark'] body :is([data-tone='danger'], .gear-alert-danger, .login-error) {
+  color: var(--dana-danger) !important;
+  background: var(--dana-danger-soft) !important;
+}
+html:root[data-dana-theme='dark'] body :is([data-tone='info'], .gear-alert-info) {
+  color: var(--dana-info) !important;
+  background: var(--dana-info-soft) !important;
+}
+@media print {
+  dana-theme-toggle {
+    display: none;
+  }
+}
+/* Keep supporting text readable at normal zoom and controls usable on shop-floor touchscreens. */
+html:root {
+  --gear-font-xs: 13px;
+  --gear-font-sm: 14px;
+  --gear-muted: #5b6573;
+  --dana-muted: #5b6573;
+}
+html:root[data-dana-theme='dark'] {
+  --gear-muted: #b0bbca;
+  --dana-muted: #b0bbca;
+}
+body :is(.gear-input, .gear-select, .gear-btn, .field-input, .login-submit) {
+  min-height: 44px;
+}
+body :is(.gear-input, .gear-select, .field-input):focus-visible {
+  outline: 2px solid var(--dana-primary);
+  outline-offset: 2px;
+}
+html:root[data-dana-theme='dark']
+  body
+  :is(
+    .gear-field,
+    .gear-page label,
+    .gear-page legend,
+    .gear-page .gear-form-label,
+    .topbar-user .user-copy span
+  ) {
+  color: var(--dana-text) !important;
+}
+html:root[data-dana-theme='dark'] body :is(.gear-btn-primary, .dana-btn-primary, .login-submit) {
+  background: var(--dana-primary) !important;
+  border-color: var(--dana-primary) !important;
+  color: var(--dana-page) !important;
+}

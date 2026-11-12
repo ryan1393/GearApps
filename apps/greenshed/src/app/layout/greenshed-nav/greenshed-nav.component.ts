@@ -47,6 +47,7 @@ export class GreenshedNavComponent {
       'GREENSHED',
       user.role,
       user.departmentCode,
+      user.permissions,
     );
   }
 

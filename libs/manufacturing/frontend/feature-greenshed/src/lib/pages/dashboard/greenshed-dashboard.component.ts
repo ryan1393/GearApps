@@ -53,6 +53,7 @@ export class GreenshedDashboardComponent implements OnInit {
       'GREENSHED',
       user?.role,
       user?.departmentCode,
+      user?.permissions,
     );
   }
 

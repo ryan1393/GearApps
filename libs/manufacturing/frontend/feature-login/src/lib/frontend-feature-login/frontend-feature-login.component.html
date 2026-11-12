@@ -93,6 +93,13 @@
         <button type="submit" class="login-submit" [disabled]="submitting" [attr.aria-busy]="submitting">{{ submitting ? 'Signing in…' : 'Sign in' }}</button>
       </form>
 
+      <form class="login-form" (ngSubmit)="loginBadge()" aria-label="Badge sign in">
+        <label class="field-label" for="badge-uid">Or scan your badge</label>
+        <input id="badge-uid" name="badgeUid" class="field-input" type="password" [(ngModel)]="badgeUid" maxlength="128" autocomplete="off" [disabled]="submitting" placeholder="Focus here and scan your card" aria-describedby="badge-help" />
+        <small id="badge-help">The reader sends the card UID followed by Enter.</small>
+        <button type="submit" class="gear-btn gear-btn-secondary" [disabled]="submitting || !badgeUid">Sign in with badge</button>
+      </form>
+
       <div class="login-footer">
         <span class="login-footer-dot"></span>
         <span>Blade Tracking · Cutter Builder · Greenshed · Lapper</span>

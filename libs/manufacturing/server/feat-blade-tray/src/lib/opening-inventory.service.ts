@@ -44,7 +44,7 @@ const NOTE = 'Opening inventory: recorded as found when the system went live';
 export class OpeningInventoryService {
   constructor(@InjectDataSource() private readonly source: DataSource) {}
 
-  async record(dto: OpeningInventoryDto, userId: Uuid) {
+  async record(dto: OpeningInventoryDto, userId: Uuid, preview = false) {
     const serial = dto.tray_serial_number.trim().toUpperCase();
     const shelfSerial = dto.shelf_serial_number.trim().toUpperCase();
     return this.source.transaction(async (manager) => {
@@ -104,6 +104,15 @@ export class OpeningInventoryService {
       const status = dto.stage === 'READY_FOR_COATING' ? BladeStatus.READY_FOR_COATING : BladeStatus.RETURNED_FROM_COATING;
       const serviceCycle = dto.service_cycle ?? 0;
       const quantity = requirement.required_blade_count;
+      if (!Number.isSafeInteger(quantity) || quantity < 1) {
+        throw new UnprocessableEntityException('The blade quantity requirement must be a positive whole number');
+      }
+      const result = {
+        tray_id: tray.id, tray_serial_number: tray.serial_number, summary_number: summary.number, part_type_code: partType.code,
+        stage_code: stage.code, stage_name: stage.name, shelf_serial_number: shelf.serial_number, blade_count: quantity,
+      };
+      // Preview uses the same checks as commit. Commit always rechecks under the tray lock.
+      if (preview) return result;
       const journal = await beginWorkflowJournal(manager, { app: 'BLADE_TRACKING', trayIds: [tray.id] }, userId);
       const bladeRepo = manager.getRepository(BladeOrmEntity);
       const assignmentRepo = manager.getRepository(BladeTrayOrmEntity);
@@ -138,10 +147,7 @@ export class OpeningInventoryService {
       await placementRepo.save(placementRepo.create({ tray_id: tray.id, location_id: shelf.id, enabled: true, createdBy: userId, updatedBy: userId }));
 
       await journal.commit(tray.serial_number, `Opening inventory: ${quantity} blades, ${stage.name}, shelf ${shelf.serial_number}`);
-      return {
-        tray_id: tray.id, tray_serial_number: tray.serial_number, summary_number: summary.number, part_type_code: partType.code,
-        stage_code: stage.code, stage_name: stage.name, shelf_serial_number: shelf.serial_number, blade_count: quantity,
-      };
+      return result;
     });
   }
 }

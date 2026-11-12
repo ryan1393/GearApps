@@ -1,3 +1,4 @@
+import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { BehaviorSubject } from 'rxjs';
@@ -9,11 +10,13 @@ describe('blade operations station', () => {
   let params: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
   let navigate: jest.Mock;
 
-  function create(op: string | null): OperationsStationComponent {
+  function create(op: string | null, permissions: string[] | null = null): OperationsStationComponent {
     params = new BehaviorSubject(convertToParamMap(op ? { op } : {}));
     navigate = jest.fn(() => Promise.resolve(true));
+    const identity = { role: 'user', permissions };
     TestBed.configureTestingModule({
       providers: [
+        { provide: AuthSessionService, useValue: { currentUser: identity, authState$: new BehaviorSubject(identity) } },
         { provide: Router, useValue: { navigate } },
         { provide: ActivatedRoute, useValue: { queryParamMap: params, snapshot: { queryParamMap: params.value } } },
       ],
@@ -59,6 +62,19 @@ describe('blade operations station', () => {
     expect(BLADE_OPERATIONS.length - station.hidden().size).toBe(1);
     const lastShown = BLADE_OPERATIONS.find(({ key }) => !station.hidden().has(key));
     expect(lastShown && station.isOnlyShownTab(lastShown.key)).toBe(true);
+  });
+
+  it('does not open or show an operation outside an assigned role, even through a saved URL', () => {
+    const station = create('grinding', ['bladeTrays:createBladeBatch']);
+    expect(station.active()).toBe('intake');
+    expect(station.shownOperations().map(row => row.key)).toEqual(['intake']);
+    expect(station.allowed('grinding')).toBe(false);
+  });
+
+  it('opens grinding for an account allowed to complete an existing grind', () => {
+    const station = create('grinding', ['trays:completeGrinding']);
+    expect(station.active()).toBe('grinding');
+    expect(station.shownOperations().map(row => row.key)).toEqual(['grinding']);
   });
 
   it('numbers the main tray flow and leaves Internal Movement outside it', () => {
