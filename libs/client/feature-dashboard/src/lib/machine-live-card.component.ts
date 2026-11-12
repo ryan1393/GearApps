@@ -1,4 +1,3 @@
-import { MachineDsfCountComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -54,7 +53,7 @@ export const LIVE_FEED_MS = 1_000;
  */
 @Component({
   selector: 'gear-machine-live-card',
-  imports: [MachineDsfCountComponent, StatusBadgeComponent, ValueFieldComponent, ScannerControlsComponent, LiveCycleTimerComponent],
+  imports: [StatusBadgeComponent, ValueFieldComponent, ScannerControlsComponent, LiveCycleTimerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <article class="dana-card" [attr.data-tone]="fanuc()?.y03_2_stack_inCycle ? 'success' : null">
@@ -72,7 +71,7 @@ export const LIVE_FEED_MS = 1_000;
           </span>
         </div>
         <div class="gear-live-status">
-          <gear-status-badge [status]="machine().status" /><gear-machine-dsf-count [machineId]="machine().id" />
+          <gear-status-badge [status]="machine().status" />
           @if (lastUpdate()) {
             <small class="gear-muted" title="Last refresh">{{ lastUpdate() }}</small>
           }

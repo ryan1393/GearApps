@@ -1,14 +1,11 @@
-import { Component, input, WritableSignal } from '@angular/core';
+import { WritableSignal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { FanucVariablesApi, GearsetsApi, Loadable, MachineCyclesApi, MachinesApi, MacroLogsApi } from '@meshforge/client/core';
-import { MachineDsfCountComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { CycleHistoryRow, LappingSummaryRow, MachineFanucVariable } from '@meshforge/shared/domain';
 import { of, Subject, throwError } from 'rxjs';
 import { LappingSummaryPageComponent } from './lapping-summary-page.component';
 
-@Component({selector:'gear-machine-dsf-count',template:''})
-class DsfCountStub { readonly machineId=input(''); }
 interface SummaryPage {
   machineId: WritableSignal<string|null>; gearsetId: WritableSignal<string|null>;
   tab: WritableSignal<string>; rows: Loadable<LappingSummaryRow[]>;
@@ -30,7 +27,7 @@ describe('Lapping Summary evidence states', () => {
       {provide:MacroLogsApi,useValue:{lappingSummary:summary,changes:()=>of([])}},
       {provide:FanucVariablesApi,useValue:{byMachine:fanuc}},
       {provide:ActivatedRoute,useValue:{queryParamMap:of(convertToParamMap({}))}},
-    ]}).overrideComponent(LappingSummaryPageComponent,{remove:{imports:[MachineDsfCountComponent]},add:{imports:[DsfCountStub]}});
+    ]});
     const fixture=TestBed.createComponent(LappingSummaryPageComponent);
     const page=fixture.componentInstance as unknown as SummaryPage;
     fixture.detectChanges();

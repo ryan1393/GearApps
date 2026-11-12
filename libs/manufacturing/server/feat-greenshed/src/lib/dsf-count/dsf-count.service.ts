@@ -1,4 +1,4 @@
-/* DSF (Digital Shop Floor) count reader for all configured physical machines.
+/* DSF (Digital Shop Floor) count reader for all configured physical machines except Lapper machines.
  *
  * The API PULLS from the DSF PostgreSQL source on a serialized poll; nothing pushes to us.
  * The source session is read-only (transaction, role policy and fixed SELECTs), and it is
@@ -14,13 +14,19 @@ import { DsfCache, DsfCountRow, DsfState, DsfRefusal, timestampUs, chooseShift,
   replacementStart, reconcileRows, safeCountRow } from './dsf-core';
 import { DSF_MAPPINGS } from './dsf-mappings';
 import { applyDsfCutterCounts, CutterAttributionResult } from './dsf-cutter-attribution';
-import { DANA_MACHINES_SQL, SOURCE_IDENTITY_SQL, ROLE_CHECK_SQL, MAPPING_SQL, SHIFTS_SQL, CYCLES_SQL, OTHER_MAPPING_ACTIVITY_SQL } from './dsf-sql';
+import { DANA_MACHINES_SQL, DANA_MACHINES_NO_LAPPER_SCHEMA_SQL, LAPPER_MACHINES_TABLE_SQL, SOURCE_IDENTITY_SQL, ROLE_CHECK_SQL, MAPPING_SQL, SHIFTS_SQL, CYCLES_SQL, OTHER_MAPPING_ACTIVITY_SQL } from './dsf-sql';
 import { grinderStateRows, collectGrinderBatches, commitGrinderBatches, GrinderBatch, GrinderStateRow } from './dsf-grinder-balance';
 import { ensureDsfCutterSchema } from './dsf-schema';
 import { findUniqueMatches, UniqueMatchResult } from './dsf-unique-matches';
 import { findRoughMatches, RoughMatchResult } from './dsf-rough-matches';
 
 type Machine = {machine_id:string;machine_number:string;department:string;machine_type:string;active:boolean};
+type QueryRunnerLike = {query(text:string,values?:unknown[]):Promise<any[]>};
+/** The machines DSF counts cover: every MeshForge machine except Lapper machines. */
+async function readDsfMachines(runner:QueryRunnerLike):Promise<Machine[]> {
+  const lapper=(await runner.query(LAPPER_MACHINES_TABLE_SQL))[0];
+  return runner.query(lapper?.present===true?DANA_MACHINES_SQL:DANA_MACHINES_NO_LAPPER_SCHEMA_SQL);
+}
 type SourceClient = { connect():Promise<void>;query(text:string,values?:unknown[]):Promise<{rows:any[]}>;end():Promise<void>;on(event:string,fn:(e:unknown)=>void):void; };
 interface Config { enabled:boolean; valid:boolean; interval:number; machines:Set<string>; client:Record<string,unknown>; privilegedAccountAcknowledged?:boolean;
   /** DSF department names (normalised, see dsfDepartmentKey) that stand for a MeshForge department code. */
@@ -206,7 +212,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
   private readonly logger=new Logger('DsfCount');
   private lastFailure:{reason:string;code:string|null;at:string}|null=null;
   async onModuleInit():Promise<void> {
-    if (this.db.options.type === 'postgres') this.machines = await this.db.query(DANA_MACHINES_SQL);
+    if (this.db.options.type === 'postgres') this.machines = await readDsfMachines(this.db);
     if(!this.config.enabled)return;
     if(!this.config.valid) {
       // Enabled but unusable settings must be visible, not a silent "not configured".
@@ -278,7 +284,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
     if(!ref)return null;
     return {...ref,manual:false};
   }
-  private async loadOverrides(runner:{query(text:string,values?:unknown[]):Promise<any[]>}):Promise<Map<string,MappingOverride>> {
+  private async loadOverrides(runner:QueryRunnerLike):Promise<Map<string,MappingOverride>> {
     const rows=await runner.query(MAPPING_OVERRIDE_SQL) as MappingOverride[];
     if(rows.length>1000)throw new DsfRefusal('MAPPING_OVERRIDE_LIMIT');
     const out=new Map<string,MappingOverride>();
@@ -297,14 +303,14 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
   private catalogReadAt = 0;
   async currentSnapshot() {
     if (this.db.options.type === 'postgres' && Date.now() - this.catalogReadAt > 30000) {
-      this.machines = await this.db.query(DANA_MACHINES_SQL);
+      this.machines = await readDsfMachines(this.db);
       this.catalogReadAt = Date.now();
     }
     return this.snapshot();
   }
 
   async adminSnapshot() {
-    if (this.db.options.type === 'postgres') this.machines = await this.db.query(DANA_MACHINES_SQL);
+    if (this.db.options.type === 'postgres') this.machines = await readDsfMachines(this.db);
     const live=this.snapshot();
     const assigned=new Map<string,string>();
     for(const machine of this.machines) {
@@ -346,8 +352,9 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
         FOR UPDATE OF m`,[machineId]) as Machine[];
       if(machineRows.length!==1)throw new NotFoundException('Machine was not found.');
       const machine=machineRows[0];
+      const allMachines=await readDsfMachines(manager);
+      if(!allMachines.some(x=>x.machine_id===machineId))throw new BadRequestException('Lapper machines do not use DSF counts.');
       if(option.department!==machine.department)throw new BadRequestException('Selected DSF source belongs to a different department.');
-      const allMachines=await manager.query(DANA_MACHINES_SQL) as Machine[];
       const overrideRows=await manager.query(MAPPING_OVERRIDE_SQL) as MappingOverride[];
       const overrideMap=new Map(overrideRows.map(row=>[row.machine_id,row]));
       for(const other of allMachines) {
@@ -398,7 +405,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
   /** What both match previews need: Admin decisions, the source each machine uses, and crediting history. */
   private async matchContext() {
     this.requireFreshSources();
-    if (this.db.options.type === 'postgres') this.machines = await this.db.query(DANA_MACHINES_SQL);
+    if (this.db.options.type === 'postgres') this.machines = await readDsfMachines(this.db);
     const overrides=await this.loadOverrides(this.db);
     const assigned=new Map<string,string>();
     const current=new Map<string,{mapping_id:string;whiteboard_name:string;line_name:string}>();
@@ -528,7 +535,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       const locks=await lease.query('SELECT pg_try_advisory_lock(1437329,77311) AS held');
       held=locks[0]?.held===true;
       if(!held)throw new DsfRefusal('READER_BUSY');
-      const machines:Machine[]=await lease.query(DANA_MACHINES_SQL);
+      const machines:Machine[]=await readDsfMachines(lease);
       if(machines.length>1000)throw new DsfRefusal('MACHINE_LIMIT');
       this.machines=machines;this.mappingOverrides=await this.loadOverrides(lease);
       const nextCaches=new Map(this.caches),nextStates=new Map<string,{status:DsfState;note:string}>();

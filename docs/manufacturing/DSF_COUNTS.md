@@ -1,6 +1,6 @@
 # DSF production counts (Digital Shop Floor / Ignition)
 
-MeshForge reads current-shift DSF piece counts for machines across all departments, including individual grinders, lappers and cutter builders. Machine DSF Counts is available in all four apps, with counts beside selected machines and in Admin. Optional cutter crediting applies only to production cutting machines in Departments 132/152. The integration is off by default.
+MeshForge reads current-shift DSF piece counts for machines across all departments, including individual grinders and cutter builders. Lapper machines (every machine with a Lapper profile in `lapper.machines`) are left out: they get no DSF count, cannot be mapped to a DSF source, and show no DSF badge in the Lapper app. Machine DSF Counts is available in all four apps, with counts beside selected machines and in Admin. Optional cutter crediting applies only to production cutting machines in Departments 132/152. The integration is off by default.
 
 The API **pulls** from DSF on a timer. Nothing pushes to MeshForge, and MeshForge never writes
 to DSF: the DSF session is a read-only transaction running fixed `SELECT`s, and it is closed
@@ -66,7 +66,7 @@ DSF migrations, so a database that already has them keeps its mappings and ledge
 
 ## Machine mapping
 
-Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operation + line). Admin mappings allow every numeric DSF department and its approved operation, including grinding and lapping. Source discovery works before the first mapping is configured. The machine and source departments must match.
+Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operation + line). Admin mappings allow every numeric DSF department and its approved operation, including grinding. Lapper machines are not listed and a mapping for one is refused; a mapping saved for one before this change stays in the table but is ignored, and its DSF source is free to map to another machine. Source discovery works before the first mapping is configured. The machine and source departments must match.
 
 DSF departments are named like `Dept. 132`. Some have a plain name instead: the CutGrind
 grinders (`CutGrind 3 1-24-79`) are in the DSF department `CUTTER GRIND`, which is MeshForge

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **DSF: removed from Lapper machines.** Lapper machines (machines with a Lapper profile) no longer
+  get DSF counts. They are left out of the DSF reader, Machine DSF Counts, the plant dashboard and
+  Admin > DSF Mappings, a mapping for one is refused, and the DSF badge is gone from the Lapper
+  live machine cards and Lapping Summary. Mappings saved earlier for Lapper machines are ignored,
+  not deleted, and their DSF sources can be mapped to other machines.
+
 - **Setting changes are one line each.** The Lapper Dashboard's Setting changes panel showed every
   changed value of a cycle in its row, so a cycle with a dozen changes filled the screen. Each
   cycle now shows how many values changed (12 changes, every name on hover) with a Show details

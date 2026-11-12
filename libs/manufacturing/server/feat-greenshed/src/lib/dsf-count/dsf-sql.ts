@@ -1,8 +1,17 @@
 /* DSFCOUNT1. Fixed SELECT statements; all data values are bound parameters. */
-export const DANA_MACHINES_SQL = `SELECT m.id::text AS machine_id, btrim(m.machine_number) AS machine_number,
+const DANA_MACHINES_SELECT = `SELECT m.id::text AS machine_id, btrim(m.machine_number) AS machine_number,
  d.code AS department, m.machine_type, (m.active AND m.enabled AND d.active AND d.enabled) AS active
  FROM public.machines m JOIN public.departments d ON d.id=m.department_id
- WHERE m."deletedAt" IS NULL AND d."deletedAt" IS NULL ORDER BY m.machine_number,m.id`;
+ WHERE m."deletedAt" IS NULL AND d."deletedAt" IS NULL`;
+/**
+ * Lapper machines (any machine with a lapper.machines profile) never take DSF counts. The Lapper
+ * schema is created at application bootstrap, after this reader first loads machines, so look for
+ * it first; until it exists there are no Lapper machines to leave out.
+ */
+export const LAPPER_MACHINES_TABLE_SQL = `SELECT to_regclass('lapper.machines') IS NOT NULL AS present`;
+export const DANA_MACHINES_SQL = `${DANA_MACHINES_SELECT}
+ AND NOT EXISTS (SELECT 1 FROM lapper.machines l WHERE l.public_machine_id=m.id) ORDER BY m.machine_number,m.id`;
+export const DANA_MACHINES_NO_LAPPER_SCHEMA_SQL = `${DANA_MACHINES_SELECT} ORDER BY m.machine_number,m.id`;
 export const SOURCE_IDENTITY_SQL = `SELECT
  to_regclass('public.tbl_whiteboard_cycles_master') IS NOT NULL AS is_source,
  to_regclass('public.cutter_machine_runs') IS NULL AS not_meshforge,

@@ -2,7 +2,7 @@
   <div class="gear-panel dana-panel-padded dsf-map-lead">
     <div>
       <h2 id="dsf-map-title" class="dana-panel-title">DSF Machine Mappings</h2>
-      <p class="dana-field-hint">Which Digital Shop Floor source feeds each machine, including grinders and lappers. Saving changes MeshForge only; nothing is ever written to DSF.</p>
+      <p class="dana-field-hint">Which Digital Shop Floor source feeds each machine, including grinders. Lapper machines do not use DSF counts. Saving changes MeshForge only; nothing is ever written to DSF.</p>
     </div>
     <div class="gear-admin-actions">
       <button type="button" class="gear-btn gear-btn-primary" (click)="previewUniqueMatches()" [disabled]="loading || saving || !board?.configured || board?.source_options_status !== 'READY'"
