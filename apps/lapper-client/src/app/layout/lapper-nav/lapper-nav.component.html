@@ -59,7 +59,7 @@
         ><span>Greenshed</span></a
       >
 
-      @if (user.role === 'admin') {
+      @if (isAdmin(user.role)) {
         <div class="nav-heading">ADMINISTRATION</div>
         <a
           (click)="mobileNav.close()"

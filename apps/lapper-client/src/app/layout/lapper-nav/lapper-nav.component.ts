@@ -36,6 +36,11 @@ export class LapperNavComponent {
     void this.router.navigate(['/login']);
   }
 
+  /** Matches the admin route guard: role names are compared case-insensitively. */
+  protected isAdmin(role?: string | null): boolean {
+    return String(role ?? '').toLowerCase() === 'admin';
+  }
+
   protected initials(email?: string): string {
     if (!email) return 'GA';
     return (email.split('@')[0] ?? email).slice(0, 2).toUpperCase();
