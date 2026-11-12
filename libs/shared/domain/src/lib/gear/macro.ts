@@ -31,6 +31,11 @@ export interface Macro extends BaseEntity {
   max_value?: number | null;
   /** Unit shown beside the value, for example mm or rpm. */
   unit?: string | null;
+  /**
+   * Flag a cycle that changes this value on the Lapper Dashboard's Setting changes (default true).
+   * Untick values that change every cycle by design. The consec counter is never flagged.
+   */
+  flag_changes?: boolean;
 }
 export type CreateMacro = Pick<
   Macro,
@@ -45,6 +50,7 @@ export type CreateMacro = Pick<
   | 'min_value'
   | 'max_value'
   | 'unit'
+  | 'flag_changes'
 >;
 export type UpdateMacro = Partial<Omit<Macro, 'id'>>;
 

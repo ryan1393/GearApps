@@ -1,3 +1,3 @@
 """Lapper Read: FANUC + scanner collector for MeshForge, packaged for Docker."""
 
-__version__ = "70.6.0"
+__version__ = "70.7.0"

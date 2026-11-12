@@ -88,3 +88,41 @@ export interface LapperProduction {
   last_cycle_at: string | null;
   machines: LapperMachineProduction[];
 }
+
+/**
+ * Macros that change on every cycle by design, so a change in them is not a setting change.
+ * #10032 is the consecutive cycle counter (consec).
+ */
+export const PER_CYCLE_MACROS: readonly number[] = [10032];
+/** The Lapper Dashboard flags setting changes over this many hours. */
+export const SETTING_CHANGE_HOURS = 8;
+
+/** One value a cycle changed: what it was on the machine and gearset's previous reading, and now. */
+export interface SettingChangeValue {
+  number: number;
+  name: string;
+  unit: string | null;
+  previous_value: number;
+  value: number;
+}
+/**
+ * A cycle that changed something other than the consec counter (PER_CYCLE_MACROS) since the
+ * previous reading of the same machine and gearset. A value's first reading is not a change.
+ */
+export interface SettingChangeCycle {
+  machine_cycle_id: string;
+  machine_id: string;
+  machine_number: string | null;
+  gearset_id: string;
+  gearset_number: string | null;
+  serial_number: string | null;
+  consec: number;
+  timestamp: Date | string;
+  changes: SettingChangeValue[];
+}
+export interface SettingChanges {
+  hours: number;
+  /** Every flagged cycle in the window; `items` holds the newest of them. */
+  total: number;
+  items: SettingChangeCycle[];
+}

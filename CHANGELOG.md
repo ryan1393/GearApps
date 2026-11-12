@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+## 70.7.0 (2026-11-12)
+
+Lappers get their cycle time recorded and shown in Lapping Summaries, a live timer while a cycle
+runs, and a Lapper Dashboard panel flagging setting changes (chosen per macro in Admin > Macros).
+Cutter-body compatibility is checked the same way everywhere and unetched bodies build again; each
+Summary has RING and PINION HOS, Inner and Outer blade, saved with one Save Part Summary; gearset
+master fields are shown and a manual base-data import keeps administrator changes; model numbers can
+be text, and DSF says why counts are not coming in. **Back up the database before deploying**: model
+numbers change from integer to text on startup.
+
+- **Setting changes on the Lapper Dashboard.** A new panel lists the cycles of the last 8 hours, on
+  every machine, where a controller value changed since the previous cycle of the same machine and
+  gearset: time, machine, gearset, serial, cycle number and each changed value with its previous
+  and new value (#10035 Backlash axial 0.12 → 0.15), with a link to that cycle history. Every
+  macro is flagged except the consec counter (#10032), which is never flagged. **Admin > Macros**
+  has a new **Flag changes** tick (and column) to leave out a value that changes every cycle by
+  design, such as a controller cycle time. A value's first reading on a machine and gearset is not
+  a change, and machines are never compared with each other. New column
+  `lapper.macros.flag_changes` (boolean, default true, migration `20261112-lapper-macro-flag-changes-v1`)
+  and read-only endpoint `GET /api/v1/machine-cycle/setting-changes?hours=8` (1 to 168 hours,
+  newest 100 cycles; `total` counts all of them).
+- **Live cycle timer.** While a lapper is in cycle, Lapper Dashboard's machine cards (Machine I/O >
+  Cycle time) and Lapping Summaries (Machine now) count up how long the cycle has been running,
+  every second. Between cycles they show Not in cycle; when the collector started mid-cycle, In
+  cycle · time unknown. When Lapper Read has not reported a machine for 90 seconds they show
+  No update for … instead, so a stopped collector never leaves a timer running. Lapper Read now
+  sends each machine's I/O at least every 30 seconds, with how long the current cycle has run
+  (`cycle_elapsed_s`, measured on its own clock); the API turns it into a start time on the
+  database clock, and reads return `cycle_elapsed_s` and `reported_age_s` as of the read, so the
+  browser's, collector's and database's clocks never have to agree. New nullable columns
+  `lapper.machine_fanuc_variables.in_cycle_since` and `reported_at` (migration
+  `20261111-lapper-live-cycle-v1`); `cycle_elapsed_s` is optional on the machine I/O update, so
+  older collectors keep working (they get no timer). An upgraded collector talking to an API that
+  is not upgraded stops sending the field. Also fixes the Lapping Summaries Cycle time header,
+  which broke into single letters when a machine and gearset had no cycles.
+
 - **RING / PINION HOS, Inner blade and Outer blade per Summary.** Each Summary now has separate
   RING and PINION HOS, Inner blade and Outer blade (table `part_summary_part_type_blades`,
   migration `20261112-summary-part-type-blades-v1`, additive). Parts show the Inner and Outer

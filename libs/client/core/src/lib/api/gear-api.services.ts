@@ -12,6 +12,8 @@ import {
   LappingChange,
   LappingSummaryRow,
   LapperProduction,
+  SETTING_CHANGE_HOURS,
+  SettingChanges,
   Machine,
   MachineCycle,
   MachineFanucVariable,
@@ -89,6 +91,10 @@ export class ScannerDetailsApi extends CrudApi<
 export class MachineCyclesApi extends CrudApi<MachineCycle, CreateMachineCycle> {
   constructor() {
     super('machine-cycle');
+  }
+  /** Cycles that changed a setting (anything but the consec counter) in the past `hours`. */
+  settingChanges(hours = SETTING_CHANGE_HOURS): Observable<SettingChanges> {
+    return this.http.get<SettingChanges>(`${this.url}/setting-changes`, { params: { hours } });
   }
   production(): Observable<LapperProduction> {
     return this.http.get<LapperProduction>(`${this.url}/production`);

@@ -14,7 +14,7 @@ from .api import MeshForgeApi, utc_now
 from .fanuc import Fanuc, NoGearsetLoaded
 from .scanner import Scanner
 from .scanner_monitor import ScannerMonitor
-from .state import ArgonautPost, CycleState, CycleStateStore, MachineState, ScannerState
+from .state import ArgonautPost, CycleState, CycleStateStore, MachineState, ScannerState, cycle_seconds
 from .tracker import DEFAULT_MAX_SAMPLE_GAP_S, CycleTracker
 
 log = logging.getLogger("lapper_read")
@@ -29,6 +29,21 @@ class Telemetry:
     process: str | None
     queue: str | None
     scanner: str | None
+    #: When the current cycle went into cycle (this collector's clock), if that was seen.
+    cycle_started_at: str | None = None
+
+
+#: Machine I/O is reported at least this often, even when nothing changed, so MeshForge can tell a
+#: running cycle from a collector that stopped (keep in step with LIVE_REPORT_INTERVAL_S).
+LIVE_REPORT_INTERVAL_S = 30.0
+#: Longest elapsed time the API accepts; a cycle "running" longer is reported as unknown.
+MAX_CYCLE_ELAPSED_S = 86400.0
+
+
+def cycle_elapsed_s(started_at: str | None, now: str) -> float | None:
+    """Seconds from `started_at` to `now` (both this collector's clock), or None when unknown."""
+    seconds = cycle_seconds(started_at, now)
+    return seconds if seconds is not None and seconds <= MAX_CYCLE_ELAPSED_S else None
 
 
 @dataclass
@@ -70,6 +85,7 @@ class Worker:
         self._dirty = False
         self._latest: Telemetry | None = None
         self._saved: Telemetry | None = None
+        self._io_reported_at = float("-inf")
         self.machine: dict = {}
         self.scanner_detail: dict = {}
         self.variables: dict = {}
@@ -251,8 +267,10 @@ class Worker:
                     if state.snapshot() != before:
                         self._dirty = True
                         self._checkpoint()
-                    self._latest = Telemetry(machine, state.active_cycle.serial if state.active_cycle else None,
-                                             state.queued_serial, state.scanner_serial)
+                    active = state.active_cycle
+                    self._latest = Telemetry(machine, active.serial if active else None,
+                                             state.queued_serial, state.scanner_serial,
+                                             active.cycle_started_at if active and machine.in_cycle else None)
                 self._heartbeat()
                 self.last_sample_at = utc_now()
                 if self.phase != "collecting" or self.last_error:
@@ -314,12 +332,18 @@ class Worker:
             log.info("[%s] Recorded cycle %s for serial %s (gearset %s): %d changed macros",
                      self.settings.machine_number or self.settings.machine_ip,
                      pending.consec, pending.serial or "(none, no scanner)", pending.part_number, written)
-        if telemetry is not None and telemetry != self._saved:
-            if self.scanner_detail:
+        heartbeat_due = time.monotonic() - self._io_reported_at >= LIVE_REPORT_INTERVAL_S
+        if telemetry is not None and (telemetry != self._saved or heartbeat_due):
+            # Serials only change with the telemetry; the heartbeat repeats the machine I/O alone.
+            if self.scanner_detail and (self._saved is None or
+                                        (telemetry.process, telemetry.queue, telemetry.scanner) !=
+                                        (self._saved.process, self._saved.queue, self._saved.scanner)):
                 self.api.patch_scanner_serials(self.scanner_detail["id"], telemetry.process, telemetry.queue, telemetry.scanner)
             m = telemetry.machine
-            self.api.patch_fanuc_variables(self.variables["id"], m.door_closed, m.start_cycle, m.in_cycle)
+            elapsed = cycle_elapsed_s(telemetry.cycle_started_at, utc_now()) if m.in_cycle else None
+            self.api.patch_fanuc_variables(self.variables["id"], m.door_closed, m.start_cycle, m.in_cycle, elapsed)
             self._saved = telemetry
+            self._io_reported_at = time.monotonic()
 
 
     def publish_argonaut_once(self) -> None:

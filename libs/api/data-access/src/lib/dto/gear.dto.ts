@@ -282,6 +282,19 @@ export class MachineFanucVariableDto implements MachineFanucVariable {
   @ApiProperty() @IsBoolean() x01_2_start_cycle!: boolean;
   @ApiProperty() @IsBoolean() y03_2_stack_inCycle!: boolean;
   @ApiProperty({ example: uuidExample }) @IsUUID('loose') machine_id!: string;
+  @ApiPropertyOptional({
+    nullable: true,
+    minimum: 0,
+    maximum: 86400,
+    example: 83.5,
+    description:
+      'Seconds the current cycle has been running, measured by the collector when it sends this. Null when not in cycle or the start was not seen.',
+  })
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false, maxDecimalPlaces: 3 })
+  @Min(0)
+  @Max(86400)
+  cycle_elapsed_s?: number | null;
 }
 export class CreateMachineFanucVariableDto
   extends OmitType(MachineFanucVariableDto, ['id'])
@@ -317,6 +330,14 @@ export class MacroDto implements Macro {
   @IsString()
   @MaxLength(24)
   unit?: string | null;
+  @ApiPropertyOptional({
+    default: true,
+    description:
+      'Flag a cycle that changes this value on the Lapper Dashboard (Setting changes). The consec counter #10032 is never flagged.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  flag_changes?: boolean;
 }
 export class CreateMacroDto extends OmitType(MacroDto, ['id']) implements CreateMacro {}
 export class UpdateMacroDto extends PartialType(CreateMacroDto) implements UpdateMacro {}

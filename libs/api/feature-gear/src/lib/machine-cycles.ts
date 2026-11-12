@@ -4,7 +4,7 @@ import {
   MachineCycleDto,
   UpdateMachineCycleDto,
 } from '@meshforge/api/data-access';
-import { CycleHistoryPage, LapperProduction, MachineCycle } from '@meshforge/shared/domain';
+import { CycleHistoryPage, LapperProduction, MachineCycle, SETTING_CHANGE_HOURS, SettingChanges } from '@meshforge/shared/domain';
 import { UseInterceptors, Controller, Get, Injectable, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 @Injectable()
@@ -12,6 +12,7 @@ export abstract class MachineCyclesService extends CrudService<MachineCycle> {
   abstract findByGearset(gearsetId: string): Promise<MachineCycle[]>;
   abstract findByMachine(machineId: string): Promise<MachineCycle[]>;
   abstract production(): Promise<LapperProduction>;
+  abstract settingChanges(hours: number, limit: number): Promise<SettingChanges>;
   abstract history(machineId: string, gearsetId: string): Promise<MachineCycle[]>;
   abstract historyPage(machineId: string, gearsetId: string, page: number, pageSize: number, serial?: string): Promise<CycleHistoryPage>;
   abstract findLatest(machineId: string, gearsetId: string): Promise<MachineCycle>;
@@ -32,6 +33,17 @@ export class MachineCyclesController extends crudController<MachineCycle>({
   @Get('production')
   @ApiOperation({ summary: 'Production totals over the past 24 hours, excluding simulations' })
   production(): Promise<LapperProduction> { return this.service.production(); }
+  @Get('setting-changes')
+  @ApiOperation({
+    summary: 'Cycles that changed a value other than the consec counter since the previous cycle of the same machine and gearset',
+  })
+  settingChanges(@Query('hours') hours?: string, @Query('limit') limit?: string): Promise<SettingChanges> {
+    const whole = (value: string | undefined, fallback: number, max: number) => {
+      const parsed = Number(value);
+      return Number.isInteger(parsed) && parsed >= 1 ? Math.min(parsed, max) : fallback;
+    };
+    return this.service.settingChanges(whole(hours, SETTING_CHANGE_HOURS, 168), whole(limit, 100, 500));
+  }
   @Get('gearset/:gearsetId')
   @ApiOperation({ summary: 'Cycles for a gearset (newest first)' })
   @ApiOkResponse({ type: MachineCycleDto, isArray: true })

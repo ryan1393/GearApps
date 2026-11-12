@@ -9,6 +9,7 @@ import {
   Gearset,
   LappingSummaryRow,
   LapperProduction,
+  SettingChanges,
   LappingChange,
   CycleHistoryPage,
   Machine,
@@ -96,6 +97,9 @@ export class PostgresCycles extends PostgresCrudAdapter<MachineCycle> {
   }
   async production(): Promise<LapperProduction> {
     return this.store.catalog.production();
+  }
+  settingChanges(hours: number, limit: number): Promise<SettingChanges> {
+    return project(this.store.catalog.settingChanges(hours, limit));
   }
   history(machineId: string, gearsetId: string): Promise<MachineCycle[]> {
     return project(this.store.catalog.cycles({ machineId, gearsetId, limit: 200 }));

@@ -63,6 +63,9 @@
             Latest{{ cycle() ? ' · ' + (cycle()!.timestamp | date: 'MMM d, HH:mm') : '' }}
           }
         </dd></div>
+        <div data-testid="lapping-machine-now"><dt>Machine now</dt><dd>
+          <gear-live-cycle-timer [snapshot]="live()" [receivedAt]="liveAt()" />
+        </dd></div>
         <div data-testid="lapping-cycle-time"><dt>Cycle time</dt><dd>
           <span class="mono" [attr.title]="shownCycleTime() !== null ? (shownCycleTime()! | number: '1.0-3') + ' s' : 'Not measured for this cycle'">{{ formatCycleTime(shownCycleTime()) }}</span>
           @if (averageCycleTime()?.average_of) {

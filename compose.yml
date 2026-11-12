@@ -1,7 +1,7 @@
 name: dana-apps
 
 x-gear-server-image: &gear-server-image
-  image: dana-apps-meshforge-server:70.6.0
+  image: dana-apps-meshforge-server:70.7.0
   pull_policy: never
 
 x-gear-db-environment: &gear-db-environment
@@ -101,7 +101,7 @@ services:
       start_period: 30s
 
   lapper-client:
-    image: dana-apps-lapper-client:70.6.0
+    image: dana-apps-lapper-client:70.7.0
     build:
       context: .
       dockerfile: apps/lapper-client/Dockerfile
@@ -118,7 +118,7 @@ services:
       retries: 5
 
   blade-tracking:
-    image: dana-apps-blade-tracking:70.6.0
+    image: dana-apps-blade-tracking:70.7.0
     build:
       context: .
       dockerfile: apps/blade-tracking/Dockerfile
@@ -135,7 +135,7 @@ services:
       retries: 5
 
   cutter-builder:
-    image: dana-apps-cutter-builder:70.6.0
+    image: dana-apps-cutter-builder:70.7.0
     build:
       context: .
       dockerfile: apps/cutter-builder/Dockerfile
@@ -152,7 +152,7 @@ services:
       retries: 5
 
   greenshed:
-    image: dana-apps-greenshed:70.6.0
+    image: dana-apps-greenshed:70.7.0
     build:
       context: .
       dockerfile: apps/greenshed/Dockerfile
@@ -175,7 +175,7 @@ services:
   # Docker collector (no .env entry needed). Not started by default:
   #   docker compose --profile collectors up -d --build lapper-read
   lapper-read:
-    image: dana-apps-lapper-read:70.6.0
+    image: dana-apps-lapper-read:70.7.0
     build:
       context: .
       dockerfile: apps/lapper-read-py/Dockerfile
