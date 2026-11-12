@@ -398,3 +398,30 @@
 .gear-admin-layout .gear-admin-list.gear-admin-record-grid-professional{grid-template-columns:repeat(3,minmax(0,1fr));}
 @media(max-width:1100px){.gear-admin-layout .gear-admin-list.gear-admin-record-grid-professional{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:760px){.gear-admin-layout .gear-admin-list.gear-admin-record-grid-professional{grid-template-columns:minmax(0,1fr);}}
+/* Lapper Admin > Scanners: the image location section of the scanner form (FTP folder/file
+   picker and preview). Visual rules only; the component keeps its own layout. */
+.scanner-image {
+  border: 1px solid var(--dana-border);
+  border-radius: var(--dana-radius-md);
+}
+.scanner-image legend {
+  font-weight: 700;
+}
+.scanner-ftp-item {
+  border: 1px solid var(--dana-border);
+  border-radius: var(--dana-radius-sm);
+  background: var(--dana-surface);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.scanner-ftp-item:hover {
+  border-color: var(--dana-control-border);
+}
+.scanner-ftp-item small {
+  color: var(--dana-muted);
+}
+.scanner-preview {
+  border: 1px solid var(--dana-border);
+  border-radius: var(--dana-radius-sm);
+}

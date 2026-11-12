@@ -49,6 +49,7 @@ import {
   IsUrl,
   IsUUID,
   Max,
+  Matches,
   MaxLength,
   Min,
   ValidateIf,
@@ -171,6 +172,10 @@ export class UpdateGearsetDto
   implements UpdateGearset {}
 
 // ---------- Scanner detail ----------
+/** A folder path on the FTP drop: no '..' segment, backslash or control character. */
+export const SCANNER_IMAGE_FOLDER = /^(?!.*(?:^|\/)\.\.(?:\/|$))[^\\\p{Cc}]*$/u;
+/** A capture file name: no folder part, ending .jpg, .jpeg or .bmp. */
+export const SCANNER_IMAGE_FILE = /^[^/\\\p{Cc}]+\.(?:jpe?g|bmp)$/iu;
 export class ScannerDetailDto implements ScannerDetail {
   @ApiProperty({ readOnly: true, example: uuidExample }) @IsUUID('loose') id!: string;
   @ApiPropertyOptional({ nullable: true, example: '10.16.80.68' }) @IsOptional() @IsIP(4) ip!:
@@ -188,6 +193,26 @@ export class ScannerDetailDto implements ScannerDetail {
   @IsOptional()
   @IsUUID('loose')
   machine_id!: string | null;
+  @ApiPropertyOptional({
+    nullable: true,
+    example: '181-lapper-scanners/10.16.82.253',
+    description: 'FTP folder of this scanner\'s captures; empty uses <SCANNER_FTP_ROOT>/<scanner IP>',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  @Matches(SCANNER_IMAGE_FOLDER, { message: "image_folder must be a folder path without '..' or backslashes" })
+  image_folder?: string | null;
+  @ApiPropertyOptional({
+    nullable: true,
+    example: 'scanner-current.jpg',
+    description: 'Capture file in that folder (.jpg, .jpeg or .bmp); empty uses SCANNER_FTP_IMAGE_FILE',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(128)
+  @Matches(SCANNER_IMAGE_FILE, { message: 'image_file must be a .jpg, .jpeg or .bmp file name' })
+  image_file?: string | null;
 }
 export class CreateScannerDetailDto
   extends OmitType(ScannerDetailDto, ['id'])

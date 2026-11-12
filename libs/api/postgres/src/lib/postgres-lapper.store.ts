@@ -36,6 +36,8 @@ const columns: Partial<Record<Resource, string[]>> = {
     'sn_scanner',
     'status',
     'ip',
+    'image_folder',
+    'image_file',
   ],
   'machine-fanuc-variable': ['x06_7_frt_dr_closed', 'x01_2_start_cycle', 'y03_2_stack_inCycle'],
 };

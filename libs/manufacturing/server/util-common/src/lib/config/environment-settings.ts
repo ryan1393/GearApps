@@ -165,8 +165,8 @@ export const ENVIRONMENT_SETTING_GROUPS: readonly EnvironmentSettingGroup[] = [
       text('SCANNER_FTP_HOST', 'Scanner FTP server'),
       text('SCANNER_FTP_USER', 'Scanner FTP user'),
       secret('SCANNER_FTP_PASSWORD', 'Scanner FTP password'),
-      text('SCANNER_FTP_ROOT', 'Scanner FTP folder'),
-      text('SCANNER_FTP_IMAGE_FILE', 'Scanner image file name'),
+      text('SCANNER_FTP_ROOT', 'Scanner FTP folder', 'Default folder; each scanner\'s captures are in <folder>/<scanner IP> unless it sets its own in Lapper Admin > Scanners.'),
+      text('SCANNER_FTP_IMAGE_FILE', 'Scanner image file name', 'Default capture file; a scanner can choose its own in Lapper Admin > Scanners.'),
       text(
         'LAPPER_READ_TOKEN_FILE',
         'Docker collector token file',

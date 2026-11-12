@@ -1,11 +1,12 @@
 import { scannerConfig } from '@meshforge/api/core';
 import {
   ScannerCommand,
+  ScannerFtpListing,
   ScannerLog,
   ScannerLogEntry,
   ScannerSummary,
 } from '@meshforge/shared/domain';
-import { BadGatewayException, Inject, Injectable, Logger } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 import { Client as FtpClient, FTPError } from 'basic-ftp';
@@ -13,7 +14,13 @@ import * as https from 'https';
 import { createConnection } from 'node:net';
 import { Writable } from 'stream';
 
-interface ScannerImage {
+/** A scanner's own image folder and file; empty values use the defaults. */
+export interface ScannerImageLocation {
+  folder?: string | null;
+  file?: string | null;
+}
+
+export interface ScannerImage {
   data: Buffer;
   contentType: 'image/jpeg' | 'image/bmp';
 }
@@ -37,6 +44,7 @@ export class ScannerClientService {
   /** At least the fastest UI poll period (1 s), with room for the requests to drift. */
   static readonly IMAGE_TTL_MS = 1_500;
   private static readonly MAX_IMAGE_BYTES = 16 * 1024 * 1024;
+  private static readonly MAX_LISTING = 2000;
 
   constructor(@Inject(scannerConfig.KEY) private readonly cfg: ConfigType<typeof scannerConfig>) {
     this.http = axios.create({
@@ -110,24 +118,72 @@ export class ScannerClientService {
     }
   }
 
-  /** Latest capture for `host` (JPEG or BMP), shared by every viewer asking at the same time. */
-  async getLatestImage(host: string): Promise<ScannerImage> {
-    const cached = this.imageCache.get(host);
+  /**
+   * The FTP folder and file of a scanner's capture: its own (Admin > Scanners) when set, otherwise
+   * `<SCANNER_FTP_ROOT>/<scanner IP>/<SCANNER_FTP_IMAGE_FILE>`.
+   */
+  imageLocation(host: string | null, location: ScannerImageLocation = {}): { folder: string; file: string } {
+    const folder = location.folder?.trim().replace(/\/+$/, '');
+    const file = location.file?.trim() || this.cfg.ftp.imageFile;
+    if (folder) return { folder, file };
+    if (!host) throw new BadRequestException('Set the scanner\'s IP address or its image folder');
+    return { folder: `${this.cfg.ftp.root.replace(/\/+$/, '')}/${host}`, file };
+  }
+
+  /**
+   * Latest capture for a scanner (JPEG or BMP), shared by every viewer asking at the same time.
+   * `label` names the scanner in errors (its IP, or its id when only a folder is set).
+   */
+  async getLatestImage(host: string | null, location: ScannerImageLocation = {}, label = host ?? 'scanner'): Promise<ScannerImage> {
+    const where = this.imageLocation(host, location);
+    const key = `${where.folder}/${where.file}`;
+    const cached = this.imageCache.get(key);
     if (cached && Date.now() - cached.at < ScannerClientService.IMAGE_TTL_MS) return cached.image;
     // Viewers asking while a fetch is under way share it (and its failure, which is not cached).
-    const pending = this.imageFetches.get(host);
+    const pending = this.imageFetches.get(key);
     if (pending) return pending;
-    const fetch = this.fetchImage(host).finally(() => this.imageFetches.delete(host));
-    this.imageFetches.set(host, fetch);
+    const fetch = this.fetchImage(key, where, label).finally(() => this.imageFetches.delete(key));
+    this.imageFetches.set(key, fetch);
     return fetch;
   }
 
-  private async fetchImage(host: string): Promise<ScannerImage> {
+  /** One level of the FTP drop: sub-folders and JPEG/BMP captures (newest first). */
+  async listFtpFolder(path?: string): Promise<ScannerFtpListing> {
+    const { ftp } = this.cfg;
+    if (!ftp.host) throw new BadGatewayException('Scanner FTP host is not configured');
+    const folder = (path?.trim() || ftp.root).replace(/\/+$/, '') || '/';
+    if (/(^|\/)\.\.(\/|$)/.test(folder) || /[\\\p{Cc}]/u.test(folder)) {
+      throw new BadRequestException("Folder paths cannot contain '..' or backslashes");
+    }
+    const client = new FtpClient(this.cfg.timeoutMs);
+    try {
+      await client.access({ host: ftp.host, user: ftp.user, password: ftp.password, secure: false });
+      const entries = (await client.list(folder)).slice(0, ScannerClientService.MAX_LISTING);
+      return {
+        path: folder,
+        root: ftp.root,
+        defaultImageFile: ftp.imageFile,
+        folders: entries.filter((e) => e.isDirectory && e.name !== '.' && e.name !== '..').map((e) => e.name).sort(),
+        images: entries
+          .filter((e) => e.isFile && /\.(?:jpe?g|bmp)$/i.test(e.name))
+          .map((e) => ({ name: e.name, size: e.size, modifiedAt: e.modifiedAt?.toISOString() ?? null }))
+          .sort((a, b) => (b.modifiedAt ?? '').localeCompare(a.modifiedAt ?? '') || a.name.localeCompare(b.name)),
+      };
+    } catch (err) {
+      if (err instanceof FTPError && err.code === 550) throw new NotFoundException(`FTP folder ${folder} does not exist`);
+      this.logger.warn(`FTP listing failed for ${folder}: ${(err as Error).message}`);
+      throw new BadGatewayException(`Could not list FTP folder ${folder}`);
+    } finally {
+      client.close();
+    }
+  }
+
+  private async fetchImage(key: string, where: { folder: string; file: string }, label: string): Promise<ScannerImage> {
     const { ftp } = this.cfg;
     if (!ftp.host) throw new BadGatewayException('Scanner FTP host is not configured');
 
     const client = new FtpClient(this.cfg.timeoutMs);
-    const folder = `${ftp.root.replace(/\/+$/, '')}/${host}`;
+    const folder = where.folder;
 
     try {
       await client.access({
@@ -137,15 +193,15 @@ export class ScannerClientService {
         secure: false,
       });
       const image =
-        (await this.downloadImage(client, `${folder}/${ftp.imageFile}`)) ??
-        (await this.newestImage(client, folder, ftp.imageFile));
+        (await this.downloadImage(client, `${folder}/${where.file}`)) ??
+        (await this.newestImage(client, folder, where.file));
       if (!image) throw new Error(`No complete JPEG or BMP capture in ${folder}`);
 
-      this.imageCache.set(host, { at: Date.now(), image });
+      this.imageCache.set(key, { at: Date.now(), image });
       return image;
     } catch (err) {
-      this.logger.warn(`FTP image fetch failed for ${host}: ${(err as Error).message}`);
-      throw new BadGatewayException(`Could not fetch image for scanner ${host}`);
+      this.logger.warn(`FTP image fetch failed for ${label} (${folder}/${where.file}): ${(err as Error).message}`);
+      throw new BadGatewayException(`Could not fetch image for scanner ${label}`);
     } finally {
       client.close();
     }

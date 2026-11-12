@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { ScannerCommand, ScannerLogEntry, ScannerSummary } from '@meshforge/shared/domain';
+import { ScannerCommand, ScannerFtpListing, ScannerLogEntry, ScannerSummary } from '@meshforge/shared/domain';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from './api-config';
 
@@ -20,6 +20,11 @@ export class ScannerApi {
 
   log(scannerId: string): Observable<ScannerLogEntry[]> {
     return this.http.get<ScannerLogEntry[]>(`${this.url}/${scannerId}/log`);
+  }
+
+  /** One folder of the scanner FTP drop (administrators); no path lists SCANNER_FTP_ROOT. */
+  browseFtp(path?: string): Observable<ScannerFtpListing> {
+    return this.http.get<ScannerFtpListing>(`${this.url}/ftp/browse`, { params: path ? { path } : {} });
   }
 
   command(scannerId: string, data: string): Observable<ScannerCommand> {
