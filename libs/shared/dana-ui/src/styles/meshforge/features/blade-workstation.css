@@ -99,7 +99,7 @@ gear-count-stepper .stepper-label {
   font-weight: 700;
 }
 gear-count-stepper .stepper-btn {
-  font-size: 1.6rem !important;
+  font-size: 1.6rem;
   font-weight: 900;
   line-height: 1;
 }
@@ -223,7 +223,7 @@ gear-station-status .flash {
 }
 
 .ops-station .ops-station-bar .gear-btn {
-  font-size: 1rem !important;
+  font-size: 1rem;
 }
 
 .ops-station .ops-station-settings legend {
@@ -357,7 +357,7 @@ gear-station-status .flash {
 }
 
 .ops-station .ops-station-work .gear-btn {
-  font-size: 1rem !important;
+  font-size: 1rem;
 }
 @media (min-width: 1024px) {
   .ops-station .op-steps > gear-station-status {

@@ -291,11 +291,11 @@
 .quick-search input {
   min-width: 0;
   flex: 1;
-  border: 0 !important;
-  outline: 0 !important;
+  border: 0;
+  outline: 0;
   padding: 0 11px;
-  background: transparent !important;
-  box-shadow: none !important;
+  background: transparent;
+  box-shadow: none;
   color: var(--gear-text);
   font-size: var(--gear-font-sm);
 }
@@ -427,7 +427,7 @@
 }
 
 .empty-row {
-  padding: 24px !important;
+  padding: 24px;
   color: #848b98 !important;
   text-align: center !important;
 }
@@ -442,12 +442,12 @@
 
 /* Recent activity retains compact independent panel behavior. */
 .gear-recent-activity-panel {
-  align-self: start !important;
+  align-self: start;
   height: auto !important;
   min-height: 0 !important;
   border-color: var(--gear-border) !important;
-  background: var(--gear-surface) !important;
-  box-shadow: none !important;
+  background: var(--gear-surface);
+  box-shadow: none;
 }
 
 .gear-recent-activity-panel > * { min-height: 0; }
