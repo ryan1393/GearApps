@@ -6,7 +6,7 @@
       <p>Fort Wayne active freight for yesterday through tomorrow, exporter health and scan controls.</p>
     </div>
     <div class="dana-actions">
-      <span class="dana-muted" *ngIf="lastUpdated">Updated {{lastUpdated | date:'shortTime'}}</span>
+      <span class="dana-muted" *ngIf="lastUpdated">Updated {{lastUpdated | plantDate:'shortTime'}}</span>
       <button class="dana-btn" type="button" [disabled]="busy" (click)="refreshAll()">Refresh</button>
       <button class="dana-btn dana-btn-primary" type="button" [disabled]="!adminAuth.canWrite() || busy || recoveryBusy || view.scanRunning || !control?.exporterRunning" [attr.aria-busy]="busy" (click)="runScanNow()">
         {{view.scanRunning ? 'Scan running…' : 'Run Scan Now'}}
@@ -20,7 +20,8 @@
   <section class="dana-alert tl-rxo-activity" [attr.data-state]="view.integrationState" role="status" aria-live="polite">
     <span class="dana-status-badge" [attr.data-tone]="view.integrationTone">{{view.integrationStatus}}</span>
     <span class="tl-rxo-activity-detail" [title]="view.integrationDetail">{{view.integrationDetail}}</span>
-    <span class="dana-muted dana-nowrap">{{view.integrationUpdated}}</span>
+    <!-- Not announced: the time changes on every 5 s poll; only real status changes are read out. -->
+    <span class="dana-muted dana-nowrap" aria-hidden="true">{{view.integrationUpdated}}</span>
   </section>
 
   <section class="dana-panel" aria-labelledby="rxo-recovery-title" *ngIf="connectionRecoveryNeeded || recoveryBusy || recoveryMessage || recoveryError">
@@ -97,13 +98,13 @@
     <div class="dana-kpi-card">
       <button type="button" class="tl-kpi-jump" (click)="jumpTo('health')" [attr.aria-label]="'Last successful export: open Exporter Health'"></button>
       <div class="dana-kpi-label">Last successful export</div>
-      <div class="dana-kpi-value tl-rxo-kpi-time">{{control?.exporterHealth?.lastSuccessAt ? (control?.exporterHealth?.lastSuccessAt | date:'M/d h:mm a') : 'Not recorded'}}</div>
+      <div class="dana-kpi-value tl-rxo-kpi-time">{{control?.exporterHealth?.lastSuccessAt ? (control?.exporterHealth?.lastSuccessAt | plantDate:'M/d h:mm a') : 'Not recorded'}}</div>
       <div class="dana-kpi-note">Batch {{control?.exporterHealth?.lastBatchId || 'not reported'}}</div>
     </div>
     <div class="dana-kpi-card" [attr.data-tone]="view.importNeedsReview ? 'warning' : null">
       <button type="button" class="tl-kpi-jump" (click)="jumpTo('health')" [attr.aria-label]="'Latest import: open Exporter Health'"></button>
       <div class="dana-kpi-label">Latest import</div>
-      <div class="dana-kpi-value tl-rxo-kpi-time">{{view.lastImportDate ? (view.lastImportDate | date:'M/d h:mm a') : 'Not recorded'}}</div>
+      <div class="dana-kpi-value tl-rxo-kpi-time">{{view.lastImportDate ? (view.lastImportDate | plantDate:'M/d h:mm a') : 'Not recorded'}}</div>
       <div class="dana-kpi-note">{{importStatus?.importHealth?.status || lastImportValue('status') || 'Status not reported'}} · {{lastImportValue('source_batch_id') || importStatus?.boundaryBatchId || 'no batch'}}</div>
     </div>
     <div class="dana-kpi-card">
@@ -192,9 +193,9 @@
             <div class="dana-detail"><span class="dana-detail-label">Exporter version</span><span class="dana-detail-value">{{control?.exporterHealth?.version || '-'}}</span></div>
             <div class="dana-detail"><span class="dana-detail-label">Runtime integrity</span><span class="dana-detail-value">{{view.runtimeIntegrityLabel}}</span><span class="dana-cell-sub" *ngIf="control?.runtime?.checked">{{control?.runtime?.verified ? 'Expected runtime hash verified' : 'Running exporter hash does not match the expected runtime'}}</span></div>
             <div class="dana-detail"><span class="dana-detail-label">Docker server</span><span class="dana-detail-value">{{control?.dockerVersion || 'Unavailable'}}</span></div>
-            <div class="dana-detail"><span class="dana-detail-label">Last successful scan</span><span class="dana-detail-value">{{control?.exporterHealth?.lastSuccessAt ? (control?.exporterHealth?.lastSuccessAt | date:'M/d/yy h:mm:ss a') : 'Not recorded'}}</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Last successful scan</span><span class="dana-detail-value">{{control?.exporterHealth?.lastSuccessAt ? (control?.exporterHealth?.lastSuccessAt | plantDate:'M/d/yy h:mm:ss a') : 'Not recorded'}}</span></div>
             <div class="dana-detail"><span class="dana-detail-label">Last duration</span><span class="dana-detail-value">{{view.durationLabel}}</span></div>
-            <div class="dana-detail"><span class="dana-detail-label">Next scan</span><span class="dana-detail-value">{{control?.exporterHealth?.nextRunAt ? (control?.exporterHealth?.nextRunAt | date:'M/d/yy h:mm:ss a') : 'Waiting / manual'}}</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Next scan</span><span class="dana-detail-value">{{control?.exporterHealth?.nextRunAt ? (control?.exporterHealth?.nextRunAt | plantDate:'M/d/yy h:mm:ss a') : 'Waiting / manual'}}</span></div>
             <div class="dana-detail"><span class="dana-detail-label">Last batch</span><span class="dana-detail-value">{{control?.exporterHealth?.lastBatchId || '-'}}</span></div>
             <div class="dana-detail"><span class="dana-detail-label">Active load window</span><span class="dana-detail-value">Yesterday, today and tomorrow (Fort Wayne time)</span></div>
             <div class="dana-detail"><span class="dana-detail-label">Scan interval</span><span class="dana-detail-value">Every {{control?.settings?.syncIntervalMinutes ?? 30}} minutes</span></div>
@@ -223,7 +224,7 @@
           <div class="dana-detail-grid">
             <div class="dana-detail"><span class="dana-detail-label">Last imported batch</span><span class="dana-detail-value">{{lastImportValue('source_batch_id') || importStatus?.boundaryBatchId || '-'}}</span></div>
             <div class="dana-detail"><span class="dana-detail-label">Import status</span><span class="dana-detail-value">{{importStatus?.importHealth?.status || lastImportValue('status') || '-'}}</span></div>
-            <div class="dana-detail"><span class="dana-detail-label">Imported at</span><span class="dana-detail-value">{{view.lastImportDate ? (view.lastImportDate | date:'M/d/yy h:mm:ss a') : '-'}}</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Imported at</span><span class="dana-detail-value">{{view.lastImportDate ? (view.lastImportDate | plantDate:'M/d/yy h:mm:ss a') : '-'}}</span></div>
             <div class="dana-detail"><span class="dana-detail-label">Linked orders</span><span class="dana-detail-value">{{lastImportValue('linked_order_rows') ?? 0}}</span></div>
           </div>
           <p class="dana-note">RXO provides planned transportation context. Truck Log stays authoritative for the physical guard and dock lifecycle.</p>

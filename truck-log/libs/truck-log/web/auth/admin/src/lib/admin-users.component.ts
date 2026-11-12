@@ -53,6 +53,7 @@ import { TruckLogAdminAccessComponent } from './admin-access.component';
      <button class="dana-btn dana-btn-sm" type="button" [disabled]="busy || !auth.canWrite() || user.id===auth.user()?.id" (click)="toggle(user)">{{user.enabled ? 'Disable' : 'Enable'}}</button></div></td></tr>
    </tbody></table>
   </div>
+  <p *ngIf="!loading && users.length && !filtered.length" class="dana-empty-state" role="status">No administrators match this filter.</p>
   <p *ngIf="loading" class="dana-loading-state" role="status">Loading administrator accounts…</p>
  </section>
  </div>`
@@ -70,12 +71,28 @@ export class TruckLogAdminUsersComponent implements OnInit {
   beginReset(user: TruckLogAdminUser) { this.cancel(); this.selected = user; this.mode = 'reset'; this.error = ''; this.message = ''; }
   save() {
     if (this.busy || !this.mode || !this.auth.canWrite()) return; this.error = '';
+    // Same rules as the server (server/auth/admin admin-security.ts): Angular forms do not block
+    // submit on required/minlength, so check here and say exactly what to fix.
+    const problem = this.formProblem();
+    if (problem) { this.error = problem; return; }
     if (this.mode !== 'edit' && (this.temporaryPassword !== this.confirmPassword || [...this.temporaryPassword].length < 15 || [...this.temporaryPassword].length > 128)) { this.error = 'Enter matching temporary passwords containing 15–128 characters.'; return; }
     this.busy = true;
     const request: Observable<unknown> = this.mode === 'create' ? this.auth.create({ displayName:this.name,username:this.username,email:this.email,password:this.temporaryPassword })
       : this.mode === 'reset' ? this.auth.reset(this.selected!.id,this.temporaryPassword) : this.auth.update(this.selected!.id,{displayName:this.name,email:this.email});
     request.subscribe({ next: () => { const mode = this.mode; this.busy = false; this.cancel(); this.message = mode === 'edit' ? 'Account saved.' : 'Account saved. Give the temporary password to the user through an approved private channel.'; this.load(); },
       error: e => { this.busy = false; this.temporaryPassword = ''; this.confirmPassword = ''; this.error = e?.error?.message || 'Account change was not confirmed.'; } });
+  }
+  private formProblem(): string {
+    if (this.mode !== 'reset') {
+      const name = this.name.trim();
+      if (!name || name.length > 120) return 'Enter a display name (1–120 characters).';
+      if (this.mode === 'create' && !/^[a-z0-9][a-z0-9._-]{2,39}$/.test(this.username.trim().toLowerCase())) {
+        return 'Username must be 3–40 letters, digits, dots, underscores or hyphens, starting with a letter or digit.';
+      }
+      const email = this.email.trim();
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return 'Enter a valid email address, or leave it blank.';
+    }
+    return '';
   }
   toggle(user: TruckLogAdminUser) {
     if (this.busy || !this.auth.canWrite() || user.id === this.auth.user()?.id) return;

@@ -1,9 +1,10 @@
+import { formatPlantDate } from '@truck-log/web/domain';
 import { TruckLogAdminAuth } from '@truck-log/web/auth/admin';
 import { TruckLogAdminAccessComponent } from '@truck-log/web/auth/admin';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { StaleDataNoticeComponent, ToastService, jumpToSection, rememberedFlag } from '@truck-log/web/ui';
+import { StaleDataNoticeComponent, ToastService, jumpToSection, rememberedFlag, PlantDatePipe } from '@truck-log/web/ui';
 import { TruckLogApi, rxoRecoveryErrorMessage, rxoRecoveryWaitFeedback } from '@truck-log/web/data-access';
 import { Subscription } from 'rxjs';
 import { expediteFailureDetail, expediteFailureTime } from './rxo-expedite/expedite-failure-display';
@@ -16,7 +17,7 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
 @Component({
   selector: 'truck-log-rxo-expedite-control-center',
   standalone: true,
-  imports: [CommonModule, RouterLink, RxoExpediteComponent, StaleDataNoticeComponent, TruckLogAdminAccessComponent],
+  imports: [CommonModule, RouterLink, RxoExpediteComponent, StaleDataNoticeComponent, TruckLogAdminAccessComponent, PlantDatePipe],
   // One Expedite poll per page, shared by the KPI cards and every tab.
   providers: [RxoExpediteStore],
   template: `
@@ -28,7 +29,7 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
         <p>Fort Wayne RXO Expedite freight on the move, exporter health, database import and scan controls.</p>
       </div>
       <div class="dana-actions">
-        <span class="dana-muted" *ngIf="lastUpdated">Updated {{lastUpdated | date:'shortTime'}}</span>
+        <span class="dana-muted" *ngIf="lastUpdated">Updated {{lastUpdated | plantDate:'shortTime'}}</span>
         <button class="dana-btn" type="button" (click)="refreshAll()">Refresh</button>
         <button class="dana-btn dana-btn-primary" type="button" [disabled]="!!scan.disabledReason || recoveryBusy"
                 [attr.aria-busy]="scan.requesting" [title]="scan.disabledReason || 'Request a fresh Expedite export'"
@@ -44,7 +45,8 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
     <section class="dana-alert tl-rxo-activity" [attr.data-state]="integrationState" role="status" aria-live="polite">
       <span class="dana-status-badge" [attr.data-tone]="integrationTone">{{integrationStatus}}</span>
       <span class="tl-rxo-activity-detail" [title]="integrationDetail">{{integrationDetail}}</span>
-      <span class="dana-muted dana-nowrap">{{integrationUpdated}}</span>
+      <!-- Not announced: the time changes on every 5 s poll; only real status changes are read out. -->
+    <span class="dana-muted dana-nowrap" aria-hidden="true">{{integrationUpdated}}</span>
     </section>
 
     <section class="dana-panel" aria-labelledby="expedite-recovery-title" *ngIf="connectionRecoveryNeeded || recoveryBusy || recoveryMessage || recoveryError">
@@ -491,11 +493,7 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
 
   get integrationUpdated(): string {
     return this.lastUpdated
-      ? `Updated ${this.lastUpdated.toLocaleTimeString([], {
-          hour: 'numeric',
-          minute: '2-digit',
-          second: '2-digit',
-        })}`
+      ? `Updated ${formatPlantDate(this.lastUpdated, 'h:mm:ss a')}`
       : 'Waiting for status';
   }
 

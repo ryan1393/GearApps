@@ -10,10 +10,22 @@ import {
 import { resolve } from 'node:path';
 import { DataSource } from 'typeorm';
 import { StationPublic } from '@truck-log/server/auth/station';
-import { TRUCK_LOG_VERSION } from '@truck-log/shared/contracts';
+import { PLANT_TIME_ZONE_DEFAULT, TRUCK_LOG_VERSION } from '@truck-log/shared/contracts';
 
 const APP_VERSION = TRUCK_LOG_VERSION;
 const RELEASE_VERSION = process.env.TRUCK_LOG_RELEASE || TRUCK_LOG_VERSION;
+
+/** The plant zone the web app shows times in: the server's TZ when it is a valid IANA zone. */
+function plantTimeZone(): string {
+  const configured = (process.env.TZ || '').trim();
+  if (!configured) return PLANT_TIME_ZONE_DEFAULT;
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: configured });
+    return configured;
+  } catch {
+    return PLANT_TIME_ZONE_DEFAULT;
+  }
+}
 
 const REQUIRED_RELEASE_COLUMNS: Record<string, readonly string[]> = {
   truck_log_access_credentials: [
@@ -189,6 +201,7 @@ export class HealthController {
       version: APP_VERSION,
       release: RELEASE_VERSION,
       time: new Date().toISOString(),
+      timeZone: plantTimeZone(),
     };
   }
 
@@ -257,6 +270,7 @@ export class HealthController {
         rxoDriverDocuments: 'ready',
         driverPrintPackages: 'ready',
         time: new Date().toISOString(),
+        timeZone: plantTimeZone(),
       };
     } catch (error: unknown) {
       const message = error instanceof Error

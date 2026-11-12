@@ -614,7 +614,9 @@ const problems = [];
 const DOM_EVENTS = new Set(['click', 'dblclick', 'keydown', 'keyup', 'keypress', 'focus', 'blur', 'focusin', 'focusout', 'input', 'change', 'submit', 'mouseenter', 'mouseleave', 'mousedown', 'mouseup', 'mouseover', 'mouseout', 'mousemove', 'scroll', 'wheel', 'dragover', 'dragenter', 'dragleave', 'drop', 'paste', 'copy', 'cut', 'pointerdown', 'pointerup', 'touchstart', 'touchend', 'contextmenu', 'load', 'error', 'animationend', 'transitionend', 'toggle', 'close', 'cancel', 'reset', 'ngSubmit', 'ngModelChange', 'beforeinput', 'compositionstart', 'compositionend', 'select', 'resize', 'visibilitychange']);
 const NATIVE_OR_FRAMEWORK_ELEMENTS = new Set(['ng-container', 'ng-template', 'ng-content', 'router-outlet']);
 const COMMON_DIRECTIVES = { ngIf: ['CommonModule', 'NgIf'], ngFor: ['CommonModule', 'NgFor', 'NgForOf'], ngClass: ['CommonModule', 'NgClass'], ngStyle: ['CommonModule', 'NgStyle'], ngTemplateOutlet: ['CommonModule', 'NgTemplateOutlet'], ngSwitch: ['CommonModule', 'NgSwitch'], ngModel: ['FormsModule'], ngSubmit: ['FormsModule', 'ReactiveFormsModule'], formGroup: ['ReactiveFormsModule'], formControl: ['ReactiveFormsModule'], formControlName: ['ReactiveFormsModule'], routerLink: ['RouterLink', 'RouterModule'], routerLinkActive: ['RouterLinkActive', 'RouterModule'] };
-const COMMON_PIPES = { date: ['CommonModule', 'DatePipe'], number: ['CommonModule', 'DecimalPipe'], json: ['CommonModule', 'JsonPipe'], async: ['CommonModule', 'AsyncPipe'], titlecase: ['CommonModule', 'TitleCasePipe'], uppercase: ['CommonModule', 'UpperCasePipe'], lowercase: ['CommonModule', 'LowerCasePipe'], slice: ['CommonModule', 'SlicePipe'], percent: ['CommonModule', 'PercentPipe'], currency: ['CommonModule', 'CurrencyPipe'], keyvalue: ['CommonModule', 'KeyValuePipe'] };
+const COMMON_PIPES = { date: ['CommonModule', 'DatePipe'], number: ['CommonModule', 'DecimalPipe'], json: ['CommonModule', 'JsonPipe'], async: ['CommonModule', 'AsyncPipe'], titlecase: ['CommonModule', 'TitleCasePipe'], uppercase: ['CommonModule', 'UpperCasePipe'], lowercase: ['CommonModule', 'LowerCasePipe'], slice: ['CommonModule', 'SlicePipe'], percent: ['CommonModule', 'PercentPipe'], currency: ['CommonModule', 'CurrencyPipe'], keyvalue: ['CommonModule', 'KeyValuePipe'],
+  // Truck Log's own pipe (web/ui plant-date.pipe.ts): dates in plant time, never the device's zone.
+  plantDate: ['PlantDatePipe'] };
 
 let checkedIdentifiers = 0;
 const localComponents = components.filter((comp) => !comp.external);
@@ -688,6 +690,8 @@ for (const comp of localComponents) {
     }
   }
   for (const pipe of usedPipes) {
+    // Angular's date pipe formats in the device's time zone; handhelds and TVs are often wrong.
+    if (pipe === 'date') { problems.push(`${where}: use '| plantDate' (plant time zone) instead of '| date'`); continue; }
     const needed = COMMON_PIPES[pipe];
     if (!needed) { problems.push(`${where}: unknown pipe '${pipe}'`); continue; }
     if (!needed.some((x) => imports.has(x))) problems.push(`${where}: uses pipe '${pipe}' without importing ${needed.join(' or ')}`);

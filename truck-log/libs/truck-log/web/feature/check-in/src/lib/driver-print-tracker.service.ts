@@ -10,6 +10,8 @@ const PRINT_STATUS_POLL_START_MS = 2500;
 const PRINT_STATUS_POLL_MAX_MS = 30_000;
 /** With no status change for this long, stop polling and tell the guard the printer is not responding. */
 export const PRINT_STATUS_POLL_LIMIT_MS = 3 * 60 * 1000;
+/** Consecutive failed status reads before the guard is told Truck Log cannot be reached. */
+const PRINT_STATUS_UNREACHABLE_AFTER = 3;
 
 /**
  * Driver Print Package tracking for the most recent check-in: status polling
@@ -31,6 +33,12 @@ export class DriverPrintTracker implements OnDestroy {
   private readonly recoveryKeys = new Map<string, string>();
   /** Polling stopped after PRINT_STATUS_POLL_LIMIT_MS without a status change. */
   printerNotResponding = false;
+  /**
+   * Truck Log itself could not be reached for print status (network or API down). Shown instead of
+   * "printer not responding", so the guard does not go and check a printer that is working.
+   */
+  printStatusUnreachable = false;
+  private pollErrors = 0;
   private lastGuardActionKey = '';
   private packagePollTimer?: number;
   private packageDiscoveryDeadline = 0;
@@ -316,6 +324,8 @@ export class DriverPrintTracker implements OnDestroy {
     if (!silent) {
       // A manual refresh restarts the bounded status polling.
       this.printerNotResponding = false;
+      this.printStatusUnreachable = false;
+      this.pollErrors = 0;
       this.pollAttempts = 0;
       this.pollSince = 0;
     }
@@ -327,6 +337,8 @@ export class DriverPrintTracker implements OnDestroy {
       next: (result) => {
         if (!this.isCurrentPrintContext(visitId, generation)) return;
         this.printPackageLoading = false;
+        this.pollErrors = 0;
+        this.printStatusUnreachable = false;
         if (result) this.applyDriverPrintPackage(result, visitId, generation);
         else if (silent && this.packageDiscoveryDeadline > Date.now()) {
           this.packagePollTimer = window.setTimeout(
@@ -340,6 +352,8 @@ export class DriverPrintTracker implements OnDestroy {
       error: (response) => {
         if (!this.isCurrentPrintContext(visitId, generation)) return;
         this.printPackageLoading = false;
+        this.pollErrors += 1;
+        if (this.pollErrors >= PRINT_STATUS_UNREACHABLE_AFTER) this.printStatusUnreachable = true;
         if (silent && this.packageDiscoveryDeadline > Date.now()) {
           this.packagePollTimer = window.setTimeout(
             () => this.refreshDriverPrintPackage(visitId, true, generation),
@@ -394,6 +408,7 @@ export class DriverPrintTracker implements OnDestroy {
     if (!visitId || !this.isCurrentPrintContext(visitId, generation)
       || (!automaticPending && rxoStatus !== 'QUEUED' && rxoStatus !== 'LEASED')) {
       this.printerNotResponding = false;
+      this.printStatusUnreachable = false;
       this.pollAttempts = 0;
       this.pollSince = 0;
       return;
@@ -405,7 +420,9 @@ export class DriverPrintTracker implements OnDestroy {
       this.pollAttempts = 0;
     }
     if (Date.now() - this.pollSince >= PRINT_STATUS_POLL_LIMIT_MS) {
-      this.printerNotResponding = true;
+      // Unchanged because the status could not be read is not the printer's fault.
+      if (this.pollErrors > 0) this.printStatusUnreachable = true;
+      else this.printerNotResponding = true;
       return;
     }
     const delay = Math.min(PRINT_STATUS_POLL_MAX_MS, PRINT_STATUS_POLL_START_MS * Math.pow(1.5, this.pollAttempts));
@@ -428,6 +445,8 @@ export class DriverPrintTracker implements OnDestroy {
     this.recoveringItemId = '';
     this.recoveryKeys.clear();
     this.printerNotResponding = false;
+    this.printStatusUnreachable = false;
+    this.pollErrors = 0;
     this.pollAttempts = 0;
     this.pollSince = 0;
     this.lastPrintPackage = null;

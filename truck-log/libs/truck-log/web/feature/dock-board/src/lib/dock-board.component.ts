@@ -11,7 +11,7 @@ import {
 import { elapsedSince } from '@truck-log/web/domain';
 import { DEFAULT_DOCK_AGING_SETTINGS, dockAgeClass, dockAgeMinutes, dockAgeTone } from '@truck-log/web/domain';
 import { DockScanComponent } from './dock-scan/dock-scan.component';
-import { ToastService, TruckLogDialogDirective, jumpToSection } from '@truck-log/web/ui';
+import { ToastService, TruckLogDialogDirective, jumpToSection, PlantDatePipe } from '@truck-log/web/ui';
 
 type DockDirectionFilter = 'ALL' | 'INBOUND' | 'OUTBOUND';
 type DockUrgencyFilter = 'ALL' | 'AGING' | 'OVERDUE';
@@ -68,10 +68,10 @@ export function dockBoardCounts(
 
 @Component({
   standalone: true,
-  imports: [CommonModule, DockScanComponent, TruckLogDialogDirective],
+  imports: [CommonModule, DockScanComponent, TruckLogDialogDirective, PlantDatePipe],
   template: `
   <header class="dana-page-header">
-    <div><h1>Dock Board</h1><p><span *ngIf="lastUpdated">Updated {{lastUpdated | date:'shortTime'}} · refreshes automatically · </span>Packing slips are optional; the guard prints them at Final Checkout.</p></div>
+    <div><h1>Dock Board</h1><p><span *ngIf="lastUpdated">Updated {{lastUpdated | plantDate:'shortTime'}} · refreshes automatically · </span>Packing slips are optional; the guard prints them at Final Checkout.</p></div>
     <div class="dana-actions"><button class="dana-btn" type="button" (click)="load()">Refresh</button></div>
   </header>
 
@@ -88,7 +88,7 @@ export function dockBoardCounts(
       </div>
     </div>
   </section>
-  <p *ngIf="refreshError" class="dana-alert dana-alert-warning tl-notice" role="alert">Dock Board refresh failed. Showing last confirmed data<span *ngIf="lastUpdated"> from {{lastUpdated | date:'shortTime'}}</span>. Select Refresh to retry.</p>
+  <p *ngIf="refreshError" class="dana-alert dana-alert-warning tl-notice" role="alert">Dock Board refresh failed. Showing last confirmed data<span *ngIf="lastUpdated"> from {{lastUpdated | plantDate:'shortTime'}}</span>. Select Refresh to retry.</p>
 
   <div class="tl-dock-grid" id="dock-board-grid" role="region" aria-label="Assigned docks" tabindex="0">
     <article class="dana-card" *ngFor="let visit of filteredVisits; trackBy: trackDockVisit" [attr.data-tone]="ageTone(visit)">
@@ -104,7 +104,7 @@ export function dockBoardCounts(
         <div class="dana-detail"><span class="dana-detail-label">Driver</span><span class="dana-detail-value">{{visit.driverName}}</span></div>
         <div class="dana-detail"><span class="dana-detail-label">Carrier</span><span class="dana-detail-value">{{visit.carrierName || '—'}}</span></div>
         <div class="dana-detail"><span class="dana-detail-label">Trailer</span><span class="dana-detail-value">{{visit.trailerId || '—'}}</span></div>
-        <div class="dana-detail"><span class="dana-detail-label">Checked in</span><span class="dana-detail-value">{{visit.guardCheckInAt | date:'shortTime'}}</span></div>
+        <div class="dana-detail"><span class="dana-detail-label">Checked in</span><span class="dana-detail-value">{{visit.guardCheckInAt | plantDate:'smartTime'}}</span></div>
         <div class="dana-detail"><span class="dana-detail-label">On site</span><span class="dana-detail-value">{{elapsed(visit.guardCheckInAt)}}</span></div>
         <div class="dana-detail"><span class="dana-detail-label">At dock</span><span class="dana-detail-value">{{visit.dockAssignedAt ? elapsed(visit.dockAssignedAt) : '—'}}</span></div>
       </div>
@@ -120,7 +120,7 @@ export function dockBoardCounts(
           <div class="tl-stack">
             <span *ngIf="packingSlipReady(visit)">SAP Document / Delivery ID <strong>{{slip.extractedDocumentId}}</strong></span>
             <span class="dana-field-error" *ngIf="!packingSlipReady(visit)">{{slip.extractionMessage || 'SAP Document/Delivery ID is still in review.'}}</span>
-            <small class="dana-muted">{{slip.originalFileName || slip.fileName}} · {{slip.scannedAt | date:'short'}}{{slip.scannedBy ? ' · ' + slip.scannedBy : ''}}</small>
+            <small class="dana-muted">{{slip.originalFileName || slip.fileName}} · {{slip.scannedAt | plantDate:'short'}}{{slip.scannedBy ? ' · ' + slip.scannedBy : ''}}</small>
           </div>
           <div class="dana-actions">
             <a *ngIf="packingSlipAvailable(visit)" class="dana-btn dana-btn-sm" [href]="packingSlipUrl(slip)" target="_blank" rel="noopener">View PDF</a>

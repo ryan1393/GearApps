@@ -3,8 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TruckLogApi } from '@truck-log/web/data-access';
 import { CarrierReferenceRecord, CheckInConfigRecord, DriverReferenceRecord, DockRecord, LocationReferenceRecord, RxoFreightRecord, ScheduledLoadLookupRecord, TruckVisitRecord } from '@truck-log/shared/contracts';
-import { CheckInForm, CheckInRxoSelection, UppercaseCheckInField, emptyCheckInForm, toCreateTruckVisitRequest } from '@truck-log/web/domain';
-import { ToastService } from '@truck-log/web/ui';
+import { CheckInForm, CheckInRxoSelection, UppercaseCheckInField, emptyCheckInForm, formatPlantDate, toCreateTruckVisitRequest } from '@truck-log/web/domain';
+import { ToastService, PlantDatePipe } from '@truck-log/web/ui';
 import { DanaComboboxComponent, type DanaComboboxColumn } from '@dana/ui';
 import { ComboboxExactEnterDirective } from './combobox-exact-enter.directive';
 import { DockStatusWidgetComponent } from './dock-status-widget.component';
@@ -28,7 +28,7 @@ import { FreightLoadPicker } from './freight-load-picker.service';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule, DockStatusWidgetComponent, DanaComboboxComponent, ComboboxExactEnterDirective],
+  imports: [CommonModule, FormsModule, DockStatusWidgetComponent, DanaComboboxComponent, ComboboxExactEnterDirective, PlantDatePipe],
   // Load picker and print-package tracking are scoped to this page.
   providers: [FreightLoadPicker, DriverPrintTracker],
   templateUrl: './check-in.component.html'
@@ -638,13 +638,9 @@ export class CheckInComponent implements OnInit, OnDestroy {
 }
 
 function shortDateTime(value?: string | null): string {
-  if (!value) return '';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  return formatPlantDate(value, 'MMM d, h:mm a');
 }
 
 function shortDate(value?: string | null): string {
-  if (!value) return '';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  return formatPlantDate(value, 'MMM d');
 }

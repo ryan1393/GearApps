@@ -41,7 +41,9 @@ export class Poller<T> {
   constructor(private readonly options: PollerOptions<T>) {
     const timeoutMs = options.timeoutMs ?? Math.max(15000, options.intervalMs * 2);
     this.restart$.pipe(
-      switchMap((start) => timer(start.delayed ? options.intervalMs : 0, options.intervalMs).pipe(
+      // A restart cancels any request in flight, so clear its loading flag here; otherwise a
+      // delayed restart would leave "loading" on for a whole interval.
+      switchMap((start) => { this.loading.set(false); return timer(start.delayed ? options.intervalMs : 0, options.intervalMs).pipe(
         exhaustMap((tick) => {
           const manual = start.manual && tick === 0;
           if (!manual && options.when && !options.when()) return of(null);
@@ -52,7 +54,7 @@ export class Poller<T> {
             catchError((error: unknown) => of<Outcome<T>>({ ok: false, error, manual })),
           );
         }),
-      )),
+      ); }),
       takeUntilDestroyed(options.destroyRef),
     ).subscribe((outcome: Outcome<T> | null) => {
       if (!outcome) return;

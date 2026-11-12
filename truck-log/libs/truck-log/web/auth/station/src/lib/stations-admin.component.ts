@@ -10,7 +10,8 @@ import {
   type StationRecord,
 } from '@truck-log/shared/contracts';
 import { TruckLogAdminAccessComponent, TruckLogAdminAuth } from '@truck-log/web/auth/admin';
-import { ToastService, TruckLogDialogDirective } from '@truck-log/web/ui';
+import { formatPlantDate } from '@truck-log/web/domain';
+import { ToastService, TruckLogDialogDirective, PlantDatePipe } from '@truck-log/web/ui';
 import { STATION_SETUP_PATH, TruckLogStationAccess, stationErrorMessage, stationKindLabel } from './station-access.service';
 
 export function relativeTime(iso: string | null | undefined, now = Date.now()): string {
@@ -27,16 +28,14 @@ export function relativeTime(iso: string | null | undefined, now = Date.now()): 
 }
 
 export function clockTime(iso: string | null | undefined): string {
-  const at = iso ? new Date(iso) : null;
-  if (!at || !Number.isFinite(at.getTime())) return '—';
-  return at.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  return formatPlantDate(iso, 'h:mm a') || '—';
 }
 
 /** Admin > Stations: register guard PCs and TVs, issue pairing codes, revoke stations. */
 @Component({
   selector: 'tl-stations-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TruckLogAdminAccessComponent, TruckLogDialogDirective],
+  imports: [CommonModule, FormsModule, RouterLink, TruckLogAdminAccessComponent, TruckLogDialogDirective, PlantDatePipe],
   template: `
   <tl-admin-access></tl-admin-access>
   <div class="tl-admin">
@@ -94,7 +93,7 @@ export function clockTime(iso: string | null | undefined): string {
         <thead><tr><th scope="col">Name</th><th scope="col">Kind</th><th scope="col">Status</th><th scope="col"><span class="dana-muted">Actions</span></th></tr></thead>
         <tbody>
           <tr *ngFor="let station of stations; trackBy: trackById">
-            <td><b>{{station.name}}</b><span class="dana-cell-sub">Added {{station.createdAt | date:'M/d/yy h:mm a'}}{{station.createdBy ? ' by ' + station.createdBy : ''}}</span></td>
+            <td><b>{{station.name}}</b><span class="dana-cell-sub">Added {{station.createdAt | plantDate:'M/d/yy h:mm a'}}{{station.createdBy ? ' by ' + station.createdBy : ''}}</span></td>
             <td><span class="dana-status-badge is-plain" [attr.data-tone]="station.kind === kinds.GUARD ? 'neutral' : 'info'">{{kindLabel(station.kind)}}</span></td>
             <td><span class="dana-status-badge" [attr.data-tone]="station.status === 'ACTIVE' ? 'success' : (station.status === 'REVOKED' ? 'danger' : 'warning')">{{statusLabel(station)}}</span></td>
             <td>

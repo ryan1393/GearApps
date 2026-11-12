@@ -166,7 +166,7 @@ test('Failed paperwork retains only unacknowledged files and retry uploads to th
   assert.equal(f.component.retryVisit, null);
 });
 
-test('Hung print status times out, releases manual refresh, and reaches bounded warning', () => {
+test('Hung print status times out, releases manual refresh, and reports Truck Log unreachable', () => {
   const scheduler = new TestScheduler((actual, expected) => assert.deepEqual(actual, expected));
   let calls = 0;
   const tracker = new DriverPrintTracker({ driverPrintPackageById: () => { calls++; return rxjs.NEVER; } }, toast);
@@ -187,9 +187,20 @@ test('Hung print status times out, releases manual refresh, and reaches bounded 
     }, 30002);
     scheduler.schedule(() => {
       assert.equal(tracker.printPackageLoading, false);
-      assert.equal(tracker.printerNotResponding, true);
+      // Every status read timed out: Truck Log was unreachable, so the printer is not blamed.
+      assert.equal(tracker.printerNotResponding, false);
+      assert.equal(tracker.printStatusUnreachable, true);
     }, 45003);
   });
+});
+
+test('Readable but unchanged print status for 3 minutes blames the printer, not the connection', () => {
+  const tracker = new DriverPrintTracker({ driverPrintPackageById: () => rxjs.of(printPackage()), driverPrintPackage: () => rxjs.of(printPackage()) }, toast);
+  tracker.startTracking(visit(), 'key', null, false);
+  now += 180001;
+  tracker.refreshDriverPrintPackage(1, true);
+  assert.equal(tracker.printerNotResponding, true);
+  assert.equal(tracker.printStatusUnreachable, false);
 });
 
 test('Queued replacement reuses an ambiguous action key and tracks only confirmed replacement', () => {

@@ -33,3 +33,7 @@
 }
 /* The narrowest handhelds (320px): a little more width for tables and cards. */
 @media (max-width: 400px) { .dana-page { padding: 10px; } }
+/* Aging/overdue rows say so in words too, not only with the row tint (Dashboard, Active Trucks). */
+.tl-age-text { font-weight: 700; }
+.tl-age-text[data-tone="danger"] { color: var(--dana-danger); }
+.tl-age-text[data-tone="warning"] { color: var(--dana-warning); }

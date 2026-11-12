@@ -31,29 +31,29 @@ import { AdminWorkflowTabComponent } from './tabs/admin-workflow-tab.component';
     </div>
   </header>
 
-  <nav class="dana-tabs" role="tablist" aria-label="Administration sections">
-    <button type="button" class="dana-tab" role="tab"
+  <nav class="dana-tabs" role="tablist" aria-label="Administration sections" (keydown)="onTabKeydown($event)">
+    <button type="button" class="dana-tab" role="tab" id="admin-tab-drivers" aria-controls="admin-panel-drivers" [attr.tabindex]="activeAdminTab === 'drivers' ? 0 : -1"
       [class.is-active]="activeAdminTab === 'drivers'" [attr.aria-selected]="activeAdminTab === 'drivers'"
       (click)="activeAdminTab = 'drivers'">Drivers <span class="dana-count-badge">{{data.drivers.length}}</span></button>
-    <button type="button" class="dana-tab" role="tab"
+    <button type="button" class="dana-tab" role="tab" id="admin-tab-carriers" aria-controls="admin-panel-carriers" [attr.tabindex]="activeAdminTab === 'carriers' ? 0 : -1"
       [class.is-active]="activeAdminTab === 'carriers'" [attr.aria-selected]="activeAdminTab === 'carriers'"
       (click)="activeAdminTab = 'carriers'">Carriers <span class="dana-count-badge">{{data.carriers.length}}</span></button>
-    <button type="button" class="dana-tab" role="tab"
+    <button type="button" class="dana-tab" role="tab" id="admin-tab-locations" aria-controls="admin-panel-locations" [attr.tabindex]="activeAdminTab === 'locations' ? 0 : -1"
       [class.is-active]="activeAdminTab === 'locations'" [attr.aria-selected]="activeAdminTab === 'locations'"
       (click)="activeAdminTab = 'locations'">Locations <span class="dana-count-badge">{{data.locations.length}}</span></button>
-    <button type="button" class="dana-tab" role="tab"
+    <button type="button" class="dana-tab" role="tab" id="admin-tab-docks" aria-controls="admin-panel-docks" [attr.tabindex]="activeAdminTab === 'docks' ? 0 : -1"
       [class.is-active]="activeAdminTab === 'docks'" [attr.aria-selected]="activeAdminTab === 'docks'"
       (click)="activeAdminTab = 'docks'">Docks <span class="dana-count-badge">{{data.activeDockCount + '/' + data.docks.length}}</span></button>
-    <button type="button" class="dana-tab" role="tab"
+    <button type="button" class="dana-tab" role="tab" id="admin-tab-alerts" aria-controls="admin-panel-alerts" [attr.tabindex]="activeAdminTab === 'alerts' ? 0 : -1"
       [class.is-active]="activeAdminTab === 'alerts'" [attr.aria-selected]="activeAdminTab === 'alerts'"
       (click)="activeAdminTab = 'alerts'">Dock alerts</button>
-    <button type="button" class="dana-tab" role="tab"
+    <button type="button" class="dana-tab" role="tab" id="admin-tab-schedule" aria-controls="admin-panel-schedule" [attr.tabindex]="activeAdminTab === 'schedule' ? 0 : -1"
       [class.is-active]="activeAdminTab === 'schedule'" [attr.aria-selected]="activeAdminTab === 'schedule'"
       (click)="activeAdminTab = 'schedule'">Scheduled loads <span class="dana-count-badge">{{data.scheduledLoads.length}}</span></button>
-    <button type="button" class="dana-tab" role="tab"
+    <button type="button" class="dana-tab" role="tab" id="admin-tab-workflow" aria-controls="admin-panel-workflow" [attr.tabindex]="activeAdminTab === 'workflow' ? 0 : -1"
       [class.is-active]="activeAdminTab === 'workflow'" [attr.aria-selected]="activeAdminTab === 'workflow'"
       (click)="activeAdminTab = 'workflow'">Workflow</button>
-    <button type="button" class="dana-tab" role="tab" id="truck-log-printing-tab" aria-controls="truck-log-printing-panel"
+    <button type="button" class="dana-tab" role="tab" id="truck-log-printing-tab" aria-controls="truck-log-printing-panel" [attr.tabindex]="activeAdminTab === 'printing' ? 0 : -1"
       [class.is-active]="activeAdminTab === 'printing'" [attr.aria-selected]="activeAdminTab === 'printing'"
       (click)="activeAdminTab = 'printing'">Printing</button>
   </nav>
@@ -65,13 +65,13 @@ import { AdminWorkflowTabComponent } from './tabs/admin-workflow-tab.component';
     </div>
   </div>
 
-  <div tlAdminDriversTab class="tl-fill" [hidden]="activeAdminTab !== \'drivers\'" role="tabpanel"></div>
-  <div tlAdminCarriersTab class="tl-fill" [hidden]="activeAdminTab !== \'carriers\'" role="tabpanel"></div>
-  <div tlAdminLocationsTab class="tl-fill" [hidden]="activeAdminTab !== \'locations\'" role="tabpanel"></div>
-  <section tlAdminDocksTab class="dana-panel tl-fill" [hidden]="activeAdminTab !== \'docks\'" role="tabpanel"></section>
-  <section tlAdminAlertsTab class="dana-panel tl-fill" [hidden]="activeAdminTab !== \'alerts\'" role="tabpanel"></section>
-  <section tlAdminScheduleTab class="dana-panel tl-fill" [hidden]="activeAdminTab !== \'schedule\'" role="tabpanel"></section>
-  <section tlAdminWorkflowTab class="dana-panel tl-fill" [hidden]="activeAdminTab !== \'workflow\'" role="tabpanel"></section>
+  <div tlAdminDriversTab id="admin-panel-drivers" aria-labelledby="admin-tab-drivers" class="tl-fill" [hidden]="activeAdminTab !== \'drivers\'" role="tabpanel"></div>
+  <div tlAdminCarriersTab id="admin-panel-carriers" aria-labelledby="admin-tab-carriers" class="tl-fill" [hidden]="activeAdminTab !== \'carriers\'" role="tabpanel"></div>
+  <div tlAdminLocationsTab id="admin-panel-locations" aria-labelledby="admin-tab-locations" class="tl-fill" [hidden]="activeAdminTab !== \'locations\'" role="tabpanel"></div>
+  <section tlAdminDocksTab id="admin-panel-docks" aria-labelledby="admin-tab-docks" class="dana-panel tl-fill" [hidden]="activeAdminTab !== \'docks\'" role="tabpanel"></section>
+  <section tlAdminAlertsTab id="admin-panel-alerts" aria-labelledby="admin-tab-alerts" class="dana-panel tl-fill" [hidden]="activeAdminTab !== \'alerts\'" role="tabpanel"></section>
+  <section tlAdminScheduleTab id="admin-panel-schedule" aria-labelledby="admin-tab-schedule" class="dana-panel tl-fill" [hidden]="activeAdminTab !== \'schedule\'" role="tabpanel"></section>
+  <section tlAdminWorkflowTab id="admin-panel-workflow" aria-labelledby="admin-tab-workflow" class="dana-panel tl-fill" [hidden]="activeAdminTab !== \'workflow\'" role="tabpanel"></section>
   </div>`
 })
 // Tabs stay mounted ([hidden], not *ngIf) so unsaved row edits survive switching tabs.
@@ -81,4 +81,19 @@ export class AdminComponent implements OnInit {
   constructor(readonly data: AdminDataStore) {}
 
   ngOnInit() { this.data.load(); }
+
+  /** WAI-ARIA tabs: arrow keys, Home and End move between tabs; Enter or Space opens the focused one. */
+  onTabKeydown(event: KeyboardEvent) {
+    const tabs = Array.from((event.currentTarget as HTMLElement).querySelectorAll<HTMLElement>('[role="tab"]'));
+    const current = tabs.indexOf(document.activeElement as HTMLElement);
+    if (current < 0) return;
+    const next = event.key === 'ArrowRight' ? (current + 1) % tabs.length
+      : event.key === 'ArrowLeft' ? (current - 1 + tabs.length) % tabs.length
+      : event.key === 'Home' ? 0
+      : event.key === 'End' ? tabs.length - 1
+      : -1;
+    if (next < 0) return;
+    event.preventDefault();
+    tabs[next].focus();
+  }
 }

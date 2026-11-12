@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import type { LocationReferenceRecord } from '@truck-log/shared/contracts';
 import { TruckLogApi } from '@truck-log/web/data-access';
-import { ToastService } from '@truck-log/web/ui';
+import { ToastService, PlantDatePipe } from '@truck-log/web/ui';
 import { AdminDataStore, normalizedText } from '../admin-data.store';
 import { RowDrafts, trimmed } from '../row-drafts';
 
@@ -18,7 +18,7 @@ function emptyLocation(): LocationDraft {
 @Component({
   selector: 'div[tlAdminLocationsTab]',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PlantDatePipe],
   template: `
     <section class="dana-panel tl-fill">
       <div class="dana-panel-header">
@@ -52,7 +52,7 @@ function emptyLocation(): LocationDraft {
               <td><input class="dana-input" [attr.aria-label]="'ZIP / postal for ' + location.name" [(ngModel)]="edits.draft(location).postalCode" placeholder="Optional"></td>
               <td><input class="dana-input" [attr.aria-label]="'Country for ' + location.name" [(ngModel)]="edits.draft(location).country" placeholder="Optional"></td>
               <td><span class="dana-status-badge" [attr.data-tone]="location.active ? 'success' : 'neutral'">{{location.active ? 'Active' : 'Disabled'}}</span><span class="dana-cell-sub" *ngIf="edits.dirty(location)">Unsaved changes</span></td>
-              <td class="dana-nowrap">{{location.lastUsedAt ? (location.lastUsedAt | date:'short') : 'Not yet'}}</td>
+              <td class="dana-nowrap">{{location.lastUsedAt ? (location.lastUsedAt | plantDate:'short') : 'Not yet'}}</td>
               <td><div class="dana-table-actions">
                 <button class="dana-btn dana-btn-sm dana-btn-primary" type="button" [disabled]="data.busy || !edits.dirty(location)" (click)="saveLocation(location)">Save</button>
                 <button class="dana-btn dana-btn-sm" type="button" [disabled]="data.busy" (click)="toggleLocation(location)">{{location.active ? 'Disable' : 'Enable'}}</button>

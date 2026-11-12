@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import type { CarrierReferenceRecord } from '@truck-log/shared/contracts';
 import { TruckLogApi } from '@truck-log/web/data-access';
-import { ToastService } from '@truck-log/web/ui';
+import { ToastService, PlantDatePipe } from '@truck-log/web/ui';
 import { AdminDataStore, normalizedText } from '../admin-data.store';
 import { RowDrafts, trimmed } from '../row-drafts';
 
@@ -13,7 +13,7 @@ interface CarrierDraft { name: string; }
 @Component({
   selector: 'div[tlAdminCarriersTab]',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PlantDatePipe],
   template: `
     <section class="dana-panel tl-fill">
       <div class="dana-panel-header">
@@ -37,7 +37,7 @@ interface CarrierDraft { name: string; }
             <tr [attr.data-tone]="edits.error(carrier) ? 'danger' : (edits.dirty(carrier) ? 'warning' : null)">
               <td><input class="dana-input" [attr.aria-label]="'Name for ' + carrier.name" [(ngModel)]="edits.draft(carrier).name"></td>
               <td><span class="dana-status-badge" [attr.data-tone]="carrier.active ? 'success' : 'neutral'">{{carrier.active ? 'Active' : 'Disabled'}}</span><span class="dana-cell-sub" *ngIf="edits.dirty(carrier)">Unsaved changes</span></td>
-              <td class="dana-nowrap">{{carrier.lastUsedAt ? (carrier.lastUsedAt | date:'short') : 'Not yet'}}</td>
+              <td class="dana-nowrap">{{carrier.lastUsedAt ? (carrier.lastUsedAt | plantDate:'short') : 'Not yet'}}</td>
               <td><div class="dana-table-actions">
                 <button class="dana-btn dana-btn-sm dana-btn-primary" type="button" [disabled]="data.busy || !edits.dirty(carrier)" (click)="saveCarrier(carrier)">Save</button>
                 <button class="dana-btn dana-btn-sm" type="button" [disabled]="data.busy" (click)="toggleCarrier(carrier)">{{carrier.active ? 'Disable' : 'Enable'}}</button>

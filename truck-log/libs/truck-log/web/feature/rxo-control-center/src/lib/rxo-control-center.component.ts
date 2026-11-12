@@ -9,7 +9,7 @@ import type {
 } from '@truck-log/shared/contracts';
 import { forkJoin, Subscription } from 'rxjs';
 import { Poller, TruckLogApi, createPoller, rxoRecoveryErrorMessage, rxoRecoveryWaitFeedback } from '@truck-log/web/data-access';
-import { StaleDataNoticeComponent, ToastService, jumpToSection, rememberedFlag } from '@truck-log/web/ui';
+import { StaleDataNoticeComponent, ToastService, jumpToSection, rememberedFlag, PlantDatePipe } from '@truck-log/web/ui';
 import { buildRxoControlView, type RxoControlView } from './rxo-control-center.presenter';
 import { RxoDataStore, type DataKind } from './rxo-data.store';
 import { RxoDataTableComponent } from './rxo-data-table.component';
@@ -34,7 +34,7 @@ const RXO_SYSTEM_STATUS_EVENT = 'truck-log-rxo-system-status';
 @Component({
   selector: 'truck-log-rxo-control-center',
   standalone: true,
-  imports: [CommonModule, RouterLink, StaleDataNoticeComponent, TruckLogAdminAccessComponent, RxoDataTableComponent, RxoSettingsPanelComponent],
+  imports: [CommonModule, RouterLink, StaleDataNoticeComponent, TruckLogAdminAccessComponent, RxoDataTableComponent, RxoSettingsPanelComponent, PlantDatePipe],
   // The Data tab keeps its dataset, filters and page while other tabs are open.
   providers: [RxoDataStore],
   templateUrl: './rxo-control-center.component.html',

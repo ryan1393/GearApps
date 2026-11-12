@@ -65,6 +65,7 @@ export class TruckLogApi {
       application: string;
       version: string;
       time: string;
+      timeZone?: string;
     }>(`${this.base}/health/live`).pipe(timeout(10000));
   }
 

@@ -1,6 +1,7 @@
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TruckLogApi } from '@truck-log/web/data-access';
+import { setPlantTimeZone } from '@truck-log/web/domain';
 import { ToastHostComponent } from '@truck-log/web/ui';
 import { TRUCK_LOG_VERSION } from '@truck-log/shared/contracts';
 import { TruckLogStationAccess, isStationPublicPath, roleCanOpen, roleHome, stationKindLabel, type TruckLogScreen } from '@truck-log/web/auth/station';
@@ -243,6 +244,7 @@ export class AppComponent implements OnInit, OnDestroy {
         this.healthRequestInFlight = false;
         this.consecutiveHealthFailures = 0;
         this.noteServerVersion(health.version);
+        this.notePlantTimeZone(health.timeZone);
         this.coreReadiness = 'ready';
         this.coreHealthDetail = `Database: ${health.database}; Paperwork storage: ${health.documentStorage}`;
         this.updateHealthPresentation();
@@ -252,6 +254,7 @@ export class AppComponent implements OnInit, OnDestroy {
           next: (live) => {
             this.healthRequestInFlight = false;
             this.noteServerVersion(live.version);
+            this.notePlantTimeZone(live.timeZone);
             this.consecutiveHealthFailures = 0;
             this.coreReadiness = 'degraded';
             this.coreHealthDetail = readinessError?.error?.message
@@ -285,6 +288,11 @@ export class AppComponent implements OnInit, OnDestroy {
    * an old web build against a new API. Compared with the first version this page
    * observed (not the compiled constant) so a mismatched deploy cannot loop.
    */
+  /** Times on every screen follow the plant zone the server reports (see web/domain plant-time.ts). */
+  private notePlantTimeZone(zone: unknown) {
+    setPlantTimeZone(zone);
+  }
+
   private noteServerVersion(version: unknown) {
     if (typeof version !== 'string' || !version) return;
     if (!this.firstServerVersion) { this.firstServerVersion = version; return; }
