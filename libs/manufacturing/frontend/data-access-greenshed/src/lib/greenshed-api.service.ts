@@ -24,7 +24,7 @@ export interface PartMasterRow {
     id: string;
     number: string;
     model_id?: string | null;
-    model?: { model_number: number | null; model_type: string | null } | null;
+    model?: { model_number: string | null; model_type: string | null } | null;
   };
   part_type?: {
     id: string;

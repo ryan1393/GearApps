@@ -19,7 +19,16 @@
     counts by part type, shared rings/pinions/Summaries, status and archive state with linked
     parts, integrity findings, and each gearset's Summary blade rule. `--seed <file>` compares a
     historical seed and lists its import rules without applying them.
-
+- **Cycle time in Lapping Summaries.** Lapper Read now also records each cycle's time (seconds in
+  cycle, Y3.2) in MeshForge, not only in Argonaut. Lapping Summaries shows it in a Cycle time
+  column (minutes:seconds, such as 2:04.3; exact seconds on hover) and at the top: the latest
+  cycle's time, or the selected cycle's, with the average of the last 20 timed cycles of that
+  machine and gearset. Cycles recorded before this, and cycles whose start or end the collector
+  missed, show a dash. New nullable column `lapper.machine_cycles.cycle_time_s` (migration
+  `20261111-lapper-cycle-time-v1`); `POST /api/v1/machine-cycle` accepts an optional
+  `cycle_time_s` (0 to 86400, up to 3 decimals), so collectors that do not send it are unaffected;
+  `history-page` returns each cycle's time and `cycle_time.average_s`. An upgraded collector
+  talking to an API that is not upgraded yet sends the cycle again without the time.
 - **Cutter-body compatibility: which body types a Summary + Part Type may use.** One shared check
   now answers "which cutter-body definitions can these blades be loaded into?" and the API enforces it
   everywhere. See `docs/manufacturing/CUTTER_BODY_BLADE_RULES.md`.
@@ -46,6 +55,13 @@
     the packaged base data (`docs/manufacturing/CUTTER_BODY_COMPATIBILITY_MATRIX.md`).
   - Hand, supplier and Tri-ac/Pent-ac family are still not restrictions (no approved rule ties them to
     a Summary, Part Type or HOS). No schema change, no data migration, no quantity changes.
+- **Model numbers can be text.** A model can now be numbered `S-110` or `9¼` as well as `174`.
+  `models.model_number` changes from an integer to text on startup (migration
+  `20261111-shared-model-number-text-v1`); existing numbers keep their digits. Numbers that
+  differ only in case or spacing are the same model. Admin > Models takes any text, shows a
+  model with no number by its type, and lists numbers in natural order (9, 110, 1000, S-110).
+  The models API still accepts a numeric `model_number` from older clients and returns it as
+  text. **Back up the database before deploying.**
 
 ## 70.6.0 (2026-11-11)
 

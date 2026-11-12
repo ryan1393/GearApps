@@ -299,7 +299,8 @@ class Worker:
             if pending.saved_cycle is None:
                 gearset = self.api.gearset_by_number(pending.part_number)
                 saved = self.api.post_cycle(pending.serial, pending.consec, pending.machine_id,
-                                            gearset["id"], pending.completed_at or utc_now(), pending.id)
+                                            gearset["id"], pending.completed_at or utc_now(), pending.id,
+                                            pending.cycle_time_s())
                 with self._lock:
                     pending.saved_cycle = {"id": saved["id"], "machine_id": pending.machine_id, "gearset_id": gearset["id"]}
                     self._dirty = True

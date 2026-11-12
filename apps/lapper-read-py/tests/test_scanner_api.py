@@ -76,6 +76,8 @@ class FakeServer(BaseHTTPRequestHandler):
     log = []
     tokens = iter([])
     revoked: set = set()
+    #: Answers like an API from before cycle times: the unknown field fails validation.
+    old_api = False
 
     def log_message(self, *args):
         pass
@@ -103,6 +105,10 @@ class FakeServer(BaseHTTPRequestHandler):
             return self._reply(404, {"message": "missing"})
         if self.path.startswith("/api/v1/gearset/number/500"):
             return self._reply(500, {"message": "boom"})
+        if FakeServer.old_api and self.path == "/api/v1/machine-cycle" and "cycle_time_s" in (body or {}):
+            # The real API's ValidationPipe answers 422 (errorHttpStatusCode in configure-api.ts).
+            return self._reply(422, {"message": ["property cycle_time_s should not exist"],
+                                     "error": "Unprocessable Entity", "statusCode": 422})
         return self._reply(201 if self.command == "POST" else 200, {"id": "x1", **(body or {})})
 
     do_GET = do_POST = do_PATCH = _handle
@@ -112,6 +118,7 @@ class ApiTests(unittest.TestCase):
     def setUp(self):
         FakeServer.log = []
         FakeServer.revoked = set()
+        FakeServer.old_api = False
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), FakeServer)
@@ -187,6 +194,24 @@ class ApiTests(unittest.TestCase):
             self.assertIsNone(FakeServer.log[-1][4]["serial_number"])
         self.api.post_cycle(" D000000001 ", 2, "m", "g", "2026-11-10T03:00:00Z", "k2")
         self.assertEqual(FakeServer.log[-1][4]["serial_number"], "D000000001")
+
+    def test_a_cycle_is_posted_with_its_cycle_time_and_without_one_when_unknown(self):
+        FakeServer.tokens = iter(["t"])
+        self.api.post_cycle("SN-1", 1, "m", "g", "2026-11-10T03:00:00Z", "k1", 124.25)
+        self.assertEqual(FakeServer.log[-1][4]["cycle_time_s"], 124.25)
+        self.api.post_cycle("SN-2", 2, "m", "g", "2026-11-10T03:00:00Z", "k2", None)
+        self.assertNotIn("cycle_time_s", FakeServer.log[-1][4])
+
+    def test_an_api_without_cycle_times_gets_the_cycle_again_without_it_under_the_same_key(self):
+        FakeServer.tokens = iter(["t"])
+        FakeServer.old_api = True
+        saved = self.api.post_cycle("SN-1", 1, "m", "g", "2026-11-10T03:00:00Z", "k1", 124.25)
+        self.assertEqual(saved["id"], "x1")
+        writes = [entry for entry in FakeServer.log if entry[1] == "/api/v1/machine-cycle"]
+        self.assertEqual([w[3] for w in writes], ["k1", "k1"])
+        self.assertIn("cycle_time_s", writes[0][4])
+        self.assertNotIn("cycle_time_s", writes[1][4])
+        self.assertEqual({k: v for k, v in writes[0][4].items() if k != "cycle_time_s"}, writes[1][4])
 
     def test_machine_lookup_disambiguates_a_shared_ip_by_asset_number(self):
         FakeServer.tokens = iter(["t"])

@@ -246,6 +246,8 @@ export class PostgresLapperStore implements OnApplicationBootstrap {
         serial_number: data.serial_number ?? null,
         recorded_at: timestamp.toISOString(),
         timestamp: () => '(CAST(:recorded AS timestamptz) AT TIME ZONE :zone)',
+        // Left as it is when not sent, so an edit without it never clears a measured time.
+        ...(data.cycle_time_s !== undefined ? { cycle_time_s: data.cycle_time_s ?? null } : {}),
       };
       if (exists)
         await manager

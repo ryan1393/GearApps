@@ -48,7 +48,9 @@ import {
   IsString,
   IsUrl,
   IsUUID,
+  Max,
   MaxLength,
+  Min,
   ValidateIf,
 } from 'class-validator';
 
@@ -253,6 +255,18 @@ export class MachineCycleDto implements MachineCycle {
   serial_number!: string | null;
   @ApiProperty({ example: 42 }) @IsInt() consec!: number;
   @ApiProperty({ type: String, format: 'date-time' }) @Type(() => Date) @IsDate() timestamp!: Date;
+  @ApiPropertyOptional({
+    nullable: true,
+    minimum: 0,
+    maximum: 86400,
+    example: 124.25,
+    description: 'Seconds the lapper was in cycle (Y3.2). Omit or null when unknown.',
+  })
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false, maxDecimalPlaces: 3 })
+  @Min(0)
+  @Max(86400)
+  cycle_time_s?: number | null;
 }
 export class CreateMachineCycleDto
   extends OmitType(MachineCycleDto, ['id'])

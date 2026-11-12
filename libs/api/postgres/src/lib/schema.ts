@@ -141,6 +141,14 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
       COLLECTOR_TOKEN_PURPOSE_SQL,
     );
     await runDatabaseMigration(manager, '20261111-lapper-master-data-dedup-v1', LAPPER_MASTER_DATA_DEDUP_SQL);
+    // Seconds each cycle was in cycle (Y3.2), as Lapper Read measured it; null when unknown,
+    // which includes every cycle recorded before collectors sent it.
+    await runDatabaseMigration(manager, '20261111-lapper-cycle-time-v1', `
+      ALTER TABLE lapper.machine_cycles ADD COLUMN IF NOT EXISTS cycle_time_s numeric(10,3);
+      ALTER TABLE lapper.machine_cycles DROP CONSTRAINT IF EXISTS ck_lapper_cycle_time;
+      ALTER TABLE lapper.machine_cycles ADD CONSTRAINT ck_lapper_cycle_time
+        CHECK (cycle_time_s IS NULL OR (cycle_time_s >= 0 AND cycle_time_s <= 86400));
+    `);
   });
 }
 
