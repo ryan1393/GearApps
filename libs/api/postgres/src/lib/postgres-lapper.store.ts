@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { createHash, randomUUID } from 'node:crypto';
 import { EntityManager } from 'typeorm';
+import { macroCanFlagChanges } from '@meshforge/shared/domain';
 import { numberOrNull, PostgresLapperCatalog, Resource, Row, text } from './catalog';
 import { migrateLapperPostgres } from './schema';
 
@@ -412,7 +413,7 @@ export class PostgresLapperStore implements OnApplicationBootstrap, OnModuleDest
       const current = exists
         ? await manager
             .createQueryBuilder()
-            .select(['m.min_value AS min_value', 'm.max_value AS max_value'])
+            .select(['m.number AS number', 'm.min_value AS min_value', 'm.max_value AS max_value'])
             .from(table, 'm')
             .where('m.id=:id', { id: rowId })
             .getRawOne<Row>()
@@ -424,6 +425,9 @@ export class PostgresLapperStore implements OnApplicationBootstrap, OnModuleDest
           throw new BadRequestException('Macro limits must be numbers below 100,000,000');
       if (min !== null && max !== null && min > max)
         throw new BadRequestException('The minimum cannot be greater than the maximum');
+      // Only the macros sent to Argonaut are flagged as setting changes; every other is stored off.
+      if (!macroCanFlagChanges(values.number !== undefined ? values.number : current?.number))
+        values.flag_changes = false;
     }
     if (kind === 'scanner-detail' && data.machine_id !== undefined) {
       values.machine_id =

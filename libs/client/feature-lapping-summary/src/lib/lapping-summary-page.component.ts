@@ -1,4 +1,3 @@
-import { MachineDsfCountComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { DatePipe, DecimalPipe, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
@@ -71,7 +70,6 @@ import { SummaryGroupComponent } from './summary-group.component';
 @Component({
   selector: 'gear-lapping-summary-page',
   imports: [
-    MachineDsfCountComponent,
     FormsModule,
     DatePipe,
     DecimalPipe,

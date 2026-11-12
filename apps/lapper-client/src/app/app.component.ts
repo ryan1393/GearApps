@@ -22,7 +22,6 @@ export class AppComponent {
     ['/fanuc-variables', 'Fanuc Variables'],
     ['/collector-tokens', 'Collector Tokens'],
     ['/dashboard/cell', 'Cell Live View'],
-    ['/machine-counts', 'Machine DSF Counts'],
     ['/admin', 'Admin'],
     ['/login', 'Sign In'],
     ['/forgot-password', 'Forgot Password'],

@@ -13,7 +13,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { apiErrorMessage, MacrosApi } from '@meshforge/client/core';
 import { DialogComponent, SegmentedComponent } from '@meshforge/client/ui';
-import { Macro, PER_CYCLE_MACROS } from '@meshforge/shared/domain';
+import { Macro, macroCanFlagChanges, PER_CYCLE_MACROS } from '@meshforge/shared/domain';
 import { MACRO_FORM_OPTIONS, MACRO_STATUS_OPTIONS, MACRO_TYPES } from './options';
 
 /** #10032, the consecutive cycle counter. */
@@ -116,7 +116,9 @@ const CONSEC_MACRO = PER_CYCLE_MACROS[0];
           <small class="gear-field-help">{{
             isConsec()
               ? 'The consec counter (#10032) goes up every cycle, so it is never flagged.'
-              : 'A cycle that changes this value from the previous cycle of the same machine and gearset is listed under Setting changes. Untick a value that changes every cycle by design, such as a cycle time.'
+              : !canFlag()
+                ? 'Only the macros sent to Argonaut are flagged, so this one never is.'
+                : 'A cycle that changes this value from the previous cycle of the same machine and gearset is listed under Setting changes. Untick a value that changes every cycle by design, such as a cycle time.'
           }}</small>
         </label>
         <label class="gear-field dana-field-full">
@@ -190,11 +192,19 @@ export class MacroFormDialogComponent {
     return Number(this.form.controls.number.value) === CONSEC_MACRO;
   }
 
+  /** Only the macros sent to Argonaut (never consec) can be flagged. */
+  protected canFlag(): boolean {
+    return macroCanFlagChanges(this.form.controls.number.value);
+  }
+
   constructor() {
-    // The consec counter is never flagged: its tick is off and cannot be changed.
+    // Only Argonaut macros are flagged: for any other, and consec, the tick is disabled.
     this.form.controls.number.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
       const flag = this.form.controls.flag_changes;
-      if (this.isConsec()) flag.disable({ emitEvent: false });
+      if (!this.canFlag()) {
+        flag.setValue(false, { emitEvent: false });
+        flag.disable({ emitEvent: false });
+      }
       else flag.enable({ emitEvent: false });
     });
     effect(() => {

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSource, EntityManager } from 'typeorm';
-import { CYCLE_TIME_AVERAGE_OF, PER_CYCLE_MACROS } from '@meshforge/shared/domain';
+import { CYCLE_TIME_AVERAGE_OF, FLAGGABLE_MACROS } from '@meshforge/shared/domain';
 
 export type Row = Record<string, unknown>;
 export type Resource =
@@ -604,7 +604,7 @@ export class PostgresLapperCatalog {
 
   /**
    * Cycles of the past `hours`, on every machine, that changed a flagged macro (Admin > Macros >
-   * Flag changes; never the per-cycle counters in PER_CYCLE_MACROS) since the previous reading of
+   * Flag changes; only the macros sent to Argonaut, never the consec counter: FLAGGABLE_MACROS) since the previous reading of
    * that value on the same machine and gearset. A value's first reading has no previous one and is
    * not a change. Newest first.
    */
@@ -629,7 +629,7 @@ export class PostgresLapperCatalog {
               ORDER BY COALESCE(pc.recorded_at, pc.timestamp AT TIME ZONE $1) DESC, pc.id DESC
               LIMIT 1
            ) previous
-          WHERE m.flag_changes AND m.number <> ALL($3::int[]) AND previous.value IS DISTINCT FROM l.value
+          WHERE m.flag_changes AND m.number = ANY($3::int[]) AND previous.value IS DISTINCT FROM l.value
        ), flagged AS (
          SELECT r.*, json_agg(json_build_object('number', ch.number, 'name', ch.name, 'unit', ch.unit,
                   'previous_value', ch.previous_value, 'value', ch.value) ORDER BY ch.number) AS changes
@@ -644,7 +644,7 @@ export class PostgresLapperCatalog {
          JOIN lapper.gearsets g ON g.id = f.gearset_id
         ORDER BY f.occurred_at DESC, f.id DESC
         LIMIT $4`,
-      [this.timeZone, hours, PER_CYCLE_MACROS, limit],
+      [this.timeZone, hours, FLAGGABLE_MACROS, limit],
     );
     const [machines, gearsets] = await readBatch(
       () => this.machines(undefined, false, unique(rows.map((row: Row) => row.machine_id))),

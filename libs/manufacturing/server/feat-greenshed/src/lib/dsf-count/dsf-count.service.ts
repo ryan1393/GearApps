@@ -1,4 +1,4 @@
-/* DSF (Digital Shop Floor) count reader for all configured physical machines.
+/* DSF (Digital Shop Floor) count reader for all configured physical machines except Lapper machines.
  *
  * The API PULLS from the DSF PostgreSQL source on a serialized poll; nothing pushes to us.
  * The source session is read-only (transaction, role policy and fixed SELECTs), and it is
@@ -14,13 +14,35 @@ import { DsfCache, DsfCountRow, DsfState, DsfRefusal, timestampUs, chooseShift,
   replacementStart, reconcileRows, safeCountRow } from './dsf-core';
 import { DSF_MAPPINGS } from './dsf-mappings';
 import { applyDsfCutterCounts, CutterAttributionResult } from './dsf-cutter-attribution';
-import { DANA_MACHINES_SQL, SOURCE_IDENTITY_SQL, ROLE_CHECK_SQL, MAPPING_SQL, SHIFTS_SQL, CYCLES_SQL, OTHER_MAPPING_ACTIVITY_SQL } from './dsf-sql';
+import { DANA_MACHINES_SQL, DANA_MACHINES_NO_LAPPER_SCHEMA_SQL, LAPPER_MACHINES_TABLE_SQL, SOURCE_IDENTITY_SQL, ROLE_CHECK_SQL, MAPPING_SQL, SHIFTS_SQL, CYCLES_SQL, OTHER_MAPPING_ACTIVITY_SQL } from './dsf-sql';
 import { grinderStateRows, collectGrinderBatches, commitGrinderBatches, GrinderBatch, GrinderStateRow } from './dsf-grinder-balance';
 import { ensureDsfCutterSchema } from './dsf-schema';
 import { findUniqueMatches, UniqueMatchResult } from './dsf-unique-matches';
 import { findRoughMatches, RoughMatchResult } from './dsf-rough-matches';
 
 type Machine = {machine_id:string;machine_number:string;department:string;machine_type:string;active:boolean};
+type QueryRunnerLike = {query(text:string,values?:unknown[]):Promise<any[]>};
+/** The machines DSF counts cover: every MeshForge machine except Lapper machines. */
+async function readDsfMachines(runner:QueryRunnerLike):Promise<Machine[]> {
+  const lapper=(await runner.query(LAPPER_MACHINES_TABLE_SQL))[0];
+  return runner.query(lapper?.present===true?DANA_MACHINES_SQL:DANA_MACHINES_NO_LAPPER_SCHEMA_SQL);
+}
+/**
+ * Deletes every DSF mapping saved for a Lapper machine, recording each as a system UNMAP in the
+ * mapping audit. Lapper machines do not use DSF counts. Runs once at start-up whether or not DSF is
+ * enabled; it does nothing when the tables are missing (no Lapper machines, or no mappings yet).
+ */
+export const LAPPER_MAPPING_TABLES_SQL = `SELECT to_regclass('lapper.machines') IS NOT NULL
+ AND to_regclass('public.dana_dsf_machine_mapping_v1') IS NOT NULL
+ AND to_regclass('public.dana_dsf_machine_mapping_audit_v1') IS NOT NULL AS present`;
+export const REMOVE_LAPPER_MAPPINGS_SQL = `WITH removed AS (
+ DELETE FROM public.dana_dsf_machine_mapping_v1 x
+ WHERE EXISTS (SELECT 1 FROM lapper.machines l WHERE l.public_machine_id=x.machine_id)
+ RETURNING x.machine_id,x.mapping_id
+) INSERT INTO public.dana_dsf_machine_mapping_audit_v1
+ (machine_id,action,previous_mapping_id,new_mapping_id,changed_by,source_snapshot)
+ SELECT machine_id,'UNMAP',mapping_id,NULL,NULL,'{"reason":"LAPPER_MACHINE"}'::jsonb FROM removed
+ RETURNING machine_id::text`;
 type SourceClient = { connect():Promise<void>;query(text:string,values?:unknown[]):Promise<{rows:any[]}>;end():Promise<void>;on(event:string,fn:(e:unknown)=>void):void; };
 interface Config { enabled:boolean; valid:boolean; interval:number; machines:Set<string>; client:Record<string,unknown>; privilegedAccountAcknowledged?:boolean;
   /** DSF department names (normalised, see dsfDepartmentKey) that stand for a MeshForge department code. */
@@ -206,7 +228,10 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
   private readonly logger=new Logger('DsfCount');
   private lastFailure:{reason:string;code:string|null;at:string}|null=null;
   async onModuleInit():Promise<void> {
-    if (this.db.options.type === 'postgres') this.machines = await this.db.query(DANA_MACHINES_SQL);
+    if (this.db.options.type === 'postgres') {
+      await this.removeLapperMappings();
+      this.machines = await readDsfMachines(this.db);
+    }
     if(!this.config.enabled)return;
     if(!this.config.valid) {
       // Enabled but unusable settings must be visible, not a silent "not configured".
@@ -220,6 +245,21 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       this.logger.error('DSF tables could not be prepared in the MeshForge database; the DSF reader is not running.'+(code?' ('+code+')':''));return;
     }
     this.schemaReady=true;this.readerState='WAITING';this.schedule(1000);
+  }
+  /** Never blocks start-up: a failure leaves the rows, which the reader already ignores. */
+  private async removeLapperMappings():Promise<void> {
+    try {
+      const removed=await this.db.transaction(async manager=>{
+        if((await manager.query(LAPPER_MAPPING_TABLES_SQL))[0]?.present!==true)return [];
+        await manager.query("SET LOCAL lock_timeout='2s'");await manager.query("SET LOCAL statement_timeout='8s'");
+        await manager.query("SELECT pg_advisory_xact_lock(hashtext('dana-dsf-mapping-admin-v1'))");
+        return await manager.query(REMOVE_LAPPER_MAPPINGS_SQL) as {machine_id:string}[];
+      });
+      if(removed.length)this.logger.log('Removed '+removed.length+' DSF mapping(s) saved for Lapper machines.');
+    } catch(e) {
+      const code=dsfFailureCode(e);
+      this.logger.warn('DSF mappings saved for Lapper machines could not be removed'+(code?' ('+code+')':'')+'; they stay ignored.');
+    }
   }
   private schemaReady=false;
   private schemaProblem:string|null=null;
@@ -278,7 +318,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
     if(!ref)return null;
     return {...ref,manual:false};
   }
-  private async loadOverrides(runner:{query(text:string,values?:unknown[]):Promise<any[]>}):Promise<Map<string,MappingOverride>> {
+  private async loadOverrides(runner:QueryRunnerLike):Promise<Map<string,MappingOverride>> {
     const rows=await runner.query(MAPPING_OVERRIDE_SQL) as MappingOverride[];
     if(rows.length>1000)throw new DsfRefusal('MAPPING_OVERRIDE_LIMIT');
     const out=new Map<string,MappingOverride>();
@@ -297,14 +337,14 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
   private catalogReadAt = 0;
   async currentSnapshot() {
     if (this.db.options.type === 'postgres' && Date.now() - this.catalogReadAt > 30000) {
-      this.machines = await this.db.query(DANA_MACHINES_SQL);
+      this.machines = await readDsfMachines(this.db);
       this.catalogReadAt = Date.now();
     }
     return this.snapshot();
   }
 
   async adminSnapshot() {
-    if (this.db.options.type === 'postgres') this.machines = await this.db.query(DANA_MACHINES_SQL);
+    if (this.db.options.type === 'postgres') this.machines = await readDsfMachines(this.db);
     const live=this.snapshot();
     const assigned=new Map<string,string>();
     for(const machine of this.machines) {
@@ -346,8 +386,9 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
         FOR UPDATE OF m`,[machineId]) as Machine[];
       if(machineRows.length!==1)throw new NotFoundException('Machine was not found.');
       const machine=machineRows[0];
+      const allMachines=await readDsfMachines(manager);
+      if(!allMachines.some(x=>x.machine_id===machineId))throw new BadRequestException('Lapper machines do not use DSF counts.');
       if(option.department!==machine.department)throw new BadRequestException('Selected DSF source belongs to a different department.');
-      const allMachines=await manager.query(DANA_MACHINES_SQL) as Machine[];
       const overrideRows=await manager.query(MAPPING_OVERRIDE_SQL) as MappingOverride[];
       const overrideMap=new Map(overrideRows.map(row=>[row.machine_id,row]));
       for(const other of allMachines) {
@@ -398,7 +439,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
   /** What both match previews need: Admin decisions, the source each machine uses, and crediting history. */
   private async matchContext() {
     this.requireFreshSources();
-    if (this.db.options.type === 'postgres') this.machines = await this.db.query(DANA_MACHINES_SQL);
+    if (this.db.options.type === 'postgres') this.machines = await readDsfMachines(this.db);
     const overrides=await this.loadOverrides(this.db);
     const assigned=new Map<string,string>();
     const current=new Map<string,{mapping_id:string;whiteboard_name:string;line_name:string}>();
@@ -528,7 +569,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       const locks=await lease.query('SELECT pg_try_advisory_lock(1437329,77311) AS held');
       held=locks[0]?.held===true;
       if(!held)throw new DsfRefusal('READER_BUSY');
-      const machines:Machine[]=await lease.query(DANA_MACHINES_SQL);
+      const machines:Machine[]=await readDsfMachines(lease);
       if(machines.length>1000)throw new DsfRefusal('MACHINE_LIMIT');
       this.machines=machines;this.mappingOverrides=await this.loadOverrides(lease);
       const nextCaches=new Map(this.caches),nextStates=new Map<string,{status:DsfState;note:string}>();

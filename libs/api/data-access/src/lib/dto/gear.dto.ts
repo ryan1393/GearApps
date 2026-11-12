@@ -368,7 +368,7 @@ export class MacroDto implements Macro {
   @ApiPropertyOptional({
     default: true,
     description:
-      'Flag a cycle that changes this value on the Lapper Dashboard (Setting changes). The consec counter #10032 is never flagged.',
+      'Flag a cycle that changes this value on the Lapper Dashboard (Setting changes). Only the 68 macros sent to Argonaut are ever flagged; the consec counter #10032 and every other macro never are, whatever this says.',
   })
   @IsOptional()
   @IsBoolean()
