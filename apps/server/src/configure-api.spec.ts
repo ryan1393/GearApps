@@ -73,6 +73,7 @@ describe('configureApi', () => {
     app = await start({ CORS_ORIGINS: '*' });
     const response = await get(app, '/api/v1/probe/ip', { 'Origin': 'http://elsewhere' });
     expect(response.headers['x-content-type-options']).toBe('nosniff');
+    expect(response.headers['strict-transport-security']).toBeUndefined();
     expect(response.headers['content-security-policy']).toContain("default-src 'self'");
     expect(response.headers['access-control-allow-origin']).toBe('*');
     expect(response.headers['access-control-allow-credentials']).toBeUndefined();

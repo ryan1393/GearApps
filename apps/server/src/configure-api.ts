@@ -30,8 +30,10 @@ export function swaggerPagePaths(prefix: string, version: string): Set<string> {
 
 /** Security headers for every response. Swagger UI needs inline styles, scripts and data: images. */
 export function securityHeaders(docsPages: ReadonlySet<string>) {
-  const strict = helmet();
-  const docs = helmet({ contentSecurityPolicy: false });
+  // No HSTS from the API: browsers apply it to every port of the host, which would force HTTPS
+  // on other plant services there. The TLS-terminating proxy decides that.
+  const strict = helmet({ strictTransportSecurity: false });
+  const docs = helmet({ contentSecurityPolicy: false, strictTransportSecurity: false });
   return (req: Request, res: Response, next: NextFunction) =>
     (docsPages.has(req.path) ? docs : strict)(req, res, next);
 }
