@@ -5,7 +5,7 @@
 // active SSH Docker context, backs up the database, swaps the new source in (the
 // previous copy is kept for --rollback), then runs `docker compose build` and
 // `up -d`. It never runs `compose down`, never deletes volumes, and keeps the
-// server's own .env.
+// server's own .env and FANUC FOCAS library (apps/lapper-read-py/fanuc/libfwlib32*).
 //
 //   node tools/manufacturing/deploy/deploy-remote.mjs                 deploy this folder
 //   node tools/manufacturing/deploy/deploy-remote.mjs --rollback      put the previous release back
@@ -143,6 +143,49 @@ const REMOVE_TREE_FN = `remove_tree() {
   return 1
 }`;
 
+// The Lapper Read collector mounts LAPPER_READ_FOCAS_DIR (default ./apps/lapper-read-py/fanuc,
+// relative to the release) at /opt/fanuc. FANUC's licensed libfwlib32.so is git-ignored, so a
+// release packed from a fresh clone or GitHub ZIP has none: like .env, it is carried over from
+// the release being replaced. A folder outside the release (absolute path) is left alone.
+const FOCAS_FN = `# Prints the release-relative FOCAS folder from an .env, or nothing when it is outside the release.
+focas_rel() {
+  local v=''
+  if [ -f "$1" ]; then
+    v="$(grep -E '^LAPPER_READ_FOCAS_DIR=' "$1" | tail -1 | cut -d= -f2- | sed 's/[[:space:]]#.*$//' | tr -d "\\r\\"'" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' || true)"
+  fi
+  case "$v" in
+    '') echo 'apps/lapper-read-py/fanuc' ;;
+    /*|'~'*|'$'*|..|../*) ;;
+    *) v="\${v#./}"; v="\${v%/}"; echo "\${v:-.}" ;;
+  esac
+}
+has_focas() { [ -e "$1/libfwlib32.so" ]; }
+# carry_focas FROM TO REL: copies libfwlib32* (symlinks kept) when TO lacks the library and FROM has it.
+carry_focas() {
+  local from="$1/$3" to="$2/$3" f
+  has_focas "$to" && return 0
+  has_focas "$from" || return 1
+  mkdir -p "$to"
+  for f in "$from"/libfwlib32*; do
+    [ -e "$to/\${f##*/}" ] || [ -L "$to/\${f##*/}" ] || cp -pP "$f" "$to/"
+  done
+  echo "[PASS] FANUC FOCAS library carried over from $1."
+}
+# The collector runs as an unprivileged container user, and releases unpack owner-only (umask 077).
+# The release folder itself stays owner-only, so this exposes nothing to other host accounts.
+open_focas() {
+  [ -d "$1" ] && has_focas "$1" || return 0
+  chmod a+rx "$1"
+  find "$1" -maxdepth 1 -type f -name 'libfwlib32*' -exec chmod a+r {} +
+}
+warn_no_focas() {
+  local c
+  c="$( { docker ps -a -q --filter label=com.docker.compose.project=${PROJECT} --filter label=com.docker.compose.service=lapper-read 2>/dev/null || true; } | head -1)"
+  [ -n "$c" ] || return 0
+  echo "[WARN] No FANUC FOCAS library at $1/libfwlib32.so: the Lapper Read collector cannot record cycles." >&2
+  echo "       Copy libfwlib32.so there, or set LAPPER_READ_FOCAS_DIR in .env to an absolute folder outside the release." >&2
+}`;
+
 // Release folders: BASE (current), BASE.prev (last good), BASE.pending-prev (the release that
 // was current when an unfinished deploy started). A deploy that fails leaves pending-prev in
 // place, so a retry discards the failed release instead of making it the rollback target.
@@ -150,6 +193,7 @@ const stageScript = (root, legacy, archive, uploadedEnv) => `set -euo pipefail
 umask 077
 BASE=${rq(root)}; NEXT="$BASE.next"; PEND="$BASE.pending-prev"; LEGACY=${rq(legacy)}
 ${REMOVE_TREE_FN}
+${FOCAS_FN}
 mkdir -p "$(dirname "$BASE")"
 remove_tree "$NEXT"; mkdir -p "$NEXT"
 tar -xzf ${rq(archive)} -C "$NEXT"
@@ -168,6 +212,12 @@ else echo '[FAIL] The host has no shared .env. Re-run with --upload-env for the 
 chmod 600 "$NEXT/.env"
 test -f "$NEXT/compose.yml"
 test -f "$NEXT/package-lock.json"
+FOCAS_REL="$(focas_rel "$NEXT/.env")"
+if [ -n "$FOCAS_REL" ]; then
+  for TREE in "$BASE" "$PEND"; do carry_focas "$TREE" "$NEXT" "$FOCAS_REL" && break; done || true
+  open_focas "$NEXT/$FOCAS_REL"
+  has_focas "$NEXT/$FOCAS_REL" || warn_no_focas "$BASE/$FOCAS_REL"
+fi
 if [ -d "$PEND" ]; then
   echo "[RETRY] Discarding the failed release while preserving $PEND as the last good release."
   remove_tree "$BASE"
@@ -187,6 +237,7 @@ const rollbackSwapScript = (root, legacy) => `set -euo pipefail
 umask 077
 BASE=${rq(root)}; PREV="$BASE.prev"; PEND="$BASE.pending-prev"; TMP="$BASE.rollback-tmp"; LEGACY=${rq(legacy)}
 ${REMOVE_TREE_FN}
+${FOCAS_FN}
 if [ -d "$PEND" ]; then TARGET="$PEND"
 elif [ -d "$PREV" ]; then TARGET="$PREV"
 elif [ -f "$LEGACY/compose.yml" ] || [ -f "$LEGACY/manufacturing/compose.yml" ]; then TARGET="$LEGACY"
@@ -201,6 +252,12 @@ if [ -f "$BASE/compose.yml" ]; then TARGET_ENV="$BASE/.env"
 elif [ -f "$BASE/manufacturing/compose.yml" ]; then TARGET_ENV="$BASE/manufacturing/.env"
 else TARGET_ENV="$BASE/.env"; fi
 [ ! -f "$KEEP/active.env" ] || cp -p "$KEEP/active.env" "$TARGET_ENV"
+# An older release may predate the FANUC library on this host: keep the one just replaced.
+FOCAS_REL="$(focas_rel "$TARGET_ENV")"
+if [ -n "$FOCAS_REL" ]; then
+  carry_focas "$PREV" "$BASE" "$FOCAS_REL" || true
+  open_focas "$BASE/$FOCAS_REL"
+fi
 echo "[PASS] Previous release restored with the current host environment preserved."`;
 
 const upScript = (root) => `set -euo pipefail

@@ -57,6 +57,17 @@ http://localhost:3333/api/v1/health/ready
 
 PostgreSQL data is persisted in the named volume from `DANA_POSTGRES_VOLUME_NAME` (default `dana-apps-gear-postgres`).
 
+## Lapper Read collector and the FANUC library
+
+The Lapper Read collector (`docker compose --profile collectors up -d lapper-read`) needs FANUC's
+licensed `libfwlib32.so`, mounted from `LAPPER_READ_FOCAS_DIR` (default
+`./apps/lapper-read-py/fanuc`, inside the release folder). It is not in git or a GitHub ZIP.
+The remote deploy (`commands/Deploy-MeshForge.cmd`) carries it over from the release it replaces,
+and warns when the collector runs but no library exists. On a server, set
+`LAPPER_READ_FOCAS_DIR` to an absolute folder outside the release (for example
+`/opt/meshforge/fanuc`) so deploys and rollbacks never touch it. See
+`apps/lapper-read-py/fanuc/README.md`.
+
 ## Clear operational data
 
 To start the floor over on the Linux Docker host, keeping users and base data, run from the release folder that holds `compose.yml` and `.env` (`~/dana-apps` after `Deploy-MeshForge`):
