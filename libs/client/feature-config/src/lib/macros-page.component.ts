@@ -18,7 +18,7 @@ import {
 import { LapperAccess, loadable, MacrosApi, ToastService } from '@meshforge/client/core';
 import { summaryPlacement } from '@meshforge/client/feature-lapping-summary';
 import { StatusBadgeComponent } from '@meshforge/client/ui';
-import { Macro, macroLimitText, PER_CYCLE_MACROS } from '@meshforge/shared/domain';
+import { Macro, macroCanFlagChanges, macroLimitText, PER_CYCLE_MACROS } from '@meshforge/shared/domain';
 import { MacroFormDialogComponent } from './macro-form-dialog.component';
 import { MACRO_FORM_OPTIONS } from './options';
 
@@ -152,6 +152,8 @@ interface MacroRow extends Macro {
                   <td>
                     @if (isCounter(m.number)) {
                       <span class="gear-muted" title="The consec counter goes up every cycle">Never</span>
+                    } @else if (!canFlag(m.number)) {
+                      <span class="gear-muted" title="Only the macros sent to Argonaut are flagged">Never</span>
                     } @else if (m.flag_changes === false) {
                       <span class="gear-muted">Off</span>
                     } @else {
@@ -223,6 +225,7 @@ export class MacrosPageComponent implements OnInit {
   private readonly api = inject(MacrosApi);
   protected readonly limitText = macroLimitText;
   protected readonly isCounter = (number: number) => PER_CYCLE_MACROS.includes(number);
+  protected readonly canFlag = macroCanFlagChanges;
   private readonly toast = inject(ToastService);
   protected readonly access = inject(LapperAccess);
 

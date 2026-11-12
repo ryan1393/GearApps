@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Setting changes flag only Argonaut macros.** The Lapper Dashboard's Setting changes now flag a
+  change only in the 68 macros Lapper Read sends to Argonaut; the consec counter #10032 and every
+  other macro are never flagged. Admin > Macros > Flag changes can still switch an Argonaut macro
+  off, and shows Never (with its tick disabled) for every other macro.
+
 - **DSF: removed from Lapper machines.** Lapper machines (machines with a Lapper profile) no longer
   get DSF counts. They are left out of the DSF reader, Machine DSF Counts, the plant dashboard and
   Admin > DSF Mappings, a mapping for one is refused, and the DSF badge is gone from the Lapper

@@ -186,8 +186,8 @@ import { groupByCell } from './cells';
               @if (settingChanges.error()) {
                 Setting changes are unavailable. Refresh to retry.
               } @else {
-                Cycles where a value other than the consec counter changed since the previous cycle of
-                that machine and gearset.
+                Cycles where a value sent to Argonaut changed since the previous cycle of that machine
+                and gearset.
                 @if ((settingChanges.value()?.total ?? 0) > (settingChanges.value()?.items?.length ?? 0)) {
                   Showing the newest {{ settingChanges.value()?.items?.length }} of {{ settingChanges.value()?.total }}.
                 }
@@ -270,7 +270,7 @@ import { groupByCell } from './cells';
                     {{
                       settingChanges.loading()
                         ? 'Loading setting changes…'
-                        : 'No settings changed in the last ' + settingHours + ' hours: only the consec counter moved.'
+                        : 'No settings changed in the last ' + settingHours + ' hours: no value sent to Argonaut changed.'
                     }}
                   </td>
                 </tr>
