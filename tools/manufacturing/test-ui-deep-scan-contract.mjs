@@ -16,15 +16,23 @@ const apps={
     app:'apps/cutter-builder',
     feature:'libs/manufacturing/frontend/feature-cutter-builder',
     base:'/cutter-builder',
-    routes:['','build','teardown','lookup','cancel-last'],
+    routes:['','build','teardown','lookup','requests','cancel-last'],
   },
   greenshed:{
     app:'apps/greenshed',
     feature:'libs/manufacturing/frontend/feature-greenshed',
     base:'/greenshed',
-    routes:['','machines','setup','check','pull','lookup','cancel-last'],
+    routes:['','machines','setup','check','pull','lookup','cutter-requests','cancel-last'],
   },
 };
+
+// Both restored navigation entry points must remain registered in their feature routes.
+if(!/path:\s*'requests'/.test(read('libs/manufacturing/frontend/feature-cutter-builder/src/lib/cutter-builder.routes.ts'))){
+  throw new Error('Cutter Builder navigation requires its restored requests route.');
+}
+if(!/path:\s*'cutter-requests'/.test(read('libs/manufacturing/frontend/feature-greenshed/src/lib/greenshed.routes.ts'))){
+  throw new Error('Greenshed navigation requires its restored cutter-requests route.');
+}
 
 function walk(dir,ext,out=[]){
   for(const e of fs.readdirSync(contractPath(process.cwd(), dir),{withFileTypes:true})){

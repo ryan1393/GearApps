@@ -13,18 +13,19 @@
         <span class="nav-icon"><span class="gear-glyph gear-glyph-dashboard" aria-hidden="true"></span></span><span>Cutter Dashboard</span><span class="nav-current">ACTIVE</span>
       </a>
 
-      <ng-container *ngIf="canEdit(user)">
+      <ng-container *ngIf="canEdit(user) || canReadRequests(user)">
         <div class="nav-heading">OPERATIONS</div>
-        <a (click)="mobileNav.close()" routerLink="/cutter-builder/build" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-build-cutter" aria-hidden="true"></span></span><span>Build Cutter</span></a>
-        <a (click)="mobileNav.close()" routerLink="/cutter-builder/teardown" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-teardown" aria-hidden="true"></span></span><span>Tear Down Cutter</span></a>
+        <a *ngIf="canReadRequests(user)" (click)="mobileNav.close()" routerLink="/cutter-builder/requests" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Cutter Requests</span></a>
+        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/cutter-builder/build" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-build-cutter" aria-hidden="true"></span></span><span>Build Cutter</span></a>
+        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/cutter-builder/teardown" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-teardown" aria-hidden="true"></span></span><span>Tear Down Cutter</span></a>
 
-        <div class="nav-heading">REFERENCE</div>
-        <a (click)="mobileNav.close()" routerLink="/cutter-builder/lookup" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span><span>Build Lookup</span></a>
+        <div *ngIf="canEdit(user)" class="nav-heading">REFERENCE</div>
+        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/cutter-builder/lookup" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span><span>Build Lookup</span></a>
       </ng-container>
 
       <div *ngIf="!canEdit(user)" class="sidebar-view-only">
         <strong>VIEW ONLY</strong>
-        <span>{{ user.departmentDescription || 'Your department' }} can view this dashboard, but cannot perform transactions in this app.</span>
+        <span>Physical cutter operations follow department permissions. Cutter Requests follow your assigned access.</span>
       </div>
 
       <a (click)="mobileNav.close()" routerLink="/machine-counts" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Machine DSF Counts</span></a>

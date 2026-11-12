@@ -3,6 +3,10 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { LabelPrinterChoiceService } from '@meshforge/manufacturing/frontend/util-common';
 import { ILocation, IPaginatedResponse, ITray } from '@meshforge/manufacturing/shared/util-types';
+import type { CutterRequestRecord, CutterRequestRow, CutterRequestStatus } from '@meshforge/shared/domain';
+
+export { CUTTER_REQUEST_STATUSES } from '@meshforge/shared/domain';
+export type { CutterRequestRecord, CutterRequestRow, CutterRequestStatus } from '@meshforge/shared/domain';
 
 export interface CutterBody {
   id: string;
@@ -38,6 +42,15 @@ export interface CutterBuilderMachine {
   active: boolean;
   enabled: boolean;
   department?: { code: string; description: string | null; active: boolean; enabled: boolean } | null;
+}
+
+export interface CutterRequestRequirement {
+  summary_id: string;
+  part_type_id: string;
+  required_blade_count: number;
+  enabled: boolean;
+  summary: { id: string; number: string; revision?: string | null; enabled: boolean; active?: boolean };
+  part_type: { id: string; code: string; name?: string; enabled: boolean };
 }
 
 export interface CutterBuildCard {
@@ -230,6 +243,24 @@ export interface CutterTrayValidation {
 export class CutterBuilderApiService {
   private readonly http = inject(HttpClient);
   private readonly printerChoice = inject(LabelPrinterChoiceService);
+
+  listCutterRequests(includeCompleted = false) {
+    return this.http.get<CutterRequestRow[]>('/api/v1/cutter-builder/requests', {
+      params: { includeCompleted: String(includeCompleted) },
+    });
+  }
+
+  createCutterRequest(input: { summary_id: string; part_type_code: string; quantity: number; notes: string | null }) {
+    return this.http.post<CutterRequestRecord>('/api/v1/cutter-builder/requests', input);
+  }
+
+  updateCutterRequestStatus(id: string, status: Extract<CutterRequestStatus, 'COMPLETED' | 'CANCELED'>) {
+    return this.http.patch<CutterRequestRecord>(`/api/v1/cutter-builder/requests/${encodeURIComponent(id)}/status`, { status });
+  }
+
+  getCutterRequestRequirements() {
+    return this.http.get<CutterRequestRequirement[]>('/api/v1/cutter-config/blade-requirements');
+  }
 
 
   startGrinding(trayId: string) {

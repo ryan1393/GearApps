@@ -1,4 +1,5 @@
 import { GEAR_ACCESS_SCHEMA } from './gear-access.schema';
+import { CUTTER_REQUESTS_MIGRATION } from './cutter-request.schema';
 import { randomUUID } from 'node:crypto';
 import { COATER_SHIPMENT_SCHEMA } from './coater-shipment.schema';
 import { COATER_STAGING_SEED, CONTAINER_SET_SCHEMA } from './coater-container-set';
@@ -66,6 +67,7 @@ export class GearMasterDataBootstrap implements OnModuleInit {
 
       `);
       await manager.query(GEAR_ACCESS_SCHEMA);
+      await runDatabaseMigration(manager, CUTTER_REQUESTS_MIGRATION.version, CUTTER_REQUESTS_MIGRATION.sql);
       await manager.query(CUTTER_BODY_SHELF_SCHEMA);
       await runDatabaseMigration(manager, CUTTER_SUMMARY_BODY_RULE_MIGRATION.version, CUTTER_SUMMARY_BODY_RULE_MIGRATION.sql);
       await runDatabaseMigration(manager, SUMMARY_PART_TYPE_BLADES_MIGRATION.version, SUMMARY_PART_TYPE_BLADES_MIGRATION.sql);

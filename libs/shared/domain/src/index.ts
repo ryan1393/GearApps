@@ -17,6 +17,7 @@ export * from './lib/gear/macro';
 export * from './lib/scanner/scanner';
 export * from './lib/cutter-tracking/log';
 export * from './lib/cutter-tracking/cutter-build';
+export * from './lib/cutter-tracking/cutter-request';
 export * from './lib/cutter-tracking/check-cmm';
 export * from './lib/cutter-tracking/check-frequency';
 export * from './lib/cutter-tracking/retired-cutter';

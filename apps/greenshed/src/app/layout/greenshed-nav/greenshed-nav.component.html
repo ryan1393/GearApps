@@ -13,20 +13,21 @@
         <span class="nav-icon"><span class="gear-glyph gear-glyph-dashboard" aria-hidden="true"></span></span><span>Greenshed Dashboard</span><span class="nav-current">ACTIVE</span>
       </a>
 
-      <ng-container *ngIf="canEdit(user)">
+      <ng-container *ngIf="canEdit(user) || canReadRequests(user)">
         <div class="nav-heading">GEAR QUALITY</div>
-        <a (click)="mobileNav.close()" routerLink="/greenshed/machines" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Running Machines</span></a>
-        <a (click)="mobileNav.close()" routerLink="/greenshed/setup" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-setup" aria-hidden="true"></span></span><span>Machine Setup</span></a>
-        <a (click)="mobileNav.close()" routerLink="/greenshed/check" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-quality-check" aria-hidden="true"></span></span><span>Quality Check</span></a>
-        <a (click)="mobileNav.close()" routerLink="/greenshed/pull" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-pull" aria-hidden="true"></span></span><span>Cutter Pull</span></a>
+        <a *ngIf="canReadRequests(user)" (click)="mobileNav.close()" routerLink="/greenshed/cutter-requests" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Cutter Requests</span></a>
+        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/greenshed/machines" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Running Machines</span></a>
+        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/greenshed/setup" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-setup" aria-hidden="true"></span></span><span>Machine Setup</span></a>
+        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/greenshed/check" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-quality-check" aria-hidden="true"></span></span><span>Quality Check</span></a>
+        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/greenshed/pull" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-pull" aria-hidden="true"></span></span><span>Cutter Pull</span></a>
 
-        <div class="nav-heading">REFERENCE</div>
-        <a (click)="mobileNav.close()" routerLink="/greenshed/lookup" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span><span>Cutter Lookup</span></a>
+        <div *ngIf="canEdit(user)" class="nav-heading">REFERENCE</div>
+        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/greenshed/lookup" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span><span>Cutter Lookup</span></a>
       </ng-container>
 
       <div *ngIf="!canEdit(user)" class="sidebar-view-only">
         <strong>VIEW ONLY</strong>
-        <span>{{ user.departmentDescription || 'Your department' }} can view this dashboard, but cannot perform transactions in this app.</span>
+        <span>Physical cutter operations follow department permissions. Cutter Requests follow your assigned access.</span>
       </div>
 
       <a (click)="mobileNav.close()" routerLink="/machine-counts" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Machine DSF Counts</span></a>
