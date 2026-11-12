@@ -39,12 +39,18 @@ describe('FrontendFeatureLoginComponent', () => {
     expect(login).not.toHaveBeenCalled();
   });
 
-  it('explains a short password instead of reporting that it is missing', () => {
+  it('accepts a short password from an account created under an older policy', () => {
     fixture.componentInstance.loginForm.setValue({ email: 'operator@example.com', password: 'short' });
+    fixture.componentInstance.login();
+    expect(login).toHaveBeenCalledWith({ email: 'operator@example.com', password: 'short' });
+  });
+
+  it('still requires a password', () => {
+    fixture.componentInstance.loginForm.setValue({ email: 'operator@example.com', password: '' });
     fixture.componentInstance.login();
     fixture.detectChanges();
     expect(document.activeElement).toBe(fixture.nativeElement.querySelector('#password'));
-    expect(fixture.nativeElement.querySelector('#password-error').textContent).toContain('at least 8 characters');
+    expect(fixture.nativeElement.querySelector('#password-error').textContent).toContain('Password is required.');
     expect(login).not.toHaveBeenCalled();
   });
 
@@ -61,6 +67,26 @@ describe('FrontendFeatureLoginComponent', () => {
     expect(loginBadge).toHaveBeenCalledWith('CARD-123');
     expect(fixture.nativeElement.textContent).toContain('Signing in with badge…');
     expect((fixture.nativeElement.querySelector('#email') as HTMLInputElement).readOnly).toBe(true);
+    pending.complete();
+  });
+
+  it('keeps the badge field focusable during sign-in and says to wait when another scan arrives', () => {
+    const pending = new Subject();
+    loginBadge.mockReturnValue(pending);
+    const component = fixture.componentInstance;
+    component.badgeUid = 'CARD-123';
+    component.loginBadge();
+    fixture.detectChanges();
+    const badge = fixture.nativeElement.querySelector('#badge-uid') as HTMLInputElement;
+    expect(badge.disabled).toBe(false);
+    expect(badge.readOnly).toBe(true);
+    expect(badge.getAttribute('aria-busy')).toBe('true');
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    badge.dispatchEvent(enter);
+    fixture.detectChanges();
+    expect(enter.defaultPrevented).toBe(true);
+    expect(fixture.nativeElement.querySelector('#badge-notice').textContent).toContain('Wait — still signing in');
+    expect(loginBadge).toHaveBeenCalledTimes(1);
     pending.complete();
   });
 

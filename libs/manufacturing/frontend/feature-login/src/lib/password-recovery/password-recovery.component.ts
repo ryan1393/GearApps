@@ -20,31 +20,13 @@ import {
 import { ActivatedRoute } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import {
+  isStrongPassword,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
-  PASSWORD_MIN_NUMBER,
-  PASSWORD_MIN_SYMBOL,
-  PASSWORD_MIN_UPPERCASE,
 } from '@meshforge/manufacturing/shared/util-constants';
 
 function strongPassword(control: AbstractControl): ValidationErrors | null {
-  const value = String(control.value ?? '');
-  const bytes = Array.from(value).reduce((count, char) => {
-    const point = char.codePointAt(0) ?? 0;
-    return (
-      count + (point > 0xffff ? 4 : point > 0x7ff ? 3 : point > 0x7f ? 2 : 1)
-    );
-  }, 0);
-  const count = (pattern: RegExp) => value.match(pattern)?.length ?? 0;
-  const valid =
-    value.length >= PASSWORD_MIN_LENGTH &&
-    value.length <= PASSWORD_MAX_LENGTH &&
-    bytes <= 72 &&
-    count(/[a-z]/g) >= 1 &&
-    count(/[A-Z]/g) >= PASSWORD_MIN_UPPERCASE &&
-    count(/[0-9]/g) >= PASSWORD_MIN_NUMBER &&
-    count(/[-#!$@£%^&*()_+|~=\x60{}[\]:";'<>?,./\\ ]/g) >= PASSWORD_MIN_SYMBOL;
-  return valid ? null : { passwordPolicy: true };
+  return isStrongPassword(control.value) ? null : { passwordPolicy: true };
 }
 
 @Component({
