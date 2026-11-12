@@ -139,14 +139,15 @@ async function importBaseData() {
 
   const modelIds = new Map();
   for (const row of models) {
-    const modelNumber = row.Model == null ? null : Number(row.Model);
-    const modelType = clean(row.Type);
+    // Model numbers are text ("174", "S-110"); match them the way the unique index does.
+    const modelNumber = clean(row.Model) || null;
+    const modelType = clean(row.Type) || null;
 
     const existing = await client.query(
       `SELECT id
        FROM models
-       WHERE model_number IS NOT DISTINCT FROM $1
-         AND model_type IS NOT DISTINCT FROM $2
+       WHERE upper(btrim(coalesce(model_number::text,''))) = upper(coalesce($1::text,''))
+         AND upper(btrim(coalesce(model_type,''))) = upper(coalesce($2::text,''))
        LIMIT 1`,
       [modelNumber, modelType],
     );

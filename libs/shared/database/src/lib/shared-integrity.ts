@@ -233,6 +233,56 @@ BEGIN
     ON public.models(coalesce(model_number,-1), upper(btrim(coalesce(model_type,''))));
 END $models$;`;
 
+/**
+ * Model numbers become text so a model can be numbered "S-110" or "9¼" as well as "174";
+ * existing numbers keep their digits ("174" stays "174"). Numbers that differ only in case or
+ * spacing name the same model, so the duplicate merge above is repeated on the text values and
+ * the normalized unique index is rebuilt for text. Safe on a database whose column is already
+ * text (a new install, or one converted by hand).
+ */
+export const MODEL_NUMBER_TEXT_SQL = `
+DO $model_number$
+DECLARE reference record;
+BEGIN
+  IF to_regclass('public.models') IS NULL THEN RETURN; END IF;
+  DROP INDEX IF EXISTS public.uq_models_number_type_normalized;
+  IF (SELECT data_type FROM information_schema.columns
+       WHERE table_schema='public' AND table_name='models' AND column_name='model_number')
+     NOT IN ('character varying','text') THEN
+    ALTER TABLE public.models ALTER COLUMN model_number TYPE character varying USING model_number::text;
+  END IF;
+  UPDATE public.models SET model_number=nullif(btrim(model_number),'')
+   WHERE model_number IS DISTINCT FROM nullif(btrim(model_number),'');
+  UPDATE public.models SET model_type=nullif(btrim(model_type),'')
+   WHERE model_type IS DISTINCT FROM nullif(btrim(model_type),'');
+  CREATE TEMP TABLE meshforge_model_number_merge ON COMMIT DROP AS
+    SELECT id, first_value(id) OVER (
+      PARTITION BY upper(coalesce(model_number,'')), upper(coalesce(model_type,''))
+      ORDER BY (enabled AND active AND "deletedAt" IS NULL) DESC, "createdAt", id) AS keeper
+    FROM public.models;
+  DELETE FROM meshforge_model_number_merge WHERE id=keeper;
+  FOR reference IN
+    SELECT c.conrelid::regclass AS source, a.attname AS source_column
+      FROM pg_constraint c JOIN pg_attribute a ON a.attrelid=c.conrelid AND a.attnum=c.conkey[1]
+     WHERE c.contype='f' AND c.confrelid='public.models'::regclass AND array_length(c.conkey,1)=1
+  LOOP
+    EXECUTE format('UPDATE %s r SET %I=m.keeper FROM meshforge_model_number_merge m WHERE r.%I=m.id',
+      reference.source, reference.source_column, reference.source_column);
+  END LOOP;
+  DELETE FROM public.models d USING meshforge_model_number_merge m WHERE d.id=m.id;
+  CREATE UNIQUE INDEX uq_models_number_type_normalized
+    ON public.models(upper(btrim(coalesce(model_number,''))), upper(btrim(coalesce(model_type,''))));
+END $model_number$;`;
+
+/** True while public.models.model_number is still the original integer column. */
+async function modelNumberIsInteger(manager: EntityManager): Promise<boolean> {
+  const [column] = await manager.query<Array<{ data_type: string }>>(
+    `SELECT data_type FROM information_schema.columns
+      WHERE table_schema='public' AND table_name='models' AND column_name='model_number'`,
+  );
+  return column?.data_type === 'integer';
+}
+
 export async function applySharedDatabaseIntegrity(manager: EntityManager): Promise<void> {
   await manager.query(GEAR_DATABASE_SCHEMA_LOCK);
   await runDatabaseMigration(manager, '20261109-shared-gearset-schema-v1', GEARSET_SCHEMA_SQL);
@@ -241,7 +291,10 @@ export async function applySharedDatabaseIntegrity(manager: EntityManager): Prom
     '20261109-shared-core-integrity-v1',
     SHARED_CORE_INTEGRITY_SQL,
   );
-  await runDatabaseMigration(manager, '20261111-shared-model-duplicates-v1', MODEL_DUPLICATES_SQL);
+  // Written for the integer column; on a text column the text migration below does its work.
+  if (await modelNumberIsInteger(manager))
+    await runDatabaseMigration(manager, '20261111-shared-model-duplicates-v1', MODEL_DUPLICATES_SQL);
+  await runDatabaseMigration(manager, '20261111-shared-model-number-text-v1', MODEL_NUMBER_TEXT_SQL);
   const [gearsets] = await manager.query<Array<{ present: string | null }>>(
     "SELECT to_regclass('public.gearsets') AS present",
   );

@@ -13,7 +13,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, IsNull } from 'typeorm';
+import { DataSource } from 'typeorm';
 import {
   CreateAdminMachineDto,
   CreateAdminModelDto,
@@ -32,10 +32,16 @@ export class AdminMasterDataService {
     });
   }
 
-  listModels() {
-    return this.dataSource.getRepository(ModelOrmEntity).find({
-      order: { model_number: 'ASC', model_type: 'ASC' },
-    });
+  /** Model numbers are text, so sort them naturally: 9 before 110 before 1000, then S-110. */
+  async listModels() {
+    const models = await this.dataSource.getRepository(ModelOrmEntity).find();
+    const natural = new Intl.Collator('en', { numeric: true, sensitivity: 'base' });
+    const blankLast = (value: string | null) => value ?? '\uffff';
+    return models.sort(
+      (a, b) =>
+        natural.compare(blankLast(a.model_number), blankLast(b.model_number)) ||
+        natural.compare(a.model_type ?? '', b.model_type ?? ''),
+    );
   }
 
   /**
@@ -110,19 +116,20 @@ export class AdminMasterDataService {
   }
 
   async createModel(dto: CreateAdminModelDto, userId: Uuid) {
+    const modelNumber = dto.model_number?.trim() || null;
     const modelType = dto.model_type?.trim() || null;
-    if (dto.model_number == null && !modelType) {
+    if (modelNumber == null && !modelType) {
       throw new UnprocessableEntityException(
         'Model number or model type is required',
       );
     }
 
     const repo = this.dataSource.getRepository(ModelOrmEntity);
-    await this.assertModelIsNew(dto.model_number ?? null, modelType);
+    await this.assertModelIsNew(modelNumber, modelType);
 
     return repo.save(
       repo.create({
-        model_number: dto.model_number ?? null,
+        model_number: modelNumber,
         model_type: modelType,
         active: dto.active ?? true,
         enabled: true,
@@ -177,13 +184,16 @@ export class AdminMasterDataService {
     );
   }
 
-  /** One model per number and type; "2G", "2g" and " 2G " are the same type. */
-  private async assertModelIsNew(number: number | null, type: string | null, exceptId?: string): Promise<void> {
-    const wanted = (type ?? '').trim().toUpperCase();
-    const sameNumber = await this.dataSource.getRepository(ModelOrmEntity).find({
-      where: { model_number: number ?? IsNull() },
+  /**
+   * One model per number and type, compared the way the database's unique index does:
+   * "S-110", "s-110" and " S-110 " are the same number; "2G", "2g" and " 2G " the same type.
+   */
+  private async assertModelIsNew(number: string | null, type: string | null, exceptId?: string): Promise<void> {
+    const key = (value: string | null | undefined) => (value ?? '').trim().toUpperCase();
+    const models = await this.dataSource.getRepository(ModelOrmEntity).find({
+      select: { id: true, model_number: true, model_type: true },
     });
-    if (sameNumber.some((model) => model.id !== exceptId && (model.model_type ?? '').trim().toUpperCase() === wanted)) {
+    if (models.some((model) => model.id !== exceptId && key(model.model_number) === key(number) && key(model.model_type) === key(type))) {
       throw new ConflictException(`Model ${number ?? ''} ${type ?? ''}`.trim() + ' already exists');
     }
   }
@@ -192,7 +202,8 @@ export class AdminMasterDataService {
     const repo = this.dataSource.getRepository(ModelOrmEntity);
     const model = await repo.findOne({ where: { id } });
     if (!model) throw new NotFoundException('Model was not found');
-    if (dto.model_number !== undefined) model.model_number = dto.model_number;
+    if (dto.model_number !== undefined)
+      model.model_number = dto.model_number?.trim() || null;
     if (dto.model_type !== undefined)
       model.model_type = dto.model_type?.trim() || null;
     if (dto.model_number !== undefined || dto.model_type !== undefined)

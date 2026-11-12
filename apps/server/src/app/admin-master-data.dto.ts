@@ -1,4 +1,4 @@
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsIn,
@@ -10,10 +10,23 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
+/**
+ * Model numbers are text ("174", "S-110", "9¼"). Numbers are still accepted from older clients
+ * and stored as their text; blanks become null.
+ */
+const ModelNumber = () =>
+  Transform(({ value }) =>
+    value === undefined ? undefined
+      : value === null ? null
+      : typeof value === 'number' ? String(value)
+      : typeof value === 'string' ? value.trim() || null
+      : value,
+  );
+
 export class CreateAdminModelDto {
-  @ApiPropertyOptional({ nullable: true })
-  @IsOptional() @Type(() => Number) @IsInt()
-  model_number?: number | null;
+  @ApiPropertyOptional({ type: String, nullable: true, example: 'S-110' })
+  @ModelNumber() @IsOptional() @IsString() @MaxLength(100)
+  model_number?: string | null;
 
   @ApiPropertyOptional({ nullable: true })
   @IsOptional() @IsString() @MaxLength(100)
@@ -25,7 +38,7 @@ export class CreateAdminModelDto {
 }
 
 export class UpdateAdminModelDto {
-  @IsOptional() @Type(() => Number) @IsInt() model_number?: number | null;
+  @ModelNumber() @IsOptional() @IsString() @MaxLength(100) model_number?: string | null;
   @IsOptional() @IsString() @MaxLength(100) model_type?: string | null;
   @IsOptional() @IsBoolean() active?: boolean;
   @IsOptional() @IsBoolean() enabled?: boolean;
