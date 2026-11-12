@@ -60,7 +60,7 @@ export const ENVIRONMENT_SETTING_GROUPS: readonly EnvironmentSettingGroup[] = [
       number('SERVER_PORT', 'Listen port', undefined, { locked: STARTUP }),
       text('API_PREFIX', 'API path prefix', undefined, { locked: API_PATH }),
       text('API_VERSION', 'API version', undefined, { locked: API_PATH }),
-      text('CORS_ORIGINS', 'Allowed web origins', 'Comma separated, or * for any (without credentials).'),
+      text('CORS_ORIGINS', 'Allowed web origins', 'Other web origins that may call the API from a browser, comma separated (e.g. http://server:4200). Leave empty to allow none; * also allows none.'),
       text(
         'TRUST_PROXY',
         'Trusted proxies',

@@ -19,12 +19,13 @@ describe('HTTP settings', () => {
     expect(parseTrustProxy('loopback; rm')).toBeNull();
   });
 
-  it('reads CORS_ORIGINS as any origin or an exact list', () => {
-    expect(parseCorsOrigins('*')).toEqual({ origin: '*', credentials: false });
-    expect(parseCorsOrigins(undefined)).toEqual({ origin: '*', credentials: false });
+  it('reads CORS_ORIGINS as an exact origin list, off otherwise', () => {
+    // Cross-origin access stays off unless exact origins are listed, as before CORS was applied.
+    expect(parseCorsOrigins('*')).toBeNull();
+    expect(parseCorsOrigins(undefined)).toBeNull();
     expect(parseCorsOrigins('http://server:4200/, https://gear.example')).toEqual({
       origin: ['http://server:4200', 'https://gear.example'],
-      credentials: true,
+      credentials: false,
     });
     expect(parseCorsOrigins('')).toBeNull();
   });

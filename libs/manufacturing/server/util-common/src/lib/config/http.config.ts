@@ -26,18 +26,20 @@ export function parseTrustProxy(value: string | undefined | null): boolean | num
 }
 
 export interface ApiCorsOptions {
-  origin: '*' | string[];
+  origin: string[];
   credentials: boolean;
 }
 
 /**
- * CORS options from the CORS_ORIGINS setting. `*` allows any origin without credentials; a
- * comma separated list allows exactly those origins. Empty turns cross-origin access off (null).
+ * CORS options from the CORS_ORIGINS setting. Cross-origin access stays off (null) unless the
+ * setting lists exact origins, such as http://server:4200,http://server:4201. `*` and empty
+ * also leave it off: the web clients call the API on their own origin through nginx, and the
+ * API sends bearer tokens, not cookies, so no browser client needs another origin.
  */
 export function parseCorsOrigins(value: string | undefined | null): ApiCorsOptions | null {
-  const text = (value ?? '*').trim();
-  if (!text) return null;
-  const origins = text.split(',').map((origin) => origin.trim().replace(/\/+$/, '')).filter(Boolean);
-  if (origins.includes('*')) return { origin: '*', credentials: false };
-  return origins.length ? { origin: origins, credentials: true } : null;
+  const origins = String(value ?? '')
+    .split(',')
+    .map((origin) => origin.trim().replace(/\/+$/, ''))
+    .filter((origin) => origin && origin !== '*');
+  return origins.length ? { origin: origins, credentials: false } : null;
 }

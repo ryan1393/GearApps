@@ -67,7 +67,7 @@ export const validationSchema = Joi.object({
   [ENV_ENVIRONMENT]: Joi.string()
     .allow('development', 'production', 'local', 'test', 'docker')
     .default('development'),
-  [ENV_CORS_ORIGINS]: Joi.string().default('*').custom((value: string, helpers) =>
+  [ENV_CORS_ORIGINS]: Joi.string().allow('').default('').custom((value: string, helpers) =>
     value.split(',').map((origin) => origin.trim()).filter(Boolean)
       .every((origin) => origin === '*' || /^https?:\/\/[^/\s?#@]+\/?$/i.test(origin))
       ? value : helpers.error('any.invalid')),
