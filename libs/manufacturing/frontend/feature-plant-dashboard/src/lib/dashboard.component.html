@@ -64,7 +64,7 @@
   </section>
 
   @if (stale()) {
-    <div danaAlert="warning" role="alert"><span><strong>Data may be stale — last updated {{ updatedClock() }}.</strong> {{ error() }}</span></div>
+    <div danaAlert="warning"><span><strong>Data may be stale — last updated {{ updatedClock() }}.</strong> {{ error() }}</span></div>
   } @else if (error()) {
     <div danaAlert="warning" role="alert">{{ error() }}</div>
   }

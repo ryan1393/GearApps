@@ -126,7 +126,10 @@ test('Lapper uses the shared MeshForge PostgreSQL database', { timeout: 180000 }
       await request('POST', 'collector-token', { name: 'Lapper integration test' }, admin, 201)
     ).token;
     await t.test('shared login, closed registration and token purpose', async () => {
-      assert.deepEqual(await request('GET', 'auth/capabilities'), { registrationEnabled: false });
+      // Capabilities also report whether password reset is on (it follows EMAIL_ENABLED).
+      const capabilities = await request('GET', 'auth/capabilities');
+      assert.equal(capabilities.registrationEnabled, false);
+      assert.equal(typeof capabilities.passwordResetEnabled, 'boolean');
       await request(
         'POST',
         'users',

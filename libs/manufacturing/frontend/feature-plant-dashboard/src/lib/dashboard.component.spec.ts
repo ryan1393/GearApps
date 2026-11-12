@@ -65,7 +65,10 @@ describe('Plant dashboard', () => {
     data.stale.set(true);
     data.error.set('Machine data is unavailable. Retrying automatically.');
     const fixture = render();
-    const alert = fixture.nativeElement.querySelector('[role="alert"]') as HTMLElement;
+    // A stale-data warning is announced politely (danaAlert gives warnings role="status").
+    const alert = [...fixture.nativeElement.querySelectorAll('[danaAlert]')].find((el: Element) =>
+      /Data may be stale/.test(el.textContent ?? '')) as HTMLElement;
+    expect(alert.getAttribute('role')).toBe('status');
     expect(alert.textContent).toMatch(/Data may be stale — last updated \d{1,2}:\d{2}:\d{2} [AP]M\./);
     expect(fixture.nativeElement.textContent).toContain('Machine 549');
   });
