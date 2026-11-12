@@ -111,3 +111,51 @@ test('rollback to the older split layout preserves its root environment and curr
   assert.equal(fs.readFileSync(path.join(f.root, '.env'), 'utf8'), 'APP=outdated-lapper\n');
   assert.equal(fs.existsSync(`${f.root}.pending-prev`), false);
 });
+
+// A release can hold files a one-off root container wrote; this account cannot delete them.
+// Simulate that with an `rm` that refuses the tree and a `docker` that deletes it "as root".
+function rootOwnedShims(dir, blocked, { dockerWorks = true } = {}) {
+  const log = path.join(dir, 'docker.log');
+  return {
+    log,
+    prefix: `rm() { case " $* " in *" ${blocked}"*) return 1;; esac; command rm "$@"; }
+docker() {
+  echo "$*" >> '${log}'
+  if [ "$1" = ps ]; then ${dockerWorks ? "echo dana-apps-meshforge-server:70.7.0" : 'true'}; return 0; fi
+  if [ "$1" = run ]; then
+    local mount="" last="\${!#}"; for a in "$@"; do case "$a" in *:/parent) mount="\${a%:/parent}";; esac; done
+    command rm -rf "$mount/\${last##*/}"; return 0
+  fi
+}
+`,
+  };
+}
+
+test('finalize removes a previous release holding root-owned files through a root container', (t) => {
+  const f = fixture(t);
+  const prev = `${f.root}.prev`;
+  write(path.join(prev, 'tools/manufacturing/data-import/work/pre-clear-operational-data-manifest.json'), '{}');
+  write(path.join(`${f.root}.pending-prev`, 'compose.yml'), 'services: {}\n');
+  const shims = rootOwnedShims(path.dirname(f.root), prev);
+  const out = execute(shims.prefix + finalizeScript(f.root));
+  assert.match(out, /Removed .*\.prev \(it held files owned by another account\)/);
+  assert.equal(fs.existsSync(path.join(prev, 'tools')), false);
+  assert.equal(fs.existsSync(path.join(prev, 'compose.yml')), true);
+  assert.equal(fs.existsSync(`${f.root}.pending-prev`), false);
+  const calls = fs.readFileSync(shims.log, 'utf8');
+  assert.match(calls, /label=com\.docker\.compose\.project=dana-apps/);
+  assert.match(calls, /run --rm --user 0:0 --network none --entrypoint rm -v .*:\/parent dana-apps-meshforge-server:70\.7\.0 -rf \/parent\//);
+});
+
+test('finalize stops with the exact command when no project image can remove the folder', (t) => {
+  const f = fixture(t);
+  const prev = `${f.root}.prev`;
+  write(path.join(prev, 'work/root-owned.json'), '{}');
+  write(path.join(`${f.root}.pending-prev`, 'compose.yml'), 'services: {}\n');
+  const shims = rootOwnedShims(path.dirname(f.root), prev, { dockerWorks: false });
+  const result = spawnSync('bash', ['-s'], { input: shims.prefix + finalizeScript(f.root), encoding: 'utf8' });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /Could not remove .*\.prev: it holds files owned by another account\. Run: sudo rm -rf '/);
+  // The pending release is kept, so a re-run (or rollback) still finds it.
+  assert.equal(fs.existsSync(path.join(`${f.root}.pending-prev`, 'compose.yml')), true);
+});
