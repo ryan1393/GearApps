@@ -5,7 +5,7 @@ import { autoShelfFor } from '../../shared/auto-shelf/auto-shelf';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MachineDsfCountComponent, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
+import { MachineDsfCountComponent, GearToastService, ScanMessage, CountStepperComponent, OptionPickerComponent, PickerOption, ScanPanelComponent, StationStatusComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { BladeStatus } from '@meshforge/manufacturing/shared/util-types';
 import {
   BladeTrackingApiService,
@@ -16,11 +16,6 @@ import {
   InventoryContainerRow,
   apiErrorText,
 } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
-import { ScanMessage } from '../../models/scan-message';
-import { CountStepperComponent } from '../../shared/count-stepper/count-stepper.component';
-import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/option-picker.component';
-import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
-import { StationStatusComponent } from '../../shared/station-status/station-status.component';
 import { StationOperation } from '../operations-station/operations-station.operations';
 import { DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
 

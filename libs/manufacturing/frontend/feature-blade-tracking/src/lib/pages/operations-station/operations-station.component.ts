@@ -11,8 +11,8 @@ import { IntakeComponent } from '../intake/intake.component';
 import { InternalMovementComponent } from '../internal-movement/internal-movement.component';
 import { LoadContainerComponent } from '../load-container/load-container.component';
 import { ReceiveContainerComponent } from '../receive-container/receive-container.component';
-import { focusExpectedScan } from '../../shared/focus-expected-scan';
 import { BLADE_OPERATIONS, BladeOperationKey, StationOperation, isBladeOperation } from './operations-station.operations';
+import { focusExpectedScan } from '@meshforge/manufacturing/frontend/util-common';
 
 const LAST_OPERATION_KEY = 'meshforge.blade-tracking.operations-station';
 const HIDDEN_TABS_KEY = 'meshforge.blade-tracking.operations-station.hidden-tabs';

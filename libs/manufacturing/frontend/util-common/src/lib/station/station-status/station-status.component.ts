@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
-import { ScanMessage } from '../../models/scan-message';
+import { ScanMessage } from '../scan-message';
 import { focusExpectedScan } from '../focus-expected-scan';
 
 /**
