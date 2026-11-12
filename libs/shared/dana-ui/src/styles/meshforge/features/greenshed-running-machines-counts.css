@@ -33,7 +33,7 @@
   font-weight: 700 !important;
   line-height: 1.2 !important;
   font-variant-numeric: tabular-nums !important;
-  color: #39414e !important;
+  color: var(--gear-text) !important;
   text-align: center !important;
   white-space: nowrap !important;
   overflow-wrap: normal !important;
@@ -43,7 +43,7 @@
   text-align: center !important;
   font-size: .8125rem !important;
   line-height: 1.25 !important;
-  color: #39414e !important;
+  color: var(--gear-text) !important;
   font-weight: 600 !important;
 }
 .running-machines-page .shift-count-note { text-align: center !important; }

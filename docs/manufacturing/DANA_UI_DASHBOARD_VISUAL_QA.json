@@ -3,8 +3,8 @@
   "requiredSourceBaseline": "V70.0.3R1",
   "sharedUiVersion": "0.2.0",
   "visualReference": "Truck Log",
-  "previousCssSha256": "812B7206F858B08B189D8E1223740BEF7E47614E8577B044B154E0F3B51DFA34",
-  "managedCssSha256": "D6F06609EF9F926BAE977F85EF8754FC434FB49FF540E27C00DD0D8F86544D45",
+  "previousCssSha256": "AFC4AA53506463165D90AC644B0000CA9A2290665B8968BE97462EF4C86440EC",
+  "managedCssSha256": "E9789A24030552C2F43DE4C65BE366F8EB2E90D488B33403FF8305D86FC71A81",
   "scope": "Reviewed shared Dana/Gear adapter: screen presentation, spacing tokens, density variables and theme-safe surfaces; current Angular templates are covered by the linked spacing review.",
   "spacingReview": {
     "date": "2026-11-12",
@@ -21,5 +21,9 @@
       "previousCssSha256": "5D736F5C27E17A92F5F11B634B8CC2B79E9EAA495D143EA3ADD634D558A4C9D2",
       "managedCssSha256": "00B37D5B91A9246A03D24F69EDF4E103C8BF78D61035348A30452CF1AAA30E1A"
     }
+  },
+  "tokenReview": {
+    "date": "2026-11-12",
+    "change": "Hard-coded light colours replaced by MeshForge role tokens (--gear-*); 150 page/theme/size screenshots compared before and after."
   }
 }

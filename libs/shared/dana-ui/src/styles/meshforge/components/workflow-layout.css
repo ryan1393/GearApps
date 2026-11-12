@@ -111,21 +111,21 @@
 }
 
 .gear-workflow-state-success {
-  border-color: #a7f3d0;
+  border-color: var(--gear-success-border);
   border-left-color: var(--gear-success);
   background: var(--gear-success-bg);
   color: var(--gear-success);
 }
 
 .gear-workflow-state-warning {
-  border-color: #fde68a;
+  border-color: var(--gear-warning-border);
   border-left-color: var(--gear-warning);
   background: var(--gear-warning-bg);
   color: var(--gear-warning);
 }
 
 .gear-workflow-state-danger {
-  border-color: #fecaca;
+  border-color: var(--gear-danger-border);
   border-left-color: var(--gear-danger);
   background: var(--gear-danger-bg);
   color: var(--gear-danger);
@@ -367,13 +367,13 @@
 }
 
 .gear-workflow-page .gear-feedback[role='alert'] {
-  border: 1px solid #fecaca;
+  border: 1px solid var(--gear-danger-border);
   background: var(--gear-danger-bg);
   color: var(--gear-danger);
 }
 
 .gear-workflow-page .gear-feedback[role='status'] {
-  border: 1px solid #a7f3d0;
+  border: 1px solid var(--gear-success-border);
   background: var(--gear-success-bg);
   color: var(--gear-success);
 }

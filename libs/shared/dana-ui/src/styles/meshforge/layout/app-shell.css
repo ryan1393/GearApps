@@ -12,7 +12,7 @@ gear-greenshed-root {
   background:
     radial-gradient(circle at 12% 2%, rgba(199, 99, 22, .10), transparent 34rem),
     radial-gradient(circle at 92% 18%, rgba(45, 145, 147, .065), transparent 30rem),
-    linear-gradient(180deg, var(--gear-page-top) 0, var(--gear-page) 48%, #f5f6f7 100%);
+    linear-gradient(180deg, var(--gear-page-top) 0, var(--gear-page) 48%, var(--gear-surface-accent) 100%);
 }
 
 @media (min-width: 1024px) {
@@ -23,7 +23,7 @@ gear-greenshed-root {
 
 .app-content-shell.login-shell {
   padding: 0 !important;
-  background: #f1f2f4;
+  background: var(--gear-surface-accent);
 }
 
 /* Keep the mobile drawer's dismiss action visible within its keyboard scope. */

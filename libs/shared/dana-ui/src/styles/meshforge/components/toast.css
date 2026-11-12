@@ -20,9 +20,9 @@
   border: 1px solid #dddfe3;
   border-left-width: 5px;
   border-radius: 10px;
-  background: #fff;
+  background: var(--gear-surface);
   box-shadow: 0 14px 36px rgba(27, 31, 37, .18);
-  color: #1b1f25;
+  color: var(--gear-heading);
   pointer-events: auto;
   animation: gear-toast-in 160ms ease-out both;
 }
@@ -39,12 +39,12 @@
   height: 32px;
   border-radius: 999px;
   background: #e8f5ef;
-  color: #047857;
+  color: var(--gear-success);
   font-size: 16px;
   font-weight: 700;
 }
 .toast-warning .gear-toast-icon { background: #fff4df; color: #8d6a07; }
-.toast-error .gear-toast-icon { background: #fdecec; color: #b42318; }
+.toast-error .gear-toast-icon { background: #fdecec; color: var(--gear-danger); }
 .toast-info .gear-toast-icon { background: #eaf2ff; color: #1d4ed8; }
 
 .gear-toast-copy { display: grid; gap: 3px; min-width: 0; }
@@ -60,7 +60,7 @@
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: #6b7381;
+  color: var(--gear-muted);
   font: inherit;
   font-size: 20px;
   line-height: 1;
@@ -69,7 +69,7 @@
 .gear-toast-close:hover,
 .gear-toast-close:focus-visible {
   background: #f1f2f3;
-  color: #1b1f25;
+  color: var(--gear-heading);
   outline: none;
 }
 

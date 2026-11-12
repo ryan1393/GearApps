@@ -31,6 +31,10 @@
   --gear-surface-accent: #f4f5f6;
   --gear-accent: var(--dana-primary);
   --gear-accent-soft: #fbeee3;
+  /* Brand-coloured text, links and borders on light surfaces (4.9:1 on white). */
+  --gear-accent-strong: #aa5413;
+  /* Hairlines between rows and sections; lighter than --gear-border. */
+  --gear-divider: #ebecee;
   --gear-focus: #aa5413;
   --gear-sidebar: var(--dana-sidebar);
 
@@ -40,6 +44,9 @@
   --gear-warning-bg: #fffbeb;
   --gear-danger: var(--dana-danger);
   --gear-danger-bg: #fff5f5;
+  --gear-danger-border: #fecaca;
+  --gear-success-border: #a7f3d0;
+  --gear-warning-border: #fde68a;
 
   /* Canonical shop-floor type scale. Responsive overrides may raise these values. */
   --gear-font-xs: 11px;

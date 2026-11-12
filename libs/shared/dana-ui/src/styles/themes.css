@@ -146,6 +146,11 @@ html:root[data-dana-theme='dark'] {
   --gear-warning-bg: var(--dana-warning-soft);
   --gear-danger-bg: var(--dana-danger-soft);
   --gear-accent-soft: #49301e;
+  --gear-accent-strong: var(--dana-primary);
+  --gear-divider: #364252;
+  --gear-danger-border: #7a3a3f;
+  --gear-success-border: #2f6b52;
+  --gear-warning-border: #6e5a24;
   --gear-focus: var(--dana-primary);
   --gear-control-bg: var(--dana-surface);
   --gear-control-border: var(--dana-control-border);

@@ -1,7 +1,7 @@
 /* Cutter Builder workflow-specific visual modifiers */
 .metric-cell {
   display:flex; align-items:center; gap:1rem; min-height:6rem; padding:1.15rem 1.25rem;
-  border-right:1px solid #e6e7ea; border-bottom:1px solid #e6e7ea;
+  border-right:1px solid var(--gear-divider); border-bottom:1px solid var(--gear-divider);
 }
 .metric-dot {
   display:grid; place-items:center; flex:0 0 auto; width:3rem; height:3rem;
@@ -12,8 +12,8 @@
 .metric-amber { background:#e1a809; }
 .metric-red { background:#dc2626; }
 .metric-number { font-size:1.4rem; line-height:1; font-weight:900; color:#15181d; }
-.metric-label { margin-top:.2rem; font-size:.8rem; font-weight:800; color:#242932; }
-.metric-help { margin-top:.1rem; font-size:.8rem; color:#6b7381; }
+.metric-label { margin-top:.2rem; font-size:.8rem; font-weight:800; color:var(--gear-heading); }
+.metric-help { margin-top:.1rem; font-size:.8rem; color:var(--gear-muted); }
 
 
 .scan-valid {
@@ -21,8 +21,8 @@
   background:#f0fdf4 !important;
 }
 .scan-invalid {
-  border-color:#fecaca !important;
-  background:#fef2f2 !important;
+  border-color:var(--gear-danger-border) !important;
+  background:var(--gear-danger-bg) !important;
 }
 
 .metric-purple { background:#7c3aed; }
