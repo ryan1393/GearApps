@@ -48,6 +48,8 @@ export class DialogComponent {
   readonly title = input.required<string>();
   readonly description = input<string>();
   readonly width = input('640px');
+  /** Keep an in-flight save visible until its result is known. */
+  readonly dismissible = input(true);
   private readonly dlg = viewChild.required<ElementRef<HTMLDialogElement>>('dlg');
 
   constructor() {
@@ -60,10 +62,12 @@ export class DialogComponent {
 
   protected onCancel(event: Event) {
     event.preventDefault();
+    if (!this.dismissible()) return;
     this.open.set(false);
   }
 
   protected onBackdrop(event: MouseEvent) {
+    if (!this.dismissible()) return;
     const el = this.dlg().nativeElement;
     if (event.target !== el) return;
     const r = el.getBoundingClientRect();

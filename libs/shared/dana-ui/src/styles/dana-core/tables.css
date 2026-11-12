@@ -128,6 +128,11 @@ td[danaTableEmpty] {
   width: 14px;
   height: 14px;
 }
+
+:where(.dana-table-filter-trigger:focus-visible) {
+  outline: 2px solid var(--dana-primary);
+  outline-offset: 2px;
+}
 :where(.dana-table-filter-funnel svg),
 :where(.dana-table-filter-search-icon svg) {
   display: block;

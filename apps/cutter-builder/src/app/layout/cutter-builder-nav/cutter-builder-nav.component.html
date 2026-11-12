@@ -1,5 +1,5 @@
 <ng-container *ngIf="session.authState$ | async as user">
-  <aside danaMobileNav [desktopMinWidth]="1024" #mobileNav="danaMobileNav" class="gear-sidebar" [class.mobile-open]="mobileNav.open" aria-label="Application navigation">
+  <aside id="application-navigation" danaMobileNav [modal]="true" [desktopMinWidth]="1024" #mobileNav="danaMobileNav" class="gear-sidebar" [class.mobile-open]="mobileNav.open" aria-label="Application navigation">
     <a (click)="mobileNav.close()" routerLink="/cutter-builder" class="brand-row">
       <span class="brand-mark dana-diamond-mark"><img src="assets/brand/meshforge-mark.svg" alt="" class="dana-diamond-image" aria-hidden="true" /></span>
       <span class="brand-copy">
@@ -7,20 +7,21 @@
         <strong>CUTTER BUILDER</strong>
       </span>
     </a>
+    <button type="button" class="gear-btn gear-btn-secondary gear-nav-close" (click)="mobileNav.close()">Close navigation</button>
 
     <nav class="side-nav" aria-label="Cutter Builder">
-      <a (click)="mobileNav.close()" routerLink="/cutter-builder" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active" class="side-link primary">
+      <a (click)="mobileNav.close()" routerLink="/cutter-builder" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active" ariaCurrentWhenActive="page" class="side-link primary">
         <span class="nav-icon"><span class="gear-glyph gear-glyph-dashboard" aria-hidden="true"></span></span><span>Cutter Dashboard</span><span class="nav-current">ACTIVE</span>
       </a>
 
       <ng-container *ngIf="canEdit(user) || canReadRequests(user)">
         <div class="nav-heading">OPERATIONS</div>
-        <a *ngIf="canReadRequests(user)" (click)="mobileNav.close()" routerLink="/cutter-builder/requests" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Cutter Requests</span></a>
-        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/cutter-builder/build" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-build-cutter" aria-hidden="true"></span></span><span>Build Cutter</span></a>
-        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/cutter-builder/teardown" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-teardown" aria-hidden="true"></span></span><span>Tear Down Cutter</span></a>
+        <a *ngIf="canReadRequests(user)" (click)="mobileNav.close()" routerLink="/cutter-builder/requests" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Cutter Requests</span></a>
+        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/cutter-builder/build" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-build-cutter" aria-hidden="true"></span></span><span>Build Cutter</span></a>
+        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/cutter-builder/teardown" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-teardown" aria-hidden="true"></span></span><span>Tear Down Cutter</span></a>
 
         <div *ngIf="canEdit(user)" class="nav-heading">REFERENCE</div>
-        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/cutter-builder/lookup" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span><span>Build Lookup</span></a>
+        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/cutter-builder/lookup" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span><span>Build Lookup</span></a>
       </ng-container>
 
       <div *ngIf="!canEdit(user)" class="sidebar-view-only">
@@ -28,7 +29,7 @@
         <span>Physical cutter operations follow department permissions. Cutter Requests follow your assigned access.</span>
       </div>
 
-      <a (click)="mobileNav.close()" routerLink="/machine-counts" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Machine DSF Counts</span></a>
+      <a (click)="mobileNav.close()" routerLink="/machine-counts" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Machine DSF Counts</span></a>
       <div class="nav-heading">SHARED APPS</div>
       <a (click)="mobileNav.close()" [href]="bladeTrackingUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-blade" aria-hidden="true"></span></span><span>Blade Tracking</span></a>
       <a (click)="mobileNav.close()" [href]="greenshedUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Greenshed</span></a>
@@ -36,7 +37,7 @@
 
       <ng-container *ngIf="user.role === 'admin'">
         <div class="nav-heading">ADMINISTRATION</div>
-        <a (click)="mobileNav.close()" routerLink="/admin" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span><span>Admin</span></a>
+        <a (click)="mobileNav.close()" routerLink="/admin" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span><span>Admin</span></a>
       </ng-container>
     </nav>
 
@@ -49,7 +50,7 @@
   <button *ngIf="mobileNav.open" type="button" class="gear-nav-overlay" aria-label="Close navigation" (click)="mobileNav.close()"></button>
 
   <header class="gear-topbar">
-    <button class="menu-button" type="button" aria-label="Open navigation" [attr.aria-expanded]="mobileNav.open" (click)="mobileNav.toggle()">☰</button>
+    <button class="menu-button" type="button" aria-controls="application-navigation" [attr.aria-label]="mobileNav.open ? 'Close navigation' : 'Open navigation'" [attr.aria-expanded]="mobileNav.open" (click)="mobileNav.toggle()">☰</button>
 
     <form *ngIf="canEdit(user)" class="global-search" (ngSubmit)="search()">
       <span class="search-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span>

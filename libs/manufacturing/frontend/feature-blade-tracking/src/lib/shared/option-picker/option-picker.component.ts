@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
 
 export interface PickerOption {
   /** What is passed back when the row is chosen: usually the serial number, as if it had been scanned. */
@@ -20,23 +20,23 @@ let nextPickerId = 1;
   host: { '[style.--picker-columns]': 'columns', '[class.picker-plain]': '!divider' },
   template: `
     @if (divider) { <div class="picker-divider" aria-hidden="true">OR</div> }
-    <button type="button" class="gear-input picker-toggle" [attr.aria-expanded]="open" [attr.aria-controls]="listId"
-      [disabled]="disabled" (click)="open = !open">
+    <button #toggle type="button" class="gear-input picker-toggle" [attr.aria-expanded]="open && !disabled" [attr.aria-controls]="open && !disabled ? listId : null"
+      [disabled]="disabled" (click)="open = !open" (keydown.escape)="open && close($event)">
       <span>{{ placeholder }}</span>
       <span class="picker-count">{{ loading ? 'Loading…' : options.length }}</span>
       <span aria-hidden="true">{{ open ? '⌃' : '⌄' }}</span>
     </button>
     @if (open && !disabled) {
-      <div class="picker-list" [id]="listId" role="list">
+      <div class="picker-list" [id]="listId" role="list" [attr.aria-label]="placeholder" [attr.aria-busy]="loading" (keydown.escape)="close($event)">
         @if (headers.length) {
           <div class="picker-row picker-head" aria-hidden="true">
             @for (header of headers; track $index) { <span>{{ header }}</span> }
           </div>
         }
         @for (option of options; track option.value) {
-          <button type="button" role="listitem" class="picker-row" (click)="choose(option.value)">
-            @for (cell of option.cells; track $index) { <span>{{ cell }}</span> }
-          </button>
+          <div role="listitem"><button type="button" class="picker-row" [disabled]="loading || !!error" (click)="choose(option.value)">
+              @for (cell of option.cells; track $index) { <span>{{ cell }}</span> }
+          </button></div>
         }
         @if (loading) { <p class="picker-note" role="status">Loading…</p> }
         @if (error) { <p class="picker-note picker-error" role="alert">{{ error }}</p> }
@@ -49,14 +49,16 @@ let nextPickerId = 1;
     :host(.picker-plain) { margin-top: 0; border-top: 0; padding-top: 0; }
     .picker-divider { margin-bottom: 8px; text-align: center; font-size: .75rem; font-weight: 900; letter-spacing: .08em; color: var(--dana-muted); }
     .picker-toggle { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; cursor: pointer; text-align: left; font-size: 1.05rem; }
-    .picker-toggle > span:first-child { flex: 1; }
+    .picker-toggle > span:first-child { flex: 1; min-width: 0; overflow-wrap: anywhere; }
     .picker-count { min-width: 2rem; padding: 2px 8px; border-radius: 999px; background: var(--dana-neutral-soft); text-align: center; font-size: .85rem; font-weight: 800; }
     .picker-list { margin-top: 6px; max-height: 300px; overflow: auto; overscroll-behavior: contain; border: 1px solid var(--dana-border); border-radius: 12px; background: var(--dana-surface); }
     .picker-row { display: grid; grid-template-columns: var(--picker-columns); align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 16px; border: 0; border-bottom: 1px solid var(--dana-border);
       background: none; color: var(--dana-text); font: inherit; text-align: left; cursor: pointer; touch-action: manipulation; }
+    .picker-row > span { min-width: 0; overflow-wrap: anywhere; }
     .picker-row > span:first-child { font-weight: 800; }
     .picker-row > span:last-child:not(:first-child) { text-align: right; }
     button.picker-row:hover, button.picker-row:focus-visible { background: var(--dana-neutral-soft); }
+    button.picker-row:disabled { cursor: wait; opacity: .6; }
     .picker-head { position: sticky; top: 0; min-height: 0; padding-block: 8px; background: var(--dana-neutral-soft); cursor: default;
       font-size: .75rem; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; color: var(--dana-muted); }
     .picker-head > span:first-child { font-weight: 900; }
@@ -83,10 +85,19 @@ export class OptionPickerComponent {
   }
 
   readonly listId = `gear-option-picker-${nextPickerId++}`;
+  @ViewChild('toggle') toggle?: ElementRef<HTMLButtonElement>;
   open = false;
 
-  choose(value: string): void {
+  close(event?: Event): void {
+    event?.preventDefault();
+    event?.stopPropagation();
     this.open = false;
+    this.toggle?.nativeElement.focus();
+  }
+
+  choose(value: string): void {
+    if (this.disabled || this.loading || this.error) return;
+    this.close();
     this.picked.emit(value);
   }
 }

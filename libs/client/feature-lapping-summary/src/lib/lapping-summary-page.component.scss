@@ -56,7 +56,7 @@
 .lapper-tab-note { margin: 0 0 10px; font-size: 13px; }
 .lapper-section-title { margin: 12px 0 6px; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--dana-muted); }
 .lapper-section-title:first-child { margin-top: 0; }
-.lapper-dense { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 6px; }
+.lapper-dense { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 6px; }
 
 .lapper-change-group { padding: 8px 0; border-top: 1px solid var(--dana-border); }
 .lapper-change-group:first-of-type { border-top: 0; padding-top: 0; }
@@ -70,12 +70,12 @@
 
 .lapper-groups {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
   gap: 8px;
 }
 
 .lapper-groups--tight {
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
 }
 
 .lapper-paths {

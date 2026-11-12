@@ -5,6 +5,7 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
+  ElementRef,
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -58,6 +59,7 @@ export class PasswordRecoveryComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private generation = 0;
   private code = '';
   mode: 'forgot' | 'reset' = 'forgot';
@@ -136,6 +138,9 @@ export class PasswordRecoveryComponent {
           (this.mode === 'reset'
             ? ' and matching passwords that meet the requirements.'
             : '.');
+      const field = this.form.controls.email.invalid ? '#recovery-email'
+        : this.form.controls.password.invalid ? '#new-password' : '#confirm-password';
+      this.element.nativeElement.querySelector<HTMLInputElement>(field)?.focus();
       return;
     }
     const generation = this.generation,

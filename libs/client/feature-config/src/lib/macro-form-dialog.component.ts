@@ -34,6 +34,7 @@ const CONSEC_MACRO = PER_CYCLE_MACROS[0];
   template: `
     <gear-dialog
       [open]="open()"
+      [dismissible]="!busy()"
       (openChange)="open.set($event)"
       [title]="macro() ? 'Edit macro #' + macro()?.number : 'Add macro'"
       description="A Fanuc macro variable the lapper reports each cycle, and where it belongs on the lapping summary."
@@ -136,7 +137,7 @@ const CONSEC_MACRO = PER_CYCLE_MACROS[0];
         }
       </form>
       <ng-container dialogActions>
-        <button type="button" class="gear-btn gear-btn-secondary" (click)="open.set(false)">
+        <button type="button" class="gear-btn gear-btn-secondary" (click)="open.set(false)" [disabled]="busy()">
           Cancel
         </button>
         <button

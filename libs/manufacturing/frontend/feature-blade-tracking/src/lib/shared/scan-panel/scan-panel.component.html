@@ -9,9 +9,9 @@
       </div>
     } @else {
       <label [for]="inputId" class="block text-lg font-bold">{{ label }}</label>
-      <p *ngIf="help" class="mt-1 text-sm text-slate-600">{{ help }}</p>
+      <p *ngIf="help" [id]="inputId + '-help'" class="mt-1 text-sm text-slate-600">{{ help }}</p>
       <div class="mt-4 flex gap-2">
-        <input #input [id]="inputId" [attr.data-gear-scan-step]="step" [(ngModel)]="value" (keyup.enter)="submit()" (focus)="selectOnFocus()" autocomplete="off"
+        <input #input [id]="inputId" [attr.aria-describedby]="help ? inputId + '-help' : null" [attr.data-gear-scan-step]="step" [(ngModel)]="value" (keyup.enter)="submit()" (focus)="selectOnFocus()" autocomplete="off" autocapitalize="characters" [spellcheck]="false" enterkeyhint="go"
           class="gear-input min-w-0 flex-1"
           [placeholder]="placeholder" [disabled]="disabled" />
         <button type="button" (click)="submit()" [disabled]="disabled || !value.trim()"

@@ -53,6 +53,18 @@ try {
   await page.locator('#direct input').press('Enter');
   await page.waitForFunction(() => window.fixture.instance.value === 'Beta');
 
+  // A search without a candidate cannot submit an old selected ID; Escape restores its label.
+  await page.locator('#direct input').fill('No matching option');
+  await page.locator('#direct input').press('ArrowUp');
+  assert.equal(await page.locator('#direct input').getAttribute('aria-activedescendant'), null);
+  await page.locator('#direct input').press('Enter');
+  assert.equal(await page.evaluate(() => window.fixture.instance.submitCount), 0);
+  assert.equal(await page.evaluate(() => window.fixture.instance.value), 'Beta');
+  await page.locator('#direct input').press('Escape');
+  await page.waitForFunction(() => document.querySelector('#direct input').value === 'Beta');
+  assert.equal(await page.locator('#direct input').inputValue(), 'Beta');
+  assert.equal(await page.locator('#direct input').evaluate(el => getComputedStyle(el).outlineWidth), '2px');
+
   await page.locator('#reactive .dana-combobox-toggle').click();
   await page.evaluate(() => { window.fixture.instance.control.disable(); window.fixture.changeDetectorRef.detectChanges(); });
   assert.equal(await page.locator('#reactive .dana-combobox-panel').count(), 0);
@@ -85,8 +97,57 @@ try {
   assert.equal(await popover.count(), 0);
   assert.equal(await trigger.evaluate(el => el === document.activeElement), true);
   assert.equal(await page.locator('#table th').first().getAttribute('role'), null, 'native column-header semantics retained');
+  // Application controls in a header retain their click/keyboard behavior without sorting.
+  await page.locator('#header-action').click();
+  await page.locator('#header-action').press('Space');
+  assert.equal(await page.evaluate(() => window.fixture.instance.headerActionCount), 2);
+  assert.equal(await page.locator('#table th').first().getAttribute('aria-sort'), 'none');
   await page.locator('#table th').last().click();
   assert.equal(await page.locator('#table th').last().getAttribute('aria-sort'), 'ascending');
+
+  // Reapplying an established order on a live cell update preserves a row control's focus.
+  await page.locator('#row-action').focus();
+  await page.evaluate(() => { window.fixture.instance.rowSuffix = 'Updated'; window.fixture.changeDetectorRef.detectChanges(); });
+  await page.waitForFunction(() => document.querySelector('#table tbody').textContent.includes('Updated'));
+  await page.evaluate(() => new Promise(resolve => setTimeout(resolve, 0)));
+  assert.equal(await page.locator('#row-action').evaluate(el => el === document.activeElement), true);
+
+  // A reused header opting out restores unchanged Angular bindings rather than deleting them.
+  await page.evaluate(() => { window.fixture.instance.staticHeader = true; window.fixture.changeDetectorRef.detectChanges(); });
+  await page.waitForFunction(() => !document.querySelector('#table th:first-child .dana-table-header-tools'));
+  assert.equal(await page.locator('#table th').first().getAttribute('aria-label'), 'Application heading');
+  assert.equal(await page.locator('#table th').first().getAttribute('tabindex'), '7');
+  assert.equal(await page.locator('#table th').first().getAttribute('aria-sort'), 'other');
+  assert.equal(await page.locator('.dana-table-filter-popover').count(), 1);
+  await page.evaluate(() => { window.fixture.instance.staticHeader = false; window.fixture.changeDetectorRef.detectChanges(); });
+  await page.waitForFunction(() => document.querySelectorAll('.dana-table-filter-popover').length === 2);
+  // New application values on the opt-out transition must also survive cleanup.
+  await page.evaluate(() => {
+    Object.assign(window.fixture.instance, { staticHeader: true, headerLabel: 'Updated heading', headerTabindex: 4, headerSort: 'descending' });
+    window.fixture.changeDetectorRef.detectChanges();
+  });
+  await page.waitForFunction(() => !document.querySelector('#table th:first-child .dana-table-header-tools'));
+  assert.equal(await page.locator('#table th').first().getAttribute('aria-label'), 'Updated heading');
+  assert.equal(await page.locator('#table th').first().getAttribute('tabindex'), '4');
+  assert.equal(await page.locator('#table th').first().getAttribute('aria-sort'), 'descending');
+  await page.evaluate(() => { window.fixture.instance.staticHeader = false; window.fixture.changeDetectorRef.detectChanges(); });
+  await page.waitForFunction(() => document.querySelectorAll('.dana-table-filter-popover').length === 2);
+
+  // Replaced Angular headers release detached controls/listeners and their body overlays.
+  await trigger.click();
+  await page.evaluate(() => {
+    window.detachedHeader = document.querySelector('#table th');
+    window.fixture.instance.alternateHeader = true; window.fixture.changeDetectorRef.detectChanges();
+  });
+  await page.waitForFunction(() => document.querySelector('#table th')?.textContent.includes('Replacement'));
+  await page.waitForFunction(() => document.querySelectorAll('.dana-table-filter-popover').length === 2);
+  assert.equal(await page.locator('.dana-table-filter-popover:visible').count(), 0);
+  assert.equal(await page.evaluate(() => {
+    const event = new MouseEvent('click', { bubbles: true, cancelable: true });
+    window.detachedHeader.dispatchEvent(event); return event.defaultPrevented;
+  }), false);
+  await page.evaluate(() => { window.fixture.instance.alternateHeader = false; window.fixture.changeDetectorRef.detectChanges(); });
+  await page.waitForFunction(() => document.querySelectorAll('.dana-table-filter-popover').length === 2);
 
   // Every header popup must be removed, whether or not one is open at destruction.
   await page.evaluate(() => { window.fixture.instance.showTable = false; window.fixture.changeDetectorRef.detectChanges(); });
@@ -162,8 +223,39 @@ try {
   await page.keyboard.press('Escape');
   await page.waitForFunction(() => document.querySelector('#gear-nav-toggle').textContent === 'false');
   assert.equal(await page.locator('#gear-nav-toggle').textContent(), 'false');
+
+  // Opt-in modal drawers enter/contain/restore focus while desktop navigation stays unchanged.
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.equal(await page.locator('#modal-nav').evaluate(el => getComputedStyle(el).visibility), 'hidden');
+  await page.locator('#drawer-opener').click();
+  await page.waitForFunction(() => document.activeElement?.id === 'drawer-close');
+  assert.equal(await page.locator('#modal-nav').getAttribute('role'), 'dialog');
+  assert.equal(await page.locator('#modal-nav').getAttribute('aria-modal'), 'true');
+  await page.keyboard.press('Shift+Tab');
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'drawer-last');
+  await page.keyboard.press('Tab');
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'drawer-close');
+  await page.keyboard.press('Escape');
+  await page.locator('#modal-nav').waitFor({ state: 'hidden' });
+  assert.equal(await page.locator('#modal-nav').isVisible(), false);
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'drawer-opener');
+  await page.locator('#drawer-opener').click();
+  await page.locator('#drawer-close').click();
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'drawer-opener');
+  await page.locator('#drawer-opener').click();
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await page.waitForFunction(() => document.querySelector('#modal-nav').getAttribute('aria-modal') === null);
+
+  // Skip links appear only on explicit focus, and reduced-motion removes moving transitions.
+  assert.equal(await page.locator('#skip-link').evaluate(el => el.getBoundingClientRect().bottom < 0), true);
+  await page.locator('#skip-link').focus();
+  assert.equal(await page.locator('#skip-link').evaluate(el => el.getBoundingClientRect().top >= 0), true);
+  await page.locator('#skip-link').click();
+  assert.equal(await page.evaluate(() => document.activeElement.id), 'fixture-main');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  assert.ok(await page.locator('#direct .dana-combobox-toggle span').evaluate(el => parseFloat(getComputedStyle(el).transitionDuration) <= .00001));
   assert.deepEqual(errors, []);
-  console.log('[PASS] Canonical layout, table sorting/filtering/cleanup, disabled controls, overflow positioning, and modal keyboard regressions.');
+  console.log('[PASS] Canonical layout, table controls/header cleanup/stable focus, combobox form safety, modal drawer keyboard focus, skip link, reduced motion, and confirmation regressions.');
 } finally {
   await browser.close();
 }

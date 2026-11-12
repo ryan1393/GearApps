@@ -3,6 +3,8 @@
     description="Record a Frequency or ZEISS / CMM check for the active cutter."></header>
   <div *ngIf="error" class="gear-feedback" role="alert">{{ error }}</div>
   <div *ngIf="message" class="gear-feedback" role="status" aria-live="polite">{{ message }}</div>
+  <div *ngIf="loadingChoices" class="gear-feedback" role="status">Loading quality check choices and piece-count settings…</div>
+  <div *ngIf="choicesError" class="gear-feedback" role="alert">{{ choicesError }} Quality checks cannot be saved until these choices load. <button type="button" class="gear-btn gear-btn-secondary" (click)="loadChoices()" [disabled]="loadingChoices">Retry choices</button></div>
 
   <section *ngIf="!lockedToRunningMachine" class="gear-workflow-section">
     <div class="gear-workflow-section-header"><div><h2>Scan Active Cutter</h2><p>Open the current machine run before recording quality.</p></div></div>
@@ -40,7 +42,7 @@
     <form #checkFormElement #checkForm="ngForm" (ngSubmit)="save()" class="gear-workflow-section">
       <div class="gear-workflow-section-header"><div><h2>Check Result</h2><p>Your logged-in user is recorded with this check.</p></div></div>
       <div class="gear-workflow-section-body">
-        <fieldset [disabled]="busy || !contextValid">
+        <fieldset [disabled]="busy || !contextValid || !refs || loadingChoices">
           <div *ngIf="resultCode === 'FAIL' || resultCode === 'HOLD'" class="gear-workflow-state gear-workflow-state-danger" role="alert">
             <strong>{{ resultCode }} selected</strong><p class="gear-workflow-help">Save the check, then review whether this cutter needs to be pulled.</p>
           </div>

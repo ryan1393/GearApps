@@ -53,7 +53,7 @@ import {
   macroLimitState,
   macroLimitText,
 } from '@meshforge/shared/domain';
-import { catchError, forkJoin, fromEvent, interval, map, merge, of, shareReplay, startWith, switchMap } from 'rxjs';
+import { catchError, exhaustMap, forkJoin, fromEvent, interval, map, merge, of, shareReplay, startWith, Subscription, switchMap } from 'rxjs';
 import {
   fieldValue,
   findByName,
@@ -112,6 +112,8 @@ export class LappingSummaryPageComponent implements OnInit {
   protected readonly allGearsets = loadable<Gearset[]>([]);
   protected readonly machineOptions = loadable<Machine[]>([]);
   protected readonly gearsetOptions = loadable<Gearset[]>([]);
+  protected readonly choicesError = computed(() => this.allMachines.error() || this.allGearsets.error() || this.machineOptions.error() || this.gearsetOptions.error());
+  private choicesSubscription: Subscription | null = null;
   protected readonly machineId = signal<string | null>(null);
   protected readonly gearsetId = signal<string | null>(null);
   protected readonly machine = computed(
@@ -202,6 +204,12 @@ export class LappingSummaryPageComponent implements OnInit {
   );
 
   constructor() {
+    this.destroyRef.onDestroy(() => {
+      clearTimeout(this.serialTimer);
+      this.choicesSubscription?.unsubscribe();
+      this.requestVersion++;
+      for (const state of [this.allMachines,this.allGearsets,this.machineOptions,this.gearsetOptions,this.rows,this.history,this.changes]) state.dispose();
+    });
     this.watchLiveCycle();
     // Load the summary whenever both selections are present.
     effect(() => {
@@ -232,8 +240,11 @@ export class LappingSummaryPageComponent implements OnInit {
       if (!machineId) return;
       const sub = visible$
         .pipe(
-          switchMap((visible) => (visible ? interval(5000).pipe(startWith(0)) : of())),
-          switchMap(() => this.fanucApi.byMachine(machineId).pipe(catchError(() => of(null)))),
+          switchMap((visible) => visible ? interval(5000).pipe(
+            startWith(0),
+            // Let a slow controller answer before starting the next read.
+            exhaustMap(() => this.fanucApi.byMachine(machineId).pipe(catchError(() => of(null)))),
+          ) : of()),
         )
         .subscribe((snapshot) => {
           this.live.set(snapshot);
@@ -244,22 +255,31 @@ export class LappingSummaryPageComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.reloadChoices();
+  }
+
+  protected reloadChoices(): void {
+    this.choicesSubscription?.unsubscribe();
     const lists$ = forkJoin({
       machines: this.machinesApi.list(),
       gearsets: this.gearsetsApi.list(),
-    }).pipe(shareReplay(1));
+    }).pipe(shareReplay({bufferSize:1,refCount:true}));
     this.allMachines.load(lists$.pipe(map((l) => l.machines)));
     this.allGearsets.load(lists$.pipe(map((l) => l.gearsets)));
     this.machineOptions.load(lists$.pipe(map((l) => l.machines)));
     this.gearsetOptions.load(lists$.pipe(map((l) => l.gearsets)));
 
     // ?gearset=<id>&machine=<id> deep links, and ?q=<text> from the topbar search.
-    this.route.queryParamMap
+    this.choicesSubscription = this.route.queryParamMap
       .pipe(
         switchMap((params) => lists$.pipe(map((lists) => ({ params, ...lists })))),
         takeUntilDestroyed(this.destroyRef),
       )
-      .subscribe(({ params, machines, gearsets }) => this.applyParams(params, machines, gearsets));
+      .subscribe({
+        next: ({ params, machines, gearsets }) => this.applyParams(params, machines, gearsets),
+        // The choice loadables expose the error and retry action in the picker.
+        error: () => undefined,
+      });
   }
 
   private applyParams(params: ParamMap, machines: Machine[], gearsets: Gearset[]) {
@@ -339,6 +359,8 @@ export class LappingSummaryPageComponent implements OnInit {
     if (!machineId || !gearsetId) return;
     this.requestVersion++;
     this.selected.set(cycle);
+    this.rows.set([]);
+    this.changes.set([]);
     // The values as they stood when this cycle finished, and what the cycle itself changed.
     this.rows.load(this.macroLogsApi.lappingSummary(machineId, gearsetId, undefined, undefined, cycle.id));
     this.changes.load(this.macroLogsApi.changes(machineId, gearsetId, cycle.id));
@@ -348,8 +370,16 @@ export class LappingSummaryPageComponent implements OnInit {
     const machineId = this.machineId(), gearsetId = this.gearsetId();
     if (!machineId || !gearsetId) return;
     this.selected.set(null);
+    this.rows.set([]);
+    this.changes.set([]);
     this.rows.load(this.macroLogsApi.lappingSummary(machineId, gearsetId));
     this.changes.load(this.macroLogsApi.changes(machineId, gearsetId));
+  }
+
+  protected retryValues(): void {
+    const selected=this.selected();
+    if (selected) this.selectCycle(selected);
+    else this.showLatest();
   }
 
   protected goToPage(page: number) {
@@ -382,6 +412,10 @@ export class LappingSummaryPageComponent implements OnInit {
     this.cycle.set(null);
     this.selected.set(null);
     this.page.set(1);
+    // A previous machine/cycle's evidence must not appear under the new selection.
+    this.history.set(null);
+    this.rows.set([]);
+    this.changes.set([]);
     this.history.load(this.cyclesApi.historyPage(machineId, gearsetId, 1, this.pageSize, this.serialSearch()));
     this.rows.load(this.macroLogsApi.lappingSummary(machineId, gearsetId));
     this.changes.load(this.macroLogsApi.changes(machineId, gearsetId));

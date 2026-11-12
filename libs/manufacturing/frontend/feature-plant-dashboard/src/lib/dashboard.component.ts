@@ -65,6 +65,7 @@ export class DashboardComponent {
   }
 
   refresh(): void { this.data.refresh(); }
+  clearFilters(): void { this.department.set(''); this.search.set(''); this.attention.set(false); }
   showCuttergrind(): void { this.department.set('45'); this.search.set(''); this.attention.set(false); this.view.set('overview'); }
   logout(): void { this.session.logout(); void this.router.navigateByUrl('/login'); }
   print(): void { window.print(); }

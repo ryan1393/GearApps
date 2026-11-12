@@ -49,6 +49,9 @@
         ></dana-combobox>
       </div>
     </div>
+    @if (choicesError()) {
+      <p class="gear-alert gear-alert-danger" role="alert">Could not load machine and gearset choices. <button type="button" class="gear-btn gear-btn-secondary" (click)="reloadChoices()" [disabled]="machineOptions.loading() || gearsetOptions.loading()">Retry choices</button></p>
+    }
     @if (ready()) {
       <dl class="lapper-facts">
         <div><dt>Gearset</dt><dd class="mono">{{ gearset()?.number }}{{ gearset()?.rev ? ' · rev ' + gearset()?.rev : '' }}</dd></div>
@@ -137,11 +140,12 @@
                   </td>
                 </tr>
               } @empty {
-                <tr><td danaTableEmpty colspan="5" class="empty-row">{{ history.loading() ? 'Loading cycles…' : serialSearch() ? 'No cycle has that serial.' : 'No cycles recorded yet.' }}</td></tr>
+                <tr><td danaTableEmpty colspan="5" class="empty-row">{{ history.loading() ? 'Loading cycles…' : history.error() ? 'Cycle history is unavailable.' : serialSearch() ? 'No cycle has that serial.' : 'No cycles recorded yet.' }}</td></tr>
               }
             </tbody>
           </table>
         </div>
+
         <nav class="lapper-pager" aria-label="Cycle pages">
           <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="goToPage(page() - 1)" [disabled]="page() <= 1 || history.loading()">‹ Newer</button>
           <span>Page {{ page() }} of {{ pageCount() }}</span>
@@ -157,6 +161,11 @@
           }
         </div>
 
+        @if (tab() !== 'changes' && rows.error()) {
+          <p class="gear-alert gear-alert-danger" role="alert">Could not load the recorded values. <button type="button" class="gear-btn gear-btn-secondary" (click)="retryValues()">Retry values</button></p>
+        }
+        @if (tab() !== 'changes' && rows.loading()) { <div danaLoadingState>Loading values…</div> }
+
         @if (tab() === 'changes') {
           <p class="gear-muted lapper-tab-note">
             @if (selected(); as c) {
@@ -166,7 +175,7 @@
             }
           </p>
           @if (changes.error()) {
-            <p class="gear-alert gear-alert-danger" role="alert">Could not load the changes. Refresh to retry.</p>
+            <p class="gear-alert gear-alert-danger" role="alert">Could not load the changes. <button type="button" class="gear-btn gear-btn-secondary" (click)="retryValues()">Retry changes</button></p>
           }
           @for (group of changeGroups(); track group.id) {
             <article class="lapper-change-group">
@@ -197,17 +206,15 @@
               }
             </article>
           } @empty {
-            <gear-empty-state
+            @if (!changes.error()) { <gear-empty-state
               [title]="changes.loading() ? 'Loading changes…' : selected() ? 'Nothing changed in this cycle' : 'No changes recorded yet'"
-              hint="Every value was the same as in the cycle before."
-            />
+              [hint]="changes.loading() ? 'Retrieving the recorded cycle changes.' : 'Every value was the same as in the cycle before.'"
+            /> }
           }
         }
 
-        @if (tab() === 'summary') {
-          @if (rows.loading() && !hasData()) {
-            <div danaLoadingState>Loading values…</div>
-          } @else if (!hasData()) {
+        @if (tab() === 'summary' && !rows.loading() && !rows.error()) {
+          @if (!hasData()) {
             <gear-empty-state title="No values recorded" hint="This machine has no recorded cycles for the selected gearset yet." />
           } @else {
             <h3 class="lapper-section-title">Gearset data</h3>
@@ -232,7 +239,7 @@
           }
         }
 
-        @if (tab() === 'paths') {
+        @if (tab() === 'paths' && !rows.loading() && !rows.error()) {
           @if (inactivePaths().length) {
             <ul class="dana-chip-list" aria-label="Inactive paths">
               @for (p of inactivePaths(); track p.form) {
@@ -261,7 +268,7 @@
           }
         }
 
-        @if (tab() === 'all') {
+        @if (tab() === 'all' && !rows.loading() && !rows.error()) {
           @for (group of configuredGroups(); track group[0]) {
             <h3 class="lapper-section-title">{{ group[0] || 'Other variables' }}</h3>
             <div class="lapper-dense">

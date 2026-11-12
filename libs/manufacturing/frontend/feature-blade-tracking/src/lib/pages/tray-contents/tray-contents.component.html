@@ -11,9 +11,11 @@
     label="Scan Tray"
     help="No individual blade scan is required."
     buttonText="Open Tray"
-    [disabled]="busy"
+    [disabled]="busy || printingTagSerial !== null"
     (scanned)="scan($event)"
   />
+
+  <p *ngIf="busy" class="gear-loading-state" role="status">Loading tray contents…</p>
 
   <div *ngIf="details as d" class="space-y-4">
     <div class="rounded-2xl bg-slate-900 p-5 text-white">
@@ -59,7 +61,7 @@
       </div>
 
       <div *ngIf="d.blades.length" danaTableShell class="table-wrap">
-        <table danaTable class="gear-table">
+        <table danaTable class="gear-table" aria-label="Tray blade contents">
           <thead>
             <tr>
               <th>Blade</th>
@@ -83,6 +85,8 @@
                     type="button"
                     class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
                     (click)="toggleBladeHistory(assignment.blade.id)"
+                    [attr.aria-expanded]="expandedBladeId === assignment.blade.id"
+                    [attr.aria-label]="(expandedBladeId === assignment.blade.id ? 'Hide history for ' : 'View history for ') + assignment.blade.serial_number"
                   >
                     {{ expandedBladeId === assignment.blade.id ? 'Hide history' : 'View history' }}
                   </button>

@@ -4,7 +4,7 @@ import { of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { IPartSummarySettings, ISummaryBodyRuleRow } from '@meshforge/manufacturing/shared/util-types';
 
-import { AdminApiService, AdminLocationRow, PartSummaryRow } from '../admin-api.service';
+import { AdminApiService, AdminLocationRow, AdminUser, PartSummaryRow } from '../admin-api.service';
 
 import { FrontendFeatureAdminUsersComponent } from './frontend-feature-admin-users.component';
 
@@ -24,6 +24,40 @@ describe('FrontendFeatureAdminUsersComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('account form feedback', () => {
+    it('focuses invalid account details and prevents a malformed email from reaching the API', () => {
+      const create = jest.spyOn(TestBed.inject(AdminApiService), 'createUser');
+      component.userForm = { email: 'not-an-email', password: 'Valid-Password1!', firstName: '', lastName: '', departmentId: 'department-one', role: 'user' };
+      component.createUser();
+      expect(create).not.toHaveBeenCalled();
+      expect(component.error).toContain('valid email address');
+      expect(document.activeElement).toBe(fixture.nativeElement.querySelector('#admin-user-email'));
+    });
+
+    it('keeps a failed save visible with the typed account draft', () => {
+      jest.spyOn(TestBed.inject(AdminApiService), 'createUser').mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409, error: { message: 'That email is already registered.' } })));
+      component.userForm = { email: 'lead@example.com', password: 'Valid-Password1!', firstName: 'Team', lastName: 'Lead', departmentId: 'department-one', role: 'user' };
+      component.createUser();
+      expect(component.error).toContain('already registered');
+      expect(component.userForm.email).toBe('lead@example.com');
+      expect(component.busy).toBe(false);
+    });
+
+    it('waits for confirmation before disabling an active account', () => {
+      const toggle = jest.spyOn(component, 'toggleUserEnabled').mockImplementation(() => undefined);
+      const user = { id: 'user-one', email: 'lead@example.com', active: true, role: 'user' } as AdminUser;
+      component.requestUserEnabled(user);
+      expect(toggle).not.toHaveBeenCalled();
+      expect(component.userToDisable).toBe(user);
+      component.userToDisable = null;
+      expect(toggle).not.toHaveBeenCalled();
+      component.requestUserEnabled(user);
+      component.confirmDisableUser();
+      expect(toggle).toHaveBeenCalledWith(user);
+      expect(component.userToDisable).toBeNull();
+    });
   });
 
   describe('location Summary and part type', () => {

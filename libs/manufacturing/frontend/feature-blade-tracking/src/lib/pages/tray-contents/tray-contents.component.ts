@@ -28,7 +28,8 @@ import {
 })
 export class TrayContentsComponent implements OnInit, OnDestroy {
   private readonly destroyed$ = new Subject<void>();
-  ngOnDestroy(): void { this.destroyed$.next(); this.destroyed$.complete(); }
+  private scanVersion = 0;
+  ngOnDestroy(): void { ++this.scanVersion; this.destroyed$.next(); this.destroyed$.complete(); }
   private readonly api = inject(BladeTrackingApiService);
   private readonly toast = inject(GearToastService);
   private readonly route = inject(ActivatedRoute);
@@ -53,15 +54,22 @@ export class TrayContentsComponent implements OnInit, OnDestroy {
   printingTagSerial: string | null = null;
 
   scan(serial: string) {
-    if (this.busy || !serial.trim()) return;
+    if (this.printingTagSerial || !serial.trim()) return;
+    const version = ++this.scanVersion;
     serial = serial.trim().toUpperCase();
     this.busy = true;
     this.details = null;
+    this.message = null;
     this.expandedBladeId = null;
+    this.historyLoadingBladeId = null;
+    this.historyByBladeId = {};
+    this.historyErrorByBladeId = {};
     this.api.scanTray(serial).pipe(takeUntil(this.destroyed$)).subscribe({
-      next: (tray) =>
+      next: (tray) => {
+        if (version !== this.scanVersion) return;
         this.api.getTrayDetails(tray).pipe(takeUntil(this.destroyed$)).subscribe({
           next: (details) => {
+            if (version !== this.scanVersion) return;
             this.details = details;
             this.busy = false;
             this.message = {
@@ -70,16 +78,18 @@ export class TrayContentsComponent implements OnInit, OnDestroy {
             };
             this.scanner?.clearAndFocus();
           },
-          error: (err: HttpErrorResponse) =>
-            this.fail(err, 'Could not load tray details.'),
-        }),
-      error: (err: HttpErrorResponse) => this.fail(err, 'Tray not found.'),
+          error: (err: HttpErrorResponse) => {
+            if (version === this.scanVersion) this.fail(err, 'Could not load tray details.');
+          },
+        });
+      },
+      error: (err: HttpErrorResponse) => { if (version === this.scanVersion) this.fail(err, 'Tray not found.'); },
     });
   }
 
 
   printTag(kind: AssetTagKind, recordId: string, serialNumber: string): void {
-    if (this.printingTagSerial) return;
+    if (this.printingTagSerial || this.busy) return;
     this.printingTagSerial = serialNumber;
     this.api.printAssetTag(kind, recordId).pipe(takeUntil(this.destroyed$)).subscribe({
       next: (result) => {
@@ -158,12 +168,15 @@ export class TrayContentsComponent implements OnInit, OnDestroy {
 
     this.historyLoadingBladeId = bladeId;
     this.historyErrorByBladeId[bladeId] = undefined;
+    const version = this.scanVersion;
     this.api.getBladeHistory(bladeId).pipe(takeUntil(this.destroyed$)).subscribe({
       next: (history) => {
+        if (version !== this.scanVersion) return;
         this.historyByBladeId[bladeId] = history;
         if (this.historyLoadingBladeId === bladeId) this.historyLoadingBladeId = null;
       },
       error: (error: HttpErrorResponse) => {
+        if (version !== this.scanVersion) return;
         if (this.historyLoadingBladeId === bladeId) this.historyLoadingBladeId = null;
         this.historyErrorByBladeId[bladeId] = apiErrorText(
           error,

@@ -9,6 +9,7 @@ export interface Loadable<T> {
   load(source: Observable<T>): void;
   set(value: T): void;
   update(fn: (current: T) => T): void;
+  dispose(): void;
 }
 
 /**
@@ -38,9 +39,11 @@ export function loadable<T>(initial: T): Loadable<T> {
           error.set(e);
           loading.set(false);
         },
+        complete: () => loading.set(false),
       });
     },
     set: (v) => { sub?.unsubscribe(); sub = null; loading.set(false); error.set(null); value.set(v); },
     update: (fn) => value.update(fn),
+    dispose: () => { sub?.unsubscribe(); sub = null; loading.set(false); },
   };
 }

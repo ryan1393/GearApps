@@ -1,13 +1,14 @@
-<section class="server-settings" aria-labelledby="server-settings-title">
+<section class="server-settings" aria-labelledby="server-settings-title" [attr.aria-busy]="loading || saving || restarting">
   <div class="gear-panel p-5 server-settings-lead">
     <div>
       <h2 id="server-settings-title" class="text-xl font-black">Server Settings</h2>
       <p class="text-sm text-slate-600">Every API setting from the server environment file (.env). A value saved here is used in place of the server value the next time the API starts. Locked settings can only be changed on the server.</p>
     </div>
-    <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || saving || restarting" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : '↻ Refresh' }}</button>
+    <button type="button" class="gear-btn gear-btn-secondary" (click)="requestRefresh()" [disabled]="loading || saving || restarting" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : 'Refresh' }}</button>
   </div>
 
   <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert"><strong>Unable to continue.</strong><span>{{ error }}</span></div>
+  <p *ngIf="loading && !board" role="status">Loading server settings…</p>
 
   <ng-container *ngIf="board as current">
     <div *ngIf="!current.available" class="gear-alert gear-alert-warning" role="status"><strong>Settings cannot be saved.</strong><span>Saved settings need the PostgreSQL database and their table could not be used. Check the API log, then restart the API.</span></div>
@@ -15,7 +16,8 @@
     <div *ngIf="restarting" class="gear-alert gear-alert-warning" role="status"><strong>Restarting the API…</strong><span>This page reloads by itself when the API is back.</span></div>
     <div *ngIf="current.restart_required && !restarting" class="gear-alert gear-alert-warning server-settings-restart" role="status">
       <div><strong>Restart needed.</strong><span> Saved changes are not in use yet. They take effect when the API restarts.</span></div>
-      <button *ngIf="current.can_restart" type="button" class="gear-btn gear-btn-dark" (click)="restart()" [disabled]="saving || changedCount > 0">Restart API Now</button>
+      <button *ngIf="current.can_restart" type="button" class="gear-btn gear-btn-dark" (click)="requestRestart()" [disabled]="loading || saving || changedCount > 0">Restart API Now</button>
+      <span *ngIf="current.can_restart && changedCount > 0">Save or discard unsaved changes before restarting.</span>
       <span *ngIf="!current.can_restart">Restart the API where it was started.</span>
     </div>
 
@@ -32,7 +34,7 @@
       </div>
       <p *ngIf="!visibleGroups.length" class="gear-panel p-5">No setting matches “{{ search }}”.</p>
 
-      <fieldset *ngFor="let group of visibleGroups; trackBy: trackGroup" class="gear-panel p-5 server-settings-group" [disabled]="saving || restarting">
+      <fieldset *ngFor="let group of visibleGroups; trackBy: trackGroup" class="gear-panel p-5 server-settings-group" [disabled]="loading || saving || restarting">
         <legend class="text-lg font-black">{{ group.title }}</legend>
         <p class="server-settings-help">{{ group.description }}</p>
 
@@ -99,12 +101,13 @@
       <div class="gear-panel server-settings-bar">
         <div class="gear-admin-actions">
           <span class="server-settings-count" aria-live="polite">{{ changedCount === 0 ? 'No unsaved changes' : changedCount === 1 ? '1 unsaved change' : changedCount + ' unsaved changes' }}</span>
-          <button type="button" class="gear-btn gear-btn-secondary" (click)="discard()" [disabled]="saving || changedCount === 0">Discard</button>
-          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="saving || restarting || changedCount === 0 || !current.available">{{ saving ? 'Saving…' : 'Save Changes' }}</button>
+          <button type="button" class="gear-btn gear-btn-secondary" (click)="requestDiscard()" [disabled]="loading || saving || restarting || changedCount === 0">Discard</button>
+          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="loading || saving || restarting || changedCount === 0 || !current.available">{{ saving ? 'Saving…' : 'Save Changes' }}</button>
         </div>
       </div>
     </form>
 
     <p class="gear-panel p-5 server-settings-help">Not on this page: the Docker host settings (published ports, the PostgreSQL container, the Lapper Read collector). Docker reads those from .env before the API exists, so they are changed on the server.</p>
   </ng-container>
+  <dana-confirm-dialog [open]="confirmation !== ''" [title]="confirmationTitle" [message]="confirmationMessage" [confirmLabel]="confirmation === 'restart' ? 'Restart API' : 'Discard changes'" [danger]="true" (confirm)="confirmAction()" (cancel)="confirmation = ''" />
 </section>

@@ -23,6 +23,7 @@ import { IPV4_PATTERN, SCANNER_TYPES, STATUS_OPTIONS } from './options';
   template: `
     <gear-dialog
       [open]="open()"
+      [dismissible]="!busy()"
       (openChange)="open.set($event)"
       [title]="scanner() ? 'Edit scanner ' + (scanner()?.ip ?? '') : 'Add scanner'"
       description="Network address, the lapper it reads parts for, and the serial numbers it last reported."
@@ -98,7 +99,7 @@ import { IPV4_PATTERN, SCANNER_TYPES, STATUS_OPTIONS } from './options';
         }
       </form>
       <ng-container dialogActions>
-        <button type="button" class="gear-btn gear-btn-secondary" (click)="open.set(false)">
+        <button type="button" class="gear-btn gear-btn-secondary" (click)="open.set(false)" [disabled]="busy()">
           Cancel
         </button>
         <button

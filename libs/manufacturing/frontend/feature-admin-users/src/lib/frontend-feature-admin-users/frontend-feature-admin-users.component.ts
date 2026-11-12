@@ -6,11 +6,12 @@ import {
   ChangeDetectorRef,
   DestroyRef,
   Component,
+  ElementRef,
   inject,
   OnInit,
   } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormsModule, Validators } from '@angular/forms';
 import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@meshforge/manufacturing/frontend/util-common';
 import { Observable } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -30,6 +31,7 @@ import {
   normalizeBladeLabel,
   CutterBodyRuleResolution,
   resolveCutterBodyRule,
+  PASSWORD_MIN_LENGTH,
 } from '@meshforge/manufacturing/shared/util-constants';
 import { IPartSummarySettings, ISavePartSummaryRequest, ISummaryBodyRuleRow, ISummaryPartTypeSettings } from '@meshforge/manufacturing/shared/util-types';
 import {
@@ -61,6 +63,7 @@ import { LappingGearsetsComponent } from '../lapping/lapping-gearsets.component'
 import { LappingMachinesComponent } from '../lapping/lapping-machines.component';
 import {
   DanaPageHeaderComponent,
+  DanaConfirmDialogComponent,
   DanaToneDirective,
 } from '@dana/ui';
 
@@ -74,7 +77,7 @@ const isAdminTab = (value: unknown): value is AdminTab => ADMIN_TABS.includes(va
 @Component({
   selector: 'gear-admin-users-page',
   standalone: true,
-  imports: [AccessManagementComponent, LocationEditorComponent, CoaterRpaSetupComponent, LaunchSetupComponent, BulkLocationsComponent, DanaToneDirective, MachineDsfCountComponent,CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent, CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, ServerSettingsComponent, GearLabelPrinterPickerComponent, LappingGearsetsComponent, LappingMachinesComponent],
+  imports: [DanaConfirmDialogComponent, AccessManagementComponent, LocationEditorComponent, CoaterRpaSetupComponent, LaunchSetupComponent, BulkLocationsComponent, DanaToneDirective, MachineDsfCountComponent,CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent, CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, ServerSettingsComponent, GearLabelPrinterPickerComponent, LappingGearsetsComponent, LappingMachinesComponent],
   templateUrl: './frontend-feature-admin-users.component.html',
   styleUrls: ['./frontend-feature-admin-users.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -83,6 +86,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(AdminApiService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly toast = inject(GearToastService);
   readonly session = inject(AuthSessionService);
   // Optional so the page also renders outside a router (component tests).
@@ -93,6 +97,8 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   busy = false;
   message = '';
   error = '';
+  readonly minPasswordLength = PASSWORD_MIN_LENGTH;
+  userToDisable: AdminUser | null = null;
 
   users: AdminUser[] = [];
   partSummaries: PartSummaryRow[] = [];
@@ -250,11 +256,24 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   }
 
   createUser(): void {
+    if (this.busy) return;
     const email = this.userForm.email.trim();
     if (this.editingUserId ? !this.userForm.departmentId : (!email || !this.userForm.departmentId || !this.userForm.password)) {
       this.error = this.editingUserId
         ? 'Department is required.'
         : 'Email, password, and department are required.';
+      this.focusUserField(!email && !this.editingUserId ? '#admin-user-email'
+        : !this.userForm.password && !this.editingUserId ? '#admin-user-password' : '#admin-user-department');
+      return;
+    }
+    if (email && Validators.email(new FormControl(email))) {
+      this.error = 'Enter a valid email address.';
+      this.focusUserField('#admin-user-email');
+      return;
+    }
+    if (!this.editingUserId && this.userForm.password.length < PASSWORD_MIN_LENGTH) {
+      this.error = `Temporary password must have at least ${PASSWORD_MIN_LENGTH} characters, uppercase and lowercase letters, a number, and a symbol.`;
+      this.focusUserField('#admin-user-password');
       return;
     }
     if (this.editingUserId && this.isSelf(this.editingUserId) && this.userForm.role !== 'admin') {
@@ -300,7 +319,25 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   /** The signed-in administrator's own account: it cannot be disabled or demoted from here. */
   isSelf(userId: string): boolean { return this.session.currentUser?.sub === userId; }
 
+  requestUserEnabled(user: AdminUser): void {
+    if (this.busy) return;
+    if (user.active && !this.isSelf(user.id)) this.userToDisable = user;
+    else this.toggleUserEnabled(user);
+  }
+
+  confirmDisableUser(): void {
+    const user = this.userToDisable;
+    this.userToDisable = null;
+    if (user) this.toggleUserEnabled(user);
+  }
+
+  private focusUserField(selector: string): void {
+    this.cdr.detectChanges();
+    this.element.nativeElement.querySelector<HTMLElement>(selector)?.focus();
+  }
+
   toggleUserEnabled(user: AdminUser): void {
+    if (this.busy) return;
     const active = !user.active;
     if (!active && this.isSelf(user.id)) { this.error = 'You cannot disable your own account. Ask another administrator.'; return; }
     this.runCreate(this.api.updateUser(user.id, { active }), `User ${active ? 'enabled' : 'disabled'}.`, () => this.loadUsers());
@@ -1284,6 +1321,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     successMessage: string,
     onSuccess: () => void,
   ): void {
+    if (this.busy) return;
     this.busy = true;
     this.clearNotice();
     request.subscribe({
@@ -1297,7 +1335,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       error: (error: HttpErrorResponse) => {
         this.busy = false;
         const message = this.errorMessage(error);
-        this.error = '';
+        this.error = message;
         this.toast.error(message, 'Save failed');
         this.cdr.markForCheck();
       },

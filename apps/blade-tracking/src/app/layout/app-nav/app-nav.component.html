@@ -1,5 +1,5 @@
 <ng-container *ngIf="session.authState$ | async as user">
-  <aside danaMobileNav [desktopMinWidth]="1024" #mobileNav="danaMobileNav" class="gear-sidebar" [class.mobile-open]="mobileNav.open" aria-label="Application navigation">
+  <aside id="application-navigation" danaMobileNav [modal]="true" [desktopMinWidth]="1024" #mobileNav="danaMobileNav" class="gear-sidebar" [class.mobile-open]="mobileNav.open" aria-label="Application navigation">
     <a (click)="mobileNav.close()" routerLink="/blades" class="brand-row">
       <span class="brand-mark dana-diamond-mark"><img src="assets/brand/meshforge-mark.svg" alt="" class="dana-diamond-image" aria-hidden="true" /></span>
       <span class="brand-copy">
@@ -7,23 +7,24 @@
         <strong>BLADE TRACKING</strong>
       </span>
     </a>
+    <button type="button" class="gear-btn gear-btn-secondary gear-nav-close" (click)="mobileNav.close()">Close navigation</button>
 
     <nav class="side-nav" aria-label="Blade Tracking">
-      <a (click)="mobileNav.close()" routerLink="/blades" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active" class="side-link primary">
+      <a (click)="mobileNav.close()" routerLink="/blades" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="active" ariaCurrentWhenActive="page" class="side-link primary">
         <span class="nav-icon"><span class="gear-glyph gear-glyph-dashboard" aria-hidden="true"></span></span><span>Blade Dashboard</span><span class="nav-current">ACTIVE</span>
       </a>
 
       <ng-container *ngIf="canEdit(user)">
         <div class="nav-heading">OPERATIONS</div>
-        <a (click)="mobileNav.close()" routerLink="/blades/operations" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Operations Station</span></a>
+        <a (click)="mobileNav.close()" routerLink="/blades/operations" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Operations Station</span></a>
 
         <div class="nav-heading">INVENTORY</div>
-        <a (click)="mobileNav.close()" routerLink="/blades/body-shelves" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-location" aria-hidden="true"></span></span><span>Empty Body Shelves</span></a>
-        <a (click)="mobileNav.close()" routerLink="/blades/tray-contents" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-tray" aria-hidden="true"></span></span><span>Tray Contents</span></a>
-        <a (click)="mobileNav.close()" routerLink="/blades/inventory" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span><span>Find Inventory</span></a>
-        <a (click)="mobileNav.close()" routerLink="/blades/all-inventory" routerLinkActive="active-sub" class="side-link inventory-master-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-inventory" aria-hidden="true"></span></span><span>Inventory Control Center</span></a>
-        <a (click)="mobileNav.close()" routerLink="/blades/locations" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-location" aria-hidden="true"></span></span><span>Locations</span></a>
-        <a (click)="mobileNav.close()" routerLink="/blades/scrap-blades" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-scrap" aria-hidden="true"></span></span><span>Scrap / Discarded</span></a>
+        <a (click)="mobileNav.close()" routerLink="/blades/body-shelves" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-location" aria-hidden="true"></span></span><span>Empty Body Shelves</span></a>
+        <a (click)="mobileNav.close()" routerLink="/blades/tray-contents" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-tray" aria-hidden="true"></span></span><span>Tray Contents</span></a>
+        <a (click)="mobileNav.close()" routerLink="/blades/inventory" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span><span>Find Inventory</span></a>
+        <a (click)="mobileNav.close()" routerLink="/blades/all-inventory" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link inventory-master-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-inventory" aria-hidden="true"></span></span><span>Inventory Control Center</span></a>
+        <a (click)="mobileNav.close()" routerLink="/blades/locations" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-location" aria-hidden="true"></span></span><span>Locations</span></a>
+        <a (click)="mobileNav.close()" routerLink="/blades/scrap-blades" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-scrap" aria-hidden="true"></span></span><span>Scrap / Discarded</span></a>
       </ng-container>
 
       <div *ngIf="!canEdit(user)" class="sidebar-view-only">
@@ -31,7 +32,7 @@
         <span>{{ user.departmentDescription || 'Your department' }} can view this dashboard, but cannot perform transactions in this app.</span>
       </div>
 
-      <a (click)="mobileNav.close()" routerLink="/machine-counts" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Machine DSF Counts</span></a>
+      <a (click)="mobileNav.close()" routerLink="/machine-counts" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Machine DSF Counts</span></a>
       <div class="nav-heading">SHARED APPS</div>
       <a (click)="mobileNav.close()" [href]="cutterBuilderUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Cutter Builder</span></a>
       <a (click)="mobileNav.close()" [href]="greenshedUrl" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Greenshed</span></a>
@@ -39,7 +40,7 @@
 
       <ng-container *ngIf="user.role === 'admin'">
         <div class="nav-heading">ADMINISTRATION</div>
-        <a (click)="mobileNav.close()" routerLink="/admin" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span><span>Admin</span></a>
+        <a (click)="mobileNav.close()" routerLink="/admin" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span><span>Admin</span></a>
       </ng-container>
     </nav>
 
@@ -52,7 +53,7 @@
   <button *ngIf="mobileNav.open" type="button" class="gear-nav-overlay" aria-label="Close navigation" (click)="mobileNav.close()"></button>
 
   <header class="gear-topbar">
-    <button class="menu-button" type="button" aria-label="Open navigation" [attr.aria-expanded]="mobileNav.open" (click)="mobileNav.toggle()">☰</button>
+    <button class="menu-button" type="button" aria-controls="application-navigation" [attr.aria-label]="mobileNav.open ? 'Close navigation' : 'Open navigation'" [attr.aria-expanded]="mobileNav.open" (click)="mobileNav.toggle()">☰</button>
 
     <form *ngIf="canEdit(user) && !onOperationsStation()" class="global-search" (ngSubmit)="search()">
       <span class="search-icon"><span class="gear-glyph gear-glyph-search" aria-hidden="true"></span></span>

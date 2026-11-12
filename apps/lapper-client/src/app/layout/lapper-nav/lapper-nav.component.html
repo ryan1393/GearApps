@@ -1,6 +1,6 @@
 @if (session.authState$ | async; as user) {
   <aside
-    danaMobileNav
+    id="application-navigation" danaMobileNav [modal]="true"
     [desktopMinWidth]="1024"
     #mobileNav="danaMobileNav"
     class="gear-sidebar"
@@ -16,12 +16,13 @@
         <strong>LAPPER</strong>
       </span>
     </a>
+    <button type="button" class="gear-btn gear-btn-secondary gear-nav-close" (click)="mobileNav.close()">Close navigation</button>
 
     <nav class="side-nav" aria-label="Lapper">
       <a
         (click)="mobileNav.close()"
         routerLink="/dashboard"
-        routerLinkActive="active"
+        routerLinkActive="active" ariaCurrentWhenActive="page"
         class="side-link primary"
       >
         <span class="nav-icon"
@@ -33,14 +34,14 @@
       <a
         (click)="mobileNav.close()"
         routerLink="/lapping-summaries"
-        routerLinkActive="active-sub"
+        routerLinkActive="active-sub" ariaCurrentWhenActive="page"
         class="side-link"
         ><span class="nav-icon"
           ><span class="gear-glyph gear-glyph-lapping" aria-hidden="true"></span></span
         ><span>Lapping Summaries</span></a
       >
 
-      <a (click)="mobileNav.close()" routerLink="/machine-counts" routerLinkActive="active-sub" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Machine DSF Counts</span></a>
+      <a (click)="mobileNav.close()" routerLink="/machine-counts" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Machine DSF Counts</span></a>
       <div class="nav-heading">SHARED APPS</div>
       <a (click)="mobileNav.close()" [href]="bladeTrackingUrl" class="side-link"
         ><span class="nav-icon"
@@ -63,7 +64,7 @@
         <a
           (click)="mobileNav.close()"
           routerLink="/admin"
-          routerLinkActive="active-sub"
+          routerLinkActive="active-sub" ariaCurrentWhenActive="page"
           class="side-link"
           ><span class="nav-icon"
             ><span class="gear-glyph gear-glyph-admin" aria-hidden="true"></span></span
@@ -93,7 +94,7 @@
     <button
       class="menu-button"
       type="button"
-      aria-label="Open navigation"
+      aria-controls="application-navigation" [attr.aria-label]="mobileNav.open ? 'Close navigation' : 'Open navigation'"
       [attr.aria-expanded]="mobileNav.open"
       (click)="mobileNav.toggle()"
     >

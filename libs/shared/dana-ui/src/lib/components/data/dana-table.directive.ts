@@ -13,6 +13,15 @@ interface DanaTableRowGroup {
   rows: HTMLTableRowElement[];
 }
 
+interface DanaTableHeaderControls {
+  tools: HTMLSpanElement;
+  popover: HTMLDivElement;
+  columnIndex: number;
+  label: string;
+  cleanups: (() => void)[];
+  attributes: Map<string, { original: string | null; written: string | null }>;
+}
+
 @Directive({
   selector: 'table[danaTable]',
   standalone: true,
@@ -25,6 +34,7 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
   private destroyed = false;
   private updateScheduled = false;
   private readonly popovers = new Set<HTMLElement>();
+  private readonly headerControls = new Map<HTMLTableCellElement, DanaTableHeaderControls>();
   private readonly cleanups: (() => void)[] = [];
   private applying = false;
   private openPopover?: HTMLElement;
@@ -68,14 +78,16 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
     this.observer?.disconnect();
     this.cleanups.splice(0).forEach(cleanup => cleanup());
     this.danaTableClosePopover();
+    for (const cell of this.headerControls.keys()) this.danaTableDisposeHeader(cell);
     for (const popover of this.popovers) {
       if (popover.parentNode) this.renderer.removeChild(popover.parentNode, popover);
     }
     this.popovers.clear();
   }
 
-  private listen(target: 'document' | 'window' | HTMLElement, event: string, callback: (event: any) => void): void {
-    this.cleanups.push(this.renderer.listen(target, event, callback));
+  private listen(target: 'document' | 'window' | HTMLElement, event: string, callback: (event: any) => void,
+    cleanups = this.cleanups): void {
+    cleanups.push(this.renderer.listen(target, event, callback));
   }
 
   private danaTableConnectObserver(): void {
@@ -92,18 +104,31 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
       });
     });
     // Include body/header replacement, including tables that start without a tbody.
-    this.observer.observe(this.host.nativeElement, { childList: true, subtree: true, characterData: true });
+    this.observer.observe(this.host.nativeElement, {
+      childList: true, subtree: true, characterData: true,
+      attributes: true, attributeFilter: ['data-dana-table-static'],
+    });
   }
 
   private danaTableInitialize(): void {
     const table = this.host.nativeElement;
     const headerRow = table.tHead?.rows.item(table.tHead.rows.length - 1);
-    if (!headerRow) return;
-    const labels = Array.from(headerRow.cells).map(cell => {
+    const cells = headerRow ? Array.from(headerRow.cells) : [];
+    const labels = cells.map(cell => {
       const clone = cell.cloneNode(true) as HTMLElement;
       clone.querySelector('.dana-table-header-tools')?.remove();
       return (clone.textContent ?? '').replace(/\s+/g, ' ').trim();
     });
+    for (const [cell, controls] of this.headerControls) {
+      const index = cells.indexOf(cell);
+      if (index !== controls.columnIndex || labels[index] !== controls.label ||
+          controls.tools.parentElement !== cell || cell.hasAttribute('data-dana-table-static')) {
+        this.filters.delete(controls.columnIndex);
+        if (this.sortColumn === controls.columnIndex) this.sortColumn = -1;
+        this.danaTableDisposeHeader(cell);
+      }
+    }
+    if (!headerRow) return;
     for (const body of Array.from(table.tBodies)) {
       for (const row of Array.from(body.rows)) {
         Array.from(row.cells).forEach((cell, index) => {
@@ -121,12 +146,16 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
 
       if (!label || /^(action|actions|view|edit|details|print|remove|delete|open|select)$/i.test(label)) return;
 
+      const attributes = new Map(['tabindex', 'aria-label', 'aria-sort'].map(attribute =>
+        [attribute, { original: cell.getAttribute(attribute), written: null as string | null }],
+      ));
       this.renderer.addClass(cell, 'dana-table-sortable');
-      this.renderer.setAttribute(cell, 'tabindex', '0');
-      this.renderer.setAttribute(cell, 'aria-label', `Sort by ${label}`);
+      this.danaTableSetHeaderAttribute(cell, 'tabindex', '0', attributes);
+      this.danaTableSetHeaderAttribute(cell, 'aria-label', `Sort by ${label}`, attributes);
 
       const headerTools = this.renderer.createElement('span') as HTMLSpanElement;
       this.renderer.addClass(headerTools, 'dana-table-header-tools');
+      const cleanups: (() => void)[] = [];
 
       const sortIndicator = this.renderer.createElement('span') as HTMLSpanElement;
       this.renderer.addClass(sortIndicator, 'dana-table-sort-indicator');
@@ -153,7 +182,8 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
       );
       this.renderer.appendChild(filterTrigger, funnel);
 
-      const popover = this.danaTableCreatePopover(label, columnIndex, filterTrigger);
+      const popover = this.danaTableCreatePopover(label, columnIndex, filterTrigger, cleanups);
+      this.headerControls.set(cell, { tools: headerTools, popover, columnIndex, label, cleanups, attributes });
 
       const toggleSort = () => {
         if (this.sortColumn === columnIndex) {
@@ -168,19 +198,19 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
 
       this.listen(cell, 'click', (event: Event) => {
         const target = event.target as HTMLElement | null;
-        if (target?.closest('.dana-table-filter-trigger')) return;
+        if (this.danaTableIsHeaderControl(target, cell)) return;
         event.preventDefault();
         toggleSort();
-      });
+      }, cleanups);
 
       this.listen(cell, 'keydown', (event: KeyboardEvent) => {
         const target = event.target as HTMLElement | null;
-        if (target?.closest('.dana-table-filter-trigger')) return;
+        if (this.danaTableIsHeaderControl(target, cell)) return;
         if (event.key === 'Enter' || event.key === ' ') {
           event.preventDefault();
           toggleSort();
         }
-      });
+      }, cleanups);
 
       this.listen(filterTrigger, 'click', (event: Event) => {
         event.preventDefault();
@@ -198,7 +228,7 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
           const input = popover.querySelector<HTMLInputElement>('.dana-table-filter-popover-input');
           queueMicrotask(() => { if (!this.destroyed && this.openPopover === popover) input?.focus(); });
         }
-      });
+      }, cleanups);
 
       this.renderer.appendChild(headerTools, sortIndicator);
       this.renderer.appendChild(headerTools, filterTrigger);
@@ -208,7 +238,44 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
     this.danaTableUpdateSortIndicators(headerRow);
   }
 
-  private danaTableCreatePopover(label: string, columnIndex: number, trigger: HTMLButtonElement): HTMLDivElement {
+  private danaTableDisposeHeader(cell: HTMLTableCellElement): void {
+    const controls = this.headerControls.get(cell);
+    if (!controls) return;
+    if (this.openPopover === controls.popover) this.danaTableClosePopover();
+    controls.cleanups.splice(0).forEach(cleanup => cleanup());
+    for (const element of [controls.popover, controls.tools]) {
+      if (element.parentNode) this.renderer.removeChild(element.parentNode, element);
+    }
+    this.popovers.delete(controls.popover);
+    this.headerControls.delete(cell);
+    this.renderer.removeClass(cell, 'dana-table-sortable');
+    this.renderer.removeClass(cell, 'dana-table-sort-active');
+    for (const [attribute, state] of controls.attributes) {
+      // Angular may leave unchanged bindings alone, and application updates take precedence.
+      if (state.written === null || cell.getAttribute(attribute) !== state.written) continue;
+      if (state.original === null) this.renderer.removeAttribute(cell, attribute);
+      else this.renderer.setAttribute(cell, attribute, state.original);
+    }
+  }
+
+  private danaTableSetHeaderAttribute(cell: HTMLTableCellElement, attribute: string, value: string,
+    attributes = this.headerControls.get(cell)?.attributes): void {
+    const state = attributes?.get(attribute);
+    if (state) {
+      const current = cell.getAttribute(attribute);
+      if (state.written !== null && current !== state.written) state.original = current;
+      state.written = value;
+    }
+    this.renderer.setAttribute(cell, attribute, value);
+  }
+
+  private danaTableIsHeaderControl(target: HTMLElement | null, cell: HTMLTableCellElement): boolean {
+    const control = target?.closest('button,a,input,select,textarea,summary,[contenteditable]:not([contenteditable="false"]),[role="button"],[role="checkbox"],[role="combobox"]');
+    return !!control && control !== cell && cell.contains(control);
+  }
+
+  private danaTableCreatePopover(label: string, columnIndex: number, trigger: HTMLButtonElement,
+    cleanups: (() => void)[]): HTMLDivElement {
     const ownerDocument = this.host.nativeElement.ownerDocument;
 
     const popover = this.renderer.createElement('div') as HTMLDivElement;
@@ -294,17 +361,17 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
       event.stopPropagation();
       this.danaTableClosePopover();
       trigger.focus();
-    });
+    }, cleanups);
 
-    this.listen(input, 'input', syncFilter);
-    this.listen(input, 'click', (event: Event) => event.stopPropagation());
+    this.listen(input, 'input', syncFilter, cleanups);
+    this.listen(input, 'click', (event: Event) => event.stopPropagation(), cleanups);
     this.listen(input, 'keydown', (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         event.preventDefault();
         this.danaTableClosePopover(true);
       }
       event.stopPropagation();
-    });
+    }, cleanups);
 
     this.listen(clear, 'click', (event: Event) => {
       event.preventDefault();
@@ -312,7 +379,7 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
       input.value = '';
       syncFilter();
       input.focus();
-    });
+    }, cleanups);
 
     this.renderer.appendChild(heading, title);
     this.renderer.appendChild(heading, close);
@@ -379,7 +446,7 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
       this.renderer.addClass(indicator, active
         ? (this.sortDirection === 'asc' ? 'dana-glyph-sort-asc' : 'dana-glyph-sort-desc')
         : 'dana-glyph-sort');
-      cell.setAttribute(
+      this.danaTableSetHeaderAttribute(cell,
         'aria-sort',
         active ? (this.sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'
       );
@@ -442,14 +509,12 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
           return this.sortDirection === 'asc' ? result : -result;
         });
 
-        for (const group of groups) {
-          for (const row of group.rows) {
-            this.renderer.appendChild(tbody, row);
-          }
-        }
-
-        for (const row of emptyRows) {
-          this.renderer.appendChild(tbody, row);
+        // Reapplying a filter or an async cell update must not detach already ordered
+        // rows: removing a focused row from the DOM drops its input/link focus.
+        let next = tbody.firstElementChild;
+        for (const row of [...groups.flatMap(group => group.rows), ...emptyRows]) {
+          if (row === next) next = next.nextElementSibling;
+          else this.renderer.insertBefore(tbody, row, next);
         }
       }
 
@@ -461,7 +526,9 @@ export class DanaTableDirective implements AfterViewInit, OnDestroy {
         this.observer.observe(this.host.nativeElement, {
           childList:true,
           subtree:true,
-          characterData:true
+          characterData:true,
+          attributes:true,
+          attributeFilter:['data-dana-table-static']
         });
       }
     }

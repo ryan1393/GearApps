@@ -18,13 +18,14 @@ import {
 } from '@meshforge/manufacturing/shared/util-constants';
 import { ILocation, ITray } from '@meshforge/manufacturing/shared/util-types';
 import {
+  DanaConfirmDialogComponent,
   DanaPageHeaderComponent,
 } from '@dana/ui';
 
 @Component({
   selector: 'gear-cutter-teardown',
   standalone: true,
-  imports: [CommonModule, GearScannerFocusDirective, FormsModule, DanaPageHeaderComponent],
+  imports: [CommonModule, GearScannerFocusDirective, FormsModule, DanaPageHeaderComponent, DanaConfirmDialogComponent],
   templateUrl: './cutter-teardown.component.html',
 })
 export class CutterTeardownComponent implements OnInit, OnDestroy {
@@ -55,6 +56,7 @@ export class CutterTeardownComponent implements OnInit, OnDestroy {
   error = '';
   message = '';
   result: CutterTeardownResult | null = null;
+  teardownConfirmation = false;
   availablePulledBuilds: CutterDashboardData['pulled_builds'] = [];
   availableEmptyTrays: ITray[] = [];
   availableLocations: ILocation[] = [];
@@ -94,16 +96,39 @@ export class CutterTeardownComponent implements OnInit, OnDestroy {
     );
   }
 
+  get canTeardown(): boolean {
+    if (this.requiresDullShelf && !this.shelfLocation) return false;
+    return Boolean(
+      !this.busy && !this.result && this.build?.status_code === 'PULLED' && this.tray?.blade_count === 0 &&
+      this.buildNumber.trim().toUpperCase() === this.build.build_number.toUpperCase() &&
+      this.traySerial.trim().toUpperCase() === this.tray.serial_number.toUpperCase() &&
+      this.scrapCountValid && (!this.requiresDullShelf ||
+        this.shelfLocationSerial.trim().toUpperCase() === this.shelfLocation?.serial_number.toUpperCase())
+    );
+  }
+
+  get teardownConfirmationMessage(): string {
+    if (!this.build || !this.tray) return '';
+    const destination = this.requiresDullShelf ? this.shelfLocation?.serial_number : 'no shelf (all blades scrapped)';
+    return `Tear down ${this.build.build_number} into tray ${this.tray.serial_number}? ${this.returnedBladeCount} blades will be returned and ${this.scrappedBladeCount} scrapped. Destination: ${destination}. This records the teardown transaction.`;
+  }
+
+  askTeardown(): void {
+    if (this.canTeardown) this.teardownConfirmation = true;
+  }
+
   buildChanged(value: string): void {
     ++this.scanVersion; this.busy = false; this.buildNumber = value; this.build = null;
     this.selectedBuildNumber = ''; this.clearTeardownDownstream();
   }
   trayChanged(value: string): void {
+    this.teardownConfirmation = false;
     ++this.scanVersion; this.busy = false; this.traySerial = value; this.tray = null;
     this.selectedTraySerial = ''; this.shelfLocationSerial = ''; this.shelfLocation = null;
     this.selectedShelfSerial = ''; this.result = null;
   }
   shelfChanged(value: string): void {
+    this.teardownConfirmation = false;
     ++this.scanVersion; this.busy = false; this.shelfLocationSerial = value;
     this.shelfLocation = null; this.selectedShelfSerial = ''; this.result = null;
   }
@@ -220,19 +245,8 @@ export class CutterTeardownComponent implements OnInit, OnDestroy {
   }
 
   teardown(): void {
-    if (this.busy) return;
-    if (
-      !this.build ||
-      !this.tray || this.tray.blade_count !== 0 ||
-      this.buildNumber.trim().toUpperCase() !== this.build.build_number.toUpperCase() ||
-      this.traySerial.trim().toUpperCase() !== this.tray.serial_number.toUpperCase() ||
-      (this.requiresDullShelf && this.shelfLocationSerial.trim().toUpperCase() !== this.shelfLocation?.serial_number.toUpperCase()) ||
-      (this.requiresDullShelf && !this.shelfLocation) ||
-      this.build.status_code !== 'PULLED' ||
-      !this.scrapCountValid
-    ) return;
-    const destination = this.requiresDullShelf ? this.shelfLocation?.serial_number ?? 'selected dull shelf' : 'no shelf (all blades scrapped)';
-    if (!globalThis.confirm(`Complete teardown of ${this.build.build_number}?\n\nTeardown tray: ${this.tray.serial_number}\nReturned blades: ${this.returnedBladeCount}\nScrapped blades: ${this.scrappedBladeCount}\nDestination: ${destination}\n\nThis records the teardown transaction.`)) return;
+    if (!this.teardownConfirmation || !this.canTeardown || !this.build || !this.tray) return;
+    this.teardownConfirmation = false;
     this.clearFeedback();
     this.busy = true;
 
@@ -256,13 +270,14 @@ export class CutterTeardownComponent implements OnInit, OnDestroy {
       error: (err: HttpErrorResponse) => {
         this.busy = false;
         const message = cutterApiErrorText(err, 'Could not tear down cutter.');
-        this.error = '';
+        this.error = message;
         this.toast.error(message, 'Cutter teardown failed');
       },
     });
   }
 
   reset(): void {
+    this.teardownConfirmation = false;
     ++this.scanVersion; this.busy = false;
     this.selectedBuildNumber = ''; this.selectedTraySerial = ''; this.selectedShelfSerial = '';
     this.buildNumber = '';
@@ -278,6 +293,7 @@ export class CutterTeardownComponent implements OnInit, OnDestroy {
   }
 
   private clearTeardownDownstream(): void {
+    this.teardownConfirmation = false;
     this.traySerial = '';
     this.selectedTraySerial = '';
     this.tray = null;

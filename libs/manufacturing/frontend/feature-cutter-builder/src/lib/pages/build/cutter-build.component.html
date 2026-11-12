@@ -182,25 +182,25 @@
         <div class="gear-workflow-form-grid">
           <label class="gear-field">
             <span>IB RO</span>
-            <input [(ngModel)]="ibRo" name="ibRo" type="number" step="any" class="gear-input" />
+            <input [(ngModel)]="ibRo" name="ibRo" type="number" step="any" class="gear-input" [disabled]="busy" />
           </label>
           <label class="gear-field">
             <span>OB RO</span>
-            <input [(ngModel)]="obRo" name="obRo" type="number" step="any" class="gear-input" />
+            <input [(ngModel)]="obRo" name="obRo" type="number" step="any" class="gear-input" [disabled]="busy" />
           </label>
           <label class="gear-field">
             <span>Honed</span>
-            <input [(ngModel)]="honed" name="honed" type="checkbox" />
+            <input [(ngModel)]="honed" name="honed" type="checkbox" [disabled]="busy" />
           </label>
           <label class="gear-field">
             <span>Coated</span>
-            <input [(ngModel)]="coated" name="coated" type="checkbox" />
+            <input [(ngModel)]="coated" name="coated" type="checkbox" [disabled]="busy" />
           </label>
         </div>
 
         <label class="gear-field">
           Comments
-          <textarea [(ngModel)]="comments" name="comments" class="gear-textarea" rows="3"></textarea>
+          <textarea [(ngModel)]="comments" name="comments" class="gear-textarea" rows="3" maxlength="2000" [disabled]="busy"></textarea>
         </label>
 
         <!-- The card prints by itself when the build is created, so the printer is chosen before building. -->

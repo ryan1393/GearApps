@@ -49,7 +49,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
     <form class="gear-panel cycle-test-panel" (ngSubmit)="run()">
       <div class="gear-form-grid">
         <label class="gear-field"
-          >Machine<select class="gear-select" name="machine" [(ngModel)]="machineId" required>
+          >Machine<select class="gear-select" name="machine" [(ngModel)]="machineId" [disabled]="working()" required>
             <option value="">Choose a machine</option>
             @for (m of machines.value(); track m.id) {
               <option [value]="m.id">{{ m.number || m.ip }}</option>
@@ -57,7 +57,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
           </select></label
         >
         <label class="gear-field"
-          >Gearset<select class="gear-select" name="gearset" [(ngModel)]="gearsetId" required>
+          >Gearset<select class="gear-select" name="gearset" [(ngModel)]="gearsetId" [disabled]="working()" required>
             <option value="">Choose a gearset</option>
             @for (g of gearsets.value(); track g.id) {
               <option [value]="g.id">{{ g.number }}</option>
@@ -69,6 +69,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
             class="gear-input"
             name="serial"
             [(ngModel)]="serial"
+            [disabled]="working()"
             maxlength="160"
             required
         /></label>
@@ -78,7 +79,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
           type="button"
           class="gear-btn gear-btn-secondary"
           (click)="readFromMachine()"
-          [disabled]="reading() || !machineId"
+          [disabled]="working() || !machineId"
         >
           {{ reading() ? 'Reading the controller…' : 'Read values from machine' }}
         </button>
@@ -113,6 +114,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
               [step]="m.type === 'real' ? 'any' : '1'"
               [name]="'macro-' + m.id"
               [(ngModel)]="values[m.number]"
+              [disabled]="working()"
             />
             <small class="gear-field-help"
               >{{ m.type }} · {{ limitText(m) ? 'Limit: ' + limitText(m) : 'No limits set' }}</small
@@ -124,7 +126,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
         <button
           class="gear-btn gear-btn-primary"
           type="submit"
-          [disabled]="busy() || !machineId || !gearsetId || !serial.trim() || macros.loading()"
+          [disabled]="working() || !machineId || !gearsetId || !serial.trim() || macros.loading()"
         >
           {{ busy() ? 'Testing…' : 'Run and save test' }}
         </button>
@@ -143,6 +145,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
             class="gear-input"
             name="argonautUrl"
             [(ngModel)]="argonautUrl"
+            [disabled]="working()"
             maxlength="2000"
             [placeholder]="selectedMachine()?.argonaut_url || 'https://argonaut:3003/api/mes/trigger-transaction'"
           />
@@ -157,6 +160,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
             class="gear-input"
             name="argonautLocation"
             [(ngModel)]="argonautLocation"
+            [disabled]="working()"
             maxlength="200"
             [placeholder]="selectedMachine()?.argonaut_location_id || ''"
           />
@@ -173,6 +177,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
             min="0"
             step="1"
             [(ngModel)]="sequence"
+            [disabled]="working()"
             required
           />
           <small class="gear-field-help">A real cycle sends its consec number.</small>
@@ -185,6 +190,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
             min="0"
             step="any"
             [(ngModel)]="cycleTime"
+            [disabled]="working()"
           />
           <small class="gear-field-help">Sent as floatData[0]. A real cycle sends the time the lapper was in cycle; empty sends 0.</small>
         </label>
@@ -195,7 +201,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
         <div class="cycle-test-macro-grid">
           @for (n of argonautMacros; track n) {
             <label class="gear-field"
-              >#{{ n }}<input class="gear-input" type="number" step="any" [name]="'argonaut-' + n" [(ngModel)]="values[n]"
+              >#{{ n }}<input class="gear-input" type="number" step="any" [name]="'argonaut-' + n" [(ngModel)]="values[n]" [disabled]="working()"
             /></label>
           }
         </div>
@@ -215,11 +221,11 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
           class="gear-btn gear-btn-secondary"
           type="button"
           (click)="previewArgonaut()"
-          [disabled]="argonautBusy() || !argonautReady()"
+          [disabled]="working() || !argonautReady()"
         >
           Preview request
         </button>
-        <button class="gear-btn gear-btn-primary" type="submit" [disabled]="argonautBusy() || !argonautReady()">
+        <button class="gear-btn gear-btn-primary" type="submit" [disabled]="working() || !argonautReady()">
           {{ argonautBusy() ? 'Sending…' : 'Send to Argonaut' }}
         </button>
       </div>
@@ -344,6 +350,7 @@ export class CycleTestsPageComponent implements OnInit {
   protected readonly reading = signal(false);
   protected readonly readError = signal('');
   protected readonly lastRead = signal<ControllerMacroValues | null>(null);
+  protected readonly working = computed(() => this.busy() || this.reading() || this.argonautBusy());
   protected readCount(read: ControllerMacroValues): number {
     return Object.values(read.values).filter((v) => v !== null).length;
   }
@@ -352,12 +359,18 @@ export class CycleTestsPageComponent implements OnInit {
   }
   /** Replaces the entered values with the controller's; macros it did not answer are cleared. */
   protected readFromMachine() {
-    if (this.reading() || !this.machineId) return;
+    if (this.working() || !this.machineId) return;
+    const machineId = this.machineId;
     this.reading.set(true); this.readError.set(''); this.lastRead.set(null);
-    this.http.post<ControllerMacroValues>('/api/v1/admin/cycle-tests/controller-values', { machine_id: this.machineId })
+    this.http.post<ControllerMacroValues>('/api/v1/admin/cycle-tests/controller-values', { machine_id: machineId })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (read) => {
+          if (this.machineId !== machineId || read.machine_id !== machineId) {
+            this.reading.set(false);
+            this.readError.set('The selected machine changed. Read values again for the current machine.');
+            return;
+          }
           this.values = { ...this.values, ...read.values };
           this.argonautPreview.set(null);
           this.reading.set(false);
@@ -403,23 +416,25 @@ export class CycleTestsPageComponent implements OnInit {
       ...(typeof this.cycleTime === 'number' && Number.isFinite(this.cycleTime) ? { cycle_time_s: this.cycleTime } : {}),
     };
   }
-  private previewRequest() {
-    return this.http.post<{ url: string; payload: ArgonautPayload }>('/api/v1/admin/cycle-tests/argonaut/preview', this.argonautInput())
+  private previewRequest(input: ArgonautTestInput) {
+    return this.http.post<{ url: string; payload: ArgonautPayload }>('/api/v1/admin/cycle-tests/argonaut/preview', input)
       .pipe(takeUntilDestroyed(this.destroyRef));
   }
   protected previewArgonaut() {
-    if (this.argonautBusy() || !this.argonautReady()) return;
+    if (this.working() || !this.argonautReady()) return;
+    const input = this.argonautInput();
     this.argonautBusy.set(true); this.argonautError.set(''); this.argonautResult.set(null);
-    this.previewRequest().subscribe({
+    this.previewRequest(input).subscribe({
       next: (preview) => { this.argonautBusy.set(false); this.argonautPreview.set(preview); },
       error: (error) => { this.argonautBusy.set(false); this.argonautPreview.set(null); this.argonautError.set(apiErrorMessage(error)); },
     });
   }
   /** Shows the exact address and serial first: Argonaut records every transaction it accepts. */
   protected sendToArgonaut() {
-    if (this.argonautBusy() || !this.argonautReady()) return;
+    if (this.working() || !this.argonautReady()) return;
+    const input = this.argonautInput();
     this.argonautBusy.set(true); this.argonautError.set(''); this.argonautResult.set(null);
-    this.previewRequest().subscribe({
+    this.previewRequest(input).subscribe({
       next: (preview) => {
         this.argonautPreview.set(preview);
         const r = preview.payload.request;
@@ -427,7 +442,7 @@ export class CycleTestsPageComponent implements OnInit {
           this.argonautBusy.set(false);
           return;
         }
-        this.http.post<ArgonautTestResult>('/api/v1/admin/cycle-tests/argonaut', this.argonautInput())
+        this.http.post<ArgonautTestResult>('/api/v1/admin/cycle-tests/argonaut', input)
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
             next: (result) => { this.argonautBusy.set(false); this.argonautPreview.set(null); this.argonautResult.set(result); },
@@ -446,7 +461,7 @@ export class CycleTestsPageComponent implements OnInit {
   }
   protected refreshHistory() { this.history.load(this.http.get<CycleTestRun[]>('/api/v1/admin/cycle-tests')); }
   protected run() {
-    if (this.busy() || !this.machineId || !this.gearsetId || !this.serial.trim()) return;
+    if (this.working() || !this.machineId || !this.gearsetId || !this.serial.trim()) return;
     this.busy.set(true); this.error.set('');
     const values = Object.fromEntries(Object.entries(this.values).filter(([, v]) => v !== null));
     this.http.post<CycleTestRun>('/api/v1/admin/cycle-tests', {

@@ -211,6 +211,7 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
 
     <gear-dialog
       [open]="createOpen()"
+      [dismissible]="!busy()"
       (openChange)="createOpen.set($event)"
       title="Create collector token"
       description="Name it after where it will run, so you know which one to revoke later."
@@ -233,7 +234,7 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
         }
       </form>
       <ng-container dialogActions>
-        <button type="button" class="gear-btn gear-btn-secondary" (click)="createOpen.set(false)">
+        <button type="button" class="gear-btn gear-btn-secondary" (click)="createOpen.set(false)" [disabled]="busy()">
           Cancel
         </button>
         <button

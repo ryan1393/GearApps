@@ -39,6 +39,8 @@ export class GreenshedCheckComponent implements OnInit {
   @ViewChild('checkFormElement') private checkFormElement?: ElementRef<HTMLFormElement>;
 
   refs: GreenshedReferenceData | null = null;
+  loadingChoices = false;
+  choicesError = '';
   build: GreenshedBuild | null = null;
   buildNumber = '';
   availableRunningBuilds: Array<{build_number:string;machine_number:string;summary_number:string;part_type_code:string;check_due:boolean}> = [];
@@ -61,10 +63,7 @@ export class GreenshedCheckComponent implements OnInit {
       next: d => this.availableRunningBuilds = d.active_machines,
       error: () => this.availableRunningBuilds = [],
     });
-    this.api.getReferenceData().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: r => this.refs = r,
-      error: (e: HttpErrorResponse) => this.error = greenshedApiErrorText(e, 'Could not load check choices.'),
-    });
+    this.loadChoices();
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       ++this.generation;
       this.busy = false;
@@ -86,6 +85,34 @@ export class GreenshedCheckComponent implements OnInit {
         this.scan();
       }
     });
+  }
+
+  loadChoices(): void {
+    if (this.loadingChoices || this.refs) return;
+    this.loadingChoices = true;
+    this.choicesError = '';
+    this.api.getReferenceData().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: refs => {
+        this.refs = refs;
+        this.loadingChoices = false;
+        this.initializePieceCount();
+      },
+      error: (error: HttpErrorResponse) => {
+        this.loadingChoices = false;
+        this.choicesError = greenshedApiErrorText(error, 'Could not load check choices.');
+      },
+    });
+  }
+
+  /** Both the validated run and its count source are needed before choosing the default. */
+  private initializePieceCount(): void {
+    const run = this.build?.machine_run;
+    if (!this.refs || !this.contextValid || !run) return;
+    // Operator-counted checks advance the running count. DSF-counted checks start at
+    // the scheduled point (or live count for an early check) without moving that count.
+    this.pieceCount = this.dsfCounts
+      ? Math.max(run.last_check_piece_count, Math.min(run.next_check_piece_count, run.current_piece_count))
+      : Math.max(run.current_piece_count, run.next_check_piece_count);
   }
 
   onBuildInput(): void { if (this.busy || this.lockedToRunningMachine) return; ++this.generation; this.build = null; this.contextValid = false; this.resetCheckEntry(); this.error = ''; }
@@ -121,12 +148,7 @@ export class GreenshedCheckComponent implements OnInit {
           this.error = 'The selected cutter or machine run has changed. Select the check from Running Machines again.';
         } else {
           this.contextValid = true;
-          // Operator-counted: the check sets the running count, so start at the next check point.
-          // DSF-counted: the running count is already live; record the check at its scheduled
-          // point (or the live count if the check is early) without moving the running count.
-          this.pieceCount = this.dsfCounts
-            ? Math.max(run.last_check_piece_count, Math.min(run.next_check_piece_count, run.current_piece_count))
-            : Math.max(run.current_piece_count, run.next_check_piece_count);
+          this.initializePieceCount();
         }
       },
       error: (e: HttpErrorResponse) => {
@@ -150,7 +172,7 @@ export class GreenshedCheckComponent implements OnInit {
   save(): void {
     const build = this.build;
     const run = build?.machine_run;
-    if (this.busy || !this.contextValid || !build || !run) return;
+    if (this.busy || !this.refs || this.loadingChoices || !this.contextValid || !build || !run) return;
     if (this.checkFormElement && !this.checkFormElement.nativeElement.checkValidity()) {
       this.error = 'Correct the highlighted count or measurement before saving.';
       this.checkFormElement.nativeElement.reportValidity();

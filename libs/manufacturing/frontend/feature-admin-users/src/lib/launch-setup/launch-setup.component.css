@@ -1,5 +1,5 @@
 :host { display: block; }
-.launch { display: grid; gap: 1rem; }
+.launch { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
 .launch-panel { padding: 1.25rem; min-width: 0; }
 .launch-lead { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: .75rem; }
 .launch-lead h2 { margin: 0 0 .25rem; font-size: 1.25rem; font-weight: 800; }

@@ -9,7 +9,7 @@
 <main class="plant-page">
   <section class="page-heading">
     <div><p class="eyebrow">OPERATIONS / {{ view() === 'overview' ? 'LIVE OVERVIEW' : 'PRODUCTION REPORTS' }}</p>
-      <h1>{{ view() === 'overview' ? 'A clearer view of your floor.' : 'From machine counts to useful reports.' }}</h1>
+      <h1>{{ view() === 'overview' ? 'Plant overview' : 'Production reports' }}</h1>
       <p class="muted">Current DSF shift · Times shown in Indianapolis · Automatic refresh every 30 seconds</p>
     </div>
     <button type="button" (click)="refresh()" [disabled]="loading()">{{ loading() ? 'Refreshing…' : 'Refresh data' }}</button>
@@ -39,7 +39,8 @@
       <label>Department<select [ngModel]="department()" (ngModelChange)="department.set($event)"><option value="">All departments</option>@for (dept of departments(); track dept) { <option [value]="dept">{{ departmentLabel(dept) }}</option> }</select></label>
       <label class="search-field">Find a machine<input type="search" placeholder="Machine number or department" [ngModel]="search()" (ngModelChange)="search.set($event)" /></label>
       <label class="checkbox"><input type="checkbox" [ngModel]="attention()" (ngModelChange)="attention.set($event)" /> Needs data review</label>
-      <span class="muted small">{{ rows().length }} of {{ snapshot.rows.length }} machines shown</span>
+      <button type="button" (click)="clearFilters()" [disabled]="!department() && !search() && !attention()">Clear filters</button>
+      <span class="muted small" role="status">{{ rows().length }} of {{ snapshot.rows.length }} machines shown</span>
     </section>
 
     <section danaKpiGrid class="plant-kpis" aria-label="Filtered machine summary">
@@ -83,7 +84,7 @@
             <p class="machine-note">{{ row.note }}</p>
             <footer>Count through {{ formatTime(row.as_of) }}</footer>
           </article>
-        } @empty { <div class="empty-state"><h2>No matching machines</h2><p>No registered machine counts match this view. Check department coverage for DSF-only sources, or clear your search and review filter.</p></div> }
+        } @empty { <div class="empty-state"><h2>No matching machines</h2><p>No registered machine counts match this view. Check department coverage for DSF-only sources, or clear your search and review filter.</p>@if (department() || search() || attention()) { <button type="button" (click)="clearFilters()">Show all registered machines</button> }</div> }
       </section>
     } @else {
       <section class="section-heading"><div><h2>Production by department and shift</h2><p class="muted">Current snapshot · Selected filters apply to all exports</p></div><div class="actions"><button type="button" (click)="exportDepartments()" [disabled]="!reports().length">Export shift CSV</button><button type="button" (click)="exportMachines()" [disabled]="!rows().length">Export machine CSV</button><button type="button" (click)="print()">Print report</button></div></section>

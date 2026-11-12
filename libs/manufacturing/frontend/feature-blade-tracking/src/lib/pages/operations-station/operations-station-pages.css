@@ -16,7 +16,9 @@
   height: 1px;
   margin: 0 !important;
   padding: 0 !important;
-  overflow: hidden;
+  /* Dana headers normally allow overflowing actions. Embedded screen-reader-only
+     headings must clip their descendants as well as their own 1px box. */
+  overflow: hidden !important;
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;

@@ -925,6 +925,14 @@
         "cwd": "."
       },
       "cache": false
+    },
+    "test-ui-ux-review": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --env-file=.env tools/manufacturing/test-ui-ux-review.mjs",
+        "cwd": "."
+      },
+      "cache": false
     }
   }
 }

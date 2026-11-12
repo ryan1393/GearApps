@@ -12,11 +12,11 @@ import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-acces
       <p class="eyebrow">MESHFORGE / PLANT INTELLIGENCE</p>
       <h1>The whole floor.<br />One clear view.</h1>
       <p class="muted">Sign in with your MeshForge account to view machine production and reports.</p>
-      <form #form="ngForm" (ngSubmit)="login()">
+      <form #form="ngForm" (ngSubmit)="login()" [attr.aria-busy]="busy()">
         <label for="email">Email address</label>
-        <input id="email" name="email" type="email" autocomplete="username" [(ngModel)]="email" required email />
+        <input id="email" name="email" type="email" autocomplete="username" [(ngModel)]="email" [readOnly]="busy()" required email />
         <label for="password">Password</label>
-        <input id="password" name="password" type="password" autocomplete="current-password" [(ngModel)]="password" required />
+        <input id="password" name="password" type="password" autocomplete="current-password" [(ngModel)]="password" [readOnly]="busy()" required />
         @if (error()) { <p role="alert" class="notice warning">{{ error() }}</p> }
         <button class="primary" type="submit" [disabled]="form.invalid || busy()" [attr.aria-busy]="busy()">{{ busy() ? 'Signing in…' : 'Sign in' }}</button>
       </form>

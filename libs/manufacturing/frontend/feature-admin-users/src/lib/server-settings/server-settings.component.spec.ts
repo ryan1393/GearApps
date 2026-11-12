@@ -93,4 +93,56 @@ describe('ServerSettingsComponent', () => {
     component.discard();
     expect(component.draft['SCANNER_TIMEOUT_MS']).toBe('4000');
   });
+
+  it('preserves unsaved settings and replacement secrets until refresh is confirmed', () => {
+    component.draft['SCANNER_TIMEOUT_MS'] = '9000';
+    component.startReplacing(find('SCANNER_FTP_PASSWORD'));
+    component.draft['SCANNER_FTP_PASSWORD'] = 'not-saved';
+    component.requestRefresh();
+    http.expectNone(API);
+    expect(component.confirmation).toBe('refresh');
+    expect(component.confirmationMessage).toContain('2 unsaved changes');
+    expect(component.confirmationMessage).not.toContain('not-saved');
+    component.confirmation = '';
+    expect(component.draft['SCANNER_FTP_PASSWORD']).toBe('not-saved');
+    component.requestRefresh();
+    component.confirmAction();
+    http.expectOne(API).flush(board());
+    expect(component.changedCount).toBe(0);
+    expect(component.draft['SCANNER_TIMEOUT_MS']).toBe('4000');
+    expect(component.draft['SCANNER_FTP_PASSWORD']).toBe('');
+  });
+
+  it('asks before discarding and keeps changes if the dialog is canceled', () => {
+    component.draft['SCANNER_TIMEOUT_MS'] = '9000';
+    component.requestDiscard();
+    expect(component.confirmation).toBe('discard');
+    expect(component.draft['SCANNER_TIMEOUT_MS']).toBe('9000');
+    component.confirmation = '';
+    expect(component.changedCount).toBe(1);
+    component.requestDiscard();
+    component.confirmAction();
+    expect(component.draft['SCANNER_TIMEOUT_MS']).toBe('4000');
+    http.expectNone(API);
+  });
+
+  it('requires restart confirmation and refuses to restart while unsaved changes exist', () => {
+    const current = component.board;
+    if (!current) throw new Error('Expected loaded settings');
+    current.can_restart = true;
+    component.draft['SCANNER_TIMEOUT_MS'] = '9000';
+    component.requestRestart();
+    expect(component.confirmation).toBe('');
+    http.expectNone(API + '/restart');
+    component.discard();
+    component.requestRestart();
+    expect(component.confirmation).toBe('restart');
+    expect(component.confirmationMessage).toContain('Every MeshForge screen and collector');
+    http.expectNone(API + '/restart');
+    component.confirmAction();
+    http.expectOne({ method: 'POST', url: API + '/restart' })
+      .flush({ message: 'Restart not available.' }, { status: 503, statusText: 'Unavailable' });
+    expect(component.restarting).toBe(false);
+    expect(component.error).toContain('Restart not available');
+  });
 });

@@ -12,9 +12,11 @@
     [step]="1"
     label="Scan Serial Number"
     buttonText="Find"
-    [disabled]="busy"
+    [disabled]="busy || printingTagSerial !== null"
     (scanned)="lookup($event)"
   />
+
+  <p *ngIf="busy" class="gear-loading-state" role="status">Finding inventory…</p>
 
   <section *ngIf="tray as t" class="gear-panel inventory-result-card">
     <div class="inventory-result-header">

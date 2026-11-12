@@ -78,6 +78,12 @@ html body .gear-page.ops-station {
   flex: none;
 }
 
+.ops-station .ops-station-tab-label {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 /* Work in progress on this tab. */
 .ops-station .ops-station-tab-busy {
   position: absolute;
@@ -239,6 +245,15 @@ body:has(.ops-station) :is(dana-toast-host, gear-toast-host) .dana-toast-stack.g
 
   .ops-station .ops-station-instruction {
     flex-basis: 100%;
+  }
+}
+
+@media (max-width: 599px) {
+  .ops-station .ops-station-tab {
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 4px;
+    font-size: .85rem;
   }
 }
 
