@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 70.7.0 (2026-11-12)
+
+Lappers get their cycle time recorded and shown in Lapping Summaries, a live timer while a cycle
+runs, and a Lapper Dashboard panel flagging setting changes (chosen per macro in Admin > Macros).
+Cutter-body compatibility is checked the same way everywhere and unetched bodies build again,
+model numbers can be text, and DSF says why counts are not coming in. **Back up the database before
+deploying**: model numbers change from integer to text on startup.
+
 - **Setting changes on the Lapper Dashboard.** A new panel lists the cycles of the last 8 hours, on
   every machine, where a controller value changed since the previous cycle of the same machine and
   gearset: time, machine, gearset, serial, cycle number and each changed value with its previous

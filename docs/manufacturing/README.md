@@ -1,4 +1,4 @@
-# MeshForge 70.6.0
+# MeshForge 70.7.0
 
 MeshForge is the Dana manufacturing workspace for four workflows sharing one API and database:
 **Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root MeshForge Nx workspace. All frontends use
@@ -12,6 +12,22 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
 | Green Shed | 4202 | `../apps/greenshed` |
 | Lapper | 4203 | `../apps/lapper-client` |
 | Shared API | 3333 | `../apps/server` (`/api/v1`, health at `/api/v1/health/ready`) |
+
+## What changed in 70.7.0
+
+- **Lapper cycle times.** Each cycle's time (seconds in cycle, Y3.2) is recorded and shown in
+  Lapping Summaries with the recent average; a live timer counts up on the Lapper Dashboard machine
+  cards and in Lapping Summaries while a lapper is in cycle.
+- **Setting changes.** The Lapper Dashboard lists the cycles of the last 8 hours that changed a
+  controller value since the previous cycle of that machine and gearset. Admin > Macros > Flag
+  changes chooses which values count; the consec counter never does.
+- **Cutter-body compatibility** is one check on screen and in the API, and unetched bodies build
+  again. See [CUTTER_BODY_BLADE_RULES.md](CUTTER_BODY_BLADE_RULES.md).
+- **Model numbers can be text** (S-110). **Back up the database before deploying**: the column
+  changes from integer to text on startup.
+- **DSF** names the setting that stops counts from coming in.
+
+See [CHANGELOG.md](../../CHANGELOG.md).
 
 ## What changed in 70.6.0
 
@@ -143,7 +159,7 @@ Docker host behind your active **SSH Docker context** (`docker context use <name
    3. runs `docker compose build` and `up -d` (never `down`, never touches volumes); when the
       Lapper Read collector (`--profile collectors`) already has a container on the host, it is
       rebuilt and restarted with the release too (a host that never started it is left alone);
-   4. waits for every service and checks that the API reports `70.6.0`. Only then does the old
+   4. waits for every service and checks that the API reports `70.7.0`. Only then does the old
       release become `~/dana-apps.prev`. If the deploy fails, the last good release is protected
       (a retry discards the failed one) and `--rollback` brings it back.
 3. **Rollback:** `Deploy-MeshForge.cmd --rollback` swaps `~/dana-apps.prev` back in and restarts it.
