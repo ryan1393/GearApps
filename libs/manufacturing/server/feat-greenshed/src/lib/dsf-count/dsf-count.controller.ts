@@ -1,6 +1,6 @@
 import { Auth, ReqUserId } from '@meshforge/manufacturing/server/util-common';
 import { RoleType, Uuid } from '@meshforge/manufacturing/shared/util-types';
-import { Body, Controller, Delete, Get, Header, Param, ParseUUIDPipe, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Header, HttpCode, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DsfCountService } from './dsf-count.service';
 
@@ -18,6 +18,21 @@ export class DsfCountController {
   @Header('Cache-Control', 'no-store')
   @Auth([RoleType.ADMIN])
   getAdminMappings() { return this.counts.adminSnapshot(); }
+
+  // Proposals only: the DSF source that is the only match for each machine. Changes nothing.
+  @Get('admin-mappings/unique-matches')
+  @Header('Cache-Control', 'no-store')
+  @Auth([RoleType.ADMIN])
+  getUniqueMatches() { return this.counts.uniqueMatches(); }
+
+  // Maps the confirmed proposals that are still the only match, each through the normal Admin save.
+  @Post('admin-mappings/unique-matches')
+  @HttpCode(200)
+  @Auth([RoleType.ADMIN])
+  applyUniqueMatches(
+    @Body() body: { matches?: unknown },
+    @ReqUserId() userId: Uuid,
+  ) { return this.counts.applyUniqueMatches(body?.matches, userId); }
 
   @Put('admin-mappings/:machineId')
   @Auth([RoleType.ADMIN])

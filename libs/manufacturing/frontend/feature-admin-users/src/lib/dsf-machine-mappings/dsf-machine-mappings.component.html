@@ -4,7 +4,11 @@
       <h2 id="dsf-map-title" class="text-xl font-black">DSF Machine Mappings</h2>
       <p class="text-sm text-slate-600">Which Digital Shop Floor source feeds each machine, including grinders and lappers. Saving changes MeshForge only; nothing is ever written to DSF.</p>
     </div>
-    <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || saving" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : '↻ Refresh Status' }}</button>
+    <div class="gear-admin-actions">
+      <button type="button" class="gear-btn gear-btn-primary" (click)="previewUniqueMatches()" [disabled]="loading || saving || !board?.configured || board?.source_options_status !== 'READY'"
+        title="Find machines whose DSF source is the only one in their department ending in the machine number">Map Unique Matches</button>
+      <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || saving" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : '↻ Refresh Status' }}</button>
+    </div>
   </div>
 
   <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert"><strong>Unable to continue.</strong><span>{{ error }}</span></div>
@@ -23,6 +27,35 @@
       <article danaSummaryCard class="gear-metric-card"><span>MAPPING REVIEW</span><strong>{{ reviewCount }}</strong><small>no source, or source changed</small></article>
       <article danaSummaryCard class="gear-metric-card"><span>CREDITING REVIEW</span><strong>{{ writerReviewCount }}</strong><small>cutter counts held for review</small></article>
     </section>
+
+    <div #matchPanel class="gear-panel p-5 dsf-map-detail" *ngIf="uniqueMatches as found" tabindex="-1" aria-labelledby="dsf-match-title">
+      <div class="dsf-map-lead">
+        <h3 id="dsf-match-title" class="text-lg font-black">Map unique matches</h3>
+        <button type="button" class="gear-btn gear-btn-secondary" (click)="closeUniqueMatches()" [disabled]="saving">Close</button>
+      </div>
+      <p>A machine is matched when exactly one active DSF source in its department has a whiteboard name ending in the machine number, and no other machine has that number. Machines you already mapped or unmapped are left alone. Each mapping is saved and audited like a single Admin save.</p>
+      <ng-container *ngIf="found.matches.length; else noMatches">
+        <div danaTableShell class="table-wrap">
+          <table danaTable class="gear-table">
+            <thead><tr><th>Machine</th><th>Dept</th><th>DSF Source</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let match of found.matches"><td><strong>{{ match.machine_number }}</strong></td><td>{{ match.department }}</td><td>{{ match.whiteboard_name }}<small class="dsf-map-sub">{{ match.line_name }}</small></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="gear-admin-actions">
+          <button type="button" class="gear-btn gear-btn-primary" (click)="applyUniqueMatches()" [disabled]="saving">{{ saving ? 'Mapping…' : 'Map ' + found.matches.length + ' Machine' + (found.matches.length === 1 ? '' : 's') }}</button>
+          <button type="button" class="gear-btn gear-btn-secondary" (click)="closeUniqueMatches()" [disabled]="saving">Cancel</button>
+        </div>
+      </ng-container>
+      <ng-template #noMatches><p role="status">No unmapped machine has exactly one matching DSF source.</p></ng-template>
+      <details *ngIf="found.skipped.length">
+        <summary>{{ found.skipped.length }} unmapped machine{{ found.skipped.length === 1 ? '' : 's' }} not matched: map these by hand</summary>
+        <ul class="dsf-map-skipped">
+          <li *ngFor="let skip of found.skipped"><strong>{{ skip.machine_number }}</strong> · Dept {{ skip.department }}: {{ skipText(skip.reason) }}</li>
+        </ul>
+      </details>
+    </div>
 
     <div #editor class="gear-panel p-5 dsf-map-detail" *ngIf="selected as machine" tabindex="-1" aria-label="Edit DSF source">
       <div class="dsf-map-lead">
