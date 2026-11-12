@@ -159,6 +159,9 @@ export const ENVIRONMENT_SETTING_GROUPS: readonly EnvironmentSettingGroup[] = [
       text('SCANNER_DEFAULT_HOST', 'Default scanner address'),
       flag('SCANNER_ALLOW_INSECURE_TLS', 'Accept scanner self-signed certificates'),
       number('SCANNER_TIMEOUT_MS', 'Scanner timeout (ms)'),
+      number('LAPPER_READ_SCANNER_PORT', 'Scanner TCP command port', undefined, {
+        locked: 'The API and Docker collector share this port. Change it in the server environment (.env).',
+      }),
       text('SCANNER_FTP_HOST', 'Scanner FTP server'),
       text('SCANNER_FTP_USER', 'Scanner FTP user'),
       secret('SCANNER_FTP_PASSWORD', 'Scanner FTP password'),

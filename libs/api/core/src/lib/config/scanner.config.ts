@@ -1,12 +1,13 @@
 import { registerAs } from '@nestjs/config';
 
-/** Scanner HTTP API + FTP image drop used by the lapping-cell live view. */
+/** Scanner HTTP and TCP connections and FTP image drop used by the lapping-cell live view. */
 export const scannerConfig = registerAs('scanner', () => ({
   /** Default scanner host used when a scanner record has no IP. */
   defaultHost: process.env['SCANNER_DEFAULT_HOST'] ?? '',
   /** Accept self-signed certs from scanners on the plant network. */
   allowInsecureTls: (process.env['SCANNER_ALLOW_INSECURE_TLS'] ?? 'true') === 'true',
   timeoutMs: parseInt(process.env['SCANNER_TIMEOUT_MS'] ?? '4000', 10),
+  commandPort: Number(process.env['LAPPER_READ_SCANNER_PORT'] || '9004'),
   ftp: {
     host: process.env['SCANNER_FTP_HOST'] ?? '',
     user: process.env['SCANNER_FTP_USER'] ?? '',

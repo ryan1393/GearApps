@@ -53,11 +53,11 @@ export class ScannerController {
 
   @Get(':scannerId/image')
   @Header('Cache-Control', 'no-store')
-  @ApiProduces('image/jpeg')
+  @ApiProduces('image/jpeg', 'image/bmp')
   @ApiOperation({ summary: 'Latest captured image from the scanner' })
   async image(@Param('scannerId', ParseUUIDPipe) id: string): Promise<StreamableFile> {
-    const buffer = await this.client.getLatestImage(await this.hostFor(id));
-    return new StreamableFile(buffer, { type: 'image/jpeg' });
+    const { data, contentType } = await this.client.getLatestImage(await this.hostFor(id));
+    return new StreamableFile(data, { type: contentType });
   }
 
   @Get(':scannerId/log')
@@ -86,12 +86,11 @@ export class ScannerController {
 
   @Get('getFile')
   @Header('Cache-Control', 'no-store')
-  @ApiProduces('image/jpeg')
+  @ApiProduces('image/jpeg', 'image/bmp')
   @ApiOperation({ summary: 'Legacy: latest image from the default scanner', deprecated: true })
   async legacyImage(): Promise<StreamableFile> {
-    return new StreamableFile(await this.client.getLatestImage(this.defaultHost()), {
-      type: 'image/jpeg',
-    });
+    const { data, contentType } = await this.client.getLatestImage(this.defaultHost());
+    return new StreamableFile(data, { type: contentType });
   }
 
   @Get('log')
@@ -103,7 +102,7 @@ export class ScannerController {
   @Post('op')
   @ApiOperation({ summary: 'Legacy: send a command to the default scanner', deprecated: true })
   legacyCommand(@Body() body: ScannerCommandDto): Promise<ScannerCommand> {
-    return this.client.sendCommand(this.defaultHost(), body);
+    return this.client.sendWebCommand(this.defaultHost(), body);
   }
 
   private async hostFor(scannerId: string): Promise<string> {
