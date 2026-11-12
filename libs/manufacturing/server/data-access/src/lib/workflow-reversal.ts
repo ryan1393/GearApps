@@ -5,6 +5,7 @@ import { DataSource, EntityManager } from 'typeorm';
 import { dsfCutterCountsEnabled } from '@meshforge/manufacturing/server/util-common';
 import { STARTUP_SCHEMA_LOCK_SQL } from '@meshforge/manufacturing/shared/util-constants';
 import { CONTAINER_SET_SCHEMA } from './coater-container-set';
+import { reverseCutterRequestAllocation } from './cutter-request-allocation';
 
 export type ReversalApp = 'GREENSHED' | 'CUTTER_BUILDER' | 'BLADE_TRACKING';
 // Columns this module reads by name. Declared so strict index-signature checks
@@ -317,6 +318,11 @@ export async function cancelWorkflow(source: DataSource, app: ReversalApp, ident
         await manager.query('UPDATE public.cutter_machine_runs SET last_check_piece_count = $2, "updatedAt" = clock_timestamp(), "updatedBy" = $3 WHERE id = $1', [runs[0].id, count, userId]);
       } else {
         await manager.query('UPDATE public.cutter_machine_runs SET current_piece_count = $2, last_check_piece_count = $2, "updatedAt" = clock_timestamp(), "updatedBy" = $3 WHERE id = $1', [runs[0].id, count, userId]);
+      }
+    }
+    if (app === 'CUTTER_BUILDER') {
+      for (const change of changes.filter(row => row.table_name === 'cutter_builds' && !row.before_row && row.after_row)) {
+        await reverseCutterRequestAllocation(manager, change.row_id, userId, reason);
       }
     }
     await manager.query('UPDATE public.dana_workflow_journal_v1 SET canceled_at = clock_timestamp(), canceled_by = $2, reason = $3 WHERE id = $1', [operation.id, userId, reason.trim()]);

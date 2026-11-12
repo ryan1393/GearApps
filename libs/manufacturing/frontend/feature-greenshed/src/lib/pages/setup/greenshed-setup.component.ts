@@ -173,10 +173,10 @@ export class GreenshedSetupComponent {
 
   setup(){
     if(this.busy||!this.build||!this.machine||!this.part||!['READY','SHELF'].includes(this.build.status_code))return;
-    if(!Number.isSafeInteger(this.startingPieceCount)||this.startingPieceCount<0){this.error='Enter a non-negative whole starting piece count.';return;}
+    if(!Number.isSafeInteger(this.startingPieceCount)||this.startingPieceCount<0||this.startingPieceCount>2147483647){this.error='Enter a whole starting piece count between 0 and 2,147,483,647.';return;}
     const request=this.buildRequest;
     this.busy=true;this.error='';this.message='';
-    this.api.setupCutter({buildNumber:this.build.build_number,machineNumber:this.machine.machine_number,partNumber:this.part.part_number,shift:'',startingPieceCount:this.startingPieceCount,comments:this.comments}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:r=>{if(request!==this.buildRequest)return;this.result=r;this.busy=false;const message=`${r.build_number} setup on ${r.machine_number}.`;this.message='';this.toast.success(message,'Cutter setup complete');},error:(e:HttpErrorResponse)=>{if(request!==this.buildRequest)return;this.busy=false;const message=greenshedApiErrorText(e,'Could not setup cutter.');this.error='';this.toast.error(message,'Cutter setup failed');}});
+    this.api.setupCutter({buildNumber:this.build.build_number,machineNumber:this.machine.machine_number,partNumber:this.part.part_number,shift:'',startingPieceCount:this.startingPieceCount,comments:this.comments}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({next:r=>{if(request!==this.buildRequest)return;this.result=r;this.busy=false;const message=`${r.build_number} setup on ${r.machine_number}.`;this.message='';this.toast.success(message,'Cutter setup complete');},error:(e:HttpErrorResponse)=>{if(request!==this.buildRequest)return;this.busy=false;const message=greenshedApiErrorText(e,'Could not setup cutter.');this.error=message;this.toast.error(message,'Cutter setup failed');}});
   }
 
   startAnother(){

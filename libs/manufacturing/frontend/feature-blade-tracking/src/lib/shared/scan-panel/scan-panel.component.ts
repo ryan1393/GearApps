@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './scan-panel.component.html',
+  styles: [`.gear-scan-step { padding: var(--dana-panel-padding); gap: var(--dana-space-4); }`],
   host: { '[attr.data-state]': 'state' },
 })
 export class ScanPanelComponent implements AfterViewInit, OnChanges {

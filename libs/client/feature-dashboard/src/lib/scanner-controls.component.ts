@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ScannerApi, ToastService } from '@meshforge/client/core';
 
 interface Cmd {
@@ -53,7 +54,7 @@ const GROUPS: { label: string; cmds: Cmd[] }[] = [
   template: `
     <div class="gear-ctl">
       @for (g of groups; track g.label) {
-        <div class="gear-ctl-group">
+        <div class="gear-ctl-group" role="group" [attr.aria-label]="g.label">
           <span class="dana-detail-label">{{ g.label }}</span>
           <div class="gear-actions">
             @for (c of g.cmds; track c.op) {
@@ -61,9 +62,11 @@ const GROUPS: { label: string; cmds: Cmd[] }[] = [
                 type="button"
                 class="gear-btn gear-btn-sm {{ c.cls ?? 'gear-btn-secondary' }}"
                 [disabled]="pending() !== null"
+                [attr.aria-label]="g.label + ' ' + c.label"
+                [attr.aria-busy]="pending() === c.op"
                 (click)="send(c.op)"
               >
-                {{ pending() === c.op ? '…' : c.label }}
+                {{ pending() === c.op ? 'Sending…' : c.label }}
               </button>
             }
           </div>
@@ -74,25 +77,27 @@ const GROUPS: { label: string; cmds: Cmd[] }[] = [
   styles: `
     .gear-ctl {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
+      gap: var(--dana-form-gap);
     }
     .gear-ctl-group {
       display: grid;
-      gap: 6px;
+      gap: var(--dana-field-gap);
     }
   `,
 })
 export class ScannerControlsComponent {
   private readonly api = inject(ScannerApi);
   private readonly toast = inject(ToastService);
+  private readonly destroy = inject(DestroyRef);
   readonly scannerId = input.required<string>();
   protected readonly groups = GROUPS;
   protected readonly pending = signal<string | null>(null);
 
   protected send(op: string) {
+    if (this.pending() !== null) return;
     this.pending.set(op);
-    this.api.command(this.scannerId(), op).subscribe({
+    this.api.command(this.scannerId(), op).pipe(takeUntilDestroyed(this.destroy)).subscribe({
       next: (r) => {
         this.pending.set(null);
         this.toast.info(`Sent ${op}`, r.data ? String(r.data).slice(0, 80) : '');

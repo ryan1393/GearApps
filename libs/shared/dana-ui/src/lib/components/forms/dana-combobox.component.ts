@@ -219,13 +219,20 @@ export class DanaComboboxComponent<T = any> implements ControlValueAccessor, OnC
         if (this.open && this.filtered.length) { event.preventDefault(); this.move(last); }
         break;
       case 'Enter':
+        // An unfinished pick-mode search must not submit a form with a stale selection.
+        if (this.open && !this.freeText) event.preventDefault();
         if (this.open && this.activeIndex >= 0 && this.filtered[this.activeIndex]) {
           event.preventDefault();
           this.pick(this.filtered[this.activeIndex]);
         }
         break;
       case 'Escape':
-        if (this.open) { event.preventDefault(); this.close(); }
+        if (this.open) {
+          event.preventDefault();
+          event.stopPropagation();
+          if (!this.freeText) { this.inputText = this.labelFor(this.selectedKey); this.query = ''; }
+          this.close();
+        }
         break;
       case 'Tab':
         this.close();
@@ -333,7 +340,7 @@ export class DanaComboboxComponent<T = any> implements ControlValueAccessor, OnC
   }
 
   private move(index: number): void {
-    this.activeIndex = index;
+    this.activeIndex = this.filtered.length ? Math.max(0, Math.min(index, this.filtered.length - 1)) : -1;
     this.cdr.markForCheck();
     this.scrollActive();
   }

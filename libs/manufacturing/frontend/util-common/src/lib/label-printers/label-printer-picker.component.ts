@@ -24,7 +24,7 @@ import { LabelPrinterChoice, LabelPrinterChoiceService, LabelType } from './labe
         </select>
       </label>
       <ng-template #noChoice>
-        <p class="gear-printer-picker-note" role="status" *ngIf="!loading">
+        <p class="gear-printer-picker-note dana-field-hint" role="status" *ngIf="!loading">
           <ng-container *ngIf="failed">Printers could not be loaded. The default printer is used.</ng-container>
           <ng-container *ngIf="!failed && defaultName">{{ label }}: {{ defaultName }}</ng-container>
           <ng-container *ngIf="!failed && !defaultName">No {{ noun }} printer is set up, so {{ noun }}s download as files. An administrator can add one in Admin › Label Printers.</ng-container>
@@ -35,8 +35,8 @@ import { LabelPrinterChoice, LabelPrinterChoiceService, LabelType } from './labe
   styles: [`
     /* Layout only. Colours, type and controls come from Dana UI. */
     .gear-printer-picker { display: flex; align-items: flex-end; min-width: 0; }
-    .gear-printer-picker .gear-field { display: grid; gap: .25rem; min-width: 16rem; max-width: 26rem; margin: 0; }
-    .gear-printer-picker-note { margin: 0; font-size: .875rem; opacity: .8; max-width: 34rem; }
+    .gear-printer-picker .gear-field { display: grid; gap: var(--dana-field-gap); min-width: min(16rem,100%); max-width: 26rem; margin: 0; }
+    .gear-printer-picker-note { margin: 0; max-width: 34rem; }
   `],
 })
 export class GearLabelPrinterPickerComponent implements OnInit {

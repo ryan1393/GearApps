@@ -3,6 +3,8 @@
     description="Record a Frequency or ZEISS / CMM check for the active cutter."></header>
   <div *ngIf="error" class="gear-feedback" role="alert">{{ error }}</div>
   <div *ngIf="message" class="gear-feedback" role="status" aria-live="polite">{{ message }}</div>
+  <div *ngIf="loadingChoices" class="gear-feedback" role="status">Loading quality check choices and piece-count settings…</div>
+  <div *ngIf="choicesError" class="gear-feedback" role="alert">{{ choicesError }} Quality checks cannot be saved until these choices load. <button type="button" class="gear-btn gear-btn-secondary" (click)="loadChoices()" [disabled]="loadingChoices">Retry choices</button></div>
 
   <section *ngIf="!lockedToRunningMachine" class="gear-workflow-section">
     <div class="gear-workflow-section-header"><div><h2>Scan Active Cutter</h2><p>Open the current machine run before recording quality.</p></div></div>
@@ -25,10 +27,10 @@
     <p>Machine and Build ID are locked to your Running Machines selection.</p>
   </div>
 
-  <div *ngIf="build" class="quality-check-layout">
+  <div *ngIf="build" class="gear-workflow-page">
     <section class="gear-workflow-section">
       <div class="gear-workflow-section-header"><div><h2>Active Cutter</h2><p>Current machine and piece-count status.</p></div></div>
-      <div class="gear-workflow-section-body gear-workflow-detail-grid quality-check-summary">
+      <div class="gear-workflow-section-body gear-workflow-detail-grid gear-workflow-detail-grid-four">
         <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Build ID</span><strong class="font-mono">{{ build.build_number }}</strong></div>
         <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Machine</span><strong>{{ build.machine_run?.machine_number || '—' }}</strong></div>
         <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Current Count</span><strong>{{ build.machine_run?.current_piece_count }}</strong></div>
@@ -40,7 +42,7 @@
     <form #checkFormElement #checkForm="ngForm" (ngSubmit)="save()" class="gear-workflow-section">
       <div class="gear-workflow-section-header"><div><h2>Check Result</h2><p>Your logged-in user is recorded with this check.</p></div></div>
       <div class="gear-workflow-section-body">
-        <fieldset [disabled]="busy || !contextValid">
+        <fieldset class="quality-check-entry" [disabled]="busy || !contextValid || !refs || loadingChoices">
           <div *ngIf="resultCode === 'FAIL' || resultCode === 'HOLD'" class="gear-workflow-state gear-workflow-state-danger" role="alert">
             <strong>{{ resultCode }} selected</strong><p class="gear-workflow-help">Save the check, then review whether this cutter needs to be pulled.</p>
           </div>
@@ -59,19 +61,19 @@
               <small *ngIf="dsfCounts" class="gear-workflow-help">DSF is counting this cutter. Enter the count this check was taken at, {{ build.machine_run?.last_check_piece_count }} (previous check) or later. The running count only changes if you enter a higher number.</small>
             </label>
           </div>
-          <h3>{{ checkType === 'FC' ? 'Frequency Measurements' : 'ZEISS / CMM Measurements' }}</h3>
-          <div *ngIf="checkType === 'FC'" class="check-measurements">
+          <h3 class="gear-section-title check-measurement-heading">{{ checkType === 'FC' ? 'Frequency Measurements' : 'ZEISS / CMM Measurements' }}</h3>
+          <div *ngIf="checkType === 'FC'" class="gear-workflow-form-grid gear-workflow-form-grid-four">
             <label *ngFor="let field of frequencyFields" class="gear-field">{{ field.label }}
               <input type="number" step="any" [(ngModel)]="frequency[field.key]" [name]="'fc_' + field.key" class="gear-input" />
             </label>
           </div>
-          <div *ngIf="checkType === 'CMM'" class="check-measurements">
+          <div *ngIf="checkType === 'CMM'" class="gear-workflow-form-grid gear-workflow-form-grid-four">
             <label *ngFor="let field of cmmFields" class="gear-field">{{ field.label }}
               <input type="number" step="any" [(ngModel)]="cmm[field.key]" [name]="'cmm_' + field.key" class="gear-input" />
             </label>
           </div>
           <label class="gear-field">Comments<textarea [(ngModel)]="comments" name="comments" maxlength="2000" rows="3" class="gear-textarea"></textarea></label>
-          <div class="check-result-actions">
+          <div class="gear-workflow-actions">
             <button type="submit" [disabled]="busy || !contextValid || !refs || checkForm.invalid" class="gear-btn gear-btn-primary">{{ busy ? 'Saving…' : 'Save Quality Check' }}</button>
             <button type="button" (click)="resetCheckEntry(true)" class="gear-btn gear-btn-secondary">Reset</button>
           </div>

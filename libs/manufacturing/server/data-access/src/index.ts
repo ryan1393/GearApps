@@ -1,5 +1,6 @@
 export * from './lib/server-data-access.module';
 export * from './lib/workflow-reversal';
+export * from './lib/cutter-request-allocation';
 export * from './lib/database/entities/user.orm-entity';
 export * from './lib/database/entities/blade-tracking/location.orm-entity';
 export * from './lib/database/entities/blade-tracking/tray.orm-entity';

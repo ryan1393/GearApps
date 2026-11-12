@@ -1,0 +1,65 @@
+/* Canonical page, panel and form rhythm. Feature styles own only their domain layout. */
+.dana-page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: var(--dana-content-max);
+  margin-inline: auto;
+  padding: var(--dana-page-padding);
+}
+
+.dana-page-stack {
+  --dana-page-header-gap: 0px;
+  display: grid;
+  gap: var(--dana-section-gap);
+}
+
+.dana-page-stack > *,
+.dana-page-stack > :is(.dana-panel,.dana-kpi-grid,.dana-summary-grid,.dana-operation-grid,.dana-dashboard-grid,.dana-page-header) { margin-block: 0; }
+
+.dana-page-header {
+  gap: var(--dana-section-gap);
+  margin-bottom: var(--dana-page-header-gap, var(--dana-section-gap));
+}
+
+.dana-page-header > div:first-child {
+  display: grid;
+  gap: var(--dana-field-gap);
+}
+
+.dana-page-header > div:first-child > :is(p,h1,h2) { margin: 0; }
+
+.dana-panel-body,
+.dana-panel-padded { padding: var(--dana-panel-padding); }
+
+.dana-panel-padded { min-width: 0; }
+
+.dana-panel-header,
+[danaPanelHeader] {
+  gap: var(--dana-action-gap);
+  padding: var(--dana-space-4) var(--dana-panel-padding);
+}
+
+.dana-form-grid { gap: var(--dana-form-gap); }
+
+.dana-field { gap: var(--dana-field-gap); }
+
+.dana-field { display: grid; }
+.dana-field label,
+.dana-label { margin-bottom: 0; }
+
+.dana-toolbar,
+.dana-actions { gap: var(--dana-action-gap); }
+:is(.dana-panel-padded,.dana-panel-body) > :first-child { margin-top: 0; }
+:is(.dana-panel-padded,.dana-panel-body) > :last-child { margin-bottom: 0; }
+
+@media (max-width: 767px) {
+  :root {
+    --dana-page-padding: var(--dana-space-4);
+    --dana-panel-padding: var(--dana-space-4);
+    --dana-section-gap: var(--dana-space-4);
+  }
+}
+
+@media print {
+  .dana-page { max-width: none !important; margin: 0 !important; padding: 0 !important; }
+}

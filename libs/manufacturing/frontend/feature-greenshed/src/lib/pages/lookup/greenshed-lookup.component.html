@@ -8,14 +8,15 @@
   ></header>
 
   <div *ngIf="error" class="gear-feedback" role="alert">{{ error }}</div>
+  <p *ngIf="busy" class="gear-workflow-help" role="status">{{ build ? 'Loading cutter history…' : 'Loading cutter builds…' }}</p>
 
   <form *ngIf="!build" (ngSubmit)="search()" class="gear-workflow-section">
     <div class="gear-workflow-section-header">
       <div><h2>Search Cutter Builds</h2><p>Search by build number, cutter body, Summary, or status.</p></div>
     </div>
     <div class="gear-workflow-section-body">
-      <div class="gear-workflow-filter-grid">
-        <label class="gear-field gear-workflow-span-full">
+      <div class="greenshed-lookup-filters">
+        <label class="gear-field">
           Search
           <input [(ngModel)]="q" name="q" class="gear-input" placeholder="Build, body, or summary..." />
         </label>
@@ -33,7 +34,7 @@
   <section *ngIf="!build" class="gear-workflow-table-panel">
     <div class="gear-workflow-table-heading"><h2>Cutter Builds</h2><p>Sort and filter the current result set from the column headers.</p></div>
     <div danaTableShell class="table-wrap">
-      <table danaTable class="gear-table">
+      <table danaTable class="gear-table" aria-label="Cutter build search results" [attr.aria-busy]="busy">
         <thead>
           <tr>
             <th>Build</th>
@@ -51,7 +52,7 @@
             <td>{{ r.summary_number }}</td>
             <td>{{ r.part_type_code }}</td>
             <td><span class="status-pill" [danaTone]="r.status_code">{{ r.status_code }}</span></td>
-            <td><button type="button" (click)="open(r.build_number)" class="gear-btn gear-btn-secondary gear-btn-sm" data-icon="view" title="View">View</button></td>
+            <td><button type="button" (click)="open(r.build_number)" class="gear-btn gear-btn-secondary gear-btn-sm" data-icon="view" [attr.aria-label]="'View cutter build ' + r.build_number">View</button></td>
           </tr>
           <tr *ngIf="!busy && !rows.length"><td danaTableEmpty colspan="6" class="empty-row">No cutter builds match this search.</td></tr>
         </tbody>
@@ -79,7 +80,7 @@
     <section class="gear-workflow-table-panel">
       <div class="gear-workflow-table-heading"><h2>Cutter History</h2><p>Production, quality, pull, and shelf activity in recorded order.</p></div>
       <div danaTableShell class="table-wrap">
-        <table danaTable class="gear-table">
+        <table danaTable class="gear-table" aria-label="Cutter history" [attr.aria-busy]="busy">
           <thead>
             <tr><th>When</th><th>Event</th><th>Machine</th><th>Piece Count</th><th>Result/Reason</th><th>Comments</th></tr>
           </thead>
@@ -92,7 +93,7 @@
               <td>{{ e.check_result?.code || e.pull_reason?.name || e.pull_reason?.code || '—' }}</td>
               <td>{{ e.comments || '—' }}<div *ngIf="e.canceled_at">Canceled by {{ e.canceled_by }} · {{ e.canceled_at | date:'MMM d, y, h:mm a' }}</div></td>
             </tr>
-            <tr *ngIf="!history.length"><td danaTableEmpty colspan="6" class="empty-row">No cutter history is recorded for this build.</td></tr>
+            <tr *ngIf="!history.length"><td danaTableEmpty colspan="6" class="empty-row">{{ busy ? 'Loading cutter history…' : historyFailed ? 'Cutter history could not be loaded.' : 'No cutter history is recorded for this build.' }} <button *ngIf="historyFailed" type="button" class="gear-btn gear-btn-secondary" (click)="open(b.build_number)">Retry history</button></td></tr>
           </tbody>
         </table>
       </div>

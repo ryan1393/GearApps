@@ -24,23 +24,10 @@ import {
   templateUrl: './greenshed-machines.component.html',
   styles: [`
     :host{display:block}
-    .machine-actions-dialog{border:1px solid var(--dana-control-border);border-radius:1rem;padding:1.5rem;margin:auto;width:min(28rem,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);overflow:auto;color:var(--dana-text);background:var(--dana-surface);box-shadow:var(--dana-shadow-raised)}
-    .machine-actions-dialog::backdrop{background:color-mix(in srgb, var(--dana-sidebar) 50%, transparent)}
-    .machine-actions-dialog h2{margin:0 0 .4rem;font-size:1.35rem}
-    .machine-actions-dialog p{margin:0 0 1rem;overflow-wrap:anywhere}
-    .machine-actions-dialog .dialog-actions{display:grid;gap:.65rem}
-    .machine-actions-dialog button{width:100%;min-height:2.75rem;text-align:left}
-    .running-machines-page{max-width:100%!important;width:100%!important;min-width:0!important;box-sizing:border-box!important;margin:0!important;padding-left:.5rem!important;padding-right:.5rem!important}
-    .running-machines-header{max-width:none!important}
-    .running-machines-grid{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:.75rem!important;width:100%!important}
-    .department-table{min-width:0!important;width:100%!important;overflow:visible!important}
-    .department-table table,.department-table-inner{width:100%!important;min-width:0!important;table-layout:fixed!important;font-size:clamp(.68rem,.70vw,.82rem)!important}
-    .department-table th,.department-table td,.department-table-inner th,.department-table-inner td{padding:.4rem .38rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
-    .department-table th,.department-table-inner th{font-size:clamp(.56rem,.55vw,.68rem)!important;letter-spacing:.02em!important}
-    .department-table th:first-child,.department-table td:first-child,.department-table-inner th:first-child,.department-table-inner td:first-child{width:18%!important}
-    .department-table .machine-cell button{width:100%!important;min-width:0!important}
-    .running-machines-footer{font-size:.68rem!important;gap:.65rem!important;flex-wrap:wrap!important}
-    @media(max-width:1150px){.running-machines-grid{grid-template-columns:1fr!important}.running-machines-page{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important}}
+    .machine-actions-dialog{margin:auto;width:min(28rem,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);overflow:auto}
+    .machine-actions-dialog p{overflow-wrap:anywhere}
+    .machine-actions-dialog .dialog-actions{display:grid;gap:var(--dana-action-gap)}
+    .machine-actions-dialog button{width:100%;text-align:left}
     /* DSF count: a seventh column. Re-share the widths the six-column board sets by position. */
     .running-machines-page.dsf-count-enabled .running-machine-table th:nth-child(1),
     .running-machines-page.dsf-count-enabled .running-machine-table td:nth-child(1){width:12%!important}
@@ -57,9 +44,8 @@ import {
     .running-machines-page.dsf-count-enabled .running-machine-table th.machine-check-col,
     .running-machines-page.dsf-count-enabled .running-machine-table td.machine-check-cell{width:18%!important}
     .running-machines-page.dsf-count-enabled .running-machine-table .dsf-count-cell{white-space:normal!important;text-align:center!important;vertical-align:middle!important}
-    .dsf-count-value{display:block;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2}
-    .dsf-count-state{display:block;font-size:.65rem;line-height:1.2;margin-top:.2rem;white-space:normal;overflow-wrap:anywhere;color:var(--dana-muted)}
-    .dsf-count-warning .dsf-count-state{color:var(--dana-warning);font-weight:700}
+    .dsf-count-value{display:block}
+    .dsf-count-state{display:block;margin-top:var(--dana-space-1);white-space:normal;overflow-wrap:anywhere}
   `],
 })
 export class GreenshedMachinesComponent implements OnInit, OnDestroy {

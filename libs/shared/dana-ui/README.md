@@ -19,3 +19,5 @@ The canonical stylesheet is `libs/shared/dana-ui/src/styles/dana-ui.css`. The or
 Standard tests verify source boundaries, canonical visual contracts, and strict AOT consumer templates against the root Angular compiler. The browser target verifies real Angular controls, table sorting/filtering/cleanup, Escape and focus behavior, native modal behavior, navigation breakpoints, and mobile layouts using Chromium.
 
 `DanaMobileNavDirective` defaults to a desktop minimum width of 1025 pixels. Manufacturing navigation binds `[desktopMinWidth]="1024"` to match its maintained CSS breakpoint. Invalid widths use the default.
+
+Overlay drawers with a separate opener can opt into `[modal]="true"`. On mobile, opening moves focus into the drawer, Tab stays within its visible controls, and closing or Escape restores the opener. Desktop navigation keeps its usual keyboard behavior. Give the host an accessible name and include a visible close button inside the drawer.

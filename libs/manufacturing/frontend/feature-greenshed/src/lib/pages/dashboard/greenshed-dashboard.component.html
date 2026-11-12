@@ -1,9 +1,9 @@
 <div class="gear-page dashboard-page" [class.view-only-dashboard]="!canEdit">
   <section class="gear-page-header dashboard-heading" danaPageHeader eyebrow="GREENSHED / GEAR QUALITY" heading="Dashboard" description="Welcome back. Here’s what’s happening in Greenshed." [dashboard]="true">
-  <button danaPageHeaderAction type="button" class="date-chip refresh-chip" (click)="refresh()" [disabled]="loading" data-icon="refresh" title="Refresh">↻ <span>{{ loading ? 'Refreshing…' : 'Refresh' }}</span></button>
+  <button danaPageHeaderAction type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading" data-icon="refresh"><span>{{ loading ? 'Refreshing…' : 'Refresh' }}</span></button>
 </section>
 
-  <div *ngIf="error" class="dashboard-alert">{{ error }}</div>
+  <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert">{{ error }}</div>
 
   <section danaKpiGrid *ngIf="data as d" class="kpi-grid greenshed-kpis">
     <article danaKpiCard class="kpi-card"><div class="kpi-icon blue"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></div><div><strong>{{ d.counts.running }}</strong><h3>Running Machines</h3><p>Active cutter setups</p></div></article>

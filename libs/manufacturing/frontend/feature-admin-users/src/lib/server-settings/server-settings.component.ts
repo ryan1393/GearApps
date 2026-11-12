@@ -1,4 +1,4 @@
-import { DanaToneDirective } from '@dana/ui';
+import { DanaConfirmDialogComponent, DanaToneDirective } from '@dana/ui';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, OnInit, inject } from '@angular/core';
@@ -53,7 +53,7 @@ const RESTART_CHECKS = 40;
 @Component({
   selector: 'gear-admin-server-settings',
   standalone: true,
-  imports: [DanaToneDirective, CommonModule, FormsModule],
+  imports: [DanaConfirmDialogComponent, DanaToneDirective, CommonModule, FormsModule],
   templateUrl: './server-settings.component.html',
   styleUrls: ['./server-settings.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -65,6 +65,7 @@ export class ServerSettingsComponent implements OnInit {
   private readonly toast = inject(GearToastService);
 
   loading = false; saving = false; restarting = false; error = '';
+  confirmation: 'refresh' | 'discard' | 'restart' | '' = '';
   board: ServerSettingsBoard | null = null;
   search = '';
   selectedGroup = '';
@@ -83,8 +84,40 @@ export class ServerSettingsComponent implements OnInit {
 
   ngOnInit(): void { this.refresh(); }
 
+  requestRefresh(): void {
+    if (this.loading || this.saving || this.restarting) return;
+    if (this.changedCount) this.confirmation = 'refresh';
+    else this.refresh();
+  }
+
+  requestDiscard(): void {
+    if (!this.loading && !this.saving && !this.restarting && this.changedCount) this.confirmation = 'discard';
+  }
+
+  requestRestart(): void {
+    if (!this.loading && !this.saving && !this.restarting && !this.changedCount && this.board?.can_restart) this.confirmation = 'restart';
+  }
+
+  get confirmationTitle(): string {
+    return this.confirmation === 'restart' ? 'Restart the shared API?' : 'Discard unsaved settings?';
+  }
+
+  get confirmationMessage(): string {
+    return this.confirmation === 'restart'
+      ? 'Every MeshForge screen and collector will disconnect for about a minute while the API starts again.'
+      : `${this.changedCount} unsaved change${this.changedCount === 1 ? '' : 's'} will be discarded, including any replacement secrets. Saved settings are unchanged.`;
+  }
+
+  confirmAction(): void {
+    const action = this.confirmation;
+    this.confirmation = '';
+    if (action === 'refresh') this.refresh();
+    else if (action === 'discard') this.discard();
+    else if (action === 'restart') this.restart();
+  }
+
   refresh(): void {
-    if (this.loading || this.restarting) return;
+    if (this.loading || this.saving || this.restarting) return;
     this.loading = true; this.error = ''; this.cdr.markForCheck();
     this.http.get<ServerSettingsBoard>(API).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (board) => { this.loading = false; this.accept(board); },
@@ -143,7 +176,7 @@ export class ServerSettingsComponent implements OnInit {
   }
 
   save(): void {
-    if (this.saving || !this.board?.available) return;
+    if (this.loading || this.saving || this.restarting || !this.board?.available) return;
     const changes = this.allSettings()
       .filter((setting) => this.isChanged(setting))
       .map((setting) => ({ key: setting.key, value: this.resetting.has(setting.key) ? null : String(this.draft[setting.key] ?? '') }));
@@ -162,8 +195,7 @@ export class ServerSettingsComponent implements OnInit {
   }
 
   restart(): void {
-    if (this.restarting || !this.board?.can_restart) return;
-    if (!globalThis.confirm('Restart the API now? Every MeshForge screen and collector is disconnected for about a minute while it starts again.')) return;
+    if (this.loading || this.saving || this.restarting || this.changedCount || !this.board?.can_restart) return;
     this.restarting = true; this.error = ''; this.cdr.markForCheck();
     this.http.post(`${API}/restart`, {}).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => this.waitForRestart(RESTART_CHECKS),

@@ -277,6 +277,7 @@ export class CutterBuildComponent implements OnDestroy {
         error: (err: HttpErrorResponse) => {
           this.busy = false;
           const message = cutterApiErrorText(err, 'Could not create Cutter Build.');
+          this.error = message;
           this.toast.error(message, 'Cutter build failed');
         },
       });

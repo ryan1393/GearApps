@@ -1,7 +1,7 @@
 <section class="coater-rpa" aria-labelledby="coater-rpa-title">
-  <div class="gear-panel coater-rpa-panel coater-rpa-lead">
+  <div class="gear-panel dana-panel-padded coater-rpa-panel coater-rpa-lead">
     <div>
-      <h2 id="coater-rpa-title">Coater RPA</h2>
+      <h2 id="coater-rpa-title" class="dana-panel-title">Coater RPA</h2>
       <p class="gear-muted">The Excel request form sent to the coater, who receives it, the PO and prices, and which form part numbers each Summary uses. Operators prepare a request in Blade Tracking > Coater Shipments.</p>
     </div>
     <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || busy" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : '↻ Refresh' }}</button>
@@ -10,16 +10,16 @@
   <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert"><strong>Unable to continue.</strong><span>{{ error }}</span></div>
 
   <ng-container *ngIf="setup as current">
-    <dl class="gear-panel coater-rpa-panel coater-rpa-status" aria-label="Setup status">
-      <div><dt>Requests</dt><dd><span class="gear-badge" [danaTone]="current.ready ? 'ready' : 'pending'">{{ current.ready ? 'Ready to prepare' : 'Setup not finished' }}</span></dd></div>
-      <div><dt>Excel form</dt><dd><span class="gear-badge" [danaTone]="current.form?.found ? 'ok' : 'pending'">{{ current.form?.found ? 'Loaded' : current.form ? 'Needs replacing' : 'Not uploaded' }}</span></dd></div>
-      <div><dt>Settings</dt><dd><span class="gear-badge" [danaTone]="current.settings ? 'ok' : 'pending'">{{ current.settings ? 'Saved' : 'Not saved' }}</span></dd></div>
-      <div><dt>Part mappings</dt><dd><span class="gear-badge" [danaTone]="current.part_map.length ? 'ok' : 'pending'">{{ current.part_map.length || 'None' }}</span></dd></div>
-      <div><dt>Email</dt><dd><span class="gear-badge" [danaTone]="current.email_enabled ? 'on' : 'not set'">{{ current.email_enabled ? 'On' : 'Off: download only' }}</span></dd></div>
+    <dl class="gear-panel dana-panel-padded coater-rpa-panel coater-rpa-status" aria-label="Setup status">
+      <div><dt class="dana-detail-label">Requests</dt><dd class="dana-detail-value"><span class="gear-badge" [danaTone]="current.ready ? 'ready' : 'pending'">{{ current.ready ? 'Ready to prepare' : 'Setup not finished' }}</span></dd></div>
+      <div><dt class="dana-detail-label">Excel form</dt><dd class="dana-detail-value"><span class="gear-badge" [danaTone]="current.form?.found ? 'ok' : 'pending'">{{ current.form?.found ? 'Loaded' : current.form ? 'Needs replacing' : 'Not uploaded' }}</span></dd></div>
+      <div><dt class="dana-detail-label">Settings</dt><dd class="dana-detail-value"><span class="gear-badge" [danaTone]="current.settings ? 'ok' : 'pending'">{{ current.settings ? 'Saved' : 'Not saved' }}</span></dd></div>
+      <div><dt class="dana-detail-label">Part mappings</dt><dd class="dana-detail-value"><span class="gear-badge" [danaTone]="current.part_map.length ? 'ok' : 'pending'">{{ current.part_map.length || 'None' }}</span></dd></div>
+      <div><dt class="dana-detail-label">Email</dt><dd class="dana-detail-value"><span class="gear-badge" [danaTone]="current.email_enabled ? 'on' : 'not set'">{{ current.email_enabled ? 'On' : 'Off: download only' }}</span></dd></div>
     </dl>
 
     <!-- 1. The form -->
-    <div class="gear-panel coater-rpa-panel">
+    <div class="gear-panel dana-panel-padded coater-rpa-panel">
       <div class="gear-step-title"><span class="gear-step-number">1</span><span>Excel form</span></div>
       <ng-container *ngIf="current.form as form; else noForm">
         <p><strong>{{ form.file_name }}</strong> · {{ sizeText(form.size) }} ·
@@ -31,7 +31,7 @@
       </ng-container>
       <ng-template #noForm><p class="gear-muted">No form yet. Upload the RPA request workbook (.xlsx, up to 2 MB). It is checked before it is saved.</p></ng-template>
       <input #fileInput type="file" class="coater-rpa-file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" (change)="upload($event)" aria-label="RPA Excel form" />
-      <div class="gear-admin-form-actions">
+      <div class="dana-actions">
         <button type="button" class="gear-btn gear-btn-primary" (click)="chooseFile()" [disabled]="busy">{{ current.form ? 'Replace Form' : 'Upload Form' }}</button>
         <button *ngIf="current.form" type="button" class="gear-btn gear-btn-secondary" (click)="download()" [disabled]="busy">Download Current Form</button>
       </div>
@@ -39,7 +39,7 @@
     </div>
 
     <!-- 2. Settings -->
-    <form class="gear-panel coater-rpa-panel" (ngSubmit)="saveSettings()" aria-label="RPA settings">
+    <form class="gear-panel dana-panel-padded coater-rpa-panel" (ngSubmit)="saveSettings()" aria-label="RPA settings">
       <div class="gear-step-title"><span class="gear-step-number">2</span><span>Request settings</span></div>
       <div *ngIf="settingsSuggested" class="gear-alert gear-alert-warning" role="status"><strong>Not saved yet.</strong><span>These values were read from the form. Check them, add the recipients, then save.</span></div>
       <div class="gear-form-grid">
@@ -73,13 +73,13 @@
           <small class="gear-field-help">When off or expired, the operator enters the PO for each request.</small>
         </label>
       </div>
-      <div class="gear-admin-form-actions">
+      <div class="dana-actions">
         <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy">{{ busy ? 'Saving…' : 'Save Settings' }}</button>
       </div>
     </form>
 
     <!-- 3. Part mappings -->
-    <div class="gear-panel coater-rpa-panel">
+    <div class="gear-panel dana-panel-padded coater-rpa-panel">
       <div class="gear-step-title"><span class="gear-step-number">3</span><span>Part mappings</span></div>
       <p class="gear-muted">Each Summary and part type sent to the coater needs the outer and inner blade part number it uses on the form.</p>
 

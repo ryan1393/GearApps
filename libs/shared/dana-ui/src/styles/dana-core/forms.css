@@ -69,3 +69,11 @@
   border-radius: var(--dana-radius-field);
   background: #fff;
 }
+
+.dana-field :is(input,select,textarea):focus-visible,
+.dana-input:focus-visible,
+.dana-select:focus-visible,
+.dana-textarea:focus-visible {
+  outline: 2px solid var(--dana-primary);
+  outline-offset: 2px;
+}

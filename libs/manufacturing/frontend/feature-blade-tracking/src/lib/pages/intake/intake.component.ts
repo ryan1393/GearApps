@@ -15,7 +15,14 @@ import { StationOperation } from '../operations-station/operations-station.opera
 import { DanaPageHeaderComponent } from '@dana/ui';
 
 @Component({ selector:'gear-blade-intake', standalone:true,
-  imports:[DanaPageHeaderComponent, CommonModule,FormsModule,RouterLink,ScanPanelComponent,StationStatusComponent,OptionPickerComponent,CountStepperComponent], templateUrl:'./intake.component.html' })
+  imports:[DanaPageHeaderComponent, CommonModule,FormsModule,RouterLink,ScanPanelComponent,StationStatusComponent,OptionPickerComponent,CountStepperComponent], templateUrl:'./intake.component.html',
+  styles: [`
+    #intake-batch { container-type: inline-size; }
+    .intake-form-fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--dana-form-gap); }
+    @container (min-width: 520px) {
+      .intake-form-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  `] })
 export class IntakeComponent implements OnInit, OnDestroy, StationOperation {
   private readonly api=inject(BladeTrackingApiService);
   private readonly toast=inject(GearToastService);

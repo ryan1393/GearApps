@@ -1,7 +1,8 @@
 @if (!isLoginRoute) {
+  <a gearSkipLink class="dana-skip-link" href="#main-content">Skip to main content</a>
   <gear-cutter-builder-nav />
 }
-<div class="app-content-shell" [class.login-shell]="isLoginRoute">
+<div class="app-content-shell" id="main-content" tabindex="-1" [attr.role]="isLoginRoute ? null : 'main'" [class.login-shell]="isLoginRoute">
   <router-outlet />
 </div>
 <gear-toast-host />

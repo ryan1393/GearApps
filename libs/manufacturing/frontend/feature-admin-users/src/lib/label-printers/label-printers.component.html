@@ -1,8 +1,8 @@
 <section class="label-printers" aria-labelledby="label-printers-title">
-  <div class="gear-panel p-5 label-printers-lead">
+  <div class="gear-panel dana-panel-padded label-printers-lead">
     <div>
-      <h2 id="label-printers-title" class="text-xl font-black">Label Printers</h2>
-      <p class="text-sm text-slate-600">Add each label printer by its network address and the language it speaks. The default printer is used by every Print button; a workstation next to its own printer can choose it on the print screen.</p>
+      <h2 id="label-printers-title" class="dana-panel-title">Label Printers</h2>
+      <p class="dana-field-hint">Add each label printer by its network address and the language it speaks. The default printer is used by every Print button; a workstation next to its own printer can choose it on the print screen.</p>
     </div>
     <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || saving" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : '↻ Refresh' }}</button>
   </div>
@@ -11,13 +11,13 @@
   <div *ngIf="board && !board.available" class="gear-alert gear-alert-warning" role="status"><strong>Printers cannot be saved.</strong><span>The printer table could not be created in the database. Check the API log, then restart the API.</span></div>
 
   <ng-container *ngIf="board as current">
-    <dl class="gear-panel p-5 label-printers-defaults" aria-label="Default printers">
-      <div><dt>Tags print to</dt><dd>{{ defaultSummary('ASSET_TAG') }}</dd></div>
-      <div><dt>Cutter cards print to</dt><dd>{{ defaultSummary('CUTTER_CARD') }}</dd></div>
+    <dl class="gear-panel dana-panel-padded label-printers-defaults" aria-label="Default printers">
+      <div><dt class="dana-detail-label">Tags print to</dt><dd class="dana-detail-value">{{ defaultSummary('ASSET_TAG') }}</dd></div>
+      <div><dt class="dana-detail-label">Cutter cards print to</dt><dd class="dana-detail-value">{{ defaultSummary('CUTTER_CARD') }}</dd></div>
     </dl>
 
-    <form class="gear-panel p-5 label-printers-form" (ngSubmit)="save()" aria-label="Printer details">
-      <h3 class="text-lg font-black">{{ editingId ? 'Edit printer' : 'Add a printer' }}</h3>
+    <form class="gear-panel dana-panel-padded label-printers-form" (ngSubmit)="save()" aria-label="Printer details">
+      <h3 class="dana-panel-title">{{ editingId ? 'Edit printer' : 'Add a printer' }}</h3>
       <div class="label-printers-fields">
         <label class="gear-field">Name
           <input #nameInput class="gear-input" name="printerName" [(ngModel)]="form.name" maxlength="60" placeholder="Cutter Grind Zebra" autocomplete="off" required />
@@ -48,30 +48,30 @@
         <label class="gear-field">Move down (dots)
           <input class="gear-input mono" name="printerOffsetDown" type="number" min="-100" max="100" step="1" [(ngModel)]="form.offset_down" />
         </label>
-        <p class="label-printers-help">Only if the label does not sit squarely on the stock. 8 dots are about 1 mm; use a negative number to move left or up. Save, then Print Test Tag to check.</p>
+        <p class="label-printers-help dana-field-hint">Only if the label does not sit squarely on the stock. 8 dots are about 1 mm; use a negative number to move left or up. Save, then Print Test Tag to check.</p>
       </div>
       <div class="label-printers-checks">
         <label><input type="checkbox" name="printerDefault" [(ngModel)]="form.is_default" [disabled]="!form.enabled" /> Default printer for {{ typeName(form.label_type).toLowerCase() }}</label>
         <label><input type="checkbox" name="printerEnabled" [(ngModel)]="form.enabled" /> Available for printing</label>
       </div>
-      <p class="label-printers-help">The printer must be on the network with raw printing on (port 9100 on most printers), and reachable from the MeshForge server. A printer plugged into one PC by USB cannot be used. The first printer added for a label becomes its default.</p>
+      <p class="label-printers-help dana-field-hint">The printer must be on the network with raw printing on (port 9100 on most printers), and reachable from the MeshForge server. A printer plugged into one PC by USB cannot be used. The first printer added for a label becomes its default.</p>
       <div class="gear-admin-actions">
         <button type="submit" class="gear-btn gear-btn-primary" [disabled]="saving || !current.available">{{ saving ? 'Saving…' : editingId ? 'Save Changes' : 'Add Printer' }}</button>
         <button type="button" class="gear-btn gear-btn-secondary" *ngIf="editingId" (click)="cancelEdit()" [disabled]="saving">Cancel</button>
       </div>
     </form>
 
-    <div class="gear-panel p-5">
-      <h3 class="text-lg font-black">Printers</h3>
+    <div class="gear-panel dana-panel-padded">
+      <h3 class="dana-panel-title">Printers</h3>
       <div danaTableShell class="table-wrap">
         <table danaTable class="gear-table">
           <thead><tr><th>Printer</th><th>Address</th><th>Status</th><th data-dana-table-static>Actions</th></tr></thead>
           <tbody>
-            <tr *ngFor="let printer of printers" [class.label-printers-editing]="printer.id === editingId">
+            <tr *ngFor="let printer of printers" [class.dana-highlight]="printer.id === editingId">
               <td><strong>{{ printer.name }}</strong>
-                <small class="label-printers-sub label-printers-kind">{{ typeName(printer.label_type) }} · {{ languageName(printer.language) }}</small>
-                <small class="label-printers-sub label-printers-kind" *ngIf="adjustmentText(printer) as moved">{{ moved }}</small>
-                <small class="label-printers-sub" *ngIf="tests[printer.id] as test" [class.label-printers-ok]="test.ok" [class.label-printers-problem]="!test.ok" role="status">{{ test.ok ? '✓' : '!' }} {{ test.text }}</small>
+                <small class="label-printers-sub dana-field-hint">{{ typeName(printer.label_type) }} · {{ languageName(printer.language) }}</small>
+                <small class="label-printers-sub dana-field-hint" *ngIf="adjustmentText(printer) as moved">{{ moved }}</small>
+                <small class="label-printers-sub" *ngIf="tests[printer.id] as test" [class.dana-text-success]="test.ok" [class.dana-text-warning]="!test.ok" role="status">{{ test.ok ? '✓' : '!' }} {{ test.text }}</small>
               </td>
               <td class="mono">{{ printer.host }}:{{ printer.port }}</td>
               <td>

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, isDevMode } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ElementRef, inject, isDevMode } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormControl,
   FormGroup,
@@ -27,6 +28,8 @@ type LoginFormType = Record<keyof IUserLogin, FormControl<string>>;
 export class FrontendFeatureLoginComponent {
   private readonly session = inject(AuthSessionService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly destroyRef = inject(DestroyRef);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
 
@@ -42,6 +45,8 @@ export class FrontendFeatureLoginComponent {
   badgeUid = '';
   loginError = '';
   submitting = false;
+  signInMethod: 'password' | 'badge' = 'password';
+  readonly minPasswordLength = PASSWORD_MIN_LENGTH;
 
   loginForm = new FormGroup<LoginFormType>({
     email: new FormControl<string>('', {
@@ -73,9 +78,11 @@ export class FrontendFeatureLoginComponent {
 
     if (this.loginForm.valid) {
       this.submitting = true;
+      this.signInMethod = 'password';
       this.cdr.markForCheck();
       this.session
         .login({ ...this.loginForm.getRawValue() })
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
             this.submitting = false;
@@ -101,6 +108,7 @@ export class FrontendFeatureLoginComponent {
     } else {
       this.loginForm.markAllAsTouched();
       this.loginError = 'Enter a valid email address and password.';
+      this.focus(this.fEmail.invalid ? '#email' : '#password');
     }
   }
 
@@ -109,9 +117,15 @@ export class FrontendFeatureLoginComponent {
     const uid = this.badgeUid;
     this.badgeUid = '';
     this.loginError = '';
-    if (!/^[!-~]{1,128}$/.test(uid)) { this.loginError = 'Scan a card UID, then press Enter.'; return; }
+    if (!/^[!-~]{1,128}$/.test(uid)) {
+      this.loginError = 'Scan a card UID, then press Enter.';
+      this.focus('#badge-uid');
+      return;
+    }
     this.submitting = true;
-    this.session.loginBadge(uid).subscribe({
+    this.signInMethod = 'badge';
+    this.cdr.markForCheck();
+    this.session.loginBadge(uid).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.submitting = false;
         const redirect = this.route.snapshot.queryParamMap.get(REDIRECT_URL_QUERY_PARAM);
@@ -121,8 +135,14 @@ export class FrontendFeatureLoginComponent {
         this.submitting = false;
         this.loginError = typeof error.error?.message === 'string' ? error.error.message : 'Badge sign-in failed. Use your email and password.';
         this.cdr.markForCheck();
+        this.focus('#badge-uid');
       },
     });
+  }
+
+  private focus(selector: string): void {
+    this.cdr.detectChanges();
+    this.element.nativeElement.querySelector<HTMLInputElement>(selector)?.focus();
   }
 
   useLocalAdminLogin(): void {

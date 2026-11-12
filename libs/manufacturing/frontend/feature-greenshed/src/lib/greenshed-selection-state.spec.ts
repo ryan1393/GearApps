@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
-import { BehaviorSubject, of, Subject } from 'rxjs';
+import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 import { GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 import {
   GreenshedApiService,
@@ -11,6 +11,7 @@ import { GreenshedMachinesComponent } from './pages/machines/greenshed-machines.
 import { GreenshedPullComponent } from './pages/pull/greenshed-pull.component';
 import { GreenshedCheckComponent } from './pages/check/greenshed-check.component';
 import { GreenshedSetupComponent } from './pages/setup/greenshed-setup.component';
+import { GreenshedLookupComponent } from './pages/lookup/greenshed-lookup.component';
 
 const build = (
   number = 'BUILD-A',
@@ -61,11 +62,13 @@ describe('Greenshed selected context safety', () => {
   function setup(params: Record<string, string> = {}) {
     query = new BehaviorSubject(convertToParamMap(params));
     api = {
-      getDashboard: jest.fn(() => of({ active_machines: [] })),
+      getDashboard: jest.fn(() => of({ active_machines: [], available_cutters: [] })),
       getReferenceData: jest.fn(() =>
         of({ pull_reasons: reasons, check_types: [], check_results: [] }),
       ),
       getBuild: jest.fn(() => of(build())),
+      getHistory: jest.fn(() => of([])),
+      searchBuilds: jest.fn(() => of([])),
       scanLocation: jest.fn(),
       pullCutter: jest.fn(() => of({ status_code: 'PULLED' })),
       qualityCheck: jest.fn(() => of({})),
@@ -244,6 +247,32 @@ describe('Greenshed selected context safety', () => {
     c.setup();
     expect(api['setupCutter']).not.toHaveBeenCalled();
     expect(c.error).toContain('whole');
+  });
+  it('rejects starting counts beyond the supported database range before invoking setup', () => {
+    setup(); const c = TestBed.runInInjectionContext(() => new GreenshedSetupComponent());
+    c.build = { ...build(), status_code: 'READY' }; c.machine = { machine_number: 'M1' } as never; c.part = { part_number: 'P1' } as never;
+    c.startingPieceCount = 2147483648; c.setup();
+    expect(api['setupCutter']).not.toHaveBeenCalled(); expect(c.error).toContain('2,147,483,647');
+  });
+  it('preserves setup failures inline and keeps the selected context for retry', () => {
+    setup(); const c = TestBed.runInInjectionContext(() => new GreenshedSetupComponent());
+    c.build = { ...build(), status_code: 'READY' }; c.machine = { machine_number: 'M1' } as never; c.part = { part_number: 'P1' } as never;
+    api['setupCutter'].mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409, error: { message: 'The machine now has a cutter.' } })));
+    c.setup(); expect(c.error).toBe('The machine now has a cutter.'); expect(c.busy).toBe(false);
+    expect(c.build.build_number).toBe('BUILD-A'); expect(c.machine).toEqual({ machine_number: 'M1' }); expect(c.part).toEqual({ part_number: 'P1' });
+  });
+  it('clears previous cutter details immediately and leaves them cleared if a replacement lookup fails', () => {
+    setup(); const c = TestBed.runInInjectionContext(() => new GreenshedLookupComponent());
+    c.build = build(); const pending = new Subject<never>(); api['getBuild'].mockReturnValue(pending);
+    c.open('MISSING'); expect(c.build).toBeNull(); expect(c.busy).toBe(true);
+    pending.error(new HttpErrorResponse({ status: 404 }));
+    expect(c.build).toBeNull(); expect(c.busy).toBe(false); expect(c.error).toBe('Build not found.');
+  });
+  it('distinguishes unavailable cutter history from an empty successful history response', () => {
+    setup(); const c = TestBed.runInInjectionContext(() => new GreenshedLookupComponent());
+    api['getHistory'].mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 503 })));
+    c.open('BUILD-A'); expect(c.build?.build_number).toBe('BUILD-A'); expect(c.historyFailed).toBe(true);
+    c.open('BUILD-A'); expect(c.historyFailed).toBe(false); expect(c.history).toEqual([]); expect(c.error).toBe('');
   });
   it('preserves machine/run preconditions in Running Machines pull navigation', () => {
     setup(); const c = TestBed.runInInjectionContext(() => new GreenshedMachinesComponent());

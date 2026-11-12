@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
-import { canEditMeshForgeApp, MESHFORGE_VERSION } from '@meshforge/manufacturing/shared/util-constants';
+import { canEditMeshForgeApp, canUseMeshForgeAction, MESHFORGE_VERSION } from '@meshforge/manufacturing/shared/util-constants';
 import { getDanaAppUrl } from '@meshforge/manufacturing/shared/dana-app-config';
 import { IJwtPayload } from '@meshforge/manufacturing/shared/util-types';
 import { DanaMobileNavDirective } from '@dana/ui';
@@ -49,6 +49,10 @@ export class GreenshedNavComponent {
       user.departmentCode,
       user.permissions,
     );
+  }
+
+  canReadRequests(user: IJwtPayload): boolean {
+    return canUseMeshForgeAction(user, 'cutter-builder:listCutterRequests');
   }
 
   logout(): void {

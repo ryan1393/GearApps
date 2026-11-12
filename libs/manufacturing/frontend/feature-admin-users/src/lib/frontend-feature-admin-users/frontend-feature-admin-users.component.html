@@ -1,15 +1,24 @@
 <section class="gear-page gear-admin-page" [class.gear-roll-master-page]="activeTab === 'roll-masters'">
   <header class="gear-page-header" danaPageHeader eyebrow="ADMIN / MASTER DATA" heading="MeshForge Administration" description="Create the reference records that drive Blade Tracking, Cutter Builder, Greenshed, and Lapping. Changes here are shared across every MeshForge frontend."></header>
 
-  <div *ngIf="error" class="gear-alert gear-alert-danger mb-4">
+  <div *ngIf="error" class="gear-alert gear-alert-danger mb-4" role="alert">
     <strong>Unable to continue.</strong>
     <span>{{ error }}</span>
   </div>
-  <div *ngIf="message" class="gear-alert gear-alert-success mb-4">
+  <div *ngIf="message" class="gear-alert gear-alert-success mb-4" role="status">
     <strong>Saved.</strong>
     <span>{{ message }}</span>
   </div>
 
+  <label class="gear-field gear-admin-mobile-section" for="admin-section">Administration section
+    <select id="admin-section" class="gear-select" [ngModel]="activeTab" (ngModelChange)="openTabByName($event)" [disabled]="busy">
+      <optgroup label="People"><option value="users">Users</option></optgroup>
+      <optgroup label="Product"><option value="part-summaries">Part Summaries</option><option value="parts">Parts</option><option value="gearsets">Gearsets</option><option value="roll-masters">Roll Master</option><option value="models">Models</option></optgroup>
+      <optgroup label="Equipment"><option value="cycle-tests">Cycle Test Lab</option><option value="machines">Machines</option><option value="lapping-machines">Lapping Machines</option><option value="scanners">Scanners</option><option value="macros">Macros</option><option value="fanuc-variables">Fanuc Variables</option><option value="collector-tokens">Collector Tokens</option></optgroup>
+      <optgroup label="Inventory"><option value="trays">Trays</option><option value="containers">Containers</option><option value="locations">Locations</option><option value="cutter-bodies">Cutter Bodies</option></optgroup>
+      <optgroup label="System"><option value="access">Roles &amp; Badges</option><option value="launch">Launch Setup</option><option value="dsf-mappings">DSF Mappings</option><option value="label-printers">Label Printers</option><option value="coater-rpa">Coater RPA</option><option value="server-settings">Server Settings</option></optgroup>
+    </select>
+  </label>
   <nav class="gear-admin-sections" aria-label="Administration sections">
     <section class="gear-admin-section"><h2>People</h2><div class="gear-admin-tabs"><button type="button" [attr.aria-current]="activeTab === 'users' ? 'page' : null" [class.active]="activeTab === 'users'" (click)="setTab('users')">Users</button></div></section>
     <section class="gear-admin-section"><h2>Product</h2><div class="gear-admin-tabs"><button type="button" [attr.aria-current]="activeTab === 'part-summaries' ? 'page' : null" [class.active]="activeTab === 'part-summaries'" (click)="setTab('part-summaries')">Part Summaries</button><button type="button" [attr.aria-current]="activeTab === 'parts' ? 'page' : null" [class.active]="activeTab === 'parts'" (click)="setTab('parts')">Parts</button><button type="button" [attr.aria-current]="activeTab === 'gearsets' ? 'page' : null" [class.active]="activeTab === 'gearsets'" (click)="setTab('gearsets')">Gearsets</button><button type="button" [attr.aria-current]="activeTab === 'roll-masters' ? 'page' : null" [class.active]="activeTab === 'roll-masters'" (click)="setTab('roll-masters')">Roll Master</button><button type="button" [attr.aria-current]="activeTab === 'models' ? 'page' : null" [class.active]="activeTab === 'models'" (click)="setTab('models')">Models</button></div></section>
@@ -34,28 +43,28 @@
   <gear-label-printer-picker *ngIf="activeTab === 'trays' || activeTab === 'containers' || activeTab === 'locations'" labelType="ASSET_TAG" label="Print tags to" />
 
   <div class="gear-admin-layout" *ngIf="activeTab === 'users'">
-    <form class="gear-panel gear-admin-form" (ngSubmit)="createUser()">
+    <form class="gear-panel gear-admin-form" #userEditor="ngForm" (ngSubmit)="createUser()" [attr.aria-busy]="busy">
       <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingUserId ? 'Edit User' : 'Create User' }}</span></div>
-      <label class="gear-field">Email<input class="gear-input" type="email" [(ngModel)]="userForm.email" name="userEmail" autocomplete="off" /></label>
-      <label *ngIf="!editingUserId" class="gear-field">Temporary Password<input class="gear-input" type="password" [(ngModel)]="userForm.password" name="userPassword" autocomplete="new-password" /></label>
+      <label class="gear-field">Email{{ editingUserId ? '' : ' (required)' }}<input id="admin-user-email" class="gear-input" type="email" email [(ngModel)]="userForm.email" #userEmail="ngModel" name="userEmail" autocomplete="off" [required]="!editingUserId" [disabled]="busy" [attr.aria-invalid]="userEmail.invalid && (userEmail.touched || userEditor.submitted)" aria-describedby="admin-user-email-error" /><small id="admin-user-email-error" *ngIf="userEmail.invalid && (userEmail.touched || userEditor.submitted)" class="gear-field-help">Enter a valid email address.</small></label>
+      <label *ngIf="!editingUserId" class="gear-field">Temporary Password (required)<input id="admin-user-password" class="gear-input" type="password" [(ngModel)]="userForm.password" #userPassword="ngModel" name="userPassword" autocomplete="new-password" required [minlength]="minPasswordLength" maxlength="128" [disabled]="busy" [attr.aria-invalid]="userPassword.invalid && (userPassword.touched || userEditor.submitted)" aria-describedby="admin-user-password-help" /><small id="admin-user-password-help" class="gear-field-help">Use at least {{ minPasswordLength }} characters with uppercase and lowercase letters, a number, and a symbol.</small></label>
       <div class="gear-form-grid">
-        <label class="gear-field">First Name<input class="gear-input" [(ngModel)]="userForm.firstName" name="userFirstName" /></label>
-        <label class="gear-field">Last Name<input class="gear-input" [(ngModel)]="userForm.lastName" name="userLastName" /></label>
+        <label class="gear-field">First Name<input class="gear-input" [(ngModel)]="userForm.firstName" name="userFirstName" [disabled]="busy" /></label>
+        <label class="gear-field">Last Name<input class="gear-input" [(ngModel)]="userForm.lastName" name="userLastName" [disabled]="busy" /></label>
       </div>
-      <label class="gear-field">Department
-        <select class="gear-select" [(ngModel)]="userForm.departmentId" name="userDepartment">
+      <label class="gear-field">Department (required)
+        <select id="admin-user-department" class="gear-select" [(ngModel)]="userForm.departmentId" #userDepartment="ngModel" name="userDepartment" required [disabled]="busy" [attr.aria-invalid]="userDepartment.invalid && (userDepartment.touched || userEditor.submitted)" aria-describedby="admin-user-department-help">
           <option value="">Select department...</option>
           <option *ngFor="let department of departments" [value]="department.id">
             {{ department.code }} — {{ department.description }}
           </option>
         </select>
-        <small class="gear-field-help">
-          Cutter Grind edits Blade Tracking + Cutter Builder. Gear Quality edits Greenshed.
-          Other departments are dashboard-only unless the account is an Admin.
+        <small id="admin-user-department-help" class="gear-field-help">
+          Department controls physical operations: Cutter Grind uses Blade Tracking and Cutter Builder; Gear Quality uses Greenshed.
+          Cutter Requests is shared across departments. Assigned custom roles can further limit screen actions; administrators retain administrator access.
         </small>
       </label>
       <label class="gear-field">Role
-        <select class="gear-select" [(ngModel)]="userForm.role" name="userRole">
+        <select class="gear-select" [(ngModel)]="userForm.role" name="userRole" [disabled]="busy">
           <option value="user">User</option>
           <option value="admin">Admin</option>
         </select>
@@ -77,6 +86,7 @@
           type="search"
           [(ngModel)]="userSearch"
           name="adminUserSearch"
+          aria-label="Search users by name, email, department or role"
           placeholder="Search name, email, department, role..."
           autocomplete="off"
         />
@@ -98,8 +108,8 @@
             </div>
           </div>
           <div class="gear-admin-actions gear-admin-record-actions">
-            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditUser(user)" data-icon="edit" title="Edit">Edit</button>
-            <button *ngIf="!isSelf(user.id)" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleUserEnabled(user)">{{ user.active ? 'Disable' : 'Enable' }}</button>
+            <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditUser(user)" data-icon="edit" [attr.aria-label]="'Edit ' + (user.fullName || user.email || 'user')" title="Edit">Edit</button>
+            <button *ngIf="!isSelf(user.id)" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="requestUserEnabled(user)" [attr.aria-label]="(user.active ? 'Disable ' : 'Enable ') + (user.fullName || user.email || 'user')">{{ user.active ? 'Disable' : 'Enable' }}</button>
             <span *ngIf="isSelf(user.id)" class="gear-badge" data-tone="info">You</span>
           </div>
         </div>
@@ -179,6 +189,7 @@
           type="search"
           [(ngModel)]="partSummarySearch"
           name="adminPartSummarySearch"
+          aria-label="Search Part Summaries"
           placeholder="Search Summary, revision, model, HOS..."
           autocomplete="off"
         />
@@ -297,6 +308,7 @@
           type="search"
           [(ngModel)]="partSearch"
           name="adminPartSearch"
+          aria-label="Search parts"
           placeholder="Search part number, Summary, type, teeth..."
           autocomplete="off"
         />
@@ -349,7 +361,7 @@
           <h2>Roll Master Quantity by Part</h2>
           <small>Current quantity and minimum warning level are stored for each individual part.</small>
         </div>
-        <input class="gear-input gear-admin-search-input" type="search" [(ngModel)]="rollMasterSearch" name="adminRollMasterSearch" placeholder="Search part, Summary, type, quantity..." autocomplete="off" />
+        <input class="gear-input gear-admin-search-input" type="search" [(ngModel)]="rollMasterSearch" name="adminRollMasterSearch" aria-label="Search Roll Master parts" placeholder="Search part, Summary, type, quantity..." autocomplete="off" />
       </div>
       <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="roll-master-v1" *ngFor="let part of filteredRollMasterParts">
         <div class="gear-admin-record-card-body">
@@ -394,6 +406,7 @@
           type="search"
           [(ngModel)]="modelSearch"
           name="adminModelSearch"
+          aria-label="Search models"
           placeholder="Search model number or type..."
           autocomplete="off"
         />
@@ -459,6 +472,7 @@
           type="search"
           [(ngModel)]="machineSearch"
           name="adminMachineSearch"
+          aria-label="Search machines"
           placeholder="Search machine, department, cell, description..."
           autocomplete="off"
         />
@@ -534,6 +548,7 @@
           type="search"
           [(ngModel)]="traySearch"
           name="adminTraySearch"
+          aria-label="Search trays"
           placeholder="Search tray serial, stage, location, container..."
           autocomplete="off"
         />
@@ -627,6 +642,7 @@
           type="search"
           [(ngModel)]="containerSearch"
           name="adminContainerSearch"
+          aria-label="Search containers"
           placeholder="Search container serial or counts..."
           autocomplete="off"
         />
@@ -814,6 +830,7 @@
           type="search"
           [(ngModel)]="locationSearch"
           name="adminLocationSearch"
+          aria-label="Search locations"
           placeholder="Search locations..."
           autocomplete="off"
         />
@@ -919,6 +936,7 @@
           type="search"
           [(ngModel)]="cutterBodySearch"
           name="adminCutterBodySearch"
+          aria-label="Search cutter bodies"
           placeholder="Search Dana serial, MF serial, description..."
           autocomplete="off"
         />
@@ -982,6 +1000,7 @@
                 class="gear-input"
                 [(ngModel)]="danaAssignments[body.id]"
                 [name]="'dana-' + body.id"
+                [attr.aria-label]="'Etched Dana serial for ' + (body.mf_serial_number || 'cutter body')"
                 placeholder="Enter etched Dana S/N"
                 [disabled]="busy"
               />
@@ -999,4 +1018,5 @@
       </div>
     </div>
   </div>
+  <dana-confirm-dialog [open]="!!userToDisable" title="Disable this account?" [message]="'Disable ' + (userToDisable?.email || userToDisable?.fullName || 'this account') + '? The user will be signed out and cannot sign in until the account is enabled again.'" confirmLabel="Disable account" [danger]="true" (confirm)="confirmDisableUser()" (cancel)="userToDisable = null" />
 </section>

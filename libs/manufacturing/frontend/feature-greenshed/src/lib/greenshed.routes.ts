@@ -11,6 +11,7 @@ import { GreenshedMachinesComponent } from './pages/machines/greenshed-machines.
 export const frontendFeatureGreenshedRoutes: Route[] = [
   { path: 'cancel-last', canActivate: [departmentEditorGuard('GREENSHED')], component: WorkflowCancellationComponent, data: { cancellationApp: 'greenshed' } },
   { path:'', pathMatch:'full', component:GreenshedDashboardComponent },
+  { path: 'cutter-requests', loadComponent: () => import('@meshforge/manufacturing/frontend/feature-cutter-builder').then(module => module.CutterRequestsComponent) },
   { path:'machines', canActivate:[departmentEditorGuard('GREENSHED')], component:GreenshedMachinesComponent },
   { path:'setup', canActivate:[departmentEditorGuard('GREENSHED')], component:GreenshedSetupComponent },
   { path:'check', canActivate:[departmentEditorGuard('GREENSHED')], component:GreenshedCheckComponent },

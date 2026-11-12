@@ -85,5 +85,6 @@ opening-inventory records and audit history are retained for inspection. Partial
 browser checks simulate one concurrent HTTP failure while other rows use the live API.
 
 The shared theme selector remembers Light, Dark or System per browser origin. Different
-application ports have separate browser storage. Demand planning, cutter requests and
-reference-photo matching are deferred at the user's request.
+application ports have separate browser storage. Cutter Requests is restored as
+documented in [Cuttergrind Needs / Cutter Requests](CUTTER_REQUESTS.md). Demand planning
+and reference-photo matching remain deferred at the user's request.

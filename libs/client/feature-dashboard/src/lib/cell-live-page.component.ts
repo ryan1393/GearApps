@@ -2,14 +2,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   input,
   OnInit,
   signal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { DanaPageHeaderComponent } from '@dana/ui';
-import { loadable, MachinesApi } from '@meshforge/client/core';
+import { apiErrorMessage, loadable, MachinesApi } from '@meshforge/client/core';
 import { EmptyStateComponent } from '@meshforge/client/ui';
 import { Machine } from '@meshforge/shared/domain';
 import { groupByCell } from './cells';
@@ -20,7 +22,7 @@ import { MachineLiveCardComponent } from './machine-live-card.component';
   imports: [RouterLink, DanaPageHeaderComponent, EmptyStateComponent, MachineLiveCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="gear-page gear-workflow-page">
+    <div class="gear-page dana-page-stack gear-workflow-page">
       <section
         danaPageHeader
         eyebrow="LAPPER · LIVE VIEW"
@@ -51,7 +53,15 @@ import { MachineLiveCardComponent } from './machine-live-card.component';
         </div>
       </section>
 
-      @if (!all.loading() && !machines().length) {
+      @if (all.error()) {
+        <div class="gear-alert gear-alert-danger" role="alert">
+          {{ errorMessage() }}
+          <button type="button" class="gear-btn gear-btn-secondary" (click)="reload()" [disabled]="all.loading()">Retry loading machines</button>
+        </div>
+      }
+      @if (all.loading() && !machines().length) {
+        <p class="gear-muted" role="status">Loading machines in cell {{ cell() }}…</p>
+      } @else if (!all.error() && !machines().length) {
         <section class="gear-workflow-section">
           <div class="gear-workflow-section-body">
             <gear-empty-state [title]="'No machines in cell ' + cell()">
@@ -72,19 +82,22 @@ import { MachineLiveCardComponent } from './machine-live-card.component';
     .gear-live-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr));
-      gap: 14px;
+      gap: var(--dana-section-gap);
     }
     .gear-rates {
       display: inline-flex;
-      gap: 4px;
+      flex-wrap: wrap;
+      gap: var(--dana-space-1);
     }
   `,
 })
 export class CellLivePageComponent implements OnInit {
   private readonly api = inject(MachinesApi);
+  private readonly destroy = inject(DestroyRef);
   readonly cell = input.required<string>();
 
   protected readonly all = loadable<Machine[]>([]);
+  protected readonly errorMessage = computed(() => this.all.error() ? apiErrorMessage(this.all.error()) : '');
   protected readonly machines = computed(
     () => groupByCell(this.all.value()).find((c) => c.id === this.cell())?.machines ?? [],
   );
@@ -96,6 +109,9 @@ export class CellLivePageComponent implements OnInit {
   ];
 
   ngOnInit() {
-    this.all.load(this.api.list());
+    this.reload();
+  }
+  protected reload(): void {
+    this.all.load(this.api.list().pipe(takeUntilDestroyed(this.destroy)));
   }
 }

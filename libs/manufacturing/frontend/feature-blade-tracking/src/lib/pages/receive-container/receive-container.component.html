@@ -85,7 +85,7 @@
               }
             </li>
           } @empty {
-            <li class="font-bold text-emerald-700">All expected trays received.</li>
+            <li class="dana-text-success">All expected trays received.</li>
           }
         </ul>
       </div>
@@ -97,7 +97,7 @@
           @for (tray of received; track tray.id) {
             <li><strong>{{ tray.serial_number }}</strong><span>→ {{ receivedShelves[tray.id] || 'Shelved' }}</span></li>
           } @empty {
-            <li class="text-slate-500">None yet in this session.</li>
+            <li class="gear-muted">None yet in this session.</li>
           }
         </ul>
       </div>

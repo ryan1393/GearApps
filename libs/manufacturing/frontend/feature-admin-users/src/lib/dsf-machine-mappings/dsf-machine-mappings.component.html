@@ -1,8 +1,8 @@
 <section class="dsf-map" aria-labelledby="dsf-map-title">
-  <div class="gear-panel p-5 dsf-map-lead">
+  <div class="gear-panel dana-panel-padded dsf-map-lead">
     <div>
-      <h2 id="dsf-map-title" class="text-xl font-black">DSF Machine Mappings</h2>
-      <p class="text-sm text-slate-600">Which Digital Shop Floor source feeds each machine, including grinders and lappers. Saving changes MeshForge only; nothing is ever written to DSF.</p>
+      <h2 id="dsf-map-title" class="dana-panel-title">DSF Machine Mappings</h2>
+      <p class="dana-field-hint">Which Digital Shop Floor source feeds each machine, including grinders and lappers. Saving changes MeshForge only; nothing is ever written to DSF.</p>
     </div>
     <div class="gear-admin-actions">
       <button type="button" class="gear-btn gear-btn-primary" (click)="previewUniqueMatches()" [disabled]="loading || saving || !board?.configured || board?.source_options_status !== 'READY'"
@@ -30,9 +30,9 @@
       <article danaSummaryCard class="gear-metric-card"><span>CREDITING REVIEW</span><strong>{{ writerReviewCount }}</strong><small>cutter counts held for review</small></article>
     </section>
 
-    <div #matchPanel class="gear-panel p-5 dsf-map-detail" *ngIf="uniqueMatches as found" tabindex="-1" aria-labelledby="dsf-match-title">
+    <div #matchPanel class="gear-panel dana-panel-padded dsf-map-detail" *ngIf="uniqueMatches as found" tabindex="-1" aria-labelledby="dsf-match-title">
       <div class="dsf-map-lead">
-        <h3 id="dsf-match-title" class="text-lg font-black">Map unique matches</h3>
+        <h3 id="dsf-match-title" class="dana-panel-title">Map unique matches</h3>
         <button type="button" class="gear-btn gear-btn-secondary" (click)="closeUniqueMatches()" [disabled]="saving">Close</button>
       </div>
       <p>A machine is matched when exactly one active DSF source in its department has a whiteboard name ending in the machine number, and no other machine has that number. Machines you already mapped or unmapped are left alone. Each mapping is saved and audited like a single Admin save.</p>
@@ -41,7 +41,7 @@
           <table danaTable class="gear-table">
             <thead><tr><th>Machine</th><th>Dept</th><th>DSF Source</th></tr></thead>
             <tbody>
-              <tr *ngFor="let match of found.matches"><td><strong>{{ match.machine_number }}</strong></td><td>{{ match.department }}</td><td>{{ match.whiteboard_name }}<small class="dsf-map-sub">{{ match.line_name }}</small></td></tr>
+              <tr *ngFor="let match of found.matches"><td><strong>{{ match.machine_number }}</strong></td><td>{{ match.department }}</td><td>{{ match.whiteboard_name }}<small class="dsf-map-sub dana-field-hint">{{ match.line_name }}</small></td></tr>
             </tbody>
           </table>
         </div>
@@ -59,9 +59,9 @@
       </details>
     </div>
 
-    <div #roughPanel class="gear-panel p-5 dsf-map-detail" *ngIf="roughMatches as rough" tabindex="-1" aria-labelledby="dsf-rough-title">
+    <div #roughPanel class="gear-panel dana-panel-padded dsf-map-detail" *ngIf="roughMatches as rough" tabindex="-1" aria-labelledby="dsf-rough-title">
       <div class="dsf-map-lead">
-        <h3 id="dsf-rough-title" class="text-lg font-black">Rough match: every DSF source against your machines</h3>
+        <h3 id="dsf-rough-title" class="dana-panel-title">Rough match: every DSF source against your machines</h3>
         <button type="button" class="gear-btn gear-btn-secondary" (click)="closeRoughMatches()" [disabled]="saving">Close</button>
       </div>
       <p>Each machine that has no working DSF source is matched by number to the free, eligible DSF sources in its department: anywhere in the whiteboard or line name, ignoring case, dashes and leading zeros. A clear best match is picked for you; otherwise choose one. Nothing is saved until you map, and each mapping is saved and audited like a single Admin save.</p>
@@ -82,10 +82,10 @@
                   <option value="">Don't map</option>
                   <option *ngFor="let candidate of machine.candidates" [value]="candidate.mapping_id">{{ candidate.whiteboard_name }} · {{ roughReasonText(candidate.reason) }}</option>
                 </select>
-                <small class="dsf-map-sub" *ngIf="machine.status === 'CHOOSE' && !roughPicks[machine.machine_id]">More than one possible source: choose one</small>
-                <small class="dsf-map-review-text" *ngIf="roughPickedTwice(roughPicks[machine.machine_id])">This source is picked for another machine too</small>
+                <small class="dsf-map-sub dana-field-hint" *ngIf="machine.status === 'CHOOSE' && !roughPicks[machine.machine_id]">More than one possible source: choose one</small>
+                <small class="dana-text-warning" *ngIf="roughPickedTwice(roughPicks[machine.machine_id])">This source is picked for another machine too</small>
               </td>
-              <ng-template #roughInfo><td [class.dsf-map-review-text]="machine.status === 'MAPPED' && machine.current_looks_right === false">{{ roughStatusText(machine) }}</td></ng-template>
+              <ng-template #roughInfo><td [class.dana-text-warning]="machine.status === 'MAPPED' && machine.current_looks_right === false">{{ roughStatusText(machine) }}</td></ng-template>
             </tr>
             <tr *ngIf="roughVisibleMachines.length === 0"><td danaTableEmpty colspan="3" class="empty-row">Every machine already has a DSF source or none matches. Tick Show all my machines to see them.</td></tr>
           </tbody>
@@ -101,16 +101,16 @@
           <table danaTable class="gear-table">
             <thead><tr><th>Dept</th><th>DSF Source</th><th>Goes to</th></tr></thead>
             <tbody>
-              <tr *ngFor="let source of rough.sources"><td>{{ source.department }}</td><td>{{ source.whiteboard_name }}<small class="dsf-map-sub">{{ source.line_name }}</small></td><td>{{ sourceOutcomeText(source) }}</td></tr>
+              <tr *ngFor="let source of rough.sources"><td>{{ source.department }}</td><td>{{ source.whiteboard_name }}<small class="dsf-map-sub dana-field-hint">{{ source.line_name }}</small></td><td>{{ sourceOutcomeText(source) }}</td></tr>
             </tbody>
           </table>
         </div>
       </details>
     </div>
 
-    <div #editor class="gear-panel p-5 dsf-map-detail" *ngIf="selected as machine" tabindex="-1" aria-label="Edit DSF source">
+    <div #editor class="gear-panel dana-panel-padded dsf-map-detail" *ngIf="selected as machine" tabindex="-1" aria-label="Edit DSF source">
       <div class="dsf-map-lead">
-        <h3 class="text-lg font-black">Machine {{ machine.machine_number }} · {{ 'Department ' + machine.department }}</h3>
+        <h3 class="dana-panel-title">Machine {{ machine.machine_number }} · {{ 'Department ' + machine.department }}</h3>
         <button type="button" class="gear-btn gear-btn-secondary" (click)="close()" [disabled]="saving">Close</button>
       </div>
       <p>Choose the exact DSF source. Sources already assigned to another machine are not listed.</p>
@@ -118,9 +118,9 @@
         <input class="gear-input" [(ngModel)]="sourceSearch" name="dsfSourceSearch" type="search" placeholder="Cutter number or line…" autocomplete="off" />
       </label>
       <div class="dsf-map-sources" role="listbox" aria-label="Eligible DSF sources" *ngIf="current.source_options_status === 'READY'; else sourceWaiting">
-        <button type="button" role="option" *ngFor="let option of filteredSources" class="dsf-map-source" [class.dsf-map-chosen]="selectedMappingId === option.mapping_id" [attr.aria-selected]="selectedMappingId === option.mapping_id" (click)="choose(option)">
+        <button type="button" role="option" *ngFor="let option of filteredSources" class="gear-btn dsf-map-source" [class.gear-btn-primary]="selectedMappingId === option.mapping_id" [class.gear-btn-secondary]="selectedMappingId !== option.mapping_id" [attr.aria-selected]="selectedMappingId === option.mapping_id" (click)="choose(option)">
           <span><strong>{{ option.whiteboard_name }}</strong><small class="dsf-map-sub">{{ option.line_name }}</small></span>
-          <span class="font-mono dsf-map-sub">{{ option.mapping_id }}</span>
+          <span class="mono dsf-map-sub">{{ option.mapping_id }}</span>
         </button>
         <p *ngIf="filteredSources.length === 0">No eligible DSF sources match this department and search.</p>
       </div>
@@ -136,20 +136,20 @@
       </div>
 
       <dl class="dsf-map-facts">
-        <div><dt>Current source</dt><dd>{{ machine.mapping?.whiteboard_name || 'Not mapped' }}</dd></div>
-        <div><dt>Chosen by</dt><dd>{{ machine.mapping_origin === 'ADMIN' ? 'Admin' : machine.mapping_origin === 'REFERENCE' ? 'Reference list' : 'Nobody (unmapped)' }}</dd></div>
-        <div><dt>Source status</dt><dd>{{ machine.status }} · {{ machine.note }}</dd></div>
-        <div><dt>Counted through</dt><dd>{{ safeTime(machine.as_of) }}</dd></div>
-        <div><dt>Cutter crediting</dt><dd>{{ writerText(machine) }}</dd></div>
-        <div><dt>DSF mapping ID</dt><dd class="font-mono">{{ machine.mapping?.mapping_id || '—' }}</dd></div>
-        <div><dt>Whiteboard ID</dt><dd class="font-mono">{{ machine.mapping?.whiteboard_id || '—' }}</dd></div>
-        <div><dt>Operation ID</dt><dd class="font-mono">{{ machine.mapping?.op_id || '—' }}</dd></div>
-        <div><dt>Line ID</dt><dd class="font-mono">{{ machine.mapping?.line_id || '—' }}</dd></div>
+        <div><dt class="dana-detail-label">Current source</dt><dd class="dana-detail-value">{{ machine.mapping?.whiteboard_name || 'Not mapped' }}</dd></div>
+        <div><dt class="dana-detail-label">Chosen by</dt><dd class="dana-detail-value">{{ machine.mapping_origin === 'ADMIN' ? 'Admin' : machine.mapping_origin === 'REFERENCE' ? 'Reference list' : 'Nobody (unmapped)' }}</dd></div>
+        <div><dt class="dana-detail-label">Source status</dt><dd class="dana-detail-value">{{ machine.status }} · {{ machine.note }}</dd></div>
+        <div><dt class="dana-detail-label">Counted through</dt><dd class="dana-detail-value">{{ safeTime(machine.as_of) }}</dd></div>
+        <div><dt class="dana-detail-label">Cutter crediting</dt><dd class="dana-detail-value">{{ writerText(machine) }}</dd></div>
+        <div><dt class="dana-detail-label">DSF mapping ID</dt><dd class="dana-detail-value mono">{{ machine.mapping?.mapping_id || '—' }}</dd></div>
+        <div><dt class="dana-detail-label">Whiteboard ID</dt><dd class="dana-detail-value mono">{{ machine.mapping?.whiteboard_id || '—' }}</dd></div>
+        <div><dt class="dana-detail-label">Operation ID</dt><dd class="dana-detail-value mono">{{ machine.mapping?.op_id || '—' }}</dd></div>
+        <div><dt class="dana-detail-label">Line ID</dt><dd class="dana-detail-value mono">{{ machine.mapping?.line_id || '—' }}</dd></div>
       </dl>
     </div>
-    <div class="gear-panel p-5">
+    <div class="gear-panel dana-panel-padded">
       <div class="dsf-map-toolbar">
-        <div><h3 class="text-lg font-black">Machine source assignments</h3><small>{{ visibleRows.length }} shown · {{ rows.length }} machines</small></div>
+        <div><h3 class="dana-panel-title">Machine source assignments</h3><small>{{ visibleRows.length }} shown · {{ rows.length }} machines</small></div>
         <label class="gear-field">Search<input class="gear-input" [(ngModel)]="search" name="dsfMappingSearch" type="search" placeholder="Machine, source, status…" autocomplete="off" /></label>
         <label class="gear-field">Department
           <select class="gear-select" [(ngModel)]="department" name="dsfDept"><option value="all">All</option><option *ngFor="let code of departments" [value]="code">{{ code }}</option></select>
@@ -162,13 +162,13 @@
         <table danaTable class="gear-table">
           <thead><tr><th>Machine</th><th>Dept</th><th>DSF Source</th><th>Mapping</th><th title="RUN production for the machine in the current DSF shift">DSF Count</th><th title="Whether DSF production is being added to the installed cutter">Crediting</th><th data-dana-table-static>Map</th></tr></thead>
           <tbody>
-            <tr *ngFor="let row of visibleRows" [class.dsf-map-selected]="row.machine_id === selectedMachineId">
+            <tr *ngFor="let row of visibleRows" [class.dana-highlight]="row.machine_id === selectedMachineId">
               <td><strong>{{ row.machine_number }}</strong></td>
               <td>{{ row.department }}</td>
-              <td>{{ row.mapping?.whiteboard_name || 'No source selected' }}<small class="dsf-map-sub" *ngIf="row.mapping">{{ row.mapping_origin === 'ADMIN' ? 'Admin selected' : 'Reference mapping' }}</small><small class="dsf-map-sub" *ngIf="!row.mapping || classification(row) === 'review'">{{ row.note }}</small></td>
+              <td>{{ row.mapping?.whiteboard_name || 'No source selected' }}<small class="dsf-map-sub dana-field-hint" *ngIf="row.mapping">{{ row.mapping_origin === 'ADMIN' ? 'Admin selected' : 'Reference mapping' }}</small><small class="dsf-map-sub dana-field-hint" *ngIf="!row.mapping || classification(row) === 'review'">{{ row.note }}</small></td>
               <td><span class="gear-badge" [danaTone]="badgeTone(row)">{{ badgeText(row) }}</span></td>
               <td>{{ row.count === null ? '—' : (row.count | number:'1.0-0') }}</td>
-              <td [class.dsf-map-review-text]="row.writer_status === 'REVIEW'">{{ writerText(row) }}</td>
+              <td [class.dana-text-warning]="row.writer_status === 'REVIEW'">{{ writerText(row) }}</td>
               <td class="dsf-map-action"><button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" [disabled]="!current.configured" (click)="open(row)">{{ row.mapping ? 'Change' : 'Map' }}</button></td>
             </tr>
             <tr *ngIf="visibleRows.length === 0"><td danaTableEmpty colspan="7" class="empty-row">No machines match your filters.</td></tr>

@@ -28,10 +28,10 @@
     </div>
 
     @if (tray && tray.workflow_eligibility?.grinding) {
-      <section class="gear-panel op-step p-5" aria-label="Grinding result">
+      <section class="gear-panel op-step" aria-label="Grinding result">
         @if (waitingToStart) {
           <h2 class="text-lg font-bold">3 · Start grinding</h2>
-          <p class="mt-1 text-slate-600">Starting removes the tray from its dull shelf and moves its {{ tray.blade_count }} blades into the active grinding stage.</p>
+          <p class="mt-1 gear-muted">Starting removes the tray from its dull shelf and moves its {{ tray.blade_count }} blades into the active grinding stage.</p>
         } @else if (tray.current_stage?.code === 'GRINDING') {
           <h2 class="mb-3 text-lg font-bold">3 · Record the result</h2>
           <gear-count-stepper label="Scrapped during grinding" [(value)]="scrappedBladeCount" [min]="0" [max]="pendingGrindingCount" [disabled]="busy" />
@@ -128,13 +128,13 @@
         @if (!tray.workflow_eligibility?.grinding) {
           @if (bladesShort > 0) {
             <p class="mt-2 font-bold">Grinding recorded. This tray is {{ bladesShort }} blade(s) short ({{ tray.blade_count }} / {{ requiredBlades }}).</p>
-            <p>It is not ready for coating and gets no shelf until it is full. Next: <a routerLink="/blades/operations" [queryParams]="{ op: 'intake' }" class="font-bold text-blue-700">add {{ bladesShort }} replacement blade(s) on Blade Intake</a>, then grind them here.</p>
+            <p>It is not ready for coating and gets no shelf until it is full. Next: <a routerLink="/blades/operations" [queryParams]="{ op: 'intake' }" class="dana-action-link">add {{ bladesShort }} replacement blade(s) on Blade Intake</a>, then grind them here.</p>
           } @else if (lastPackedContainer && tray.current_stage?.code === 'EMPTY') {
             <p class="mt-2 font-bold">Grinding recorded. The blades are in container {{ lastPackedContainer }}.</p>
-            <p>Tray {{ tray.serial_number }} is empty and ready to reuse. Next: add container {{ lastPackedContainer }} to a <a routerLink="/blades/operations" [queryParams]="{ op: 'coater-shipments' }" class="font-bold text-blue-700">coater shipment</a>.</p>
+            <p>Tray {{ tray.serial_number }} is empty and ready to reuse. Next: add container {{ lastPackedContainer }} to a <a routerLink="/blades/operations" [queryParams]="{ op: 'coater-shipments' }" class="dana-action-link">coater shipment</a>.</p>
           } @else {
             <p class="mt-2 font-bold">Grinding recorded. {{ tray.current_stage?.name }} · Location: {{ tray.current_location?.serial_number || 'None' }}</p>
-            <p>Next: <a routerLink="/blades/operations" [queryParams]="{ op: 'load-container' }" class="font-bold text-blue-700">move the blades into a coater container</a>.</p>
+            <p>Next: <a routerLink="/blades/operations" [queryParams]="{ op: 'load-container' }" class="dana-action-link">move the blades into a coater container</a>.</p>
           }
         }
       </div>
@@ -143,13 +143,13 @@
         <summary class="cursor-pointer px-5 py-4 font-bold">Tray details and grinding history</summary>
         <div class="px-5 py-3"><button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="retryTray()">Refresh tray {{ selectedTraySerial }}</button></div>
         <p *ngIf="historyLoading" class="px-5 py-3 text-sm">Loading history…</p>
-        <p *ngIf="historyError" class="px-5 py-3 text-sm text-red-700">{{ historyError }} <button type="button" class="gear-btn gear-btn-secondary" (click)="retryTray()">Retry</button></p>
+        <p *ngIf="historyError" class="gear-alert gear-alert-danger">{{ historyError }} <button type="button" class="gear-btn gear-btn-secondary" (click)="retryTray()">Retry</button></p>
         <div danaTableShell class="table-wrap"><table danaTable class="gear-table"><thead><tr><th>Completed</th><th>Grinder</th><th>Blades In</th><th>Scrapped</th><th>Returned</th><th>Required</th></tr></thead><tbody><tr *ngFor="let run of grindingRuns"><td>{{ run.completed_at | date:'short' }}</td><td>{{ run.grinding_machine_number || 'Historical · not recorded' }}</td><td>{{ run.starting_blade_count }}</td><td>{{ run.scrapped_blade_count }}</td><td>{{ run.returned_blade_count }}</td><td>{{ run.required_blade_count }}</td></tr><tr *ngIf="!historyLoading && !historyError && !grindingRuns.length"><td colspan="6">No completed grinding passes yet.</td></tr></tbody></table></div>
       </details>
     }
 
     @if (grinder) {
-      <details class="gear-panel p-5" (toggle)="machineDetails.open && loadMachineHistory()" #machineDetails>
+      <details class="gear-panel dana-panel-padded" (toggle)="machineDetails.open && loadMachineHistory()" #machineDetails>
         <summary class="cursor-pointer font-bold">Grinder {{ grinder.machine_number }} · Recent passes</summary>
         <p *ngIf="machineHistoryLoading" role="status">Loading history…</p><p *ngIf="machineHistoryError" role="alert">{{ machineHistoryError }}</p>
         <div danaTableShell class="table-wrap"><table danaTable class="gear-table"><thead><tr><th>Completed</th><th>Tray</th><th>Blades in</th><th>Returned</th><th>Scrapped</th></tr></thead><tbody><tr *ngFor="let run of machineHistory"><td>{{ run.completed_at | date:'short' }}</td><td>{{ run.tray?.serial_number || run.tray_id }}</td><td>{{ run.starting_blade_count }}</td><td>{{ run.returned_blade_count }}</td><td>{{ run.scrapped_blade_count }}</td></tr><tr *ngIf="!machineHistoryLoading && !machineHistoryError && !machineHistory.length"><td colspan="5">No completed passes on this grinder.</td></tr></tbody></table></div><p class="gear-muted">Latest 100 completed passes</p>

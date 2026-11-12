@@ -1,4 +1,4 @@
-import { beginWorkflowJournal } from '@meshforge/manufacturing/server/data-access';
+import { allocateCutterRequest, beginWorkflowJournal } from '@meshforge/manufacturing/server/data-access';
 import {
   BladeHistoryOrmEntity,
   BladeOrmEntity,
@@ -682,6 +682,7 @@ export class ServerFeatCutterBuildService {
         tray.updatedBy = userId;
         await trayRepo.save(tray);
 
+        await allocateCutterRequest(manager, { buildId: build.id, summaryId, partTypeId }, userId);
         await journal.commit(build.build_number, `Build cutter from tray ${traySerial}`);
         return {
           build: {

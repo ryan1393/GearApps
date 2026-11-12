@@ -15,7 +15,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   styles: `
     .lapper-empty {
       display: grid;
-      gap: 6px;
+      gap: var(--dana-space-2);
       justify-items: start;
     }
   `,

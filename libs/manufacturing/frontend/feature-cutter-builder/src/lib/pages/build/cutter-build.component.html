@@ -37,7 +37,7 @@
         <div class="gear-workflow-divider">OR</div>
         <label class="gear-field">
           Select Available Cutter Body
-          <select [(ngModel)]="selectedCutterBodyId" name="selectedCutterBodyId" class="gear-input" (change)="selectAvailableCutterBody()" [disabled]="busy">
+          <select [(ngModel)]="selectedCutterBodyId" name="selectedCutterBodyId" class="gear-select" (change)="selectAvailableCutterBody()" [disabled]="busy">
             <option value="">Choose available cutter body...</option>
             <option *ngFor="let body of availableCutterBodies" [value]="body.id" [disabled]="!cutterBodyRule(body).rule">
               {{ body.dana_serial_number || body.mf_serial_number }}{{ body.definition?.definition_code ? ' · ' + body.definition?.definition_code : '' }} · {{ cutterBodyCapacityText(body) }}
@@ -106,7 +106,7 @@
         <div class="gear-workflow-divider">OR</div>
         <label class="gear-field">
           Select Compatible Ready Tray
-          <select [(ngModel)]="selectedTraySerial" name="selectedTraySerial" class="gear-input"
+          <select [(ngModel)]="selectedTraySerial" name="selectedTraySerial" class="gear-select"
                   (change)="selectAvailableTray()" [disabled]="busy || !cutterBody">
             <option value="">Choose compatible ready tray...</option>
             <option *ngFor="let ready of compatibleReadyTrays" [value]="ready.tray_serial_number">
@@ -155,7 +155,7 @@
       </div>
     </section>
 
-    <section class="gear-workflow-section">
+    <section class="gear-workflow-section gear-workflow-span-full">
       <div class="gear-workflow-section-header">
         <span class="gear-workflow-step">3</span>
         <div>
@@ -166,7 +166,7 @@
       <div class="gear-workflow-section-body">
         <label class="gear-field">
           Cutter Builder Machine
-          <select [(ngModel)]="selectedCutterBuilderMachineId" name="cutterBuilderMachineId" class="gear-input" [disabled]="busy">
+          <select [(ngModel)]="selectedCutterBuilderMachineId" name="cutterBuilderMachineId" class="gear-select" [disabled]="busy">
             <option value="">Choose Department 45 Cutter Builder machine...</option>
             <option *ngFor="let machine of availableCutterBuilderMachines" [value]="machine.id">
               {{ machine.machine_number }}<ng-container *ngIf="machine.description"> · {{ machine.description }}</ng-container>
@@ -179,28 +179,28 @@
           No eligible Cutter Builder machines are configured. In Admin → Machines, enable a Department 45 machine and set Machine Type to Cutter Builder.
         </div>
 
-        <div class="gear-workflow-form-grid">
+        <div class="gear-workflow-form-grid gear-workflow-form-grid-four">
           <label class="gear-field">
             <span>IB RO</span>
-            <input [(ngModel)]="ibRo" name="ibRo" type="number" step="any" class="gear-input" />
+            <input [(ngModel)]="ibRo" name="ibRo" type="number" step="any" class="gear-input" [disabled]="busy" />
           </label>
           <label class="gear-field">
             <span>OB RO</span>
-            <input [(ngModel)]="obRo" name="obRo" type="number" step="any" class="gear-input" />
+            <input [(ngModel)]="obRo" name="obRo" type="number" step="any" class="gear-input" [disabled]="busy" />
           </label>
-          <label class="gear-field">
+          <label class="gear-workflow-option">
             <span>Honed</span>
-            <input [(ngModel)]="honed" name="honed" type="checkbox" />
+            <input [(ngModel)]="honed" name="honed" type="checkbox" [disabled]="busy" />
           </label>
-          <label class="gear-field">
+          <label class="gear-workflow-option">
             <span>Coated</span>
-            <input [(ngModel)]="coated" name="coated" type="checkbox" />
+            <input [(ngModel)]="coated" name="coated" type="checkbox" [disabled]="busy" />
           </label>
         </div>
 
         <label class="gear-field">
           Comments
-          <textarea [(ngModel)]="comments" name="comments" class="gear-textarea" rows="3"></textarea>
+          <textarea [(ngModel)]="comments" name="comments" class="gear-textarea" rows="3" maxlength="2000" [disabled]="busy"></textarea>
         </label>
 
         <!-- The card prints by itself when the build is created, so the printer is chosen before building. -->

@@ -40,13 +40,10 @@ import { fieldValue, GroupDef, RETRACT_MODES } from './macro-map';
       gap: 0;
       align-content: start;
     }
-    .dana-section-title {
-      margin-bottom: 10px;
-    }
     .gear-group-fields {
       display: grid;
       grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
-      gap: 8px;
+      gap: var(--dana-field-gap);
     }
     @media (max-width: 520px) {
       .gear-group-fields {

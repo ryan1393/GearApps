@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { CoaterAvailableContainer, CoaterShipment, CoaterShipmentContainer, CoaterShipmentList } from '@meshforge/manufacturing/shared/util-types';
 import { CoaterShipmentsApiService, apiErrorText } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
-import { DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
+import { DanaPageHeaderComponent, DanaStatusBadgeDirective, DanaSummaryCardDirective, DanaSummaryGridDirective, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
 import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/option-picker.component';
 import { StationOperation } from '../operations-station/operations-station.operations';
 import { coaterPackingSlipHtml, coaterContainerLabelsHtml } from './coater-packing-slip';
@@ -13,7 +13,7 @@ import { createCoaterRequestId } from './coater-request-id';
 
 @Component({
   selector: 'gear-coater-shipments', standalone: true,
-  imports: [DanaPageHeaderComponent, CommonModule,FormsModule,RouterLink,OptionPickerComponent,DanaTableDirective,DanaTableShellDirective],
+  imports: [DanaPageHeaderComponent, DanaStatusBadgeDirective, DanaSummaryCardDirective, DanaSummaryGridDirective, CommonModule,FormsModule,RouterLink,OptionPickerComponent,DanaTableDirective,DanaTableShellDirective],
   templateUrl: './coater-shipments.component.html', styleUrls: ['./coater-shipments.component.css'],
 })
 export class CoaterShipmentsComponent implements OnDestroy, StationOperation {
@@ -33,6 +33,7 @@ export class CoaterShipmentsComponent implements OnDestroy, StationOperation {
   confirmRpaEmail = false;
   private requestId = createCoaterRequestId();
   private listVersion = 0;
+  private availableVersion = 0;
   constructor() { this.refreshList(); }
   ngOnDestroy() { this.destroy$.next(); this.destroy$.complete(); }
   get inProgress() { return this.active?.status==='DRAFT'; }
@@ -85,11 +86,12 @@ export class CoaterShipmentsComponent implements OnDestroy, StationOperation {
   start() { if(this.busy || this.active || !this.destination.trim())return;this.act(this.api.create(this.requestId,this.destination,this.notes),'Shipment started. Scan packed containers.',()=>{this.requestId=createCoaterRequestId();this.undoSerial='';}); }
   open(id: string) { if(this.busy)return;this.undoSerial='';this.act(this.api.get(id),'Shipment loaded.'); }
   refresh() { if(this.active)this.open(this.active.id);else this.refreshList(); }
-  close() { if(this.busy)return;this.active=null;this.error='';this.notice='';this.undoSerial='';this.serial='';this.selectedContainer='';this.availableQuery='';this.destination='Coater';this.notes='';this.stale=false;this.confirmSend=false;this.cancelOpen=false;this.refreshList(); }
+  close() { if(this.busy)return;this.availableVersion++;this.availableContainers=[];this.availableLoading=false;this.availableError='';this.active=null;this.error='';this.notice='';this.undoSerial='';this.serial='';this.selectedContainer='';this.availableQuery='';this.destination='Coater';this.notes='';this.stale=false;this.confirmSend=false;this.cancelOpen=false;this.refreshList(); }
   refreshAvailable() {
-    const s=this.active;if(!s || s.status!=='DRAFT'){this.availableContainers=[];return;}
+    const version=++this.availableVersion;
+    const s=this.active;if(!s || s.status!=='DRAFT'){this.availableContainers=[];this.availableLoading=false;this.availableError='';return;}
     this.availableLoading=true;this.availableError='';
-    this.api.available(s.id,this.availableQuery).pipe(takeUntil(this.destroy$)).subscribe({next:rows=>{this.availableContainers=rows;this.availableLoading=false;if(this.selectedContainer && !rows.some(r=>r.serial===this.selectedContainer))this.selectedContainer='';},error:e=>{this.availableContainers=[];this.availableLoading=false;this.availableError=apiErrorText(e,'Could not load available containers.');}});
+    this.api.available(s.id,this.availableQuery).pipe(takeUntil(this.destroy$)).subscribe({next:rows=>{if(version!==this.availableVersion || this.active?.id!==s.id || this.active.revision!==s.revision)return;this.availableContainers=rows;this.availableLoading=false;if(this.selectedContainer && !rows.some(r=>r.serial===this.selectedContainer))this.selectedContainer='';},error:e=>{if(version!==this.availableVersion || this.active?.id!==s.id || this.active.revision!==s.revision)return;this.availableContainers=[];this.availableLoading=false;this.availableError=apiErrorText(e,'Could not load available containers.');}});
   }
   chooseAvailable() {
     if(!this.selectedContainer || !this.active || !this.canEdit || this.dirty)return;
