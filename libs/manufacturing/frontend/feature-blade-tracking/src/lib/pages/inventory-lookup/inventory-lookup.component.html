@@ -12,7 +12,7 @@
     [step]="1"
     label="Scan Serial Number"
     buttonText="Find"
-    [disabled]="busy || printingTagSerial !== null"
+    [disabled]="printingTagSerial !== null" [busy]="busy"
     (scanned)="lookup($event)"
   />
 

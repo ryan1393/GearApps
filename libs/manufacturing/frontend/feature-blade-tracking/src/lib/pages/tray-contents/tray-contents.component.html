@@ -11,7 +11,7 @@
     label="Scan Tray"
     help="No individual blade scan is required."
     buttonText="Open Tray"
-    [disabled]="busy || printingTagSerial !== null"
+    [disabled]="printingTagSerial !== null" [busy]="busy"
     (scanned)="scan($event)"
   />
 

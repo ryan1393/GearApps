@@ -5,7 +5,7 @@
 
     <div class="gear-panel op-step">
       <gear-scan-panel #trayScanner [step]="1" label="Scan Tray" help="Its current location loads automatically." buttonText="Select" changeText="Choose another tray"
-        [doneValue]="tray?.serial_number ?? null" [disabled]="busy" (scanned)="scanTray($event)" (reopen)="clearTray()">
+        [doneValue]="tray?.serial_number ?? null" [busy]="busy" (scanned)="scanTray($event)" (reopen)="clearTray()">
         <gear-option-picker placeholder="Choose tray…" [headers]="['Tray', 'Location', 'Blades']" [options]="trayOptions"
           emptyText="No trays can be moved right now." [disabled]="busy" (picked)="chooseTray($event)" />
       </gear-scan-panel>
@@ -14,7 +14,7 @@
     @if (tray) {
       <div class="gear-panel op-step">
         <gear-scan-panel #locationScanner [step]="2" label="Scan Destination Location" help="Scan the location tag where the tray now sits." buttonText="Select"
-          [doneValue]="destination?.serial_number ?? null" [disabled]="busy" (scanned)="scanLocation($event)" (reopen)="destination = null">
+          [doneValue]="destination?.serial_number ?? null" [busy]="busy" (scanned)="scanLocation($event)" (reopen)="destination = null">
           <gear-option-picker placeholder="Choose destination…" [headers]="['Location', 'Description']" [options]="destinationOptions"
             emptyText="No other enabled locations are available." [disabled]="busy" (picked)="chooseLocation($event)" />
         </gear-scan-panel>

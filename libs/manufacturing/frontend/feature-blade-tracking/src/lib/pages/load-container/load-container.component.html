@@ -5,7 +5,7 @@
 
     <div class="gear-panel op-step">
       <gear-scan-panel #containerScanner [step]="1" label="Scan Container" buttonText="Select" changeText="Change container"
-        [doneValue]="container?.serial_number ?? null" [disabled]="busy" (scanned)="scanContainer($event)" (reopen)="changeContainer()">
+        [doneValue]="container?.serial_number ?? null" [busy]="busy" (scanned)="scanContainer($event)" (reopen)="changeContainer()">
         <gear-option-picker placeholder="Choose container…" [headers]="['Container', 'Blades', 'Trays']" [options]="containerOptions"
           emptyText="No empty containers are available to load." [disabled]="busy" (picked)="chooseContainer($event)" />
       </gear-scan-panel>
@@ -13,7 +13,7 @@
 
     @if (container) {
       <div class="gear-panel op-step">
-        <gear-scan-panel #trayScanner [step]="2" label="Scan Tray To Empty Into Container" [disabled]="busy" (scanned)="scanTray($event)">
+        <gear-scan-panel #trayScanner [step]="2" label="Scan Tray To Empty Into Container" [busy]="busy" (scanned)="scanTray($event)">
           <gear-option-picker placeholder="Choose tray…" [headers]="['Tray', 'Location', 'Blades']" [options]="trayOptions"
             emptyText="No full, ground trays are waiting at COATER-STAGING or on a rough shelf bin." [disabled]="busy" (picked)="chooseTray($event)" />
         </gear-scan-panel>
