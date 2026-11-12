@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
 
 import {
   PAGINATION_DEFAULT_LIMIT,
@@ -35,12 +35,13 @@ export class PaginationOptionsDto implements IPaginationOptions {
     type: Number,
     minimum: 1,
     default: PAGINATION_DEFAULT_PER_PAGE,
-    maximum: 50,
+    maximum: PAGINATION_DEFAULT_LIMIT,
     required: false,
   })
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(PAGINATION_DEFAULT_LIMIT)
   @IsOptional()
   readonly perPage?: number;
 
@@ -48,12 +49,13 @@ export class PaginationOptionsDto implements IPaginationOptions {
     type: Number,
     minimum: 1,
     default: PAGINATION_DEFAULT_LIMIT,
-    maximum: 100,
+    maximum: PAGINATION_DEFAULT_LIMIT,
     required: false,
   })
   @Type(() => Number)
   @IsInt()
   @Min(1)
+  @Max(PAGINATION_DEFAULT_LIMIT)
   @IsOptional()
   readonly limit?: number;
 
