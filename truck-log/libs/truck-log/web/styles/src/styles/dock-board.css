@@ -23,3 +23,7 @@
 /* Delivery Number scan dialog. */
 .tl-scan-dialog { --dana-dialog-width: 640px; }
 .tl-scan-receiver { display: grid; gap: 4px; text-align: center; cursor: text; }
+/* Count badges filter the board; the active filter shows a ring. */
+.tl-count-jump { border: 0; cursor: pointer; }
+.tl-count-jump:hover { filter: brightness(.96); }
+.tl-count-jump[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px currentColor; }

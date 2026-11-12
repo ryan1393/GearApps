@@ -7,6 +7,20 @@ import { CheckInForm, CheckInRxoSelection, UppercaseCheckInField, emptyCheckInFo
 import { ToastService } from '@truck-log/web/ui';
 import { DanaComboboxComponent, type DanaComboboxColumn } from '@dana/ui';
 import { DockStatusWidgetComponent } from './dock-status-widget.component';
+
+/** The control each "missing required item" chip jumps to (labels match missingRequiredItems). */
+const REQUIRED_ITEM_TARGETS: Record<string, string> = {
+  'Load Number': '#checkin-load-manual, input[aria-label="RXO or Expedite load"]',
+  'Direction': '[aria-labelledby="checkin-direction-label"] button',
+  'Origin': 'input[aria-label="Origin"]',
+  'Destination': 'input[aria-label="Destination"]',
+  'Driver Name': 'input[aria-label="Driver name"]',
+  'Driver Phone': '#checkin-driver-phone',
+  'Carrier': 'input[aria-label="Carrier"]',
+  'Tractor ID': '#checkin-tractor',
+  'Trailer ID': '#checkin-trailer',
+  'Dock': 'input[aria-label="Dock"]',
+};
 import { DriverPrintTracker } from './driver-print-tracker.service';
 import { FreightLoadPicker } from './freight-load-picker.service';
 
@@ -299,6 +313,15 @@ export class CheckInComponent implements OnInit, OnDestroy {
       ['Dock', Boolean(this.form.dockCode.trim())],
     ];
     return required.filter(([, complete]) => !complete).map(([label]) => label);
+  }
+
+  /** A missing-item chip was clicked: bring that field into view in the form card and focus it. */
+  jumpToField(item: string) {
+    const selector = REQUIRED_ITEM_TARGETS[item];
+    const field = selector ? document.querySelector<HTMLElement>(selector) : null;
+    if (!field) return;
+    field.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    field.focus({ preventScroll: true });
   }
 
   get visibleMissingRequiredItems() { return this.missingRequiredItems.slice(0, 3); }
