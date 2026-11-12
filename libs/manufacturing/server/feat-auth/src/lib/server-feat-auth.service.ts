@@ -36,6 +36,9 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
+/** A bcrypt hash (cost 10, as saved passwords) of a discarded random value; nothing matches it. */
+const UNUSABLE_PASSWORD_HASH = '$2b$10$T0QknPt2OaC6GeKe0pJrwOk4tilH/V1rtC9FgiQX3oEKhO/q2VbPm';
+
 @Injectable()
 export class ServerFeatAuthService {
   private logger = new Logger(ServerFeatAuthService.name);
@@ -123,21 +126,20 @@ export class ServerFeatAuthService {
     }
     const user = await this.userService.findByEmail(userLoginDto.email);
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
-    }
-
-    if (!user.active) {
-      throw new ForbiddenException('User account is inactive');
-    }
-
+    // Compare against a stand-in hash when there is no account or no password, so the
+    // answer takes the same time and says the same thing whether or not the email exists.
     const isPasswordValid = await bcrypt.compare(
       userLoginDto.password,
-      user.password ?? '',
+      user?.password || UNUSABLE_PASSWORD_HASH,
     );
 
-    if (!isPasswordValid) {
+    if (!user?.password || !isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
+    }
+
+    // Only someone who knows the password learns that the account is inactive.
+    if (!user.active) {
+      throw new ForbiddenException('User account is inactive');
     }
 
     return user;
