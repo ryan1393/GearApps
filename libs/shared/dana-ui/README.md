@@ -21,3 +21,22 @@ Standard tests verify source boundaries, canonical visual contracts, and strict 
 `DanaMobileNavDirective` defaults to a desktop minimum width of 1025 pixels. Manufacturing navigation binds `[desktopMinWidth]="1024"` to match its maintained CSS breakpoint. Invalid widths use the default.
 
 Overlay drawers with a separate opener can opt into `[modal]="true"`. On mobile, opening moves focus into the drawer, Tab stays within its visible controls, and closing or Escape restores the opener. Desktop navigation keeps its usual keyboard behavior. Give the host an accessible name and include a visible close button inside the drawer.
+
+## Disabled actions
+
+Disabled primary and secondary buttons (`:disabled` or `aria-disabled="true"`) use one neutral style in both themes: a grey surface (`--dana-disabled-bg`), a label that keeps at least 4.5:1 contrast (`--dana-disabled-text`) and a not-allowed cursor. They never fade the brand colour.
+
+When a user may wonder why an action is unavailable, say so. `danaButton` accepts an optional reason that is shown next to the button, and linked to it with `aria-describedby`, only while the button is disabled:
+
+```html
+<button danaButton="primary" type="submit" [disabled]="!tray" danaDisabledReason="Scan a tray first.">Save</button>
+```
+
+Without the directive, use the same helper class and wire it yourself:
+
+```html
+<button class="gear-btn gear-btn-primary" type="submit" disabled aria-describedby="save-reason">Save</button>
+<span id="save-reason" class="dana-disabled-reason">Scan a tray first.</span>
+```
+
+Keep the reason short and actionable. A disabled button is skipped by the Tab key, so put anything essential in visible text, not only in the description.

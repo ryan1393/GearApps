@@ -8,6 +8,7 @@ import {
   DanaComboboxComponent, DanaConfirmDialogComponent, DanaTableDirective,
   DanaKpiGridDirective, DanaKpiCardDirective, DanaOperationGridDirective,
   DanaOperationCardComponent, DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaMobileNavDirective,
+  DanaButtonDirective,
 } from '../../../../../dist/libs/shared/dana-ui/fesm2022/dana-ui.mjs';
 
 class Fixture {
@@ -27,6 +28,7 @@ class Fixture {
   headerLabel = 'Application heading';
   headerTabindex = 7;
   headerSort = 'other';
+  saveBlocked = true;
   columns = [{ label: 'Name', value: row => row }];
   options = ['Alpha', 'Beta'];
   cancel() { this.cancelCount++; this.open = false; }
@@ -36,12 +38,13 @@ Component({
   imports: [CommonModule, FormsModule, ReactiveFormsModule, DanaComboboxComponent,
     DanaConfirmDialogComponent, DanaTableDirective, DanaKpiGridDirective,
     DanaKpiCardDirective, DanaOperationGridDirective, DanaOperationCardComponent,
-    DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaMobileNavDirective],
+    DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaMobileNavDirective, DanaButtonDirective],
   template: `
     <a class="dana-skip-link" id="skip-link" href="#fixture-main">Skip to content</a>
     <nav danaMobileNav #defaultNav="danaMobileNav"><button id="default-nav-toggle" (click)="defaultNav.toggle()">{{ defaultNav.open }}</button></nav>
     <nav danaMobileNav [desktopMinWidth]="1024" #gearNav="danaMobileNav"><button id="gear-nav-toggle" (click)="gearNav.toggle()">{{ gearNav.open }}</button></nav>
     <button id="launch" (click)="open = true">Open confirmation</button>
+    <div id="save-row"><button id="save" type="button" danaButton="primary" [disabled]="saveBlocked" danaDisabledReason="Scan a tray first.">Save</button></div>
     <button id="background">Background action</button>
     <dana-confirm-dialog *ngIf="showDialog" [open]="open" title="Delete entry?" message="Confirm this action."
       [danger]="true" (cancel)="cancel()" (confirm)="open = false">

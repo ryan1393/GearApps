@@ -1446,13 +1446,15 @@ html body .gear-page :is(.gear-btn, .date-chip) {
   font-weight: 600 !important;
   transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, color .15s ease;
 }
-html body .gear-page .gear-btn-primary:disabled,
-html body .gear-page .gear-btn-primary[disabled] {
-  background: #e7c9b4 !important;
-  border-color: transparent !important;
-  color: #fff !important;
+/* Disabled primary and secondary buttons share one neutral look in both themes (tokens in themes.css). */
+html:root body :is(.gear-btn, .dana-btn):is(.gear-btn-primary, .dana-btn-primary, .gear-btn-secondary, .dana-btn-secondary):is(:disabled, [aria-disabled='true']) {
+  background: var(--dana-disabled-bg) !important;
+  border-color: var(--dana-disabled-border) !important;
+  color: var(--dana-disabled-text) !important;
   opacity: 1 !important;
-  cursor: not-allowed;
+  box-shadow: none !important;
+  transform: none !important;
+  cursor: not-allowed !important;
 }
 html body :is(.gear-btn, .date-chip, .signout-button, .side-link, .operation-card, .menu-button, .dana-table-filter-trigger):focus-visible {
   outline: 2px solid var(--dana-focus-color, var(--dana-primary)) !important;

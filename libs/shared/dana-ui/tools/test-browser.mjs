@@ -42,6 +42,21 @@ try {
   assert.equal(await page.locator('[danaDashboardGrid]').evaluate(el => getComputedStyle(el).display), 'grid');
   assert.equal(await page.locator('[danaDashboardPanel]').evaluate(el => getComputedStyle(el).borderTopWidth), '1px');
 
+  // Disabled actions are neutral and readable, and say why while they stay disabled.
+  const save = page.locator('#save');
+  assert.equal(await save.evaluate(el => getComputedStyle(el).backgroundColor), 'rgb(236, 238, 241)');
+  assert.equal(await save.evaluate(el => getComputedStyle(el).color), 'rgb(91, 101, 115)');
+  assert.equal(await save.evaluate(el => getComputedStyle(el).cursor), 'not-allowed');
+  assert.equal(await save.evaluate(el => getComputedStyle(el).opacity), '1');
+  await page.waitForFunction(() => document.querySelector('#save + .dana-disabled-reason')?.textContent === 'Scan a tray first.');
+  const reasonId = await page.locator('#save + .dana-disabled-reason').getAttribute('id');
+  assert.equal(await save.getAttribute('aria-describedby'), reasonId);
+  await page.evaluate(() => { window.fixture.instance.saveBlocked = false; window.fixture.changeDetectorRef.detectChanges(); });
+  await page.waitForFunction(() => !document.querySelector('.dana-disabled-reason'));
+  assert.equal(await save.getAttribute('aria-describedby'), null);
+  await page.evaluate(() => { window.fixture.instance.saveBlocked = true; window.fixture.changeDetectorRef.detectChanges(); });
+  await page.waitForFunction(() => document.querySelector('#save')?.getAttribute('aria-describedby') === document.querySelector('#save + .dana-disabled-reason')?.id);
+
   // Disabling an unfocused but open list must remove it and block stale actions.
   await page.locator('#direct .dana-combobox-toggle').click();
   assert.equal(await page.locator('#direct input').evaluate(el => el === document.activeElement), false);
