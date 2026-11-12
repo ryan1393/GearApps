@@ -7,6 +7,8 @@
     <div class="gear-admin-actions">
       <button type="button" class="gear-btn gear-btn-primary" (click)="previewUniqueMatches()" [disabled]="loading || saving || !board?.configured || board?.source_options_status !== 'READY'"
         title="Find machines whose DSF source is the only one in their department ending in the machine number">Map Unique Matches</button>
+      <button type="button" class="gear-btn gear-btn-secondary" (click)="previewRoughMatches()" [disabled]="loading || saving || !board?.configured || board?.source_options_status !== 'READY'"
+        title="List every DSF source against all your machines, matched loosely by machine number, and pick what to map">Rough Match</button>
       <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || saving" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : '↻ Refresh Status' }}</button>
     </div>
   </div>
@@ -54,6 +56,55 @@
         <ul class="dsf-map-skipped">
           <li *ngFor="let skip of found.skipped"><strong>{{ skip.machine_number }}</strong> · Dept {{ skip.department }}: {{ skipText(skip.reason) }}</li>
         </ul>
+      </details>
+    </div>
+
+    <div #roughPanel class="gear-panel p-5 dsf-map-detail" *ngIf="roughMatches as rough" tabindex="-1" aria-labelledby="dsf-rough-title">
+      <div class="dsf-map-lead">
+        <h3 id="dsf-rough-title" class="text-lg font-black">Rough match: every DSF source against your machines</h3>
+        <button type="button" class="gear-btn gear-btn-secondary" (click)="closeRoughMatches()" [disabled]="saving">Close</button>
+      </div>
+      <p>Each machine that has no working DSF source is matched by number to the free, eligible DSF sources in its department: anywhere in the whiteboard or line name, ignoring case, dashes and leading zeros. A clear best match is picked for you; otherwise choose one. Nothing is saved until you map, and each mapping is saved and audited like a single Admin save.</p>
+      <p role="status"><strong>{{ rough.sources.length }}</strong> DSF sources ·
+        <strong>{{ rough.machines.length }}</strong> active machines: {{ roughCount('PROPOSED') }} matched, {{ roughCount('CHOOSE') }} to choose,
+        {{ roughCount('MAPPED') }} already mapped<ng-container *ngIf="roughLooksWrongCount"> ({{ roughLooksWrongCount }} to a source that does not look like the machine)</ng-container>,
+        {{ roughCount('NO_CANDIDATE') }} with no DSF source<ng-container *ngIf="roughCount('LEFT_UNMAPPED') + roughCount('CREDITING_HISTORY')">, {{ roughCount('LEFT_UNMAPPED') + roughCount('CREDITING_HISTORY') }} to map by hand</ng-container>.</p>
+      <label class="dsf-map-check"><input type="checkbox" [(ngModel)]="roughShowAll" [ngModelOptions]="{ standalone: true }" /> Show all my machines</label>
+      <div danaTableShell class="table-wrap">
+        <table danaTable class="gear-table">
+          <thead><tr><th>Machine</th><th>Dept</th><th>DSF Source</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let machine of roughVisibleMachines">
+              <td><strong>{{ machine.machine_number }}</strong></td>
+              <td>{{ machine.department }}</td>
+              <td *ngIf="roughPickable(machine); else roughInfo">
+                <select class="gear-select" [(ngModel)]="roughPicks[machine.machine_id]" [ngModelOptions]="{ standalone: true }" [attr.aria-label]="'DSF source for machine ' + machine.machine_number">
+                  <option value="">Don't map</option>
+                  <option *ngFor="let candidate of machine.candidates" [value]="candidate.mapping_id">{{ candidate.whiteboard_name }} · {{ roughReasonText(candidate.reason) }}</option>
+                </select>
+                <small class="dsf-map-sub" *ngIf="machine.status === 'CHOOSE' && !roughPicks[machine.machine_id]">More than one possible source: choose one</small>
+                <small class="dsf-map-review-text" *ngIf="roughPickedTwice(roughPicks[machine.machine_id])">This source is picked for another machine too</small>
+              </td>
+              <ng-template #roughInfo><td [class.dsf-map-review-text]="machine.status === 'MAPPED' && machine.current_looks_right === false">{{ roughStatusText(machine) }}</td></ng-template>
+            </tr>
+            <tr *ngIf="roughVisibleMachines.length === 0"><td danaTableEmpty colspan="3" class="empty-row">Every machine already has a DSF source or none matches. Tick Show all my machines to see them.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="gear-admin-actions">
+        <button type="button" class="gear-btn gear-btn-primary" (click)="applyRoughMatches()" [disabled]="saving || !roughPairs.length || roughHasDuplicate">{{ saving ? 'Mapping…' : 'Map ' + roughPairs.length + ' Machine' + (roughPairs.length === 1 ? '' : 's') }}</button>
+        <button type="button" class="gear-btn gear-btn-secondary" (click)="closeRoughMatches()" [disabled]="saving">Cancel</button>
+      </div>
+      <details>
+        <summary>Every DSF source ({{ rough.sources.length }}) and where it goes</summary>
+        <div danaTableShell class="table-wrap">
+          <table danaTable class="gear-table">
+            <thead><tr><th>Dept</th><th>DSF Source</th><th>Goes to</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let source of rough.sources"><td>{{ source.department }}</td><td>{{ source.whiteboard_name }}<small class="dsf-map-sub">{{ source.line_name }}</small></td><td>{{ sourceOutcomeText(source) }}</td></tr>
+            </tbody>
+          </table>
+        </div>
       </details>
     </div>
 

@@ -6,6 +6,7 @@ import { DsfMachineMappingsComponent } from './dsf-machine-mappings.component';
 
 const ADMIN = '/api/v1/greenshed/dsf-counts/admin-mappings';
 const MATCHES = ADMIN + '/unique-matches';
+const ROUGH = ADMIN + '/rough-matches';
 const board = {
   format: 'DSFMAPADMIN1', status: 'OK', enabled: true, configured: true, interval_seconds: 60,
   last_success_at: '2026-11-12T00:00:00Z', served_at: '2026-11-12T00:00:00Z', cutter_write_enabled: false,
@@ -56,5 +57,37 @@ describe('DsfMachineMappingsComponent: Map Unique Matches', () => {
     http.expectOne(MATCHES).flush({ matches: [], skipped: [] });
     fixture.detectChanges();
     expect(page().textContent).toContain('No unmapped machine has exactly one matching DSF source.');
+  });
+
+  it('rough-matches every DSF source, lets you choose, and maps what you picked', () => {
+    button('Rough Match').click();
+    http.expectOne(ROUGH).flush({
+      machines: [
+        { machine_id: 'm549', machine_number: '549', department: '132', status: 'PROPOSED', current_source: null, current_looks_right: null, proposed_mapping_id: 's549',
+          candidates: [{ mapping_id: 's549', whiteboard_name: '132 PIN CUTTER 549', line_name: 'L', reason: 'ENDS_IN_NUMBER' }] },
+        { machine_id: 'm553', machine_number: '553', department: '132', status: 'CHOOSE', current_source: null, current_looks_right: null, proposed_mapping_id: null,
+          candidates: [{ mapping_id: 's553a', whiteboard_name: '553 A', line_name: 'L', reason: 'NAME_HAS_NUMBER' }, { mapping_id: 's553b', whiteboard_name: '553 B', line_name: 'L', reason: 'NAME_HAS_NUMBER' }] },
+        { machine_id: 'm501', machine_number: '501', department: '132', status: 'MAPPED', current_source: '132 PIN CUTTER 502', current_looks_right: false, proposed_mapping_id: null, candidates: [] },
+      ],
+      sources: [{ mapping_id: 'x', department: '152', whiteboard_name: '152 RING CUTTER 549', line_name: 'L', outcome: 'NO_MACHINE', machine_numbers: [], other_departments: ['132'] }],
+    });
+    fixture.detectChanges();
+    const text = page().textContent || '';
+    expect(text).toContain('1 matched, 1 to choose');
+    expect(text).toContain('More than one possible source: choose one');
+    expect(text).toContain('does not look like it: 132 PIN CUTTER 502');
+    expect(text).toContain('No machine: the number is a machine in Dept 132');
+
+    const selects = page().querySelectorAll<HTMLSelectElement>('select[aria-label^="DSF source for machine"]');
+    selects[1].value = selects[1].options[2].value;
+    selects[1].dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    button('Map 2 Machines').click();
+    const save = http.expectOne(ROUGH);
+    expect(save.request.method).toBe('POST');
+    expect(save.request.body).toEqual({ matches: [{ machine_id: 'm549', mapping_id: 's549' }, { machine_id: 'm553', mapping_id: 's553b' }] });
+    save.flush({ mapped: [{ machine_id: 'm549', machine_number: '549', whiteboard_name: '132 PIN CUTTER 549' }, { machine_id: 'm553', machine_number: '553', whiteboard_name: '553 B' }], skipped: [] });
+    fixture.detectChanges();
+    expect(page().textContent).toContain('2 machines mapped.');
   });
 });

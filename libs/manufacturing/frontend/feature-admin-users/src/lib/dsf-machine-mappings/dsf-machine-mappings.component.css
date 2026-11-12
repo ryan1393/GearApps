@@ -12,6 +12,7 @@
 .dsf-map-selected > td { background: var(--dana-neutral-soft); }
 .dsf-map-review-text { color: var(--dana-warning); font-weight: 600; }
 .dsf-map-detail { display: grid; gap: .75rem; }
+.dsf-map-check { display: inline-flex; align-items: center; gap: .4rem; }
 .dsf-map-skipped { margin: .5rem 0 0; padding-left: 1.25rem; max-height: 14rem; overflow: auto; }
 .dsf-map-sources { display: grid; gap: .4rem; max-height: 18rem; overflow: auto; }
 .dsf-map-source { display: flex; justify-content: space-between; gap: 1rem; padding: .6rem .75rem; border: 1px solid var(--dana-control-border); border-radius: 8px; background: var(--dana-surface); text-align: left; cursor: pointer; }
