@@ -1,7 +1,8 @@
 /*
- * The 4 x 6 in location label, printed landscape (6 in across, 4 in tall): the Summary and part
- * type kept at the location in large type on the left, the location number on the right, and
- * the location's own barcode across the bottom (Code 128 of its serial, the same value its
+ * The 4 x 6 in location label, printed landscape (6 in across, 4 in tall). Read from across
+ * the aisle: the Summary kept at the location fills the top row, the part type and the
+ * location number share the row under it, each as large as its width allows, and the
+ * location's own barcode runs across the bottom (Code 128 of its serial, the same value its
  * small tag carries, so a scan finds the location).
  *
  * It is a browser print, like the 4 x 6 coater container labels, so it goes to whatever 4 x 6
@@ -37,9 +38,13 @@ const CODE128_PATTERNS: readonly string[] = [
 /** Code 128 needs at least ten modules of white either side to scan. */
 const QUIET_ZONE_MODULES = 10;
 
-/** Column widths inside the 0.25 in margins, in CSS pixels (96 per inch). */
-const SUMMARY_COLUMN_PX = 3.15 * 96;
-const NUMBER_COLUMN_PX = 2.1 * 96;
+/** Width inside the 0.25 in margins, in inches, less a little for the rule between columns. */
+const CONTENT_WIDTH_IN = 5.4;
+const PX_PER_IN = 96;
+
+/** The largest type each row's height leaves room for, in CSS pixels. */
+const SUMMARY_MAX_PX = 112;
+const ROW_MAX_PX = 100;
 
 /** Arial bold averages a little over 0.6 of its size per character. */
 const CHARACTER_WIDTH = 0.64;
@@ -87,22 +92,21 @@ function labelSection(input: LocationLabelInput): string {
   const summary = clean(input.summary).toUpperCase();
   const partType = clean(input.part_type).toUpperCase();
   const footer = [clean(input.description), clean(input.department)].filter(Boolean).join(' · ');
-  const value = (text: string, preferred: number) =>
+  const value = (text: string, preferred: number, widthIn: number) =>
     text
-      ? `<div class="value" style="font-size:${fittedFontSize(text, preferred, SUMMARY_COLUMN_PX)}px">${esc(text)}</div>`
+      ? `<div class="value" style="font-size:${fittedFontSize(text, preferred, widthIn * PX_PER_IN)}px">${esc(text)}</div>`
       : '<div class="value unset">Not set</div>';
+  // Part type and location number share a row in proportion to their length, so neither
+  // shrinks to make room for empty space beside the other.
+  const partShare = Math.min(0.65, Math.max(0.35, Math.max(partType.length, 4) / (Math.max(partType.length, 4) + Math.max(number.length, 3))));
+  const partWidth = CONTENT_WIDTH_IN * partShare;
+  const numberWidth = CONTENT_WIDTH_IN - partWidth;
 
   return `<section class="label">
-    <header><span>MESHFORGE</span><span>LOCATION</span></header>
-    <div class="top">
-      <div class="part">
-        <div class="caption">SUMMARY</div>${value(summary, 72)}
-        <div class="caption">PART TYPE</div>${value(partType, 56)}
-      </div>
-      <div class="location">
-        <div class="caption">LOCATION #</div>
-        <div class="number" style="font-size:${fittedFontSize(number, 72, NUMBER_COLUMN_PX)}px">${esc(number)}</div>
-      </div>
+    <div class="summary"><div class="caption">SUMMARY</div>${value(summary, SUMMARY_MAX_PX, CONTENT_WIDTH_IN)}</div>
+    <div class="row">
+      <div class="part" style="flex-basis:${partWidth.toFixed(2)}in"><div class="caption">PART TYPE</div>${value(partType, ROW_MAX_PX, partWidth)}</div>
+      <div class="location"><div class="caption">LOCATION #</div>${value(number, ROW_MAX_PX, numberWidth)}</div>
     </div>
     <div class="barcode">${code128Svg(serial)}</div>
     <div class="serial">${esc(serial)}${footer ? ` <span>· ${esc(footer)}</span>` : ''}</div>
@@ -122,16 +126,15 @@ export function locationLabelsHtml(labels: readonly LocationLabelInput[]): strin
   .toolbar p{margin:8px 0 0}
   .label{width:6in;height:4in;padding:.25in;margin:12px auto;page-break-after:always;break-after:page;border:1px solid #999;display:flex;flex-direction:column;overflow:hidden}
   .label:last-child{page-break-after:auto;break-after:auto}
-  header{display:flex;justify-content:space-between;font-weight:bold;letter-spacing:2px;font-size:13px;border-bottom:3px solid #000;padding-bottom:6px}
-  .top{display:flex;flex:1;min-height:0}
-  .part{flex:0 0 3.25in;min-width:0;padding-right:.1in}
-  .location{flex:1;min-width:0;border-left:3px solid #000;padding-left:.1in;display:flex;flex-direction:column}
-  .caption{font-size:12px;font-weight:bold;letter-spacing:1.5px;margin-top:6px}
-  .value{font-weight:bold;line-height:1;white-space:nowrap;overflow:hidden}
-  .value.unset{font-size:26px;font-weight:normal;font-style:italic}
-  .number{font-weight:bold;line-height:1;white-space:nowrap;overflow:hidden;margin:auto 0;text-align:center}
-  .barcode{border-top:3px solid #000;padding-top:6px}
-  .barcode svg{display:block;width:100%;height:.8in}
+  .summary{flex:1 1 0;min-height:0;overflow:hidden}
+  .row{display:flex;flex:1 1 0;min-height:0;border-top:3px solid #000}
+  .part{flex:0 0 auto;min-width:0;overflow:hidden}
+  .location{flex:1;min-width:0;overflow:hidden;border-left:3px solid #000;padding-left:.08in}
+  .caption{font-size:11px;font-weight:bold;letter-spacing:1.5px;margin-top:3px}
+  .value{font-weight:bold;line-height:.95;white-space:nowrap;overflow:hidden}
+  .value.unset{font-size:30px;font-weight:normal;font-style:italic;line-height:1.2}
+  .barcode{border-top:3px solid #000;padding-top:4px}
+  .barcode svg{display:block;width:100%;height:.6in}
   .serial{font:bold 16px "Courier New",monospace;letter-spacing:1px;margin-top:3px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .serial span{font:12px Arial,Helvetica,sans-serif;letter-spacing:0}
   @media print{.toolbar{display:none}.label{border:0;margin:0}}

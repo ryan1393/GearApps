@@ -6,11 +6,22 @@ MeshForge prints two kinds of label straight to network label printers:
 | --- | --- | --- |
 | Tray, container and location tags | 2.125 x 0.625 in | every **Print Tag** button |
 | Location summary tags | 2.125 x 0.625 in (tag stock) | **Print Summary Tag** on Admin > Locations and Blade Tracking > Locations |
-| Location label | 4 x 6 in landscape, browser print | **Print 4×6 Label** on Admin > Locations and Blade Tracking > Locations opens a landscape 4 x 6 in label (6 in across, 4 in tall) for that location and the browser's print dialog. The label shows:
+| Location label | 4 x 6 in landscape, browser print | **Print 4×6 Label** on Admin > Locations and Blade Tracking > Locations |
+| Cutter Build card | 4 x 6.5 in | **Print Cutter Card** on Build Cutter and Build Lookup |
 
-- Left: the **Summary** and **Part Type** kept at the location, in large type (shrunk to fit one line). Either one not set prints *Not set*; set them in the location's Summary and Part Type fields in Admin > Locations.
-- Right: **Location #** — the location number.
+A location summary tag has the same layout as the other tags, but its barcode and text are the Summary and part type set on the location, for example `1.955FC-RING`. Set them in the location's Summary and Part Type fields in Admin > Locations; Green Shed summary shelves (`GSR-`/`GSP-`) take them from their barcode. The location's own tag is unchanged.
+
+Coater packing slips (Letter), coater container labels (4 x 6) and location labels (4 x 6) are ordinary browser prints and use whatever printer the browser offers.
+
+## Location label (4 x 6)
+
+**Print 4×6 Label** on Admin > Locations and Blade Tracking > Locations opens a landscape 4 x 6 in label (6 in across, 4 in tall) for that location and the browser's print dialog. The label shows:
+
+- Top row: the **Summary** kept at the location, in type up to about 1.2 in tall.
+- Second row: the **Part Type** and **Location #** (the location number) side by side, each up to about 1 in tall.
 - Across the bottom: the location's barcode, Code 128 of its serial — the same value its small tag carries, so scanning it finds the location — with the serial, description and department under it.
+
+Each value shrinks only as far as it must to fit on one line. A Summary or part type that is not set prints *Not set*; set them in the location's Summary and Part Type fields in Admin > Locations.
 
 Choose the 4 x 6 printer in the print dialog and print landscape, at actual size (100%), with no margins. The layout is `libs/manufacturing/frontend/util-common/src/lib/location-label/location-label.ts`.
 
