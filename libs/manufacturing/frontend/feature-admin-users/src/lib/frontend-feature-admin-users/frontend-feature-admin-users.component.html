@@ -894,6 +894,15 @@
               [title]="locationSummaryTag(location) ? 'Print a tag reading ' + locationSummaryTag(location) : 'Set a Summary and Part Type to print a summary tag'">
               {{ printingTagId === location.id + ':summary' ? 'Printing…' : 'Print Summary Tag' }}
             </button>
+            <button
+              type="button"
+              class="gear-btn gear-btn-secondary"
+              [disabled]="busy || !location.enabled"
+              (click)="printLocationLabel(location)"
+              data-icon="print"
+              title="Print a 4 × 6 label with the Summary, part type, location number and location barcode">
+              Print 4×6 Label
+            </button>
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditLocation(location)" data-icon="edit" title="Edit">Edit</button>
             <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleLocationEnabled(location)">
               {{ location.enabled ? 'Disable' : 'Enable' }}

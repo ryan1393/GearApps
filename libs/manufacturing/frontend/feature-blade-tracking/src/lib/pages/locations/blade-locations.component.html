@@ -122,6 +122,14 @@
                   [title]="'Print a tag reading ' + summary">
                   {{ printingTagSerial === summary ? 'Printing…' : 'Print Summary Tag' }}
                 </button>
+                <button
+                  type="button"
+                  class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
+                  (click)="printLocationLabel(location)"
+                  data-icon="print"
+                  title="Print a 4 × 6 label with the Summary, part type, location number and location barcode">
+                  Print 4×6 Label
+                </button>
               </td>
               <td>
                 <button

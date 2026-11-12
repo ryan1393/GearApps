@@ -6,11 +6,23 @@ MeshForge prints two kinds of label straight to network label printers:
 | --- | --- | --- |
 | Tray, container and location tags | 2.125 x 0.625 in | every **Print Tag** button |
 | Location summary tags | 2.125 x 0.625 in (tag stock) | **Print Summary Tag** on Admin > Locations and Blade Tracking > Locations |
+| Location label | 4 x 6 in, browser print | **Print 4×6 Label** on Admin > Locations and Blade Tracking > Locations |
 | Cutter Build card | 4 x 6.5 in | **Print Cutter Card** on Build Cutter and Build Lookup |
 
 A location summary tag has the same layout as the other tags, but its barcode and text are the Summary and part type set on the location, for example `1.955FC-RING`. Set them in the location's Summary and Part Type fields in Admin > Locations; Green Shed summary shelves (`GSR-`/`GSP-`) take them from their barcode. The location's own tag is unchanged.
 
-Coater packing slips (Letter) and coater container labels (4 x 6) are ordinary browser prints and use whatever printer the browser offers.
+Coater packing slips (Letter), coater container labels (4 x 6) and location labels (4 x 6) are ordinary browser prints and use whatever printer the browser offers.
+
+## Location label (4 x 6)
+
+**Print 4×6 Label** on Admin > Locations and Blade Tracking > Locations opens a 4 x 6 in label for that location and the browser's print dialog. The label shows, top to bottom:
+
+- **Summary** and **Part Type** kept at the location, in large type (shrunk to fit one line). Either one not set prints *Not set*; set them in the location's Summary and Part Type fields in Admin > Locations.
+- **Location #** — the location number.
+- The location's barcode: Code 128 of its serial, the same value its small tag carries, so scanning it finds the location. The serial is printed under the barcode.
+- The description and department, when set.
+
+Choose the 4 x 6 printer in the print dialog and print at actual size (100%) with no margins. The layout is `libs/manufacturing/frontend/util-common/src/lib/location-label/location-label.ts`.
 
 ## Set up a printer
 
