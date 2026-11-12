@@ -1,7 +1,9 @@
 import { dockerCollectorTokenFile, isPrivateAddress, privateNetworkLookup, scannerConfig } from '@meshforge/api/core';
 import {
+  resolveScannerImagePath,
   ScannerCommand,
   ScannerFtpListing,
+  ScannerImageDefaults,
   ScannerLog,
   ScannerLogEntry,
   ScannerSummary,
@@ -184,11 +186,17 @@ export class ScannerClientService {
    * `<SCANNER_FTP_ROOT>/<scanner IP>/<SCANNER_FTP_IMAGE_FILE>`.
    */
   imageLocation(host: string | null, location: ScannerImageLocation = {}): { folder: string; file: string } {
-    const folder = location.folder?.trim().replace(/\/+$/, '');
-    const file = location.file?.trim() || this.cfg.ftp.imageFile;
-    if (folder) return { folder, file };
-    if (!host) throw new BadRequestException('Set the scanner\'s IP address or its image folder');
-    return { folder: `${this.cfg.ftp.root.replace(/\/+$/, '')}/${host}`, file };
+    const { folder, file } = resolveScannerImagePath(
+      { ip: host, image_folder: location.folder, image_file: location.file },
+      this.imageDefaults(),
+    );
+    if (!folder) throw new BadRequestException('Set the scanner\'s IP address or its image folder');
+    return { folder, file };
+  }
+
+  /** The default capture folder root and file name, for showing where each scanner's image is read. */
+  imageDefaults(): ScannerImageDefaults {
+    return { root: this.cfg.ftp.root, imageFile: this.cfg.ftp.imageFile };
   }
 
   /**

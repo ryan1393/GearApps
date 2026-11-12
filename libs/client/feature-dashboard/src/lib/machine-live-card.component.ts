@@ -12,7 +12,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
   FanucVariablesApi,
   LapperAccess,
@@ -20,7 +20,7 @@ import {
   ScannerDetailsApi,
 } from '@meshforge/client/core';
 import { LiveCycleTimerComponent, StatusBadgeComponent, ValueFieldComponent } from '@meshforge/client/ui';
-import { Machine, MachineFanucVariable, ScannerDetail } from '@meshforge/shared/domain';
+import { Machine, MachineFanucVariable, resolveScannerImagePath, ScannerDetail } from '@meshforge/shared/domain';
 import {
   catchError,
   combineLatest,
@@ -80,7 +80,8 @@ export const LIVE_FEED_MS = 1_000;
       </header>
 
       <div class="gear-live-body">
-        <div class="dana-media-frame gear-live-image">
+        <div class="gear-live-media">
+          <div class="dana-media-frame gear-live-image">
           @if (live()) {
             <span class="gear-live-feed dana-status-badge" data-tone="success" role="status">Live · photoeye on</span>
           }
@@ -95,6 +96,15 @@ export const LIVE_FEED_MS = 1_000;
             <div class="dana-media-placeholder" data-tone="warning">Image unavailable</div>
           } @else {
             <div class="dana-media-placeholder">Loading…</div>
+          }
+          </div>
+          @if (imagePath(); as p) {
+            <small
+              class="gear-live-path gear-muted"
+              [title]="p.defaultFolder ? 'Default folder: no image folder is set on this scanner' : 'Image folder set on this scanner'"
+            >
+              FTP <code>{{ p.folder }}/{{ p.file }}</code>{{ p.defaultFolder ? ' (default)' : '' }}
+            </small>
           }
         </div>
 
@@ -229,6 +239,15 @@ export const LIVE_FEED_MS = 1_000;
       object-fit: contain;
       display: block;
     }
+    .gear-live-media {
+      display: grid;
+      gap: var(--dana-space-1);
+      align-content: start;
+    }
+    .gear-live-path {
+      display: block;
+      overflow-wrap: anywhere;
+    }
     .gear-live-data {
       display: grid;
       gap: var(--dana-form-gap);
@@ -277,6 +296,18 @@ export class MachineLiveCardComponent implements OnDestroy {
   protected readonly fanucStale = signal(false);
   protected readonly lastUpdate = signal<string | null>(null);
   protected readonly controlsOpen = signal(false);
+  private readonly imageDefaults = toSignal(
+    this.scannerApi.imageDefaults().pipe(catchError(() => of(null))),
+    { initialValue: null },
+  );
+  /** Where this card's image is read on the FTP drop, so a wrong folder is easy to spot. */
+  protected readonly imagePath = computed(() => {
+    const scanner = this.scanner();
+    const defaults = this.imageDefaults();
+    if (!scanner || !defaults) return null;
+    const path = resolveScannerImagePath(scanner, defaults);
+    return path.folder ? path : null;
+  });
   private readonly scannerId = computed(
     () => this.machine().scanner?.id ?? this.machine().scanner_id ?? null,
   );

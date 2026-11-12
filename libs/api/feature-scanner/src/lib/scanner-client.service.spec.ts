@@ -4,6 +4,7 @@ import { createServer as createHttpServer, IncomingMessage } from 'node:http';
 import { AddressInfo, createServer, Server } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { resolveScannerImagePath } from '@meshforge/shared/domain';
 import { ScannerClientService } from './scanner-client.service';
 
 jest.mock('@meshforge/api/core', () => ({
@@ -405,5 +406,42 @@ describe('ScannerClientService commands through Lapper Read', () => {
     writeFileSync(tokenFile, '');
     await expect(client().sendCommand('127.0.0.1', { data: 'TUNE01' })).rejects.toThrow('Scanner 127.0.0.1:1');
     expect(seen).toEqual([]);
+  });
+});
+
+describe('Where a scanner\'s image is read (shared by the API, Scanners page and live cards)', () => {
+  const defaults = { root: '181-lapper-scanners/', imageFile: 'scanner-current.jpg' };
+
+  it('defaults to <root>/<IP>/<default file> and says so', () => {
+    expect(resolveScannerImagePath({ ip: '10.16.81.235', image_folder: null, image_file: null }, defaults)).toEqual({
+      folder: '181-lapper-scanners/10.16.81.235',
+      file: 'scanner-current.jpg',
+      defaultFolder: true,
+      defaultFile: true,
+    });
+  });
+
+  it("uses the scanner's own folder and file, trimmed", () => {
+    expect(
+      resolveScannerImagePath({ ip: '10.16.82.253', image_folder: ' 181-lapper-scanners/53711922/ ', image_file: 'a.JPG' }, defaults),
+    ).toEqual({ folder: '181-lapper-scanners/53711922', file: 'a.JPG', defaultFolder: false, defaultFile: false });
+  });
+
+  it('has no folder without an IP or a folder of its own', () => {
+    expect(resolveScannerImagePath({ ip: null, image_folder: '  ', image_file: null }, defaults).folder).toBeNull();
+  });
+
+  it('is the location the API reads', () => {
+    const service = new ScannerClientService({
+      defaultHost: '',
+      allowInsecureTls: true,
+      timeoutMs: 1000,
+      commandPort: 9004,
+      collectorUrl: 'http://127.0.0.1:1',
+      ftp: { host: '', user: '', password: '', ...defaults },
+    });
+    expect(service.imageDefaults()).toEqual(defaults);
+    expect(service.imageLocation('10.16.81.235')).toEqual({ folder: '181-lapper-scanners/10.16.81.235', file: 'scanner-current.jpg' });
+    expect(() => service.imageLocation(null)).toThrow("Set the scanner's IP address or its image folder");
   });
 });
