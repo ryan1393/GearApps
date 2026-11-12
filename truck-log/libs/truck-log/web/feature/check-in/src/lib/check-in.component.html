@@ -216,7 +216,7 @@
         </p>
         <div class="dana-alert" [class.dana-alert-success]="canSave" aria-live="polite">
           <b>{{canSave ? 'Ready to check in' : (missingRequiredItems.length + ' required item' + (missingRequiredItems.length === 1 ? '' : 's') + ' left')}}</b>
-          <ul class="dana-chip-list tl-missing" *ngIf="!canSave && missingRequiredItems.length" aria-label="Required items still needed"><li class="dana-chip" data-tone="warning" *ngFor="let item of visibleMissingRequiredItems">{{item}}</li><li class="dana-chip" *ngIf="hiddenMissingRequiredCount">+{{hiddenMissingRequiredCount}} more</li></ul>
+          <ul class="dana-chip-list tl-missing" *ngIf="!canSave && missingRequiredItems.length" aria-label="Required items still needed"><li class="dana-chip tl-chip-jump" data-tone="warning" *ngFor="let item of visibleMissingRequiredItems"><button type="button" [attr.aria-label]="'Go to ' + item" (click)="jumpToField(item)">{{item}}</button></li><li class="dana-chip" *ngIf="hiddenMissingRequiredCount">+{{hiddenMissingRequiredCount}} more</li></ul>
         </div>
         <label class="dana-field" for="checkin-print-mode">Printing
           <select id="checkin-print-mode" [ngModel]="printMode" (ngModelChange)="choosePrintMode($event)" [disabled]="formDisabled || printingConfigLoading" aria-describedby="checkin-print-help">

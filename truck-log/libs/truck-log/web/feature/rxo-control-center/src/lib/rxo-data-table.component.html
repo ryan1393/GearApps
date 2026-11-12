@@ -13,8 +13,8 @@
 <div class="dana-panel-body tl-stack tl-rxo-data-body">
   <input #rxoDriverDocumentFile type="file" accept="application/pdf,.pdf" hidden (change)="data.uploadRxoDriverDocument($event)">
   <form class="dana-filter-row tl-rxo-data-filters" (ngSubmit)="data.applyDataFilters()">
-    <label class="tl-rxo-search">Search<input name="rxoSearch" [(ngModel)]="data.dataSearch" placeholder="Shipment, order, carrier, PRO, trailer, status"></label>
-    <label>Direction<select name="rxoDirection" [(ngModel)]="data.dataDirection" (change)="data.applyDataFilters()"><option value="">All directions</option><option value="OUTBOUND">Outbound</option><option value="INBOUND">Inbound</option></select></label>
+    <label class="tl-rxo-search"><span class="tl-filter-label">Search</span><input name="rxoSearch" aria-label="Search RXO data" [(ngModel)]="data.dataSearch" placeholder="Shipment, order, carrier, PRO, trailer, status"></label>
+    <label><span class="tl-filter-label">Direction</span><select name="rxoDirection" aria-label="Direction" [(ngModel)]="data.dataDirection" (change)="data.applyDataFilters()"><option value="">All directions</option><option value="OUTBOUND">Outbound</option><option value="INBOUND">Inbound</option></select></label>
     <div class="dana-actions tl-filter-actions">
       <button class="dana-btn dana-btn-primary" type="submit" [disabled]="data.dataLoading">Search</button>
       <button class="dana-btn dana-btn-ghost" type="button" [disabled]="data.dataLoading" (click)="data.clearDataFilters()">Clear</button>
@@ -34,9 +34,6 @@
     </div>
   </div>
 
-  <div class="dana-actions tl-rxo-range" *ngIf="(data.dataPage?.total ?? 0) > 0">
-    <span class="dana-muted">{{data.dataSearch || data.dataDirection ? 'Filtered' : 'Current'}} active RXO data · {{data.dataRangeStart}}–{{data.dataRangeEnd}} of {{data.dataPage?.total ?? 0}}</span>
-  </div>
 
   <!-- Shipments -->
   <div class="dana-table-shell is-sticky-head" *ngIf="data.dataKind === 'shipments' && !data.dataLoading && !data.rxoDataError && data.dataPage?.kind === 'shipments'"
@@ -192,9 +189,14 @@
     <button class="dana-btn dana-btn-sm" type="button" [disabled]="data.dataLoading" (click)="data.retryRxoData()">Retry</button>
   </div>
 
+  <div class="tl-rxo-data-footer">
+  <div class="tl-rxo-range" *ngIf="(data.dataPage?.total ?? 0) > 0">
+    <span class="dana-muted">{{data.dataSearch || data.dataDirection ? 'Filtered' : 'Current'}} active RXO data · {{data.dataRangeStart}}–{{data.dataRangeEnd}} of {{data.dataPage?.total ?? 0}}</span>
+  </div>
   <nav class="dana-actions tl-pagination" aria-label="RXO data pages" *ngIf="(data.dataPage?.total ?? 0) > data.pageSize">
     <button class="dana-btn" type="button" [disabled]="data.dataLoading || data.currentPage <= 1" (click)="data.goPage(data.currentPage-1)">Previous</button>
     <span class="dana-muted">Page {{data.currentPage}} of {{data.totalPages}}</span>
     <button class="dana-btn" type="button" [disabled]="data.dataLoading || data.currentPage >= data.totalPages" (click)="data.goPage(data.currentPage+1)">Next</button>
   </nav>
+  </div>
 </div>

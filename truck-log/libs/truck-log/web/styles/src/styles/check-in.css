@@ -19,3 +19,7 @@
   .tl-checkin-rail { position: static; }
 }
 @media (max-width: 760px) { .tl-load-entry { grid-template-columns: 1fr; } }
+/* Missing-item chips are buttons that jump to their field. */
+.dana-chip.tl-chip-jump { padding: 0; }
+.tl-chip-jump > button { padding: 3px 8px; border: 0; border-radius: inherit; background: transparent; color: inherit; font-size: 12px; font-weight: 700; cursor: pointer; }
+.tl-chip-jump > button:hover { text-decoration: underline; }

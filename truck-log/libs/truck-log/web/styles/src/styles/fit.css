@@ -117,6 +117,31 @@ table.dana-table td { padding: 9px 12px; }
   .tl-rxo-status-summary .dana-kpi-note { display: none; }
   .tl-rxo-activity { padding: 8px 12px; }
 
+  /* RXO data panels: filter labels and table captions stay for screen readers only. */
+  .tl-rxo-data-filters .tl-filter-label,
+  .tl-rxo-toolbar .tl-filter-label,
+  .tl-rxo-caption { position: absolute; width: 1px; height: 1px; overflow: hidden; margin: -1px; padding: 0; border: 0; clip: rect(0 0 0 0); white-space: nowrap; }
+  /* Anchor the screen-reader-only captions inside their scrolling table instead of the page. */
+  .dana-page .dana-table-shell { position: relative; }
+  .tl-rxo-datasets > button { min-height: 34px; padding-block: 4px; }
+  /* After a jump (compact summary) the table comes first: the page description, the data panel
+     subtitle and the per-status strip give way until "Full summary" brings them back. */
+  .tl-rxo.is-focused > .dana-page-header p,
+  .tl-rxo.is-focused .tl-rxo-data-header small,
+  .tl-rxo.is-focused .tl-rxo-status-summary { display: none; }
+  .tl-rxo.is-focused .tl-rxo-activity { flex-wrap: nowrap; }
+  .tl-rxo.is-focused .tl-rxo-activity-detail { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tl-rxo-data-body { gap: 10px; }
+  .tl-rxo.is-focused [role="tabpanel"] table.dana-table td { padding-block: 7px; }
+  /* RXO Expedite Data tab: the search row stays put and only the shipments table scrolls. */
+  .tl-fill > tl-rxo-expedite.tl-scroll { display: flex; flex-direction: column; overflow: hidden; }
+  tl-rxo-expedite > section,
+  tl-rxo-expedite > section > .dana-panel-body,
+  tl-rxo-expedite section[aria-labelledby="expedite-shipments-title"] { display: flex; flex: 1 1 auto; min-height: 0; flex-direction: column; }
+  tl-rxo-expedite > section > .dana-panel-body { overflow: auto; }
+  tl-rxo-expedite section[aria-labelledby="expedite-shipments-title"] > * { flex: 0 0 auto; }
+  tl-rxo-expedite section[aria-labelledby="expedite-shipments-title"] > .dana-table-shell { flex: 1 1 auto; min-height: 160px; max-height: none; overflow: auto; }
+
   /* Sign-in strip above admin screens: one slim row. */
   .tl-admin-access { margin-bottom: 0; padding: 6px 12px; }
 }

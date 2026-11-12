@@ -9,9 +9,9 @@ import type {
 } from '@truck-log/shared/contracts';
 import { forkJoin, Subscription } from 'rxjs';
 import { Poller, TruckLogApi, createPoller, rxoRecoveryErrorMessage, rxoRecoveryWaitFeedback } from '@truck-log/web/data-access';
-import { StaleDataNoticeComponent, ToastService } from '@truck-log/web/ui';
+import { StaleDataNoticeComponent, ToastService, jumpToSection, rememberedFlag } from '@truck-log/web/ui';
 import { buildRxoControlView, type RxoControlView } from './rxo-control-center.presenter';
-import { RxoDataStore } from './rxo-data.store';
+import { RxoDataStore, type DataKind } from './rxo-data.store';
 import { RxoDataTableComponent } from './rxo-data-table.component';
 import { RxoSettingsPanelComponent, applyRxoSettings, emptyRxoSettingsForm } from './rxo-settings-panel.component';
 
@@ -58,6 +58,9 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
   statusReceivedAt = 0;
   serverClockOffsetMs = 0;
   timerDiagnosticsOpen = false;
+  /** Full KPI tiles (true) or the slim summary strip (false); remembered in this browser. */
+  private readonly summaryPreference = rememberedFlag('rxo.summary-open', true);
+  summaryOpen = this.summaryPreference.get();
   /** The latest background status refresh failed; the page shows older status. */
   statusRefreshFailed = false;
   /** Status presentation, recomputed once per status update and clock tick. */
@@ -258,6 +261,21 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
   get connectionRecoveryDetail() {
     return this.control?.recovery?.message || 'A controlled recovery reopens RXO with the saved login and requests a fresh scan. The previous verified data stays available.';
   }
+  toggleSummary() { this.setSummaryOpen(!this.summaryOpen); }
+  private setSummaryOpen(open: boolean) { this.summaryOpen = open; this.summaryPreference.set(open); }
+
+  /**
+   * A KPI tile was clicked: open the tab (and dataset) it summarizes, shrink the summary
+   * to its slim strip so the table gets the height, and move focus to that panel.
+   */
+  jumpTo(tab: MainTab, kind?: DataKind, diagnostics = false) {
+    this.activeTab = tab;
+    if (kind && this.data.dataKind !== kind) this.data.changeKind(kind);
+    if (diagnostics) this.timerDiagnosticsOpen = true;
+    this.setSummaryOpen(false);
+    jumpToSection(`rxo-panel-${tab}`);
+  }
+
   openRecoverySettings() {
     this.activeTab = 'settings';
     document.getElementById('rxo-tab-settings')?.focus();

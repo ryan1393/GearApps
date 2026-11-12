@@ -12,7 +12,7 @@ const mocks = {
   '@angular/core': { Component: decorator, Injectable: decorator, inject: () => ({}) },
   '@angular/common': {}, '@angular/router': {}, '@angular/common/http': {},
   '@truck-log/web/auth/admin': {}, '@truck-log/shared/contracts': {},
-  '@truck-log/web/data-access': {}, '@truck-log/web/ui': {},
+  '@truck-log/web/data-access': {}, '@truck-log/web/ui': { rememberedFlag: (_key, fallback) => ({ get: () => fallback, set() {} }), jumpToSection() {} },
   './rxo-data.store': {}, './rxo-data-table.component': {},
   './rxo-settings-panel.component': { emptyRxoSettingsForm: () => ({}), applyRxoSettings() {} },
   './rxo-expedite/rxo-expedite.component': {}, './rxo-expedite/rxo-expedite.store': {},

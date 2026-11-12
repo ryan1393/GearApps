@@ -11,7 +11,7 @@ import {
 import { elapsedSince } from '@truck-log/web/domain';
 import { DEFAULT_DOCK_AGING_SETTINGS, dockAgeClass, dockAgeMinutes, dockAgeTone } from '@truck-log/web/domain';
 import { DockScanComponent } from './dock-scan/dock-scan.component';
-import { ToastService, TruckLogDialogDirective } from '@truck-log/web/ui';
+import { ToastService, TruckLogDialogDirective, jumpToSection } from '@truck-log/web/ui';
 
 type DockDirectionFilter = 'ALL' | 'INBOUND' | 'OUTBOUND';
 type DockUrgencyFilter = 'ALL' | 'AGING' | 'OVERDUE';
@@ -82,15 +82,15 @@ export function dockBoardCounts(
       <label>Dock wait<select id="dock-board-urgency" [value]="urgencyFilter" (change)="onUrgencyChange($event)"><option value="ALL">All wait times</option><option value="AGING">Aging + overdue</option><option value="OVERDUE">Overdue only</option></select></label>
       <button class="dana-btn dana-btn-ghost" type="button" [disabled]="!hasActiveFilters" (click)="clearFilters()">Clear filters</button>
       <div class="tl-dock-counts" role="status" aria-live="polite" aria-atomic="true">
-        <span class="dana-count-badge">{{filteredVisits.length}} of {{totalCount}} shown</span>
-        <span class="dana-count-badge" [attr.data-tone]="agingCount ? 'warning' : null">{{agingCount}} aging</span>
-        <span class="dana-count-badge" [attr.data-tone]="overdueCount ? 'danger' : null">{{overdueCount}} overdue</span>
+        <button type="button" class="dana-count-badge tl-count-jump" [attr.aria-pressed]="!hasActiveFilters" title="Show every dock" (click)="showUrgency('ALL')">{{filteredVisits.length}} of {{totalCount}} shown</button>
+        <button type="button" class="dana-count-badge tl-count-jump" [attr.data-tone]="agingCount ? 'warning' : null" [attr.aria-pressed]="urgencyFilter === 'AGING'" title="Show aging and overdue docks" (click)="showUrgency('AGING')">{{agingCount}} aging</button>
+        <button type="button" class="dana-count-badge tl-count-jump" [attr.data-tone]="overdueCount ? 'danger' : null" [attr.aria-pressed]="urgencyFilter === 'OVERDUE'" title="Show overdue docks only" (click)="showUrgency('OVERDUE')">{{overdueCount}} overdue</button>
       </div>
     </div>
   </section>
   <p *ngIf="refreshError" class="dana-alert dana-alert-warning tl-notice" role="alert">Dock Board refresh failed. Showing last confirmed data<span *ngIf="lastUpdated"> from {{lastUpdated | date:'shortTime'}}</span>. Select Refresh to retry.</p>
 
-  <div class="tl-dock-grid" role="region" aria-label="Assigned docks" tabindex="0">
+  <div class="tl-dock-grid" id="dock-board-grid" role="region" aria-label="Assigned docks" tabindex="0">
     <article class="dana-card" *ngFor="let visit of filteredVisits; trackBy: trackDockVisit" [attr.data-tone]="ageTone(visit)">
       <header class="dana-card-header">
         <div><span class="dana-card-eyebrow">Dock</span><strong class="dana-card-title">{{visit.dockCode || '—'}}</strong></div>
@@ -191,6 +191,12 @@ export class DockBoardComponent implements OnInit, OnDestroy {
     const value = (event.target as HTMLSelectElement).value;
     this.urgencyFilter = value === 'AGING' || value === 'OVERDUE' ? value : 'ALL';
     this.updateFilteredVisits();
+  }
+  /** A count badge was clicked: filter the board to that wait level ('ALL' clears every filter) and jump to the cards. */
+  showUrgency(level: DockUrgencyFilter): void {
+    if (level === 'ALL') this.clearFilters();
+    else { this.urgencyFilter = level; this.updateFilteredVisits(); }
+    jumpToSection('dock-board-grid');
   }
   clearFilters(): void {
     this.searchTerm = '';

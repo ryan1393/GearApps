@@ -93,13 +93,15 @@ const EXPEDITE_DOCUMENT_SITE_KEY = 'fort-wayne-expedite';
         </ng-container>
 
         <section *ngIf="mode === 'data'" class="tl-stack" aria-labelledby="expedite-shipments-title">
+          <div class="tl-rxo-toolbar">
           <form class="dana-filter-row">
-            <label class="tl-rxo-search">Search<input name="expediteSearch" type="search" [(ngModel)]="shipmentSearch" placeholder="Shipment, origin, destination, status, SCAC" aria-label="Search Expedite shipments"></label>
+            <label class="tl-rxo-search"><span class="tl-filter-label">Search</span><input name="expediteSearch" type="search" [(ngModel)]="shipmentSearch" placeholder="Shipment, origin, destination, status, SCAC" aria-label="Search Expedite shipments"></label>
             <div class="dana-actions tl-filter-actions"><button class="dana-btn dana-btn-ghost" type="button" [disabled]="!shipmentSearch" (click)="shipmentSearch=''">Clear</button></div>
           </form>
 
           <div class="dana-actions tl-rxo-range">
             <span class="dana-muted" id="expedite-shipments-title">{{shipments?.storage === 'POSTGRESQL' ? 'Database copy of the latest verified batch' : 'Latest verified batch'}}<ng-container *ngIf="shipments"> · {{filteredShipments.length}} of {{shipments.rowCount}}</ng-container></span>
+          </div>
           </div>
 
           <p *ngIf="shipmentsLoading" class="dana-loading-state" role="status">Loading verified Expedite shipments…</p>

@@ -3,7 +3,7 @@ import { TruckLogAdminAccessComponent } from '@truck-log/web/auth/admin';
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { StaleDataNoticeComponent, ToastService } from '@truck-log/web/ui';
+import { StaleDataNoticeComponent, ToastService, jumpToSection, rememberedFlag } from '@truck-log/web/ui';
 import { TruckLogApi, rxoRecoveryErrorMessage, rxoRecoveryWaitFeedback } from '@truck-log/web/data-access';
 import { Subscription } from 'rxjs';
 import { expediteFailureDetail, expediteFailureTime } from './rxo-expedite/expedite-failure-display';
@@ -21,7 +21,7 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
   providers: [RxoExpediteStore],
   template: `
   <tl-admin-access></tl-admin-access>
-  <div class="tl-rxo">
+  <div class="tl-rxo" [class.is-focused]="!summaryOpen">
     <header class="dana-page-header">
       <div>
         <h1>RXO Expedite Control Center</h1>
@@ -43,7 +43,7 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
 
     <section class="dana-alert tl-rxo-activity" [attr.data-state]="integrationState" role="status" aria-live="polite">
       <span class="dana-status-badge" [attr.data-tone]="integrationTone">{{integrationStatus}}</span>
-      <span class="tl-rxo-activity-detail">{{integrationDetail}}</span>
+      <span class="tl-rxo-activity-detail" [title]="integrationDetail">{{integrationDetail}}</span>
       <span class="dana-muted dana-nowrap">{{integrationUpdated}}</span>
     </section>
 
@@ -88,24 +88,28 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
       </div>
     </section>
 
-    <div class="tl-rxo-kpis">
+    <div class="tl-rxo-kpis" [class.is-compact]="!summaryOpen" id="rxo-expedite-summary">
     <section class="dana-kpi-grid" aria-label="RXO Expedite scan and import summary">
       <div class="dana-kpi-card" [attr.data-tone]="needsReview && !waitingForNextScan ? 'danger' : (needsReview || timerStatusStale ? 'warning' : null)">
+        <button type="button" class="tl-kpi-jump" (click)="jumpTo('health')" [attr.aria-label]="'Timer status: open Exporter Health'"></button>
         <div class="dana-kpi-label">{{timerTitle}}</div>
         <div class="dana-kpi-value" aria-live="off">{{timerLabel}}</div>
         <div class="dana-kpi-note">{{schedulerStateLabel}} · {{scan.run?.status === 'RUNNING' ? 'manual' : 'scheduled'}}</div>
       </div>
       <div class="dana-kpi-card">
+        <button type="button" class="tl-kpi-jump" (click)="jumpTo('health')" [attr.aria-label]="'Last successful export: open Exporter Health'"></button>
         <div class="dana-kpi-label">Last successful export</div>
         <div class="dana-kpi-value tl-rxo-kpi-time">{{displayTime(status?.acquisition?.lastSuccessfulExport)}}</div>
         <div class="dana-kpi-note">Batch {{status?.acquisition?.sourceBatchId || status?.scheduler?.lastSourceBatchId || 'not reported'}}</div>
       </div>
       <div class="dana-kpi-card" [attr.data-tone]="databaseNeedsReview ? 'warning' : null">
+        <button type="button" class="tl-kpi-jump" (click)="jumpTo('health')" [attr.aria-label]="'Latest import: open Exporter Health'"></button>
         <div class="dana-kpi-label">Latest import</div>
         <div class="dana-kpi-value tl-rxo-kpi-time">{{displayTime(status?.database?.importedAt || null)}}</div>
         <div class="dana-kpi-note">{{status?.database?.state || (status?.databaseIngestionEnabled ? 'Not reported' : 'Migration required')}} · {{status?.database?.lastImportedBatch || status?.database?.latestVerifiedBatch || 'no batch'}}</div>
       </div>
       <div class="dana-kpi-card">
+        <button type="button" class="tl-kpi-jump" (click)="jumpTo('settings')" [attr.aria-label]="'Automatic scan: open Settings and Login'"></button>
         <div class="dana-kpi-label">Automatic scan</div>
         <div class="dana-kpi-value tl-rxo-kpi-time">Every {{status?.scheduler?.intervalMinutes ?? 30}} min</div>
         <div class="dana-kpi-note">Own scheduler · never overlaps</div>
@@ -113,13 +117,14 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
     </section>
 
     <section class="dana-kpi-grid" aria-label="Expedite shipment counts">
-      <div class="dana-kpi-card"><div class="dana-kpi-label">Expedite shipments</div><div class="dana-kpi-value">{{shipmentCount}}</div><div class="dana-kpi-note">Latest verified batch</div></div>
-      <div class="dana-kpi-card" [attr.data-tone]="criticalCount ? 'warning' : null"><div class="dana-kpi-label">Critical</div><div class="dana-kpi-value">{{criticalCount}}</div><div class="dana-kpi-note">Critical Expedite shipments</div></div>
-      <div class="dana-kpi-card" [attr.data-tone]="delayedCount ? 'warning' : null"><div class="dana-kpi-label">Delayed / watch</div><div class="dana-kpi-value">{{delayedCount}}</div><div class="dana-kpi-note">ETA status needs attention</div></div>
-      <div class="dana-kpi-card"><div class="dana-kpi-label">Documents ready</div><div class="dana-kpi-value">{{documentsReadyCount}}</div><div class="dana-kpi-note">With an active driver document</div></div>
+      <div class="dana-kpi-card"><button type="button" class="tl-kpi-jump" (click)="jumpTo('data')" [attr.aria-label]="'Expedite shipments: open the shipments table'"></button><div class="dana-kpi-label">Expedite shipments</div><div class="dana-kpi-value">{{shipmentCount}}</div><div class="dana-kpi-note">Latest verified batch</div></div>
+      <div class="dana-kpi-card" [attr.data-tone]="criticalCount ? 'warning' : null"><button type="button" class="tl-kpi-jump" (click)="jumpTo('data')" [attr.aria-label]="'Critical: open the shipments table'"></button><div class="dana-kpi-label">Critical</div><div class="dana-kpi-value">{{criticalCount}}</div><div class="dana-kpi-note">Critical Expedite shipments</div></div>
+      <div class="dana-kpi-card" [attr.data-tone]="delayedCount ? 'warning' : null"><button type="button" class="tl-kpi-jump" (click)="jumpTo('data')" [attr.aria-label]="'Delayed / watch: open the shipments table'"></button><div class="dana-kpi-label">Delayed / watch</div><div class="dana-kpi-value">{{delayedCount}}</div><div class="dana-kpi-note">ETA status needs attention</div></div>
+      <div class="dana-kpi-card"><button type="button" class="tl-kpi-jump" (click)="jumpTo('data')" [attr.aria-label]="'Documents ready: open the shipments table'"></button><div class="dana-kpi-label">Documents ready</div><div class="dana-kpi-value">{{documentsReadyCount}}</div><div class="dana-kpi-note">With an active driver document</div></div>
     </section>
     </div>
 
+    <div class="tl-rxo-tabbar">
     <div class="dana-tabs tl-rxo-tabs" role="tablist" aria-label="RXO Expedite Control Center sections">
       <button #dataTabButton id="rxo-expedite-tab-data" class="dana-tab" type="button" role="tab" aria-controls="rxo-expedite-panel-data"
               [class.is-active]="activeTab === 'data'" [attr.aria-selected]="activeTab === 'data'" [attr.tabindex]="activeTab === 'data' ? 0 : -1"
@@ -133,6 +138,8 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
               [class.is-active]="activeTab === 'settings'" [attr.aria-selected]="activeTab === 'settings'" [attr.tabindex]="activeTab === 'settings' ? 0 : -1"
               (click)="activeTab='settings'" (keydown.arrowright)="dataTabButton.focus(); $event.preventDefault()" (keydown.arrowleft)="healthTabButton.focus(); $event.preventDefault()"
               (keydown.home)="dataTabButton.focus(); $event.preventDefault()" (keydown.end)="settingsTabButton.focus(); $event.preventDefault()">Settings &amp; Login</button>
+    </div>
+    <button type="button" class="dana-btn dana-btn-ghost dana-btn-sm" aria-controls="rxo-expedite-summary" [attr.aria-expanded]="summaryOpen" (click)="toggleSummary()">{{summaryOpen ? 'Compact summary' : 'Full summary'}}</button>
     </div>
 
     <section *ngIf="activeTab === 'data'" id="rxo-expedite-panel-data" role="tabpanel"
@@ -169,6 +176,9 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
 export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
   readonly scan: ExpediteScanAction;
   activeTab: ExpediteMainTab = 'data';
+  /** Full KPI tiles (true) or the slim summary strip (false); remembered in this browser. */
+  private readonly summaryPreference = rememberedFlag('rxo-expedite.summary-open', true);
+  summaryOpen = this.summaryPreference.get();
   recoveryBusy = false;
   recoveryMessage = '';
   recoveryError = '';
@@ -234,6 +244,16 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
     }
     return this.status?.recovery?.message || 'A controlled recovery reopens Expedite with its saved login and requests a fresh scan. The previous verified batch stays available.';
   }
+  toggleSummary() { this.setSummaryOpen(!this.summaryOpen); }
+  private setSummaryOpen(open: boolean) { this.summaryOpen = open; this.summaryPreference.set(open); }
+
+  /** A KPI tile was clicked: open its tab, shrink the summary so the table gets the height, focus the panel. */
+  jumpTo(tab: ExpediteMainTab) {
+    this.activeTab = tab;
+    this.setSummaryOpen(false);
+    jumpToSection(`rxo-expedite-panel-${tab}`);
+  }
+
   openRecoverySettings() {
     this.activeTab = 'settings';
     document.getElementById('rxo-expedite-tab-settings')?.focus();

@@ -5,3 +5,10 @@
 .tl-panel-note { margin: 12px 18px 0; }
 /* Visit tables scroll sideways on tablets instead of squeezing every column. */
 .tl-wide-table { min-width: 940px; }
+/* Clickable summary tile: a full-size button inside the tile jumps to the section it summarizes.
+   The tile keeps its own markup and text; the button only adds the hit area, hover and focus ring. */
+.tl-rxo-kpis .dana-kpi-card,
+.tl-kpi-links .dana-kpi-card { position: relative; }
+.tl-kpi-jump { position: absolute; inset: 0; z-index: 1; width: 100%; padding: 0; border: 0; border-radius: inherit; background: transparent; cursor: pointer; }
+.tl-kpi-jump:hover { background: color-mix(in srgb, var(--dana-primary) 5%, transparent); }
+.tl-kpi-jump:focus-visible { outline: 2px solid var(--dana-primary); outline-offset: 2px; }

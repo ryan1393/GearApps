@@ -6,7 +6,7 @@ import { Poller, TruckLogApi, createPoller } from '@truck-log/web/data-access';
 import { DashboardData, DockAgingSettingsRecord, TruckVisitRecord } from '@truck-log/shared/contracts';
 import { elapsedSince, visitStatusLabel } from '@truck-log/web/domain';
 import { DEFAULT_DOCK_AGING_SETTINGS, dockAgeTone } from '@truck-log/web/domain';
-import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService } from '@truck-log/web/ui';
+import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService, jumpToSection } from '@truck-log/web/ui';
 
 @Component({
   standalone: true,
@@ -18,14 +18,14 @@ import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService } 
   </header>
   <tl-stale-data-notice [stale]="!!data && poller.stale()" [lastUpdated]="lastUpdated" subject="The Guard Dashboard"></tl-stale-data-notice>
 
-  <div class="dana-kpi-grid">
-    <div class="dana-kpi-card"><div class="dana-kpi-label">Trucks on site</div><div class="dana-kpi-value">{{data?.open ?? 0}}</div></div>
-    <div class="dana-kpi-card"><div class="dana-kpi-label">Assigned to dock</div><div class="dana-kpi-value">{{data?.atDock ?? 0}}</div></div>
-    <div class="dana-kpi-card" [attr.data-tone]="(data?.awaitingExit ?? 0) > 0 ? 'warning' : null"><div class="dana-kpi-label">Needs guard checkout</div><div class="dana-kpi-value">{{data?.awaitingExit ?? 0}}</div></div>
-    <div class="dana-kpi-card"><div class="dana-kpi-label">Checked out today</div><div class="dana-kpi-value">{{data?.checkedOutToday ?? 0}}</div></div>
+  <div class="dana-kpi-grid tl-kpi-links">
+    <div class="dana-kpi-card"><a class="tl-kpi-jump" routerLink="/active-trucks" aria-label="Trucks on site: open Active Trucks"></a><div class="dana-kpi-label">Trucks on site</div><div class="dana-kpi-value">{{data?.open ?? 0}}</div></div>
+    <div class="dana-kpi-card"><a class="tl-kpi-jump" routerLink="/dock-board" aria-label="Assigned to dock: open the Dock Board"></a><div class="dana-kpi-label">Assigned to dock</div><div class="dana-kpi-value">{{data?.atDock ?? 0}}</div></div>
+    <div class="dana-kpi-card" [attr.data-tone]="(data?.awaitingExit ?? 0) > 0 ? 'warning' : null"><button type="button" class="tl-kpi-jump" aria-label="Needs guard checkout: go to the checkout queue" (click)="jumpToQueue()"></button><div class="dana-kpi-label">Needs guard checkout</div><div class="dana-kpi-value">{{data?.awaitingExit ?? 0}}</div></div>
+    <div class="dana-kpi-card"><a class="tl-kpi-jump" routerLink="/history" aria-label="Checked out today: open Records and Paperwork"></a><div class="dana-kpi-label">Checked out today</div><div class="dana-kpi-value">{{data?.checkedOutToday ?? 0}}</div></div>
   </div>
 
-  <section class="dana-panel tl-cap" aria-label="Guard checkout queue">
+  <section class="dana-panel tl-cap" id="guard-checkout-queue" tabindex="-1" aria-label="Guard checkout queue">
     <div class="dana-panel-header"><h2>Needs Guard Action</h2><span class="dana-count-badge" [attr.data-tone]="awaitingExit.length > 0 ? 'warning' : 'success'">{{awaitingExit.length}} waiting</span></div>
     <p class="dana-list-empty" *ngIf="data && !awaitingExit.length">No trucks waiting for final checkout.</p>
     <p class="dana-list-empty" *ngIf="!data && !poller.stale()">Loading the guard checkout queue…</p>
@@ -88,6 +88,13 @@ export class DashboardComponent implements OnInit {
 
   load() {
     this.poller.refresh();
+  }
+
+  /** "Needs guard checkout" tile: focus the first Final Checkout button, or the queue when it is empty. */
+  jumpToQueue() {
+    const first = document.querySelector<HTMLElement>('#guard-checkout-queue .dana-btn-success');
+    if (first) { first.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); first.focus({ preventScroll: true }); }
+    else jumpToSection('guard-checkout-queue');
   }
 
   ageTone(visit: TruckVisitRecord) {
