@@ -201,7 +201,10 @@ export class MacroFormDialogComponent {
     // Only Argonaut macros are flagged: for any other, and consec, the tick is disabled.
     this.form.controls.number.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
       const flag = this.form.controls.flag_changes;
-      if (!this.canFlag()) flag.disable({ emitEvent: false });
+      if (!this.canFlag()) {
+        flag.setValue(false, { emitEvent: false });
+        flag.disable({ emitEvent: false });
+      }
       else flag.enable({ emitEvent: false });
     });
     effect(() => {
