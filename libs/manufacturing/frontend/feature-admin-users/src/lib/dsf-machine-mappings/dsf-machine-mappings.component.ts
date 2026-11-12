@@ -197,7 +197,7 @@ export class DsfMachineMappingsComponent implements OnInit {
   get sourceListProblem(): string {
     const problem = this.board?.source_options_problem;
     if (!problem) return '';
-    if (problem.reason === 'NO_SOURCES') return 'DSF returned no machine sources in a department named like "Dept. 132".';
+    if (problem.reason === 'NO_SOURCES') return 'DSF returned no machine sources in a department named like "Dept. 132" or listed in DSF_DEPARTMENT_NAMES.';
     if (problem.reason === 'NO_VALID_SOURCES') return 'DSF returned machine sources, but none had complete identifiers.';
     const code = problem.code ? ' (' + problem.code + ')' : '';
     const hint = this.codeHint(problem.code);

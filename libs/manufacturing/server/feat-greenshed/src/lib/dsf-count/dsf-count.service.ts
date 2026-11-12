@@ -23,11 +23,13 @@ import { findRoughMatches, RoughMatchResult } from './dsf-rough-matches';
 type Machine = {machine_id:string;machine_number:string;department:string;machine_type:string;active:boolean};
 type SourceClient = { connect():Promise<void>;query(text:string,values?:unknown[]):Promise<{rows:any[]}>;end():Promise<void>;on(event:string,fn:(e:unknown)=>void):void; };
 interface Config { enabled:boolean; valid:boolean; interval:number; machines:Set<string>; client:Record<string,unknown>; privilegedAccountAcknowledged?:boolean;
+  /** DSF department names (normalised, see dsfDepartmentKey) that stand for a MeshForge department code. */
+  departmentNames?:ReadonlyMap<string,string>;
   /** Why an enabled reader is not running: names the setting, never its value. */ problem?:string; }
 
 type SourceOption = {
   mapping_id:string; whiteboard_id:string; op_id:string; line_id:string; department_id:string;
-  department:string; line_name:string; whiteboard_name:string; mapping_active:boolean;
+  department:string; department_name?:string; line_name:string; whiteboard_name:string; mapping_active:boolean;
   whiteboard_active:boolean; operation_line_matches:boolean; active_mappings:number; running_reasons:number;
 };
 type MappingOverride = {
@@ -45,7 +47,7 @@ const MAPPING_OVERRIDE_SQL = `SELECT machine_id::text,mapping_id::text,whiteboar
  FROM public.dana_dsf_machine_mapping_v1`;
 const SOURCE_OPTIONS_SQL = `SELECT wm.id::text AS mapping_id,wm.whiteboard_id::text,wm.op_id::text,wm.line_id::text,
  l.department_id::text AS department_id,
- substring(d.name from '^Dept\\.\\s*([0-9]+)$') AS department,
+ substring(d.name from '^Dept\\.\\s*([0-9]+)$') AS department,btrim(d.name) AS department_name,
  btrim(l.name) AS line_name,btrim(w.name) AS whiteboard_name,wm.active AS mapping_active,w.active AS whiteboard_active,
  (o.line_id=wm.line_id) AS operation_line_matches,
  (SELECT count(*)::int FROM public.tbl_whiteboard_machines x WHERE x.op_id=wm.op_id AND x.active) AS active_mappings,
@@ -53,8 +55,31 @@ const SOURCE_OPTIONS_SQL = `SELECT wm.id::text AS mapping_id,wm.whiteboard_id::t
  FROM public.tbl_whiteboard_machines wm JOIN public.tbl_whiteboard w ON w.id=wm.whiteboard_id
  JOIN public.tbl_op o ON o.id=wm.op_id JOIN public.tbl_line l ON l.id=wm.line_id
  LEFT JOIN public.tbl_department d ON d.id=l.department_id
- WHERE d.name ~ '^Dept\\.\\s*[0-9]+$'
+ WHERE d.name ~ '^Dept\\.\\s*[0-9]+$' OR regexp_replace(upper(btrim(d.name)),'\\s+',' ','g') = ANY($1::text[])
  ORDER BY department,whiteboard_name,mapping_id LIMIT 5001`;
+
+/**
+ * DSF departments are named "Dept. 132"; a few use a plain name instead ("CUTTER GRIND" is
+ * Department 45, the CutGrind grinders). DSF_DEPARTMENT_NAMES lists those as NAME=code pairs.
+ */
+export const DSF_DEFAULT_DEPARTMENT_NAMES = 'CUTTER GRIND=45';
+export function dsfDepartmentKey(name:string):string { return String(name??'').trim().replace(/\s+/g,' ').toUpperCase(); }
+export function parseDsfDepartmentNames(value:string|undefined):Map<string,string>|null {
+  const text=(value??'').trim()||DSF_DEFAULT_DEPARTMENT_NAMES;
+  const out=new Map<string,string>();
+  for(const entry of text.split(',').map(x=>x.trim()).filter(Boolean)) {
+    const match=/^([^=]{1,60})=\s*([0-9]{1,10})$/.exec(entry);
+    const key=match?dsfDepartmentKey(match[1]):'';
+    if(!match||!key||/^DEPT\./.test(key)||out.has(key))return null;
+    out.set(key,match[2]);
+  }
+  return out.size<=50?out:null;
+}
+/** The MeshForge department code a DSF department name stands for, or null. */
+export function dsfDepartmentCode(name:string|null|undefined,names:ReadonlyMap<string,string>):string|null {
+  const text=String(name??'').trim();
+  return /^Dept\.\s*([0-9]+)$/.exec(text)?.[1] ?? names.get(dsfDepartmentKey(text)) ?? null;
+}
 
 // DSFCONNECT2: a user-approved exception, NOT removal of source/readonly/mapping guards.
 export const DSF_PRIVILEGED_ACK = 'TEMPORARY_APP_READ_ONLY_ACCEPTED';
@@ -88,7 +113,9 @@ export function readDsfConfig(env:NodeJS.ProcessEnv): Config {
     const n=Number(v);return n>=min&&n<=max?n:NaN;
   };
   const interval=integer('DSF_COUNT_INTERVAL_SECONDS',60,30,3600);
-  const off=(problem?:string):Config=>({enabled,valid:false,interval:Number.isFinite(interval)?interval:60,machines:new Set<string>(),client:{},...(problem?{problem}:{})});
+  const departmentNames=parseDsfDepartmentNames(env['DSF_DEPARTMENT_NAMES']);
+  const off=(problem?:string):Config=>({enabled,valid:false,interval:Number.isFinite(interval)?interval:60,machines:new Set<string>(),client:{},
+    departmentNames:departmentNames??new Map(),...(problem?{problem}:{})});
   if(!enabled)return off(); // Do not read secret files or construct a client while disabled.
   const host=env['DSF_DB_HOST']?.trim(),database=env['DSF_DB_NAME']?.trim(),user=env['DSF_DB_USER']?.trim();
   const port=integer('DSF_DB_PORT',5432,1,65535);
@@ -104,6 +131,8 @@ export function readDsfConfig(env:NodeJS.ProcessEnv): Config {
   if(!user)return off('DSF_DB_USER is empty.');
   if(!Number.isFinite(port))return off('DSF_DB_PORT must be a whole number from 1 to 65535.');
   if(!Number.isFinite(interval))return off('DSF_COUNT_INTERVAL_SECONDS must be a whole number from 30 to 3600.');
+  if(!departmentNames)
+    return off('DSF_DEPARTMENT_NAMES must be DSF department names and MeshForge department numbers, like CUTTER GRIND=45, separated by commas.');
   if(machineValues.length>1000||machineValues.some(x=>!/^[A-Za-z0-9-]{1,20}$/.test(x))||new Set(machineValues).size!==machineValues.length)
     return off('DSF_COUNT_MACHINES must be distinct machine numbers separated by commas (or empty).');
   // Never inherit PG* defaults or fall back to the Dana Apps database credentials.
@@ -129,7 +158,7 @@ export function readDsfConfig(env:NodeJS.ProcessEnv): Config {
         return off(caKey+' must hold PEM certificate(s) (-----BEGIN CERTIFICATE-----) and no private key.');
       ssl={rejectUnauthorized:true,...(ca?{ca}:{})};
     }
-    return {enabled:true,valid:true,interval,machines:new Set(machineValues),privilegedAccountAcknowledged,client:{
+    return {enabled:true,valid:true,interval,machines:new Set(machineValues),privilegedAccountAcknowledged,departmentNames,client:{
       host,port,database,user,password,ssl,application_name:'DanaApps-DSF-Count-V2',
       connectionTimeoutMillis:5000,query_timeout:7000,statement_timeout:5000,lock_timeout:1000,
       options:'-c default_transaction_read_only=on',keepAlive:true,
@@ -555,7 +584,9 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       const rights=(await client.query(ROLE_CHECK_SQL)).rows[0];
       this.accountPolicy=dsfAccountPolicy(this.config,account,rights);
       try {
-        const options=(await client.query(SOURCE_OPTIONS_SQL)).rows as SourceOption[];
+        const names=this.config.departmentNames??new Map<string,string>();
+        const options=((await client.query(SOURCE_OPTIONS_SQL,[[...names.keys()]])).rows as SourceOption[])
+          .map(x=>({...x,department:x.department||dsfDepartmentCode(x.department_name,names)||''}));
         if(options.length>5000)throw new DsfRefusal('SOURCE_OPTION_LIMIT');
         const valid=options.filter(x=>this.uuid(x.mapping_id)&&this.uuid(x.whiteboard_id)&&this.uuid(x.op_id)&&this.uuid(x.line_id)&&
           this.uuid(x.department_id)&&/^[0-9]+$/.test(x.department)&&typeof x.line_name==='string'&&x.line_name.trim().length>0&&typeof x.whiteboard_name==='string'&&x.whiteboard_name.trim().length>0);
@@ -588,7 +619,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
           (mapping.manual || actual.op_name==='OP10')&&actual.operation_line_matches===true&&actual.mapping_active===true&&
           actual.whiteboard_active===true&&actual.running_reasons>0&&
           (mapping.manual || (actual.active_mappings===1&&JSON.stringify(actual.known_mapping_ids)===JSON.stringify(mapping.known_mapping_ids)))&&
-          new RegExp('^Dept\\.\\s*'+mapping.department+'$').test(actual.department_name||'');
+          dsfDepartmentCode(actual.department_name,this.config.departmentNames??new Map())===mapping.department;
         if(!identityMatches) {nextStates.set(m.machine_id,{status:'MAPPING_REVIEW',note:'Source identity changed or is ambiguous'});nextCaches.delete(m.machine_id);continue;}
         let shift;
         try {shift=chooseShift((await client.query(SHIFTS_SQL,[mapping.line_id,at])).rows,at);}

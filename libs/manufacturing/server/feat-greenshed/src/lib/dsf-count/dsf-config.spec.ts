@@ -1,4 +1,4 @@
-import { DSF_PRIVILEGED_ACK, dsfAccountPolicy, dsfFailureCode, readDsfConfig } from './dsf-count.service';
+import { DSF_PRIVILEGED_ACK, dsfAccountPolicy, dsfDepartmentCode, dsfFailureCode, parseDsfDepartmentNames, readDsfConfig } from './dsf-count.service';
 import { DsfRefusal } from './dsf-core';
 
 const base = {
@@ -86,5 +86,20 @@ describe('DSF connection settings', () => {
     expect(dsfFailureCode(new Error('Connection terminated unexpectedly'))).toBe('CONNECTION_TERMINATED');
     expect(dsfFailureCode(Object.assign(new Error('x'), { code: 'not a safe code; DROP' }))).toBeNull();
     expect(dsfFailureCode(null)).toBeNull();
+  });
+
+  it('reads DSF departments with a plain name, CUTTER GRIND = 45 unless told otherwise', () => {
+    expect([...readDsfConfig(base).departmentNames!]).toEqual([['CUTTER GRIND', '45']]);
+    expect([...readDsfConfig({ ...base, DSF_DEPARTMENT_NAMES: ' cutter  grind=45, Heat Treat = 60 ' }).departmentNames!])
+      .toEqual([['CUTTER GRIND', '45'], ['HEAT TREAT', '60']]);
+    expect(readDsfConfig({ ...base, DSF_DEPARTMENT_NAMES: 'CUTTER GRIND' }).valid).toBe(false);
+    expect(readDsfConfig({ ...base, DSF_DEPARTMENT_NAMES: 'A=1,a=2' }).problem).toContain('DSF_DEPARTMENT_NAMES');
+    expect(parseDsfDepartmentNames('Dept. 45=45')).toBeNull();
+
+    const names = parseDsfDepartmentNames(undefined)!;
+    expect(dsfDepartmentCode('Dept. 132', names)).toBe('132');
+    expect(dsfDepartmentCode(' Cutter Grind ', names)).toBe('45');
+    expect(dsfDepartmentCode('Carb', names)).toBeNull();
+    expect(dsfDepartmentCode(null, names)).toBeNull();
   });
 });

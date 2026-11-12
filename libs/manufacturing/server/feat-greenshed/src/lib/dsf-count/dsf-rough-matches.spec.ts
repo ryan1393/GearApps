@@ -27,6 +27,16 @@ describe('DSF rough matches', () => {
     expect(roughMatch('LAP3', at('181', 'LAP 3 GLEASON'))).toBe('NAME_HAS_NUMBER');
     expect(roughMatch('G01', at('45', 'GRINDER 1'))).toBe('DIGITS_ONLY');
     expect(roughMatch('54', at('132', '132 PIN CUTTER 549'))).toBeNull();
+    // CutGrind grinders: whichever way the MeshForge machine number is written.
+    const cutGrind = at('45', 'CutGrind 3 1-24-79', 'CUTTER GRIND');
+    expect(roughMatch('1-24-79', cutGrind)).toBe('ENDS_IN_NUMBER');
+    expect(roughMatch('79', cutGrind)).toBe('ENDS_IN_NUMBER');
+    expect(roughMatch('CutGrind 3', cutGrind)).toBe('NAME_HAS_NUMBER');
+    expect(roughMatch('CUTGRIND3', cutGrind)).toBe('NAME_HAS_NUMBER');
+    expect(roughMatch('3', cutGrind)).toBe('NAME_HAS_NUMBER');
+    expect(roughMatch('G03', cutGrind)).toBe('DIGITS_ONLY');
+    expect(roughMatch('G01', at('45', 'CutGrind 7 1-24-80'))).toBeNull();
+    expect(roughMatch('1-24-78', cutGrind)).toBeNull();
     // The department number in a line name is not a machine number.
     expect(roughMatch('132', at('132', 'PIN CUTTER', 'LIne132-PIN_549'))).toBeNull();
   });
