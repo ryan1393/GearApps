@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { expectedScanInput } from '../focus-expected-scan';
+import { heldScanIgnoredText } from '../status-line';
 
 /** Every live scan panel by its host element, so a held scan can be handed to the step that is now expected. */
 const panels = new WeakMap<Element, ScanPanelComponent>();
@@ -153,11 +154,12 @@ export class ScanPanelComponent implements AfterViewInit, OnChanges, OnDestroy {
         target.acceptScan(scan);
         return;
       }
+      // Not used: say so beside this box when it is still showing, and tell the page (for its status line).
       if (!closing && startedReady) {
-        this.note = `Scan ${scan} ignored — wait for the previous step to finish, then scan again.`;
-        this.heldScanIgnored.emit(scan);
+        this.note = heldScanIgnoredText(scan);
         this.select();
       }
+      this.heldScanIgnored.emit(scan);
     });
   }
 
