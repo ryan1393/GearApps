@@ -20,7 +20,7 @@ function emptyLocation(): LocationDraft {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <section class="dana-panel">
+    <section class="dana-panel tl-fill">
       <div class="dana-panel-header">
         <div><h2>Locations</h2><small>{{data.locations.length}} saved — used for origin and destination</small></div>
       </div>

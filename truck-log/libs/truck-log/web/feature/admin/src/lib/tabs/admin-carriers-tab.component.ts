@@ -15,7 +15,7 @@ interface CarrierDraft { name: string; }
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <section class="dana-panel">
+    <section class="dana-panel tl-fill">
       <div class="dana-panel-header">
         <div><h2>Carriers</h2><small>{{data.carriers.length}} saved carrier{{data.carriers.length === 1 ? '' : 's'}}</small></div>
       </div>

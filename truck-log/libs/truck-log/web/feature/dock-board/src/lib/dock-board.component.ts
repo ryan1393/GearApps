@@ -71,7 +71,7 @@ export function dockBoardCounts(
   imports: [CommonModule, DockScanComponent, TruckLogDialogDirective],
   template: `
   <header class="dana-page-header">
-    <div><h1>Dock Board</h1><p *ngIf="lastUpdated">Updated {{lastUpdated | date:'shortTime'}} · refreshes automatically</p></div>
+    <div><h1>Dock Board</h1><p><span *ngIf="lastUpdated">Updated {{lastUpdated | date:'shortTime'}} · refreshes automatically · </span>Packing slips are optional; the guard prints them at Final Checkout.</p></div>
     <div class="dana-actions"><button class="dana-btn" type="button" (click)="load()">Refresh</button></div>
   </header>
 
@@ -90,7 +90,7 @@ export function dockBoardCounts(
   </section>
   <p *ngIf="refreshError" class="dana-alert dana-alert-warning tl-notice" role="alert">Dock Board refresh failed. Showing last confirmed data<span *ngIf="lastUpdated"> from {{lastUpdated | date:'shortTime'}}</span>. Select Refresh to retry.</p>
 
-  <div class="tl-dock-grid">
+  <div class="tl-dock-grid" role="region" aria-label="Assigned docks" tabindex="0">
     <article class="dana-card" *ngFor="let visit of filteredVisits; trackBy: trackDockVisit" [attr.data-tone]="ageTone(visit)">
       <header class="dana-card-header">
         <div><span class="dana-card-eyebrow">Dock</span><strong class="dana-card-title">{{visit.dockCode || '—'}}</strong></div>
@@ -135,10 +135,9 @@ export function dockBoardCounts(
             <button class="dana-btn" type="button" [disabled]="uploadingVisitId !== null || busy" (click)="packingSlipInput.click()">{{uploadingVisitId===visit.id ? 'Reading PDF…' : 'Upload PDF'}}</button>
           </div>
         </ng-template>
-        <p class="dana-field-hint">The guard prints this PDF during Final Checkout. One current PDF per load; the delivery number is saved even without a PDF.</p>
       </section>
 
-      <button class="dana-btn dana-btn-success dana-btn-lg dana-btn-block" type="button" [disabled]="busy || uploadingVisitId===visit.id" (click)="askComplete(visit)">Dock Complete — Send to Guard</button>
+      <button class="dana-btn dana-btn-success dana-btn-block" type="button" [disabled]="busy || uploadingVisitId===visit.id" (click)="askComplete(visit)">Dock Complete — Send to Guard</button>
     </article>
     <div class="dana-empty-state tl-dock-grid-empty" *ngIf="!filteredVisits.length && visits.length"><b>No trucks match the current filters.</b> Change the search or filters to see other docks. <button class="dana-btn dana-btn-sm" type="button" (click)="clearFilters()">Clear filters</button></div>
     <div class="dana-empty-state tl-dock-grid-empty" *ngIf="!visits.length && !lastUpdated && !refreshError">Loading assigned docks…</div>

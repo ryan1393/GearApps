@@ -24,7 +24,7 @@
 <p class="dana-alert dana-alert-warning tl-notice" *ngIf="docksLoaded && !activeDocks.length"><b>No active docks are configured.</b> Go to Administration → Docks before checking in a truck.</p>
 
 <!-- Post-save print package status and retry controls. -->
-<section class="dana-panel" *ngIf="print.lastPrintPackage && (print.rxoPrintItem || print.lastPrintPackage.automaticDockAssignment)">
+<section class="dana-panel tl-checkin-print" *ngIf="print.lastPrintPackage && (print.rxoPrintItem || print.lastPrintPackage.automaticDockAssignment)">
   <div class="dana-panel-header">
     <div><h2>Driver Print Package</h2><p>{{lastVisit?.visitReference}} · RXO document version {{print.lastPrintPackage.frozenRxoDocumentVersion || '—'}}</p></div>
     <span class="dana-status-badge" [attr.data-tone]="print.driverPrintComplete ? 'success' : print.driverPrintNeedsAttention ? 'warning' : 'info'">{{print.lastPrintPackage.status}}</span>

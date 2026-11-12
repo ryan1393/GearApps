@@ -88,6 +88,7 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
       </div>
     </section>
 
+    <div class="tl-rxo-kpis">
     <section class="dana-kpi-grid" aria-label="RXO Expedite scan and import summary">
       <div class="dana-kpi-card" [attr.data-tone]="needsReview && !waitingForNextScan ? 'danger' : (needsReview || timerStatusStale ? 'warning' : null)">
         <div class="dana-kpi-label">{{timerTitle}}</div>
@@ -117,6 +118,7 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
       <div class="dana-kpi-card" [attr.data-tone]="delayedCount ? 'warning' : null"><div class="dana-kpi-label">Delayed / watch</div><div class="dana-kpi-value">{{delayedCount}}</div><div class="dana-kpi-note">ETA status needs attention</div></div>
       <div class="dana-kpi-card"><div class="dana-kpi-label">Documents ready</div><div class="dana-kpi-value">{{documentsReadyCount}}</div><div class="dana-kpi-note">With an active driver document</div></div>
     </section>
+    </div>
 
     <div class="dana-tabs tl-rxo-tabs" role="tablist" aria-label="RXO Expedite Control Center sections">
       <button #dataTabButton id="rxo-expedite-tab-data" class="dana-tab" type="button" role="tab" aria-controls="rxo-expedite-panel-data"
@@ -134,23 +136,23 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
     </div>
 
     <section *ngIf="activeTab === 'data'" id="rxo-expedite-panel-data" role="tabpanel"
-             aria-labelledby="rxo-expedite-tab-data" tabindex="0" class="dana-panel">
+             aria-labelledby="rxo-expedite-tab-data" tabindex="0" class="dana-panel tl-fill">
       <div class="dana-panel-header">
         <div>
           <h2>Expedite shipments <span class="dana-count-badge">{{shipmentCount}}</span></h2>
           <small>Latest verified Expedite batch, mirrored into Truck Log.</small>
         </div>
       </div>
-      <tl-rxo-expedite mode="data"></tl-rxo-expedite>
+      <tl-rxo-expedite class="tl-scroll" mode="data"></tl-rxo-expedite>
     </section>
 
     <div *ngIf="activeTab === 'health'" id="rxo-expedite-panel-health" role="tabpanel"
-         aria-labelledby="rxo-expedite-tab-health" tabindex="0">
+         aria-labelledby="rxo-expedite-tab-health" tabindex="0" class="tl-fill tl-scroll">
       <tl-rxo-expedite mode="health"></tl-rxo-expedite>
     </div>
 
     <div *ngIf="activeTab === 'settings'" id="rxo-expedite-panel-settings" role="tabpanel"
-         aria-labelledby="rxo-expedite-tab-settings" tabindex="0">
+         aria-labelledby="rxo-expedite-tab-settings" tabindex="0" class="tl-fill tl-scroll">
       <tl-rxo-expedite *ngIf="adminAuth.canWrite(); else expediteSettingsSignIn" mode="settings"></tl-rxo-expedite>
       <ng-template #expediteSettingsSignIn>
         <section class="dana-panel">

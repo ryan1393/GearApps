@@ -39,6 +39,8 @@ const expectedImports = [
   './rxo.css',
   './tv.css',
   './admin.css',
+  // Last: desktop viewport-fit layout and density, which adjusts the area files above.
+  './fit.css',
 ];
 const entry = read(entryPath);
 const imports = [...entry.matchAll(/@import\s+["']([^"']+)["'];/g)].map((match) => match[1]);

@@ -2,9 +2,17 @@
 .tl-dock-search { flex: 1 1 320px; }
 .tl-dock-counts { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-left: auto; align-self: center; }
 
-.tl-dock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); align-items: start; gap: 16px; }
+.tl-dock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); align-items: start; gap: 14px; }
+/* Compact dock cards: three across on a 1366px guard PC. */
+.tl-dock-grid > .dana-card { gap: 10px; padding: 14px; }
+.tl-dock-grid .dana-card-title { font-size: 22px; }
+.tl-dock-grid .dana-card-section { padding: 10px; }
+.tl-dock-grid .dana-card-section .dana-btn { min-height: 32px; padding: 6px 10px; font-size: 12px; }
+.tl-dock-facts .dana-detail { padding: 7px 9px; }
+.tl-dock-facts .dana-detail-label { font-size: 10px; }
+.tl-dock-facts .dana-detail-value { margin-top: 2px; font-size: 13px; }
 .tl-dock-grid-empty { grid-column: 1 / -1; }
-.tl-dock-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tl-dock-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 
 @media (max-width: 760px) {
   .tl-dock-grid { grid-template-columns: 1fr; }

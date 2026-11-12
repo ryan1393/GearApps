@@ -25,12 +25,12 @@ import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService } 
     <div class="dana-kpi-card"><div class="dana-kpi-label">Checked out today</div><div class="dana-kpi-value">{{data?.checkedOutToday ?? 0}}</div></div>
   </div>
 
-  <section class="dana-panel" aria-label="Guard checkout queue">
+  <section class="dana-panel tl-cap" aria-label="Guard checkout queue">
     <div class="dana-panel-header"><h2>Needs Guard Action</h2><span class="dana-count-badge" [attr.data-tone]="awaitingExit.length > 0 ? 'warning' : 'success'">{{awaitingExit.length}} waiting</span></div>
     <p class="dana-list-empty" *ngIf="data && !awaitingExit.length">No trucks waiting for final checkout.</p>
     <p class="dana-list-empty" *ngIf="!data && !poller.stale()">Loading the guard checkout queue…</p>
     <p class="dana-list-empty" role="alert" *ngIf="!data && poller.stale()">Could not load the guard checkout queue. Retrying automatically; trucks waiting for checkout are not shown until it loads.</p>
-    <ul class="dana-action-list" *ngIf="awaitingExit.length">
+    <ul class="dana-action-list tl-scroll" *ngIf="awaitingExit.length">
       <li class="dana-action-row" *ngFor="let visit of awaitingExit">
         <div class="dana-action-main"><strong>{{visit.loadNumber || visit.visitReference}}</strong><span>{{visit.driverName}} · Trailer {{visit.trailerId}} · Dock {{visit.dockCode}}</span></div>
         <div class="dana-action-meta"><span>Dock complete</span><strong>{{visit.dockCompletedAt | date:'shortTime'}}</strong></div>
@@ -39,7 +39,7 @@ import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService } 
     </ul>
   </section>
 
-  <section class="dana-panel">
+  <section class="dana-panel tl-fill">
     <div class="dana-panel-header">
       <h2>Recent Trucks On Site</h2>
       <div class="dana-actions"><span class="dana-muted" *ngIf="data">Showing {{data.activeTrucks.length}} of {{data.open}} on site</span><a routerLink="/active-trucks" class="dana-btn">View All Active Trucks</a></div>

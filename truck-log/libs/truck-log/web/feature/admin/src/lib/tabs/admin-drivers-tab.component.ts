@@ -15,7 +15,7 @@ interface DriverDraft { name: string; phoneNumber: string; }
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <section class="dana-panel">
+    <section class="dana-panel tl-fill">
       <div class="dana-panel-header">
         <div><h2>Drivers</h2><small>{{data.drivers.length}} saved driver{{data.drivers.length === 1 ? '' : 's'}}</small></div>
       </div>

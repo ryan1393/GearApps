@@ -15,7 +15,7 @@ import { AdminDataStore } from '../admin-data.store';
     <div class="dana-panel-header">
       <div><h2>Dock time alerts</h2><small>When a truck at a dock turns yellow, then red</small></div>
     </div>
-    <div class="dana-panel-body tl-stack">
+    <div class="dana-panel-body tl-stack tl-scroll">
       <p class="dana-page-description">Only trucks still assigned to a dock are colored. Yellow starts at the first threshold; red starts at the second.</p>
       <form class="dana-filter-row" (ngSubmit)="saveDockAging()">
         <label>Yellow after (minutes)<input name="warningMinutes" type="number" min="1" max="10080" step="1" [(ngModel)]="warningMinutes"></label>

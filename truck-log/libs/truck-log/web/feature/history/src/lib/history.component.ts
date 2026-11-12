@@ -40,13 +40,14 @@ export class MaterialsAccessTokenStore {
     </form>
   </section>
 
+  <div class="tl-records-body" [class.has-detail]="!!selected">
   <section class="dana-panel" [attr.aria-busy]="loading">
     <div class="dana-panel-header">
       <div><h2>Visit Records</h2><p *ngIf="loading">Searching visit records…</p><p *ngIf="!loading && !searchError">{{pageStart}}–{{pageEnd}} of {{visits.length}} matching records</p><p class="dana-field-error" *ngIf="!loading && searchError">Search failed — retry when ready</p></div>
       <label class="dana-muted tl-inline-field" *ngIf="!loading && !searchError && visits.length">Rows per page <select class="dana-select tl-page-size" [(ngModel)]="pageSize" (ngModelChange)="page=1" aria-label="Records per page"><option [ngValue]="25">25</option><option [ngValue]="50">50</option><option [ngValue]="100">100</option></select></label>
     </div>
     <p class="dana-note tl-panel-note" *ngIf="!loading && !searchError && visits.length >= 250" role="note">Showing only the newest 250 matching visits. Narrow the search or date to find older ones.</p>
-    <div class="dana-table-shell"><table class="dana-table tl-wide-table"><thead><tr><th>Guard in</th><th>Load / Visit</th><th>Driver</th><th>Carrier</th><th>Trailer</th><th>Dock</th><th>Status</th><th>Paperwork</th><th><span class="dana-nowrap">Record</span></th></tr></thead><tbody>
+    <div class="dana-table-shell" role="region" aria-label="Visit records" tabindex="0"><table class="dana-table tl-wide-table"><thead><tr><th>Guard in</th><th>Load / Visit</th><th>Driver</th><th>Carrier</th><th>Trailer</th><th>Dock</th><th>Status</th><th>Paperwork</th><th><span class="dana-nowrap">Record</span></th></tr></thead><tbody>
       <tr *ngFor="let v of pageVisits"><td class="dana-nowrap">{{v.guardCheckInAt | date:'short'}}</td><td><b class="dana-nowrap">{{v.loadNumber || 'No load #'}}</b><span class="dana-cell-sub">{{v.visitReference}}</span><span class="dana-cell-sub" *ngIf="v.scannedDeliveryNumbers?.length">SAP {{v.scannedDeliveryNumbers?.join(', ')}}</span></td><td>{{v.driverName}}</td><td>{{v.carrierName || '—'}}</td><td class="dana-nowrap">{{v.trailerId || '—'}}</td><td><b class="dana-nowrap">{{v.dockCode || '—'}}</b></td><td><span class="dana-status-badge" [attr.data-tone]="v.status === 'DOCK_COMPLETE' ? 'warning' : v.status === 'GUARD_CHECKED_OUT' ? 'success' : 'info'">{{statusLabel(v.status)}}</span></td><td><span class="dana-count-badge" [attr.data-tone]="v.documentCount ? 'success' : null">{{v.documentCount || 0}} file{{v.documentCount === 1 ? '' : 's'}}</span></td><td><button class="dana-btn dana-btn-sm" type="button" (click)="openRecord(v)">Open</button></td></tr>
       <tr *ngIf="loading"><td colspan="9" class="dana-table-empty" role="status">Searching visit records…</td></tr>
       <tr *ngIf="!loading && searchError"><td colspan="9" class="dana-table-empty" role="alert">{{searchError}} <button type="button" class="dana-btn dana-btn-sm" (click)="load()">Retry Search</button></td></tr>
@@ -64,7 +65,7 @@ export class MaterialsAccessTokenStore {
       <div><h2>{{selected.loadNumber || selected.visitReference}}</h2><p>{{selected.visitReference}}</p></div>
       <div class="dana-actions"><a class="dana-btn" [href]="api.slipUrl(selected.id)" target="_blank">Print Slip</a><button class="dana-btn" type="button" (click)="closeRecord()">Close</button></div>
     </div>
-    <div class="dana-panel-body tl-stack">
+    <div class="dana-panel-body tl-stack tl-scroll">
       <div class="dana-detail-grid">
         <div class="dana-detail"><span class="dana-detail-label">Status</span><span class="dana-detail-value">{{statusLabel(selected.status)}}</span></div>
         <div class="dana-detail"><span class="dana-detail-label">Driver</span><span class="dana-detail-value">{{selected.driverName}}</span></div>
@@ -111,6 +112,7 @@ export class MaterialsAccessTokenStore {
       </div>
     </div>
   </section>
+  </div>
 
   <div class="dana-dialog-backdrop" *ngIf="tokenDialogOpen" (click)="cancelTokenDialog()">
     <form class="dana-dialog" tlDialog="materials-token-title" (tlDialogClose)="cancelTokenDialog()" (click)="$event.stopPropagation()" (ngSubmit)="submitTokenDialog()" autocomplete="off">
