@@ -17,12 +17,12 @@ import {
   GreenshedReferenceData,
   greenshedApiErrorText,
 } from '@meshforge/manufacturing/frontend/data-access-greenshed';
-import { DanaPageHeaderComponent } from '@dana/ui';
+import { DanaConfirmDialogComponent, DanaPageHeaderComponent } from '@dana/ui';
 
 @Component({
   selector: 'gear-greenshed-pull',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaPageHeaderComponent, GearScannerFocusDirective],
+  imports: [CommonModule, FormsModule, DanaPageHeaderComponent, DanaConfirmDialogComponent, GearScannerFocusDirective],
   templateUrl: './greenshed-pull.component.html',
 })
 export class GreenshedPullComponent implements OnInit {
@@ -259,6 +259,7 @@ export class GreenshedPullComponent implements OnInit {
       });
   }
   onReasonChange(): void {
+    this.pullConfirmation = false;
     ++this.shelfRequest;
     this.shelfSerial = '';
     this.shelf = null;
@@ -278,36 +279,49 @@ export class GreenshedPullComponent implements OnInit {
     this.resetPullDownstream();
   }
   private resetPullDownstream(): void {
+    this.pullConfirmation = false;
     ++this.shelfRequest;
     this.shelfSerial = '';
     this.shelf = null;
     this.comments = '';
     this.result = null;
   }
+  /** The pull is waiting for the operator to confirm it in the dialog. */
+  pullConfirmation = false;
+  /** Everything a pull needs is selected and validated. */
+  get pullReady(): boolean {
+    const build = this.build,
+      reason = this.reason;
+    return Boolean(
+      !this.busy &&
+        this.contextValid &&
+        build?.machine_run &&
+        reason &&
+        build.status_code === 'RUNNING' &&
+        (!reason.returns_to_shelf || this.shelf),
+    );
+  }
+  get pullConfirmationMessage(): string {
+    const build = this.build,
+      reason = this.reason;
+    if (!build?.machine_run || !reason) return '';
+    const destination = reason.returns_to_shelf
+      ? (this.shelf?.serial_number ?? 'selected shelf')
+      : 'Cutter Builder';
+    return `Machine ${build.machine_run.machine_number} · Reason: ${reason.name} · Destination: ${destination}. This records the cutter pull transaction.`;
+  }
+  /** Pull Cutter asks first; nothing is recorded until the operator confirms. */
   pull(): void {
+    if (this.pullReady) this.pullConfirmation = true;
+  }
+  confirmPull(): void {
+    this.pullConfirmation = false;
     const build = this.build,
       run = build?.machine_run,
       reason = this.reason,
       shelf = this.shelf;
-    if (
-      this.busy ||
-      !this.contextValid ||
-      !build ||
-      !run ||
-      !reason ||
-      build.status_code !== 'RUNNING' ||
-      (reason.returns_to_shelf && !shelf)
-    )
-      return;
-    const destination = reason.returns_to_shelf
-      ? (shelf?.serial_number ?? 'selected shelf')
-      : 'Cutter Builder';
-    if (
-      !globalThis.confirm(
-        `Pull cutter ${build.build_number}?\n\nMachine: ${run.machine_number}\nReason: ${reason.name}\nDestination: ${destination}\n\nThis records the cutter pull transaction.`,
-      )
-    )
-      return;
+    // Revalidate: the selection may have changed while the dialog was open.
+    if (!this.pullReady || !build || !run || !reason) return;
     const generation = this.generation;
     this.busy = true;
     this.error = '';

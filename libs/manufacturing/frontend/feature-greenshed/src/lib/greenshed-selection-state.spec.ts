@@ -190,18 +190,21 @@ describe('Greenshed selected context safety', () => {
   it('does not preselect a pull reason and refuses to pull until one is chosen', () => {
     setup({ build: 'BUILD-A' });
     const c = pull();
-    const confirm = jest.spyOn(globalThis, 'confirm').mockReturnValue(true);
     expect(c.reasonCode).toBe('');
     c.pull();
-    expect(confirm).not.toHaveBeenCalled();
+    expect(c.pullConfirmation).toBe(false);
+    c.confirmPull();
     expect(api['pullCutter']).not.toHaveBeenCalled();
   });
   it('sends the validated machine and run as pull preconditions', () => {
     setup({ build: 'BUILD-A' });
     const c = pull();
     c.reasonCode = 'TEARDOWN';
-    jest.spyOn(globalThis, 'confirm').mockReturnValue(true);
     c.pull();
+    expect(api['pullCutter']).not.toHaveBeenCalled();
+    expect(c.pullConfirmation).toBe(true);
+    expect(c.pullConfirmationMessage).toContain('Machine M1');
+    c.confirmPull();
     expect(api['pullCutter']).toHaveBeenCalledWith(
       expect.objectContaining({
         buildNumber: 'BUILD-A',
@@ -216,10 +219,11 @@ describe('Greenshed selected context safety', () => {
     const pending = new Subject<never>();
     api['pullCutter'].mockReturnValue(pending);
     c.reasonCode = 'TEARDOWN';
-    jest.spyOn(globalThis, 'confirm').mockReturnValue(true);
     c.pull();
+    c.confirmPull();
     c.reset();
     c.pull();
+    c.confirmPull();
     expect(c.build?.build_number).toBe('BUILD-A');
     expect(api['pullCutter']).toHaveBeenCalledTimes(1);
   });
@@ -273,6 +277,18 @@ describe('Greenshed selected context safety', () => {
     api['getHistory'].mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 503 })));
     c.open('BUILD-A'); expect(c.build?.build_number).toBe('BUILD-A'); expect(c.historyFailed).toBe(true);
     c.open('BUILD-A'); expect(c.historyFailed).toBe(false); expect(c.history).toEqual([]); expect(c.error).toBe('');
+  });
+  it('asks with the Dana dialog and does not pull when the selection changes before confirming', () => {
+    setup({ build: 'BUILD-A' });
+    const c = pull();
+    c.reasonCode = 'TEARDOWN';
+    c.pull();
+    expect(c.pullConfirmation).toBe(true);
+    c.buildNumber = 'OTHER';
+    c.onBuildInput();
+    expect(c.pullConfirmation).toBe(false);
+    c.confirmPull();
+    expect(api['pullCutter']).not.toHaveBeenCalled();
   });
   it('preserves machine/run preconditions in Running Machines pull navigation', () => {
     setup(); const c = TestBed.runInInjectionContext(() => new GreenshedMachinesComponent());

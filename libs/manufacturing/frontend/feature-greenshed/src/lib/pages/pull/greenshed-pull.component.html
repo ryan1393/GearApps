@@ -106,4 +106,6 @@
       <button type="button" (click)="reset()" class="gear-btn gear-btn-dark">Pull Another Cutter</button>
     </div>
   </div>
+  <dana-confirm-dialog [open]="pullConfirmation" [title]="'Pull cutter ' + (build?.build_number ?? '') + '?'" [message]="pullConfirmationMessage"
+    confirmLabel="Pull Cutter" (confirm)="confirmPull()" (cancel)="pullConfirmation = false" />
 </section>
