@@ -23,6 +23,11 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
   changes chooses which values count; the consec counter never does.
 - **Cutter-body compatibility** is one check on screen and in the API, and unetched bodies build
   again. See [CUTTER_BODY_BLADE_RULES.md](CUTTER_BODY_BLADE_RULES.md).
+- **Summary blades.** Each Summary has RING and PINION HOS, Inner blade and Outer blade, saved with
+  one Save Part Summary in Admin > Part Summaries. See
+  [SUMMARY_PART_TYPE_BLADES.md](SUMMARY_PART_TYPE_BLADES.md).
+- **Gearsets** show their master fields, and a manual base-data import keeps administrator
+  changes. See [GEARSETS.md](GEARSETS.md).
 - **Model numbers can be text** (S-110). **Back up the database before deploying**: the column
   changes from integer to text on startup.
 - **DSF** names the setting that stops counts from coming in.

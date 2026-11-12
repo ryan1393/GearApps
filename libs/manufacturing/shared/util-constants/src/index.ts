@@ -10,5 +10,6 @@ export * from './lib/app-access.constants';
 export * from './lib/blade-workflow.constants';
 
 export * from './lib/cutter-body-compatibility.constants';
+export * from './lib/summary-part-type-blades.constants';
 export * from './lib/startup-schema-lock.constants';
 export * from './lib/app-version.constants';

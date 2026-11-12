@@ -1,8 +1,10 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { IPartSummarySettings, ISummaryBodyRuleRow } from '@meshforge/manufacturing/shared/util-types';
 
-import { AdminApiService, AdminLocationRow } from '../admin-api.service';
+import { AdminApiService, AdminLocationRow, PartSummaryRow } from '../admin-api.service';
 
 import { FrontendFeatureAdminUsersComponent } from './frontend-feature-admin-users.component';
 
@@ -86,6 +88,67 @@ describe('FrontendFeatureAdminUsersComponent', () => {
       const location = { summary: { id: 's', number: '1.955fc' }, part_type: { id: 'r', code: 'RING' } } as AdminLocationRow;
       expect(component.locationSummaryTag(location)).toBe('1.955FC-RING');
       expect(component.locationSummaryTag({ ...location, part_type: null })).toBeNull();
+    });
+  });
+
+  describe('Edit Part Summary: one save for every field', () => {
+    const summary = { id: 's30538', number: '30538', revision: 'D', model_id: null, hos: 'LH', active: true, enabled: true } as PartSummaryRow;
+    const settings: IPartSummarySettings = {
+      summary_id: 's30538', summary_number: '30538', summary_revision: 'D', model_id: null, hos: 'LH',
+      part_types: [
+        { part_type_id: 'r', part_type_code: 'RING', hos: 'RH', inner_blade: 'RH IB', outer_blade: 'RH OB' },
+        { part_type_id: 'p', part_type_code: 'PINION', hos: 'LH', inner_blade: 'LH IB', outer_blade: 'RH IB' },
+      ],
+      body_rule: { summary_id: 's30538', required_blade_sets: 19, required_total_blades: 38, configured_body_rule: null } as ISummaryBodyRuleRow,
+    };
+    beforeEach(() => {
+      component.summarySettings = new Map([[summary.id, settings]]);
+      component.summaryBodyRules = new Map([[summary.id, settings.body_rule]]);
+      component.beginEditPartSummary(summary);
+    });
+
+    it('loads each Part Type group separately, keeping PINION Outer blade RH IB', () => {
+      expect(component.summaryTypeForm.RING).toEqual({ hos: 'RH', inner_blade: 'RH IB', outer_blade: 'RH OB' });
+      expect(component.summaryTypeForm.PINION).toEqual({ hos: 'LH', inner_blade: 'LH IB', outer_blade: 'RH IB' });
+      expect(component.summaryBodyRuleChoice).toBe('KEEP');
+      expect(component.summaryRequiredBladesPreview).toContain('38 blades (19 sets)');
+    });
+
+    it('sends Revision, both groups and no body rule in ONE request when the rule is kept', () => {
+      const save = jest.spyOn(TestBed.inject(AdminApiService), 'savePartSummary').mockReturnValue(of(settings));
+      component.summaryForm.revision = 'E';
+      component.summaryTypeForm.RING.inner_blade = '';
+      component.createPartSummary();
+      expect(save).toHaveBeenCalledTimes(1);
+      const [, body] = save.mock.calls[0];
+      expect(body).toEqual({
+        number: '30538', revision: 'E', model_id: null, hos: 'LH',
+        part_types: {
+          RING: { hos: 'RH', inner_blade: null, outer_blade: 'RH OB' },
+          PINION: { hos: 'LH', inner_blade: 'LH IB', outer_blade: 'RH IB' },
+        },
+      });
+      expect('body_rule' in body).toBe(false);
+    });
+
+    it('includes an explicit Body Size change and previews its Required Blades', () => {
+      const save = jest.spyOn(TestBed.inject(AdminApiService), 'savePartSummary').mockReturnValue(of(settings));
+      jest.spyOn(globalThis, 'confirm').mockReturnValue(true);
+      component.summaryBodyRuleChoice = '105';
+      expect(component.summaryRequiredBladesPreview).toContain('38 blades');
+      component.createPartSummary();
+      expect(save.mock.calls[0][1].body_rule).toBe('105');
+    });
+
+    it('keeps the draft when the save fails', () => {
+      jest.spyOn(TestBed.inject(AdminApiService), 'savePartSummary').mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409, error: { message: 'already exists' } })));
+      component.summaryForm.revision = 'C';
+      component.summaryTypeForm.PINION.outer_blade = 'RH IB';
+      component.createPartSummary();
+      expect(component.editingPartSummaryId).toBe('s30538');
+      expect(component.summaryForm.revision).toBe('C');
+      expect(component.summaryTypeForm.PINION.outer_blade).toBe('RH IB');
+      expect(component.busy).toBe(false);
     });
   });
 });

@@ -449,6 +449,27 @@
   },
   {
     "method": "GET",
+    "path": "/api/v1/cutter-config/summary-settings",
+    "controller": "ServerFeatCutterConfigController",
+    "source": "libs/manufacturing/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/cutter-config/summary-settings/:summaryId",
+    "controller": "ServerFeatCutterConfigController",
+    "source": "libs/manufacturing/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "PUT",
+    "path": "/api/v1/cutter-config/summary-settings/:summaryId",
+    "controller": "ServerFeatCutterConfigController",
+    "source": "libs/manufacturing/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",
+    "has_parameters": true
+  },
+  {
+    "method": "GET",
     "path": "/api/v1/cutter-config/body-compatibility",
     "controller": "ServerFeatCutterConfigController",
     "source": "libs/manufacturing/server/feat-cutter-config/src/lib/server-feat-cutter-config.controller.ts",

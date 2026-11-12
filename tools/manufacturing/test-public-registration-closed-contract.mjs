@@ -26,7 +26,7 @@ const registrationRoute = manifest.find(
   (route) => route.method === 'POST' && route.path === '/api/v1/auth/email/register',
 );
 if (registrationRoute) throw new Error('Route manifest still contains POST /api/v1/auth/email/register');
-if (manifest.length !== 119) throw new Error(`Expected 119 API routes after closing public registration; found ${manifest.length}`);
+if (manifest.length !== 122) throw new Error(`Expected 122 API routes after closing public registration; found ${manifest.length}`);
 
 // swagger.json is a generated artifact. The pre-merge cleanup deliberately moves generated
 // artifacts outside the Nx source tree before the source-only sweep, so its absence must not

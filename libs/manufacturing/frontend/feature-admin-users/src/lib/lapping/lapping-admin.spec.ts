@@ -45,6 +45,34 @@ describe('Lapping master data in Admin', () => {
     expect(text).toContain('(41:12)');
   });
 
+  it('shows both gearsets that share a pinion and Summary, with business status apart from Status', () => {
+    const fixture = TestBed.createComponent(LappingGearsetsComponent);
+    fixture.detectChanges();
+    const pinion = { id: 'p', number: '10060466', teeth: 11 };
+    const summary = { number: '30634', model: '200' };
+    http.expectOne('/api/v1/gearset').flush([
+      { id: 'g1', number: '10060460', rev: 'C', ratio: 3.7273, status: 'active', summary_id: 's', summary, pinion_id: 'p', pinion,
+        ring_id: 'r1', ring: { number: '10060462', teeth: 41 }, user_id: null, customer: 'Stellantis', application: 'JL Jeep Wrangler Front',
+        business_statuses: ['Production'], cut: '3-Axis', archived: false },
+      { id: 'g2', number: '10161958', rev: 'C', ratio: 3.4545, status: 'active', summary_id: 's', summary, pinion_id: 'p', pinion,
+        ring_id: 'r2', ring: { number: '10161959', teeth: 38 }, user_id: null, business_statuses: ['Service'], archived: false },
+    ]);
+    http.expectOne('/api/v1/part').flush([]);
+    http.expectOne('/api/v1/part-summary').flush([]);
+    fixture.detectChanges();
+    const rows = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('tbody tr'), (r) => r.textContent ?? '');
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toContain('10060466 / 10060462');
+    expect(rows[1]).toContain('10060466 / 10161959');
+    expect(rows.every((r) => r.includes('30634'))).toBe(true);
+    expect(rows[0]).toContain('Stellantis');
+    expect(rows[0]).toContain('Production');
+    // A Service gearset keeps its business status and stays usable.
+    expect(rows[1]).toContain('Service');
+    expect(rows[1].toLowerCase()).toContain('active');
+    expect(rows[1]).not.toContain('archived');
+  });
+
   it('suggests enabled production machines that have no Lapping setup yet', () => {
     const fixture = TestBed.createComponent(LappingMachinesComponent);
     fixture.componentRef.setInput('sharedMachines', [

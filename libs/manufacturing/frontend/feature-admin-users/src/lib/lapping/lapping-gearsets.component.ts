@@ -39,7 +39,9 @@ import { GearsetFormDialogComponent } from './gearset-form-dialog.component';
           <h2>Gearsets</h2>
           <p>
             Pair a pinion with a ring from the same Part Summary. Number, parts and Summary are
-            fixed once a gearset is assembled; revision and status can change.
+            fixed once a gearset is assembled; revision and status can change. A ring or pinion
+            can belong to several gearsets. Customer, application, business status and cut are
+            master data shown as stored; business status (Production, Service) is not Status.
           </p>
         </div>
         <div class="dana-toolbar">
@@ -66,6 +68,10 @@ import { GearsetFormDialogComponent } from './gearset-form-dialog.component';
               <th>Pinion / Ring</th>
               <th>Ratio</th>
               <th>Summary</th>
+              <th>Model</th>
+              <th>Customer / Application</th>
+              <th title="Business classification, separate from Status">Business status</th>
+              <th>Cut</th>
               <th>Status</th>
               <th data-dana-table-static aria-label="Actions"></th>
             </tr>
@@ -85,7 +91,21 @@ import { GearsetFormDialogComponent } from './gearset-form-dialog.component';
                   }
                 </td>
                 <td class="mono">{{ g.summary?.number ?? '—' }}</td>
-                <td><gear-status-badge [status]="g.status" /></td>
+                <td class="mono">{{ g.model || g.summary?.model || '—' }}</td>
+                <td>
+                  {{ g.customer || '—' }}
+                  @if (g.application) {
+                    <span class="gear-muted">· {{ g.application }}</span>
+                  }
+                </td>
+                <td>{{ businessStatuses(g) }}</td>
+                <td>{{ g.cut || '—' }}</td>
+                <td>
+                  <gear-status-badge [status]="g.status" />
+                  @if (g.archived) {
+                    <span class="gear-muted"> archived</span>
+                  }
+                </td>
                 <td class="right">
                   <div class="gear-actions">
                     <a
@@ -115,7 +135,7 @@ import { GearsetFormDialogComponent } from './gearset-form-dialog.component';
               </tr>
             } @empty {
               <tr>
-                <td danaTableEmpty colspan="7" class="empty-row">
+                <td danaTableEmpty colspan="11" class="empty-row">
                   {{
                     gearsets.loading()
                       ? 'Loading gearsets…'
@@ -182,6 +202,11 @@ export class LappingGearsetsComponent implements OnInit {
   protected onSaved() {
     this.toast.success(this.editing() ? 'Gearset updated' : 'Gearset added');
     this.reload();
+  }
+
+  /** Business classification (Production, Service, ...); not the same as Status. */
+  protected businessStatuses(gearset: Gearset): string {
+    return gearset.business_statuses?.length ? gearset.business_statuses.join(', ') : '—';
   }
 
   protected lappingSummaryUrl(gearset: Gearset): string {

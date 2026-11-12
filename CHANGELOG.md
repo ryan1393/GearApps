@@ -6,9 +6,11 @@
 
 Lappers get their cycle time recorded and shown in Lapping Summaries, a live timer while a cycle
 runs, and a Lapper Dashboard panel flagging setting changes (chosen per macro in Admin > Macros).
-Cutter-body compatibility is checked the same way everywhere and unetched bodies build again,
-model numbers can be text, and DSF says why counts are not coming in. **Back up the database before
-deploying**: model numbers change from integer to text on startup.
+Cutter-body compatibility is checked the same way everywhere and unetched bodies build again; each
+Summary has RING and PINION HOS, Inner and Outer blade, saved with one Save Part Summary; gearset
+master fields are shown and a manual base-data import keeps administrator changes; model numbers can
+be text, and DSF says why counts are not coming in. **Back up the database before deploying**: model
+numbers change from integer to text on startup.
 
 - **Setting changes on the Lapper Dashboard.** A new panel lists the cycles of the last 8 hours, on
   every machine, where a controller value changed since the previous cycle of the same machine and
@@ -36,6 +38,41 @@ deploying**: model numbers change from integer to text on startup.
   is not upgraded stops sending the field. Also fixes the Lapping Summaries Cycle time header,
   which broke into single letters when a machine and gearset had no cycles.
 
+- **RING / PINION HOS, Inner blade and Outer blade per Summary.** Each Summary now has separate
+  RING and PINION HOS, Inner blade and Outer blade (table `part_summary_part_type_blades`,
+  migration `20261112-summary-part-type-blades-v1`, additive). Parts show the Inner and Outer
+  blade of their own Summary + Part Type (view `part_blade_settings`, no copies on parts). A label
+  is kept in the field it was assigned to: PINION 30538 keeps Outer blade `RH IB`.
+  See `docs/manufacturing/SUMMARY_PART_TYPE_BLADES.md`.
+  - **One Save Part Summary.** Admin > Part Summaries > Edit has one form and one button for the
+    Summary fields, both Part Type groups and the Body Size rule (Required Blades preview), saved
+    in one request and one transaction (`PUT /api/v1/cutter-config/summary-settings/:summaryId`).
+    Omitting the Body Size keeps it; any failure saves nothing and keeps the draft. The per-card
+    Save Rule button is removed.
+  - **Opt-in source import** of the 216 Blade sheet cope.xlsx Sheet2 rows:
+    `npm run report:summary-part-type-blades` (dry run), then `npm run apply:summary-part-type-blades`.
+    Fills blank fields only, skips 30588/32414 and zero rows, creates no Summary.
+  - **Fix:** a partial `PATCH /api/v1/part-summaries/:id` that left out `revision` blanked the
+    Summary's revision (the update DTO inherited the create default). Revision now changes only
+    when sent.
+
+- **Gearsets: master fields visible, relationships and administrator states kept on import.**
+  See `docs/manufacturing/GEARSETS.md`.
+  - **A manual `npm run import:base-data` no longer undoes administrator changes.** It used to
+    re-enable and reactivate every Summary, ring/pinion part, roll master and blade requirement in
+    its files, including ones an administrator had disabled, and could rewrite the Summary or
+    teeth of a ring or pinion already used by a gearset. Existing rows now keep their
+    active/enabled state, parts used by a gearset keep their Summary, type and teeth, and the
+    import lists what it kept (`[KEEP]`). A missing Summary that exists only as a disabled row is
+    no longer recreated or re-enabled. Automatic deploys were never affected (they import only
+    into an empty database).
+  - **Gearset master fields.** The gearset API and Admin > Gearsets now show the stored model,
+    customer, application, business status (Production, Service, …), cut and archived flag,
+    read-only. Business status is shown apart from Status and never makes a gearset inactive.
+  - **`npm run audit:gearsets`** (read-only): actual `public.gearsets` columns and constraints,
+    counts by part type, shared rings/pinions/Summaries, status and archive state with linked
+    parts, integrity findings, and each gearset's Summary blade rule. `--seed <file>` compares a
+    historical seed and lists its import rules without applying them.
 - **DSF: say why counts are not coming in.** When `DSF_COUNT_ENABLED=true` but a setting is wrong,
   the API start-up log and Admin > DSF Mappings now name the setting (for example "DSF_DB_HOST is
   empty" or "DSF_DB_SSL_MODE must be verify-full or disable"), never its value; before, both only

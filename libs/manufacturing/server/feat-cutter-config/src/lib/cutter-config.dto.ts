@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min } from 'class-validator';
+import { IsBoolean, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, MaxLength, Min, ValidateNested } from 'class-validator';
 
 export class CreateCutterBladeRequirementDto {
   @IsUUID() summary_id!: string;
@@ -32,4 +32,32 @@ export class CutterBodyCompatibilityQueryDto {
 export class SetSummaryBodyRuleDto {
   @ApiProperty({ enum: ['064', '076', '088', '105', '105-SPECIAL'], description: 'Approved cutter-body rule; it controls the Summary-based required quantity.' })
   @IsIn(['064', '076', '088', '105', '105-SPECIAL']) body_rule!: string;
+}
+
+/** One Part Type group: omitted = unchanged; null or '' = clear. Positions are the fields themselves. */
+export class SavePartTypeSettingsDto {
+  @ApiPropertyOptional({ nullable: true, enum: ['RH', 'LH'], description: 'Workpiece Hand of Spiral for this Summary + Part Type' })
+  @IsOptional() @IsString() @MaxLength(8) hos?: string | null;
+  @ApiPropertyOptional({ nullable: true, example: 'LH IB' }) @IsOptional() @IsString() @MaxLength(64) inner_blade?: string | null;
+  @ApiPropertyOptional({ nullable: true, example: 'RH IB', description: 'Kept exactly; an IB label may be the Outer blade' })
+  @IsOptional() @IsString() @MaxLength(64) outer_blade?: string | null;
+}
+
+export class SavePartTypesDto {
+  @ApiPropertyOptional({ type: SavePartTypeSettingsDto }) @IsOptional() @ValidateNested() @Type(() => SavePartTypeSettingsDto) RING?: SavePartTypeSettingsDto;
+  @ApiPropertyOptional({ type: SavePartTypeSettingsDto }) @IsOptional() @ValidateNested() @Type(() => SavePartTypeSettingsDto) PINION?: SavePartTypeSettingsDto;
+}
+
+/** Save Part Summary: every submitted field in one transaction. Omitted fields stay as they are. */
+export class SavePartSummaryDto {
+  @ApiPropertyOptional() @IsOptional() @IsString() @IsNotEmpty() @MaxLength(100) number?: string;
+  @ApiPropertyOptional() @IsOptional() @IsString() @MaxLength(100) revision?: string;
+  @ApiPropertyOptional({ format: 'uuid', nullable: true }) @IsOptional() @IsUUID() model_id?: string | null;
+  @ApiPropertyOptional({ nullable: true, description: 'Summary-level HOS (part_summaries.hos)' }) @IsOptional() @IsString() @MaxLength(8) hos?: string | null;
+  @ApiPropertyOptional({ type: SavePartTypesDto }) @IsOptional() @ValidateNested() @Type(() => SavePartTypesDto) part_types?: SavePartTypesDto;
+  @ApiPropertyOptional({
+    nullable: true, enum: ['064', '076', '088', '105', '105-SPECIAL'],
+    description: 'Omitted keeps the current Body Size Rule; a code changes it (RING/PINION requirements follow); null clears it.',
+  })
+  @IsOptional() @IsIn(['064', '076', '088', '105', '105-SPECIAL']) body_rule?: string | null;
 }

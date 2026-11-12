@@ -61,3 +61,4 @@ export * from './lib/coater-container-set';
 
 export * from './lib/database/subscribers/user.entity-subscriber';
 export * from './lib/cutter-summary-body-rule.schema';
+export * from './lib/summary-part-type-blades.schema';
