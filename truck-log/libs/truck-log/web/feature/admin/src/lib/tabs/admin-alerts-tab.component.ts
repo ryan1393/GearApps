@@ -20,25 +20,37 @@ import { AdminDataStore } from '../admin-data.store';
       <form class="dana-filter-row" (ngSubmit)="saveDockAging()">
         <label>Yellow after (minutes)<input name="warningMinutes" type="number" min="1" max="10080" step="1" [(ngModel)]="warningMinutes"></label>
         <label>Red after (minutes)<input name="criticalMinutes" type="number" min="2" max="10080" step="1" [(ngModel)]="criticalMinutes"></label>
-        <div class="dana-actions tl-filter-actions"><button class="dana-btn dana-btn-primary" type="submit" [disabled]="data.busy || !dockAgingValid">Save alerts</button></div>
+        <div class="dana-actions tl-filter-actions"><button class="dana-btn dana-btn-primary" type="submit" [disabled]="data.busy || !loaded || !dockAgingValid">Save alerts</button></div>
       </form>
-      <p class="dana-note" *ngIf="dockAgingValid">Yellow at {{warningMinutes}} minutes; red at {{criticalMinutes}} minutes.</p>
+      <p class="dana-loading-state" role="status" *ngIf="!loaded && !loadFailed">Loading the current thresholds…</p>
+      <p class="dana-alert dana-alert-danger" role="alert" *ngIf="loadFailed">The current thresholds could not be loaded, so saving is off to avoid overwriting them. <button class="dana-btn dana-btn-sm" type="button" (click)="loadSettings()">Try again</button></p>
+      <p class="dana-note" *ngIf="loaded && dockAgingValid">Yellow at {{warningMinutes}} minutes; red at {{criticalMinutes}} minutes.</p>
       <p class="dana-alert dana-alert-danger" *ngIf="!dockAgingValid">Red minutes must be greater than yellow minutes.</p>
     </div>`,
 })
 export class AdminAlertsTabComponent implements OnInit {
   warningMinutes = 15;
   criticalMinutes = 30;
+  /** Save stays off until the server's values are shown, so the 15/30 placeholders can never overwrite them. */
+  loaded = false;
+  loadFailed = false;
 
   constructor(readonly data: AdminDataStore, private readonly api: TruckLogApi, private readonly toast: ToastService) {}
 
-  ngOnInit() {
+  ngOnInit() { this.loadSettings(); }
+
+  loadSettings() {
+    this.loadFailed = false;
     this.api.dockAgingSettings().subscribe({
       next: (settings) => {
         this.warningMinutes = settings.warningMinutes;
         this.criticalMinutes = settings.criticalMinutes;
+        this.loaded = true;
       },
-      error: () => this.toast.error('Could not load dock time alert settings.', 'Settings load failed'),
+      error: () => {
+        this.loadFailed = !this.loaded;
+        this.toast.error('Could not load dock time alert settings.', 'Settings load failed');
+      },
     });
   }
 
@@ -50,7 +62,7 @@ export class AdminAlertsTabComponent implements OnInit {
   }
 
   saveDockAging() {
-    if (this.data.busy || !this.dockAgingValid) return;
+    if (this.data.busy || !this.loaded || !this.dockAgingValid) return;
     const payload: DockAgingSettingsRecord = {
       warningMinutes: Number(this.warningMinutes),
       criticalMinutes: Number(this.criticalMinutes),

@@ -39,7 +39,7 @@ function emptyLocation(): LocationDraft {
           <label class="tl-admin-grow">Filter locations<input type="search" [(ngModel)]="locationFilter" placeholder="Name, city, state, address"></label>
         </div>
       </div>
-        <div class="dana-table-shell">
+        <div class="dana-table-shell" *ngIf="filteredLocations.length">
           <table class="dana-table tl-ref-table">
             <thead><tr><th scope="col">Name</th><th scope="col">Street address</th><th scope="col">City</th><th scope="col">State</th><th scope="col">ZIP / postal</th><th scope="col">Country</th><th scope="col">Status</th><th scope="col">Last used</th><th scope="col"><span class="dana-muted">Actions</span></th></tr></thead>
             <tbody>
@@ -63,7 +63,7 @@ function emptyLocation(): LocationDraft {
             </tbody>
           </table>
         </div>
-      <div class="dana-empty-state" *ngIf="!filteredLocations.length">No locations match this filter.</div>
+      <div class="dana-empty-state" *ngIf="!filteredLocations.length" role="status">{{data.emptyText('locations', 'locations', locationFilter)}}</div>
     </section>`,
 })
 export class AdminLocationsTabComponent {

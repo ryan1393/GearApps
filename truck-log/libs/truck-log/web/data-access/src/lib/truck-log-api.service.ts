@@ -55,7 +55,8 @@ export class TruckLogApi {
   }
 
   health() {
-    return this.http.get<HealthData>(`${this.base}/health`);
+    // Bounded: a hung check would otherwise freeze the status badge (and the TVs' redeploy reload).
+    return this.http.get<HealthData>(`${this.base}/health`).pipe(timeout(10000));
   }
 
   healthLive() {
@@ -64,7 +65,7 @@ export class TruckLogApi {
       application: string;
       version: string;
       time: string;
-    }>(`${this.base}/health/live`);
+    }>(`${this.base}/health/live`).pipe(timeout(10000));
   }
 
   dashboard() {
@@ -96,7 +97,7 @@ export class TruckLogApi {
 
   dockBoard(refreshKey?: string) {
     const suffix = refreshKey ? '?_refresh=' + encodeURIComponent(refreshKey) : '';
-    return this.http.get<TruckVisitRecord[]>(`${this.base}/visits/dock-board${suffix}`);
+    return this.http.get<TruckVisitRecord[]>(`${this.base}/visits/dock-board${suffix}`).pipe(timeout(20000));
   }
 
   docks() {
@@ -174,7 +175,7 @@ export class TruckLogApi {
   }
 
   dockAgingSettings() {
-    return this.http.get<DockAgingSettingsRecord>(`${this.base}/settings/dock-aging`);
+    return this.http.get<DockAgingSettingsRecord>(`${this.base}/settings/dock-aging`).pipe(timeout(10000));
   }
 
   updateDockAgingSettings(payload: DockAgingSettingsRecord) {
@@ -318,7 +319,9 @@ export class TruckLogApi {
   }
 
   createVisit(payload: CreateTruckVisitRequest) {
-    return this.http.post<TruckVisitRecord>(`${this.base}/visits`, payload);
+    // Bounded so a dropped connection ends in a clear error instead of an endless "Saving…";
+    // payload.clientRequestId makes the guard's retry safe if the server did save it.
+    return this.http.post<TruckVisitRecord>(`${this.base}/visits`, payload).pipe(timeout(30000));
   }
 
   driverPrintPackage(visitId: number) {
@@ -417,7 +420,8 @@ export class TruckLogApi {
     form.append('file', file);
     form.append('actor', actor);
     form.append('documentType', 'DRIVER_PAPERWORK');
-    return this.http.post<VisitDocumentRecord>(`${this.base}/visits/${id}/documents`, form);
+    // Generous for large scans over dock Wi-Fi, but never unbounded.
+    return this.http.post<VisitDocumentRecord>(`${this.base}/visits/${id}/documents`, form).pipe(timeout(120000));
   }
 
   saveManualDeliveryNumber(id: number, deliveryNumber: string) {
@@ -449,7 +453,8 @@ export class TruckLogApi {
     const form = new FormData();
     form.append('file', file);
     form.append('actor', actor);
-    return this.http.post<VisitDocumentRecord>(`${this.base}/visits/${id}/packing-slip`, form);
+    // Bounded: a hung upload would otherwise keep the whole Dock Board paused.
+    return this.http.post<VisitDocumentRecord>(`${this.base}/visits/${id}/packing-slip`, form).pipe(timeout(120000));
   }
 
   slipUrl(id: number) {

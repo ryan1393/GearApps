@@ -75,6 +75,24 @@ export class TruckLogDialogDirective implements AfterViewInit, OnDestroy {
     else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
   }
 
+  /**
+   * When the focused control disappears or becomes disabled while the dialog is open (a button
+   * that disables itself, a scan field replaced by a status line), focus falls to <body> and the
+   * host listener above stops hearing keys. Keep Escape and Tab working from there.
+   */
+  @HostListener('document:keydown', ['$event'])
+  onDocumentKeydown(event: KeyboardEvent) {
+    const active = document.activeElement;
+    if (active && active !== document.body) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      if (this.tlDialogEscape) this.tlDialogClose.emit();
+    } else if (event.key === 'Tab') {
+      event.preventDefault();
+      (this.focusable()[0] ?? this.host.nativeElement).focus();
+    }
+  }
+
   private focusable(): HTMLElement[] {
     const root: HTMLElement = this.host.nativeElement;
     return Array.from(root.querySelectorAll<HTMLElement>(FOCUSABLE))

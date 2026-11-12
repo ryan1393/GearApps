@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { TruckLogApi } from '@truck-log/web/data-access';
 import { ToastHostComponent } from '@truck-log/web/ui';
@@ -44,7 +44,7 @@ const WARNING_RXO_PHASE_LABELS: Record<string, string> = {
     <router-outlet />
   } @else {
   <div class="dana-app-shell" [class.is-fullscreen]="tvDisplayMode" [attr.data-role]="station.role()">
-    <aside class="dana-sidebar" [class.is-open]="mobileNavOpen" aria-label="Truck Log navigation">
+    <aside id="truck-log-sidebar" class="dana-sidebar" [class.is-open]="mobileNavOpen" aria-label="Truck Log navigation">
       <a [routerLink]="home" class="dana-brand-row" (click)="closeMobileNav()">
         <span class="dana-brand-mark" aria-hidden="true"><img src="assets/branding/dana-diamond.png" alt=""></span>
         <span class="dana-brand-copy"><strong>Truck Log</strong><span>Guard Shack</span></span>
@@ -117,7 +117,7 @@ const WARNING_RXO_PHASE_LABELS: Record<string, string> = {
 
     <div class="dana-main">
       <header class="dana-topbar">
-        <button class="dana-menu-button" type="button" aria-label="Open navigation" [attr.aria-expanded]="mobileNavOpen" (click)="toggleMobileNav()">&#9776;</button>
+        <button #menuButton class="dana-menu-button" type="button" aria-label="Open navigation" aria-controls="truck-log-sidebar" [attr.aria-expanded]="mobileNavOpen" (click)="toggleMobileNav()">&#9776;</button>
         <form class="dana-global-search" role="search" (submit)="$event.preventDefault(); search(globalSearch.value)">
           <input #globalSearch type="search" placeholder="Find load, driver, phone, trailer, carrier…" aria-label="Find load, driver, phone, trailer, carrier">
         </form>
@@ -148,6 +148,7 @@ const WARNING_RXO_PHASE_LABELS: Record<string, string> = {
 })
 export class AppComponent implements OnInit, OnDestroy {
   readonly version = TRUCK_LOG_VERSION;
+  @ViewChild('menuButton') private menuButton?: ElementRef<HTMLButtonElement>;
   healthState: HealthState = 'checking';
   healthLabel = 'Checking System';
   healthDetail = 'Checking API, database, and document storage.';
@@ -207,11 +208,19 @@ export class AppComponent implements OnInit, OnDestroy {
 
   toggleMobileNav() {
     this.mobileNavOpen = !this.mobileNavOpen;
+    // Move keyboard focus into the drawer so Tab walks its links, not the page behind the backdrop.
+    if (this.mobileNavOpen) setTimeout(() => document.querySelector<HTMLElement>('#truck-log-sidebar nav a')?.focus());
   }
 
-  closeMobileNav() {
+  /** returnFocus: closed from the keyboard (Escape), so focus goes back to the menu button. */
+  closeMobileNav(returnFocus = false) {
+    if (!this.mobileNavOpen) return;
     this.mobileNavOpen = false;
+    if (returnFocus) this.menuButton?.nativeElement.focus();
   }
+
+  @HostListener('document:keydown.escape')
+  onEscape() { this.closeMobileNav(true); }
 
   search(value: string) {
     const q = value.trim();

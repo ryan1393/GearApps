@@ -7,6 +7,13 @@ import type { TvBoardSnapshot, TvVisitRecord } from '@truck-log/shared/contracts
 import { TV_ROTATION_DEFAULT, tvRotationSeconds, tvRotationKey, tvAge, TvAge, TvAgePart } from './tv-display.preferences';
 import { readTvSnapshot, tvBoard, tvElapsed, tvPages, tvPhase, tvUrgency, TvBoardView, TvDockTile } from './tv-display.model';
 
+/** Rotation resumes on its own after this long without an edit in the rotation box. */
+const ROTATION_EDIT_IDLE_MS = 60_000;
+/** How often the per-page counts go back to the screen's full capacity before refitting. */
+const CAPACITY_RESET_MS = 10 * 60_000;
+/** A snapshot this much older than the last one means the server clock was reset, not a replay. */
+const CLOCK_RESET_MS = 60_000;
+
 @Component({
   selector: 'tl-tv-display', standalone: true, imports: [CommonModule, RouterLink],
   templateUrl: './tv-display.component.html',
@@ -42,6 +49,8 @@ export class TvDisplayComponent implements OnInit, OnDestroy, AfterViewChecked {
   private requestId = 0;
   private fitFrame?: number;
   private fitKey = '';
+  private capacityMeasuredAt = 0;
+  private rotationEditedAt = 0;
   constructor(private readonly http: HttpClient, private readonly route: ActivatedRoute, private readonly element: ElementRef<HTMLElement>) {}
   ngOnInit(): void {
     this.measure();
@@ -61,6 +70,7 @@ export class TvDisplayComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.subscriptions.unsubscribe();
   }
   @HostListener('window:resize') measure(): void {
+    this.capacityMeasuredAt = performance.now();
     const w = window.innerWidth, h = window.innerHeight;
     this.tileCapacity = w < 700 ? 1 : w < 1400 ? (h < 900 ? 2 : 4) : (h < 820 ? 3 : 6);
     this.rowCapacity = w < 700 ? 1 : Math.max(2, Math.min(12, Math.floor((h - (w < 1150 ? 470 : 385)) / 88)));
@@ -98,6 +108,12 @@ export class TvDisplayComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.ageSeconds = Math.max(0, Math.floor((mono - this.receivedMonotonic) / 1000));
       this.now = this.serverTime + Math.max(0, mono - this.receivedMonotonic);
     }
+    // An unattended TV must not stay paused because someone clicked the rotation box and walked away.
+    if (this.rotationEditing && mono - this.rotationEditedAt > ROTATION_EDIT_IDLE_MS) {
+      this.rotationEditing = false; this.rotationInput = String(this.rotationSeconds); this.rotationError = '';
+      this.nextRotation = mono + this.rotationSeconds * 1000;
+      (document.activeElement as HTMLElement | null)?.blur?.();
+    }
     if (!this.paused && !this.rotationEditing && mono >= this.nextRotation) { this.cycle++; this.nextRotation = mono + this.rotationSeconds * 1000; }
   }
   refresh(): void {
@@ -114,7 +130,12 @@ export class TvDisplayComponent implements OnInit, OnDestroy, AfterViewChecked {
         if (this.destroyed) return;
         try {
           const next = readTvSnapshot(raw), time = Date.parse(next.generatedAt);
-          if (this.snapshot && time <= this.serverTime) throw new Error('No newer server snapshot.');
+          // Same-or-older answers are replays (a cache) and are refused, except a clearly older clock:
+          // after the database clock is corrected backwards, the TV must not stay "stale" for hours.
+          if (this.snapshot && time <= this.serverTime && this.serverTime - time < CLOCK_RESET_MS) throw new Error('No newer server snapshot.');
+          // fitToVisibleArea only ever lowers the per-page counts; start again from the screen's
+          // full capacity now and then so one busy hour cannot leave a TV at 1 card per page for days.
+          if (performance.now() - this.capacityMeasuredAt > CAPACITY_RESET_MS) this.measure();
           this.snapshot = next; this.view = tvBoard(next);
           this.serverTime = time; this.receivedMonotonic = performance.now(); this.now = time;
           this.ageSeconds = 0; this.refreshError = '';
@@ -157,9 +178,9 @@ export class TvDisplayComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
   editRotation(value: string): void {
     if (this.destroyed) return;
-    this.rotationInput = value; this.rotationEditing = true; this.rotationError = ''; this.rotationMessage = '';
+    this.rotationInput = value; this.rotationEditing = true; this.rotationEditedAt = performance.now(); this.rotationError = ''; this.rotationMessage = '';
   }
-  focusRotation(): void { this.rotationEditing = true; }
+  focusRotation(): void { this.rotationEditing = true; this.rotationEditedAt = performance.now(); }
   blurRotation(): void {
     this.rotationEditing = false;
     this.nextRotation = performance.now() + this.rotationSeconds * 1000;

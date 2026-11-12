@@ -49,6 +49,8 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
   private recoveryRequest?: Subscription;
   private scanRequest?: Subscription;
   private destroyed = false;
+  private refreshAllRequest?: Subscription;
+  private statusRequestSeq = 0;
   lastUpdated: Date | null = null;
   importStatus: RxoImportStatusData | null = null;
   control: RxoControlStatusData | null = null;
@@ -104,6 +106,7 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.destroyed = true;
+    this.refreshAllRequest?.unsubscribe();
     this.recoveryRequest?.unsubscribe();
     this.scanRequest?.unsubscribe();
     if (this.pageClockTimer) {
@@ -139,11 +142,14 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
 
   refreshAll() {
     this.busy = true;
-    forkJoin({
+    this.refreshAllRequest?.unsubscribe();
+    this.refreshAllRequest = forkJoin({
       importStatus: this.api.rxoStatus(),
       control: this.api.rxoControl(),
     }).subscribe({
       next: ({ importStatus, control }) => {
+        if (this.destroyed) return;
+        this.statusRequestSeq += 1;
         this.importStatus = importStatus;
         this.statusRefreshFailed = false;
         this.lastUpdated = new Date();
@@ -153,11 +159,32 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
         this.controlPoller.schedule();
       },
       error: (error) => {
+        if (this.destroyed) return;
         this.busy = false;
         this.statusRefreshFailed = true;
         this.publishSystemStatus(false, true);
         this.toast.error(error?.error?.message || 'Could not load RXO Control Center.');
+        // The data tables come from their own endpoint; load them even when status failed.
+        this.data.loadData();
         this.controlPoller.schedule();
+      },
+    });
+  }
+
+  /** Background import-status reads can overlap; only the newest one may update the page. */
+  private refreshImportStatus(after?: () => void, failed?: () => void) {
+    const seq = ++this.statusRequestSeq;
+    this.api.rxoStatus().subscribe({
+      next: (status) => {
+        if (this.destroyed || seq !== this.statusRequestSeq) return;
+        this.importStatus = status;
+        this.updateView();
+        after?.();
+      },
+      error: () => {
+        if (this.destroyed || seq !== this.statusRequestSeq) return;
+        this.statusRefreshFailed = true;
+        failed?.();
       },
     });
   }
@@ -177,15 +204,12 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
     if (next !== previous && (next === 'COMPLETE' || next === 'PARTIAL')) {
       if (next === 'PARTIAL') this.toast.warning('RXO import needs review. Open Import details for the affected dataset and direction.');
       else this.toast.success('RXO scan, sync, and PostgreSQL import completed.');
-      this.api.rxoStatus().subscribe({
-        next: (status) => { this.importStatus = status; this.updateView(); this.data.loadData(); },
-        // The scan finished but the import summary could not be read: show the data and mark status stale.
-        error: () => { this.statusRefreshFailed = true; this.data.loadData(); },
-      });
+      // The scan finished; if the import summary cannot be read, show the data and mark status stale.
+      this.refreshImportStatus(() => this.data.loadData(), () => this.data.loadData());
     } else if (next !== previous && next === 'FAILED') {
       this.toast.error(control.manualRun?.error || 'RXO manual scan/import failed.');
     } else {
-      this.api.rxoStatus().subscribe({ next: (status) => { this.importStatus = status; this.updateView(); }, error: () => { this.statusRefreshFailed = true; } });
+      this.refreshImportStatus();
     }
   }
 
@@ -209,7 +233,7 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
       ? serverEpoch - receivedAt
       : 0;
     this.control = control;
-    if (updateInputs) applyRxoSettings(this.settingsForm, control);
+    if (updateInputs || !this.settingsForm.loaded) applyRxoSettings(this.settingsForm, control);
     this.updateView();
     this.publishSystemStatus();
   }

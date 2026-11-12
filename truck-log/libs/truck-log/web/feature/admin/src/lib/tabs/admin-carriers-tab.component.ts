@@ -29,7 +29,7 @@ interface CarrierDraft { name: string; }
           <label class="tl-admin-grow">Filter carriers<input type="search" [(ngModel)]="carrierFilter" placeholder="Carrier name"></label>
         </div>
       </div>
-        <div class="dana-table-shell">
+        <div class="dana-table-shell" *ngIf="filteredCarriers.length">
           <table class="dana-table">
             <thead><tr><th scope="col">Name</th><th scope="col">Status</th><th scope="col">Last used</th><th scope="col"><span class="dana-muted">Actions</span></th></tr></thead>
             <tbody>
@@ -48,7 +48,7 @@ interface CarrierDraft { name: string; }
             </tbody>
           </table>
         </div>
-      <div class="dana-empty-state" *ngIf="!filteredCarriers.length">No carriers match this filter.</div>
+      <div class="dana-empty-state" *ngIf="!filteredCarriers.length" role="status">{{data.emptyText('carriers', 'carriers', carrierFilter)}}</div>
     </section>`,
 })
 export class AdminCarriersTabComponent {

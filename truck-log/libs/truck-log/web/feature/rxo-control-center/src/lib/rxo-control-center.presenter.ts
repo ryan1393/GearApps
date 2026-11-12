@@ -442,7 +442,8 @@ export function buildRxoControlView(input: RxoControlInputs) {
     if (scanRecoveryActive) return `Automatic recovery ${exporterAttemptLabel.toLowerCase()}. ${recoveryReasonLabel}`;
     if (scanTimerRunning) return `${schedulerTriggerLabel} / ${schedulerPhaseLabel} - last completed scan ${durationLabel}`;
     if (nextRunAt) return `Next automatic scan ${new Date(nextRunAt).toLocaleString()}`;
-    return `Automatic interval: every ${control?.settings?.syncIntervalMinutes ?? input.fallbackSettings.syncIntervalMinutes} minute(s)`;
+    const minutes = control?.settings?.syncIntervalMinutes ?? input.fallbackSettings.syncIntervalMinutes;
+    return `Automatic interval: every ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
   })();
 
   const runFailed =

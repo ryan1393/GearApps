@@ -30,7 +30,7 @@ interface DriverDraft { name: string; phoneNumber: string; }
           <label class="tl-admin-grow">Filter drivers<input type="search" [(ngModel)]="driverFilter" placeholder="Name or phone"></label>
         </div>
       </div>
-        <div class="dana-table-shell">
+        <div class="dana-table-shell" *ngIf="filteredDrivers.length">
           <table class="dana-table">
             <thead><tr><th scope="col">Name</th><th scope="col">Phone</th><th scope="col">Status</th><th scope="col">Last used</th><th scope="col"><span class="dana-muted">Actions</span></th></tr></thead>
             <tbody>
@@ -50,7 +50,7 @@ interface DriverDraft { name: string; phoneNumber: string; }
             </tbody>
           </table>
         </div>
-      <div class="dana-empty-state" *ngIf="!filteredDrivers.length">No drivers match this filter.</div>
+      <div class="dana-empty-state" *ngIf="!filteredDrivers.length" role="status">{{data.emptyText('drivers', 'drivers', driverFilter)}}</div>
     </section>`,
 })
 export class AdminDriversTabComponent {

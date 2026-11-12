@@ -85,7 +85,11 @@ export class ActiveTrucksComponent implements OnInit {
 
   get lastUpdated() { return this.poller.lastUpdated(); }
 
-  get awaitingExit() { return this.visits.filter((v) => v.status === 'DOCK_COMPLETE'); }
+  /** Longest wait first, the same order as the Guard Dashboard's "Needs Guard Action" list. */
+  get awaitingExit() {
+    const completedAt = (v: TruckVisitRecord) => Date.parse(v.dockCompletedAt ?? v.guardCheckInAt ?? '') || 0;
+    return this.visits.filter((v) => v.status === 'DOCK_COMPLETE').sort((a, b) => completedAt(a) - completedAt(b));
+  }
 
   load() {
     this.poller.refresh();

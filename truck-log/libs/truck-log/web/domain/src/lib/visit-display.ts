@@ -1,8 +1,9 @@
 import type { VisitEventRecord } from '@truck-log/shared/contracts';
 
+/** One wording per status on every screen (Dashboard, Active Trucks, Records, filters). */
 const STATUS_LABELS: Record<string, string> = {
   DOCK_ASSIGNED: 'At / Sent to Dock',
-  DOCK_COMPLETE: 'Dock Complete — Return to Guard',
+  DOCK_COMPLETE: 'Dock Complete — Awaiting Guard',
   GUARD_CHECKED_OUT: 'Checked Out',
 };
 
@@ -45,10 +46,8 @@ export function visitStatusLabel(status: string): string {
   return STATUS_LABELS[status] ?? status.replace(/_/g, ' ');
 }
 
-export function recordStatusLabel(status: string): string {
-  if (status === 'DOCK_COMPLETE') return 'Dock Complete — Awaiting Guard';
-  return visitStatusLabel(status);
-}
+/** Kept for existing imports; Records uses the same labels as every other screen. */
+export const recordStatusLabel = visitStatusLabel;
 
 export function visitEventLabel(event: VisitEventRecord): string {
   return EVENT_LABELS[event.eventType] ?? event.eventType.replace(/_/g, ' ');
@@ -57,7 +56,10 @@ export function visitEventLabel(event: VisitEventRecord): string {
 export function elapsedSince(start: string, now = Date.now()): string {
   const startMs = new Date(start).getTime();
   const elapsedMs = now - startMs;
-  if (!Number.isFinite(elapsedMs) || elapsedMs < 0) return '—';
+  if (!Number.isFinite(elapsedMs)) return '—';
+  // A device clock a little behind the server would make a fresh check-in look like it is in the
+  // future; show "0 min" rather than a blank. A large negative gap is a real data problem.
+  if (elapsedMs < 0) return elapsedMs > -10 * 60_000 ? '0 min' : '—';
 
   const minutes = Math.floor(elapsedMs / 60_000);
   if (minutes < 60) return `${minutes} min`;

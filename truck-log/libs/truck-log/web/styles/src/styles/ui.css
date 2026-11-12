@@ -14,7 +14,6 @@
 .tl-kpi-jump:focus-visible { outline: 2px solid var(--dana-primary); outline-offset: 2px; }
 /* Roles (data-role on the shell): hide what a role cannot use. The server enforces the same limits. */
 .dana-app-shell[data-role="MANAGEMENT"] .tl-write,
-.dana-app-shell[data-role="MANAGEMENT"] .tl-dock-grid .dana-card-section .dana-actions,
 .dana-app-shell[data-role="DOCK"] .tl-guard-only { display: none; }
 /* Dock handheld (CK65): its two screens as big tabs under the top bar on small screens. */
 .tl-role-tabs { display: none; }

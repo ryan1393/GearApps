@@ -43,7 +43,7 @@ export function clockTime(iso: string | null | undefined): string {
   <header class="dana-page-header">
     <div>
       <h1>Stations</h1>
-      <p>Guard PCs and TV displays that may open Truck Log. Each station is paired once with a one-time code.</p>
+      <p>Guard PCs, dock handhelds, management screens and TV displays that may open Truck Log. Each station is paired once with a one-time code.</p>
     </div>
     <div class="dana-actions"><a class="dana-btn" routerLink="/admin">Back to Administration</a></div>
   </header>
@@ -107,7 +107,7 @@ export function clockTime(iso: string | null | undefined): string {
         </tbody>
       </table>
     </div>
-    <div class="dana-empty-state" *ngIf="!stations.length && !loading">No stations yet. Add the first guard PC or TV above.</div>
+    <div class="dana-empty-state" *ngIf="!stations.length && !loading && loaded">No stations yet. Add the first guard PC, dock handheld or TV above.</div>
   </section>
   </div>
 
@@ -167,11 +167,14 @@ export class StationsAdminComponent implements OnInit, OnDestroy {
     return `Waiting for pairing (code expires ${clockTime(station.pairingExpiresAt)})`;
   }
 
+  /** The list has been read at least once: "No stations yet" is never shown for a failed load. */
+  loaded = false;
+
   load() {
     if (this.loading) return;
     this.loading = true;
     this.access.stations().subscribe({
-      next: (rows) => { this.stations = rows; this.loading = false; this.now = Date.now(); },
+      next: (rows) => { this.stations = rows; this.loading = false; this.loaded = true; this.error = ''; this.now = Date.now(); },
       error: (e) => { this.loading = false; this.error = stationErrorMessage(e, 'Could not load stations.'); },
     });
   }

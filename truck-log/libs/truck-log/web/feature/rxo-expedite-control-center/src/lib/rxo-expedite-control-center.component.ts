@@ -146,7 +146,7 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
              aria-labelledby="rxo-expedite-tab-data" tabindex="0" class="dana-panel tl-fill">
       <div class="dana-panel-header">
         <div>
-          <h2>Expedite shipments <span class="dana-count-badge">{{shipmentCount}}</span></h2>
+          <h2>Expedite shipments <span class="dana-count-badge">{{shipments?.rowCount ?? shipmentCount}}</span></h2>
           <small>Latest verified Expedite batch, mirrored into Truck Log.</small>
         </div>
       </div>

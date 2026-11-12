@@ -92,7 +92,10 @@ const EXPEDITE_DOCUMENT_SITE_KEY = 'fort-wayne-expedite';
           <p *ngIf="s.scheduler?.lastErrorCode" class="dana-alert dana-alert-warning" role="status">Scheduled export code {{s.scheduler?.lastErrorCode}}. The scheduler waits for the next interval; the previous verified batch stays available.</p>
         </ng-container>
 
-        <section *ngIf="mode === 'data'" class="tl-stack" aria-labelledby="expedite-shipments-title">
+      </ng-container>
+
+      <!-- Shipments do not depend on the status request: keep the Data tab usable when status fails. -->
+      <section *ngIf="mode === 'data'" class="tl-stack" aria-labelledby="expedite-shipments-title">
           <div class="tl-rxo-toolbar">
           <form class="dana-filter-row">
             <label class="tl-rxo-search"><span class="tl-filter-label">Search</span><input name="expediteSearch" type="search" [(ngModel)]="shipmentSearch" placeholder="Shipment, origin, destination, status, SCAC" aria-label="Search Expedite shipments"></label>
@@ -167,12 +170,15 @@ const EXPEDITE_DOCUMENT_SITE_KEY = 'fort-wayne-expedite';
                   </tr>
                 </ng-container>
                 <tr *ngIf="filteredShipments.length === 0">
-                  <td colspan="6" class="dana-table-empty">No verified Expedite shipments match this search.</td>
+                  <td colspan="6" class="dana-table-empty">{{shipmentSearch.trim() && shipments.rowCount ? 'No verified Expedite shipments match this search.' : 'No Expedite shipments are waiting in the latest verified batch.'}}</td>
                 </tr>
               </tbody>
             </table>
           </div>
+          <div class="dana-empty-state" *ngIf="!shipmentsLoading && !shipments && !shipmentsError">Expedite shipments have not loaded yet. Use Refresh to try again.</div>
         </section>
+
+      <ng-container *ngIf="status as s">
 
         <div *ngIf="mode === 'settings'" class="tl-rxo-columns">
           <section class="dana-panel">

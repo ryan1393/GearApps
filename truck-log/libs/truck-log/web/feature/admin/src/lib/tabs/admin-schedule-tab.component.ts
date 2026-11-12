@@ -28,7 +28,7 @@ import { AdminDataStore } from '../admin-data.store';
         <tr *ngFor="let load of data.scheduledLoads"><td><b>{{load.loadNumber}}</b></td><td>{{load.scheduledAt | date:'M/d/yy h:mm a'}}</td><td>{{load.source || 'Manual/System'}}</td></tr>
       </tbody></table>
     </div>
-    <div class="dana-empty-state" *ngIf="!data.scheduledLoads.length">No active scheduled loads have been imported yet.</div>`,
+    <div class="dana-empty-state" *ngIf="!data.scheduledLoads.length" role="status">{{data.state.scheduledLoads === 'ready' ? 'No active scheduled loads have been imported yet.' : data.emptyText('scheduledLoads', 'scheduled loads', '')}}</div>`,
 })
 export class AdminScheduleTabComponent {
   scheduleFile: File | null = null;

@@ -27,6 +27,7 @@ const mocks = {
   '@angular/common': {}, '@angular/forms': {}, '@truck-log/web/data-access': {},
   '@truck-log/shared/contracts': {}, '@truck-log/web/ui': {}, '@dana/ui': {},
   './dock-status-widget.component': {}, './driver-print-tracker.service': {}, './freight-load-picker.service': {},
+  './combobox-exact-enter.directive': {},
   rxjs,
 };
 function load(relative) {
@@ -153,10 +154,16 @@ test('Failed paperwork retains only unacknowledged files and retry uploads to th
   f.uploads[0].subject.next({}); f.uploads[1].subject.error({ status: 503 });
   assert.equal(f.component.retryFiles.length, 1);
   assert.equal(f.component.retryFiles[0].name, 'second.pdf');
-  assert.equal(f.component.formDisabled, true);
-  f.component.retryPaperwork(); assert.equal(f.uploads[2].visitId, 42);
-  f.uploads[2].subject.next({});
+  // A failed upload never blocks the gate: the form is released for the next truck.
   assert.equal(f.component.formDisabled, false);
+  assert.equal(f.component.retryVisit.id, 42);
+  // The next truck is checked in before the retry: the retry still goes to visit 42.
+  f.component.form = filled(); f.component.save(); f.creates[1].subject.next(visit(43));
+  f.component.retryPaperwork(); assert.equal(f.uploads[2].visitId, 42);
+  assert.equal(f.component.formDisabled, false, 'A retry never locks the form');
+  f.uploads[2].subject.next({});
+  assert.equal(f.component.retryFiles.length, 0);
+  assert.equal(f.component.retryVisit, null);
 });
 
 test('Hung print status times out, releases manual refresh, and reaches bounded warning', () => {

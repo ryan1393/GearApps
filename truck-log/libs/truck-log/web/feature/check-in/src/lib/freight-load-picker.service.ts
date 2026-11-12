@@ -46,7 +46,7 @@ export class FreightLoadPicker implements OnDestroy {
         this.expediteFreightLoads = result.rows;
         this.expediteLoadsPending = false;
         this.expediteLoadsMessage = result.unselectableCount
-          ? `${result.unselectableCount} Expedite load(s) need shipment identity or direction review before selection.` : '';
+          ? `${result.unselectableCount} Expedite ${result.unselectableCount === 1 ? 'load needs' : 'loads need'} shipment identity or direction review before selection.` : '';
         this.publishFreightLoads();
       },
       error: () => {
