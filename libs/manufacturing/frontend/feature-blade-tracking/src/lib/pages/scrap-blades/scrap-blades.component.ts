@@ -61,20 +61,26 @@ export class ScrapBladesComponent implements OnInit {
     this.loadPage(this.meta?.page ?? 1);
   }
 
+  private pageVersion = 0;
+
+  /** Only the newest page answer is shown: paging or searching again makes an earlier answer stale. */
   loadPage(page: number): void {
     if (page < 1) return;
 
+    const version = ++this.pageVersion;
     this.loading = true;
     this.error = '';
     this.expandedBladeId = null;
 
     this.api.getScrappedBlades(page, 50, this.appliedSearch).subscribe({
       next: (response) => {
+        if (version !== this.pageVersion) return;
         this.rows = response.data;
         this.meta = response.meta;
         this.loading = false;
       },
       error: (error: HttpErrorResponse) => {
+        if (version !== this.pageVersion) return;
         this.loading = false;
         this.error = apiErrorText(
           error,

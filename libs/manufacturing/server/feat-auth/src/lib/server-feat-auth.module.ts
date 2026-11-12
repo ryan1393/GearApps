@@ -10,6 +10,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 
+import { AuthAttemptLimits } from './auth-attempt-limits';
 import { GoogleAuthController } from './google-auth/google-auth.controller';
 import { GoogleAuthService } from './google-auth/google-auth.service';
 import { ServerFeatAuthController } from './server-feat-auth.controller';
@@ -28,6 +29,7 @@ const controllers = [
 
 const services = [
   ServerFeatAuthService,
+  AuthAttemptLimits,
   ...(process.env[ENV_SOCIAL_GOOGLE_ENABLED] === 'true'
     ? [GoogleAuthService]
     : []),

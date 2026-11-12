@@ -31,6 +31,7 @@ import {
   mailerConfig,
   EntityNotFoundFilter,
   QueryFailedFilter,
+  ReportServerErrorsFilter,
   TypeormConfigService,
   validationSchema,
 } from '@meshforge/manufacturing/server/util-common';
@@ -83,6 +84,8 @@ const featureModules = [
     EnvironmentSettingsService,
     { provide: APP_GUARD, useClass: JwtAccessTokenGuard },
     { provide: APP_GUARD, useClass: CustomRoleGuard },
+    // Listed before the specific filters: Nest tries the last registered filter first.
+    { provide: APP_FILTER, useClass: ReportServerErrorsFilter },
     { provide: APP_FILTER, useClass: EntityNotFoundFilter },
     { provide: APP_FILTER, useClass: QueryFailedFilter },
   ],

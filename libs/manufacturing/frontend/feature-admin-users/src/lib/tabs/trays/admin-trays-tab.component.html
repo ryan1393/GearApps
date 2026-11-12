@@ -1,0 +1,95 @@
+<gear-admin-feedback [tab]="this" />
+<gear-label-printer-picker labelType="ASSET_TAG" label="Print tags to" />
+<div class="gear-admin-layout" data-gear-admin-style="standard-v18">
+  <form class="gear-panel gear-admin-form" data-admin-editor data-gear-admin-create="tray-v15" (ngSubmit)="createTray()">
+    <div class="gear-step-title"><span class="gear-step-number">1</span><span>Create Tray</span></div>
+    <label class="gear-field">
+      Tray Serial Number
+      <input
+        class="gear-input mono"
+        [(ngModel)]="trayForm.serial_number"
+        name="adminCreateTraySerial"
+        placeholder="T0301 or 301"
+        autocomplete="off"
+      />
+      <small class="gear-field-help">Enter the sequence with or without T. It is saved as T plus at least four digits. A new tray starts EMPTY with 0 blades.</small>
+    </label>
+    <label class="gear-field" *ngIf="trayForm.serial_number.trim()">
+      Saved Serial Preview
+      <input
+        class="gear-input mono gear-admin-create-preview-input"
+        [value]="traySerialPreview || 'Invalid serial'"
+        readonly
+        aria-live="polite"
+      />
+      <small class="gear-field-help">The backend remains authoritative and stores the canonical T-prefixed serial.</small>
+    </label>
+    <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy || !traySerialPreview">Create Tray</button>
+  </form>
+
+  <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+    <div class="gear-admin-list-header gear-admin-search-header">
+      <div>
+        <h2>Tray Records</h2>
+        <small>{{ filteredTrays.length }} shown · {{ trays.length }} total</small>
+      </div>
+      <input
+        class="gear-input gear-admin-search-input"
+        type="search"
+        [(ngModel)]="traySearch"
+        name="adminTraySearch"
+        aria-label="Search trays"
+        placeholder="Search tray serial, stage, location, container..."
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="tray-v20" *ngFor="let tray of filteredTrays">
+      <div class="gear-admin-record-card-body">
+        <div class="gear-admin-record-heading">
+          <strong class="gear-admin-record-title mono">{{ tray.serial_number }}</strong>
+          <span class="gear-badge" [danaTone]="tray.enabled ? 'Active' : 'Inactive'">{{ tray.enabled ? 'Active' : 'Inactive' }}</span>
+        </div>
+        <div class="gear-admin-record-meta">
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Blades</span>
+            <span class="gear-admin-record-value gear-admin-record-value-strong">{{ tray.blade_count }}</span>
+          </div>
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Stage</span>
+            <span class="gear-admin-record-value">{{ tray.current_stage?.name || tray.current_stage?.code || 'No stage' }}</span>
+          </div>
+          <div class="gear-admin-record-field gear-admin-record-field-wide gear-admin-record-placement">
+            <ng-container *ngIf="tray.current_location?.serial_number; else trayContainerPlacementV20">
+              <span class="gear-admin-record-label">Location</span>
+              <span class="gear-admin-record-value mono">{{ tray.current_location?.serial_number }}</span>
+            </ng-container>
+            <ng-template #trayContainerPlacementV20>
+              <ng-container *ngIf="tray.current_container?.serial_number; else trayUnassignedPlacementV20">
+                <span class="gear-admin-record-label">Container</span>
+                <span class="gear-admin-record-value mono">{{ tray.current_container?.serial_number }}</span>
+              </ng-container>
+            </ng-template>
+            <ng-template #trayUnassignedPlacementV20>
+              <span class="gear-admin-record-label">Placement</span>
+              <span class="gear-admin-record-value">Unassigned</span>
+            </ng-template>
+          </div>
+        </div>
+        <div class="gear-admin-actions gear-admin-record-actions">
+          <button
+            type="button"
+            class="gear-btn gear-btn-secondary"
+            [disabled]="busy || !tray.enabled || printingTagId === tray.id"
+            (click)="printTag('TRAY', tray.id, tray.serial_number)"
+           data-icon="print" title="Print tag">
+            {{ printingTagId === tray.id ? 'Printing…' : 'Print Tag' }}
+          </button>
+          <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleTrayEnabled(tray)">{{ tray.enabled ? 'Disable' : 'Enable' }}</button>
+        </div>
+      </div>
+    </div>
+
+    <gear-admin-list-state [list]="traysList" noun="trays" [shown]="filteredTrays.length" [total]="trays.length" (retry)="loadTrays()" />
+  </div>
+</div>

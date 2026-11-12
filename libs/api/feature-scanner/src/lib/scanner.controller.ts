@@ -1,18 +1,20 @@
 import { ErrorResponseDto, ScannerCommandDto } from '@meshforge/api/data-access';
 import { ScannerDetailsService } from '@meshforge/api/feature-gear';
-import { LapperWritePolicy, scannerConfig } from '@meshforge/api/core';
-import { ScannerCommand, ScannerLogEntry, ScannerSummary } from '@meshforge/shared/domain';
+import { LapperWritePolicy, ReqUser, RequestUser, scannerConfig } from '@meshforge/api/core';
+import { ScannerCommand, ScannerFtpListing, ScannerLogEntry, ScannerSummary } from '@meshforge/shared/domain';
 import {
   UseInterceptors,
   BadRequestException,
   Body,
   Controller,
+  ForbiddenException,
   Get,
   Header,
   Inject,
   Param,
   ParseUUIDPipe,
   Post,
+  Query,
   StreamableFile,
 } from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
@@ -22,6 +24,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiProduces,
+  ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
 import { ScannerClientService } from './scanner-client.service';
@@ -43,6 +46,18 @@ export class ScannerController {
     @Inject(scannerConfig.KEY) private readonly cfg: ConfigType<typeof scannerConfig>,
   ) {}
 
+  // ----- FTP drop (admin) -----
+
+  @Get('ftp/browse')
+  @ApiOperation({ summary: 'List a folder of the scanner FTP drop, to choose a scanner\'s image folder and file (administrators)' })
+  @ApiQuery({ name: 'path', required: false, description: 'Folder to list; defaults to SCANNER_FTP_ROOT' })
+  browseFtp(@ReqUser() user: RequestUser, @Query('path') path?: string): Promise<ScannerFtpListing> {
+    // Collector tokens act as non-admin users, so a token can never browse the FTP drop.
+    if (user?.role !== 'admin' || 'collectorTokenId' in (user ?? {}))
+      throw new ForbiddenException('Only MeshForge administrators can browse the scanner FTP drop');
+    return this.client.listFtpFolder(path);
+  }
+
   // ----- by scanner id -----
 
   @Get(':scannerId/summary')
@@ -56,7 +71,14 @@ export class ScannerController {
   @ApiProduces('image/jpeg', 'image/bmp')
   @ApiOperation({ summary: 'Latest captured image from the scanner' })
   async image(@Param('scannerId', ParseUUIDPipe) id: string): Promise<StreamableFile> {
-    const { data, contentType } = await this.client.getLatestImage(await this.hostFor(id));
+    const scanner = await this.scanners.findOne(id);
+    if (!scanner.ip && !scanner.image_folder?.trim())
+      throw new BadRequestException(`Scanner ${id} has no IP address or image folder configured`);
+    const { data, contentType } = await this.client.getLatestImage(
+      scanner.ip,
+      { folder: scanner.image_folder, file: scanner.image_file },
+      scanner.ip ?? id,
+    );
     return new StreamableFile(data, { type: contentType });
   }
 

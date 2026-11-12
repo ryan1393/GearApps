@@ -10,8 +10,8 @@ describe('blade operations station', () => {
   let params: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
   let navigate: jest.Mock;
 
-  function create(op: string | null, permissions: string[] | null = null): OperationsStationComponent {
-    params = new BehaviorSubject(convertToParamMap(op ? { op } : {}));
+  function create(op: string | null, permissions: string[] | null = null, extra: Record<string, string> = {}): OperationsStationComponent {
+    params = new BehaviorSubject(convertToParamMap(op ? { op, ...extra } : extra));
     navigate = jest.fn(() => Promise.resolve(true));
     const identity = { role: 'user', permissions };
     TestBed.configureTestingModule({
@@ -87,5 +87,11 @@ describe('blade operations station', () => {
     for (const { key } of BLADE_OPERATIONS) {
       expect(children.find((route) => route.path === key)?.redirectTo).toBe(`/blades/operations?op=${key}`);
     }
+  });
+
+  it('passes a tray named by another app (?tray=) to the Grinding tab', () => {
+    const station = create('grinding', null, { tray: 'T0042' });
+    expect(station.active()).toBe('grinding');
+    expect(station.requestedTray()).toBe('T0042');
   });
 });

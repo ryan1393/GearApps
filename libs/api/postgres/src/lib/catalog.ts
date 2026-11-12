@@ -43,6 +43,153 @@ const readBatch = async (...reads: Array<() => Promise<Row[]>>): Promise<Row[][]
   return result;
 };
 
+/** Rows GET /machine-cycle and GET /macro-log return when no page is asked for, newest first. */
+export const LIST_DEFAULT_LIMIT = 1000;
+/**
+ * Above this many referenced records a targeted read is no cheaper than reading the whole
+ * table, and keeps the IN list well inside PostgreSQL's parameter limit.
+ */
+const TARGETED_READ_LIMIT = 2000;
+const unique = (values: unknown[]): unknown[] => [...new Set(values.filter((v) => v != null))];
+const numberKey = (value: unknown): string => text(value).trim().toLowerCase();
+/** Like `rows.find(r => key(r) === k)` for every k, in one pass: the first row per key wins. */
+const firstBy = (rows: Row[], key: (row: Row) => unknown): Map<unknown, Row> => {
+  const map = new Map<unknown, Row>();
+  for (const row of rows) if (!map.has(key(row))) map.set(key(row), row);
+  return map;
+};
+
+const shapeSummary = (s: Row): Row => ({
+  id: s.id,
+  number: s.number,
+  model: text(s.model_number),
+  hos: s.hos ?? '',
+  revision: s.revision,
+  status: status(s),
+  user_id: owner(s.createdBy),
+});
+
+/** Parts as the API returns them, from raw public.parts, shaped summaries and public.gearsets rows. */
+export function buildParts(rows: Row[], summaries: Row[], publicGearsets: Row[]): Row[] {
+  const summariesById = new Map(summaries.map((s) => [s.id, s]));
+  const gearByPart = new Map(publicGearsets.map((g) => [g.gearset_part_id, g]));
+  const result: Row[] = rows.map((p) => {
+    const gear = gearByPart.get(p.id);
+    return {
+      id: p.id,
+      number: p.part_number,
+      type: p.part_type,
+      summary_id: p.summary_id,
+      summary: summariesById.get(p.summary_id),
+      teeth: gear ? numberOrNull(gear.ratio_value) : numberOrNull(p.teeth),
+      status: status(p),
+      user_id: owner(p.createdBy),
+      ring_id: gear?.ring_part_id ?? null,
+      pinion_id: gear?.pinion_part_id ?? null,
+    };
+  });
+  const byId = new Map(result.map((p) => [p.id, p]));
+  return result.map((p) => ({ ...p, ring: byId.get(p.ring_id), pinion: byId.get(p.pinion_id) }));
+}
+
+/**
+ * Gearsets as the API returns them: MeshForge assemblies (with Lapper's status override), then
+ * pending Lapper numbers no assembly uses yet. `legacy` must be ordered by id. `knownNumbers`
+ * adds assembly numbers outside `current` (a targeted read does not load every assembly).
+ */
+export function buildGearsets(
+  current: Row[],
+  legacy: Row[],
+  parts: Row[],
+  knownNumbers: unknown[] = [],
+): Row[] {
+  const partById = new Map(parts.map((p) => [p.id, p]));
+  const overrideByGear = firstBy(
+    legacy.filter((l) => l.public_gearset_id != null),
+    (l) => l.public_gearset_id,
+  );
+  const result: Row[] = current.flatMap((g) => {
+    const part = partById.get(g.gearset_part_id);
+    if (!part) return [];
+    const override = overrideByGear.get(g.id);
+    const summary = part.summary as Row | undefined;
+    return [
+      {
+        id: g.id,
+        number: part.number,
+        rev: override?.rev ?? summary?.revision ?? null,
+        ratio: numberOrNull(g.ratio_value),
+        status:
+          g.active && g.enabled && !g.archived_at ? (override?.status ?? 'active') : 'inactive',
+        summary_id: g.summary_id,
+        summary,
+        ring_id: g.ring_part_id,
+        ring: partById.get(g.ring_part_id),
+        pinion_id: g.pinion_part_id,
+        pinion: partById.get(g.pinion_part_id),
+        user_id: override?.user_id ?? owner(g.created_by),
+        // Stored master fields, read-only here. business_statuses is the business
+        // classification (Production, Service, ...), kept apart from status above.
+        ratio_text: g.ratio_text ?? null,
+        model: summary?.model ? text(summary.model) : null,
+        customer: g.customer ?? null,
+        application: g.application ?? null,
+        business_statuses: Array.isArray(g.statuses) ? (g.statuses as unknown[]).map(text) : [],
+        cut: g.cut ?? null,
+        archived: Boolean(g.archived_at),
+      },
+    ];
+  });
+  const known = new Set([...result.map((g) => numberKey(g.number)), ...knownNumbers.map(numberKey)]);
+  for (const g of legacy) {
+    if (g.public_gearset_id || known.has(numberKey(g.number))) continue;
+    result.push({ ...g, ratio: numberOrNull(g.ratio) });
+    known.add(numberKey(g.number));
+  }
+  return result.sort((a, b) => text(a.number).localeCompare(text(b.number)));
+}
+
+/** Machines as the API returns them, from raw lapper.machines rows (joined) and scanners by id. */
+export function buildMachines(rows: Row[], scanners: Row[]): Row[] {
+  const scannerByProfile = firstBy(scanners, (s) => s.machine_id);
+  return rows.map((l) => {
+    const scanner = scannerByProfile.get(l.id);
+    return {
+      id: l.api_id,
+      legacy_id: l.id,
+      number: l.api_number,
+      ip: l.machine_ip,
+      dept_id: l.department_code,
+      description: l.api_description,
+      type: l.type,
+      builder: l.builder,
+      cell: l.api_cell == null ? null : text(l.api_cell),
+      status: l.api_active && l.api_enabled ? l.status : 'inactive',
+      scanner_id: scanner?.id ?? null,
+      scanner: scanner ? { ...scanner, machine_id: l.api_id } : null,
+      argonaut_url: l.argonaut_url ?? null,
+      argonaut_location_id: l.argonaut_location_id ?? null,
+    };
+  });
+}
+
+/** A machine cycle as the API returns it. */
+export const shapeCycle = (
+  c: Row,
+  machineById: Map<unknown, Row>,
+  gearById: Map<unknown, Row>,
+): Row => ({
+  id: c.id,
+  consec: c.consec,
+  serial_number: c.serial_number,
+  timestamp: c.occurred_at,
+  cycle_time_s: numberOrNull(c.cycle_time_s),
+  machine_id: c.api_machine_id,
+  machine: machineById.get(c.api_machine_id),
+  gearset_id: c.api_gearset_id,
+  gearset: gearById.get(c.api_gearset_id),
+});
+
 @Injectable()
 export class PostgresLapperCatalog {
   readonly timeZone: string;
@@ -66,121 +213,150 @@ export class PostgresLapperCatalog {
     return rows.map((d) => ({ id: d.id, number: Number(d.code), description: d.description }));
   }
 
-  async summaries(manager = this.db.manager): Promise<Row[]> {
-    const rows = await manager
+  /** All summaries, or (with `ids`) only those, in the same shape. */
+  async summaries(manager = this.db.manager, ids?: unknown[]): Promise<Row[]> {
+    if (ids && !ids.length) return [];
+    const query = manager
       .createQueryBuilder()
       .select('s.*')
       .addSelect('m.model_number', 'model_number')
       .from('public.part_summaries', 's')
       .leftJoin('(SELECT * FROM public.models)', 'm', 'm.id=s.model_id')
-      .where('s."deletedAt" IS NULL')
-      .orderBy('s.number')
-      .getRawMany<Row>();
-    return rows.map((s) => ({
-      id: s.id,
-      number: s.number,
-      model: text(s.model_number),
-      hos: s.hos ?? '',
-      revision: s.revision,
-      status: status(s),
-      user_id: owner(s.createdBy),
-    }));
+      .where('s."deletedAt" IS NULL');
+    if (ids) query.andWhere('s.id IN (:...summaryIds)', { summaryIds: ids });
+    const rows = await query.orderBy('s.number').getRawMany<Row>();
+    return rows.map(shapeSummary);
   }
 
-  async parts(manager = this.db.manager): Promise<Row[]> {
-    const [rows, summaries, gearsets] = await readBatch(
-      () =>
-        manager
-          .createQueryBuilder()
-          .select('p.*')
-          .addSelect('t.name', 'part_type')
-          .from('public.parts', 'p')
-          .innerJoin('(SELECT * FROM public.part_types)', 't', 't.id=p.part_type_id')
-          .where('p."deletedAt" IS NULL')
-          .orderBy('p.part_number')
-          .getRawMany<Row>(),
-      () => this.summaries(manager),
-      () =>
-        manager.createQueryBuilder().select('g.*').from('public.gearsets', 'g').getRawMany<Row>(),
-    );
-    const summariesById = new Map(summaries.map((s) => [s.id, s]));
-    const gearByPart = new Map(gearsets.map((g) => [g.gearset_part_id, g]));
-    const result: Row[] = rows.map((p) => {
-      const gear = gearByPart.get(p.id);
-      return {
-        id: p.id,
-        number: p.part_number,
-        type: p.part_type,
-        summary_id: p.summary_id,
-        summary: summariesById.get(p.summary_id),
-        teeth: gear ? numberOrNull(gear.ratio_value) : numberOrNull(p.teeth),
-        status: status(p),
-        user_id: owner(p.createdBy),
-        ring_id: gear?.ring_part_id ?? null,
-        pinion_id: gear?.pinion_part_id ?? null,
-      };
-    });
-    const byId = new Map(result.map((p) => [p.id, p]));
-    return result.map((p) => ({ ...p, ring: byId.get(p.ring_id), pinion: byId.get(p.pinion_id) }));
-  }
-
-  async gearsets(manager = this.db.manager): Promise<Row[]> {
-    const [current, legacy, parts] = await readBatch(
-      () =>
-        manager.createQueryBuilder().select('g.*').from('public.gearsets', 'g').getRawMany<Row>(),
-      () =>
-        manager
-          .createQueryBuilder()
-          .select('g.*')
-          .from('lapper.gearsets', 'g')
-          .orderBy('g.id')
-          .getRawMany<Row>(),
-      () => this.parts(manager),
-    );
-    const partById = new Map(parts.map((p) => [p.id, p]));
-    const result: Row[] = current.flatMap((g) => {
-      const part = partById.get(g.gearset_part_id);
-      if (!part) return [];
-      const override = legacy.find((l) => l.public_gearset_id === g.id);
-      const summary = part.summary as Row | undefined;
-      return [
-        {
-          id: g.id,
-          number: part.number,
-          rev: override?.rev ?? summary?.revision ?? null,
-          ratio: numberOrNull(g.ratio_value),
-          status:
-            g.active && g.enabled && !g.archived_at ? (override?.status ?? 'active') : 'inactive',
-          summary_id: g.summary_id,
-          summary,
-          ring_id: g.ring_part_id,
-          ring: partById.get(g.ring_part_id),
-          pinion_id: g.pinion_part_id,
-          pinion: partById.get(g.pinion_part_id),
-          user_id: override?.user_id ?? owner(g.created_by),
-          // Stored master fields, read-only here. business_statuses is the business
-          // classification (Production, Service, ...), kept apart from status above.
-          ratio_text: g.ratio_text ?? null,
-          model: summary?.model ? text(summary.model) : null,
-          customer: g.customer ?? null,
-          application: g.application ?? null,
-          business_statuses: Array.isArray(g.statuses) ? (g.statuses as unknown[]).map(text) : [],
-          cut: g.cut ?? null,
-          archived: Boolean(g.archived_at),
-        },
-      ];
-    });
-    const knownNumbers = new Set(result.map((g) => text(g.number).trim().toLowerCase()));
-    for (const g of legacy) {
-      if (g.public_gearset_id || knownNumbers.has(text(g.number).trim().toLowerCase())) continue;
-      result.push({ ...g, ratio: numberOrNull(g.ratio) });
-      knownNumbers.add(text(g.number).trim().toLowerCase());
+  /** All parts, or (with `ids`) only those, in the same shape. */
+  async parts(manager = this.db.manager, ids?: unknown[]): Promise<Row[]> {
+    if (ids && !ids.length) return [];
+    const query = manager
+      .createQueryBuilder()
+      .select('p.*')
+      .addSelect('t.name', 'part_type')
+      .from('public.parts', 'p')
+      .innerJoin('(SELECT * FROM public.part_types)', 't', 't.id=p.part_type_id')
+      .where('p."deletedAt" IS NULL');
+    if (!ids) {
+      const [rows, summaries, gearsets] = await readBatch(
+        () => query.orderBy('p.part_number').getRawMany<Row>(),
+        () => this.summaries(manager),
+        () =>
+          manager.createQueryBuilder().select('g.*').from('public.gearsets', 'g').getRawMany<Row>(),
+      );
+      return buildParts(rows, summaries, gearsets);
     }
-    return result.sort((a, b) => text(a.number).localeCompare(text(b.number)));
+    const rows = await query
+      .andWhere('p.id IN (:...partIds)', { partIds: ids })
+      .orderBy('p.part_number')
+      .getRawMany<Row>();
+    const [summaries, gearsets] = await readBatch(
+      () => this.summaries(manager, unique(rows.map((p) => p.summary_id))),
+      () =>
+        rows.length
+          ? manager
+              .createQueryBuilder()
+              .select('g.*')
+              .from('public.gearsets', 'g')
+              .where('g.gearset_part_id IN (:...partIds)', { partIds: rows.map((p) => p.id) })
+              .getRawMany<Row>()
+          : Promise.resolve([]),
+    );
+    return buildParts(rows, summaries, gearsets);
   }
 
-  async machines(manager = this.db.manager, withScanners = true): Promise<Row[]> {
-    const rows = await manager
+  /**
+   * All gearsets, or (with `ids`) the ones with those API ids, in the same shape. The targeted
+   * read loads only the rows those gearsets are built from, for single-record responses.
+   */
+  async gearsets(manager = this.db.manager, ids?: unknown[]): Promise<Row[]> {
+    if (ids && !ids.length) return [];
+    if (!ids || ids.length > TARGETED_READ_LIMIT) {
+      const [current, legacy, parts] = await readBatch(
+        () =>
+          manager.createQueryBuilder().select('g.*').from('public.gearsets', 'g').getRawMany<Row>(),
+        () =>
+          manager
+            .createQueryBuilder()
+            .select('g.*')
+            .from('lapper.gearsets', 'g')
+            .orderBy('g.id')
+            .getRawMany<Row>(),
+        () => this.parts(manager),
+      );
+      const all = buildGearsets(current, legacy, parts);
+      if (!ids) return all;
+      const wanted = new Set(ids);
+      return all.filter((g) => wanted.has(g.id));
+    }
+    const current = await manager
+      .createQueryBuilder()
+      .select('g.*')
+      .from('public.gearsets', 'g')
+      .where('g.id IN (:...gearIds)', { gearIds: ids })
+      .getRawMany<Row>();
+    // Lapper's own rows: overrides of these assemblies and the pending rows asked for...
+    const referenced = await manager
+      .createQueryBuilder()
+      .select('g.*')
+      .from('lapper.gearsets', 'g')
+      .where('(g.public_gearset_id IN (:...gearIds) OR g.id IN (:...gearIds))', { gearIds: ids })
+      .orderBy('g.id')
+      .getRawMany<Row>();
+    // ...plus every pending row sharing a number with those (the first by id stands for it).
+    const pendingNumbers = unique(
+      referenced.filter((g) => !g.public_gearset_id).map((g) => numberKey(g.number)),
+    );
+    const [sameNumber, publicNumbers, parts] = await readBatch(
+      () =>
+        pendingNumbers.length
+          ? manager
+              .createQueryBuilder()
+              .select('g.*')
+              .from('lapper.gearsets', 'g')
+              .where('g.public_gearset_id IS NULL AND lower(btrim(g.number)) IN (:...numbers)', {
+                numbers: pendingNumbers,
+              })
+              .orderBy('g.id')
+              .getRawMany<Row>()
+          : Promise.resolve([]),
+      // Numbers MeshForge assemblies already use: a pending row with one of them is not listed.
+      () =>
+        pendingNumbers.length
+          ? manager
+              .createQueryBuilder()
+              .select('p.part_number', 'number')
+              .from('public.gearsets', 'g')
+              .innerJoin('(SELECT * FROM public.parts)', 'p', 'p.id=g.gearset_part_id')
+              .innerJoin('(SELECT * FROM public.part_types)', 't', 't.id=p.part_type_id')
+              .where('p."deletedAt" IS NULL AND lower(btrim(p.part_number)) IN (:...numbers)', {
+                numbers: pendingNumbers,
+              })
+              .getRawMany<Row>()
+          : Promise.resolve([]),
+      () =>
+        this.parts(
+          manager,
+          unique(current.flatMap((g) => [g.gearset_part_id, g.ring_part_id, g.pinion_part_id])),
+        ),
+    );
+    const legacy = [...new Map([...referenced, ...sameNumber].map((g) => [g.id, g])).values()].sort(
+      (a, b) => (text(a.id) < text(b.id) ? -1 : text(a.id) > text(b.id) ? 1 : 0),
+    );
+    const wanted = new Set(ids);
+    return buildGearsets(
+      current,
+      legacy,
+      parts,
+      publicNumbers.map((p) => p.number),
+    ).filter((g) => wanted.has(g.id));
+  }
+
+  /** All machines, or (with `ids`, their API ids) only those, in the same shape. */
+  async machines(manager = this.db.manager, withScanners = true, ids?: unknown[]): Promise<Row[]> {
+    if (ids && !ids.length) return [];
+    const query = manager
       .createQueryBuilder()
       .select('l.*')
       .addSelect('p.id', 'api_id')
@@ -193,37 +369,19 @@ export class PostgresLapperCatalog {
       .from('lapper.machines', 'l')
       .innerJoin('(SELECT * FROM public.machines)', 'p', 'p.id=l.public_machine_id')
       .innerJoin('(SELECT * FROM public.departments)', 'd', 'd.id=p.department_id')
-      .where('p."deletedAt" IS NULL')
+      .where('p."deletedAt" IS NULL');
+    if (ids) query.andWhere('p.id IN (:...machineIds)', { machineIds: ids });
+    const rows = await query
       .orderBy('p.cell', 'ASC')
       .addOrderBy('p.machine_number', 'ASC')
       .getRawMany<Row>();
-    const scanners = withScanners
-      ? await manager
-          .createQueryBuilder()
-          .select('s.*')
-          .from('lapper.scanners', 's')
-          .orderBy('s.id')
-          .getRawMany<Row>()
-      : [];
-    return rows.map((l) => {
-      const scanner = scanners.find((s) => s.machine_id === l.id);
-      return {
-        id: l.api_id,
-        legacy_id: l.id,
-        number: l.api_number,
-        ip: l.machine_ip,
-        dept_id: l.department_code,
-        description: l.api_description,
-        type: l.type,
-        builder: l.builder,
-        cell: l.api_cell == null ? null : text(l.api_cell),
-        status: l.api_active && l.api_enabled ? l.status : 'inactive',
-        scanner_id: scanner?.id ?? null,
-        scanner: scanner ? { ...scanner, machine_id: l.api_id } : null,
-        argonaut_url: l.argonaut_url ?? null,
-        argonaut_location_id: l.argonaut_location_id ?? null,
-      };
-    });
+    let scanners: Row[] = [];
+    if (withScanners && (!ids || rows.length)) {
+      const scannerQuery = manager.createQueryBuilder().select('s.*').from('lapper.scanners', 's');
+      if (ids) scannerQuery.where('s.machine_id IN (:...profileIds)', { profileIds: rows.map((l) => l.id) });
+      scanners = await scannerQuery.orderBy('s.id').getRawMany<Row>();
+    }
+    return buildMachines(rows, scanners);
   }
 
   async machineByIp(ip: string, number?: string): Promise<Row> {
@@ -255,8 +413,9 @@ export class PostgresLapperCatalog {
         manager.createQueryBuilder().select('s.*').from('lapper.scanners', 's').getRawMany<Row>(),
       () => this.machines(manager, false),
     );
+    const machineByProfile = firstBy(machines, (m) => m.legacy_id);
     return rows.map((s) => {
-      const machine = machines.find((m) => m.legacy_id === s.machine_id);
+      const machine = machineByProfile.get(s.machine_id);
       return { ...s, machine_id: machine?.id ?? s.machine_id, machine };
     });
   }
@@ -274,11 +433,12 @@ export class PostgresLapperCatalog {
           .getRawMany<Row>(),
       () => this.machines(manager, false),
     );
+    const machineByProfile = firstBy(machines, (m) => m.legacy_id);
     return rows.map((v) => {
       // Internal timestamps: callers get the ages below instead.
       delete v.in_cycle_since;
       delete v.reported_at;
-      const machine = machines.find((m) => m.legacy_id === v.machine_id);
+      const machine = machineByProfile.get(v.machine_id);
       const elapsed = numberOrNull(v.cycle_elapsed_s);
       return {
         ...v,
@@ -291,13 +451,12 @@ export class PostgresLapperCatalog {
     });
   }
 
-  async macros(manager = this.db.manager): Promise<Row[]> {
-    const rows = await manager
-      .createQueryBuilder()
-      .select('m.*')
-      .from('lapper.macros', 'm')
-      .orderBy('m.number')
-      .getRawMany<Row>();
+  /** All macros, or (with `ids`) only those, in the same shape. */
+  async macros(manager = this.db.manager, ids?: unknown[]): Promise<Row[]> {
+    if (ids && !ids.length) return [];
+    const query = manager.createQueryBuilder().select('m.*').from('lapper.macros', 'm');
+    if (ids) query.where('m.id IN (:...macroIds)', { macroIds: ids });
+    const rows = await query.orderBy('m.number').getRawMany<Row>();
     // PostgreSQL returns numeric columns as text.
     return rows.map((m) => ({
       ...m,
@@ -382,6 +541,7 @@ export class PostgresLapperCatalog {
       ids?: string[];
       latest?: boolean;
       limit?: number;
+      offset?: number;
     } = {},
     manager = this.db.manager,
   ): Promise<Row[]> {
@@ -389,39 +549,49 @@ export class PostgresLapperCatalog {
     const query = this.cycleQuery(manager, filter);
     if (filter.latest) query.limit(1);
     else if (filter.limit) query.limit(filter.limit);
-    const [rows, machines, gearsets] = await readBatch(
-      () => query.getRawMany<Row>(),
-      () => this.machines(manager),
-      () => this.gearsets(manager),
+    if (filter.offset) query.offset(filter.offset);
+    const rows = await query.getRawMany<Row>();
+    // Only the machines and gearsets these cycles reference, not the whole catalog.
+    const [machines, gearsets] = await readBatch(
+      () => this.machines(manager, true, unique(rows.map((c) => c.api_machine_id))),
+      () => this.gearsets(manager, unique(rows.map((c) => c.api_gearset_id))),
     );
     const machineById = new Map(machines.map((m) => [m.id, m]));
     const gearById = new Map(gearsets.map((g) => [g.id, g]));
-    return rows.map((c) => ({
-      id: c.id,
-      consec: c.consec,
-      serial_number: c.serial_number,
-      timestamp: c.occurred_at,
-      cycle_time_s: numberOrNull(c.cycle_time_s),
-      machine_id: c.api_machine_id,
-      machine: machineById.get(c.api_machine_id),
-      gearset_id: c.api_gearset_id,
-      gearset: gearById.get(c.api_gearset_id),
-    }));
+    return rows.map((c) => shapeCycle(c, machineById, gearById));
   }
 
-  async logs(id?: string, manager = this.db.manager): Promise<Row[]> {
+  /** One page of every cycle, newest first. */
+  cyclePage(page: number, pageSize: number, manager = this.db.manager): Promise<Row[]> {
+    return this.cycles({ limit: pageSize, offset: (page - 1) * pageSize }, manager);
+  }
+
+  /** One macro log by id (or legacy alias), or one page of all of them, newest cycle first. */
+  async logs(
+    id?: string,
+    manager = this.db.manager,
+    page = { page: 1, pageSize: LIST_DEFAULT_LIMIT },
+  ): Promise<Row[]> {
     const query = manager.createQueryBuilder().select('l.*').from('lapper.macro_logs', 'l');
     if (id)
       query.where(
         'l.id=COALESCE((SELECT a.canonical_id FROM lapper.macro_log_aliases a WHERE a.original_id=:id),CAST(:id AS uuid))',
         { id },
       );
-    const [rows, macros] = await readBatch(
-      () => query.getRawMany<Row>(),
-      () => this.macros(manager),
+    else
+      query
+        .innerJoin('(SELECT * FROM lapper.machine_cycles)', 'c', 'c.id=l.machine_cycle_id')
+        .orderBy('COALESCE(c.recorded_at,c.timestamp AT TIME ZONE :zone)', 'DESC')
+        .addOrderBy('l.id', 'DESC')
+        .setParameter('zone', this.timeZone)
+        .offset((page.page - 1) * page.pageSize)
+        .limit(page.pageSize);
+    const rows = await query.getRawMany<Row>();
+    const ids = unique(rows.map((l) => text(l.machine_cycle_id))) as string[];
+    const [macros, cycles] = await readBatch(
+      () => this.macros(manager, unique(rows.map((l) => l.macro_id))),
+      () => this.cycles({ ids }, manager),
     );
-    const ids = [...new Set(rows.map((l) => text(l.machine_cycle_id)))];
-    const cycles = await this.cycles(ids.length > 10000 ? {} : { ids }, manager);
     const cycleById = new Map(cycles.map((c) => [c.id, c]));
     const macroById = new Map(macros.map((m) => [m.id, m]));
     return rows.map((l) => ({
@@ -476,7 +646,10 @@ export class PostgresLapperCatalog {
         LIMIT $4`,
       [this.timeZone, hours, PER_CYCLE_MACROS, limit],
     );
-    const [machines, gearsets] = await readBatch(() => this.machines(), () => this.gearsets());
+    const [machines, gearsets] = await readBatch(
+      () => this.machines(undefined, false, unique(rows.map((row: Row) => row.machine_id))),
+      () => this.gearsets(undefined, unique(rows.map((row: Row) => row.gearset_id))),
+    );
     const machineById = new Map(machines.map((m) => [m.id, m]));
     const gearById = new Map(gearsets.map((g) => [g.id, g]));
     return {
@@ -675,8 +848,9 @@ export class PostgresLapperCatalog {
         return this.scanners(manager);
       case 'machine-fanuc-variable':
         return this.variables(manager);
+      // Newest first and capped: these grow with every cycle. Page with cyclePage / logs.
       case 'machine-cycle':
-        return this.cycles({}, manager);
+        return this.cyclePage(1, LIST_DEFAULT_LIMIT, manager);
       case 'macro-log':
         return this.logs(undefined, manager);
     }

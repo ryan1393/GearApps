@@ -3,7 +3,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective, DanaToneDirective } from '@dana/ui';
+import { DanaConfirmDialogComponent, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective, DanaToneDirective } from '@dana/ui';
 import { GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 import { Observable, concatMap, from, last } from 'rxjs';
 
@@ -72,7 +72,7 @@ const addresses = (text: string) => text.split(/[\s,;]+/).map(address => address
 @Component({
   selector: 'gear-admin-coater-rpa',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective, DanaToneDirective],
+  imports: [CommonModule, FormsModule, DanaConfirmDialogComponent, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective, DanaToneDirective],
   templateUrl: './coater-rpa-setup.component.html',
   styleUrls: ['./coater-rpa-setup.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -186,8 +186,18 @@ export class CoaterRpaSetupComponent implements OnInit {
     this.run(this.http.put<RpaSetup>(`${API}/part-map`, mapping), `${mapping.summary} ${mapping.part_type} saved.`, 'Mapping saved', false, () => this.cancelMapping());
   }
 
+  /** The mapping waiting for the administrator to confirm its removal. */
+  pendingRemoval: PartMapping | null = null;
+
   removeMapping(mapping: PartMapping): void {
     if (this.busy) return;
+    this.pendingRemoval = mapping;
+  }
+
+  confirmRemoval(): void {
+    const mapping = this.pendingRemoval;
+    this.pendingRemoval = null;
+    if (!mapping || this.busy) return;
     this.run(this.http.post<RpaSetup>(`${API}/part-map/remove`, { summary: mapping.summary, part_type: mapping.part_type }),
       `${mapping.summary} ${mapping.part_type} removed.`, 'Mapping removed', false, () => { if (this.editingKey === keyOf(mapping)) this.cancelMapping(); });
   }

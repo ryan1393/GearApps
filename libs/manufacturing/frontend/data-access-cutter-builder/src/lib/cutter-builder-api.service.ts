@@ -1,7 +1,7 @@
 import { defer, EMPTY, expand, map, Observable, reduce } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { LabelPrinterChoiceService } from '@meshforge/manufacturing/frontend/util-common';
+import { code128BPatterns, LabelPrinterChoiceService } from '@meshforge/manufacturing/frontend/util-common';
 import { ILocation, IPaginatedResponse, ITray } from '@meshforge/manufacturing/shared/util-types';
 import type { CutterRequestRecord, CutterRequestRow, CutterRequestStatus } from '@meshforge/shared/domain';
 
@@ -239,6 +239,15 @@ export interface CutterTrayValidation {
   reason?: string;
 }
 
+/**
+ * A row of the /api/v1/trays list: the tray plus where it currently is. A tray in a coater
+ * container or still assigned to a cutter build is not free for a teardown.
+ */
+export interface CutterSelectionTray extends ITray {
+  current_container: { id: string; serial_number: string } | null;
+  current_cutter_build: { id: string } | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CutterBuilderApiService {
   private readonly http = inject(HttpClient);
@@ -262,13 +271,6 @@ export class CutterBuilderApiService {
     return this.http.get<CutterRequestRequirement[]>('/api/v1/cutter-config/blade-requirements');
   }
 
-
-  startGrinding(trayId: string) {
-    return this.http.post(
-      `/api/v1/trays/${encodeURIComponent(trayId)}/start-grinding`,
-      {},
-    );
-  }
 
   getDashboard() {
     return this.http.get<CutterDashboardData>('/api/v1/cutter-builder/dashboard');
@@ -347,7 +349,7 @@ export class CutterBuilderApiService {
     });
   }
 
-  getSelectionTrays() { return this.allPages<ITray>('/api/v1/trays'); }
+  getSelectionTrays() { return this.allPages<CutterSelectionTray>('/api/v1/trays'); }
   getSelectionLocations() { return this.allPages<ILocation>('/api/v1/locations'); }
 
   scanCutterBody(serialNumber: string) {
@@ -442,18 +444,6 @@ export function cutterApiErrorText(
 }
 
 
-const CUTTER_CARD_CODE128_PATTERNS: readonly string[] = [
-  '212222','222122','222221','121223','121322','131222','122213','122312','132212','221213','221312','231212',
-  '112232','122132','122231','113222','123122','123221','223211','221132','221231','213212','223112','312131',
-  '311222','321122','321221','312212','322112','322211','212123','212321','232121','111323','131123','131321',
-  '112313','132113','132311','211313','231113','231311','112133','112331','132131','113123','113321','133121',
-  '313121','211331','231131','213113','213311','213131','311123','311321','331121','312113','312311','332111',
-  '314111','221411','431111','111224','111422','121124','121421','141122','141221','112214','112412','122114',
-  '122411','142112','142211','241211','221114','413111','241112','134111','111242','121142','121241','114212',
-  '124112','124211','411212','421112','421211','212141','214121','412121','111143','111341','131141','114113',
-  '114311','411113','411311','113141','114131','311141','411131','211412','211214','211232','2331112',
-];
-
 function cutterCardFileStem(value: string): string {
   return value.trim().replace(/[^A-Za-z0-9._-]/g, '_') || 'cutter-card';
 }
@@ -477,21 +467,6 @@ function downloadBlob(blob: Blob, fileName: string): void {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-function code128BPatterns(value: string): string[] {
-  const text = value
-    .split('')
-    .map((character) => {
-      const code = character.charCodeAt(0);
-      return code >= 32 && code <= 126 ? character : '?';
-    })
-    .join('');
-  const codes = [104, ...text.split('').map((character) => character.charCodeAt(0) - 32)];
-  let checksum = 104;
-  for (let i = 1; i < codes.length; i += 1) checksum += codes[i] * i;
-  codes.push(checksum % 103, 106);
-  return codes.map((code) => CUTTER_CARD_CODE128_PATTERNS[code]);
-}
-
 function drawCode128(
   context: CanvasRenderingContext2D,
   text: string,
@@ -500,7 +475,8 @@ function drawCode128(
   width: number,
   height: number,
 ): void {
-  const patterns = code128BPatterns(text);
+  // The preview never refuses a build number: characters a scanner cannot read print as '?'.
+  const patterns = code128BPatterns(text, { replaceUnsupported: true });
   const moduleCount = patterns.reduce(
     (total, pattern) => total + pattern.split('').reduce((sum, digit) => sum + Number(digit), 0),
     20,

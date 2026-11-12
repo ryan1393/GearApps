@@ -20,4 +20,7 @@
       <tr *ngIf="!loading && !filteredRows.length"><td colspan="6">No matching empty-body shelf observations. Record the actual shelf above; old build locations are not assumed to be current.</td></tr>
     </tbody></table></div>
   </section>
+  <dana-confirm-dialog [open]="!!confirmation" [title]="confirmationTitle" [message]="confirmationMessage"
+    [confirmLabel]="confirmation?.kind === 'remove' ? 'Remove' : 'Confirm placement'" [danger]="confirmation?.kind === 'remove'"
+    (confirm)="confirm()" (cancel)="confirmation = null" />
 </section>

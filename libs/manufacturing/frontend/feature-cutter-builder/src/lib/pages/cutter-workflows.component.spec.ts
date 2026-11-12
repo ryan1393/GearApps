@@ -48,6 +48,33 @@ describe('Cutter workflow selection safety', () => {
     second.next({ ...build, build_number: 'SECOND' }); first.next({ ...build, build_number: 'FIRST' });
     expect(component.card?.build_number).toBe('SECOND');
   });
+  it('offers only free, enabled, empty trays and enabled dull shelves for teardown', () => {
+    const free = { ...tray, id: 'free', serial_number: 'FREE', enabled: true, current_container: null, current_cutter_build: null };
+    api['getSelectionTrays'].mockReturnValue(of([
+      free,
+      { ...free, id: 'disabled', serial_number: 'DISABLED', enabled: false },
+      { ...free, id: 'full', serial_number: 'FULL', blade_count: 4 },
+      { ...free, id: 'coater', serial_number: 'COATER', current_container: { id: 'c', serial_number: 'C1' } },
+      { ...free, id: 'built', serial_number: 'BUILT', current_cutter_build: { id: 'b' } },
+    ]));
+    const shelf = { id: 's1', serial_number: 'CGDR-A1A', location_type: 'SHELF', department: 'CUTTERGRIND', enabled: true };
+    api['getSelectionLocations'].mockReturnValue(of([shelf, { ...shelf, id: 's2', serial_number: 'CGDR-A1B', enabled: false }]));
+    const component = teardown(); component.build = build; component.scrappedBladeCount = 0;
+    expect(component.availableEmptyTrays.map((row) => row.serial_number)).toEqual(['FREE']);
+    expect(component.eligibleDullShelves.map((row) => row.serial_number)).toEqual(['CGDR-A1A']);
+  });
+  it('sets the teardown scrap count with the − / + count stepper, within the build blade count', () => {
+    const fixture = TestBed.createComponent(CutterTeardownComponent);
+    fixture.componentInstance.build = build;
+    fixture.detectChanges();
+    const stepper = fixture.nativeElement.querySelector('gear-count-stepper') as HTMLElement;
+    expect(stepper.textContent).toContain('Number of Scrapped Blades');
+    const [minus, plus] = Array.from(stepper.querySelectorAll('button')) as HTMLButtonElement[];
+    plus.click(); plus.click(); minus.click();
+    expect(fixture.componentInstance.scrappedBladeCount).toBe(1);
+    expect(fixture.componentInstance.returnedBladeCount).toBe(10);
+    fixture.destroy();
+  });
   it('rejects fractional scrap quantities', () => {
     const component = teardown(); component.build = build; component.scrappedBladeCount = 0.5;
     expect(component.scrapCountValid).toBe(false);

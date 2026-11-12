@@ -54,7 +54,11 @@ class ArgonautOverride:
         text = lambda key: str(found.get(key) or "").strip()  # noqa: E731
         type_id = found.get("transaction_type_id")
         verify = found.get("verify_tls")
-        return cls(text("url"), text("location_id"), text("username"), str(found.get("password") or ""),
+        # Only a collector token is sent the password. Without it (a legacy administrator sign-in)
+        # the collector keeps its own ARGONAUT_USERNAME / ARGONAUT_PASSWORD rather than a half sign-in.
+        signed_in = "password" in found
+        return cls(text("url"), text("location_id"), text("username") if signed_in else "",
+                   str(found.get("password") or "") if signed_in else "",
                    int(type_id) if isinstance(type_id, (int, float)) and not isinstance(type_id, bool) else None,
                    verify if isinstance(verify, bool) else None)
 

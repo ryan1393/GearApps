@@ -27,7 +27,7 @@ export class PaginationMetaDto implements IPaginationMeta {
   })
   @IsInt()
   @Min(1)
-  @Max(50)
+  @Max(100)
   readonly perPage!: number;
 
   @ApiProperty()

@@ -56,9 +56,16 @@
   z-index: 2200;
   display: grid;
   width: min(390px,calc(100vw - 32px));
-  gap: 10px;
+  gap: 0;
   pointer-events: none;
 }
+
+/* The polite and assertive live regions are siblings; space only between filled regions. */
+.dana-toast-region {
+  display: grid;
+  gap: 10px;
+}
+.dana-toast-region:not(:empty) ~ .dana-toast-region:not(:empty) { margin-top: 10px; }
 
 .dana-toast {
   display: grid;

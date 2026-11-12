@@ -312,6 +312,11 @@ export class GreenshedApiService {
     );
   }
 
+  /** Every part, active or not; Machine Setup offers the active, enabled ones for the cutter's Summary. */
+  listParts() {
+    return this.http.get<PartMasterRow[]>('/api/v1/parts', { params: { active: 'ALL' } });
+  }
+
   getPartByNumber(partNumber: string) {
     return this.http.get<PartMasterRow>(
       `/api/v1/parts/number/${encodeURIComponent(partNumber.trim())}`,

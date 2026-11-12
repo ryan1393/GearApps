@@ -4,3 +4,4 @@ export * from './lib/crud/crud-controller.factory';
 export * from './lib/auth/lapper-write-policy';
 export * from './lib/config/scanner.config';
 export * from './lib/crud/crud-service';
+export * from './lib/crud/list-page';

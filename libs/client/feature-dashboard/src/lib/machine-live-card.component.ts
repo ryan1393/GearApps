@@ -33,8 +33,13 @@ import {
   of,
   startWith,
   switchMap,
+  timeout,
 } from 'rxjs';
 import { ScannerControlsComponent } from './scanner-controls.component';
+
+/** How long one live request (image, scanner slots, machine I/O) may take before it counts as failed. */
+export const LIVE_REQUEST_TIMEOUT_MS = 6_000;
+const NOT_REFRESHED = 'not-refreshed' as const;
 
 /**
  * Live tile for one machine: scanner capture, serial-number slots and Fanuc I/O.
@@ -71,6 +76,9 @@ import { ScannerControlsComponent } from './scanner-controls.component';
         <div class="dana-media-frame gear-live-image">
           @if (imageUrl()) {
             <img [src]="imageUrl()" alt="Latest scanner capture for {{ machine().number }}" />
+            @if (imageError()) {
+              <small class="gear-live-stale gear-muted" data-tone="warning">Image did not refresh</small>
+            }
           } @else if (!scanner()) {
             <div class="dana-media-placeholder">No scanner assigned</div>
           } @else if (imageError()) {
@@ -135,7 +143,9 @@ import { ScannerControlsComponent } from './scanner-controls.component';
                 /></span>
               </div>
             </div>
-            @if (fanucError()) {
+            @if (fanucStale()) {
+              <p class="gear-field-help" data-tone="warning">Machine I/O did not refresh; showing the last values received.</p>
+            } @else if (fanucError()) {
               <p class="gear-field-help">No I/O snapshot recorded for this machine yet.</p>
             }
           </div>
@@ -178,6 +188,12 @@ import { ScannerControlsComponent } from './scanner-controls.component';
       overflow: hidden;
       display: grid;
       place-items: center;
+      position: relative;
+    }
+    .gear-live-stale {
+      position: absolute;
+      inset: auto 0 0 0;
+      text-align: center;
     }
     .gear-live-image img {
       width: 100%;
@@ -224,6 +240,8 @@ export class MachineLiveCardComponent implements OnDestroy {
   protected readonly imageUrl = signal<string | null>(null);
   protected readonly imageError = signal(false);
   protected readonly fanucError = signal(false);
+  /** The last machine I/O request failed or timed out; the values shown are the previous ones. */
+  protected readonly fanucStale = signal(false);
   protected readonly lastUpdate = signal<string | null>(null);
   protected readonly controlsOpen = signal(false);
   private readonly scannerId = computed(
@@ -251,15 +269,24 @@ export class MachineLiveCardComponent implements OnDestroy {
           filter(() => this.doc.visibilityState === 'visible'),
           // exhaustMap, not switchMap: a scanner image slower than the poll period would be
           // cancelled by every tick, so the card (and its serials and machine I/O) never updated.
+          // Each request gives up after LIVE_REQUEST_TIMEOUT_MS, so one that hangs shows as an
+          // error on this poll instead of holding every later poll back.
           exhaustMap(() =>
             forkJoin({
               image: scannerId
-                ? this.scannerApi.image(scannerId).pipe(catchError(() => of(null)))
+                ? this.scannerApi.image(scannerId).pipe(timeout(LIVE_REQUEST_TIMEOUT_MS), catchError(() => of(null)))
                 : of(undefined),
               scanner: scannerId
-                ? this.scannerDetails.get(scannerId).pipe(catchError(() => of(null)))
+                ? this.scannerDetails.get(scannerId).pipe(timeout(LIVE_REQUEST_TIMEOUT_MS), catchError(() => of(null)))
                 : of(undefined),
-              fanuc: this.fanucApi.byMachine(machine.id).pipe(catchError(() => of(null))),
+              // 404: the machine has no snapshot yet. Anything else (a timeout, an outage) keeps
+              // the last values on screen, marked as not refreshed.
+              fanuc: this.fanucApi.byMachine(machine.id).pipe(
+                timeout(LIVE_REQUEST_TIMEOUT_MS),
+                catchError((error: unknown) =>
+                  of((error as { status?: number })?.status === 404 ? null : NOT_REFRESHED),
+                ),
+              ),
             }),
           ),
           takeUntilDestroyed(this.destroyRef),
@@ -273,9 +300,12 @@ export class MachineLiveCardComponent implements OnDestroy {
             this.imageError.set(true);
           }
           if (scanner) this.scanner.set(scanner);
-          this.fanuc.set(fanuc);
-          this.fanucAt.set(Date.now());
-          this.fanucError.set(fanuc === null);
+          this.fanucStale.set(fanuc === NOT_REFRESHED);
+          if (fanuc !== NOT_REFRESHED) {
+            this.fanuc.set(fanuc);
+            this.fanucAt.set(Date.now());
+            this.fanucError.set(fanuc === null);
+          }
           this.lastUpdate.set(new Date().toLocaleTimeString());
         });
 

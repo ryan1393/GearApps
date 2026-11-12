@@ -322,7 +322,9 @@ $renamedTray=New-AssetSerial 'T'
 $tray=Invoke-Api PATCH "/trays/$($tray.id)" @{serial_number=$renamedTray} $script:AdminHeaders 'Update tray'
 Assert-Equal $tray.serial_number $renamedTray 'Verify tray update' 'serial_number'
 
-$blade1=Invoke-Api POST '/blades' @{summary_id=$SummaryId;serial_number=(New-Token 'E2E-BLADE');part_type_id=$PartTypeId;status='new';service_cycle=0;enabled=$true} $script:AdminHeaders 'Create blade'
+# Dull (waiting-for-grinding) blades: an administrator may take a blade out of such a tray,
+# never out of one mid-grinding.
+$blade1=Invoke-Api POST '/blades' @{summary_id=$SummaryId;serial_number=(New-Token 'E2E-BLADE');part_type_id=$PartTypeId;status='waiting_for_grinding';service_cycle=0;enabled=$true} $script:AdminHeaders 'Create blade'
 $blade1=Invoke-Api PATCH "/blades/$($blade1.id)" @{service_cycle=1} $script:AdminHeaders 'Update blade'
 Assert-Equal $blade1.service_cycle 1 'Verify blade update' 'service_cycle'
 
@@ -343,7 +345,7 @@ Invoke-Api DELETE "/trays/$($tray.id)" $null $script:AdminHeaders 'Delete tray'|
 
 # Batch blade route
 $batchTray=Invoke-Api POST '/trays' @{serial_number=(New-AssetSerial 'T');blade_count=0;enabled=$true} $script:AdminHeaders 'Create batch tray'
-$batch=Invoke-Api POST '/bladeTrays/batch' @{tray_id=$batchTray.id;summary_id=$SummaryId;part_type_id=$PartTypeId;quantity=2;status='new';service_cycle=0} $script:AdminHeaders 'Create blade batch'
+$batch=Invoke-Api POST '/bladeTrays/batch' @{tray_id=$batchTray.id;summary_id=$SummaryId;part_type_id=$PartTypeId;quantity=2;status='waiting_for_grinding';service_cycle=0} $script:AdminHeaders 'Create blade batch'
 Assert-Equal $batch.quantity 2 'Verify blade batch quantity' 'quantity'
 $batchAssignments=@(Invoke-Api GET "/bladeTrays/tray/$($batchTray.id)/active" $null $script:AdminHeaders 'Read batch assignments')
 foreach($assignment in $batchAssignments){ Invoke-Api DELETE "/bladeTrays/$($assignment.id)" $null $script:AdminHeaders "Delete batch assignment $($assignment.id)"|Out-Null }

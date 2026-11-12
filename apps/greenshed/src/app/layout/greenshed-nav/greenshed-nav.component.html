@@ -18,6 +18,7 @@
         <div class="nav-heading">GEAR QUALITY</div>
         <a *ngIf="canReadRequests(user)" (click)="mobileNav.close()" routerLink="/greenshed/cutter-requests" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-cutter" aria-hidden="true"></span></span><span>Cutter Requests</span></a>
         <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/greenshed/machines" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Running Machines</span></a>
+        <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/greenshed/machines-board" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-machine" aria-hidden="true"></span></span><span>Running Machines Board</span></a>
         <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/greenshed/setup" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-setup" aria-hidden="true"></span></span><span>Machine Setup</span></a>
         <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/greenshed/check" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-quality-check" aria-hidden="true"></span></span><span>Quality Check</span></a>
         <a *ngIf="canEdit(user)" (click)="mobileNav.close()" routerLink="/greenshed/pull" routerLinkActive="active-sub" ariaCurrentWhenActive="page" class="side-link"><span class="nav-icon"><span class="gear-glyph gear-glyph-pull" aria-hidden="true"></span></span><span>Cutter Pull</span></a>
@@ -61,6 +62,7 @@
     </form>
 
     <div class="topbar-user">
+      <dana-theme-toggle class="dana-theme-toggle-inline" />
       <div class="avatar">{{ initials(user.email) }}</div>
       <div class="user-copy"><strong>{{ user.email }}</strong><span>{{ user.departmentDescription || user.role }}</span></div>
       <button type="button" class="signout-button" (click)="logout()" data-icon="signout" title="Sign out">Sign out</button>

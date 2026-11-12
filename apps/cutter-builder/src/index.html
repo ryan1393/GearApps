@@ -3,6 +3,16 @@
   <head>
     <meta name="theme-color" content="#14171c" />
     <meta charset="utf-8" />
+    <!-- Apply the stored Dana theme (DanaThemeService: localStorage "dana-theme", html[data-dana-theme]) before first paint. -->
+    <script>
+      (function () {
+        var stored = null;
+        try { stored = window.localStorage.getItem('dana-theme'); } catch (e) { /* storage may be disabled */ }
+        var dark = stored === 'dark' || (stored !== 'light' && !!window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.setAttribute('data-dana-theme', dark ? 'dark' : 'light');
+        document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+      })();
+    </script>
     <title>Dashboard | Cutter Builder</title>
     <base href="/" />
     

@@ -93,7 +93,7 @@
           placeholder="Enter your password"
         />
         <small id="password-error" *ngIf="fPassword.invalid && (fPassword.touched || fPassword.dirty)" class="field-message">
-          {{ fPassword.hasError('required') ? 'Password is required.' : 'Use at least ' + minPasswordLength + ' characters.' }}
+          Password is required.
         </small>
 
         <button type="submit" class="login-submit" [disabled]="submitting" [attr.aria-busy]="submitting && signInMethod === 'password'">{{ submitting && signInMethod === 'password' ? 'Signing in…' : 'Sign in' }}</button>
@@ -101,8 +101,9 @@
 
       <form class="login-form" (ngSubmit)="loginBadge()" aria-label="Badge sign in" [attr.aria-busy]="submitting && signInMethod === 'badge'">
         <label class="field-label" for="badge-uid">Or scan your badge</label>
-        <input id="badge-uid" name="badgeUid" class="field-input" type="password" [(ngModel)]="badgeUid" maxlength="128" autocomplete="off" [disabled]="submitting" placeholder="Focus here and scan your card" aria-describedby="badge-help" />
+        <input id="badge-uid" name="badgeUid" class="field-input" type="password" [(ngModel)]="badgeUid" maxlength="128" autocomplete="off" [readOnly]="submitting" [attr.aria-busy]="submitting" (keydown)="badgeKeydown($event)" placeholder="Focus here and scan your card" aria-describedby="badge-help badge-notice" />
         <small id="badge-help">The reader sends the card UID followed by Enter.</small>
+        <small id="badge-notice" class="field-message" role="status" aria-live="polite">{{ badgeNotice }}</small>
         <button type="submit" class="gear-btn gear-btn-secondary" [disabled]="submitting || !badgeUid">{{ submitting && signInMethod === 'badge' ? 'Signing in with badge…' : 'Sign in with badge' }}</button>
       </form>
 

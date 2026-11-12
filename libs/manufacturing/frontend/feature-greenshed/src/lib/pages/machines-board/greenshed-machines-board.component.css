@@ -1,0 +1,172 @@
+/*
+ * Layout only. Appearance comes from Dana classes (gear-panel, dana-status-badge, gear-muted) and
+ * text-size utilities in the template, so dark mode follows the Dana tokens. The cell colour from
+ * the machine data is drawn by the accent bar beside the written "Cell n", never as the only signal.
+ */
+:host {
+  display: block;
+}
+
+.machines-board-page {
+  display: grid;
+  gap: var(--dana-section-gap);
+}
+
+.board-actions,
+.board-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dana-action-gap);
+  align-items: center;
+}
+
+/* Every control is a 48px touch target. */
+.dana-btn {
+  min-height: 48px;
+  min-width: 6rem;
+  touch-action: manipulation;
+}
+
+.board-meta,
+.board-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--dana-space-2) var(--dana-space-5);
+}
+
+.board-department {
+  /* A heading and its cards. Not a gear-panel itself: Dana flattens panels nested in panels,
+     which would strip the cards' own padding. */
+  min-width: 0;
+}
+
+.board-department-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--dana-space-3);
+  margin: 0 0 var(--dana-space-4);
+}
+
+/* One column on phones, then as many 18rem cards as fit. */
+.board-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--dana-workstation-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (min-width: 640px) {
+  .board-grid {
+    grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  }
+}
+
+.board-grid > li {
+  min-width: 0;
+}
+
+.board-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--dana-space-3);
+  height: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  overflow: hidden;
+  padding: var(--dana-space-4) var(--dana-space-5) var(--dana-space-4) var(--dana-space-6);
+}
+
+/* The cell colour: a bar down the card's leading edge. */
+.card-accent {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 0.5rem;
+}
+
+.card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--dana-space-3);
+}
+
+.card-machine {
+  display: grid;
+}
+
+.card-cell {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--dana-space-2);
+}
+
+.card-badge {
+  align-self: flex-start;
+}
+
+.card-note,
+.card-empty {
+  margin: 0;
+}
+
+.card-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--dana-space-3) var(--dana-space-4);
+  margin: 0;
+}
+
+.card-facts > div {
+  min-width: 0;
+}
+
+.card-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.card-facts .card-wide {
+  grid-column: 1 / -1;
+}
+
+.card-sub {
+  display: block;
+}
+
+/* The action button stretches over the whole card, so a tap anywhere on it opens the machine. */
+.card-action {
+  margin-top: auto;
+}
+
+.card-action::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+
+.board-actions-dialog {
+  margin: auto;
+  width: min(28rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+}
+
+.board-actions-dialog p {
+  overflow-wrap: anywhere;
+}
+
+.board-dialog-actions {
+  display: grid;
+  gap: var(--dana-action-gap);
+}
+
+.board-dialog-actions .dana-btn {
+  width: 100%;
+  justify-content: flex-start;
+}

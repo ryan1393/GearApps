@@ -57,7 +57,7 @@ const actionFiles = [
   'libs/manufacturing/frontend/feature-greenshed/src/lib/pages/setup/greenshed-setup.component.ts',
   'libs/manufacturing/frontend/feature-greenshed/src/lib/pages/check/greenshed-check.component.ts',
   'libs/manufacturing/frontend/feature-greenshed/src/lib/pages/pull/greenshed-pull.component.ts',
-  'libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.ts',
+  'libs/manufacturing/frontend/feature-admin-users/src/lib/shared/admin-tab-base.ts',
 ];
 for (const rel of actionFiles) {
   const source = read(rel);

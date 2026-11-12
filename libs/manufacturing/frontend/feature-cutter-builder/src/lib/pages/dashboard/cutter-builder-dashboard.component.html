@@ -20,9 +20,19 @@
       <a routerLink="/cutter-builder/build" class="operation-card" danaOperationCard icon="build-cutter" tone="blue" heading="Build Cutter" description="Build a cutter from a complete returned tray." aria-label="Build Cutter"></a>
       <a routerLink="/cutter-builder/teardown" class="operation-card" danaOperationCard icon="teardown" tone="green" heading="Tear Down Cutter" description="Return blades to a tray and close the current build." aria-label="Tear Down Cutter"></a>
       <a routerLink="/cutter-builder/lookup" class="operation-card" danaOperationCard icon="search" tone="purple" heading="Build Lookup" description="Find cutter status, body, build, and history." aria-label="Build Lookup"></a>
-      <a routerLink="/cutter-builder/cancel-last" class="operation-card" danaOperationCard icon="search" tone="orange" heading="Cancel Last Build" description="Review the last transaction and its cancellation history." aria-label="Cancel Last Build"></a>
+      <a routerLink="/cutter-builder/cancel-last" class="operation-card" danaOperationCard icon="pull" tone="orange" heading="Cancel Last Build" description="Review the last transaction and its cancellation history." aria-label="Cancel Last Build"></a>
     </div>
   </section>
+
+  <!-- IDs and status pills stay on one line; a cut-off value shows in full on hover (title) and can be copied. -->
+  <ng-template #idCell let-id>
+    <span class="id-cell">
+      <span class="cell-text mono strong" [title]="id">{{ id }}</span>
+      <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm id-copy" (click)="copy(id)"
+        [attr.aria-label]="'Copy ' + id" [title]="copiedValue === id ? 'Copied' : 'Copy ' + id">{{ copiedValue === id ? '✓' : '⧉' }}</button>
+    </span>
+  </ng-template>
+  <span class="sr-only" role="status" aria-live="polite">{{ copiedValue ? 'Copied ' + copiedValue : '' }}</span>
 
   <section *ngIf="data as d" danaDashboardGrid class="bottom-grid cutter-dashboard-grid">
     <article danaDashboardPanel class="gear-panel data-panel">
@@ -35,8 +45,14 @@
           <col class="cutter-col-blades" />
           <col class="cutter-col-tail" />
         </colgroup>
-        <thead><tr><th>Tray</th><th>Summary</th><th>Type</th><th>Blades</th><th></th></tr></thead><tbody>
-        <tr *ngFor="let row of d.waiting_for_grinding"><td class="mono strong">{{ row.tray_serial_number }}</td><td>{{ row.summary_number || '—' }}</td><td>{{ row.part_type_code || '—' }}</td><td>{{ row.blade_count }}</td><td class="right"><button *ngIf="canEdit" type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="startGrinding(row.tray_id, row.tray_serial_number)" [disabled]="loading">Start Grinding</button></td></tr>
+        <thead><tr><th><span class="th-label">Tray</span></th><th><span class="th-label">Summary</span></th><th><span class="th-label">Type</span></th><th><span class="th-label">Blades</span></th><th><span class="sr-only">Action</span></th></tr></thead><tbody>
+        <tr *ngFor="let row of d.waiting_for_grinding">
+          <td><ng-container *ngTemplateOutlet="idCell; context: { $implicit: row.tray_serial_number }" /></td>
+          <td><span class="cell-text" [title]="row.summary_number || ''">{{ row.summary_number || '—' }}</span></td>
+          <td><span class="cell-text" [title]="row.part_type_code || ''">{{ row.part_type_code || '—' }}</span></td>
+          <td><span class="cell-text">{{ row.blade_count }}</span></td>
+          <td class="right"><a *ngIf="canEditBladeTracking" class="gear-btn gear-btn-secondary gear-btn-sm table-action" [href]="grindingStationUrl(row.tray_serial_number)" [attr.aria-label]="'Start grinding tray ' + row.tray_serial_number + ' in Blade Tracking'">Start in Grinding</a></td>
+        </tr>
         <tr *ngIf="d.waiting_for_grinding.length === 0"><td danaTableEmpty colspan="5" class="empty-row">No trays waiting for grinding.</td></tr>
       </tbody></table></div>
     </article>
@@ -51,8 +67,14 @@
           <col class="cutter-col-blades" />
           <col class="cutter-col-tail" />
         </colgroup>
-        <thead><tr><th>Tray</th><th>Summary</th><th>Type</th><th>Blades</th><th>Shelf</th></tr></thead><tbody>
-        <tr *ngFor="let row of d.ready_for_cutter"><td class="mono strong">{{ row.tray_serial_number }}</td><td>{{ row.summary_number || '—' }}</td><td>{{ row.part_type_code || '—' }}</td><td>{{ row.blade_count }} / {{ row.required_blade_count ?? '—' }}</td><td><strong>{{ row.shelf_location }}</strong></td></tr>
+        <thead><tr><th><span class="th-label">Tray</span></th><th><span class="th-label">Summary</span></th><th><span class="th-label">Type</span></th><th><span class="th-label">Blades</span></th><th><span class="th-label">Shelf</span></th></tr></thead><tbody>
+        <tr *ngFor="let row of d.ready_for_cutter">
+          <td><ng-container *ngTemplateOutlet="idCell; context: { $implicit: row.tray_serial_number }" /></td>
+          <td><span class="cell-text" [title]="row.summary_number || ''">{{ row.summary_number || '—' }}</span></td>
+          <td><span class="cell-text" [title]="row.part_type_code || ''">{{ row.part_type_code || '—' }}</span></td>
+          <td><span class="cell-text">{{ row.blade_count }} / {{ row.required_blade_count ?? '—' }}</span></td>
+          <td><strong class="cell-text" [title]="row.shelf_location">{{ row.shelf_location }}</strong></td>
+        </tr>
         <tr *ngIf="d.ready_for_cutter.length === 0"><td danaTableEmpty colspan="5" class="empty-row">No coated trays ready for cutter builds.</td></tr>
       </tbody></table></div>
     </article>
@@ -69,8 +91,14 @@
           <col class="cutter-col-state" />
           <col class="cutter-col-date" />
         </colgroup>
-        <thead><tr><th>Build</th><th>Body</th><th>Summary</th><th>Status</th><th>Built</th></tr></thead><tbody>
-        <tr *ngFor="let row of d.recent_builds"><td><a routerLink="/cutter-builder/lookup" [queryParams]="{ build: row.build_number }" class="build-link mono">{{ row.build_number }}</a></td><td>{{ row.cutter_body_serial_number }}</td><td>{{ row.summary_number }}</td><td><span danaStatusBadge class="status-pill" [danaTone]="row.status_code">{{ row.status_code }}</span></td><td>{{ row.built_at | date:'MMM d, y' }}</td></tr>
+        <thead><tr><th><span class="th-label">Build</span></th><th><span class="th-label">Body</span></th><th><span class="th-label">Summary</span></th><th><span class="th-label">Status</span></th><th><span class="th-label">Built</span></th></tr></thead><tbody>
+        <tr *ngFor="let row of d.recent_builds">
+          <td><span class="id-cell"><a routerLink="/cutter-builder/lookup" [queryParams]="{ build: row.build_number }" class="build-link mono cell-text" [title]="row.build_number">{{ row.build_number }}</a><button type="button" class="gear-btn gear-btn-secondary gear-btn-sm id-copy" (click)="copy(row.build_number)" [attr.aria-label]="'Copy ' + row.build_number" [title]="copiedValue === row.build_number ? 'Copied' : 'Copy ' + row.build_number">{{ copiedValue === row.build_number ? '✓' : '⧉' }}</button></span></td>
+          <td><ng-container *ngTemplateOutlet="idCell; context: { $implicit: row.cutter_body_serial_number }" /></td>
+          <td><span class="cell-text" [title]="row.summary_number">{{ row.summary_number }}</span></td>
+          <td><span danaStatusBadge class="status-pill" [danaTone]="row.status_code" [title]="row.status_code">{{ row.status_code }}</span></td>
+          <td><span class="cell-text">{{ row.built_at | date:'MMM d, y' }}</span></td>
+        </tr>
         <tr *ngIf="d.recent_builds.length === 0"><td danaTableEmpty colspan="5" class="empty-row">No cutter builds yet.</td></tr>
       </tbody></table></div>
     </article>
@@ -85,8 +113,14 @@
           <col class="cutter-col-state" />
           <col class="cutter-col-date" />
         </colgroup>
-        <thead><tr><th>Build</th><th>Body</th><th>Returned</th><th>Scrapped</th><th>Date</th></tr></thead><tbody>
-        <tr *ngFor="let row of d.recent_teardowns"><td class="mono strong">{{ row.build_number }}</td><td>{{ row.cutter_body_serial_number }}</td><td>{{ row.returned_blade_count }}</td><td>{{ row.scrapped_blade_count }}</td><td>{{ row.torn_down_at | date:'MMM d, y' }}</td></tr>
+        <thead><tr><th><span class="th-label">Build</span></th><th><span class="th-label">Body</span></th><th><span class="th-label">Returned</span></th><th><span class="th-label">Scrapped</span></th><th><span class="th-label">Date</span></th></tr></thead><tbody>
+        <tr *ngFor="let row of d.recent_teardowns">
+          <td><ng-container *ngTemplateOutlet="idCell; context: { $implicit: row.build_number }" /></td>
+          <td><ng-container *ngTemplateOutlet="idCell; context: { $implicit: row.cutter_body_serial_number }" /></td>
+          <td><span class="cell-text">{{ row.returned_blade_count }}</span></td>
+          <td><span class="cell-text">{{ row.scrapped_blade_count }}</span></td>
+          <td><span class="cell-text">{{ row.torn_down_at | date:'MMM d, y' }}</span></td>
+        </tr>
         <tr *ngIf="d.recent_teardowns.length === 0"><td danaTableEmpty colspan="5" class="empty-row">No cutter teardowns yet.</td></tr>
       </tbody></table></div>
     </article>

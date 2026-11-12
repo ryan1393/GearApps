@@ -57,9 +57,11 @@ export class GreenshedDashboardComponent implements OnInit {
     );
   }
 
+  private version = 0;
   ngOnInit(){this.refresh();}
-  refresh(){this.loading=true;this.error='';this.api.getDashboard().subscribe({
-    next:d=>{this.data=d;this.loading=false;},
-    error:(e:HttpErrorResponse)=>{this.loading=false;this.error=greenshedApiErrorText(e,'Could not load Greenshed dashboard.');}
+  /** Only the newest answer is shown: a slow earlier refresh never replaces newer counts. */
+  refresh(){const version=++this.version;this.loading=true;this.error='';this.api.getDashboard().subscribe({
+    next:d=>{if(version!==this.version)return;this.data=d;this.loading=false;},
+    error:(e:HttpErrorResponse)=>{if(version!==this.version)return;this.loading=false;this.error=greenshedApiErrorText(e,'Could not load Greenshed dashboard.');}
   });}
 }

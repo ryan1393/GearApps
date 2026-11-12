@@ -1,4 +1,4 @@
-import { LapperWritePolicy, CrudService, crudController } from '@meshforge/api/core';
+import { LapperWritePolicy, CrudService, crudController, LIST_PAGE_MAX, listPage } from '@meshforge/api/core';
 import {
   CreateMacroLogDto,
   LappingSummaryRowDto,
@@ -18,6 +18,8 @@ import {
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 @Injectable()
 export abstract class MacroLogsService extends CrudService<MacroLog> {
+  /** One page of every recorded value, newest cycle first. */
+  abstract findPage(page: number, pageSize: number): Promise<MacroLog[]>;
   /**
    * Latest recorded value of every macro for a machine + gearset, optionally
    * restricted to one form group. Replaces the string-interpolated SQL from the
@@ -45,6 +47,17 @@ export class MacroLogsController extends crudController<MacroLog>({
 }) {
   constructor(override readonly service: MacroLogsService) {
     super();
+  }
+  @Get()
+  @ApiOperation({
+    summary: `Recorded macro values, newest cycle first: the newest ${LIST_PAGE_MAX} unless paged with page and pageSize`,
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'From 1 (default 1)' })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number, description: `1 to ${LIST_PAGE_MAX} (default ${LIST_PAGE_MAX})` })
+  @ApiOkResponse({ type: MacroLogDto, isArray: true })
+  override findAll(@Query('page') page?: string, @Query('pageSize') pageSize?: string): Promise<MacroLog[]> {
+    const wanted = listPage(page, pageSize);
+    return this.service.findPage(wanted.page, wanted.pageSize);
   }
   @Get('summary/:machineId/:gearsetId')
   @ApiOperation({ summary: 'Lapping summary: latest value of each macro for a machine + gearset' })

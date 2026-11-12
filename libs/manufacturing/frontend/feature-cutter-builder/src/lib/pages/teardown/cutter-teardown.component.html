@@ -1,4 +1,4 @@
-<section class="gear-page gear-workflow-page">
+<section class="gear-page gear-workflow-page op-page">
   <header
     class="gear-page-header"
     danaPageHeader
@@ -7,31 +7,17 @@
     description="Scan the pulled Cutter Build and an empty tray. Enter only the number of scrapped blades; returned quantity is calculated automatically."
   ></header>
 
-  <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert">{{ error }}</div>
-  <div *ngIf="message" class="gear-alert gear-alert-success" role="status" aria-live="polite">{{ message }}</div>
+  <gear-station-status class="station-status-line" [message]="status" [prompt]="prompt" (dismiss)="dismissStatus()" />
 
   <div *ngIf="!result" class="gear-workflow-grid">
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header">
-        <span class="gear-workflow-step">1</span>
-        <div><h2>Pulled Cutter Build</h2><p>Scan the build that was pulled from production.</p></div>
-      </div>
-      <div class="gear-workflow-section-body">
-        <form class="gear-workflow-scan-row" (ngSubmit)="scanBuild()">
-          <label class="gear-field">
-            Build number
-            <input gearScannerFocus [ngModel]="buildNumber" (ngModelChange)="buildChanged($event)" [disabled]="busy" name="buildNumber" class="gear-input font-mono" placeholder="Scan build number..." />
-          </label>
-          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy">Scan</button>
-        </form>
-        <div class="gear-workflow-divider">OR</div>
-        <label class="gear-field">Select Pulled Cutter Build
-          <select [(ngModel)]="selectedBuildNumber" name="selectedBuildNumber" class="gear-select" (change)="selectPulledBuild()" [disabled]="busy">
-            <option value="">Choose pulled cutter build...</option>
-            <option *ngFor="let row of availablePulledBuilds" [value]="row.build_number">{{row.build_number}} · {{row.summary_number}} · {{row.part_type_code}} · {{row.machine_number || 'No machine'}}</option>
-          </select>
-        </label>
-
+    <section class="gear-workflow-section" aria-label="Step 1: pulled cutter build">
+      <gear-scan-panel [step]="1" label="Scan Pulled Cutter Build" help="The build that was pulled from production." placeholder="Scan build number..."
+        changeText="Change build" [doneValue]="build?.build_number ?? null" [busy]="busy"
+        (scanned)="useBuild($event)" (reopen)="changeBuild()" (heldScanIgnored)="scanIgnored($event)">
+        <gear-option-picker placeholder="Choose a pulled cutter build…" [headers]="['Build', 'Summary', 'Machine']" [options]="buildOptions" [disabled]="busy"
+          emptyText="No pulled cutter builds are waiting for teardown." (picked)="useBuild($event)" />
+      </gear-scan-panel>
+      <div *ngIf="build" class="gear-workflow-section-body">
         <div *ngIf="build" class="gear-workflow-selection">
           <div class="gear-workflow-detail-grid">
             <div class="gear-workflow-detail gear-workflow-span-full"><span class="gear-workflow-detail-label">Build</span><strong class="font-mono">{{ build.build_number }}</strong></div>
@@ -45,27 +31,14 @@
       </div>
     </section>
 
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header">
-        <span class="gear-workflow-step">2</span>
-        <div><h2>Empty Teardown Tray</h2><p>The destination tray must be empty before teardown.</p></div>
-      </div>
-      <div class="gear-workflow-section-body">
-        <form class="gear-workflow-scan-row" (ngSubmit)="scanTray()">
-          <label class="gear-field">
-            Tray serial
-            <input [gearScannerFocus]="2" [ngModel]="traySerial" (ngModelChange)="trayChanged($event)" [disabled]="busy || !build" name="traySerial" class="gear-input" placeholder="Scan empty tray..." autocomplete="off" />
-          </label>
-          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy || !build">Scan</button>
-        </form>
-        <div class="gear-workflow-divider">OR</div>
-        <label class="gear-field">Select Empty Teardown Tray
-          <select [(ngModel)]="selectedTraySerial" name="selectedTraySerial" class="gear-select" (change)="selectEmptyTray()" [disabled]="busy || !build">
-            <option value="">Choose empty available tray...</option>
-            <option *ngFor="let row of availableEmptyTrays" [value]="row.serial_number">{{row.serial_number}}</option>
-          </select>
-        </label>
-
+    <section class="gear-workflow-section" aria-label="Step 2: empty teardown tray">
+      <gear-scan-panel [step]="2" label="Scan Empty Teardown Tray" help="The destination tray must be empty before teardown." placeholder="Scan empty tray..."
+        changeText="Change tray" [doneValue]="tray?.serial_number ?? null" [disabled]="!build" [busy]="busy"
+        (scanned)="useTray($event)" (reopen)="changeTray()" (heldScanIgnored)="scanIgnored($event)">
+        <gear-option-picker placeholder="Choose an empty available tray…" [headers]="['Tray', 'Contents']" [options]="trayOptions" [disabled]="busy || !build"
+          emptyText="No empty, free trays are available." (picked)="useTray($event)" />
+      </gear-scan-panel>
+      <div *ngIf="tray" class="gear-workflow-section-body">
         <div
           *ngIf="tray"
           class="gear-workflow-state"
@@ -88,10 +61,8 @@
       </div>
       <div class="gear-workflow-section-body">
         <div class="gear-workflow-form-grid">
-          <label class="gear-field">
-            Number of Scrapped Blades
-            <input type="number" min="0" step="1" [max]="build?.blade_count ?? 0" [(ngModel)]="scrappedBladeCount" name="scrappedBladeCount" class="gear-input" [disabled]="busy || !build" />
-          </label>
+          <gear-count-stepper class="gear-field" label="Number of Scrapped Blades" [(value)]="scrappedBladeCount" [min]="0"
+            [max]="build?.blade_count ?? 0" [disabled]="busy || !build" />
           <label class="gear-field">
             Comments
             <textarea rows="3" [(ngModel)]="comments" name="comments" class="gear-textarea" maxlength="2000" [disabled]="busy"></textarea>
@@ -120,20 +91,12 @@
           <p class="gear-workflow-help">
             Because {{ returnedBladeCount }} blade(s) are returning to the tray, it inherits this cutter's Summary + Part Type and must go to the matching Cuttergrind Dull shelf.
           </p>
-          <form class="gear-workflow-scan-row" (ngSubmit)="scanShelf()">
-            <label class="gear-field">
-              Dull shelf tag
-              <input [gearScannerFocus]="3" [ngModel]="shelfLocationSerial" (ngModelChange)="shelfChanged($event)" [disabled]="busy" name="shelfLocationSerial" class="gear-input" placeholder="Scan CGDR-/CGDP- shelf tag, e.g. CGDR-A1A" autocomplete="off" />
-            </label>
-            <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy">Scan</button>
-          </form>
-          <div class="gear-workflow-divider">OR</div>
-          <label class="gear-field">Select Compatible Dull Shelf
-            <select [(ngModel)]="selectedShelfSerial" name="selectedShelfSerial" class="gear-select" (change)="selectDullShelf()" [disabled]="busy">
-              <option value="">Choose compatible dull shelf...</option>
-              <option *ngFor="let location of eligibleDullShelves" [value]="location.serial_number">{{location.serial_number}} · {{location.description || 'Available shelf'}}</option>
-            </select>
-          </label>
+          <gear-scan-panel [step]="4" label="Scan Dull Shelf" placeholder="Scan CGDR-/CGDP- shelf tag, e.g. CGDR-A1A" changeText="Change shelf"
+            [doneValue]="shelfLocation?.serial_number ?? null" [busy]="busy"
+            (scanned)="useShelf($event)" (reopen)="changeShelf()" (heldScanIgnored)="scanIgnored($event)">
+            <gear-option-picker placeholder="Choose a compatible dull shelf…" [headers]="['Shelf', 'Description']" [options]="shelfOptions" [disabled]="busy"
+              emptyText="No compatible dull shelves are set up. Ask a supervisor to add the shelf bin tags." (picked)="useShelf($event)" />
+          </gear-scan-panel>
           <div *ngIf="shelfLocation" class="gear-workflow-state gear-workflow-state-success">
             <span class="gear-workflow-kicker">Validated Cuttergrind Dull Shelf</span>
             <div class="gear-workflow-selection-title font-mono">{{ shelfLocation.serial_number }}</div>
@@ -151,14 +114,17 @@
           </div>
         </ng-template>
 
-        <button
-          type="button"
-          (click)="askTeardown()"
-          [disabled]="!canTeardown"
-          class="gear-btn gear-btn-primary gear-workflow-submit"
-        >
-          {{ busy ? 'Processing...' : 'Complete Cutter Teardown' }}
-        </button>
+        <div class="op-primary">
+          <button
+            type="button"
+            (click)="askTeardown()"
+            [disabled]="!canTeardown"
+            class="gear-btn gear-btn-primary gear-workflow-submit"
+          >
+            {{ busy ? 'Processing...' : 'Complete Cutter Teardown' }}
+          </button>
+          @if (teardownBlockedReason) { <p class="op-blocked gear-workflow-help" role="status">{{ teardownBlockedReason }}</p> }
+        </div>
       </div>
     </section>
   </div>

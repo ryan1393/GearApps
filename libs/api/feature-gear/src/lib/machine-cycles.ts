@@ -1,4 +1,4 @@
-import { LapperWritePolicy, CrudService, crudController } from '@meshforge/api/core';
+import { LapperWritePolicy, CrudService, crudController, LIST_PAGE_MAX, listPage } from '@meshforge/api/core';
 import {
   CreateMachineCycleDto,
   MachineCycleDto,
@@ -6,9 +6,11 @@ import {
 } from '@meshforge/api/data-access';
 import { CycleHistoryPage, LapperProduction, MachineCycle, SETTING_CHANGE_HOURS, SettingChanges } from '@meshforge/shared/domain';
 import { UseInterceptors, Controller, Get, Injectable, Param, ParseUUIDPipe, Query } from '@nestjs/common';
-import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 @Injectable()
 export abstract class MachineCyclesService extends CrudService<MachineCycle> {
+  /** One page of every cycle, newest first. */
+  abstract findPage(page: number, pageSize: number): Promise<MachineCycle[]>;
   abstract findByGearset(gearsetId: string): Promise<MachineCycle[]>;
   abstract findByMachine(machineId: string): Promise<MachineCycle[]>;
   abstract production(): Promise<LapperProduction>;
@@ -29,6 +31,17 @@ export class MachineCyclesController extends crudController<MachineCycle>({
 }) {
   constructor(override readonly service: MachineCyclesService) {
     super();
+  }
+  @Get()
+  @ApiOperation({
+    summary: `Machine cycles, newest first: the newest ${LIST_PAGE_MAX} unless paged with page and pageSize`,
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, description: 'From 1 (default 1)' })
+  @ApiQuery({ name: 'pageSize', required: false, type: Number, description: `1 to ${LIST_PAGE_MAX} (default ${LIST_PAGE_MAX})` })
+  @ApiOkResponse({ type: MachineCycleDto, isArray: true })
+  override findAll(@Query('page') page?: string, @Query('pageSize') pageSize?: string): Promise<MachineCycle[]> {
+    const wanted = listPage(page, pageSize);
+    return this.service.findPage(wanted.page, wanted.pageSize);
   }
   @Get('production')
   @ApiOperation({ summary: 'Production totals over the past 24 hours, excluding simulations' })

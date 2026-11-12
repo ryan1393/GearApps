@@ -25,11 +25,11 @@ import {
   macroLimitState,
   macroLimitText,
 } from '@meshforge/shared/domain';
-import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
+import { DanaConfirmDialogComponent, DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
 
 @Component({
   selector: 'gear-cycle-tests-page',
-  imports: [CommonModule, FormsModule, DanaPageHeaderComponent, DanaToneDirective],
+  imports: [CommonModule, FormsModule, DanaConfirmDialogComponent, DanaPageHeaderComponent, DanaToneDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section
@@ -294,6 +294,14 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
         <p class="gear-muted">{{ history.loading() ? 'Loading…' : 'No saved tests yet.' }}</p>
       }
     </section>
+    <dana-confirm-dialog
+      [open]="!!argonautConfirm()"
+      title="Send a test transaction to Argonaut?"
+      [message]="argonautConfirm()?.message ?? ''"
+      confirmLabel="Send to Argonaut"
+      (confirm)="confirmArgonautSend()"
+      (cancel)="cancelArgonautSend()"
+    />
   `,
   host: { class: 'dana-page-stack' },
   styles: `
@@ -432,20 +440,35 @@ export class CycleTestsPageComponent implements OnInit {
       next: (preview) => {
         this.argonautPreview.set(preview);
         const r = preview.payload.request;
-        if (!globalThis.confirm(`Send a test transaction to Argonaut?\n\nAddress: ${preview.url}\nSerial: ${r.serialNumber}\nPart number: ${r.partNumber}\nSequence: ${r.sequence}\n\nArgonaut records it as a real transaction.`)) {
-          this.argonautBusy.set(false);
-          return;
-        }
-        this.http.post<ArgonautTestResult>('/api/v1/admin/cycle-tests/argonaut', input)
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe({
-            next: (result) => { this.argonautBusy.set(false); this.argonautPreview.set(null); this.argonautResult.set(result); },
-            error: (error) => { this.argonautBusy.set(false); this.argonautError.set(apiErrorMessage(error)); },
-          });
+        // Argonaut records every transaction it accepts: show exactly what will be sent and wait for a yes.
+        this.argonautConfirm.set({
+          input,
+          message: `Address: ${preview.url} · Serial: ${r.serialNumber} · Part number: ${r.partNumber} · Sequence: ${r.sequence}. Argonaut records it as a real transaction.`,
+        });
       },
       error: (error) => { this.argonautBusy.set(false); this.argonautError.set(apiErrorMessage(error)); },
     });
   }
+  /** The previewed input waiting for confirmation; exactly this input is sent. */
+  protected readonly argonautConfirm = signal<{ input: ArgonautTestInput; message: string } | null>(null);
+
+  protected confirmArgonautSend() {
+    const pending = this.argonautConfirm();
+    this.argonautConfirm.set(null);
+    if (!pending) return;
+    this.http.post<ArgonautTestResult>('/api/v1/admin/cycle-tests/argonaut', pending.input)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => { this.argonautBusy.set(false); this.argonautPreview.set(null); this.argonautResult.set(result); },
+        error: (error) => { this.argonautBusy.set(false); this.argonautError.set(apiErrorMessage(error)); },
+      });
+  }
+
+  protected cancelArgonautSend() {
+    this.argonautConfirm.set(null);
+    this.argonautBusy.set(false);
+  }
+
   ngOnInit() { this.reload(); }
   protected reload() {
     this.machines.load(this.machinesApi.list());

@@ -169,3 +169,150 @@ describe('ScannerClientService capture images', () => {
     ]);
   });
 });
+
+describe('ScannerClientService shared image fetches', () => {
+  const host = '10.16.82.253';
+  const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xd9]);
+  const transferOk = { code: 226, message: 'Transfer complete' };
+  let logins: jest.SpyInstance;
+  let release: () => void = () => undefined;
+  let fail = false;
+
+  function client() {
+    return new ScannerClientService({
+      defaultHost: '',
+      allowInsecureTls: true,
+      timeoutMs: 1000,
+      commandPort: 9004,
+      ftp: { host: 'ftp.example.test', user: 'reader', password: 'test', root: 'root', imageFile: 'img.jpg' },
+    });
+  }
+  // Each FTP download waits until the test releases it, so concurrent viewers overlap.
+  const settle = () => new Promise((resolve) => setImmediate(resolve));
+  async function finish<T>(pending: Promise<T>): Promise<T> {
+    await settle();
+    release();
+    return pending;
+  }
+
+  beforeEach(() => {
+    fail = false;
+    jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+    logins = jest.spyOn(FtpClient.prototype, 'access').mockResolvedValue({ code: 230, message: 'Logged in' });
+    jest.spyOn(FtpClient.prototype, 'list').mockResolvedValue([]);
+    jest.spyOn(FtpClient.prototype, 'downloadTo').mockImplementation(async (sink) => {
+      if (typeof sink === 'string') throw new Error('Expected an in-memory image download');
+      await new Promise<void>((resolve) => (release = resolve));
+      if (fail) throw new Error('connection reset');
+      sink.end(jpeg);
+      return transferOk;
+    });
+  });
+
+  afterEach(() => jest.restoreAllMocks());
+
+  it('shares one FTP fetch between viewers asking at the same time', async () => {
+    const service = client();
+    const images = await finish(Promise.all([1, 2, 3].map(() => service.getLatestImage(host))));
+    expect(logins).toHaveBeenCalledTimes(1);
+    expect(images).toEqual(Array(3).fill({ data: jpeg, contentType: 'image/jpeg' }));
+  });
+
+  it('serves the cached image for at least the 1 s poll period', async () => {
+    expect(ScannerClientService.IMAGE_TTL_MS).toBeGreaterThanOrEqual(1000);
+    const service = client();
+    await finish(service.getLatestImage(host));
+    jest.spyOn(Date, 'now').mockReturnValue(1_000_000 + 1000);
+    await service.getLatestImage(host);
+    expect(logins).toHaveBeenCalledTimes(1);
+    jest.spyOn(Date, 'now').mockReturnValue(1_000_000 + ScannerClientService.IMAGE_TTL_MS);
+    await finish(service.getLatestImage(host));
+    expect(logins).toHaveBeenCalledTimes(2);
+  });
+
+  it('shares a failure with the viewers waiting on it but does not keep it', async () => {
+    const service = client();
+    fail = true;
+    const failed = finish(Promise.all([service.getLatestImage(host), service.getLatestImage(host)]));
+    await expect(failed).rejects.toThrow(`Could not fetch image for scanner ${host}`);
+    expect(logins).toHaveBeenCalledTimes(1);
+    fail = false;
+    await expect(finish(service.getLatestImage(host))).resolves.toEqual({ data: jpeg, contentType: 'image/jpeg' });
+    expect(logins).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('ScannerClientService per-scanner image location', () => {
+  const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xd9]);
+  const transferOk = { code: 226, message: 'Transfer complete' };
+  let paths: string[];
+
+  function client() {
+    return new ScannerClientService({
+      defaultHost: '',
+      allowInsecureTls: true,
+      timeoutMs: 1000,
+      commandPort: 9004,
+      ftp: { host: 'ftp.example.test', user: 'reader', password: 'test', root: '181-lapper-scanners/', imageFile: 'scanner-current.jpg' },
+    });
+  }
+  function file(name: string, type: FileType, seconds = 0): FileInfo {
+    const info = new FileInfo(name);
+    info.type = type;
+    info.size = 10;
+    info.modifiedAt = new Date(seconds * 1000);
+    return info;
+  }
+
+  beforeEach(() => {
+    paths = [];
+    jest.spyOn(FtpClient.prototype, 'access').mockResolvedValue({ code: 230, message: 'Logged in' });
+    jest.spyOn(FtpClient.prototype, 'downloadTo').mockImplementation(async (sink, path) => {
+      if (typeof sink === 'string') throw new Error('Expected an in-memory image download');
+      paths.push(path);
+      sink.end(jpeg);
+      return transferOk;
+    });
+  });
+  afterEach(() => jest.restoreAllMocks());
+
+  it('uses the default <root>/<IP>/<image file> when the scanner sets nothing', async () => {
+    await client().getLatestImage('10.16.82.253', { folder: null, file: '' });
+    expect(paths).toEqual(['181-lapper-scanners/10.16.82.253/scanner-current.jpg']);
+  });
+
+  it("uses the scanner's own folder and file, without needing its IP", async () => {
+    await client().getLatestImage(null, { folder: ' cell-4/scanner-b/ ', file: 'live.BMP' }, 'scanner-b');
+    expect(paths).toEqual(['cell-4/scanner-b/live.BMP']);
+  });
+
+  it('keeps one cache entry per image location', async () => {
+    const service = client();
+    await service.getLatestImage('10.0.0.1', { folder: 'a' });
+    await service.getLatestImage('10.0.0.1', { folder: 'b' });
+    await service.getLatestImage('10.0.0.1', { folder: 'a' });
+    expect(paths).toEqual(['a/scanner-current.jpg', 'b/scanner-current.jpg']);
+  });
+
+  it('refuses a scanner with neither an IP nor a folder', async () => {
+    await expect(client().getLatestImage(null, {})).rejects.toThrow('IP address or its image folder');
+  });
+
+  it('lists folders and captures of a folder, newest first, defaulting to the root', async () => {
+    const list = jest.spyOn(FtpClient.prototype, 'list').mockResolvedValue([
+      file('10.16.82.253', FileType.Directory),
+      file('old.jpg', FileType.File, 10),
+      file('new.BMP', FileType.File, 20),
+      file('notes.txt', FileType.File, 30),
+    ]);
+    const listing = await client().listFtpFolder();
+    expect(list).toHaveBeenCalledWith('181-lapper-scanners');
+    expect(listing.folders).toEqual(['10.16.82.253']);
+    expect(listing.images.map((i) => i.name)).toEqual(['new.BMP', 'old.jpg']);
+    expect(listing.defaultImageFile).toBe('scanner-current.jpg');
+  });
+
+  it("refuses folder paths with '..'", async () => {
+    await expect(client().listFtpFolder('181-lapper-scanners/../secret')).rejects.toThrow("cannot contain '..'");
+  });
+});

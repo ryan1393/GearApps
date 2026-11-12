@@ -4,7 +4,7 @@
     <gear-station-status [message]="message" [prompt]="prompt" (dismiss)="message = null" />
 
     <div class="gear-panel op-step">
-      <gear-scan-panel #trayScanner [step]="1" label="Scan Intake Tray" [disabled]="busy" (scanned)="scanTray($event)">
+      <gear-scan-panel #trayScanner [step]="1" label="Scan Intake Tray" [busy]="busy" (scanned)="scanTray($event)">
         <gear-option-picker placeholder="Choose intake tray…" [headers]="['Tray', 'Stage', 'Blades']" [options]="trayOptions"
           [loading]="pickerLoading" [error]="pickerError" emptyText="No trays currently need intake." [disabled]="busy" (picked)="chooseTray($event)" />
       </gear-scan-panel>

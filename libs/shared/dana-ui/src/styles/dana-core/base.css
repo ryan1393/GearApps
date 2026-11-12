@@ -23,8 +23,9 @@ textarea { font: inherit; }
 
 a { color: inherit; }
 
+/* A solid ring at 3:1 or more against the surface; themes may set --dana-focus-color. */
 :focus-visible {
-  outline: 2px solid color-mix(in srgb,var(--dana-primary) 72%,#fff);
+  outline: 2px solid var(--dana-focus-color, var(--dana-primary));
   outline-offset: 2px;
 }
 

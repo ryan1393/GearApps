@@ -15,6 +15,9 @@ import {
   PaginationResponseDto,
 } from '../dtos';
 
+/** The largest page any paginated list returns. */
+export const PAGINATION_MAX_PAGE_SIZE = PAGINATION_DEFAULT_LIMIT;
+
 export class PaginationService<OrmEntity extends AbstractOrmEntity> {
   private readonly _logger: Logger;
   private repo: Repository<OrmEntity>;
@@ -46,10 +49,10 @@ export class PaginationService<OrmEntity extends AbstractOrmEntity> {
     const qb = this.createBuilder(opts);
 
     const [items, total] = await qb.getManyAndCount();
-    const limit = qb.expressionMap.take;
-    const offset = qb.expressionMap.skip;
+    const limit = qb.expressionMap.take ?? PAGINATION_DEFAULT_PER_PAGE;
+    const offset = qb.expressionMap.skip ?? 0;
 
-    const meta = this.createPaginationMeta(total, limit ?? total, offset ?? 0);
+    const meta = PaginationService.createPaginationMeta(total, limit, offset);
     const data = serializeFn
       ? items.map(serializeFn)
       : items.map((i) => instanceToPlain(i) as SerializedEntityType);
@@ -74,35 +77,24 @@ export class PaginationService<OrmEntity extends AbstractOrmEntity> {
       )}`,
     );
 
-    // NOTE this code currently defaults to using pre-defined pagination defaults,
-    // but this could be updated to not return paginated data if `page` or `limit`
-    // are not defined
-    if (opts) {
-      // TODO add ability to sort by arbitrary columns instead of createdAt
-      const sortBy = `${this.alias}.createdAt`;
-      builder.orderBy(sortBy, opts.order ?? PAGINATION_DEFAULT_ORDER);
-
-      const take = this.calculateTake(opts.limit, opts.perPage);
-      if (take) {
-        builder.take(take);
-      }
-
-      const skip = this.calculateSkip(opts.page, take);
-      if (skip) {
-        builder.skip(skip);
-      }
-    }
+    // TODO add ability to sort by arbitrary columns instead of createdAt
+    builder.orderBy(`${this.alias}.createdAt`, opts?.order ?? PAGINATION_DEFAULT_ORDER);
+    const take = PaginationService.calculateTake(opts?.limit, opts?.perPage);
+    builder.take(take);
+    const page = opts?.page && opts.page >= 1 ? Math.floor(opts.page) : 1;
+    if (page > 1) builder.skip(take * (page - 1));
 
     return builder;
   }
 
-  private createPaginationMeta(
+  /** Page metadata. The page follows the offset even past the last page (which is then empty). */
+  static createPaginationMeta(
     total: number,
     limit: number,
     offset: number,
   ): PaginationMetaDto {
-    const totalPages = limit && total ? Math.ceil(total / limit) : 1;
-    const page = totalPages > 1 && limit ? Math.floor(offset / limit) + 1 : 1;
+    const totalPages = Math.max(Math.ceil(total / limit), 1);
+    const page = Math.floor(offset / limit) + 1;
     return new PaginationMetaDto({
       page,
       totalPages,
@@ -113,23 +105,18 @@ export class PaginationService<OrmEntity extends AbstractOrmEntity> {
     });
   }
 
-  private calculateTake(limit?: number, perPage?: number): number | null {
-    let take = null;
-
-    if (limit && perPage) {
-      take = Math.min(limit, perPage);
-    } else if (perPage && perPage <= PAGINATION_DEFAULT_PER_PAGE) {
-      take = perPage;
-    } else if (limit && limit <= PAGINATION_DEFAULT_LIMIT) {
-      take = limit;
-    } else if (!limit && !perPage) {
-      // neither defined
-      take = Math.min(PAGINATION_DEFAULT_LIMIT, PAGINATION_DEFAULT_PER_PAGE);
-    }
-    return take;
+  /**
+   * Page size: the smaller of `limit` and `perPage` when given, else the default page size,
+   * never more than PAGINATION_MAX_PAGE_SIZE. There is no unlimited page: callers page through.
+   */
+  static calculateTake(limit?: number, perPage?: number): number {
+    const requested = [limit, perPage].filter(
+      (value): value is number => typeof value === 'number' && Number.isFinite(value) && value >= 1,
+    );
+    const size = requested.length
+      ? Math.floor(Math.min(...requested))
+      : PAGINATION_DEFAULT_PER_PAGE;
+    return Math.min(Math.max(size, 1), PAGINATION_MAX_PAGE_SIZE);
   }
 
-  private calculateSkip(page?: number, take?: number | null): number | null {
-    return page && take ? take * (page - 1) : null;
-  }
 }

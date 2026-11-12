@@ -66,13 +66,35 @@ describe('Manufacturing inventory integrity', () => {
     expect(blade.softRemove).not.toHaveBeenCalled();
   });
 
-  it('allows an unassigned blade status change and records the prior status', async () => {
-    const blade = repository({ id: 'blade', status: BladeStatus.NEW, service_cycle: 0 });
+  it.each([
+    [BladeStatus.NEW, BladeStatus.SCRAPPED],
+    [BladeStatus.SCRAPPED, BladeStatus.AVAILABLE],
+    [BladeStatus.NEW, BladeStatus.READY_FOR_COATING],
+  ])('never changes a blade status through the generic edit: %s to %s', async (from, to) => {
+    const blade = repository({ id: 'blade', status: from, service_cycle: 0 });
     const history = repository();
     environment([[BladeOrmEntity, blade], [BladeHistoryOrmEntity, history]]);
     const service = new ServerFeatBladeService(blade as never, history as never);
-    await service.updateBlade('blade', { status: BladeStatus.SCRAPPED }, 'operator');
-    expect(history.save).toHaveBeenCalledWith(expect.objectContaining({ from_status: BladeStatus.NEW, to_status: BladeStatus.SCRAPPED }));
+    await expect(service.updateBlade('blade', { status: to }, 'admin')).rejects.toBeInstanceOf(UnprocessableEntityException);
+    expect(blade.save).not.toHaveBeenCalled();
+    expect(history.save).not.toHaveBeenCalled();
+  });
+
+  it('edits other fields of a loose blade and keeps its status', async () => {
+    const blade = repository({ id: 'blade', status: BladeStatus.NEW, service_cycle: 0 });
+    environment([[BladeOrmEntity, blade]]);
+    const service = new ServerFeatBladeService(blade as never, repository() as never);
+    await service.updateBlade('blade', { service_cycle: 1, status: BladeStatus.NEW }, 'admin');
+    expect(blade.save).toHaveBeenCalledWith(expect.objectContaining({ service_cycle: 1, status: BladeStatus.NEW, updatedBy: 'admin' }));
+  });
+
+  it('rejects editing a blade packed in a coater set', async () => {
+    const blade = repository({ id: 'blade', status: BladeStatus.READY_FOR_COATING });
+    const { manager } = environment([[BladeOrmEntity, blade]]);
+    manager.query.mockResolvedValue([{ id: 'set-blade' }]);
+    const service = new ServerFeatBladeService(blade as never, repository() as never);
+    await expect(service.updateBlade('blade', { service_cycle: 2 }, 'admin')).rejects.toBeInstanceOf(ConflictException);
+    expect(blade.save).not.toHaveBeenCalled();
   });
 
   it.each([{ enabled: false }, { serial_number: 'T0002' }])('rejects an occupied tray mutation: %j', async (data) => {

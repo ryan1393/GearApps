@@ -1,29 +1,27 @@
-<section class="gear-page gear-workflow-page">
+<section class="gear-page gear-workflow-page op-page">
   <header
     class="gear-page-header"
     danaPageHeader
     eyebrow="GREENSHED / SETUP"
     heading="Machine Setup"
-    description="Assign an available cutter to a validated machine and matching production part."
+    description="Scan or choose the cutter build, the machine and the production part, then set the cutter up."
   ></header>
 
-  <div *ngIf="error" class="gear-feedback" role="alert">{{ error }}</div>
-  <div *ngIf="message" class="gear-feedback" role="status" aria-live="polite">{{ message }}</div>
-  <div *ngIf="choicesFailed" class="gear-feedback" role="alert">Could not load {{ choiceErrors.builds ? 'available cutter builds' : choiceErrors.machines ? 'available machines' : 'the part list' }}. The lists below may be incomplete. <button type="button" class="gear-btn gear-btn-secondary" (click)="reloadChoices()" [disabled]="busy">Retry</button></div>
+  <gear-station-status class="station-status-line" [message]="status" [prompt]="prompt" (dismiss)="dismissStatus()" />
+  <div *ngIf="choicesFailed" class="gear-feedback" role="alert">Could not load {{ choiceErrors.builds ? 'available cutter builds' : choiceErrors.machines ? 'available machines' : 'the part list' }}. The lists below may be incomplete; scanning still works. <button type="button" class="gear-btn gear-btn-secondary" (click)="reloadChoices()" [disabled]="busy">Retry</button></div>
 
   <div *ngIf="!result" class="gear-workflow-grid">
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header"><span class="gear-workflow-step">1</span><div><h2>Select Cutter Build</h2><p>Choose a ready cutter build to put on a machine.</p></div></div>
-      <div class="gear-workflow-section-body">
-        <label class="gear-field">Available Cutter Build
-          <select [(ngModel)]="buildNumber" name="build" (change)="selectBuild()" class="gear-select" [disabled]="busy">
-            <option value="">Choose available cutter build...</option>
-            <option *ngFor="let row of availableBuilds" [value]="row.build_number">{{row.build_number}} · Summary {{row.summary_number}} · {{row.part_type_code}}</option>
-          </select>
-        </label>
-        <p *ngIf="!choiceErrors.builds && !availableBuilds.length && !build" class="gear-workflow-help">No cutter builds are ready for setup. Build a cutter in Cutter Builder, or return one to a Greenshed shelf with a changeover pull.</p>
-        <div *ngIf="build" class="gear-workflow-selection">
-          <div class="gear-workflow-selection-title font-mono">{{ build.build_number }}</div>
+    <section class="gear-workflow-section" aria-label="Step 1: cutter build">
+      <gear-scan-panel [step]="1" label="Scan Cutter Build" help="A READY cutter from Cutter Builder, or one returned to a Greenshed shelf." placeholder="Scan cutter build..."
+        changeText="Change build" [doneValue]="build?.build_number ?? null" [busy]="busy"
+        (scanned)="useBuild($event)" (reopen)="changeBuild()" (heldScanIgnored)="scanIgnored($event)">
+        <gear-option-picker placeholder="Choose an available cutter build…" [headers]="['Build', 'Summary', 'Type']" [options]="buildOptions"
+          [error]="choiceErrors.builds ? 'Could not load the available cutter builds. Scan the build, or tap Retry above.' : ''" [disabled]="busy"
+          emptyText="No cutter builds are ready for setup. Build a cutter in Cutter Builder, or return one to a Greenshed shelf with a changeover pull."
+          (picked)="useBuild($event)" />
+      </gear-scan-panel>
+      <div *ngIf="build" class="gear-workflow-section-body">
+        <div class="gear-workflow-selection">
           <div class="gear-workflow-detail-grid">
             <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Body</span><strong>{{ build.cutter_body_serial_number }}</strong></div>
             <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Status</span><strong>{{ build.status_code }}</strong></div>
@@ -34,27 +32,34 @@
       </div>
     </section>
 
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header"><span class="gear-workflow-step">2</span><div><h2>Machine &amp; Production Part</h2><p>Pick the machine and the part it will run.</p></div></div>
-      <div class="gear-workflow-section-body">
-        <label class="gear-field">Machine Number
-          <select [(ngModel)]="machineNumber" name="machine" (change)="selectMachine()" class="gear-select" [disabled]="busy||!build||machineLocked">
-            <option value="">Choose available machine...</option>
-            <option *ngIf="machineLocked && !availableMachineNumbers.includes(machineNumber)" [value]="machineNumber">{{machineNumber}}</option>
-            <option *ngFor="let machineNo of availableMachineNumbers" [value]="machineNo">{{machineNo}}</option>
-          </select>
-        </label>
-        <p *ngIf="machineLocked" class="gear-workflow-help">Selected from Running Machines. To use a different machine, return to Running Machines.</p>
-        <div *ngIf="machine" class="gear-workflow-state gear-workflow-state-success"><strong>Validated {{machine.machine_number}}</strong> · {{machine.department_code}}<ng-container *ngIf="machine.cell!==null"> · Cell {{machine.cell}}</ng-container></div>
+    <section class="gear-workflow-section" aria-label="Step 2: machine">
+      <gear-scan-panel [step]="2" label="Scan Machine Number" placeholder="Scan machine number..."
+        [help]="machineLocked ? 'Selected from Running Machines. To use a different machine, return to Running Machines.' : 'The machine must be active, empty and in the department for this part type.'"
+        changeText="Change machine" [doneValue]="machine?.machine_number ?? null" [disabled]="!buildReady || machineLocked" [busy]="busy"
+        (scanned)="useMachine($event)" (reopen)="changeMachine()" (heldScanIgnored)="scanIgnored($event)">
+        @if (!machineLocked) {
+          <gear-option-picker placeholder="Choose an available machine…" [headers]="['Machine']" [options]="machineOptions"
+            [error]="choiceErrors.machines ? 'Could not load the available machines. Scan the machine number instead.' : ''" [disabled]="busy || !buildReady"
+            emptyText="No empty, active machines in this department." (picked)="useMachine($event)" />
+        }
+      </gear-scan-panel>
+      <div *ngIf="machine" class="gear-workflow-section-body">
+        <div class="gear-workflow-state gear-workflow-state-success"><strong>Validated {{machine.machine_number}}</strong> · {{machine.department_code}}<ng-container *ngIf="machine.cell!==null"> · Cell {{machine.cell}}</ng-container></div>
+      </div>
+    </section>
 
-        <label class="gear-field">Part Number
-          <select [(ngModel)]="partNumber" name="part" (change)="selectPart()" class="gear-select" [disabled]="busy||!build">
-            <option value="">Choose part for Summary {{build?.summary_number || '—'}}...</option>
-            <option *ngFor="let row of matchingParts" [value]="row.part_number">{{row.part_number}}</option>
-          </select>
-        </label>
-        <div *ngIf="build && !choiceErrors.parts && matchingParts.length===0" class="gear-workflow-state gear-workflow-state-warning">No active {{build.part_type_code}} parts are assigned to Summary {{build.summary_number}}.</div>
-        <div *ngIf="part" class="gear-workflow-state gear-workflow-state-success">
+    <section class="gear-workflow-section" aria-label="Step 3: production part">
+      <gear-scan-panel [step]="3" label="Scan Part Number" placeholder="Scan part number..."
+        [help]="build ? 'An active part for Summary ' + build.summary_number + ' ' + build.part_type_code + '.' : 'Scan the cutter build first.'"
+        changeText="Change part" [doneValue]="part?.part_number ?? null" [disabled]="!buildReady" [busy]="busy"
+        (scanned)="usePart($event)" (reopen)="changePart()" (heldScanIgnored)="scanIgnored($event)">
+        <gear-option-picker [placeholder]="'Choose part for Summary ' + (build?.summary_number || '—') + '…'" [headers]="['Part', 'Type']" [options]="partOptions"
+          [error]="choiceErrors.parts ? 'Could not load the part list. Scan the part number instead.' : ''" [disabled]="busy || !buildReady"
+          [emptyText]="build ? 'No active ' + build.part_type_code + ' parts are assigned to Summary ' + build.summary_number + '.' : 'Scan the cutter build first.'"
+          (picked)="usePart($event)" />
+      </gear-scan-panel>
+      <div *ngIf="part" class="gear-workflow-section-body">
+        <div class="gear-workflow-state gear-workflow-state-success">
           <div class="gear-workflow-detail-grid gear-workflow-detail-grid-four">
             <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Part</span><strong>{{part.part_number}}</strong></div>
             <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Summary</span><strong>{{part.summary?.number}}</strong></div>
@@ -62,23 +67,29 @@
             <div class="gear-workflow-detail"><span class="gear-workflow-detail-label">Teeth</span><strong>{{part.teeth ?? '—'}}</strong></div>
           </div>
         </div>
-        <div *ngIf="part && selectedRollMaster as rollMaster" class="gear-workflow-state" [class.gear-workflow-state-warning]="rollMasterLow" [class.gear-workflow-state-info]="!rollMasterLow">
+        <div *ngIf="selectedRollMaster as rollMaster" class="gear-workflow-state" [class.gear-workflow-state-warning]="rollMasterLow" [class.gear-workflow-state-info]="!rollMasterLow">
           <div class="gear-workflow-status-row">
             <div><span class="gear-workflow-detail-label">Roll Master</span><strong>Current {{ rollMasterCurrentQuantity }} · Minimum {{ rollMasterMinimumQuantity }}</strong></div>
             <span *ngIf="rollMasterLow" class="gear-workflow-kicker">Low Quantity</span>
           </div>
           <p *ngIf="rollMasterLow"><strong>Warning: Roll Master quantity for {{ part.part_number }} is at or below its configured minimum.</strong></p>
         </div>
-        <div *ngIf="part && !selectedRollMaster" class="gear-workflow-state gear-workflow-state-info">No Roll Master quantity is configured for {{ part.part_number }}.</div>
+        <div *ngIf="!selectedRollMaster" class="gear-workflow-state gear-workflow-state-info">No Roll Master quantity is configured for {{ part.part_number }}.</div>
+      </div>
+    </section>
 
+    <section class="gear-workflow-section gear-workflow-span-full">
+      <div class="gear-workflow-section-header"><span class="gear-workflow-step">4</span><div><h2>Starting Count &amp; Setup</h2><p>Check the starting piece count, then set the cutter up.</p></div></div>
+      <div class="gear-workflow-section-body station-step-details">
         <div class="gear-workflow-form-grid">
           <label class="gear-field">Starting Piece Count<input type="number" min="0" max="2147483647" step="1" [disabled]="busy || carriedPieceCount !== null" [(ngModel)]="startingPieceCount" name="count" class="gear-input" />
             <small *ngIf="carriedPieceCount !== null" class="gear-workflow-help">Carried from this cutter's last run. A cutter coming back from the shelf continues its count.</small>
           </label>
           <label class="gear-field gear-workflow-span-full">Comments<textarea [(ngModel)]="comments" [disabled]="busy" name="comments" rows="3" class="gear-textarea"></textarea></label>
         </div>
-        <div class="gear-workflow-actions">
+        <div class="op-primary">
           <button type="button" (click)="setup()" [disabled]="busy||!build||!machine||!part||!['READY','SHELF'].includes(build.status_code)" danaButton="primary" class="gear-workflow-submit">{{busy?'Setting up…':'Setup Cutter'}}</button>
+          @if (setupBlockedReason) { <p class="op-blocked gear-workflow-help" role="status">{{ setupBlockedReason }}</p> }
         </div>
       </div>
     </section>

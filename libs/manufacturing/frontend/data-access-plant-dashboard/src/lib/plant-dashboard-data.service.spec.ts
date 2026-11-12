@@ -72,4 +72,36 @@ describe('PlantDashboardDataService', () => {
     http.expectNone('/api/v1/dsf-counts/admin-mappings');
     TestBed.resetTestingModule();
   }));
+
+  it('keeps the last good snapshot when a later poll fails, and marks it stale', fakeAsync(() => {
+    const service = configure('USER');
+    tick(0);
+    http.expectOne('/api/v1/dsf-counts').flush(counts);
+    const received = service.updatedAt();
+    expect(received).not.toBeNull();
+    expect(service.stale()).toBe(false);
+    tick(30000);
+    http.expectOne('/api/v1/dsf-counts').flush({}, { status: 502, statusText: 'Bad Gateway' });
+    expect(service.board()).toEqual(counts);
+    expect(service.stale()).toBe(true);
+    expect(service.updatedAt()).toBe(received);
+    expect(service.error()).toContain('unavailable');
+    tick(30000);
+    http.expectOne('/api/v1/dsf-counts').flush(counts);
+    expect(service.stale()).toBe(false);
+    expect(service.error()).toBe('');
+    TestBed.resetTestingModule();
+  }));
+
+  it('stops showing machine counts once access to them is withdrawn', fakeAsync(() => {
+    const service = configure('USER');
+    tick(0);
+    http.expectOne('/api/v1/dsf-counts').flush(counts);
+    tick(30000);
+    http.expectOne('/api/v1/dsf-counts').flush({}, { status: 403, statusText: 'Forbidden' });
+    expect(service.board()).toBeNull();
+    expect(service.stale()).toBe(false);
+    expect(service.error()).toContain('does not have access');
+    TestBed.resetTestingModule();
+  }));
 });

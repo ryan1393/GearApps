@@ -1,4 +1,5 @@
 import { contractPath } from './lib/contract-paths.mjs';
+import { readAdminScreenHtml, readAdminScreenTs } from './lib/admin-screen-source.mjs';
 import fs from 'node:fs';
 const read = (path) => fs.readFileSync(contractPath(process.cwd(), path), 'utf8');
 const shelf = read('libs/manufacturing/shared/util-constants/src/lib/shelf-location.constants.ts');
@@ -7,7 +8,7 @@ const fixtures = read('tools/manufacturing/test-data/ensure-workflow-test-fixtur
 const workflow = read('tools/manufacturing/test-full-workflow.ps1');
 const shelfTest = read('tools/manufacturing/test-shelf-location-conventions.ps1');
 const ensureShelves = read('tools/manufacturing/ensure-summary-shelf-locations.ps1');
-const adminHtml = read('libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.html');
+const adminHtml = readAdminScreenHtml();
 const migration = read('tools/manufacturing/data-import/migrate-summary-shelf-tags.mjs');
 
 // Green Shed shelves are per-summary (GSR-/GSP-<summary>). Cuttergrind shelves became

@@ -129,7 +129,8 @@ export class ServerFeatBladeTrayController {
   @ApiOkResponse({
     type: BladeTrayDto,
   })
-  @Auth([RoleType.ADMIN, RoleType.USER])
+  // Administrator correction only; operators use the intake, transfer and grinding workflows.
+  @Auth([RoleType.ADMIN])
   async deleteBladeTray(
     @Param('id', new ParseUUIDPipe()) id: Uuid,
     @ReqUserId() userId: Uuid,

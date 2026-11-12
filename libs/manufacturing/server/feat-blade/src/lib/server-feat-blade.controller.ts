@@ -85,7 +85,8 @@ export class ServerFeatBladeController {
   @ApiOkResponse({
     type: BladeDto,
   })
-  @Auth([RoleType.ADMIN, RoleType.USER])
+  // Administrator correction only; status is never edited here (see the service).
+  @Auth([RoleType.ADMIN])
   async updateBlade(
     @Param('id', new ParseUUIDPipe()) id: Uuid,
     @Body() dto: UpdateBladeDto,

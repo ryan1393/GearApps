@@ -19,15 +19,26 @@ import {
   CutterTrayValidation,
   cutterApiErrorText,
 } from '@meshforge/manufacturing/frontend/data-access-cutter-builder';
-import { MachineDsfCountComponent, GearLabelPrinterPickerComponent, GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
+import {
+  GearLabelPrinterPickerComponent,
+  GearToastService,
+  MachineDsfCountComponent,
+  OptionPickerComponent,
+  PickerOption,
+  ScanPanelComponent,
+  StationStatusComponent,
+  createStatusLine,
+  heldScanIgnoredText,
+} from '@meshforge/manufacturing/frontend/util-common';
 import { DanaPageHeaderComponent } from '@dana/ui';
 import { ITray } from '@meshforge/manufacturing/shared/util-types';
 
 @Component({
   selector: 'gear-cutter-build',
   standalone: true,
-  imports: [MachineDsfCountComponent, CommonModule, GearScannerFocusDirective, GearLabelPrinterPickerComponent, FormsModule, DanaPageHeaderComponent],
+  imports: [MachineDsfCountComponent, CommonModule, GearLabelPrinterPickerComponent, FormsModule, DanaPageHeaderComponent, ScanPanelComponent, StationStatusComponent, OptionPickerComponent],
   templateUrl: './cutter-build.component.html',
+  styleUrl: '../station-page.css',
 })
 export class CutterBuildComponent implements OnDestroy {
   private readonly destroyed$ = new Subject<void>();
@@ -57,7 +68,92 @@ export class CutterBuildComponent implements OnDestroy {
 
   busy = false;
   error = '';
+  /** The last success, for the status line (the toast still shows it too). */
+  message = '';
+  /** Shown when there is no error or success: e.g. a scan made too early. */
+  notice = '';
   result: CutterBuildResult | null = null;
+
+  // ---- Station layout: numbered scan-or-pick steps, one status line, a reason on a blocked action ----
+
+  private readonly statusLine = createStatusLine();
+  get status() {
+    return this.statusLine(this.error, this.message, this.notice);
+  }
+  dismissStatus(): void {
+    this.error = '';
+    this.message = '';
+    this.notice = '';
+  }
+  scanIgnored(scan: string): void {
+    if (!this.error) this.notice = heldScanIgnoredText(scan);
+  }
+
+  /** Bodies offered in the list: those whose blade capacity is known (the others could not be chosen before either). */
+  get bodyOptions(): PickerOption[] {
+    return this.availableCutterBodies
+      .filter((body) => this.cutterBodyRule(body).rule)
+      .map((body) => ({
+        value: body.dana_serial_number ?? body.mf_serial_number ?? '',
+        cells: [body.dana_serial_number || body.mf_serial_number || '', body.definition?.definition_code ?? '—', this.cutterBodyCapacityText(body)],
+      }))
+      .filter((option) => option.value);
+  }
+  get trayOptions(): PickerOption[] {
+    return this.compatibleReadyTrays.map((ready) => ({
+      value: ready.tray_serial_number,
+      cells: [ready.tray_serial_number, ready.summary_number || 'No Summary', ready.part_type_code || 'No Part Type', this.bladeSetText(ready.blade_count)],
+    }));
+  }
+
+  /** What to do next, shown in the status line when there is no message. */
+  get prompt(): string {
+    if (this.busy) return 'Working…';
+    if (this.result) return 'Build created. Print the card again if needed, or tap Build Another.';
+    if (!this.cutterBody) return 'Scan the Cutter Body (Dana S/N, or MF S/N), or choose it from the list.';
+    if (!this.tray) return 'Scan or choose a ready blade tray for this body.';
+    if (!this.selectedCutterBuilderMachineId) return 'Choose the Cutter Builder machine, then tap Create Cutter Build.';
+    return 'Check the details, then tap Create Cutter Build. The card prints by itself.';
+  }
+
+  /** Why Create Cutter Build is not available, in operator terms. Empty when it is (or while working). */
+  get buildBlockedReason(): string {
+    if (this.busy || this.result || this.canBuild) return '';
+    const body = this.cutterBody;
+    if (!body) return 'Scan or choose the Cutter Body first (step 1).';
+    if (!body.enabled) return 'This Cutter Body is disabled and cannot be used for a build.';
+    const validation = this.trayValidation;
+    if (!this.tray) return 'Scan or choose a ready blade tray (step 2).';
+    if (!validation) return 'The tray did not pass validation for this body. Scan another tray.';
+    if (!validation.valid) return validation.reason || 'This tray is not ready for Cutter Builder.';
+    if (validation.body_available === false) return validation.body_availability_reason || 'This Cutter Body is not available.';
+    if (!this.selectedCutterBuilderMachineId || !this.availableCutterBuilderMachines.some((machine) => machine.id === this.selectedCutterBuilderMachineId)) {
+      return 'Choose the Cutter Builder machine (step 3).';
+    }
+    return this.bodyCompatibility?.reason || 'This body and tray do not match. Check the tray validation.';
+  }
+
+  /** A body scanned or picked: the same lookup and checks as before. */
+  useBody(value: string): void {
+    if (this.busy || !value.trim()) return;
+    this.notice = '';
+    this.cutterBodySerial = value.trim();
+    this.scanCutterBody();
+  }
+  changeBody(): void {
+    if (this.busy) return;
+    this.cutterBodyChanged('');
+  }
+  useTray(value: string): void {
+    if (this.busy || !value.trim()) return;
+    this.notice = '';
+    this.traySerial = value.trim();
+    this.scanTray();
+  }
+  changeTray(): void {
+    if (this.busy) return;
+    this.trayChanged('');
+  }
 
   get bodyDisplaySerial(): string {
     return (
@@ -267,10 +363,8 @@ export class CutterBuildComponent implements OnDestroy {
           this.result = result;
           // The body and tray just used are no longer available: reload the pick lists for the next build.
           this.refreshAvailableSelections();
-          this.toast.success(
-            `Build ${result.build.build_number} created with ${result.build.blade_count} blades.`,
-            'Cutter build complete',
-          );
+          this.message = `Build ${result.build.build_number} created with ${result.build.blade_count} blades.`;
+          this.toast.success(this.message, 'Cutter build complete');
           // The card goes to the card printer as soon as the build exists; Print Cutter Card reprints it.
           this.print();
         },
@@ -376,5 +470,7 @@ export class CutterBuildComponent implements OnDestroy {
 
   private clearError(): void {
     this.error = '';
+    this.message = '';
+    this.notice = '';
   }
 }

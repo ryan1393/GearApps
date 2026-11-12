@@ -208,6 +208,16 @@ class ArgonautSettingsTests(unittest.TestCase):
                          ("https://machine/x", "admin-loc"))
         self.assertIsNone(ArgonautOverride.from_api(None))
 
+    def test_without_the_password_the_environment_sign_in_is_kept(self):
+        # An administrator sign-in is never sent the Argonaut password, only whether one is set.
+        env = Settings(machine_ip="", scanner_ip="", argonaut_url="https://env/x", argonaut_location_id="env-loc",
+                       argonaut_username="user", argonaut_password="pw")
+        o = ArgonautOverride.from_api({"url": "https://admin/x", "location_id": "", "username": "mes",
+                                       "password_set": True, "transaction_type_id": 101, "verify_tls": True})
+        s = o.apply(env)
+        self.assertEqual((s.argonaut_url, s.argonaut_username, s.argonaut_password, s.argonaut_transaction_type_id),
+                         ("https://admin/x", "user", "pw", 101))
+
 
 class MacroReadTests(unittest.TestCase):
     setUp, tearDown, _wait = SupervisorTests.setUp, SupervisorTests.tearDown, SupervisorTests._wait

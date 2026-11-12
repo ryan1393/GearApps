@@ -161,6 +161,22 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
     await runDatabaseMigration(manager, '20261112-lapper-macro-flag-changes-v1', `
       ALTER TABLE lapper.macros ADD COLUMN IF NOT EXISTS flag_changes boolean NOT NULL DEFAULT true;
     `);
+    // Collector Idempotency-Keys are kept for INGEST_REQUEST_RETENTION_DAYS; the daily prune
+    // finds expired ones by age.
+    // Where each scanner's capture is on the FTP drop (Admin > Scanners). Null keeps the default,
+    // <SCANNER_FTP_ROOT>/<scanner IP>/<SCANNER_FTP_IMAGE_FILE>. No '..' segments; JPEG or BMP files.
+    await runDatabaseMigration(manager, '20261112-lapper-scanner-image-location-v1', `
+      ALTER TABLE lapper.scanners ADD COLUMN IF NOT EXISTS image_folder text;
+      ALTER TABLE lapper.scanners ADD COLUMN IF NOT EXISTS image_file text;
+      ALTER TABLE lapper.scanners DROP CONSTRAINT IF EXISTS ck_lapper_scanner_image_location;
+      ALTER TABLE lapper.scanners ADD CONSTRAINT ck_lapper_scanner_image_location CHECK (
+        (image_folder IS NULL OR (length(image_folder) <= 255 AND image_folder !~ '(^|/)\\.\\.(/|$)' AND image_folder !~ '[\\\\[:cntrl:]]'))
+        AND (image_file IS NULL OR (length(image_file) <= 128 AND image_file ~* '^[^/\\\\[:cntrl:]]+\\.(jpe?g|bmp)$'))
+      );
+    `);
+    await runDatabaseMigration(manager, '20261112-lapper-ingest-requests-created-v1', `
+      CREATE INDEX IF NOT EXISTS ix_lapper_ingest_requests_created ON lapper.ingest_requests(created_at);
+    `);
   });
 }
 

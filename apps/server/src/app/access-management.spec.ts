@@ -58,14 +58,14 @@ describe('custom role enforcement', () => {
 });
 
 describe('badge authentication', () => {
-  const setup = (badge: unknown = { user_id: 'u', revoked_at: null }, active = true) => {
+  const setup = (badge: unknown = { user_id: 'u', revoked_at: null }, active = true, role = 'user') => {
     const query = jest.fn().mockResolvedValue(badge ? [badge] : []);
     const getTokens = jest
       .fn()
       .mockResolvedValue({ accessToken: 'access', refreshToken: 'refresh' });
     const findUser = jest
       .fn()
-      .mockResolvedValue({ id: 'u', active, email: 'operator@example.com' });
+      .mockResolvedValue({ id: 'u', active, role, email: 'operator@example.com' });
     const transactionQuery = jest.fn().mockResolvedValue(badge ? [badge] : []);
     const transaction = (work: (manager: { query: typeof transactionQuery }) => Promise<unknown>) =>
       work({ query: transactionQuery });
@@ -103,6 +103,40 @@ describe('badge authentication', () => {
       await expect(service.login({ uid: 'bad' }, 'local')).rejects.toThrow('not recognized');
     await expect(service.login({ uid: 'bad' }, 'local')).rejects.toThrow('Too many');
     expect(query).toHaveBeenCalledTimes(10);
+  });
+  it('answers 429 with Retry-After once limited', async () => {
+    const { service } = setup(null);
+    for (let attempt = 0; attempt < 10; attempt++)
+      await service.login({ uid: 'bad' }, 'local').catch(() => undefined);
+    const response = { setHeader: jest.fn() };
+    const error = await service.login({ uid: 'bad' }, 'local', response as never).catch((thrown) => thrown);
+    expect(error.getStatus()).toBe(429);
+    expect(response.setHeader).toHaveBeenCalledWith('Retry-After', expect.stringMatching(/^\d+$/));
+  });
+  it('does not let a successful badge clear the failures of its address', async () => {
+    const { service, query } = setup();
+    const unknown = () => query.mockResolvedValueOnce([]);
+    for (let attempt = 0; attempt < 9; attempt++) {
+      unknown();
+      await expect(service.login({ uid: 'guess' }, 'local')).rejects.toThrow('not recognized');
+    }
+    await expect(service.login({ uid: 'ABC123' }, 'local')).resolves.toHaveProperty('accessToken');
+    unknown();
+    await expect(service.login({ uid: 'guess' }, 'local')).rejects.toThrow('not recognized');
+    await expect(service.login({ uid: 'ABC123' }, 'local')).rejects.toThrow('Too many badge attempts');
+  });
+  it('caps failed badge attempts across all addresses', async () => {
+    const { service } = setup(null);
+    for (let attempt = 0; attempt < 100; attempt++)
+      await expect(service.login({ uid: 'bad' }, `10.0.${attempt >> 8}.${attempt & 255}`)).rejects.toThrow('not recognized');
+    await expect(service.login({ uid: 'bad' }, '192.0.2.1')).rejects.toThrow('on this server');
+  });
+  it('refuses badge sign-in for administrators', async () => {
+    const { service, getTokens } = setup(undefined, true, 'admin');
+    const error = await service.login({ uid: 'ABC123' }, 'local').catch((thrown) => thrown);
+    expect(error.getStatus()).toBe(403);
+    expect(error.message).toBe('Administrators sign in with email and password.');
+    expect(getTokens).not.toHaveBeenCalled();
   });
   it('rejects revocation between the initial UID lookup and reading the account version', async () => {
     const { service, transactionQuery, findUser, getTokens } = setup();

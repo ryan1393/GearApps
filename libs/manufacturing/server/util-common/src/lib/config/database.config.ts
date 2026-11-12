@@ -11,6 +11,11 @@ import {
 } from '@meshforge/manufacturing/shared/util-constants';
 import { registerAs } from '@nestjs/config';
 
+/** Environment values are text. TypeORM only logs queries when `logging` is the boolean true. */
+export function environmentFlag(value: string | undefined): boolean {
+  return typeof value === 'string' && value.trim().toLowerCase() === 'true';
+}
+
 export const dbConfig = registerAs('db', () => ({
   type: process.env[ENV_DATABASE_TYPE],
   host: process.env[ENV_DATABASE_HOST],
@@ -20,6 +25,6 @@ export const dbConfig = registerAs('db', () => ({
   path: process.env[ENV_DATABASE_PATH],
   username: process.env[ENV_DATABASE_USERNAME],
   synchronize: process.env[ENV_DATABASE_SYNCHRONIZE] === 'true',
-  logging: process.env[ENV_DATABASE_LOGGING_ENABLED],
+  logging: environmentFlag(process.env[ENV_DATABASE_LOGGING_ENABLED]),
   lapperTimeZone: process.env['LAPPER_TIME_ZONE'] ?? 'America/Indianapolis',
 }));

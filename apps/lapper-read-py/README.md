@@ -53,7 +53,10 @@ Unsent runs stay in `/data` and are retried after network or API outages and res
   volume shared only with this container (`/run/meshforge/collector/token`) and revokes the
   previous one; the collector reads it there and picks up a replacement by itself. The token
   never expires, can only send machine data, is never shown, and is revoked from the same page.
-  `LAPPER_READ_API_TOKEN` (a pasted token) or an account's email and password still override it.
+  `LAPPER_READ_API_TOKEN` (a pasted token) overrides it. **A collector token is required**: the API
+  only accepts machine data from collector tokens and administrators, so the older sign-in with a
+  regular account's email and password (`MESHFORGE_API_EMAIL` / `MESHFORGE_API_PASSWORD`) is
+  refused with HTTP 403. It still works with an administrator's account, but use a token instead.
 - Network access from the Docker host to the controller (8193) and scanner (9004).
 
 ## Run
@@ -90,7 +93,7 @@ single worker without the supervisor.
 | `LAPPER_STATE_DIR` | /data | Checkpoint, heartbeat and FOCAS log |
 | `MESHFORGE_API_BASE_URL` | http://meshforge-server:3333 | Shared MeshForge API |
 | `MESHFORGE_API_TOKEN` | | Collector token (`glr_…`); replaces email and password |
-| `MESHFORGE_API_EMAIL` / `MESHFORGE_API_PASSWORD` | | Collector account, when no token is set |
+| `MESHFORGE_API_EMAIL` / `MESHFORGE_API_PASSWORD` | | Legacy sign-in when no token is set; must be an administrator account (regular accounts get HTTP 403). Use a token |
 | `ARGONAUT_ENABLED` | false | Also send each finished cycle to Argonaut (see below) |
 | `ARGONAUT_URL` | | Argonaut `trigger-transaction` URL (required when enabled) |
 | `ARGONAUT_LOCATION_ID` | | Sent as `?locationId=` |
@@ -140,6 +143,9 @@ is sent as 0, as before. The macro list is in `lapper_read/argonaut.py`.
   (`GET /api/v1/lapper-read/argonaut`, collector tokens and admins only) on each machine check and
   they replace its `ARGONAUT_*` environment; a change restarts the workers. `ARGONAUT_ENABLED`, the
   CA file and the timeout stay in the environment. Saved settings take effect after the API restarts.
+  Only a collector token is sent the Argonaut password; an administrator's sign-in gets
+  `password_set` instead, and a collector signed in that way keeps its own `ARGONAUT_USERNAME` /
+  `ARGONAUT_PASSWORD`.
 - Argonaut has its own queue in the machine's checkpoint, so an Argonaut outage never holds up
   recording cycles in MeshForge. Failed posts are retried with a growing delay (up to 5
   minutes) and survive restarts; at most 1000 unsent cycles are kept per machine.
@@ -153,6 +159,9 @@ is sent as 0, as before. The macro list is in `lapper_read/argonaut.py`.
   this collector's own token may ask (`Authorization: Bearer glr_…`): MeshForge's API, which reaches
   the collector at `LAPPER_READ_STATUS_URL` (default `http://lapper-read:8080`) for Admin > Cycle Test
   Lab > Read values from machine. A collector that signs in with an account instead refuses it.
+  Because the request carries the token, the API only sends it to an address on its own host or a
+  private network (loopback, 10/8, 172.16/12, 192.168/16, link-local, IPv6 unique local); a name
+  such as `lapper-read` must resolve to one of those.
 - **Test without a machine:** Admin > Cycle Test Lab > Send to Argonaut sends one transaction built
   the same way (`buildArgonautPayload` in `libs/shared/domain`; keep its macro lists in step with
   `lapper_read/argonaut.py`) from the API, using these same `LAPPER_READ_ARGONAUT_*` settings.

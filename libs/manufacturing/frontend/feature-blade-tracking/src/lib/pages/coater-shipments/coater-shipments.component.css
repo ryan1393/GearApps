@@ -26,8 +26,9 @@ td details { margin-top: var(--dana-space-2); }
 .blade-id { margin: var(--dana-space-1) var(--dana-space-1) 0 0; }
 .workflow-actions, .cancel-panel, .send-confirm, .container-picker { display: grid; gap: var(--dana-form-gap); }
 .workflow-actions > .gear-btn { justify-self: start; }
-.check { display: flex; gap: var(--dana-action-gap); align-items: flex-start; }
-.check input { width: 1.25rem; height: 1.25rem; flex: none; margin-top: .15rem; }
+.check { display: flex; gap: var(--dana-action-gap); align-items: center; min-height: 48px; padding-block: var(--dana-space-2); cursor: pointer; touch-action: manipulation; }
+/* The whole row is the tap target (at least 48px tall); the box itself is large enough to see with gloves. */
+.check input { width: 1.75rem; height: 1.75rem; flex: none; margin: 0; }
 .audit ul { margin-top: var(--dana-form-gap); display: grid; gap: var(--dana-action-gap); }
 .audit li { padding-bottom: var(--dana-action-gap); }
 .tabs { margin-bottom: var(--dana-form-gap); }

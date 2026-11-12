@@ -1,4 +1,5 @@
-import { code128BSymbols, code128Svg, fittedFontSize, locationLabelsHtml, openLocationLabels } from './location-label';
+import { code128BSymbols } from '../barcodes';
+import { code128Svg, fittedFontSize, locationLabelsHtml, openLocationLabels } from './location-label';
 
 const LOCATION = {
   serial_number: 'GSR-1.955FC-RING',

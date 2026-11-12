@@ -23,6 +23,7 @@ import {
   normalizeSummaryNumber,
 } from '@meshforge/manufacturing/shared/util-constants';
 import { dsfCutterCountsEnabled } from '@meshforge/manufacturing/server/util-common';
+import { assertManualPieceCountAllowed, countsAfterQualityCheck } from './greenshed-piece-counts';
 import { Uuid } from '@meshforge/manufacturing/shared/util-types';
 import {
   ConflictException,
@@ -441,6 +442,7 @@ export class ServerFeatGreenshedService {
     pieceCount: number,
     userId: Uuid,
   ) {
+    assertManualPieceCountAllowed(dsfCutterCountsEnabled());
     return this.dataSource.transaction(async (manager) => {
       const runRepo = manager.getRepository(CutterMachineRunOrmEntity);
       const machine = normalizeMachine(machineNumber);
@@ -563,20 +565,8 @@ export class ServerFeatGreenshedService {
           'The active machine run has changed. Reopen the cutter before recording a check.',
         );
       }
-      // Operator-counted cutters: a check also sets the running count, so it cannot go backwards.
-      // DSF-counted cutters: the running count moves on its own and is usually already past the
-      // check point, so a check records the count it was taken at, at or after the previous check.
-      const dsfCounts = dsfCutterCountsEnabled();
-      if (dsfCounts && dto.piece_count < run.last_check_piece_count) {
-        throw new UnprocessableEntityException(
-          `Check piece count cannot be below previous check count ${run.last_check_piece_count}`,
-        );
-      }
-      if (!dsfCounts && dto.piece_count < run.current_piece_count) {
-        throw new UnprocessableEntityException(
-          `Check piece count cannot be below current machine count ${run.current_piece_count}`,
-        );
-      }
+      // With DSF counts on, the check leaves the running count to DSF (see countsAfterQualityCheck).
+      const counts = countsAfterQualityCheck(run, dto.piece_count, dsfCutterCountsEnabled());
 
       const occurredAt = new Date();
       const journal = await beginWorkflowJournal(manager, { app: 'GREENSHED', buildIds: [build.id] }, userId);
@@ -661,10 +651,8 @@ export class ServerFeatGreenshedService {
         );
       }
 
-      run.current_piece_count = dsfCounts
-        ? Math.max(run.current_piece_count, dto.piece_count)
-        : dto.piece_count;
-      run.last_check_piece_count = dto.piece_count;
+      run.current_piece_count = counts.current_piece_count;
+      run.last_check_piece_count = counts.last_check_piece_count;
       run.updatedBy = userId;
       await runRepo.save(run);
       await journal.commit(build.build_number, `${eventType.code} check at piece ${dto.piece_count}`);

@@ -100,7 +100,10 @@ export interface ArgonautCollectorSettings {
   url: string;
   location_id: string;
   username: string;
-  password: string;
+  /** Only sent to collector tokens; an administrator's session gets `password_set` instead. */
+  password?: string;
+  /** Administrators only: whether a password is configured. */
+  password_set?: boolean;
   transaction_type_id: number;
   verify_tls: boolean;
 }

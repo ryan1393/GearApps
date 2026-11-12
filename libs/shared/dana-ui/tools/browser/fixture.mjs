@@ -8,6 +8,8 @@ import {
   DanaComboboxComponent, DanaConfirmDialogComponent, DanaTableDirective,
   DanaKpiGridDirective, DanaKpiCardDirective, DanaOperationGridDirective,
   DanaOperationCardComponent, DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaMobileNavDirective,
+  DanaButtonDirective, DanaToastHostComponent, DanaToastService, DanaTabsDirective, DanaTabDirective,
+  DanaAlertDirective,
 } from '../../../../../dist/libs/shared/dana-ui/fesm2022/dana-ui.mjs';
 
 class Fixture {
@@ -27,6 +29,10 @@ class Fixture {
   headerLabel = 'Application heading';
   headerTabindex = 7;
   headerSort = 'other';
+  saveBlocked = true;
+  loads = [2, 1];
+  activeTab = '';
+  alertTone = 'info';
   columns = [{ label: 'Name', value: row => row }];
   options = ['Alpha', 'Beta'];
   cancel() { this.cancelCount++; this.open = false; }
@@ -36,12 +42,16 @@ Component({
   imports: [CommonModule, FormsModule, ReactiveFormsModule, DanaComboboxComponent,
     DanaConfirmDialogComponent, DanaTableDirective, DanaKpiGridDirective,
     DanaKpiCardDirective, DanaOperationGridDirective, DanaOperationCardComponent,
-    DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaMobileNavDirective],
+    DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaMobileNavDirective, DanaButtonDirective, DanaToastHostComponent, DanaTabsDirective,
+    DanaTabDirective, DanaAlertDirective],
   template: `
     <a class="dana-skip-link" id="skip-link" href="#fixture-main">Skip to content</a>
     <nav danaMobileNav #defaultNav="danaMobileNav"><button id="default-nav-toggle" (click)="defaultNav.toggle()">{{ defaultNav.open }}</button></nav>
     <nav danaMobileNav [desktopMinWidth]="1024" #gearNav="danaMobileNav"><button id="gear-nav-toggle" (click)="gearNav.toggle()">{{ gearNav.open }}</button></nav>
     <button id="launch" (click)="open = true">Open confirmation</button>
+    <div danaTabs id="tabs" aria-label="Views"><button danaTab type="button" id="tab-a" [active]="activeTab === 'a'">First view</button><button danaTab type="button" id="tab-b" [active]="activeTab === 'b'">Second view</button></div>
+    <div id="alert" [danaAlert]="alertTone">Alert text</div>
+    <div id="save-row"><button id="save" type="button" danaButton="primary" [disabled]="saveBlocked" danaDisabledReason="Scan a tray first.">Save</button></div>
     <button id="background">Background action</button>
     <dana-confirm-dialog *ngIf="showDialog" [open]="open" title="Delete entry?" message="Confirm this action."
       [danger]="true" (cancel)="cancel()" (confirm)="open = false">
@@ -63,7 +73,7 @@ Component({
       <thead *ngIf="!alternateHeader"><tr><th [attr.data-dana-table-static]="staticHeader ? '' : null"
         [attr.aria-label]="headerLabel" [attr.tabindex]="headerTabindex" [attr.aria-sort]="headerSort">Name <button id="header-action" type="button" (click)="headerActionCount = headerActionCount + 1">Refresh</button></th><th>Load</th></tr></thead>
       <thead *ngIf="alternateHeader"><tr><th>Replacement</th><th>Count</th></tr></thead>
-      <tbody><tr><td>Beta</td><td>2</td></tr><tr><td>Alpha <span>{{ rowSuffix }}</span><button id="row-action" type="button">Inspect</button></td><td>1</td></tr></tbody>
+      <tbody><tr><td>Beta</td><td>{{ loads[0] }}</td></tr><tr><td>Alpha <span>{{ rowSuffix }}</span><button id="row-action" type="button">Inspect</button></td><td>{{ loads[1] }}</td></tr></tbody>
     </table>
     <table *ngIf="showSecondTable" danaTable id="table2"><thead><tr><th>Other</th></tr></thead><tbody></tbody></table>
     <button id="drawer-opener" type="button" (click)="drawer.toggle()">Open navigation</button>
@@ -76,6 +86,7 @@ Component({
       <button id="drawer-last" type="button">Last navigation action</button>
     </aside>
     <main id="fixture-main" tabindex="-1"><h1>Fixture content</h1></main>
+    <dana-toast-host></dana-toast-host>
   `,
 })(Fixture);
 
@@ -88,4 +99,5 @@ Component({
   app.attachView(ref.hostView);
   ref.changeDetectorRef.detectChanges();
   window.fixture = ref;
+  window.toast = ref.injector.get(DanaToastService);
 })().catch(error => { window.fixtureError = String(error); });

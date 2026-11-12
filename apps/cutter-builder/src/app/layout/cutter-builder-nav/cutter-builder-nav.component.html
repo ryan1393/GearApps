@@ -59,6 +59,7 @@
     </form>
 
     <div class="topbar-user">
+      <dana-theme-toggle class="dana-theme-toggle-inline" />
       <div class="avatar">{{ initials(user.email) }}</div>
       <div class="user-copy"><strong>{{ user.email }}</strong><span>{{ user.departmentDescription || user.role }}</span></div>
       <button type="button" class="signout-button" (click)="logout()" data-icon="signout" title="Sign out">Sign out</button>

@@ -5,7 +5,7 @@
 
     <div class="gear-panel op-step">
       <gear-scan-panel [step]="1" label="Scan Grinder Machine Number" changeText="Change grinder"
-        [doneValue]="grinder && !changingGrinder ? grinder.machine_number : null" [disabled]="busy || grinderLoading"
+        [doneValue]="grinder && !changingGrinder ? grinder.machine_number : null" [disabled]="grinderLoading" [busy]="busy"
         (scanned)="scanGrinder($event)" (reopen)="changingGrinder = true">
         <gear-option-picker placeholder="Choose this workstation’s grinder…" [headers]="['Grinder', 'Department']" [options]="grinderOptions"
           [loading]="grinderLoading" [error]="grinderError" [disabled]="busy || grinderLoading"
@@ -20,7 +20,7 @@
     </div>
 
     <div class="gear-panel op-step">
-      <gear-scan-panel #trayScanner [step]="2" label="Scan Tray For Grinding" [disabled]="busy || !grinder" (scanned)="scanTray($event)">
+      <gear-scan-panel #trayScanner [step]="2" label="Scan Tray For Grinding" [disabled]="!grinder" [busy]="busy" (scanned)="scanTray($event)">
         <gear-option-picker placeholder="Choose grinding tray…" [headers]="['Tray', 'Location', 'Blades']" [options]="trayOptions"
           [loading]="pickerLoading" [error]="pickerError" [disabled]="busy || !grinder"
           emptyText="No trays are waiting for or active in grinding." (picked)="chooseTray($event)" />
@@ -47,7 +47,7 @@
             </div>
             @if (packDestination === 'CONTAINER') {
               <gear-scan-panel class="mt-3 block" [step]="4" label="Scan Empty Coater Container"
-                [doneValue]="hasSelectedContainer ? containerSerial : null" [disabled]="busy || containersLoading"
+                [doneValue]="hasSelectedContainer ? containerSerial : null" [disabled]="containersLoading" [busy]="busy"
                 (scanned)="selectContainer($event)" (reopen)="containerSerial = ''">
                 <gear-option-picker placeholder="Choose an empty container…" [headers]="['Container', 'Contents']" [options]="containerOptions"
                   [loading]="containersLoading" [error]="containersError" [disabled]="busy || containersLoading"
@@ -63,7 +63,7 @@
                 <button type="button" class="gear-btn gear-btn-secondary mt-2" [disabled]="busy" (click)="setUseRoughShelf(true)">Use a rough shelf instead</button>
               } @else {
                 <gear-scan-panel class="mt-2 block" [step]="packDestination === 'CONTAINER' ? 5 : 4" label="Scan Rough Shelf Bin"
-                  [doneValue]="hasSelectedRoughShelf ? roughShelfSerial : null" [disabled]="busy || shelvesLoading"
+                  [doneValue]="hasSelectedRoughShelf ? roughShelfSerial : null" [disabled]="shelvesLoading" [busy]="busy"
                   (scanned)="selectRoughShelf($event)" (reopen)="roughShelfSerial = ''">
                   <gear-option-picker [placeholder]="'Choose ' + expectedShelfPrefix + ' shelf…'" [headers]="['Shelf', 'Trays', 'Blades']" [options]="shelfOptions"
                     [loading]="shelvesLoading" [error]="shelvesError" [disabled]="busy || shelvesLoading"

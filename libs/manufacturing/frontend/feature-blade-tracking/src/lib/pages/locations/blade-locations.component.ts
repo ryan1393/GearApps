@@ -166,7 +166,7 @@ export class BladeLocationsComponent implements OnInit {
     this.error = '';
     this.expandedLocationId = null;
     this.expandedTrayId = null;
-    this.loadLocationsPage(1, []);
+    this.loadLocationsPage(1, [], ++this.locationsVersion);
   }
 
   clearSearch(): void {
@@ -200,15 +200,20 @@ export class BladeLocationsComponent implements OnInit {
     return value.replace(/_/g, ' ');
   }
 
+  /** The refresh that owns the list; pages from an earlier refresh are dropped. */
+  private locationsVersion = 0;
+
   private loadLocationsPage(
     page: number,
     accumulated: InventoryLocationRow[],
+    version: number,
   ): void {
     this.api.getLocations(page, 50).subscribe({
       next: (response) => {
+        if (version !== this.locationsVersion) return;
         const combined = [...accumulated, ...response.data];
         if (response.meta.hasNextPage) {
-          this.loadLocationsPage(page + 1, combined);
+          this.loadLocationsPage(page + 1, combined, version);
           return;
         }
 
@@ -216,6 +221,7 @@ export class BladeLocationsComponent implements OnInit {
         this.loading = false;
       },
       error: (error: HttpErrorResponse) => {
+        if (version !== this.locationsVersion) return;
         this.loading = false;
         this.error = apiErrorText(
           error,

@@ -9,13 +9,13 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1.25rem 1.35rem;
-  border-bottom: 1px solid #ebecef;
-  background: #f9fafa;
+  border-bottom: 1px solid var(--gear-divider);
+  background: var(--gear-surface-muted);
 }
 
 .inventory-result-header h3 {
   margin: .55rem 0 .2rem;
-  color: #1c2027;
+  color: var(--gear-heading);
   font-size: 1.45rem;
   font-weight: 800;
   letter-spacing: -.02em;
@@ -23,22 +23,22 @@
 
 .inventory-result-header p {
   margin: 0;
-  color: #707886;
+  color: var(--gear-muted);
   font-size: var(--gear-font-md);
 }
 
 .inventory-count {
   min-width: 82px;
   padding: .65rem .8rem;
-  border: 1px solid #e1e3e6;
+  border: 1px solid var(--gear-border);
   border-radius: var(--dana-radius-card);
-  background: #fff;
+  background: var(--gear-surface);
   text-align: center;
 }
 
 .inventory-count strong {
   display: block;
-  color: #1c2027;
+  color: var(--gear-heading);
   font-size: 1.6rem;
   line-height: 1;
 }
@@ -46,7 +46,7 @@
 .inventory-count span {
   display: block;
   margin-top: .25rem;
-  color: #707886;
+  color: var(--gear-muted);
   font-size: var(--gear-font-xs);
   font-weight: 700;
   text-transform: uppercase;
@@ -61,8 +61,8 @@
 .inventory-detail-grid .gear-detail {
   min-height: 92px;
   padding: 1rem 1.25rem;
-  border-right: 1px solid #f0f1f2;
-  border-bottom: 1px solid #f0f1f2;
+  border-right: 1px solid var(--gear-divider);
+  border-bottom: 1px solid var(--gear-divider);
 }
 
 .inventory-detail-grid .gear-detail span,
@@ -72,7 +72,7 @@
 
 .inventory-detail-grid .gear-detail span {
   margin-bottom: .3rem;
-  color: #808895;
+  color: var(--gear-muted);
   font-size: var(--gear-font-xs);
   font-weight: 800;
   letter-spacing: .055em;
@@ -80,13 +80,13 @@
 }
 
 .inventory-detail-grid .gear-detail strong {
-  color: #2f3641;
+  color: var(--gear-text);
   font-size: var(--gear-font-lg);
 }
 
 .inventory-detail-grid .gear-detail small {
   margin-top: .25rem;
-  color: #808895;
+  color: var(--gear-muted);
   font-size: var(--gear-font-xs);
 }
 
@@ -116,7 +116,7 @@
 .inventory-overview-kpi.active {
   transform: translateY(-1px);
   border-color: #bfc3c9;
-  background: #fafbfb;
+  background: var(--gear-surface-muted);
   box-shadow: 0 7px 18px rgba(45,51,62,.07);
 }
 
@@ -138,9 +138,9 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 10px 14px;
-  border-top: 1px solid #ebecef;
-  background: #fcfcfc;
-  color: #707886;
+  border-top: 1px solid var(--gear-divider);
+  background: var(--gear-surface-muted);
+  color: var(--gear-muted);
   font-size: var(--gear-font-xs);
 }
 

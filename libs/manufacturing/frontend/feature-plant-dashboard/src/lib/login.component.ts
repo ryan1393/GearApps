@@ -47,9 +47,13 @@ export class LoginComponent {
       next: () => { this.password = ''; this.busy.set(false); void this.router.navigateByUrl('/'); },
       error: (error: HttpErrorResponse) => {
         this.busy.set(false);
-        this.error.set(error.status === 0 || error.status >= 500
-          ? 'MeshForge is unavailable. Please try again shortly.'
-          : 'Unable to sign in. Check your email and password.');
+        const serverMessage = typeof error.error?.message === 'string' ? error.error.message : '';
+        this.error.set(error.status === 429 && serverMessage
+          // Too many attempts: the server says how long to wait.
+          ? serverMessage
+          : error.status === 0 || error.status >= 500
+            ? 'MeshForge is unavailable. Please try again shortly.'
+            : 'Unable to sign in. Check your email and password.');
       },
     });
   }
