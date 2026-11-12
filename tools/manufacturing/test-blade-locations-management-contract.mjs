@@ -1,4 +1,5 @@
 import { contractPath } from './lib/contract-paths.mjs';
+import { readAdminScreenHtml, readAdminScreenTs } from './lib/admin-screen-source.mjs';
 import fs from 'node:fs';
 import { readMeshForgeStyles } from './lib/read-meshforge-styles.mjs';
 
@@ -13,8 +14,8 @@ const bladeApi=read('libs/manufacturing/frontend/data-access-blade-tracking/src/
 const locationService=read('libs/manufacturing/server/feat-location/src/lib/server-feat-location.service.ts');
 const locationController=read('libs/manufacturing/server/feat-location/src/lib/server-feat-location.controller.ts');
 const adminApi=read('libs/manufacturing/frontend/feature-admin-users/src/lib/admin-api.service.ts');
-const adminTs=read('libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.ts');
-const adminHtml=read('libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.html');
+const adminTs=readAdminScreenTs();
+const adminHtml=readAdminScreenHtml();
 const styles=readMeshForgeStyles();
 
 for(const marker of [
@@ -109,7 +110,7 @@ for(const marker of [
 
 for(const marker of [
   "'locations' | 'cutter-bodies'",
-  'loadable<AdminLocationRow[]>([])',
+  'this.list<AdminLocationRow[]>([])',
   'saveLocation(): void',
   'beginEditLocation(location: AdminLocationRow)',
   'toggleLocationEnabled(location: AdminLocationRow',

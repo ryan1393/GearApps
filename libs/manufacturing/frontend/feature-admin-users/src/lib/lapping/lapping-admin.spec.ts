@@ -2,7 +2,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { FrontendFeatureAdminUsersComponent } from '../frontend-feature-admin-users/frontend-feature-admin-users.component';
+import { frontendFeatureAdminUsersRoutes } from '../lib.routes';
 import { LappingGearsetsComponent } from './lapping-gearsets.component';
 import { LappingMachinesComponent } from './lapping-machines.component';
 import { ARGONAUT_URL_PATTERN } from './machine-options';
@@ -115,15 +117,22 @@ describe('Lapping master data in Admin', () => {
     expect(ARGONAUT_URL_PATTERN.test('ftp://host/x')).toBe(false);
   });
 
-  it('opens the tab named in ?tab= and keeps the URL in step with the selected tab', async () => {
+  it('opens the tab named in an old ?tab= link as its own route and moves between tabs by route', async () => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting(),
+        provideRouter([{ path: 'admin', children: frontendFeatureAdminUsersRoutes }])],
+    });
+    const harness = await RouterTestingHarness.create();
+    const shell = await harness.navigateByUrl('/admin?tab=gearsets', FrontendFeatureAdminUsersComponent);
     const router = TestBed.inject(Router);
-    await router.navigateByUrl('/?tab=gearsets');
-    const fixture = TestBed.createComponent(FrontendFeatureAdminUsersComponent);
-    fixture.detectChanges();
-    expect(fixture.componentInstance.activeTab).toBe('gearsets');
+    expect(router.url).toBe('/admin/gearsets');
+    expect(shell.activeTab).toBe('gearsets');
+    expect(harness.routeNativeElement?.querySelector('gear-admin-lapping-gearsets')).not.toBeNull();
 
-    fixture.componentInstance.setTab('lapping-machines');
-    await fixture.whenStable();
-    expect(router.url).toBe('/?tab=lapping-machines');
+    shell.setTab('lapping-machines');
+    await harness.fixture.whenStable();
+    expect(router.url).toBe('/admin/lapping-machines');
+    expect(harness.routeNativeElement?.querySelector('gear-admin-lapping-machines')).not.toBeNull();
   });
 });

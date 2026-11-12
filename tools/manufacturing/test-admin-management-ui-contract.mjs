@@ -1,19 +1,14 @@
 import { contractPath } from './lib/contract-paths.mjs';
+import { readAdminScreenHtml, readAdminScreenTs } from './lib/admin-screen-source.mjs';
 import fs from 'node:fs';
 import { readMeshForgeStyles } from './lib/read-meshforge-styles.mjs';
 
-const adminTs=fs.readFileSync(
-  contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.ts'),
-  'utf8'
-);
+const adminTs=readAdminScreenTs();
 const adminApi=fs.readFileSync(
   contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-admin-users/src/lib/admin-api.service.ts'),
   'utf8'
 );
-const adminHtml=fs.readFileSync(
-  contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.html'),
-  'utf8'
-);
+const adminHtml=readAdminScreenHtml();
 const adminCss=fs.readFileSync(
   contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.css'),
   'utf8'

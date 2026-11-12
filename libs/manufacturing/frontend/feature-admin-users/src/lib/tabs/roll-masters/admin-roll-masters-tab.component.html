@@ -1,0 +1,34 @@
+<gear-admin-feedback [tab]="this" />
+<div class="gear-admin-layout gear-admin-layout-full gear-admin-roll-master-layout">
+  <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+    <div class="gear-admin-list-header gear-admin-search-header">
+      <div>
+        <h2>Roll Master Quantity by Part</h2>
+        <small>Current quantity and minimum warning level are stored for each individual part.</small>
+      </div>
+      <input class="gear-input gear-admin-search-input" type="search" [(ngModel)]="rollMasterSearch" name="adminRollMasterSearch" aria-label="Search Roll Master parts" placeholder="Search part, Summary, type, quantity..." autocomplete="off" />
+    </div>
+    <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="roll-master-v1" *ngFor="let part of filteredRollMasterParts">
+      <div class="gear-admin-record-card-body">
+        <div class="gear-admin-record-heading">
+          <strong class="gear-admin-record-title mono">{{ part.part_number }}</strong>
+          <span class="gear-badge" [danaTone]="rollMasterRecord(part) && !rollMasterRecord(part)?.enabled ? 'Disabled' : (rollMasterLow(part) ? 'LOW' : 'OK')">{{ rollMasterRecord(part) && !rollMasterRecord(part)?.enabled ? 'Disabled' : (rollMasterLow(part) ? 'LOW' : 'OK') }}</span>
+        </div>
+        <div class="gear-admin-record-meta">
+          <div class="gear-admin-record-field"><span class="gear-admin-record-label">Summary</span><span class="gear-admin-record-value">{{ part.summary?.number || '—' }}</span></div>
+          <div class="gear-admin-record-field"><span class="gear-admin-record-label">Part Type</span><span class="gear-admin-record-value">{{ part.part_type?.code || '—' }}</span></div>
+        </div>
+        <div class="gear-form-grid mt-3">
+          <label class="gear-field">Current Quantity<input class="gear-input" type="number" min="0" step="1" [(ngModel)]="rollMasterEdit(part).current_quantity" [name]="'roll-current-' + part.id" /></label>
+          <label class="gear-field">Minimum Quantity<input class="gear-input" type="number" min="0" step="1" [(ngModel)]="rollMasterEdit(part).minimum_quantity" [name]="'roll-min-' + part.id" /></label>
+        </div>
+        <div class="gear-admin-actions gear-admin-record-actions">
+          <button type="button" class="gear-btn gear-btn-primary" [disabled]="busy" (click)="saveRollMaster(part)">Save Quantity</button>
+          <button *ngIf="rollMasterRecord(part) as rollMaster" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleRollMasterEnabled(part)">{{ rollMaster.enabled ? 'Disable' : 'Enable' }}</button>
+        </div>
+      </div>
+    </div>
+    <gear-admin-list-state [list]="partsList" noun="parts" [shown]="filteredRollMasterParts.length" [total]="parts.length" (retry)="loadParts()" />
+    <div *ngIf="rollMastersList.error() !== null" class="gear-alert gear-alert-danger" role="alert"><strong>Could not load Roll Master quantities.</strong> <span>Quantities shown may be out of date.</span> <button type="button" class="gear-btn gear-btn-secondary" (click)="loadRollMasters()">Retry</button></div>
+  </div>
+</div>

@@ -1,4 +1,5 @@
 import { contractPath } from './lib/contract-paths.mjs';
+import { readAdminScreenHtml, readAdminScreenTs } from './lib/admin-screen-source.mjs';
 import fs from 'node:fs';
 
 const read = (path) => fs.readFileSync(contractPath(process.cwd(), path), 'utf8').replace(/\r\n/g, '\n');
@@ -9,7 +10,7 @@ const greenshedPullHtml = read('libs/manufacturing/frontend/feature-greenshed/sr
 const locationService = read('libs/manufacturing/server/feat-location/src/lib/server-feat-location.service.ts');
 const locationTrayService = read('libs/manufacturing/server/feat-location-tray/src/lib/server-feat-location-tray.service.ts');
 const locationDto = read('libs/manufacturing/server/data-access/src/lib/dtos/blade-tracking/locations/create-location.dto.ts');
-const adminHtml = read('libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.html');
+const adminHtml = readAdminScreenHtml();
 const seed = read('tools/manufacturing/data-import/seed-trays-containers-mock-data.mjs');
 const fixtures = read('tools/manufacturing/test-data/ensure-workflow-test-fixtures.mjs');
 const workflow = read('tools/manufacturing/test-full-workflow.ps1');

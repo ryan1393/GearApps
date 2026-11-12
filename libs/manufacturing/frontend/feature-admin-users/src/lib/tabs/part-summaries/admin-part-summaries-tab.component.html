@@ -1,0 +1,127 @@
+<gear-admin-feedback [tab]="this" />
+<div class="gear-admin-layout">
+  <form class="gear-panel gear-admin-form" data-admin-editor (ngSubmit)="createPartSummary()">
+    <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingPartSummaryId ? 'Edit Part Summary' : 'Create Part Summary' }}</span></div>
+    <div class="gear-form-grid">
+      <label class="gear-field">Summary Number<input class="gear-input" [(ngModel)]="summaryForm.number" name="summaryNumber" placeholder="1.955FC" /></label>
+      <label class="gear-field">Revision<input class="gear-input" [(ngModel)]="summaryForm.revision" name="summaryRevision" /></label>
+    </div>
+    <label class="gear-field">Model
+      <select class="gear-select" [(ngModel)]="summaryForm.model_id" name="summaryModel">
+        <option value="">No model</option>
+        <option *ngFor="let model of models" [value]="model.id">
+          {{ model.model_number ?? '—' }} {{ model.model_type || '' }}
+        </option>
+      </select>
+    </label>
+    <label class="gear-field">Summary HOS<select [(ngModel)]="summaryForm.hos" name="summaryHos" class="gear-select">
+          <option value="">Select hand...</option>
+          <option value="LH">Left Hand</option>
+          <option value="RH">Right Hand</option>
+        </select></label>
+    <ng-container *ngIf="editingPartSummaryId">
+      <fieldset class="gear-field" *ngFor="let code of summaryPartTypes" [attr.data-gear-summary-part-type]="code">
+        <legend>{{ code }}</legend>
+        <div class="gear-form-grid">
+          <label class="gear-field">{{ code }} HOS
+            <select class="gear-select" [(ngModel)]="summaryTypeForm[code].hos" [name]="'summaryHos' + code">
+              <option value="">Not set</option>
+              <option value="RH">RH</option>
+              <option value="LH">LH</option>
+            </select>
+          </label>
+          <label class="gear-field">Inner blade
+            <select class="gear-select" [(ngModel)]="summaryTypeForm[code].inner_blade" [name]="'summaryInner' + code">
+              <option value="">Not set</option>
+              <option *ngFor="let label of bladeLabelChoices(summaryTypeForm[code].inner_blade)" [value]="label">{{ label }}</option>
+            </select>
+          </label>
+          <label class="gear-field">Outer blade
+            <select class="gear-select" [(ngModel)]="summaryTypeForm[code].outer_blade" [name]="'summaryOuter' + code">
+              <option value="">Not set</option>
+              <option *ngFor="let label of bladeLabelChoices(summaryTypeForm[code].outer_blade)" [value]="label">{{ label }}</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
+      <small class="gear-field-help">Each Part Type keeps its own values; the field is the position (an IB label can be the Outer blade). Parts show the Inner and Outer blade of their own Summary and Part Type.</small>
+      <label class="gear-field">Body Size
+        <select class="gear-select" [(ngModel)]="summaryBodyRuleChoice" name="summaryBodyRuleChoice">
+          <option value="KEEP">Keep current Body Size rule</option>
+          <option *ngFor="let rule of cutterBodyRules" [value]="rule.code">{{ rule.label }} · {{ rule.total_blades }} blades</option>
+          <option value="">Remove Body Size rule (quantities stay)</option>
+        </select>
+      </label>
+      <div class="gear-field" data-gear-summary-required-preview>Required Blades (read-only)<strong>{{ summaryRequiredBladesPreview }}</strong></div>
+    </ng-container>
+    <div class="gear-admin-form-actions">
+      <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">{{ editingPartSummaryId ? 'Save Part Summary' : 'Create Part Summary' }}</button>
+      <button *ngIf="editingPartSummaryId" class="gear-btn gear-btn-secondary" type="button" [disabled]="busy" (click)="cancelPartSummaryEdit()">Cancel Edit</button>
+    </div>
+  </form>
+
+  <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+          <div class="gear-admin-list-header gear-admin-search-header">
+      <div>
+        <h2>Existing Part Summaries</h2>
+        <small>{{ filteredPartSummaries.length }} shown · {{ partSummaries.length }} total</small>
+      </div>
+      <input
+        class="gear-input gear-admin-search-input"
+        type="search"
+        [(ngModel)]="partSummarySearch"
+        name="adminPartSummarySearch"
+        aria-label="Search Part Summaries"
+        placeholder="Search Summary, revision, model, HOS..."
+        autocomplete="off"
+      />
+    </div>
+    <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="summary-v20" *ngFor="let summary of filteredPartSummaries">
+      <div class="gear-admin-record-card-body">
+        <div class="gear-admin-record-heading">
+          <strong class="gear-admin-record-title">{{ summary.number }}</strong>
+          <span class="gear-badge" [danaTone]="summary.enabled && summary.active ? 'Active' : 'Inactive'">{{ summary.enabled && summary.active ? 'Active' : 'Inactive' }}</span>
+        </div>
+        <div class="gear-admin-record-meta">
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Revision</span>
+            <span class="gear-admin-record-value">{{ summary.revision || '—' }}</span>
+          </div>
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Model</span>
+            <span class="gear-admin-record-value">{{ modelLabel(summaryModel(summary)) }}</span>
+          </div>
+          <div class="gear-admin-record-field gear-admin-record-field-wide">
+            <span class="gear-admin-record-label">HOS</span>
+            <span class="gear-admin-record-value">{{ summary.hos || '—' }}</span>
+          </div>
+          <div class="gear-admin-record-field gear-admin-record-field-wide" data-gear-summary-body-rule>
+            <span class="gear-admin-record-label">Body Size Rule</span>
+            <span class="gear-admin-record-value">{{ summaryBodyRuleText(summary) }}</span>
+          </div>
+          <div class="gear-admin-record-field" data-gear-summary-required-blades>
+            <span class="gear-admin-record-label">Required Blades (read-only)</span>
+            <span class="gear-admin-record-value">{{ summaryRequiredBladesText(summary) }}</span>
+          </div>
+          <div *ngFor="let code of summaryPartTypes" class="gear-admin-record-field gear-admin-record-field-wide" [attr.data-gear-summary-blades]="code">
+            <span class="gear-admin-record-label">{{ code }}</span>
+            <span class="gear-admin-record-value">
+              HOS {{ summaryPartTypeSettings(summary.id, code)?.hos || '—' }} ·
+              Inner blade {{ summaryPartTypeSettings(summary.id, code)?.inner_blade || '—' }} ·
+              Outer blade {{ summaryPartTypeSettings(summary.id, code)?.outer_blade || '—' }}
+            </span>
+          </div>
+          <div class="gear-admin-record-field gear-admin-record-field-wide" data-gear-summary-permitted-bodies>
+            <span class="gear-admin-record-label">Permitted Cutter Body Types (RING and PINION)</span>
+            <span class="gear-admin-record-value">{{ summaryPermittedBodiesText(summary) }}</span>
+          </div>
+        </div>
+        <div class="gear-admin-actions gear-admin-record-actions">
+          <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditPartSummary(summary)" data-icon="edit" title="Edit">Edit</button>
+          <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="togglePartSummaryEnabled(summary)">{{ summary.enabled ? 'Disable' : 'Enable' }}</button>
+        </div>
+      </div>
+    </div>
+    <gear-admin-list-state [list]="partSummariesList" noun="Part Summaries" [shown]="filteredPartSummaries.length" [total]="partSummaries.length" (retry)="loadPartSummaries()" />
+  </div>
+</div>

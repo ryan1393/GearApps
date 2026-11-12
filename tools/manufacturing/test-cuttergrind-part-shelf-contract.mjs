@@ -1,4 +1,5 @@
 import { contractPath } from './lib/contract-paths.mjs';
+import { readAdminScreenHtml, readAdminScreenTs } from './lib/admin-screen-source.mjs';
 import fs from 'node:fs';
 const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8');
 const shelf=read('libs/manufacturing/shared/util-constants/src/lib/shelf-location.constants.ts');
@@ -6,7 +7,7 @@ const locationService=read('libs/manufacturing/server/feat-location/src/lib/serv
 const locationTray=read('libs/manufacturing/server/feat-location-tray/src/lib/server-feat-location-tray.service.ts');
 const receive=read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/receive-container/receive-container.component.ts');
 const teardown=read('libs/manufacturing/frontend/feature-cutter-builder/src/lib/pages/teardown/cutter-teardown.component.ts');
-const admin=read('libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.ts');
+const admin=readAdminScreenTs();
 for(const marker of ['parseCuttergrindNumberedShelfTag','(CGDR|CGDP|CGFR|CGFP)-([A-Z])([1-9])([A-Z])']) if(!shelf.includes(marker)) throw new Error(`Numbered shelf constants missing ${marker}`);
 if(!locationService.includes('shelf letter, layer number and bin letter')) throw new Error('Location backend does not enforce numbered Cuttergrind shelves.');
 for(const marker of ['cuttergrindShelf.partTypeCode','WAITING_FOR_GRINDING','READY_FOR_CUTTER']) if(!locationTray.includes(marker)) throw new Error(`Location-tray backend missing ${marker}`);
