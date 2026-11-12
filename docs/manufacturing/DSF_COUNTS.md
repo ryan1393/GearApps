@@ -128,11 +128,13 @@ is a new run.
   and last-check count of its previous run. Pieces made while no cutter was recorded on the
   machine are not credited to anyone.
 - **Quality checks.** With crediting on, a check records the count it was taken at (at or after
-  the previous check) and no longer sets the running count. Cancelling a check puts back the
-  previous check point and leaves the running count alone.
+  the previous check) and never changes the running count, even when entered above it; the next
+  check is due from the check's count. Cancelling a check puts back the previous check point and
+  leaves the running count alone. A typed running-count update (`POST greenshed/machines/:machine/piece-count`)
+  is refused while crediting is on.
 - **Review instead of guessing.** Crediting for a machine stops, and Admin > DSF Mappings shows
-  why, if the DSF total goes down or if the cutter's count was changed by hand (a count update,
-  or a check entered above the running count). A hand-changed cutter resumes at the next shift.
+  why, if the DSF total goes down or if the cutter's count was changed outside DSF crediting.
+  A hand-changed cutter resumes at the next shift.
 - Reads are bounded: more than 10,000 events for one machine in a read is refused rather than
   published truncated.
 
