@@ -2,6 +2,10 @@
    MESHFORGE DESIGN SYSTEM TOKENS
    Canonical visual constants shared by every MeshForge frontend.
    This is the only module allowed to define global design tokens.
+   One token set: where MeshForge already gives the Dana core a value (text, surface, primary,
+   sidebar, status colours, radii, border), the --gear- name is an alias of that --dana- token,
+   so a theme (dark mode) changes both names at once. MeshForge's values for the Dana core
+   tokens live in gear-compat-overrides.css, which loads after the core.
    ============================================================ */
 
 :root {
@@ -10,42 +14,31 @@
   --gear-sidebar-width: 272px;
   --gear-topbar-height: 68px;
 
-  --gear-navy-950: #16191f;
-  --gear-navy-900: #161a1f;
-  --gear-navy-800: #1e2229;
-  --gear-blue-700: #ae520b;
-  --gear-blue-600: #bf5d12;
-  --gear-blue-500: #ad5410;
 
   --gear-heading: #1e2229;
-  --gear-text: #303743;
+  --gear-text: var(--dana-text);
   /* Quiet text: both pass 4.5:1 on white and on the page grey. */
   --gear-muted: #5b6573;
   --gear-muted-soft: #687080;
   --gear-text-muted: var(--gear-muted);
   --gear-border: #dee1e4;
-  --gear-border-soft: #ebecee;
   --gear-border-strong: #ced1d6;
   --gear-page: #f1f2f4;
   --gear-page-top: #f9fafa;
-  --gear-page-accent: #eff1f2;
-  --gear-bg-app: var(--gear-page);
-  --gear-surface: #ffffff;
+  --gear-surface: var(--dana-surface);
   --gear-surface-muted: #f8f8f9;
   --gear-surface-subtle: var(--gear-surface-muted);
   --gear-surface-accent: #f4f5f6;
-  --gear-accent: #b4581a;
+  --gear-accent: var(--dana-primary);
   --gear-accent-soft: #fbeee3;
   --gear-focus: #aa5413;
-  --gear-sidebar: #14171c;
-  --gear-sidebar-raised: #232830;
-  --gear-sidebar-text: #ecedef;
+  --gear-sidebar: var(--dana-sidebar);
 
-  --gear-success: #047857;
+  --gear-success: var(--dana-success);
   --gear-success-bg: #ecfdf5;
-  --gear-warning: #8d6a07;
+  --gear-warning: var(--dana-warning);
   --gear-warning-bg: #fffbeb;
-  --gear-danger: #b42318;
+  --gear-danger: var(--dana-danger);
   --gear-danger-bg: #fff5f5;
 
   /* Canonical shop-floor type scale. Responsive overrides may raise these values. */
@@ -56,7 +49,6 @@
   --gear-font-xl: 20px;
   --gear-font-2xl: 24px;
 
-  --gear-weight-normal: 400;
   --gear-weight-medium: 500;
   --gear-weight-semibold: 600;
   --gear-weight-bold: 700;
@@ -64,33 +56,27 @@
 
   --gear-line-tight: 1.2;
   --gear-line-normal: 1.45;
-  --gear-line-relaxed: 1.55;
 
   --gear-space-1: .25rem;
   --gear-space-2: .375rem;
   --gear-space-3: .5rem;
   --gear-space-4: .75rem;
   --gear-space-5: 1rem;
-  --gear-space-6: 1.25rem;
-  --gear-space-7: 1.5rem;
-  --gear-space-8: 2rem;
 
-  --gear-radius-sm: 8px;
-  --gear-radius-md: 10px;
-  --gear-radius-lg: 12px;
-  --gear-radius-xl: 16px;
+  --gear-radius-sm: var(--dana-radius-sm);
+  --gear-radius-md: var(--dana-radius-md);
+  --gear-radius-lg: var(--dana-radius-lg);
+  --gear-radius-xl: var(--dana-radius-xl);
   --gear-radius-pill: 999px;
 
   --gear-shadow-sm: 0 1px 2px rgba(21, 24, 29, .025);
   --gear-shadow-panel: 0 1px 2px rgba(21, 24, 29, .04), 0 8px 24px rgba(44, 50, 61, .065);
-  --gear-shadow-raised: 0 14px 34px rgba(21, 24, 29, .12);
   --gear-shadow-popover: 0 14px 34px rgba(21, 24, 29, .20);
 
-  --gear-panel-bg: var(--gear-surface);
-  --gear-panel-border: var(--gear-border);
-  --gear-panel-radius: var(--gear-radius-lg);
   --gear-panel-header-pad-y: 14px;
   --gear-panel-header-pad-x: 16px;
+
+  --gear-panel-bg: var(--gear-surface);
 
   --gear-control-height: 44px;
   /* Field outlines need 3:1 against the surface; --dana-control-border carries that value. */
@@ -106,7 +92,7 @@
   --gear-table-header-gap: .42rem;
   --gear-table-header-bg: linear-gradient(180deg, #f3f4f5, #eff0f2);
   --gear-table-header-text: #5f6671;
-  --gear-table-border: #e3e5e8;
+  --gear-table-border: var(--dana-border);
   --gear-table-row-hover: #f4f5f6;
 
   /* === DANA APPS SHARED SEMANTIC TOKENS START === */
