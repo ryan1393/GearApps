@@ -1,6 +1,6 @@
-<form class="gear-panel bulk-locations" (ngSubmit)="create()" aria-labelledby="bulk-locations-title">
+<form class="gear-panel dana-panel-padded bulk-locations" (ngSubmit)="create()" aria-labelledby="bulk-locations-title">
   <div class="bulk-locations-head">
-    <h2 id="bulk-locations-title">Bulk shelf locations</h2>
+    <h2 id="bulk-locations-title" class="dana-panel-title">Bulk shelf locations</h2>
     <p class="gear-muted">Make every bin of one shelf at once. Barcodes read shelf letter, layer number, bin letter: <span class="mono">{{ prefix }}-{{ shelf }}1A</span> is shelf {{ shelf }}, layer 1, bin A. A barcode that already exists is left as it is.</p>
   </div>
 
@@ -21,7 +21,7 @@
     </label>
   </div>
 
-  <fieldset class="bulk-locations-layers" [disabled]="busy">
+  <fieldset class="bulk-locations-layers dana-fieldset-reset" [disabled]="busy">
     <legend>Layers</legend>
     <label *ngFor="let layer of layerNumbers">
       <input type="checkbox" [name]="'bulkLayer' + layer" [checked]="layers.has(layer)" (change)="toggleLayer(layer)" />
@@ -37,7 +37,7 @@
 
   <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert"><strong>Not created.</strong><span>{{ error }}</span></div>
 
-  <div class="gear-admin-form-actions bulk-locations-actions">
+  <div class="dana-actions bulk-locations-actions">
     <label class="bulk-locations-print"><input type="checkbox" name="bulkPrint" [(ngModel)]="printTags" [disabled]="busy" /> Print a tag for each bin</label>
     <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy || !!problem">
       {{ busy ? 'Working… ' + progress : 'Create ' + serials.length + ' Location' + (serials.length === 1 ? '' : 's') }}

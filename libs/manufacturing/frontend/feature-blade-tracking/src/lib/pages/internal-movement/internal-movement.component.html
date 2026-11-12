@@ -36,13 +36,13 @@
     }
 
     @if (tray) {
-      <div class="gear-panel p-5">
+      <div class="gear-panel op-card">
         <div class="grid gap-4 sm:grid-cols-2">
-          <div><span class="op-card-eyebrow">From</span><div class="op-card-title">{{ current?.location?.serial_number || 'Unassigned' }}</div><div *ngIf="current?.location?.description" class="text-sm text-slate-500">{{ current?.location?.description }}</div></div>
-          <div><span class="op-card-eyebrow">To</span>@if (destination) {<div class="op-card-title">{{ destination.serial_number }}</div><div *ngIf="destination.description" class="text-sm text-slate-500">{{ destination.description }}</div>@if (autoSelected) {<div class="text-sm text-slate-500" data-testid="internal-movement-auto-shelf">Selected automatically: the only shelf for this Summary and Part Type.</div>}} @else {<div class="op-card-title">—</div>}</div>
+          <div><span class="op-card-eyebrow">From</span><div class="op-card-title">{{ current?.location?.serial_number || 'Unassigned' }}</div><div *ngIf="current?.location?.description" class="gear-muted">{{ current?.location?.description }}</div></div>
+          <div><span class="op-card-eyebrow">To</span>@if (destination) {<div class="op-card-title">{{ destination.serial_number }}</div><div *ngIf="destination.description" class="gear-muted">{{ destination.description }}</div>@if (autoSelected) {<div class="gear-muted" data-testid="internal-movement-auto-shelf">Selected automatically: the only shelf for this Summary and Part Type.</div>}} @else {<div class="op-card-title">—</div>}</div>
         </div>
       </div>
-      <div class="gear-panel p-5">
+      <div class="gear-panel op-card">
         <div danaDetailGrid data-testid="internal-movement-tray-contents">
           <dana-detail-item label="Tray">{{ tray.serial_number }}</dana-detail-item>
           <dana-detail-item label="Summary">{{ tray.summary?.number || 'Unassigned' }}</dana-detail-item>

@@ -1,9 +1,9 @@
 <div class="gear-page dashboard-page" [class.view-only-dashboard]="!canEdit">
   <section class="gear-page-header dashboard-heading" danaPageHeader eyebrow="CUTTER BUILDER" heading="Dashboard" description="Welcome back. Here’s what’s happening in Cutter Builder." [dashboard]="true">
-  <button danaPageHeaderAction type="button" class="date-chip refresh-chip" (click)="refresh()" [disabled]="loading" data-icon="refresh" title="Refresh">↻ <span>{{ loading ? 'Refreshing…' : 'Refresh' }}</span></button>
+  <button danaPageHeaderAction type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading" data-icon="refresh"><span>{{ loading ? 'Refreshing…' : 'Refresh' }}</span></button>
 </section>
 
-  <div *ngIf="error" class="dashboard-alert">{{ error }}</div>
+  <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert">{{ error }}</div>
 
   <section danaKpiGrid *ngIf="data as d" class="kpi-grid cutter-kpis">
     <article danaKpiCard class="kpi-card"><div class="kpi-icon blue"><span class="gear-glyph gear-glyph-build-cutter" aria-hidden="true"></span></div><div><strong>{{ d.counts.builds_in_progress }}</strong><h3>Builds In Progress</h3><p>Open cutter builds</p></div></article>
@@ -36,7 +36,7 @@
           <col class="cutter-col-tail" />
         </colgroup>
         <thead><tr><th>Tray</th><th>Summary</th><th>Type</th><th>Blades</th><th></th></tr></thead><tbody>
-        <tr *ngFor="let row of d.waiting_for_grinding"><td class="mono strong">{{ row.tray_serial_number }}</td><td>{{ row.summary_number || '—' }}</td><td>{{ row.part_type_code || '—' }}</td><td>{{ row.blade_count }}</td><td class="right"><button *ngIf="canEdit" type="button" class="table-action" (click)="startGrinding(row.tray_id, row.tray_serial_number)" [disabled]="loading">Start Grinding</button></td></tr>
+        <tr *ngFor="let row of d.waiting_for_grinding"><td class="mono strong">{{ row.tray_serial_number }}</td><td>{{ row.summary_number || '—' }}</td><td>{{ row.part_type_code || '—' }}</td><td>{{ row.blade_count }}</td><td class="right"><button *ngIf="canEdit" type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="startGrinding(row.tray_id, row.tray_serial_number)" [disabled]="loading">Start Grinding</button></td></tr>
         <tr *ngIf="d.waiting_for_grinding.length === 0"><td danaTableEmpty colspan="5" class="empty-row">No trays waiting for grinding.</td></tr>
       </tbody></table></div>
     </article>

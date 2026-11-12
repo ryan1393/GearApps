@@ -482,12 +482,12 @@
     display: none !important;
   }
 
-  .app-content-shell {
+  html:root body .app-content-shell:not(.login-shell) {
     padding: 0 !important;
     background: white !important;
   }
 
-  .gear-page {
+  html:root body .gear-page {
     max-width: none !important;
     padding: 0 !important;
   }

@@ -10,11 +10,12 @@ interface EditRow { id: string; serial: string; description: string; original: s
   selector: 'gear-location-editor', standalone: true,
   imports: [CommonModule, FormsModule, DanaTableDirective, DanaTableShellDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<details class="gear-panel" style="padding:1rem;margin-bottom:1rem">
-    <summary>Mass edit location descriptions</summary>
+  template: `<details class="gear-panel dana-panel-padded">
+    <summary class="dana-panel-title">Mass edit location descriptions</summary>
+    <div class="location-editor-body">
     <p>Select records, edit their descriptions, then save. Inventory, barcodes and placements stay unchanged.</p>
     <label class="gear-field">Filter locations <input class="gear-input" [(ngModel)]="filter" [disabled]="busy" /></label>
-    <div class="gear-admin-form-actions">
+    <div class="dana-actions">
       <button type="button" class="gear-btn gear-btn-secondary" (click)="selectVisible()" [disabled]="busy || !visible.length">Select filtered</button>
       <button type="button" class="gear-btn gear-btn-primary" (click)="save()" [disabled]="busy || !dirtyCount || !!problem">Save {{ dirtyCount }} selected changes</button>
       <button type="button" class="gear-btn gear-btn-secondary" (click)="cancel()" [disabled]="busy">Cancel unsaved changes</button>
@@ -23,7 +24,9 @@ interface EditRow { id: string; serial: string; description: string; original: s
     <p *ngIf="message" role="status">{{ message }}</p>
     <div danaTableShell><table danaTable class="gear-table"><thead><tr><th data-dana-table-static>Select</th><th data-dana-table-static>Barcode</th><th data-dana-table-static>Description</th><th data-dana-table-static>Result</th></tr></thead>
     <tbody><tr *ngFor="let row of visible"><td><input type="checkbox" [(ngModel)]="row.selected" [disabled]="busy" [attr.aria-label]="'Select ' + row.serial" /></td><td>{{ row.serial }}</td><td><input class="gear-input" [(ngModel)]="row.description" (ngModelChange)="row.result = ''" maxlength="255" [disabled]="busy" [attr.aria-label]="'Description for ' + row.serial" /></td><td>{{ row.result || (row.description !== row.original ? 'Unsaved' : 'Unchanged') }}</td></tr></tbody></table></div>
+    </div>
   </details>`,
+  styles: [':host { display:block; min-width:0; margin-bottom:var(--dana-section-gap); } .location-editor-body { display:grid; gap:var(--dana-form-gap); margin-top:var(--dana-form-gap); } .location-editor-body > p { margin:0; }'],
 })
 export class LocationEditorComponent {
   private readonly api = inject(AdminApiService);

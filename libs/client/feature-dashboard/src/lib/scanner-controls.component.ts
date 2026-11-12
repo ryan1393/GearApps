@@ -77,12 +77,12 @@ const GROUPS: { label: string; cmds: Cmd[] }[] = [
   styles: `
     .gear-ctl {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
+      gap: var(--dana-form-gap);
     }
     .gear-ctl-group {
       display: grid;
-      gap: 6px;
+      gap: var(--dana-field-gap);
     }
   `,
 })

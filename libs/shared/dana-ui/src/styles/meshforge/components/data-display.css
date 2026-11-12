@@ -63,14 +63,14 @@ table.dana-table td small {
 .dashboard-table tbody tr:nth-child(even) td,
 table[danaTable] tbody tr:nth-child(even) td,
 table.dana-table tbody tr:nth-child(even) td {
-  background: rgba(249, 249, 250, .72);
+  background: var(--dana-table-state-bg, rgba(249, 249, 250, .72));
 }
 
 .gear-table tbody tr:hover td,
 .dashboard-table tbody tr:hover td,
 table[danaTable] tbody tr:hover td,
 table.dana-table tbody tr:hover td {
-  background: var(--gear-table-row-hover);
+  background: var(--dana-table-state-bg, var(--gear-table-row-hover));
 }
 
 .dana-table-sortable {

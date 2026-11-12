@@ -20,8 +20,8 @@ interface CancellationView { latest: Operation | null; history: Operation[]; mes
   styles: [`
     :host{display:block}.cancel-content{max-width:64rem;margin:auto}
     .cancel-actions{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
-    .cancel-entry{padding:1rem 0;border-bottom:1px solid var(--dana-control-border);overflow-wrap:anywhere}
-    .cancel-entry p{margin:.35rem 0}.cancel-entry:last-child{border:0}
+    .cancel-entry{padding:var(--dana-form-gap) 0;overflow-wrap:anywhere}
+    .cancel-entry p{margin:var(--dana-space-2) 0}
   `],
   template: `
     <section class="gear-page gear-workflow-page cancel-content">
@@ -51,7 +51,7 @@ interface CancellationView { latest: Operation | null; history: Operation[]; mes
       <section *ngIf="view?.history?.length" class="gear-workflow-section">
         <div class="gear-workflow-section-header"><div><h2>Transaction History</h2><p>Original entries and cancellation details are retained.</p></div></div>
         <div class="gear-workflow-section-body">
-          <article *ngFor="let row of view?.history" class="cancel-entry">
+          <article *ngFor="let row of view?.history" class="cancel-entry dana-divider-section">
             <strong>{{ row.action }} · {{ row.canceled_at ? 'Canceled' : 'Recorded' }}</strong>
             <p>{{ row.recorded_by }} · {{ row.occurred_at | date:'MMM d, y, h:mm:ss a' }}</p>
             <p *ngIf="row.canceled_at">Canceled by {{ row.canceled_by }} · {{ row.canceled_at | date:'MMM d, y, h:mm:ss a' }}</p>

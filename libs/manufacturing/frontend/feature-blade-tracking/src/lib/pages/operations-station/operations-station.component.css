@@ -3,26 +3,24 @@
  * The layout of the embedded operation pages is in operations-station-pages.css.
  * Unencapsulated; every rule is scoped under .ops-station.
  */
-/* !important beats the shared `html body .gear-page` width/padding overrides in @dana/ui. */
 html body .gear-page.ops-station {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--dana-action-gap);
   box-sizing: border-box;
   max-width: none !important;
   margin: 0 !important;
-  padding: 14px 18px 18px !important;
+  padding: var(--dana-space-4) var(--dana-space-5) var(--dana-space-5) !important;
 }
 
 /* Operation tabs: one row of large touch targets. Internal Movement sits apart from the numbered flow. */
 .ops-station .ops-station-tabs {
   display: grid;
   grid-template-columns: repeat(var(--ops-tab-count, 6), minmax(0, 1fr));
-  gap: 8px;
+  gap: var(--dana-space-2);
   flex: none;
   margin: 0;
   padding: 0;
-  border: 0;
 }
 
 .ops-station .ops-station-tab {
@@ -30,27 +28,16 @@ html body .gear-page.ops-station {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--dana-action-gap);
   min-width: 0;
   min-height: 64px;
   margin: 0;
-  padding: 8px 12px;
-  border: 2px solid var(--dana-control-border);
-  border-radius: 12px;
-  background: var(--dana-surface);
-  color: var(--dana-text);
-  font-size: 1.05rem;
-  font-weight: 800;
-  line-height: 1.15;
-  text-align: center;
-  cursor: pointer;
+  padding: var(--dana-space-2) var(--dana-workstation-gap);
   touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .ops-station .ops-station-tab.is-side {
-  margin-left: 14px;
-  border-style: dashed;
+  margin-left: var(--dana-space-4);
 }
 
 .ops-station .ops-station-tab.is-side::before {
@@ -59,7 +46,6 @@ html body .gear-page.ops-station {
   left: -13px;
   top: 10px;
   bottom: 10px;
-  border-left: 2px solid var(--dana-border);
 }
 
 .ops-station .ops-station-tab-step {
@@ -68,10 +54,6 @@ html body .gear-page.ops-station {
   flex: none;
   width: 30px;
   height: 30px;
-  border-radius: 50%;
-  border: 2px solid currentColor;
-  font-size: .95rem;
-  font-weight: 900;
 }
 
 .ops-station .ops-station-tab .gear-glyph {
@@ -91,73 +73,49 @@ html body .gear-page.ops-station {
   right: 7px;
   width: 14px;
   height: 14px;
-  border: 2px solid var(--dana-surface);
-  border-radius: 50%;
-  background: var(--dana-warning);
-}
-
-.ops-station .ops-station-tab.is-active {
-  border-color: var(--dana-primary);
-  background: var(--dana-primary);
-  color: var(--dana-surface);
-}
-
-.ops-station .ops-station-tab:active {
-  transform: scale(.98);
-}
-
-.ops-station .ops-station-tab:focus-visible {
-  outline: 3px solid var(--dana-focus-border);
-  outline-offset: 2px;
 }
 
 /* Instruction for the open operation, plus station tools. */
 .ops-station .ops-station-bar {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--dana-action-gap);
   flex: none;
 }
 
 .ops-station .ops-station-instruction {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--dana-action-gap);
   flex: 1;
   min-width: 0;
   margin: 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--dana-muted);
 }
 
 .ops-station .ops-station-bar .gear-btn {
   flex: none;
   min-height: 48px !important;
-  font-size: 1rem !important;
 }
 
 .ops-station .ops-station-settings {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 22px;
+  gap: var(--dana-action-gap) 22px;
   flex: none;
   margin: 0;
-  padding: 14px 18px;
+  padding: var(--dana-space-4) var(--dana-space-5);
 }
 
 .ops-station .ops-station-settings legend {
   padding: 0 6px;
-  font-weight: 800;
 }
 
 .ops-station .ops-station-settings label {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--dana-space-2);
   min-height: 44px;
-  font-weight: 700;
 }
 
 .ops-station .ops-station-settings input {
@@ -168,34 +126,22 @@ html body .gear-page.ops-station {
 .ops-station .ops-station-settings p {
   flex-basis: 100%;
   margin: 0;
-  color: var(--dana-muted);
 }
 
 /* A row of figures the operator checks before confirming. */
 .ops-station .op-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-  gap: 8px;
+  gap: var(--dana-space-2);
   margin: 0;
 }
 
 .ops-station .op-summary > div {
-  padding: 8px 10px;
-  border-radius: 10px;
-  background: var(--dana-neutral-soft);
-}
-
-.ops-station .op-summary dt {
-  font-size: .75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: var(--dana-muted);
+  padding: var(--dana-space-2) var(--dana-action-gap);
 }
 
 .ops-station .op-summary dd {
   margin: 0;
-  font-size: 1.2rem;
-  font-weight: 900;
   /* Long barcodes such as COATER-STAGING wrap inside their cell. */
   overflow-wrap: break-word;
 }
@@ -210,21 +156,27 @@ body:has(.ops-station) :is(dana-toast-host, gear-toast-host) .dana-toast-stack.g
 @media (min-width: 1024px) and (max-width: 1399px) {
   .ops-station .ops-station-tab {
     flex-direction: column;
-    gap: 4px;
-    font-size: .92rem;
+    gap: var(--dana-space-1);
   }
 
   .ops-station .ops-station-tab-step {
     width: 24px;
     height: 24px;
-    font-size: .8rem;
+  }
+
+  .ops-station .ops-station-tab.is-side {
+    margin-left: 0;
+  }
+
+  .ops-station .ops-station-tab.is-side::before {
+    display: none;
   }
 }
 
 /* Phones and small tablets keep a normal scrolling page. */
 @media (max-width: 1023px) {
   html body .gear-page.ops-station {
-    padding: 12px !important;
+    padding: var(--dana-workstation-gap) !important;
   }
 
   .ops-station .ops-station-tabs {
@@ -251,9 +203,8 @@ body:has(.ops-station) :is(dana-toast-host, gear-toast-host) .dana-toast-stack.g
 @media (max-width: 599px) {
   .ops-station .ops-station-tab {
     flex-direction: column;
-    gap: 4px;
-    padding: 8px 4px;
-    font-size: .85rem;
+    gap: var(--dana-space-1);
+    padding: var(--dana-space-2) var(--dana-space-1);
   }
 }
 

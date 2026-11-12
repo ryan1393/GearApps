@@ -1,15 +1,14 @@
-:host { display: block; margin-bottom: 1rem; }
-.bulk-locations { padding: 1.25rem; min-width: 0; }
-.bulk-locations-head h2 { margin: 0 0 .25rem; font-size: 1.1rem; font-weight: 800; }
-.bulk-locations-head p { margin: 0 0 1rem; max-width: 80ch; }
-.bulk-locations-layers { display: flex; flex-wrap: wrap; gap: .5rem 1.25rem; margin: 1rem 0 0; padding: 0; border: 0; min-width: 0; }
-.bulk-locations-layers legend { width: 100%; margin-bottom: .4rem; padding: 0; font-weight: 600; }
-.bulk-locations-layers label { display: inline-flex; align-items: center; gap: .35rem; min-height: 2rem; font-variant-numeric: tabular-nums; }
-.bulk-locations-preview { display: flex; flex-wrap: wrap; gap: .25rem 1.25rem; margin: 1rem 0 0; }
-.bulk-locations-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem; margin-top: 1rem; }
-.bulk-locations-print { display: inline-flex; align-items: center; gap: .5rem; }
-.bulk-locations .table-wrap { margin-top: 1rem; }
-.bulk-locations .gear-alert { margin: 1rem 0 0; }
-/* Shelf type, shelf and bins side by side; the shared grid stacks them on a phone. */
+/* Layout only; fields, panel gutters and headings come from Dana. */
+:host { display: block; margin-bottom: var(--dana-section-gap); }
+.bulk-locations { display: grid; gap: var(--dana-form-gap); min-width: 0; }
+.bulk-locations > p { margin: 0; }
+.bulk-locations-head { display: grid; gap: var(--dana-field-gap); }
+.bulk-locations-head p { margin: 0; max-width: 80ch; }
+.bulk-locations-layers { display: flex; flex-wrap: wrap; gap: var(--dana-field-gap) var(--dana-form-gap); margin: 0; padding: 0; min-width: 0; }
+.bulk-locations-layers legend { width: 100%; margin-bottom: var(--dana-field-gap); padding: 0; }
+.bulk-locations-layers label { display: inline-flex; align-items: center; gap: var(--dana-field-gap); min-height: 2rem; }
+.bulk-locations-preview { display: flex; flex-wrap: wrap; gap: var(--dana-field-gap) var(--dana-form-gap); margin: 0; }
+.bulk-locations-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--dana-action-gap); }
+.bulk-locations-print { display: inline-flex; align-items: center; gap: var(--dana-field-gap); }
 .bulk-locations-fields { align-items: start; }
 @media (min-width: 601px) { .bulk-locations-fields { grid-template-columns: 2fr 1fr 1fr; } }

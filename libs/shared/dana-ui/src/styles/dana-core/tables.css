@@ -11,17 +11,17 @@ table.dana-table {
   border-collapse: collapse;
   color: var(--dana-text);
   font-family: var(--dana-font-sans);
-  font-size: 13px;
+  font-size: var(--dana-table-font-size, 13px);
 }
 
 table[danaTable] th,
 table.dana-table th {
-  padding: 11px 12px;
+  padding: var(--dana-table-header-pad-y, 11px) var(--dana-table-header-pad-x, 12px);
   border-bottom: 1px solid var(--dana-border);
   background: #fbfcfe;
   color: var(--dana-muted);
   text-align: left;
-  font-size: 11px;
+  font-size: var(--dana-table-header-font-size, 11px);
   font-weight: 800;
   letter-spacing: .05em;
   text-transform: uppercase;
@@ -30,7 +30,7 @@ table.dana-table th {
 
 table[danaTable] td,
 table.dana-table td {
-  padding: 13px 12px;
+  padding: var(--dana-table-cell-pad-y, 13px) var(--dana-table-cell-pad-x, 12px);
   border-bottom: 1px solid #edf1f5;
   vertical-align: middle;
 }
@@ -39,7 +39,7 @@ table[danaTable] tbody tr:last-child td,
 table.dana-table tbody tr:last-child td { border-bottom: 0; }
 
 table[danaTable] tbody tr:hover td,
-table.dana-table tbody tr:hover td { background: #fbfdff; }
+table.dana-table tbody tr:hover td { background: var(--dana-table-state-bg, #fbfdff); }
 
 .dana-status-badge,
 [danaStatusBadge],
@@ -70,7 +70,7 @@ table.dana-table tbody tr:hover td { background: #fbfdff; }
 
 .dana-table-empty,
 td[danaTableEmpty] {
-  padding: 22px !important;
+  padding: var(--dana-panel-padding) !important;
   color: var(--dana-muted);
   text-align: center;
 }

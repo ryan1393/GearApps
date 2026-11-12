@@ -14,16 +14,16 @@ interface ReviewRow extends OpeningImportRow { payload?: Payload; blades?: numbe
   imports: [CommonModule, FormsModule, DanaHelpComponent, DanaTableDirective, DanaTableShellDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="gear-panel launch-panel" aria-labelledby="bulk-opening-title" [attr.aria-busy]="busy || readingFile">
-      <h3 id="bulk-opening-title">Import opening inventory</h3>
+    <section class="gear-panel dana-panel-padded launch-panel" aria-labelledby="bulk-opening-title" [attr.aria-busy]="busy || readingFile">
+      <h3 id="bulk-opening-title" class="dana-panel-title">Import opening inventory</h3>
       <p>Upload full trays already ground or coated. Review every row before recording inventory.
         <dana-help label="Opening inventory import format">CSV with six columns: tray, summary (include revision as shown in the list), part_type (RING or PINION), stage (READY_FOR_COATING or READY_FOR_CUTTER), shelf and service_cycle (0–99). Use up to 100 rows, without quotes or commas in values. Quantities come from the Summary. Existing stock is never replaced.</dana-help>
       </p>
       <button class="gear-btn gear-btn-secondary" type="button" (click)="template()">Download CSV template</button>
       <p *ngIf="!lookupsReady" role="status">Waiting for enabled Summaries and part types. If none are configured, add them in Admin before importing inventory.</p>
-      <label class="gear-field">CSV file <input type="file" accept=".csv,text/csv" [disabled]="busy" (change)="file($event)" /></label>
-      <label class="gear-field">Or paste CSV<textarea class="gear-input" rows="5" [(ngModel)]="text" [disabled]="busy" (ngModelChange)="invalidate()"></textarea></label>
-      <div class="gear-admin-form-actions">
+      <label class="gear-field">CSV file <input class="gear-input" type="file" accept=".csv,text/csv" [disabled]="busy" (change)="file($event)" /></label>
+      <label class="gear-field">Or paste CSV<textarea class="gear-textarea" rows="5" [(ngModel)]="text" [disabled]="busy" (ngModelChange)="invalidate()"></textarea></label>
+      <div class="dana-actions">
         <button class="gear-btn gear-btn-secondary" type="button" [disabled]="busy || readingFile || !text.trim() || !lookupsReady" (click)="preview()">{{ busy ? 'Working…' : 'Preview and validate' }}</button>
         <button class="gear-btn gear-btn-primary" type="button" [disabled]="busy || readingFile || !canCommit" (click)="commit()">Record {{ readyCount }} reviewed trays</button>
         <button class="gear-btn gear-btn-secondary" type="button" [disabled]="busy" (click)="clear()">Clear import</button>
@@ -38,7 +38,7 @@ interface ReviewRow extends OpeningImportRow { payload?: Payload; blades?: numbe
         <tbody><tr *ngFor="let row of rows"><td>{{ row.line }}</td><td>{{ row.tray }}</td><td>{{ row.summary }} / {{ row.part_type }}</td><td>{{ row.stage }} / {{ row.shelf }}</td><td>{{ row.blades ?? '—' }}</td><td><strong>{{ row.state }}</strong> {{ row.error }}</td></tr></tbody>
       </table></div>
     </section>`,
-  styles: [':host { display: block; min-width: 0; } .launch-panel { padding: 1.25rem; min-width: 0; } textarea, input[type="file"] { width: 100%; max-width: 100%; } .gear-admin-form-actions { display:flex; flex-wrap:wrap; gap:.5rem; margin:1rem 0; }'],
+  styles: [':host { display:block; min-width:0; } .launch-panel { display:grid; gap:var(--dana-form-gap); min-width:0; } .launch-panel > p { margin:0; } .launch-panel > .gear-btn { justify-self:start; } textarea, input[type="file"] { width:100%; max-width:100%; }'],
 })
 export class BulkOpeningComponent {
   private readonly http = inject(HttpClient);

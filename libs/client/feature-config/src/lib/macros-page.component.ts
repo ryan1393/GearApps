@@ -43,8 +43,16 @@ interface MacroRow extends Macro {
     MacroFormDialogComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    @media (min-width: 901px) {
+      .lapper-macros-table {
+        --dana-table-min-width: 64rem;
+        --dana-table-layout: auto;
+      }
+    }
+  `,
   template: `
-    <div class="gear-page gear-workflow-page">
+    <div class="gear-page dana-page-stack gear-workflow-page">
       <section
         danaPageHeader
         eyebrow="LAPPER / CONFIGURATION"
@@ -100,7 +108,7 @@ interface MacroRow extends Macro {
           </label>
         </div>
         <div danaTableShell class="table-wrap">
-          <table danaTable class="gear-table">
+          <table danaTable class="gear-table lapper-macros-table">
             <thead>
               <tr>
                 <th>Macro</th>

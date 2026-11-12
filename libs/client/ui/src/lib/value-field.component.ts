@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
   imports: [DecimalPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="dana-detail" [class.is-compact]="compact()" [class.is-alert]="!!alert()">
+    <div class="dana-detail" [class.is-compact]="compact()" [attr.data-tone]="alert() ? 'danger' : null">
       <span class="dana-detail-label">{{ label() }}</span>
       @switch (kind()) {
         @case ('flag') {
@@ -38,27 +38,15 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
     </div>
   `,
   styles: `
-    .dana-detail.is-compact {
-      padding: 9px 10px;
-    }
-    .dana-detail.is-compact .dana-detail-value {
-      font-size: 14px;
-    }
     .dana-detail-value {
       font-variant-numeric: tabular-nums;
       overflow-wrap: anywhere;
     }
-    .dana-detail.is-alert {
-      border-color: var(--dana-danger);
-      background: var(--dana-danger-soft);
-    }
     .value-alert {
-      margin-top: 4px;
+      margin-top: var(--dana-space-1);
     }
     .dana-detail-value small {
-      margin-left: 3px;
-      font-size: 11px;
-      font-weight: 600;
+      margin-left: var(--dana-space-1);
     }
   `,
 })

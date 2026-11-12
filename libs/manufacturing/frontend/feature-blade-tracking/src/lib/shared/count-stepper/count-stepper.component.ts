@@ -24,11 +24,10 @@ let nextStepperId = 1;
   `,
   styles: [`
     :host { display: block; }
-    .stepper-label { display: block; margin-bottom: 4px; font-weight: 700; }
-    .stepper { display: grid; grid-template-columns: 64px minmax(80px, 1fr) 64px; gap: 8px; }
-    /* !important beats the compact html body .gear-btn sizing in @dana/ui. */
-    .stepper-btn { min-height: 56px !important; font-size: 1.6rem !important; font-weight: 900; line-height: 1; }
-    .stepper-input { min-height: 56px; text-align: center; font-size: 1.3rem; font-weight: 800; }
+    .stepper-label { display: block; margin-bottom: var(--dana-space-1); }
+    .stepper { display: grid; grid-template-columns: 64px minmax(80px, 1fr) 64px; gap: var(--dana-space-2); }
+    .stepper-btn { min-height: 56px !important; }
+    .stepper-input { min-height: 56px; }
   `],
 })
 export class CountStepperComponent {

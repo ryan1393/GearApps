@@ -17,15 +17,8 @@ import { DanaPageHeaderComponent } from '@dana/ui';
   imports: [CommonModule, GearScannerFocusDirective, FormsModule, RouterLink, DanaPageHeaderComponent],
   templateUrl: './greenshed-check.component.html',
   styles: [`
-    .quality-check-layout{display:grid;gap:1rem}
-    .quality-check-summary{grid-template-columns:repeat(4,minmax(0,1fr))}
-    .check-measurements{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem;margin:1.25rem 0}
-    .check-measurements input{width:100%;min-width:0}
-    h3{font-size:1rem;font-weight:700;margin:1.5rem 0 .75rem}
-    fieldset{border:0;padding:0;margin:0;min-width:0}
-    .check-result-actions{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;margin-top:1rem}
-    @media(max-width:900px){.check-measurements,.quality-check-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
-    @media(max-width:480px){.check-measurements,.quality-check-summary{grid-template-columns:1fr}}
+    .quality-check-entry{display:grid;gap:var(--dana-form-gap);border:0;padding:0;margin:0;min-width:0}
+    .check-measurement-heading{margin:0}
   `],
 })
 export class GreenshedCheckComponent implements OnInit {

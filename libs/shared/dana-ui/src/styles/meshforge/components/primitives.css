@@ -83,7 +83,7 @@
 
 .gear-field {
   display: grid;
-  gap: .4rem;
+  gap: var(--dana-field-gap);
   color: #38404d;
   font-size: var(--gear-font-md);
   font-weight: 700;
@@ -134,7 +134,7 @@
 .gear-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: .75rem;
+  gap: var(--dana-action-gap);
   align-items: center;
 }
 

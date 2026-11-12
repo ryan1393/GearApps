@@ -1,16 +1,16 @@
-<section class="gear-page cutter-requests-page">
+<section class="gear-page gear-workflow-page cutter-requests-page">
   <header danaPageHeader class="gear-page-header" eyebrow="CUTTERGRIND NEEDS" heading="Cutter Requests" description="Request cutters by Part Summary and Part Type. Matching completed builds update the queue automatically."></header>
 
   <p *ngIf="!canRead" class="gear-alert gear-alert-danger" role="alert">Your role cannot view cutter requests. Ask an administrator to review your access.</p>
 
   <ng-container *ngIf="canRead">
-    <section *ngIf="canCreate" class="gear-panel request-panel" aria-labelledby="new-request-heading">
-      <h2 id="new-request-heading">Request cutters</h2>
-      <p>Quantity is the number of cutters needed, not the blade count for one cutter.</p>
+    <section *ngIf="canCreate" class="gear-workflow-section" aria-labelledby="new-request-heading">
+      <div class="gear-workflow-section-header"><div><h2 id="new-request-heading">Request cutters</h2><p>Quantity is the number of cutters needed, not the blade count for one cutter.</p></div></div>
+      <div class="gear-workflow-section-body">
       <p *ngIf="lookupError" class="gear-alert gear-alert-danger" role="alert">{{ lookupError }} <button type="button" class="gear-btn gear-btn-secondary" (click)="loadChoices()" [disabled]="loadingChoices || busy">Retry choices</button></p>
       <p *ngIf="!loadingChoices && !lookupError && !requirements.length" role="status">No enabled Summary / Part Type requirements are available. Ask an administrator to check cutter configuration.</p>
-      <form (ngSubmit)="create()" aria-label="New cutter request">
-        <div class="gear-form-grid request-form-grid">
+      <form (ngSubmit)="create()" aria-label="New cutter request" class="request-form">
+        <div class="gear-workflow-form-grid request-form-grid">
           <label class="gear-field">Part Summary
             <select class="gear-select" name="requestSummary" [(ngModel)]="draft.summary_id" (ngModelChange)="summaryChanged()" [disabled]="busy || loadingChoices" required>
               <option value="">Choose a Summary…</option><option *ngFor="let summary of summaries; trackBy: trackSummary" [value]="summary.id">{{ summary.label }}</option>
@@ -24,23 +24,25 @@
           <label class="gear-field">Quantity (cutters)
             <input class="gear-input" name="requestQuantity" type="number" min="1" max="99" step="1" [(ngModel)]="draft.quantity" [disabled]="busy" required />
           </label>
-          <label class="gear-field request-notes">Notes <span class="gear-muted">(optional)</span>
-            <textarea class="gear-input" name="requestNotes" rows="2" maxlength="2000" [(ngModel)]="draft.notes" [disabled]="busy"></textarea>
+          <label class="gear-field request-notes"><span>Notes <span class="gear-muted">(optional)</span></span>
+            <textarea class="gear-textarea" name="requestNotes" rows="2" maxlength="2000" [(ngModel)]="draft.notes" [disabled]="busy"></textarea>
           </label>
         </div>
         <p *ngIf="formError" class="gear-alert gear-alert-danger" role="alert">{{ formError }}</p>
-        <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy || loadingChoices || !draft.summary_id || !draft.part_type_code || !quantityValid">{{ busy ? 'Saving…' : 'Request cutters' }}</button>
+        <div class="request-form-actions"><button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy || loadingChoices || !draft.summary_id || !draft.part_type_code || !quantityValid">{{ busy ? 'Saving…' : 'Request cutters' }}</button></div>
       </form>
+      </div>
     </section>
 
-    <section class="gear-panel request-panel" aria-labelledby="request-queue-heading">
-      <div class="request-queue-heading">
+    <section class="gear-workflow-section" aria-labelledby="request-queue-heading">
+      <div class="gear-workflow-section-header request-queue-heading">
         <div><h2 id="request-queue-heading">{{ includeCompleted ? 'All requests' : 'Open requests' }}</h2><p>Requested: work has not started. Ready: the requested cutters have been built.</p><p>In Progress means a matching tray holds blades or a build is linked. This is not a reservation. Complete closes a Ready request without recording pickup or moving inventory.</p></div>
         <div class="request-queue-controls">
           <label><input type="checkbox" [(ngModel)]="includeCompleted" (ngModelChange)="refresh()" [disabled]="busy" /> Include completed and canceled</label>
           <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading || busy">{{ loading ? 'Refreshing…' : 'Refresh' }}</button>
         </div>
       </div>
+      <div class="gear-workflow-section-body">
       <p *ngIf="error" class="gear-alert gear-alert-danger" role="alert">{{ error }}</p>
       <p *ngIf="message" class="gear-alert gear-alert-success" role="status">{{ message }}</p>
       <p class="request-totals" aria-label="Listed request totals"><span><strong>{{ rows.length }}</strong> requests</span><span>Quantity <strong>{{ requestedTotal }}</strong></span><span>Built <strong>{{ builtTotal }}</strong></span><span>Remaining <strong>{{ remainingTotal }}</strong></span></p>
@@ -50,15 +52,16 @@
           <tbody>
             <tr *ngFor="let row of rows; trackBy: trackRequest">
               <td>{{ row.summary_number }}</td><td>{{ row.part_type_code }}</td><td>{{ row.requested_quantity }}</td><td>{{ row.built_quantity }}</td><td>{{ row.remaining_quantity }}</td>
-              <td><span danaStatusBadge [attr.data-tone]="statusTone(row)">{{ statusLabel(row) }}</span><small *ngIf="row.allocation_inconsistent" class="request-legacy-warning">Legacy counts need review</small></td>
+              <td><span danaStatusBadge [attr.data-tone]="statusTone(row)">{{ statusLabel(row) }}</span><small *ngIf="row.allocation_inconsistent" class="request-legacy-warning"><span danaStatusBadge data-tone="warning">Legacy counts need review</span></small></td>
               <td><div class="request-builds"><ng-container *ngFor="let build of builds(row); trackBy: trackBuild"><a *ngIf="canOpenBuild; else plainBuild" [routerLink]="lookupRoute" [queryParams]="{ build: build.number }">{{ build.number }}</a><ng-template #plainBuild><span>{{ build.number }}</span></ng-template></ng-container><span *ngIf="!builds(row).length">—</span></div></td>
               <td class="request-note-cell">{{ row.notes || '—' }}</td>
-              <td>{{ row.requested_by_name || row.requested_by || '—' }}<small class="request-date">{{ row.requested_at | date:'medium' }}</small></td>
+              <td>{{ row.requested_by_name || row.requested_by || '—' }}<small class="request-date gear-muted">{{ row.requested_at | date:'medium' }}</small></td>
               <td><div *ngIf="canUpdate && !terminal(row); else noActions" class="request-row-actions"><button *ngIf="row.status === 'READY'" type="button" class="gear-btn gear-btn-primary" [disabled]="busy" (click)="askStatus(row, 'COMPLETED')">Complete</button><button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="askStatus(row, 'CANCELED')">Cancel</button></div><ng-template #noActions>—</ng-template></td>
             </tr>
             <tr *ngIf="!rows.length"><td danaTableEmpty colspan="10">{{ loading ? 'Loading cutter requests…' : 'No cutter requests to show.' }}</td></tr>
           </tbody>
         </table>
+      </div>
       </div>
     </section>
   </ng-container>

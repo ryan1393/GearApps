@@ -292,8 +292,8 @@
 }
 @media (min-width: 1200px) {
   .running-machines-page {
-    height: calc(100dvh - 58px) !important;
-    max-height: calc(100dvh - 58px) !important;
+    height: calc(100dvh - var(--gear-topbar-height)) !important;
+    max-height: calc(100dvh - var(--gear-topbar-height)) !important;
     min-height: 0 !important;
     overflow-y: hidden !important;
   }

@@ -13,8 +13,14 @@ const ts = read(tsPath);
 const html = read(htmlPath);
 
 // Tray Contents must show the tray business identity immediately, not just the Summary.
-requireText(html, '<small>Summary</small>', htmlPath);
-requireText(html, '<small>Part Type</small>', htmlPath);
+// Dana detail labels may use spans or small text; their identity/value pairing is the contract.
+const detailCards = [...html.matchAll(/<div\b[^>]*class="(?:[^"]*\s)?(?:gear|dana)-detail(?:\s[^"]*)?"[^>]*>([\s\S]*?)<\/div>/g)].map(match => match[1]);
+for (const [label, binding] of [['Summary', '{{ traySummary }}'], ['Part Type', '{{ trayPartType }}']]) {
+  const labelPattern = new RegExp(`<(?:small|span)\\b[^>]*>\\s*${label}\\s*<\\/(?:small|span)>`);
+  if (!detailCards.some(card => labelPattern.test(card) && card.includes(binding))) {
+    fail(`${htmlPath} must pair its ${label} label with ${binding} in the same Dana detail.`);
+  }
+}
 requireText(html, '{{ traySummary }}', htmlPath);
 requireText(html, '{{ trayPartType }}', htmlPath);
 requireText(html, 'Blade Contents', htmlPath);

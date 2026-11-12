@@ -39,7 +39,7 @@ import {
       display: none;
     }
     .gear-dialog-body {
-      margin-top: 18px;
+      margin-top: var(--dana-form-gap);
     }
   `,
 })

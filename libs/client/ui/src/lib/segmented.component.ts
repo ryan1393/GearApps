@@ -14,7 +14,7 @@ export interface SegmentOption<T = string> {
     .gear-segmented {
       display: flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: var(--dana-action-gap);
     }
     .gear-segmented > button {
       flex: 1 1 0;

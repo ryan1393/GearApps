@@ -26,7 +26,7 @@
         </form>
         <div class="gear-workflow-divider">OR</div>
         <label class="gear-field">Select Pulled Cutter Build
-          <select [(ngModel)]="selectedBuildNumber" name="selectedBuildNumber" class="gear-input" (change)="selectPulledBuild()" [disabled]="busy">
+          <select [(ngModel)]="selectedBuildNumber" name="selectedBuildNumber" class="gear-select" (change)="selectPulledBuild()" [disabled]="busy">
             <option value="">Choose pulled cutter build...</option>
             <option *ngFor="let row of availablePulledBuilds" [value]="row.build_number">{{row.build_number}} · {{row.summary_number}} · {{row.part_type_code}} · {{row.machine_number || 'No machine'}}</option>
           </select>
@@ -60,7 +60,7 @@
         </form>
         <div class="gear-workflow-divider">OR</div>
         <label class="gear-field">Select Empty Teardown Tray
-          <select [(ngModel)]="selectedTraySerial" name="selectedTraySerial" class="gear-input" (change)="selectEmptyTray()" [disabled]="busy || !build">
+          <select [(ngModel)]="selectedTraySerial" name="selectedTraySerial" class="gear-select" (change)="selectEmptyTray()" [disabled]="busy || !build">
             <option value="">Choose empty available tray...</option>
             <option *ngFor="let row of availableEmptyTrays" [value]="row.serial_number">{{row.serial_number}}</option>
           </select>
@@ -129,7 +129,7 @@
           </form>
           <div class="gear-workflow-divider">OR</div>
           <label class="gear-field">Select Compatible Dull Shelf
-            <select [(ngModel)]="selectedShelfSerial" name="selectedShelfSerial" class="gear-input" (change)="selectDullShelf()" [disabled]="busy">
+            <select [(ngModel)]="selectedShelfSerial" name="selectedShelfSerial" class="gear-select" (change)="selectDullShelf()" [disabled]="busy">
               <option value="">Choose compatible dull shelf...</option>
               <option *ngFor="let location of eligibleDullShelves" [value]="location.serial_number">{{location.serial_number}} · {{location.description || 'Available shelf'}}</option>
             </select>

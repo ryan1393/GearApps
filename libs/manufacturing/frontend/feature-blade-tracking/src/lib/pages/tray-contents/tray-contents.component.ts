@@ -15,6 +15,7 @@ import { ScanMessage } from '../../models/scan-message';
 import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import {
   DanaPageHeaderComponent,
+  DanaPanelHeaderDirective,
   DanaTableDirective,
   DanaTableShellDirective,
   DanaToneDirective,
@@ -23,7 +24,7 @@ import {
 @Component({
   selector: 'gear-tray-contents',
   standalone: true,
-  imports: [DanaToneDirective, GearLabelPrinterPickerComponent, CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
+  imports: [DanaToneDirective, GearLabelPrinterPickerComponent, CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaPanelHeaderDirective, DanaTableDirective, DanaTableShellDirective],
   templateUrl: './tray-contents.component.html',
 })
 export class TrayContentsComponent implements OnInit, OnDestroy {

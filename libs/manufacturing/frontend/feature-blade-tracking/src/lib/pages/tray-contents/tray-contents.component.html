@@ -1,9 +1,9 @@
-<section class="gear-page space-y-5">
+<section class="gear-page dana-page-stack">
   <header class="gear-page-header" danaPageHeader eyebrow="TRAY INVENTORY" heading="Tray Contents" description="Scan a tray to review its current placement and tracked blade contents."></header>
 
   <gear-label-printer-picker labelType="ASSET_TAG" label="Print tags to" />
 
-  <div *ngIf="message" class="rounded-xl border px-4 py-3 text-sm font-semibold" [class.border-emerald-200]="message.tone === 'success'" [class.bg-emerald-50]="message.tone === 'success'" [class.text-emerald-800]="message.tone === 'success'" [class.border-red-200]="message.tone === 'error'" [class.bg-red-50]="message.tone === 'error'" [class.text-red-800]="message.tone === 'error'" [class.border-blue-200]="message.tone === 'info'" [class.bg-blue-50]="message.tone === 'info'" [class.text-blue-800]="message.tone === 'info'" [attr.role]="message.tone === 'error' ? 'alert' : 'status'" [attr.aria-live]="message.tone === 'error' ? 'assertive' : 'polite'">{{ message.text }}</div>
+  <div *ngIf="message" class="gear-alert" [class.gear-alert-success]="message.tone === 'success'" [class.gear-alert-danger]="message.tone === 'error'" [class.gear-alert-info]="message.tone === 'info'" [attr.role]="message.tone === 'error' ? 'alert' : 'status'" [attr.aria-live]="message.tone === 'error' ? 'assertive' : 'polite'">{{ message.text }}</div>
 
   <gear-scan-panel
     #scanner
@@ -18,38 +18,38 @@
   <p *ngIf="busy" class="gear-loading-state" role="status">Loading tray contents…</p>
 
   <div *ngIf="details as d" class="space-y-4">
-    <div class="rounded-2xl bg-slate-900 p-5 text-white">
-      <div class="flex flex-wrap items-center justify-between gap-3">
-        <div class="text-3xl font-black">{{ d.tray.serial_number }}</div>
+    <div class="gear-panel inventory-result-card">
+      <div danaPanelHeader class="inventory-result-header">
+        <h3 class="mono">{{ d.tray.serial_number }}</h3>
         <button
           type="button"
-          class="rounded-xl bg-white px-4 py-2 text-sm font-black text-slate-900 disabled:opacity-50"
+          class="gear-btn gear-btn-secondary"
           [disabled]="printingTagSerial !== null"
           (click)="printTag('TRAY', d.tray.id, d.tray.serial_number)"
          data-icon="print" title="Print tag">
           {{ printingTagSerial === d.tray.serial_number ? 'Printing…' : 'Print Tag' }}
         </button>
       </div>
-      <div class="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
-        <div>
-          <small>Summary</small>
-          <div class="font-bold">{{ traySummary }}</div>
+      <div class="inventory-detail-grid">
+        <div class="gear-detail">
+          <span>Summary</span>
+          <strong>{{ traySummary }}</strong>
         </div>
-        <div>
-          <small>Part Type</small>
-          <div class="font-bold">{{ trayPartType }}</div>
+        <div class="gear-detail">
+          <span>Part Type</span>
+          <strong>{{ trayPartType }}</strong>
         </div>
-        <div>
-          <small>Location</small>
-          <div class="font-bold">{{ d.location?.location?.serial_number || (d.tray.blade_count === 0 && d.tray.current_stage?.code === 'EMPTY' && !d.container ? 'Available / Ready to Use' : 'Unassigned') }}</div>
+        <div class="gear-detail">
+          <span>Location</span>
+          <strong>{{ d.location?.location?.serial_number || (d.tray.blade_count === 0 && d.tray.current_stage?.code === 'EMPTY' && !d.container ? 'Available / Ready to Use' : 'Unassigned') }}</strong>
         </div>
-        <div>
-          <small>Container</small>
-          <div class="font-bold">{{ d.container?.container?.serial_number || 'Not in container' }}</div>
+        <div class="gear-detail">
+          <span>Container</span>
+          <strong>{{ d.container?.container?.serial_number || 'Not in container' }}</strong>
         </div>
-        <div>
-          <small>Tracked Blades</small>
-          <div class="font-bold">{{ d.blades.length }}</div>
+        <div class="gear-detail">
+          <span>Tracked Blades</span>
+          <strong>{{ d.blades.length }}</strong>
         </div>
       </div>
     </div>

@@ -46,7 +46,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
         <button type="button" class="gear-btn gear-btn-secondary" (click)="reload()">Retry</button>
       </p>
     }
-    <form class="gear-panel cycle-test-panel" (ngSubmit)="run()">
+    <form class="gear-panel dana-panel-padded cycle-test-panel" (ngSubmit)="run()">
       <div class="gear-form-grid">
         <label class="gear-field"
           >Machine<select class="gear-select" name="machine" [(ngModel)]="machineId" [disabled]="working()" required>
@@ -100,7 +100,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
           }
         </p>
       }
-      <h3 class="cycle-test-heading">Active macro values</h3>
+      <h3 class="dana-section-title cycle-test-heading">Active macro values</h3>
       @if (!macros.loading() && !activeMacros().length) {
         <p class="gear-muted">No active macros yet. Add them in Admin > Macros.</p>
       }
@@ -132,8 +132,8 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
         </button>
       </div>
     </form>
-    <form class="gear-panel cycle-test-panel" (ngSubmit)="sendToArgonaut()">
-      <h2 class="cycle-test-title">Send to Argonaut</h2>
+    <form class="gear-panel dana-panel-padded cycle-test-panel" (ngSubmit)="sendToArgonaut()">
+      <h2 class="gear-panel-title">Send to Argonaut</h2>
       <p class="gear-muted cycle-test-intro">
         Sends one real Track and Trace transaction for the machine, gearset and serial number above, built
         exactly as Lapper Read sends a finished cycle. Argonaut records it, so point it at a test location.
@@ -210,10 +210,10 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
         <p class="gear-alert gear-alert-danger" role="alert">{{ argonautError() }}</p>
       }
       @if (argonautPreview(); as preview) {
-        <div class="cycle-test-argonaut-box">
+        <div class="dana-card-section cycle-test-argonaut-box">
           <strong>Request preview</strong>
           <span class="gear-muted">POST {{ preview.url }}</span>
-          <pre class="cycle-test-json">{{ preview.payload | json }}</pre>
+          <pre class="dana-code-block cycle-test-json">{{ preview.payload | json }}</pre>
         </div>
       }
       <div class="gear-admin-form-actions">
@@ -230,26 +230,26 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
         </button>
       </div>
       @if (argonautResult(); as r) {
-        <div class="cycle-test-argonaut-box" role="status">
+        <div class="dana-card-section cycle-test-argonaut-box" role="status">
           <span class="dana-status-badge" [danaTone]="r.ok ? 'pass' : 'fail'"
             >Argonaut · {{ r.ok ? 'Accepted' : 'Not accepted' }}</span
           >
           <span>{{ r.message }}</span>
           <span class="gear-muted">Sent to {{ r.url }} · {{ r.sent_at | date: 'medium' }}</span>
           @if (r.response) {
-            <pre class="cycle-test-json">{{ r.response }}</pre>
+            <pre class="dana-code-block cycle-test-json">{{ r.response }}</pre>
           }
           <details class="cycle-test-details">
             <summary>Request sent</summary>
-            <pre class="cycle-test-json">{{ r.payload | json }}</pre>
+            <pre class="dana-code-block cycle-test-json">{{ r.payload | json }}</pre>
           </details>
         </div>
       }
     </form>
-    <section class="gear-panel cycle-test-panel">
+    <section class="gear-panel dana-panel-padded cycle-test-panel">
       <div class="cycle-test-history-heading">
         <div>
-          <h2>Test history</h2>
+          <h2 class="gear-panel-title">Test history</h2>
           <p class="gear-muted">The latest 100 saved test runs. Failed runs are kept for diagnosis.</p>
         </div>
         <button type="button" class="gear-btn gear-btn-secondary" (click)="refreshHistory()">
@@ -260,7 +260,7 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
         <p class="gear-alert gear-alert-danger" role="alert">Could not load test history.</p>
       }
       @for (test of history.value(); track test.id) {
-        <details class="cycle-test-result">
+        <details class="dana-divider-section cycle-test-result">
           <summary>
             <span class="dana-status-badge" [danaTone]="test.result.passed ? 'pass' : 'fail'"
               >Test · {{ test.result.passed ? 'Pass' : 'Fail' }}</span
@@ -280,9 +280,9 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
           }
           <div class="cycle-test-values">
             @for (macro of test.result.macros; track macro.number) {
-              <div class="cycle-test-value" [attr.data-state]="valueState(macro)">
-                <span class="cycle-test-value-label">#{{ macro.number }} · {{ macro.name }}</span>
-                <strong>{{ macro.value ?? 'Missing' }}{{ macro.unit ? ' ' + macro.unit : '' }}</strong>
+              <div class="dana-detail cycle-test-value" [attr.data-state]="valueState(macro)" [attr.data-tone]="valueState(macro) === 'fail' ? 'danger' : null">
+                <span class="dana-detail-label">#{{ macro.number }} · {{ macro.name }}</span>
+                <strong class="dana-detail-value">{{ macro.value ?? 'Missing' }}{{ macro.unit ? ' ' + macro.unit : '' }}</strong>
                 @if (limitText(macro); as limits) {
                   <small class="gear-muted">Limit: {{ limits }}</small>
                 }
@@ -295,31 +295,25 @@ import { DanaPageHeaderComponent, DanaToneDirective } from '@dana/ui';
       }
     </section>
   `,
+  host: { class: 'dana-page-stack' },
   styles: `
-    :host { display: grid; gap: 1rem; }
-    .cycle-test-panel { padding: 1.25rem; }
-    .cycle-test-heading { margin: 1.25rem 0 .75rem; font-size: 1rem; }
-    .cycle-test-panel .gear-admin-form-actions { margin-top: 1.25rem; }
-    .cycle-test-history-heading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: .75rem; margin-bottom: .5rem; }
-    .cycle-test-history-heading h2 { margin: 0; font-size: 1.125rem; }
-    .cycle-test-history-heading p { margin: .25rem 0 0; }
-    .cycle-test-result { padding: .75rem 0; border-top: 1px solid var(--dana-border); overflow-wrap: anywhere; }
-    .cycle-test-result summary { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; cursor: pointer; }
-    .cycle-test-issues { margin: .75rem 0 0; padding-left: 1.25rem; color: var(--dana-danger); }
-    .cycle-test-values { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: .5rem; margin-top: .75rem; }
-    .cycle-test-value { display: grid; gap: .125rem; padding: .5rem .75rem; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-md); background: var(--dana-surface); }
-    .cycle-test-value[data-state='fail'] { border-color: var(--dana-danger); background: var(--dana-danger-soft); }
-    .cycle-test-read { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; margin-top: 1rem; }
+    .cycle-test-heading { margin-block: var(--dana-section-gap) var(--dana-form-gap); }
+    .cycle-test-panel .gear-admin-form-actions { margin-top: var(--dana-section-gap); }
+    .cycle-test-history-heading { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: var(--dana-action-gap); margin-bottom: var(--dana-field-gap); }
+    .cycle-test-result { overflow-wrap: anywhere; }
+    .cycle-test-result summary { display: flex; flex-wrap: wrap; align-items: center; gap: var(--dana-field-gap) var(--dana-action-gap); }
+    .cycle-test-issues { margin: var(--dana-form-gap) 0 0; padding-inline-start: var(--dana-space-5); }
+    .cycle-test-values { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr)); gap: var(--dana-field-gap); margin-top: var(--dana-form-gap); }
+    .cycle-test-value { display: grid; gap: var(--dana-space-1); }
+    .cycle-test-read { display: flex; flex-wrap: wrap; align-items: center; gap: var(--dana-action-gap); margin-top: var(--dana-form-gap); }
     .cycle-test-read .gear-muted { flex: 1 1 18rem; }
-    .cycle-test-title { margin: 0; font-size: 1.125rem; }
-    .cycle-test-intro { margin: .25rem 0 1rem; max-width: 48rem; }
-    .cycle-test-details { margin-top: 1rem; }
-    .cycle-test-details summary { cursor: pointer; font-weight: 600; }
-    .cycle-test-macro-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr)); gap: .5rem; margin-top: .5rem; }
-    .cycle-test-argonaut-box { display: grid; gap: .375rem; margin-top: 1rem; padding: .75rem; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-md); overflow-wrap: anywhere; }
+    .cycle-test-intro { max-width: 48rem; }
+    .cycle-test-details { margin-top: var(--dana-form-gap); }
+    .cycle-test-macro-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr)); gap: var(--dana-field-gap); margin-top: var(--dana-field-gap); }
+    .cycle-test-argonaut-box { display: grid; gap: var(--dana-field-gap); margin-top: var(--dana-form-gap); overflow-wrap: anywhere; }
     .cycle-test-argonaut-box .dana-status-badge { justify-self: start; }
-    .cycle-test-json { margin: 0; max-height: 20rem; overflow: auto; padding: .5rem; font-size: .75rem; white-space: pre-wrap; background: var(--dana-surface); border-radius: var(--dana-radius-md); }
-    .cycle-test-value-label { font-size: .75rem; font-weight: 700; color: var(--dana-muted); }
+    .cycle-test-json { max-height: 20rem; }
+
   `,
 })
 export class CycleTestsPageComponent implements OnInit {

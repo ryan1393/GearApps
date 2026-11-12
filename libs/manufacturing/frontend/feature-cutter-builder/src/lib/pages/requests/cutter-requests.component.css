@@ -1,15 +1,15 @@
 :host { display: block; }
-.request-panel { padding: 1.25rem; margin-bottom: 1rem; min-width: 0; }
-.request-panel h2 { margin: 0 0 .5rem; }
-.request-form-grid { grid-template-columns: minmax(12rem, 2fr) minmax(10rem, 1fr) minmax(8rem, 1fr); margin-bottom: 1rem; }
+.request-form { display: grid; gap: var(--dana-form-gap); }
+.request-form-grid { grid-template-columns: minmax(12rem, 2fr) minmax(10rem, 1fr) minmax(8rem, 1fr); }
 .request-notes { grid-column: 1 / -1; }
-.request-queue-heading, .request-queue-controls, .request-totals, .request-row-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+.request-queue-heading, .request-queue-controls, .request-totals, .request-row-actions, .request-form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--dana-action-gap); }
 .request-queue-heading { align-items: flex-start; justify-content: space-between; }
 .request-queue-heading p { max-width: 72ch; }
-.request-totals { gap: 1.25rem; }
+.request-queue-controls label { display: flex; align-items: center; gap: var(--dana-field-gap); }
+.request-totals { gap: var(--dana-space-5); margin: 0; }
 .request-table { max-width: 100%; }
-.request-builds { display: grid; gap: .35rem; overflow-wrap: anywhere; }
+.request-builds { display: grid; gap: var(--dana-space-1); overflow-wrap: anywhere; }
 .request-note-cell { min-width: 10rem; max-width: 24rem; white-space: pre-wrap; overflow-wrap: anywhere; }
-.request-date { display: block; margin-top: .25rem; color: var(--dana-muted); }
-.request-legacy-warning { display: block; margin-top: .5rem; color: var(--dana-warning); font-weight: 700; }
-@media (max-width: 700px) { .request-form-grid { grid-template-columns: minmax(0, 1fr); } .request-panel { padding: 1rem; } }
+.request-date { display: block; margin-top: var(--dana-space-1); }
+.request-legacy-warning { display: block; margin-top: var(--dana-space-2); }
+@media (max-width: 700px) { .request-form-grid { grid-template-columns: minmax(0, 1fr); } }

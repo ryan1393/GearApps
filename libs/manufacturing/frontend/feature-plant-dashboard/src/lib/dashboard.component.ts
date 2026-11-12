@@ -3,7 +3,7 @@ import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { DanaKpiCardDirective, DanaKpiGridDirective, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
+import { DanaAlertDirective, DanaButtonDirective, DanaEmptyStateDirective, DanaKpiCardDirective, DanaKpiGridDirective, DanaLoadingStateDirective, DanaPageHeaderComponent, DanaPanelHeaderDirective, DanaTabDirective, DanaTableDirective, DanaTableShellDirective, DanaTabsDirective } from '@dana/ui';
 import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
 import { timer } from 'rxjs';
 import { csvCell, filterMachines, formatPlantTime, freshCount, machineCsv, rowLabel, shiftReports, cuttergrindCoverage, departmentLabel, plantDepartmentCoverage, REFERENCE_DEPARTMENTS } from '@meshforge/manufacturing/frontend/util-plant-dashboard';
@@ -13,7 +13,7 @@ import { PlantDashboardDataService } from '@meshforge/manufacturing/frontend/dat
 @Component({
   selector: 'gear-plant-dashboard', standalone: true,
   styleUrls: ['./plant-layout.css'],
-  imports: [CommonModule, FormsModule, DanaKpiCardDirective, DanaKpiGridDirective, DanaTableDirective, DanaTableShellDirective],
+  imports: [CommonModule, FormsModule, DanaAlertDirective, DanaButtonDirective, DanaEmptyStateDirective, DanaKpiCardDirective, DanaKpiGridDirective, DanaLoadingStateDirective, DanaPageHeaderComponent, DanaPanelHeaderDirective, DanaTabDirective, DanaTableDirective, DanaTableShellDirective, DanaTabsDirective],
   templateUrl: './dashboard.component.html',
   providers: [PlantDashboardDataService],
 })

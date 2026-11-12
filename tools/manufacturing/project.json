@@ -933,6 +933,14 @@
         "cwd": "."
       },
       "cache": false
+    },
+    "test-dana-spacing": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --env-file=.env tools/manufacturing/test-ui-ux-review.mjs --spacing",
+        "cwd": "."
+      },
+      "cache": false
     }
   }
 }

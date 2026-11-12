@@ -9,7 +9,7 @@ export class DanaResponsiveGridDirective {
   @Input() danaColumns: number | string = 4;
   @Input() danaCompactColumns: number | string = 2;
   @Input() danaMobileColumns: number | string = 1;
-  @Input() danaGridGap = 'var(--gear-space-4, 16px)';
+  @Input() danaGridGap = 'var(--dana-form-gap, 16px)';
 
   @HostBinding('style.--dana-grid-columns') get columns(): string { return String(this.danaColumns); }
   @HostBinding('style.--dana-grid-compact-columns') get compactColumns(): string { return String(this.danaCompactColumns); }

@@ -62,7 +62,7 @@ import { FANUC_SIGNALS, ON_OFF_OPTIONS } from './options';
   styles: `
     .lapper-fanuc-form {
       display: grid;
-      gap: 14px;
+      gap: var(--dana-form-gap);
     }
   `,
 })

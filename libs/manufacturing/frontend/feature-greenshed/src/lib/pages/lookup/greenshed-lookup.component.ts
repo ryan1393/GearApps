@@ -13,7 +13,10 @@ import {
   DanaToneDirective,
 } from '@dana/ui';
 
-@Component({selector:'gear-greenshed-lookup',standalone:true,imports: [DanaToneDirective, CommonModule, FormsModule, DanaPageHeaderComponent, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],templateUrl:'./greenshed-lookup.component.html'})
+@Component({selector:'gear-greenshed-lookup',standalone:true,imports: [DanaToneDirective, CommonModule, FormsModule, DanaPageHeaderComponent, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],templateUrl:'./greenshed-lookup.component.html',styles:[`
+ .greenshed-lookup-filters{display:grid;grid-template-columns:minmax(0,2fr) minmax(9rem,1fr) auto;gap:var(--dana-form-gap);align-items:end}
+ @media(max-width:680px){.greenshed-lookup-filters{grid-template-columns:minmax(0,1fr)}}
+`]})
 export class GreenshedLookupComponent implements OnInit {
  private readonly api=inject(GreenshedApiService);private readonly route=inject(ActivatedRoute);private readonly destroyRef=inject(DestroyRef);private request=0;q='';status='';rows:GreenshedSearchRow[]=[];build:GreenshedBuild|null=null;history:GreenshedHistoryEvent[]=[];busy=false;error='';historyFailed=false;
  readonly statuses=['','READY','RUNNING','SHELF','PULLED'];

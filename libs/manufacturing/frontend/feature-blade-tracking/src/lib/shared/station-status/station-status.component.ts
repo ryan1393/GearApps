@@ -24,19 +24,9 @@ import { focusExpectedScan } from '../focus-expected-scan';
   `,
   styles: [`
     :host { display: block; }
-    .station-status { display: flex; align-items: center; gap: 12px; min-height: 64px; box-sizing: border-box; padding: 10px 16px;
-      border: 2px solid var(--dana-border); border-radius: 12px; background: var(--dana-neutral-soft); font-size: 1.05rem; font-weight: 700; }
+    .station-status { display: flex; align-items: center; gap: var(--dana-workstation-gap); min-height: 64px; box-sizing: border-box; padding: var(--dana-action-gap) var(--dana-space-4); }
     .station-status-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-    .station-status-icon { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%;
-      background: var(--dana-surface); font-weight: 900; }
-    [data-tone='prompt'] { border-style: dashed; color: var(--dana-text); }
-    [data-tone='prompt'] .station-status-icon { color: var(--dana-primary); }
-    [data-tone='success'] { border-color: var(--dana-success); background: var(--dana-success-soft); color: var(--dana-success); }
-    [data-tone='info'] { border-color: var(--dana-info); background: var(--dana-info-soft); color: var(--dana-info); }
-    [data-tone='error'] { border-color: var(--dana-danger); background: var(--dana-danger-soft); color: var(--dana-danger); }
-    .flash { animation: station-status-flash .8s ease-out 3; }
-    @keyframes station-status-flash { 0% { box-shadow: 0 0 0 8px var(--dana-danger); } 100% { box-shadow: 0 0 0 0 transparent; } }
-    @media (prefers-reduced-motion: reduce) { .flash { animation: none; } }
+    .station-status-icon { display: grid; place-items: center; flex: none; width: 32px; height: 32px; }
   `],
 })
 export class StationStatusComponent implements OnChanges {

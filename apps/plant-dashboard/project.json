@@ -3,16 +3,25 @@
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/plant-dashboard/src",
-  "tags": ["type:app", "scope:frontend", "framework:angular", "domain:meshforge"],
+  "tags": [
+    "type:app",
+    "scope:frontend",
+    "framework:angular",
+    "domain:meshforge"
+  ],
   "targets": {
     "build": {
       "executor": "@angular/build:application",
-      "outputs": ["{workspaceRoot}/dist/apps/plant-dashboard"],
+      "outputs": [
+        "{workspaceRoot}/dist/apps/plant-dashboard"
+      ],
       "options": {
         "outputPath": "dist/apps/plant-dashboard",
         "browser": "apps/plant-dashboard/src/main.ts",
         "index": "apps/plant-dashboard/src/index.html",
-        "polyfills": ["zone.js"],
+        "polyfills": [
+          "zone.js"
+        ],
         "tsConfig": "apps/plant-dashboard/tsconfig.app.json",
         "styles": [
           "apps/plant-dashboard/src/styles.css",
@@ -20,6 +29,13 @@
           "libs/shared/dana-ui/src/styles/gear-compat-features.css",
           "libs/shared/dana-ui/src/styles/dana-ui.css",
           "libs/shared/dana-ui/src/styles/gear-compat-overrides.css"
+        ],
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "libs/manufacturing/assets",
+            "output": "assets"
+          }
         ]
       },
       "defaultConfiguration": "production",
@@ -64,7 +80,10 @@
       "dependsOn": [
         {
           "target": "test",
-          "projects": ["frontend-util-plant-dashboard", "frontend-data-access-plant-dashboard"]
+          "projects": [
+            "frontend-util-plant-dashboard",
+            "frontend-data-access-plant-dashboard"
+          ]
         }
       ]
     },

@@ -22,7 +22,7 @@
 .dana-section-title { color: #3b4352; }
 table[danaTable] th, table.dana-table th { background: #fcfcfc; }
 table[danaTable] td, table.dana-table td { border-bottom: 1px solid #f0f1f2; }
-table[danaTable] tbody tr:hover td, table.dana-table tbody tr:hover td { background: #fdfdfd; }
+table[danaTable] tbody tr:hover td, table.dana-table tbody tr:hover td { background: var(--dana-table-state-bg, #fdfdfd); }
 .dana-status-badge, [danaStatusBadge], .dana-count-badge, [danaCountBadge] { background: #f2f3f5; color: #aa5413; }
 .dana-loading-state, [danaLoadingState], .dana-empty-state, [danaEmptyState] { border: 1px dashed #cfd2d7; background: #f9fafa; }
 .dana-dialog-backdrop { background: rgba(27,31,37,.46); }
@@ -157,7 +157,7 @@ table[danaTable] tbody tr:hover td, table.dana-table tbody tr:hover td { backgro
   height: var(--dana-topbar-height, 70px) !important;
   padding-inline: 26px !important;
   border-bottom-color: var(--dana-border,#e1e3e7) !important;
-  background: #fff !important;
+  background: var(--dana-surface) !important;
   box-shadow: none !important;
 }
 
@@ -184,13 +184,13 @@ table[danaTable] tbody tr:hover td, table.dana-table tbody tr:hover td { backgro
 html body .gear-page {
   max-width: var(--dana-content-max,1580px) !important;
   margin-inline: auto !important;
-  padding: var(--dana-content-pad,26px) !important;
+  padding: var(--dana-page-padding) !important;
 }
 
 html body .gear-page-header {
   align-items: flex-end !important;
-  gap: 20px !important;
-  margin-bottom: 22px !important;
+  gap: var(--dana-section-gap) !important;
+  margin-bottom: var(--dana-page-header-gap, var(--dana-section-gap)) !important;
   padding: 0 !important;
   overflow: visible !important;
   border: 0 !important;
@@ -212,7 +212,7 @@ html body .gear-page-title {
 }
 
 html body .gear-page-description {
-  margin-top: 5px !important;
+  margin-top: 0 !important;
   color: var(--dana-muted,#737b8a) !important;
   font-size: 14px !important;
 }
@@ -228,9 +228,9 @@ html body .inventory-panel {
 
 html body .gear-panel-header,
 html body .data-panel .panel-heading {
-  padding: 16px 18px !important;
+  padding: var(--dana-space-4) var(--dana-panel-padding) !important;
   border-bottom: 1px solid var(--dana-border,#e1e3e7) !important;
-  background: #fff !important;
+  background: var(--dana-surface) !important;
 }
 
 html body .gear-panel-header h2,
@@ -275,20 +275,20 @@ html body select.gear-input,
 html body textarea.gear-input {
   border-color: #d6d8dc !important;
   border-radius: 9px !important;
-  background: #fff !important;
+  background: var(--dana-surface) !important;
 }
 
 html body table.gear-table,
-html body .gear-table { font-size: 13px !important; }
+html body .gear-table { font-size: var(--dana-table-font-size, 13px) !important; }
 
 html body table.gear-table thead th,
 html body .gear-table thead th,
 html body .dashboard-table thead th {
-  padding: 11px 12px !important;
+  padding: var(--dana-table-header-pad-y, 11px) var(--dana-table-header-pad-x, 12px) !important;
   border-bottom: 1px solid var(--dana-border,#e1e3e7) !important;
   background: #fcfcfc !important;
   color: var(--dana-muted,#737b8a) !important;
-  font-size: 11px !important;
+  font-size: var(--dana-table-header-font-size, 11px) !important;
   font-weight: 800 !important;
   letter-spacing: .05em !important;
 }
@@ -296,7 +296,7 @@ html body .dashboard-table thead th {
 html body table.gear-table tbody td,
 html body .gear-table tbody td,
 html body .dashboard-table tbody td {
-  padding: 13px 12px !important;
+  padding: var(--dana-table-cell-pad-y, 13px) var(--dana-table-cell-pad-x, 12px) !important;
   border-bottom-color: #f0f1f2 !important;
 }
 
@@ -316,7 +316,7 @@ html body .blade-location-summary-card,
 html body .gear-summary-card {
   border: 1px solid var(--dana-border,#e1e3e7) !important;
   border-radius: var(--dana-radius-lg,12px) !important;
-  background: #fff !important;
+  background: var(--dana-surface) !important;
   box-shadow: var(--dana-shadow-panel,0 1px 2px rgba(27,31,37,.05),0 6px 18px rgba(27,31,37,.04)) !important;
 }
 
@@ -327,7 +327,7 @@ html body .gear-summary-card {
 }
 
 @media (max-width: 760px) {
-  html body .gear-page { padding: 16px !important; }
+  html body .gear-page { padding: var(--dana-page-padding) !important; }
   html body .gear-page-header { align-items: flex-start !important; flex-direction: column !important; }
 }
 
@@ -466,17 +466,17 @@ html body .gear-summary-card {
 
   html body .dashboard-page :is(.gear-table, .dashboard-table, table[danaTable]),
   html body .dashboard-page :is(.panel-link, .refresh-chip, .dashboard-activity-row strong) {
-    font-size: var(--dana-gear-dashboard-body-size, 14px) !important;
+    font-size: var(--dana-table-font-size, var(--dana-gear-dashboard-body-size, 14px)) !important;
   }
 
   html body .dashboard-page :is(.gear-table, .dashboard-table, table[danaTable]) thead th {
-    font-size: var(--dana-gear-dashboard-note-size, 12px) !important;
+    font-size: var(--dana-table-header-font-size, var(--dana-gear-dashboard-note-size, 12px)) !important;
     color: #4f545e !important;
     letter-spacing: .025em !important;
   }
 
   html body .dashboard-page :is(.gear-table, .dashboard-table, table[danaTable]) tbody td {
-    font-size: var(--dana-gear-dashboard-body-size, 14px) !important;
+    font-size: var(--dana-table-font-size, var(--dana-gear-dashboard-body-size, 14px)) !important;
     line-height: 1.5;
   }
 
@@ -485,7 +485,7 @@ html body .gear-summary-card {
   }
 
   /* BEGIN DANA-APPS TOPBAR CONTRAST V70.0.4R7 */
-  html body header.gear-topbar.gear-topbar { color:var(--dana-text,#1b1f25)!important; background:#fff!important; border-bottom:1px solid #ced1d6!important; box-shadow:0 2px 6px rgba(27,31,37,.06)!important; }
+  html body header.gear-topbar.gear-topbar { color:var(--dana-text,#1b1f25)!important; background:var(--dana-surface)!important; border-bottom:1px solid #ced1d6!important; box-shadow:0 2px 6px rgba(27,31,37,.06)!important; }
   html body header.gear-topbar.gear-topbar .global-search.global-search { min-width:0!important; border:1px solid #89909c!important; border-radius:10px!important; background:#f5f6f7!important; box-shadow:none!important; }
   html body header.gear-topbar.gear-topbar .global-search.global-search input { color:var(--dana-text,#1b1f25)!important; -webkit-text-fill-color:var(--dana-text,#1b1f25)!important; caret-color:var(--dana-primary,#aa5413)!important; background:transparent!important; opacity:1!important; }
   html body header.gear-topbar.gear-topbar .global-search.global-search input::placeholder { color:#4f545e!important; -webkit-text-fill-color:#4f545e!important; opacity:1!important; }
@@ -528,9 +528,9 @@ html body .gear-summary-card {
   html body .gear-page :is(label,.gear-field-label,.field-label) { font-size: 14px !important; font-weight: 600 !important; line-height: 1.35 !important; }
   html body .gear-page :is(.gear-input,.gear-select,.gear-textarea,input,select,textarea) { font-size: 14px !important; line-height: 1.4 !important; }
   html body .gear-page :is(.gear-btn,button[role="tab"],[role="tab"],.tab-button,.tab-link) { font-size: 14px !important; font-weight: 600 !important; }
-  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) { font-size: 14px !important; }
-  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) thead th { font-size: 12px !important; font-weight: 700 !important; letter-spacing: .035em !important; line-height: 1.35 !important; }
-  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) tbody td { font-size: 14px !important; line-height: 1.5 !important; }
+  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) { font-size: var(--dana-table-font-size, 14px) !important; }
+  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) thead th { font-size: var(--dana-table-header-font-size, 12px) !important; font-weight: 700 !important; letter-spacing: .035em !important; line-height: 1.35 !important; }
+  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) tbody td { font-size: var(--dana-table-font-size, 14px) !important; line-height: 1.5 !important; }
   html body .gear-page :is(.gear-badge,.gear-status-badge,.status-pill,.gear-count-badge) { font-size: 12px !important; font-weight: 700 !important; }
 }
 @media screen and (min-width: 1500px) {
@@ -546,8 +546,8 @@ html body .gear-summary-card {
   html body .gear-page :is(label,.gear-field-label,.field-label) { font-size: 15px !important; }
   html body .gear-page :is(.gear-input,.gear-select,.gear-textarea,input,select,textarea) { font-size: 15px !important; }
   html body .gear-page :is(.gear-btn,button[role="tab"],[role="tab"],.tab-button,.tab-link) { font-size: 15px !important; }
-  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) tbody td { font-size: 15px !important; }
-  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) thead th { font-size: 13px !important; }
+  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) tbody td { font-size: var(--dana-table-font-size, 15px) !important; }
+  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) thead th { font-size: var(--dana-table-header-font-size, 13px) !important; }
   html body .gear-page :is(.gear-badge,.gear-status-badge,.status-pill,.gear-count-badge) { font-size: 13px !important; }
 }
 /* END DANA-APPS TYPOGRAPHY READABILITY V70.0.5 */
@@ -557,19 +557,19 @@ html body .gear-summary-card {
 @media screen {
   html body .gear-admin-layout {
     align-items: start !important;
-    gap: 18px !important;
+    gap: var(--dana-section-gap) !important;
   }
 
   html body .gear-admin-list.gear-admin-record-grid,
   html body .gear-admin-record-grid-professional {
-    gap: 12px !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-admin-record-card {
     min-width: 0 !important;
     border: 1px solid #d5d7dc !important;
     border-radius: 10px !important;
-    background: #ffffff !important;
+    background: var(--dana-surface) !important;
     box-shadow: 0 1px 2px rgba(27, 31, 37, .04) !important;
     overflow: hidden !important;
   }
@@ -582,7 +582,7 @@ html body .gear-summary-card {
   html body .gear-admin-record-card-body {
     display: grid !important;
     align-content: start !important;
-    gap: 12px !important;
+    gap: var(--dana-form-gap) !important;
     min-height: 142px !important;
     padding: 14px 15px !important;
   }
@@ -591,7 +591,7 @@ html body .gear-summary-card {
     display: flex !important;
     align-items: flex-start !important;
     justify-content: space-between !important;
-    gap: 10px !important;
+    gap: var(--dana-field-gap) !important;
     min-width: 0 !important;
     margin: 0 !important;
   }
@@ -608,7 +608,7 @@ html body .gear-summary-card {
 
   html body .gear-admin-record-meta {
     display: grid !important;
-    gap: 8px !important;
+    gap: var(--dana-space-3) var(--dana-form-gap) !important;
     margin: 0 !important;
   }
 
@@ -662,11 +662,11 @@ html body .gear-summary-card {
   }
 
   html body .gear-admin-form {
-    padding: 18px !important;
+    padding: var(--dana-panel-padding) !important;
   }
 
   html body .gear-admin-form .gear-field {
-    margin-bottom: 12px !important;
+    margin-bottom: 0 !important;
   }
 
   html body .gear-admin-form .gear-field-help {
@@ -678,18 +678,18 @@ html body .gear-summary-card {
 
 @media screen and (min-width: 1500px) {
   html body .gear-admin-layout {
-    gap: 22px !important;
+    gap: var(--dana-section-gap) !important;
   }
 
   html body .gear-admin-list.gear-admin-record-grid,
   html body .gear-admin-record-grid-professional {
-    gap: 14px !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-admin-record-card-body {
     min-height: 156px !important;
     padding: 16px 17px !important;
-    gap: 13px !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-admin-record-title {
@@ -709,7 +709,7 @@ html body .gear-summary-card {
   }
 
   html body .gear-admin-form {
-    padding: 20px !important;
+    padding: var(--dana-panel-padding) !important;
   }
 }
 
@@ -752,16 +752,16 @@ html body .gear-summary-card {
     max-height: none !important;
     overflow: visible !important;
     grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 1rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-list-header {
     position: static !important;
     top: auto !important;
-    padding: .9rem 1rem !important;
+    padding: var(--dana-space-4) var(--dana-panel-padding) !important;
     border: 1px solid #e4e6e9 !important;
     border-radius: 10px !important;
-    background: #fff !important;
+    background: var(--dana-surface) !important;
     overflow: visible !important;
   }
 
@@ -777,7 +777,7 @@ html body .gear-summary-card {
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-card-body {
-    gap: .78rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-title {
@@ -793,7 +793,7 @@ html body .gear-summary-card {
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-form-grid {
-    gap: .9rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-field {
@@ -887,11 +887,11 @@ html body .gear-summary-card {
   /* Keep R21 full-width / natural page scrolling, but return the cards and controls
      to the tighter Admin scale requested after the large-card R21 pass. */
   html body .gear-page .gear-admin-roll-master-layout > .gear-admin-list.gear-admin-record-grid-professional {
-    gap: .72rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-list-header {
-    padding: .62rem .72rem !important;
+    padding: var(--dana-space-4) var(--dana-panel-padding) !important;
     border-radius: 8px !important;
   }
 
@@ -911,11 +911,11 @@ html body .gear-summary-card {
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-card-body {
     min-height: 0 !important;
     padding: .72rem .78rem !important;
-    gap: .48rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-heading {
-    gap: .5rem !important;
+    gap: var(--dana-field-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-title {
@@ -930,7 +930,7 @@ html body .gear-summary-card {
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-meta {
-    gap: .4rem !important;
+    gap: var(--dana-space-3) var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-label {
@@ -945,7 +945,7 @@ html body .gear-summary-card {
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-form-grid {
-    gap: .52rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-form-grid.mt-3 {
@@ -1026,7 +1026,7 @@ html body .gear-summary-card {
 
   html body .gear-page.gear-admin-page .gear-admin-layout {
     grid-template-columns: minmax(275px, 340px) minmax(0, 1fr) !important;
-    gap: .72rem !important;
+    gap: var(--dana-section-gap) !important;
     align-items: start !important;
   }
 
@@ -1044,17 +1044,17 @@ html body .gear-summary-card {
   }
 
   html body .gear-page.gear-admin-page :where(.gear-admin-record-grid-professional,.gear-admin-record-grid-wide,.gear-admin-record-grid-compact) {
-    gap: .72rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-list-header {
     position: static !important;
     top: auto !important;
     min-width: 0 !important;
-    padding: .58rem .70rem !important;
+    padding: var(--dana-space-4) var(--dana-panel-padding) !important;
     border: 1px solid #e4e6e9 !important;
     border-radius: 8px !important;
-    background: #fff !important;
+    background: var(--dana-surface) !important;
     overflow: visible !important;
   }
 
@@ -1080,13 +1080,13 @@ html body .gear-summary-card {
   /* Compact create/edit forms so the form side of every tab matches the
      compact record-card scale instead of towering over the list. */
   html body .gear-page.gear-admin-page .gear-admin-form {
-    gap: .56rem !important;
-    padding: .72rem .78rem !important;
+    gap: var(--dana-form-gap) !important;
+    padding: var(--dana-panel-padding) !important;
     border-radius: 8px !important;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-form .gear-field {
-    gap: .18rem !important;
+    gap: var(--dana-field-gap) !important;
     margin-bottom: 0 !important;
     font-size: .84rem !important;
     font-weight: 700 !important;
@@ -1100,12 +1100,12 @@ html body .gear-summary-card {
   }
 
   html body .gear-page.gear-admin-page .gear-form-grid {
-    gap: .52rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page.gear-admin-page :where(.gear-admin-form,.gear-admin-record-card) :where(.gear-input,.gear-select,.gear-textarea) {
     min-height: 36px !important;
-    padding: .40rem .52rem !important;
+    padding: var(--dana-space-2) var(--dana-space-3) !important;
     font-size: .90rem !important;
     line-height: 1.18 !important;
   }
@@ -1131,12 +1131,12 @@ html body .gear-summary-card {
 
   html body .gear-page.gear-admin-page .gear-admin-record-card-body {
     min-height: 0 !important;
-    padding: .70rem .76rem !important;
-    gap: .46rem !important;
+    padding: var(--dana-panel-padding) !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-heading {
-    gap: .48rem !important;
+    gap: var(--dana-field-gap) !important;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-title {
@@ -1151,7 +1151,7 @@ html body .gear-summary-card {
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-meta {
-    gap: .36rem .52rem !important;
+    gap: var(--dana-space-3) var(--dana-form-gap) !important;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-label {
@@ -1168,12 +1168,12 @@ html body .gear-summary-card {
   html body .gear-page.gear-admin-page .gear-admin-actions,
   html body .gear-page.gear-admin-page .gear-admin-record-actions,
   html body .gear-page.gear-admin-page .gear-admin-form-actions {
-    gap: .34rem !important;
+    gap: var(--dana-action-gap) !important;
   }
 
   html body .gear-page.gear-admin-page :where(.gear-admin-record-actions,.gear-admin-form-actions) .gear-btn {
     min-height: 34px !important;
-    padding: .36rem .54rem !important;
+    padding: var(--dana-space-2) var(--dana-space-4) !important;
     font-size: .84rem !important;
     line-height: 1.1 !important;
   }
@@ -1595,9 +1595,9 @@ html body .gear-page { line-height: 1.5; }
 /* :not(#_) lifts these above the older per-feature size rules without touching them.
    The Running Machines wall board keeps its own scale. */
 html body .gear-page:not(.running-machines-page):not(#_) :is(td, .gear-input, .gear-select, .gear-textarea, select, input, textarea, .gear-field, .gear-btn:not([data-icon]), .date-chip:not([data-icon])) {
-  font-size: var(--gear-read-body) !important;
+  font-size: var(--dana-table-font-size, var(--gear-read-body)) !important;
 }
-html body .gear-page:not(.running-machines-page):not(#_) table :is(td, th) .gear-btn:not([data-icon]) { font-size: var(--gear-read-secondary) !important; }
+html body .gear-page:not(.running-machines-page):not(#_) table :is(td, th) .gear-btn:not([data-icon]) { font-size: var(--dana-table-header-font-size, var(--gear-read-secondary)) !important; }
 /* Supporting sentences: descriptions, hints, sub-lines. */
 html body .gear-page:not(.running-machines-page):not(#_) :is(
   small, .gear-field-help, .operation-copy small, .inventory-browser-status, .inventory-pagination span,
@@ -1609,7 +1609,7 @@ html body .gear-page:not(.running-machines-page):not(#_) :is(
 }
 /* Small capitals labels and chips. */
 html body .gear-page:not(.running-machines-page):not(#_) :is(th, .gear-admin-record-label, .dana-summary-card > span, .scrap-summary-card > span, .gear-badge, .gear-status-badge, .status-pill, .dana-status-badge, .gear-count-badge, .count-chip, .subheading-row :is(strong, a)) {
-  font-size: var(--gear-read-micro) !important;
+  font-size: var(--dana-table-header-font-size, var(--gear-read-micro)) !important;
 }
 html body .gear-page .gear-eyebrow { font-size: var(--gear-read-micro) !important; }
 html body .gear-page th { color: var(--gear-table-header-text) !important; }
@@ -1691,22 +1691,22 @@ html body :is(.gear-badge, .status-pill, .dana-status-badge)[data-tone='neutral'
 }
 /* Keep wide data readable without horizontal scrolling. Tables become labelled records. */
 html body .gear-page :is(.table-wrap, .gear-table-wrap, .dana-table-shell, [danaTableShell]) { min-width: 0; max-width: 100%; }
-html body .gear-page table[danaTable] { width: 100%; min-width: 0 !important; table-layout: fixed; }
+html body .gear-page table[danaTable]:not(.running-machine-table) { width: 100%; min-width: var(--dana-table-min-width, 0) !important; table-layout: var(--dana-table-layout, fixed); }
 html body .gear-page table[danaTable] :is(th, td) { white-space: normal !important; overflow-wrap: anywhere; min-width: 0; }
 html body .gear-page table[danaTable] :is(.gear-actions, .gear-admin-actions) { flex-wrap: wrap; }
 /* A button or field in a cell shrinks with its column instead of pushing the table sideways. */
 html body .gear-page table[danaTable] td :is(button, .gear-btn, input, select) { min-width: 0; max-width: 100%; white-space: normal; }
 @media screen and (max-width: 900px) {
-  html body .gear-page table[danaTable] { display: block; }
-  html body .gear-page table[danaTable] thead { display: block; }
-  html body .gear-page table[danaTable] thead tr { display: flex; flex-wrap: wrap; }
-  html body .gear-page table[danaTable] thead th { flex: 1 1 8rem; }
-  html body .gear-page table[danaTable] tbody { display: grid; gap: var(--dana-record-gap, 1rem); }
-  html body .gear-page table[danaTable] tbody tr { display: grid; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-md); padding: .5rem; }
-  html body .gear-page table[danaTable] tbody tr[hidden] { display: none; }
-  html body .gear-page table[danaTable] tbody td { display: flex; flex-wrap: wrap; gap: .5rem; width: auto !important; max-width: 100%; }
-  html body .gear-page table[danaTable] tbody td::before { content: attr(data-dana-label); flex: 0 0 40%; font-weight: 700; color: var(--dana-muted); }
-  html body .gear-page table[danaTable] tbody td[colspan]::before { display: none; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) { display: block; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) thead { display: block; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) thead tr { display: flex; flex-wrap: wrap; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) thead th { flex: 1 1 8rem; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) tbody { display: grid; gap: var(--dana-record-gap, 1rem); }
+  html body .gear-page table[danaTable]:not(.running-machine-table) tbody tr { display: grid; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-md); padding: .5rem; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) tbody tr[hidden] { display: none; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) tbody td { display: flex; flex-wrap: wrap; gap: .5rem; width: auto !important; max-width: 100%; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) tbody td::before { content: attr(data-dana-label); flex: 0 0 40%; font-weight: 700; color: var(--dana-muted); }
+  html body .gear-page table[danaTable]:not(.running-machine-table) tbody td[colspan]::before { display: none; }
 }
 
 html body :is(.gear-sidebar, .gear-topbar, .gear-page, .app-content-shell, .login-page), html body .gear-page .gear-page-title, html body .dashboard-page .dashboard-heading h1 { font-family: var(--dana-font-sans) !important; }
@@ -1720,3 +1720,5 @@ html body :is(.gear-sidebar, .gear-topbar, .gear-page, .app-content-shell, .logi
 }
 /* Inside a section row the tabs are a plain wrapped list: no strip border or background. */
 html body .gear-page.gear-admin-page .gear-admin-section .gear-admin-tabs { display: flex; flex-wrap: wrap; gap: .25rem; overflow: visible; margin: 0 !important; padding: 0 !important; border: 0; background: none; box-shadow: none; }
+/* Embedded Admin tools inherit their enclosing page's container and gutters. */
+html body .gear-page .gear-page { max-width: none !important; margin: 0 !important; padding: 0 !important; }

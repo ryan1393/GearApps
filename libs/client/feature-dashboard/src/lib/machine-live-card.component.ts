@@ -68,15 +68,15 @@ import { ScannerControlsComponent } from './scanner-controls.component';
       </header>
 
       <div class="gear-live-body">
-        <div class="gear-live-image">
+        <div class="dana-media-frame gear-live-image">
           @if (imageUrl()) {
             <img [src]="imageUrl()" alt="Latest scanner capture for {{ machine().number }}" />
           } @else if (!scanner()) {
-            <div class="gear-live-placeholder">No scanner assigned</div>
+            <div class="dana-media-placeholder">No scanner assigned</div>
           } @else if (imageError()) {
-            <div class="gear-live-placeholder is-error">Image unavailable</div>
+            <div class="dana-media-placeholder" data-tone="warning">Image unavailable</div>
           } @else {
-            <div class="gear-live-placeholder">Loading…</div>
+            <div class="dana-media-placeholder">Loading…</div>
           }
         </div>
 
@@ -143,7 +143,7 @@ import { ScannerControlsComponent } from './scanner-controls.component';
       </div>
 
       @if (access.canEditSetup() && scanner(); as s) {
-        <footer class="gear-live-foot">
+        <footer class="dana-divider-section gear-live-foot">
           <button
             type="button"
             class="gear-btn gear-btn-secondary gear-btn-sm"
@@ -161,24 +161,20 @@ import { ScannerControlsComponent } from './scanner-controls.component';
   styles: `
     .gear-live-meta {
       display: block;
-      margin-top: 4px;
-      font-size: 12px;
+      margin-top: var(--dana-space-1);
     }
     .gear-live-status {
       display: grid;
       justify-items: end;
-      gap: 4px;
-      font-size: 12px;
+      gap: var(--dana-space-1);
     }
     .gear-live-body {
       display: grid;
       grid-template-columns: minmax(200px, 1.1fr) 1fr;
-      gap: 14px;
+      gap: var(--dana-form-gap);
     }
     .gear-live-image {
       aspect-ratio: 1;
-      background: var(--dana-sidebar);
-      border-radius: var(--dana-radius-md);
       overflow: hidden;
       display: grid;
       place-items: center;
@@ -189,31 +185,18 @@ import { ScannerControlsComponent } from './scanner-controls.component';
       object-fit: contain;
       display: block;
     }
-    .gear-live-placeholder {
-      color: var(--gear-sidebar-text);
-      font-size: 13px;
-      font-weight: 700;
-    }
-    .gear-live-placeholder.is-error {
-      color: var(--dana-focus-border);
-    }
     .gear-live-data {
       display: grid;
-      gap: 12px;
+      gap: var(--dana-form-gap);
       align-content: start;
     }
     .gear-live-fields {
       display: grid;
-      gap: 8px;
-    }
-    .dana-section-title {
-      margin-bottom: 10px;
+      gap: var(--dana-field-gap);
     }
     .gear-live-foot {
       display: grid;
-      gap: 12px;
-      padding-top: 12px;
-      border-top: 1px solid var(--dana-border);
+      gap: var(--dana-form-gap);
     }
     @media (max-width: 640px) {
       .gear-live-body {

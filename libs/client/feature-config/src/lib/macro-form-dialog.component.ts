@@ -27,8 +27,7 @@ const CONSEC_MACRO = PER_CYCLE_MACROS[0];
     .gear-macro-flag-row {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      font-weight: 600;
+      gap: var(--dana-field-gap);
     }
   `,
   template: `

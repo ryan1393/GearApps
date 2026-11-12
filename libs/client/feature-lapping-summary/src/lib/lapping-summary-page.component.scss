@@ -1,93 +1,47 @@
-// Layout only: colours and type come from Dana UI.
-:host {
-  display: block;
-}
-
-.lapper-summary { gap: 12px; }
-.lapper-picker { padding: 12px 16px; display: grid; gap: 10px; }
-.lapper-picker-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 12px; }
-.lapper-facts { display: flex; flex-wrap: wrap; gap: 6px 22px; margin: 0; }
+/* Domain layout only. Dana UI owns surfaces, typography, density and state colours. */
+:host { display: block; }
+.lapper-picker { display: grid; gap: var(--dana-form-gap); }
+.lapper-picker-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: var(--dana-form-gap); }
+.lapper-facts { display: flex; flex-wrap: wrap; gap: var(--dana-field-gap) var(--dana-section-gap); margin: 0; }
 .lapper-facts div { min-width: 0; }
-.lapper-facts dt { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--dana-muted); }
-.lapper-facts dd { margin: 0; font-weight: 700; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-
-// Cycles on the left, values on the right.
-.lapper-columns { display: grid; grid-template-columns: minmax(320px, 440px) minmax(0, 1fr); gap: 12px; align-items: start; }
-.lapper-pane { padding: 12px 16px; min-width: 0; position: relative; }
-// On a desktop the whole screen fits the window: the two panes take the space that is left
-// and scroll inside it, so the pickers and the cycle list stay in view.
+.lapper-facts dd { margin-inline-start: 0; display: flex; flex-wrap: wrap; align-items: center; gap: var(--dana-field-gap); }
+.lapper-columns { display: grid; grid-template-columns: minmax(320px, 440px) minmax(0, 1fr); gap: var(--dana-section-gap); align-items: start; }
+.lapper-pane { min-width: 0; position: relative; }
+/* Keep the selected cycle and its values independently scrollable on a desktop. */
 @media (min-width: 1001px) {
-  .lapper-summary.is-ready {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh - var(--dana-topbar-height, 70px) - 2 * var(--dana-content-pad, 26px));
-    min-height: 540px;
-  }
+  .lapper-summary.is-ready { display: flex; flex-direction: column; height: calc(100vh - var(--dana-topbar-height, 70px) - 2 * var(--dana-page-padding)); min-height: 540px; }
   .lapper-summary.is-ready > * { flex: 0 0 auto; }
   .lapper-summary.is-ready > .lapper-columns { flex: 1 1 0; min-height: 0; align-items: stretch; grid-template-rows: minmax(0, 1fr); }
   .lapper-summary.is-ready .lapper-columns .lapper-pane { height: 100%; overflow-y: auto; }
 }
-.lapper-pane-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-.lapper-pane-heading h2 { margin: 0; font-size: 16px; }
-.lapper-serial-filter { margin-bottom: 8px; }
-
-.lapper-cycles-table :is(th, td) { padding: 5px 6px !important; font-size: 13px !important; line-height: 1.25; }
-/* Columns size to their content; only a long serial may wrap. Headers, times and cycle times
-   never break mid-value (2:11. / 8). */
-.lapper-cycles-table { table-layout: auto !important; }
+.lapper-pane-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--dana-field-gap); margin-bottom: var(--dana-form-gap); }
+.lapper-serial-filter { margin-bottom: var(--dana-form-gap); }
+/* Headers, times and cycle times remain intact; long serials may wrap. */
+@media (min-width: 901px) {
+  .lapper-cycles-table {
+    --dana-table-min-width: 34rem;
+    --dana-table-layout: auto;
+  }
+  .lapper-cycles-table :is(th, td):nth-child(2) { min-width: 14ch; }
+}
 .lapper-cycles-table th,
 .lapper-cycles-table td:nth-child(1),
 .lapper-cycles-table td:nth-child(1) .lapper-cycle-button,
 .lapper-cycles-table td:nth-child(3),
 .lapper-cycles-table td:nth-child(4) { white-space: nowrap !important; }
-/* "Cycle time" may stack over two lines, leaving the serial room for a full Dana serial. */
 .lapper-cycles-table th:nth-child(4) { white-space: normal !important; overflow-wrap: normal !important; word-break: keep-all; }
 .lapper-cycles-table td:nth-child(2) { overflow-wrap: anywhere; }
-/* Every column but the serial shrinks to its content, so the serial gets the rest. */
 .lapper-cycles-table th:not(:nth-child(2)) { width: 1%; }
-.lapper-cycle-row { cursor: pointer; }
-.lapper-cycle-row.is-selected > td { background: var(--dana-neutral-soft); box-shadow: inset 0 0 0 1px var(--dana-border); }
-.lapper-cycle-row.is-selected > td:first-child { box-shadow: inset 3px 0 0 var(--dana-primary); }
-.lapper-changed-count { color: var(--dana-info); }
-.lapper-cycle-button { white-space: nowrap; border: 0; padding: 0; background: none; font: inherit; font-weight: 700; color: var(--dana-primary); cursor: pointer; text-align: left; }
-.lapper-pager { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; font-size: 13px; }
-
-.lapper-tabs { flex-wrap: wrap; overflow: visible; margin-bottom: 10px; }
-.lapper-tab-note { margin: 0 0 10px; font-size: 13px; }
-.lapper-section-title { margin: 12px 0 6px; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--dana-muted); }
-.lapper-section-title:first-child { margin-top: 0; }
-.lapper-dense { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: 6px; }
-
-.lapper-change-group { padding: 8px 0; border-top: 1px solid var(--dana-border); }
-.lapper-change-group:first-of-type { border-top: 0; padding-top: 0; }
-.lapper-change-group header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; margin-bottom: 6px; }
-.lapper-change-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: 6px; }
-.lapper-change { display: grid; gap: 2px; padding: 6px 10px; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-sm); background: var(--dana-surface); overflow-wrap: anywhere; }
-.lapper-change.is-alert { border-color: var(--dana-danger); background: var(--dana-danger-soft); }
-.lapper-change-name { font-size: 12px; font-weight: 700; color: var(--dana-muted); }
-.lapper-change-values { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; font-variant-numeric: tabular-nums; }
+.lapper-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--dana-action-gap); margin-top: var(--dana-form-gap); }
+.lapper-tabs { flex-wrap: wrap; overflow: visible; margin-bottom: var(--dana-form-gap); }
+.lapper-tab-note { margin: 0 0 var(--dana-form-gap); }
+.lapper-dense { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr)); gap: var(--dana-field-gap); }
+.lapper-change-group header { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--dana-field-gap) var(--dana-action-gap); margin-bottom: var(--dana-field-gap); }
+.lapper-change-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr)); gap: var(--dana-field-gap); }
+.lapper-change { overflow-wrap: anywhere; }
+.lapper-change-values { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--dana-field-gap); font-variant-numeric: tabular-nums; }
 .lapper-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-
-.lapper-groups {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
-  gap: 8px;
-}
-
-.lapper-groups--tight {
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
-}
-
-.lapper-paths {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr));
-  gap: 10px;
-}
-
-.dana-chip-list {
-  margin: 0 0 10px;
-}
-
-@media (max-width: 1000px) {
-  .lapper-columns { grid-template-columns: minmax(0, 1fr); }
-}
+.lapper-groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: var(--dana-field-gap); }
+.lapper-groups--tight { grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); }
+.lapper-paths { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); gap: var(--dana-form-gap); }
+@media (max-width: 1000px) { .lapper-columns { grid-template-columns: minmax(0, 1fr); } }

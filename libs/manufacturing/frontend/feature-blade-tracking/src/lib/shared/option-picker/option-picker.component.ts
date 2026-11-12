@@ -45,25 +45,17 @@ let nextPickerId = 1;
     }
   `,
   styles: [`
-    :host { display: block; margin-top: 16px; border-top: 1px solid var(--dana-border); padding-top: 12px; }
-    :host(.picker-plain) { margin-top: 0; border-top: 0; padding-top: 0; }
-    .picker-divider { margin-bottom: 8px; text-align: center; font-size: .75rem; font-weight: 900; letter-spacing: .08em; color: var(--dana-muted); }
-    .picker-toggle { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; cursor: pointer; text-align: left; font-size: 1.05rem; }
+    :host { display: block; margin-top: var(--dana-space-4); padding-top: var(--dana-workstation-gap); }
+    :host(.picker-plain) { margin-top: 0; padding-top: 0; }
+    .picker-divider { margin-bottom: var(--dana-space-2); }
+    .picker-toggle { display: flex; align-items: center; gap: var(--dana-workstation-gap); width: 100%; min-height: 56px; }
     .picker-toggle > span:first-child { flex: 1; min-width: 0; overflow-wrap: anywhere; }
-    .picker-count { min-width: 2rem; padding: 2px 8px; border-radius: 999px; background: var(--dana-neutral-soft); text-align: center; font-size: .85rem; font-weight: 800; }
-    .picker-list { margin-top: 6px; max-height: 300px; overflow: auto; overscroll-behavior: contain; border: 1px solid var(--dana-border); border-radius: 12px; background: var(--dana-surface); }
-    .picker-row { display: grid; grid-template-columns: var(--picker-columns); align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 16px; border: 0; border-bottom: 1px solid var(--dana-border);
-      background: none; color: var(--dana-text); font: inherit; text-align: left; cursor: pointer; touch-action: manipulation; }
+    .picker-count { min-width: 2rem; padding: 2px var(--dana-space-2); }
+    .picker-list { margin-top: 6px; max-height: 300px; overflow: auto; overscroll-behavior: contain; }
+    .picker-row { display: grid; grid-template-columns: var(--picker-columns); align-items: center; gap: var(--dana-workstation-gap); width: 100%; min-height: 56px; padding: var(--dana-space-2) var(--dana-space-4); touch-action: manipulation; }
     .picker-row > span { min-width: 0; overflow-wrap: anywhere; }
-    .picker-row > span:first-child { font-weight: 800; }
-    .picker-row > span:last-child:not(:first-child) { text-align: right; }
-    button.picker-row:hover, button.picker-row:focus-visible { background: var(--dana-neutral-soft); }
-    button.picker-row:disabled { cursor: wait; opacity: .6; }
-    .picker-head { position: sticky; top: 0; min-height: 0; padding-block: 8px; background: var(--dana-neutral-soft); cursor: default;
-      font-size: .75rem; font-weight: 900; letter-spacing: .05em; text-transform: uppercase; color: var(--dana-muted); }
-    .picker-head > span:first-child { font-weight: 900; }
-    .picker-note { margin: 0; padding: 12px 16px; font-size: .95rem; }
-    .picker-error { color: var(--dana-danger); }
+    .picker-head { position: sticky; top: 0; min-height: 0; padding-block: var(--dana-space-2); }
+    .picker-note { margin: 0; padding: var(--dana-workstation-gap) var(--dana-space-4); }
   `],
 })
 export class OptionPickerComponent {

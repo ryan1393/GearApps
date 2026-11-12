@@ -1,4 +1,4 @@
-<div class="gear-page gear-workflow-page lapper-summary" [class.is-ready]="ready()">
+<div class="gear-page dana-page-stack gear-workflow-page lapper-summary" [class.is-ready]="ready()">
   <section
     danaPageHeader
     eyebrow="LAPPER / OPERATIONS"
@@ -13,7 +13,7 @@
     </div>
   </section>
 
-  <section class="gear-panel lapper-picker">
+  <section class="gear-panel dana-panel-padded lapper-picker">
     @if (searchMiss(); as miss) {
       <div class="gear-alert gear-alert-danger" role="status">No gearset or machine matches “{{ miss }}”.</div>
     }
@@ -54,11 +54,11 @@
     }
     @if (ready()) {
       <dl class="lapper-facts">
-        <div><dt>Gearset</dt><dd class="mono">{{ gearset()?.number }}{{ gearset()?.rev ? ' · rev ' + gearset()?.rev : '' }}</dd></div>
-        <div><dt>Pinion / Ring</dt><dd class="mono">{{ gearset()?.pinion?.number ?? '—' }} / {{ gearset()?.ring?.number ?? '—' }}</dd></div>
-        <div><dt>Ratio</dt><dd>{{ gearset()?.ratio !== null && gearset()?.ratio !== undefined ? (gearset()!.ratio | number: '1.2-4') : '—' }}</dd></div>
-        <div><dt>Machine</dt><dd class="mono">{{ machine()?.number ?? machine()?.ip }}{{ machine()?.cell ? ' · cell ' + machine()?.cell : '' }}</dd></div>
-        <div><dt>Showing</dt><dd>
+        <div><dt class="dana-detail-label">Gearset</dt><dd class="dana-detail-value mono">{{ gearset()?.number }}{{ gearset()?.rev ? ' · rev ' + gearset()?.rev : '' }}</dd></div>
+        <div><dt class="dana-detail-label">Pinion / Ring</dt><dd class="dana-detail-value mono">{{ gearset()?.pinion?.number ?? '—' }} / {{ gearset()?.ring?.number ?? '—' }}</dd></div>
+        <div><dt class="dana-detail-label">Ratio</dt><dd class="dana-detail-value">{{ gearset()?.ratio !== null && gearset()?.ratio !== undefined ? (gearset()!.ratio | number: '1.2-4') : '—' }}</dd></div>
+        <div><dt class="dana-detail-label">Machine</dt><dd class="dana-detail-value mono">{{ machine()?.number ?? machine()?.ip }}{{ machine()?.cell ? ' · cell ' + machine()?.cell : '' }}</dd></div>
+        <div><dt class="dana-detail-label">Showing</dt><dd class="dana-detail-value">
           @if (selected(); as c) {
             Cycle {{ c.consec }} · {{ c.timestamp | date: 'MMM d, HH:mm' }}
             <button type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="showLatest()">Back to latest</button>
@@ -66,16 +66,16 @@
             Latest{{ cycle() ? ' · ' + (cycle()!.timestamp | date: 'MMM d, HH:mm') : '' }}
           }
         </dd></div>
-        <div data-testid="lapping-machine-now"><dt>Machine now</dt><dd>
+        <div data-testid="lapping-machine-now"><dt class="dana-detail-label">Machine now</dt><dd class="dana-detail-value">
           <gear-live-cycle-timer [snapshot]="live()" [receivedAt]="liveAt()" />
         </dd></div>
-        <div data-testid="lapping-cycle-time"><dt>Cycle time</dt><dd>
+        <div data-testid="lapping-cycle-time"><dt class="dana-detail-label">Cycle time</dt><dd class="dana-detail-value">
           <span class="mono" [attr.title]="shownCycleTime() !== null ? (shownCycleTime()! | number: '1.0-3') + ' s' : 'Not measured for this cycle'">{{ formatCycleTime(shownCycleTime()) }}</span>
           @if (averageCycleTime()?.average_of) {
             <span class="gear-muted"> · avg {{ formatCycleTime(averageCycleTime()!.average_s) }} of last {{ averageCycleTime()!.average_of }}</span>
           }
         </dd></div>
-        <div><dt>Limits</dt><dd>
+        <div><dt class="dana-detail-label">Limits</dt><dd class="dana-detail-value">
           @if (outOfLimit().length) {
             <span class="dana-status-badge" data-tone="danger">{{ outOfLimit().length }} outside limits</span>
           } @else if (limitedCount()) {
@@ -84,21 +84,21 @@
             <span class="gear-muted">None set</span>
           }
         </dd></div>
-        <div><dt>DSF count</dt><dd><gear-machine-dsf-count [machineId]="machineId()!" /></dd></div>
+        <div><dt class="dana-detail-label">DSF count</dt><dd class="dana-detail-value"><gear-machine-dsf-count [machineId]="machineId()!" /></dd></div>
       </dl>
     }
   </section>
 
   @if (!ready()) {
-    <section class="gear-panel lapper-pane">
+    <section class="gear-panel dana-panel-padded lapper-pane">
       <gear-empty-state title="Choose a gearset and a machine" hint="Pick either one first. The other list narrows to what has run with it." />
     </section>
   } @else {
     <div class="lapper-columns">
       <!-- Cycles -->
-      <section class="gear-panel lapper-pane" aria-label="Cycle history">
+      <section class="gear-panel dana-panel-padded lapper-pane" aria-label="Cycle history">
         <div class="lapper-pane-heading">
-          <h2>Cycles</h2>
+          <h2 class="gear-panel-title">Cycles</h2>
           <span danaCountBadge class="gear-count-badge count-chip">{{ history.value()?.total ?? 0 }}</span>
         </div>
         <label class="gear-field lapper-serial-filter">Find a serial number
@@ -108,7 +108,7 @@
           <p class="gear-alert gear-alert-danger" role="alert">Could not load the cycles. Refresh to retry.</p>
         }
         <div danaTableShell class="table-wrap">
-          <table danaTable class="gear-table lapper-cycles-table">
+          <table danaTable class="gear-table dana-table-compact lapper-cycles-table">
             <thead>
               <tr>
                 <th data-dana-table-static>Time</th>
@@ -120,9 +120,9 @@
             </thead>
             <tbody>
               @for (c of history.value()?.items ?? []; track c.id) {
-                <tr class="lapper-cycle-row" [class.is-selected]="selected()?.id === c.id" (click)="selectCycle(c)">
+                <tr class="lapper-cycle-row" [class.is-selected]="selected()?.id === c.id" [attr.data-selected]="selected()?.id === c.id" (click)="selectCycle(c)">
                   <td>
-                    <button type="button" class="lapper-cycle-button" [attr.aria-pressed]="selected()?.id === c.id" (click)="selectCycle(c); $event.stopPropagation()">
+                    <button type="button" class="dana-action-link lapper-cycle-button" [attr.aria-pressed]="selected()?.id === c.id" (click)="selectCycle(c); $event.stopPropagation()">
                       {{ c.timestamp | date: 'MMM d, HH:mm' }}
                     </button>
                   </td>
@@ -133,7 +133,7 @@
                   </td>
                   <td>
                     @if (c.changed_count) {
-                      <strong class="lapper-changed-count">{{ c.changed_count }}</strong>
+                      <strong danaCountBadge>{{ c.changed_count }}</strong>
                     } @else {
                       <span class="gear-muted">0</span>
                     }
@@ -154,7 +154,7 @@
       </section>
 
       <!-- Values -->
-      <section class="gear-panel lapper-pane" aria-label="Recorded values">
+      <section class="gear-panel dana-panel-padded lapper-pane" aria-label="Recorded values">
         <div danaTabs class="lapper-tabs">
           @for (t of tabs; track t.id) {
             <button type="button" danaTab [active]="tab() === t.id" (click)="tab.set(t.id)">{{ t.label }}</button>
@@ -178,7 +178,7 @@
             <p class="gear-alert gear-alert-danger" role="alert">Could not load the changes. <button type="button" class="gear-btn gear-btn-secondary" (click)="retryValues()">Retry changes</button></p>
           }
           @for (group of changeGroups(); track group.id) {
-            <article class="lapper-change-group">
+            <article class="dana-divider-section lapper-change-group">
               <header>
                 <strong>Cycle {{ group.consec }}</strong>
                 <span class="gear-muted">{{ group.timestamp | date: 'MMM d, HH:mm' }} · {{ group.serial_number || 'no serial' }}</span>
@@ -189,8 +189,8 @@
               @if (group.changed.length) {
                 <div class="lapper-change-list">
                   @for (change of group.changed; track change.macro_id) {
-                    <div class="lapper-change" [class.is-alert]="changeAlert(change)">
-                      <span class="lapper-change-name">#{{ change.number }} · {{ change.name }}</span>
+                    <div class="dana-value-delta lapper-change" [attr.data-tone]="changeAlert(change) ? 'danger' : null">
+                      <span class="dana-detail-label">#{{ change.number }} · {{ change.name }}</span>
                       <span class="lapper-change-values">
                         <span class="gear-muted">{{ change.previous_value | number: '1.0-4' }}</span>
                         <span aria-hidden="true">→</span><span class="lapper-visually-hidden">changed to</span>
@@ -217,20 +217,20 @@
           @if (!hasData()) {
             <gear-empty-state title="No values recorded" hint="This machine has no recorded cycles for the selected gearset yet." />
           } @else {
-            <h3 class="lapper-section-title">Gearset data</h3>
+            <h3 class="dana-section-title">Gearset data</h3>
             <div class="lapper-dense">
               <gear-value-field label="Description" [value]="gearset()?.summary?.model" type="text" [compact]="true" />
               @for (f of gearsetFields; track f.label) {
                 <gear-value-field [label]="f.label" [value]="valueOf(gearData(), f)" [compact]="true" />
               }
             </div>
-            <h3 class="lapper-section-title">General data</h3>
+            <h3 class="dana-section-title">General data</h3>
             <div class="lapper-groups">
               @for (g of generalGroups; track g.title) {
                 <gear-summary-group [group]="g" [rows]="generalData()" [columns]="g.fields.length === 1 ? 1 : 2" />
               }
             </div>
-            <h3 class="lapper-section-title">Meshing position</h3>
+            <h3 class="dana-section-title">Meshing position</h3>
             <div class="lapper-groups">
               @for (g of meshGroups; track g.title) {
                 <gear-summary-group [group]="g" [rows]="meshData()" [columns]="g.fields.length" />
@@ -270,7 +270,7 @@
 
         @if (tab() === 'all' && !rows.loading() && !rows.error()) {
           @for (group of configuredGroups(); track group[0]) {
-            <h3 class="lapper-section-title">{{ group[0] || 'Other variables' }}</h3>
+            <h3 class="dana-section-title">{{ group[0] || 'Other variables' }}</h3>
             <div class="lapper-dense">
               @for (row of group[1]; track row.id) {
                 <gear-value-field [label]="'#' + row.number + ' · ' + row.name" [value]="row.value" [unit]="row.unit ?? undefined" [alert]="limitAlert(row)" [compact]="true" />

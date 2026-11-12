@@ -1,0 +1,150 @@
+/* Shared content variants. Features own their data and layout, Dana owns presentation. */
+.dana-panel-title {
+  margin: 0;
+  color: var(--dana-text);
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.3;
+}
+
+.dana-field-hint {
+  margin: 0;
+  color: var(--dana-muted);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.dana-text-warning { color: var(--dana-warning); }
+.dana-text-success { color: var(--dana-success); }
+.dana-highlight { --dana-table-state-bg: var(--dana-neutral-soft); }
+.dana-highlight,
+.dana-highlight > :is(th,td) { background: var(--dana-table-state-bg); }
+.dana-divider-top { border-top: 1px solid var(--dana-border); }
+
+.dana-divider-section {
+  padding-block: var(--dana-space-3);
+  border-top: 1px solid var(--dana-border);
+}
+.dana-divider-section:first-child { padding-top: 0; border-top: 0; }
+
+.dana-fieldset-reset { min-width: 0; margin: 0; padding: 0; border: 0; }
+
+.dana-detail.is-compact { padding: var(--dana-space-2) var(--dana-space-3); }
+.dana-detail.is-compact .dana-detail-value { font-size: 14px; }
+.dana-detail[data-tone="danger"] {
+  border-color: var(--dana-danger);
+  background: var(--dana-danger-soft);
+}
+.dana-detail-value { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.dana-detail-value small {
+  margin-inline-start: var(--dana-space-1);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.dana-media-frame {
+  display: grid;
+  min-width: 0;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--dana-border);
+  border-radius: var(--dana-radius-md);
+  background: var(--dana-sidebar);
+  color: var(--dana-on-dark);
+}
+.dana-media-frame > :is(img,video,canvas) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.dana-media-placeholder {
+  margin: 0;
+  padding: var(--dana-space-3);
+  color: var(--dana-on-dark);
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.dana-media-placeholder[data-tone="warning"] { color: var(--dana-on-dark-warning); }
+
+.dana-value-delta {
+  display: grid;
+  min-width: 0;
+  gap: var(--dana-space-1);
+  margin: 0;
+  padding: var(--dana-space-2) var(--dana-space-3);
+  border: 1px solid var(--dana-border);
+  border-radius: var(--dana-radius-sm);
+  background: var(--dana-surface);
+  overflow-wrap: anywhere;
+}
+.dana-value-delta > :is(p,dt,dd) { margin: 0; }
+.dana-value-delta[data-tone="danger"] {
+  border-color: var(--dana-danger);
+  background: var(--dana-danger-soft);
+}
+
+table.dana-table-compact {
+  --dana-table-cell-pad-y: var(--dana-space-1);
+  --dana-table-cell-pad-x: var(--dana-space-2);
+  --dana-table-header-pad-y: var(--dana-space-1);
+  --dana-table-header-pad-x: var(--dana-space-2);
+  --dana-table-font-size: 13px;
+  --dana-table-header-font-size: 13px;
+  font-size: var(--dana-table-font-size);
+}
+table.dana-table-compact :is(th,td) { font-size: var(--dana-table-font-size); line-height: 1.25; }
+table.dana-table-compact tr[data-selected="true"] { --dana-table-state-bg: var(--dana-neutral-soft); }
+table.dana-table-compact tr[data-selected="true"] > td,
+table.dana-table-compact tr[data-selected="true"]:hover > td { background: var(--dana-table-state-bg); }
+table.dana-table-compact tr[data-selected="true"] > td:first-child {
+  box-shadow: inset var(--dana-space-1) 0 0 var(--dana-primary);
+}
+td.dana-table-detail-cell {
+  --dana-table-state-bg: var(--dana-neutral-soft);
+  --dana-table-cell-pad-y: var(--dana-panel-padding);
+  --dana-table-cell-pad-x: var(--dana-panel-padding);
+  padding: var(--dana-table-cell-pad-y) var(--dana-table-cell-pad-x);
+  background: var(--dana-table-state-bg);
+}
+
+.dana-action-link {
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--dana-primary);
+  font: inherit;
+  font-weight: 700;
+  text-align: inherit;
+  text-decoration: underline;
+  text-underline-offset: .15em;
+  cursor: pointer;
+}
+.dana-action-link:disabled,
+.dana-action-link[aria-disabled="true"] { opacity: .5; cursor: not-allowed; }
+.dana-action-link:focus-visible { outline: 2px solid var(--dana-primary); outline-offset: 2px; }
+
+.dana-code-block {
+  display: block;
+  max-width: 100%;
+  margin: 0;
+  padding: var(--dana-space-3) var(--dana-space-4);
+  overflow: auto;
+  border: 1px solid var(--dana-border);
+  border-radius: var(--dana-radius-sm);
+  background: var(--dana-neutral-soft);
+  color: var(--dana-text);
+  font-family: var(--dana-font-mono,ui-monospace,SFMono-Regular,Menlo,Consolas,monospace);
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.dana-empty-state.is-compact { padding: var(--dana-space-2) var(--dana-space-3); }
+.dana-empty-state.is-compact > p { margin: 0; }

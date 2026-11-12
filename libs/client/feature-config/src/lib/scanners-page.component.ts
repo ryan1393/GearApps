@@ -41,7 +41,7 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="gear-page gear-workflow-page">
+    <div class="gear-page dana-page-stack gear-workflow-page">
       <section
         danaPageHeader
         eyebrow="LAPPER / CONFIGURATION"

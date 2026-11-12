@@ -22,7 +22,7 @@ import { MachineLiveCardComponent } from './machine-live-card.component';
   imports: [RouterLink, DanaPageHeaderComponent, EmptyStateComponent, MachineLiveCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="gear-page gear-workflow-page">
+    <div class="gear-page dana-page-stack gear-workflow-page">
       <section
         danaPageHeader
         eyebrow="LAPPER · LIVE VIEW"
@@ -82,12 +82,12 @@ import { MachineLiveCardComponent } from './machine-live-card.component';
     .gear-live-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(min(100%, 520px), 1fr));
-      gap: 14px;
+      gap: var(--dana-section-gap);
     }
     .gear-rates {
       display: inline-flex;
       flex-wrap: wrap;
-      gap: 4px;
+      gap: var(--dana-space-1);
     }
   `,
 })

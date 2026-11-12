@@ -3,24 +3,31 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
+import { DanaAlertDirective, DanaButtonDirective } from '@dana/ui';
 
 @Component({
-  selector: 'gear-plant-login', standalone: true, imports: [FormsModule],
+  selector: 'gear-plant-login', standalone: true, imports: [FormsModule, DanaAlertDirective, DanaButtonDirective],
   styleUrls: ['./plant-layout.css'],
-  template: `<main class="sign-in">
-    <section class="sign-in-card">
-      <p class="eyebrow">MESHFORGE / PLANT INTELLIGENCE</p>
-      <h1>The whole floor.<br />One clear view.</h1>
-      <p class="muted">Sign in with your MeshForge account to view machine production and reports.</p>
-      <form #form="ngForm" (ngSubmit)="login()" [attr.aria-busy]="busy()">
-        <label for="email">Email address</label>
-        <input id="email" name="email" type="email" autocomplete="username" [(ngModel)]="email" [readOnly]="busy()" required email />
-        <label for="password">Password</label>
-        <input id="password" name="password" type="password" autocomplete="current-password" [(ngModel)]="password" [readOnly]="busy()" required />
-        @if (error()) { <p role="alert" class="notice warning">{{ error() }}</p> }
-        <button class="primary" type="submit" [disabled]="form.invalid || busy()" [attr.aria-busy]="busy()">{{ busy() ? 'Signing in…' : 'Sign in' }}</button>
-      </form>
-      <p class="muted small">Uses the shared MeshForge sign-in service.</p>
+  template: `<main class="login-page plant-sign-in">
+    <section class="login-form-panel">
+      <div class="login-card">
+        <header class="plant-login-copy">
+          <p class="gear-eyebrow">MESHFORGE / PLANT INTELLIGENCE</p>
+          <h1 class="gear-page-title">The whole floor.<br />One clear view.</h1>
+          <p class="gear-muted">Sign in with your MeshForge account to view machine production and reports.</p>
+        </header>
+        <form class="login-form plant-login-form" #form="ngForm" (ngSubmit)="login()" [attr.aria-busy]="busy()">
+          <label class="gear-field" for="email">Email address
+            <input class="gear-input" id="email" name="email" type="email" autocomplete="username" [(ngModel)]="email" [readOnly]="busy()" required email />
+          </label>
+          <label class="gear-field" for="password">Password
+            <input class="gear-input" id="password" name="password" type="password" autocomplete="current-password" [(ngModel)]="password" [readOnly]="busy()" required />
+          </label>
+          @if (error()) { <p role="alert" danaAlert="warning">{{ error() }}</p> }
+          <button danaButton="primary" type="submit" [disabled]="form.invalid || busy()" [attr.aria-busy]="busy()">{{ busy() ? 'Signing in…' : 'Sign in' }}</button>
+        </form>
+        <p class="gear-field-help">Uses the shared MeshForge sign-in service.</p>
+      </div>
     </section>
   </main>`,
 })

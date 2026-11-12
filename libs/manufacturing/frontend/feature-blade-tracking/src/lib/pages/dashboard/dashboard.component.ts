@@ -30,12 +30,13 @@ import {
   DanaPageHeaderComponent,
   DanaOperationCardComponent,
   DanaOperationGridDirective,
+  DanaSummaryCardDirective,
 } from '@dana/ui';
 
 @Component({
   selector: 'gear-blade-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaKpiGridDirective, DanaKpiCardDirective, DanaPanelHeaderDirective, DanaPanelActionDirective, DanaTableShellDirective, DanaTableDirective, DanaCountBadgeDirective, DanaLoadingStateDirective, DanaEmptyStateDirective, DanaTableEmptyDirective, DanaPageHeaderComponent, DanaOperationCardComponent, DanaOperationGridDirective],
+  imports: [CommonModule, FormsModule, RouterLink, DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaKpiGridDirective, DanaKpiCardDirective, DanaPanelHeaderDirective, DanaPanelActionDirective, DanaTableShellDirective, DanaTableDirective, DanaCountBadgeDirective, DanaLoadingStateDirective, DanaEmptyStateDirective, DanaTableEmptyDirective, DanaPageHeaderComponent, DanaOperationCardComponent, DanaOperationGridDirective, DanaSummaryCardDirective],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css'],
 })

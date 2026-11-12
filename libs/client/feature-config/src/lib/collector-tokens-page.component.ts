@@ -38,21 +38,19 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
   styles: `
     .lapper-token-secret {
       display: flex;
-      gap: 8px;
+      gap: var(--dana-field-gap);
       align-items: stretch;
     }
     .lapper-token-secret input {
       flex: 1;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
     .lapper-token-steps {
-      margin: 16px 0 0;
-      padding-left: 20px;
-      line-height: 1.6;
+      margin: var(--dana-form-gap) 0 0;
+      padding-inline-start: var(--dana-space-5);
     }
   `,
   template: `
-    <div class="gear-page gear-workflow-page">
+    <div class="gear-page dana-page-stack gear-workflow-page">
       <section
         danaPageHeader
         eyebrow="LAPPER / CONFIGURATION"
