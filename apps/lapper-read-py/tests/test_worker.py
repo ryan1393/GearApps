@@ -8,7 +8,7 @@ from decimal import Decimal
 from lapper_read.config import Settings
 from lapper_read.fanuc import Fanuc
 from lapper_read.state import CycleStateStore, ScannerState
-from lapper_read.worker import Worker
+from lapper_read.worker import ScannerCommandError, Worker
 from tests.fakes import FakeApi, FakeTransport
 
 
@@ -17,10 +17,18 @@ class StubScanner:
         self.state = ScannerState(None, None)
         self.fail = False
 
+        self.commands = []
+
     def read(self, previous):
         if self.fail:
             raise OSError("scanner offline")
         return self.state
+
+    def command(self, op):
+        if self.fail:
+            raise OSError("scanner offline")
+        self.commands.append(op)
+        return "OK," + op
 
     def close(self):
         pass
@@ -41,6 +49,20 @@ class WorkerTests(unittest.TestCase):
     def _worker(self):
         fanuc = Fanuc(self.transport, "10.0.0.1", 1000, self.api)
         return Worker(self.settings, self.api, fanuc, self.scanner, CycleStateStore(self.settings.state_file))
+
+    def test_dashboard_scanner_commands_are_sent_by_the_sampling_thread(self):
+        self._start(self.worker)
+        self.assertEqual(self.worker.scanner_command("TUNE01", timeout_s=5), "OK,TUNE01")
+        self.assertEqual(self.scanner.commands, ["TUNE01"])
+        self.scanner.fail = True
+        with self.assertRaisesRegex(ScannerCommandError, "scanner 10.0.0.2: scanner offline"):
+            self.worker.scanner_command("FTUNE", timeout_s=5)
+
+    def test_a_machine_without_a_scanner_refuses_scanner_commands(self):
+        fanuc = Fanuc(self.transport, "10.0.0.1", 1000, self.api)
+        worker = Worker(self.settings, self.api, fanuc, None, CycleStateStore(self.settings.state_file))
+        with self.assertRaisesRegex(ScannerCommandError, "no scanner"):
+            worker.scanner_command("TUNE01", timeout_s=0.1)
 
     def _start(self, worker):
         thread = threading.Thread(target=worker.run, daemon=True)

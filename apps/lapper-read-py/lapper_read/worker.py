@@ -59,6 +59,19 @@ class MacroReadError(RuntimeError):
     pass
 
 
+@dataclass
+class ScannerCommand:
+    """A dashboard op code for the scanner, sent by the sampling thread on its own connection."""
+    op: str
+    done: threading.Event = field(default_factory=threading.Event)
+    reply: str | None = None
+    error: str | None = None
+
+
+class ScannerCommandError(RuntimeError):
+    pass
+
+
 class Worker:
     def __init__(self, settings, api: MeshForgeApi, fanuc: Fanuc, scanner: Scanner | None, store: CycleStateStore,
                  scanner_monitor: ScannerMonitor | None = None, argonaut: argo.ArgonautClient | None = None):
@@ -80,6 +93,7 @@ class Worker:
         self.argonaut_last_error: str | None = None
         self.stop_event = threading.Event()
         self._reads: queue.Queue[MacroRead] = queue.Queue()
+        self._commands: queue.Queue[ScannerCommand] = queue.Queue()
         self._lock = threading.Lock()
         self._tracker = self._new_tracker(CycleState())
         self._dirty = False
@@ -170,7 +184,38 @@ class Worker:
             raise MacroReadError(request.error)
         return request.values or {}
 
+    def scanner_command(self, op: str, timeout_s: float = 20.0) -> str:
+        """Sends `op` to this machine's scanner between samples, on the connection the worker
+        already holds (the scanner accepts only one), and returns the scanner's reply."""
+        if not self.scanner:
+            raise ScannerCommandError("this machine has no scanner assigned")
+        request = ScannerCommand(op)
+        self._commands.put(request)
+        if not request.done.wait(timeout_s):
+            raise ScannerCommandError(f"the scanner did not answer within {timeout_s:.0f}s (worker is {self.phase})")
+        if request.error is not None:
+            raise ScannerCommandError(request.error)
+        return request.reply or ""
+
+    def _serve_commands(self, stopping: bool = False) -> None:
+        while True:
+            try:
+                request = self._commands.get_nowait()
+            except queue.Empty:
+                return
+            try:
+                if stopping:
+                    raise ScannerCommandError("the worker is stopping")
+                request.reply = self.scanner.command(request.op)
+                log.info("[%s] Sent %s to scanner %s: %s", self.settings.machine_number or self.settings.machine_ip,
+                         request.op, self.settings.scanner_ip, request.reply)
+            except Exception as error:  # noqa: BLE001 - reported to whoever asked
+                request.error = f"scanner {self.settings.scanner_ip}: {error}"
+            finally:
+                request.done.set()
+
     def _serve_reads(self, stopping: bool = False) -> None:
+        self._serve_commands(stopping)
         while True:
             try:
                 request = self._reads.get_nowait()

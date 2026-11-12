@@ -57,6 +57,12 @@ class FakeWorker:
     def status(self):
         return {"phase": self.phase}
 
+    def scanner_command(self, op, timeout_s=20.0):
+        from lapper_read.worker import ScannerCommandError
+        if self.fail:
+            raise ScannerCommandError("scanner 10.16.80.57: timed out")
+        return "OK," + op
+
     def read_macros(self, numbers, timeout_s=15.0):
         from lapper_read.worker import MacroReadError
         if self.fail:
@@ -238,6 +244,23 @@ class MacroReadTests(unittest.TestCase):
         self.supervisor._slots["m1"].worker.fail = True
         self.assertEqual(read("m1", "numbers=10020", "Bearer glr_good")[0], 503)
 
+
+    def test_scanner_commands_need_the_collector_token_and_go_to_the_worker_holding_the_scanner(self):
+        self.api.machines = [machine("m1", scanner_ip="10.16.80.57")]
+        self.supervisor.discover_once()
+        self._wait(lambda: self.supervisor._slots["m1"].worker is not None)
+        send = self.supervisor.scanner_command
+        good = "Bearer glr_good"
+        self.assertEqual(send("10.16.80.57", b'{"command": "TUNE01"}', "")[0], 401)
+        self.assertEqual(send("10.16.80.57", b'{"command": "TUNE01"}', "Bearer glr_wrong")[0], 401)
+        self.assertEqual(send("10.16.80.57", b'{"command": "tune\\r"}', good)[0], 400)
+        self.assertEqual(send("10.16.80.57", b"not json", good)[0], 400)
+        self.assertEqual(send("10.16.80.99", b'{"command": "TUNE01"}', good)[0], 404)
+        self.assertEqual(send("", b'{"command": "TUNE01"}', good)[0], 404)
+        code, body = send("10.16.80.57", b'{"command": "TUNE01"}', good)
+        self.assertEqual((code, body["reply"]), (200, "OK,TUNE01"))
+        self.supervisor._slots["m1"].worker.fail = True
+        self.assertEqual(send("10.16.80.57", b'{"command": "TUNE01"}', good)[0], 502)
 
     def test_only_this_collectors_own_token_is_accepted(self):
         import os

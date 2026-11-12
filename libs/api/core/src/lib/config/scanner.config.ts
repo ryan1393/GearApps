@@ -8,6 +8,11 @@ export const scannerConfig = registerAs('scanner', () => ({
   allowInsecureTls: (process.env['SCANNER_ALLOW_INSECURE_TLS'] ?? 'true') === 'true',
   timeoutMs: parseInt(process.env['SCANNER_TIMEOUT_MS'] ?? '4000', 10),
   commandPort: Number(process.env['LAPPER_READ_SCANNER_PORT'] || '9004'),
+  /**
+   * Lapper Read's status server. A scanner accepts one command connection, which the collector holds,
+   * so dashboard commands for a scanner it reads go through it.
+   */
+  collectorUrl: process.env['LAPPER_READ_STATUS_URL'] || 'http://lapper-read:8080',
   ftp: {
     host: process.env['SCANNER_FTP_HOST'] ?? '',
     user: process.env['SCANNER_FTP_USER'] ?? '',

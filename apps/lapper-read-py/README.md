@@ -38,6 +38,10 @@ Full detail, including IPs and errors, is at `http://<docker-host>:8090/status`.
 4. **Change log**: only macros whose value changed since the previous run of that
    gearset on that machine are posted, so each run records what changed.
 5. **Live view**: keeps the scanner serials and Fanuc I/O on the Lapper live view current.
+6. **Scanner controls**: a scanner accepts one command connection, and the worker holds it, so the
+   dashboard's scanner buttons (Tune, Focus, outputs, trigger, test) are sent through the worker:
+   MeshForge posts them to `POST /scanners/<scanner ip>/command` with this collector's token, and
+   the worker sends them between samples. A scanner no worker holds is reached by MeshForge directly.
 
 A run is never recorded under a substitute serial: without a confirmed scan it has no serial.
 Unsent runs stay in `/data` and are retried after network or API outages and restarts.

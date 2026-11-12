@@ -85,6 +85,34 @@ class ScannerTests(unittest.TestCase):
             "INCHK,1",
         ])
 
+    def test_dashboard_commands_share_the_polling_connection_and_replies_stay_in_step(self):
+        serial = "DM1A48B0B7"
+        fake = ScriptedScanner([
+            [b"OK,TUNE\r"],
+            # The trigger's acknowledgement comes before the read result (Keyence SR-1000 format).
+            [b"OK,LON\r", f"{serial}:78:F/A/A:scanner-current.JPG\r".encode("ascii")],
+            # A late acknowledgement from an earlier command is skipped, not taken as the input state.
+            [b"OK,OUTON\r", b"OK,INCHK,OFF\r"],
+            [b"OK,AMON\r"],
+        ])
+        fake.start()
+        scanner = Scanner("127.0.0.1", fake.port, 2)
+        self.addCleanup(scanner.close)
+
+        self.assertEqual(scanner.command("TUNE01"), "OK,TUNE")
+        self.assertEqual(scanner.command("LON01"), f"{serial}:78:F/A/A:scanner-current.JPG")
+        self.assertEqual(scanner.read(ScannerState(None, None)), ScannerState(None, None))
+        self.assertEqual(fake.commands, ["TUNE01", "LON01", "INCHK,1", "AMON"])
+
+    def test_dashboard_command_rejections_and_bad_op_codes(self):
+        fake = ScriptedScanner([[b"ER,FTUNE,02\r"]])
+        fake.start()
+        scanner = Scanner("127.0.0.1", fake.port, 2)
+        self.addCleanup(scanner.close)
+        with self.assertRaises(ValueError):
+            scanner.command("LON\rRESET")
+        self.assertEqual(scanner.command("FTUNE"), "ER,FTUNE,02")
+
     def test_timeout_drops_the_connection_so_the_next_poll_reconnects(self):
         fake = ScriptedScanner([[]])  # never answers
         fake.start()

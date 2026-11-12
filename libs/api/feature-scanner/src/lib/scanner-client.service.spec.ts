@@ -1,8 +1,15 @@
 import { Client as FtpClient, FileInfo, FileType, FTPError } from 'basic-ftp';
-import { createServer, Server } from 'node:net';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { createServer as createHttpServer, IncomingMessage } from 'node:http';
+import { AddressInfo, createServer, Server } from 'node:net';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { ScannerClientService } from './scanner-client.service';
 
-jest.mock('@meshforge/api/core', () => ({ scannerConfig: { KEY: 'scanner' } }));
+jest.mock('@meshforge/api/core', () => ({
+  scannerConfig: { KEY: 'scanner' },
+  ...jest.requireActual('../../../core/src/lib/collector/collector-network'),
+}));
 
 describe('ScannerClientService tuning commands', () => {
   let server: Server;
@@ -41,6 +48,7 @@ describe('ScannerClientService tuning commands', () => {
       allowInsecureTls: true,
       timeoutMs,
       commandPort: port,
+      collectorUrl: 'http://127.0.0.1:1',
       ftp: { host: '', user: '', password: '', root: '', imageFile: '' },
     });
   }
@@ -90,6 +98,7 @@ describe('ScannerClientService capture images', () => {
       allowInsecureTls: true,
       timeoutMs: 1000,
       commandPort: 9004,
+      collectorUrl: 'http://127.0.0.1:1',
       ftp: {
         host: 'ftp.example.test',
         user: 'reader',
@@ -184,6 +193,7 @@ describe('ScannerClientService shared image fetches', () => {
       allowInsecureTls: true,
       timeoutMs: 1000,
       commandPort: 9004,
+      collectorUrl: 'http://127.0.0.1:1',
       ftp: { host: 'ftp.example.test', user: 'reader', password: 'test', root: 'root', imageFile: 'img.jpg' },
     });
   }
@@ -253,6 +263,7 @@ describe('ScannerClientService per-scanner image location', () => {
       allowInsecureTls: true,
       timeoutMs: 1000,
       commandPort: 9004,
+      collectorUrl: 'http://127.0.0.1:1',
       ftp: { host: 'ftp.example.test', user: 'reader', password: 'test', root: '181-lapper-scanners/', imageFile: 'scanner-current.jpg' },
     });
   }
@@ -314,5 +325,85 @@ describe('ScannerClientService per-scanner image location', () => {
 
   it("refuses folder paths with '..'", async () => {
     await expect(client().listFtpFolder('181-lapper-scanners/../secret')).rejects.toThrow("cannot contain '..'");
+  });
+});
+
+describe('ScannerClientService commands through Lapper Read', () => {
+  const scannerIp = '10.16.82.253';
+  const tokenFile = join(mkdtempSync(join(tmpdir(), 'collector-')), 'token');
+  const previous = process.env['LAPPER_READ_TOKEN_FILE'];
+  let seen: { url?: string; auth?: string; body: string }[] = [];
+  let answer: { status: number; body: unknown } = { status: 200, body: {} };
+  const collector = createHttpServer((req: IncomingMessage, res) => {
+    let body = '';
+    req.on('data', (chunk) => (body += chunk));
+    req.on('end', () => {
+      seen.push({ url: req.url, auth: req.headers.authorization, body });
+      res.writeHead(answer.status, { 'Content-Type': 'application/json' }).end(JSON.stringify(answer.body));
+    });
+  });
+  let collectorUrl = '';
+
+  beforeAll(async () => {
+    await new Promise<void>((resolve) => collector.listen(0, '127.0.0.1', resolve));
+    collectorUrl = `http://127.0.0.1:${(collector.address() as AddressInfo).port}`;
+  });
+  afterAll(async () => {
+    await new Promise<void>((resolve) => collector.close(() => resolve()));
+    if (previous === undefined) delete process.env['LAPPER_READ_TOKEN_FILE'];
+    else process.env['LAPPER_READ_TOKEN_FILE'] = previous;
+  });
+  beforeEach(() => {
+    seen = [];
+    writeFileSync(tokenFile, 'glr_docker\n');
+    process.env['LAPPER_READ_TOKEN_FILE'] = tokenFile;
+  });
+
+  function client(commandPort = 1) {
+    return new ScannerClientService({
+      defaultHost: '',
+      allowInsecureTls: true,
+      timeoutMs: 1000,
+      commandPort,
+      collectorUrl,
+      ftp: { host: '', user: '', password: '', root: '', imageFile: '' },
+    });
+  }
+
+  it('sends Tune on the connection the collector holds, with the collector token', async () => {
+    answer = { status: 200, body: { reply: 'OK,TUNE' } };
+
+    await expect(client().sendCommand(scannerIp, { data: 'TUNE01' })).resolves.toEqual({ data: 'OK,TUNE' });
+    expect(seen).toEqual([
+      { url: `/scanners/${scannerIp}/command`, auth: 'Bearer glr_docker', body: JSON.stringify({ command: 'TUNE01' }) },
+    ]);
+  });
+
+  it('reports a scanner rejection and a collector failure without connecting directly', async () => {
+    answer = { status: 200, body: { reply: 'ER,FTUNE,02' } };
+    await expect(client().sendCommand(scannerIp, { data: 'FTUNE' })).rejects.toThrow(
+      `Scanner ${scannerIp} rejected the command (ER,FTUNE,02)`,
+    );
+    answer = { status: 502, body: { message: 'Machine 01-094-292: scanner 10.16.82.253: timed out' } };
+    await expect(client().sendCommand(scannerIp, { data: 'OUTON,1' })).rejects.toThrow('timed out');
+  });
+
+  it('connects directly when the collector does not hold the scanner', async () => {
+    answer = { status: 404, body: { message: 'No collector worker holds scanner 127.0.0.1.' } };
+    const scanner = createServer((socket) => socket.on('data', () => socket.write('OK,TUNE\r')));
+    await new Promise<void>((resolve) => scanner.listen(0, '127.0.0.1', resolve));
+    try {
+      const port = (scanner.address() as AddressInfo).port;
+      await expect(client(port).sendCommand('127.0.0.1', { data: 'TUNE01' })).resolves.toEqual({ data: 'OK,TUNE' });
+      expect(seen).toHaveLength(1);
+    } finally {
+      await new Promise<void>((resolve) => scanner.close(() => resolve()));
+    }
+  });
+
+  it('does not ask the collector without its token', async () => {
+    writeFileSync(tokenFile, '');
+    await expect(client().sendCommand('127.0.0.1', { data: 'TUNE01' })).rejects.toThrow('Scanner 127.0.0.1:1');
+    expect(seen).toEqual([]);
   });
 });
