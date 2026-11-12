@@ -41,6 +41,29 @@ The first time the reader is enabled it creates four additive tables in the Mesh
 `dana_dsf_cutter_machine_state_v1` and `dana_dsf_cutter_run_shifts_v1`. They match the original
 DSF migrations, so a database that already has them keeps its mappings and ledger.
 
+## Getting it working
+
+1. Set `DSF_COUNT_ENABLED=true` and the `DSF_DB_*` settings (in `.env` or Admin > Server
+   Settings), then restart the API.
+2. Open Admin > DSF Mappings. The banner at the top says what is wrong:
+   - **Reader not running: <setting> ...** a setting is missing or invalid. It names the setting.
+   - **The last DSF read failed: ... (CODE)** the settings are complete but the connection or the
+     checks failed. The banner explains the common codes:
+
+     | Code | Usually means |
+     |---|---|
+     | `ECONNREFUSED`, `CONNECT_TIMEOUT`, `ETIMEDOUT`, `EHOSTUNREACH` | Wrong `DSF_DB_HOST`/`DSF_DB_PORT`, or a firewall (or the Docker network) between the API and DSF. |
+     | `SSL_NOT_SUPPORTED` | The DSF server has no SSL: set `DSF_DB_SSL_MODE=disable`. |
+     | `DEPTH_ZERO_SELF_SIGNED_CERT`, `SELF_SIGNED_CERT_IN_CHAIN`, `ERR_TLS_CERT_ALTNAME_INVALID` | `verify-full` cannot verify the DSF certificate: supply its CA in `DSF_DB_SSL_CA_PEM`, or use `disable` on a trusted plant network. |
+     | `28P01` / `28000` | Wrong password / DSF's `pg_hba.conf` refuses this login from the API host (try the other SSL mode). |
+     | `3D000` / `42P01` | `DSF_DB_NAME` is not the DSF database. |
+     | `READ_ONLY_ROLE_REQUIRED` | The login is not a restricted read-only role; see Settings above. |
+     | `CLOCK_DIFFERENCE` | The API server and DSF clocks are more than 10 seconds apart. |
+3. Once the banner says **DSF reader running**, open a machine, choose its source and save. If no
+   sources are listed, the editor says why (for example, no DSF department is named like `Dept. 132`).
+4. Check the DSF Count against the shop floor for a few shifts before turning on
+   `DSF_CUTTER_WRITE_ENABLED`.
+
 ## Machine mapping
 
 Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operation + line). Admin mappings allow every numeric DSF department and its approved operation, including grinding and lapping. Source discovery works before the first mapping is configured. The machine and source departments must match.

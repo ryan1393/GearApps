@@ -20,7 +20,8 @@ import { ensureDsfCutterSchema } from './dsf-schema';
 
 type Machine = {machine_id:string;machine_number:string;department:string;machine_type:string;active:boolean};
 type SourceClient = { connect():Promise<void>;query(text:string,values?:unknown[]):Promise<{rows:any[]}>;end():Promise<void>;on(event:string,fn:(e:unknown)=>void):void; };
-interface Config { enabled:boolean; valid:boolean; interval:number; machines:Set<string>; client:Record<string,unknown>; privilegedAccountAcknowledged?:boolean; }
+interface Config { enabled:boolean; valid:boolean; interval:number; machines:Set<string>; client:Record<string,unknown>; privilegedAccountAcknowledged?:boolean;
+  /** Why an enabled reader is not running: names the setting, never its value. */ problem?:string; }
 
 type SourceOption = {
   mapping_id:string; whiteboard_id:string; op_id:string; line_id:string; department_id:string;
@@ -73,6 +74,10 @@ export function dsfAccountPolicy(config:Config,account:any,rights:any):string {
     return 'USER_APPROVED_PRIVILEGED_ACCOUNT_APP_READ_ONLY';
   throw new DsfRefusal('READ_ONLY_ROLE_REQUIRED');
 }
+/**
+ * Reads the DSF_* settings. When DSF is enabled but the settings cannot be used, `problem` says
+ * which setting is wrong (never its value), so Admin > DSF Mappings and the start-up log can say so.
+ */
 export function readDsfConfig(env:NodeJS.ProcessEnv): Config {
   const enabled=env['DSF_COUNT_ENABLED']==='true';
   const integer=(key:string,def:number,min:number,max:number)=>{
@@ -81,32 +86,45 @@ export function readDsfConfig(env:NodeJS.ProcessEnv): Config {
     const n=Number(v);return n>=min&&n<=max?n:NaN;
   };
   const interval=integer('DSF_COUNT_INTERVAL_SECONDS',60,30,3600);
-  const off={enabled,valid:false,interval:Number.isFinite(interval)?interval:60,machines:new Set<string>(),client:{}};
-  if(!enabled)return off; // Do not read secret files or construct a client while disabled.
+  const off=(problem?:string):Config=>({enabled,valid:false,interval:Number.isFinite(interval)?interval:60,machines:new Set<string>(),client:{},...(problem?{problem}:{})});
+  if(!enabled)return off(); // Do not read secret files or construct a client while disabled.
   const host=env['DSF_DB_HOST']?.trim(),database=env['DSF_DB_NAME']?.trim(),user=env['DSF_DB_USER']?.trim();
   const port=integer('DSF_DB_PORT',5432,1,65535);
   const acknowledgment=env['DSF_PRIVILEGED_READER_ACK'];
   const privilegedAccountAcknowledged=acknowledgment===DSF_PRIVILEGED_ACK;
-  if(acknowledgment && (!privilegedAccountAcknowledged || !dsfAckSource(host,database,user)))return off;
+  if(acknowledgment && !privilegedAccountAcknowledged)
+    return off('DSF_PRIVILEGED_READER_ACK is set but is not the exact acknowledgment text; clear it or see DSF_COUNTS.md.');
+  if(acknowledgment && !dsfAckSource(host,database,user))
+    return off('DSF_PRIVILEGED_READER_ACK is only accepted for the recorded plant source (host 10.16.80.10, database maindblocal, login dana_dsf_reader or whiteboard); clear it for any other source.');
   const machineValues=(env['DSF_COUNT_MACHINES']||'').split(',').map(x=>x.trim()).filter(Boolean);
-  if(!host||!database||!user||!Number.isFinite(port)||!Number.isFinite(interval)||
-    machineValues.length>1000||machineValues.some(x=>!/^[A-Za-z0-9-]{1,20}$/.test(x))||new Set(machineValues).size!==machineValues.length) return off;
+  if(!host)return off('DSF_DB_HOST is empty.');
+  if(!database)return off('DSF_DB_NAME is empty.');
+  if(!user)return off('DSF_DB_USER is empty.');
+  if(!Number.isFinite(port))return off('DSF_DB_PORT must be a whole number from 1 to 65535.');
+  if(!Number.isFinite(interval))return off('DSF_COUNT_INTERVAL_SECONDS must be a whole number from 30 to 3600.');
+  if(machineValues.length>1000||machineValues.some(x=>!/^[A-Za-z0-9-]{1,20}$/.test(x))||new Set(machineValues).size!==machineValues.length)
+    return off('DSF_COUNT_MACHINES must be distinct machine numbers separated by commas (or empty).');
   // Never inherit PG* defaults or fall back to the Dana Apps database credentials.
-  if(host===env['DATABASE_HOST']&&database===env['DATABASE_NAME'])return off;
+  if(host===env['DATABASE_HOST']&&database===env['DATABASE_NAME'])
+    return off('DSF_DB_HOST and DSF_DB_NAME point at the MeshForge database itself, not DSF.');
   let password=env['DSF_DB_PASSWORD'];
+  let reading='DSF_DB_PASSWORD_FILE';
   try {
     if(env['DSF_DB_PASSWORD_FILE']) {
-      if(password)return off;
+      if(password)return off('Set DSF_DB_PASSWORD or DSF_DB_PASSWORD_FILE, not both.');
       password=readFileSync(env['DSF_DB_PASSWORD_FILE'],'utf8').replace(/\r?\n$/,'');
     }
-    if(!password)return off;
+    if(!password)return off(env['DSF_DB_PASSWORD_FILE']?'DSF_DB_PASSWORD_FILE is empty.':'DSF_DB_PASSWORD is empty.');
     const mode=env['DSF_DB_SSL_MODE']||'verify-full';
-    if(!['verify-full','disable'].includes(mode))return off;
+    if(!['verify-full','disable'].includes(mode))return off('DSF_DB_SSL_MODE must be verify-full or disable.');
     let ssl:unknown=false;
     if(mode==='verify-full') {
-      if(env['DSF_DB_SSL_CA_FILE'] && env['DSF_DB_SSL_CA_PEM'])return off;
+      if(env['DSF_DB_SSL_CA_FILE'] && env['DSF_DB_SSL_CA_PEM'])return off('Set DSF_DB_SSL_CA_FILE or DSF_DB_SSL_CA_PEM, not both.');
+      reading='DSF_DB_SSL_CA_FILE';
       const ca=env['DSF_DB_SSL_CA_PEM'] || (env['DSF_DB_SSL_CA_FILE']?readFileSync(env['DSF_DB_SSL_CA_FILE'],'utf8'):undefined);
-      if(ca && (!ca.includes('-----BEGIN CERTIFICATE-----') || /PRIVATE KEY/.test(ca) || ca.length>131072))return off;
+      const caKey=env['DSF_DB_SSL_CA_PEM']?'DSF_DB_SSL_CA_PEM':'DSF_DB_SSL_CA_FILE';
+      if(ca && (!ca.includes('-----BEGIN CERTIFICATE-----') || /PRIVATE KEY/.test(ca) || ca.length>131072))
+        return off(caKey+' must hold PEM certificate(s) (-----BEGIN CERTIFICATE-----) and no private key.');
       ssl={rejectUnauthorized:true,...(ca?{ca}:{})};
     }
     return {enabled:true,valid:true,interval,machines:new Set(machineValues),privilegedAccountAcknowledged,client:{
@@ -114,7 +132,22 @@ export function readDsfConfig(env:NodeJS.ProcessEnv): Config {
       connectionTimeoutMillis:5000,query_timeout:7000,statement_timeout:5000,lock_timeout:1000,
       options:'-c default_transaction_read_only=on',keepAlive:true,
     }};
-  } catch { return off; }
+  } catch { return off(reading+' could not be read by the API process.'); }
+}
+
+/**
+ * A short, secret-free code for a failed DSF connection or query. Driver and OS errors carry one
+ * (ECONNREFUSED, 28P01, ...); a few `pg` and TLS failures only carry a message, so name those here.
+ */
+export function dsfFailureCode(e:unknown):string|null {
+  const raw=(e as {code?:unknown}|null)?.code;
+  if(typeof raw==='string'&&/^[A-Z0-9_]{2,40}$/.test(raw))return raw;
+  const message=e instanceof Error?e.message:'';
+  if(/does not support SSL/i.test(message))return 'SSL_NOT_SUPPORTED';
+  if(/timeout expired|Connection terminated due to connection timeout/i.test(message))return 'CONNECT_TIMEOUT';
+  if(/Query read timeout/i.test(message))return 'QUERY_TIMEOUT';
+  if(/Connection terminated/i.test(message))return 'CONNECTION_TERMINATED';
+  return null;
 }
 
 @Injectable()
@@ -146,14 +179,20 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
     if(!this.config.enabled)return;
     if(!this.config.valid) {
       // Enabled but unusable settings must be visible, not a silent "not configured".
-      this.logger.warn('DSF_COUNT_ENABLED=true but the DSF_* settings are incomplete or invalid; the DSF reader is not running.');
+      this.logger.warn('DSF_COUNT_ENABLED=true but the DSF reader is not running: '+(this.config.problem||'the DSF_* settings are incomplete or invalid.'));
       return;
     }
     try { await ensureDsfCutterSchema(this.db); }
-    catch { this.logger.error('DSF tables could not be prepared in the MeshForge database; the DSF reader is not running.');return; }
+    catch(e) {
+      const code=dsfFailureCode(e);
+      this.schemaProblem='The DSF tables could not be created in the MeshForge database'+(code?' ('+code+')':'')+'. Check the API log, then restart the API.';
+      this.logger.error('DSF tables could not be prepared in the MeshForge database; the DSF reader is not running.'+(code?' ('+code+')':''));return;
+    }
     this.schemaReady=true;this.readerState='WAITING';this.schedule(1000);
   }
   private schemaReady=false;
+  private schemaProblem:string|null=null;
+  private sourceOptionsProblem:{reason:string;code:string|null}|null=null;
   onModuleDestroy():void {
     this.stopped=true;if(this.timer)clearTimeout(this.timer);
     if(this.source)void this.source.end().catch(()=>undefined);
@@ -244,6 +283,8 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
     return {format:'DSFMAPADMIN1',status:live.status,configured:live.configured,interval_seconds:live.interval_seconds,
       last_success_at:live.last_success_at,served_at:live.served_at,cutter_write_enabled:live.cutter_write_enabled,
       enabled:this.config.enabled,last_failure:this.lastFailure,account_policy:live.account_policy,
+      config_problem:this.config.enabled?(this.config.problem||this.schemaProblem):null,
+      source_options_problem:this.sourceOptionsProblem,
       source_options_status:this.sourceOptions.length?'READY':'WAITING',source_options_refreshed_at:this.sourceOptionsRefreshedAt,
       source_options:this.sourceOptions.map(option=>({...option,assigned_machine_id:assigned.get(option.mapping_id)||null})),
       rows:live.rows.map(row=>{
@@ -428,7 +469,14 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
         const valid=options.filter(x=>this.uuid(x.mapping_id)&&this.uuid(x.whiteboard_id)&&this.uuid(x.op_id)&&this.uuid(x.line_id)&&
           this.uuid(x.department_id)&&/^[0-9]+$/.test(x.department)&&typeof x.line_name==='string'&&x.line_name.trim().length>0&&typeof x.whiteboard_name==='string'&&x.whiteboard_name.trim().length>0);
         this.sourceOptions=valid;this.sourceOptionsRefreshedAt=at;
-      } catch { this.sourceOptions=[];this.sourceOptionsRefreshedAt=null; }
+        this.sourceOptionsProblem=valid.length?null:{reason:options.length?'NO_VALID_SOURCES':'NO_SOURCES',code:null};
+      } catch(e) {
+        this.sourceOptions=[];this.sourceOptionsRefreshedAt=null;
+        const reason=e instanceof DsfRefusal?e.reason:'SOURCE_LIST_QUERY_FAILED',code=dsfFailureCode(e);
+        if(this.sourceOptionsProblem?.reason!==reason||this.sourceOptionsProblem?.code!==code)
+          this.logger.warn('DSF source list could not be read: '+reason+(code?' ('+code+')':''));
+        this.sourceOptionsProblem={reason,code};
+      }
       // The five grinders share this *same* validated, read-only DSF connection.
       // Errors in their stream cannot block the existing cutter-count writer.
       let grinderBatches:GrinderBatch[]=[];
@@ -501,8 +549,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       const reason=e instanceof DsfRefusal?e.reason:'SOURCE_CONNECTION_OR_QUERY_FAILED';
       // Driver/OS error codes (ECONNREFUSED, ETIMEDOUT, 28P01, ...) identify a wrong port, SSL
       // mode or password without exposing the message, host or credentials.
-      const rawCode=(e as {code?:unknown}|null)?.code;
-      const code=typeof rawCode==='string'&&/^[A-Z0-9_]{2,40}$/.test(rawCode)?rawCode:null;
+      const code=dsfFailureCode(e);
       if(this.lastFailure?.reason!==reason||this.lastFailure?.code!==code)
         this.logger.warn('DSF refresh failed: '+reason+(code?' ('+code+')':''));
       this.lastFailure={reason,code,at:new Date().toISOString()};

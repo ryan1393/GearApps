@@ -37,6 +37,15 @@
     counts by part type, shared rings/pinions/Summaries, status and archive state with linked
     parts, integrity findings, and each gearset's Summary blade rule. `--seed <file>` compares a
     historical seed and lists its import rules without applying them.
+- **DSF: say why counts are not coming in.** When `DSF_COUNT_ENABLED=true` but a setting is wrong,
+  the API start-up log and Admin > DSF Mappings now name the setting (for example "DSF_DB_HOST is
+  empty" or "DSF_DB_SSL_MODE must be verify-full or disable"), never its value; before, both only
+  said the settings were "incomplete or invalid". A failed DSF read now also explains its code in
+  plain words (ECONNREFUSED: check host and port; 28P01: wrong password; SSL_NOT_SUPPORTED: set
+  `DSF_DB_SSL_MODE=disable`, ...), and pg failures that carry no code (no SSL on the server,
+  connection timeout) get one. If the DSF source list cannot be read or is empty, the mapping editor
+  says so instead of waiting for it forever. `GET /api/v1/greenshed/dsf-counts/admin-mappings` adds
+  `config_problem` and `source_options_problem`.
 - **Cycle time in Lapping Summaries.** Lapper Read now also records each cycle's time (seconds in
   cycle, Y3.2) in MeshForge, not only in Argonaut. Lapping Summaries shows it in a Cycle time
   column (minutes:seconds, such as 2:04.3; exact seconds on hover) and at the top: the latest
