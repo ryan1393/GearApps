@@ -68,6 +68,13 @@ DSF migrations, so a database that already has them keeps its mappings and ledge
 
 Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operation + line). Admin mappings allow every numeric DSF department and its approved operation, including grinding and lapping. Source discovery works before the first mapping is configured. The machine and source departments must match.
 
+DSF departments are named like `Dept. 132`. Some have a plain name instead: the CutGrind
+grinders (`CutGrind 3 1-24-79`) are in the DSF department `CUTTER GRIND`, which is MeshForge
+Department 45. `DSF_DEPARTMENT_NAMES` lists those as `NAME=department` pairs, comma separated
+(case and extra spaces ignored); empty means `CUTTER GRIND=45`. Setting it replaces the default,
+so keep `CUTTER GRIND=45` in the list when adding others. Sources in any other department are not
+listed.
+
 - **Reference list.** The archived identities in `dsf-mappings.ts`. A reference mapping is used
   only for machine numbers listed in `DSF_COUNT_MACHINES`, and never when it is marked blocked.
 - **Map Unique Matches** (Admin > DSF Mappings). Lists every machine whose DSF source is the
@@ -79,8 +86,9 @@ Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operati
   checks and audit row.
 - **Rough Match** (Admin > DSF Mappings). Lists every DSF source against every active machine,
   matched loosely by machine number: the number anywhere in the whiteboard name, or in the line
-  name (not counting the department number), ignoring case, punctuation and leading zeros
-  (`G01` = `GRINDER G-1`); a lettered number whose digits alone match is the weakest match. Only
+  name (not counting the department number). Words and numbers are compared apart, ignoring case,
+  punctuation and leading zeros, so machine `1-24-79`, `79` or `CutGrind 3` all match
+  `CutGrind 3 1-24-79`; a lettered number whose digits alone match (`G03`) is the weakest match. Only
   free, eligible sources in the machine's own department are offered. When one source is clearly
   the best for one machine it is picked; otherwise the administrator chooses from the candidates.
   Machines that already have a working source are shown (flagged when the source name does not

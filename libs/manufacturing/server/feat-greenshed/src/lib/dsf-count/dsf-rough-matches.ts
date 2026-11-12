@@ -5,8 +5,9 @@
  *  - ENDS_IN_NUMBER   the whiteboard name ends in the machine number   ("132 PIN CUTTER 549" -> 549)
  *  - NAME_HAS_NUMBER  the number is anywhere in the whiteboard name    ("549 PIN CUTTER" -> 549)
  *  - LINE_HAS_NUMBER  the number is only in the line name              ("Line132-PIN_549" -> 549)
- *  - DIGITS_ONLY      only the digits of a lettered number match       ("GRINDER 1" -> G01)
- * Case, punctuation and leading zeros are ignored ("G01" = "g-1"). A source is only offered to a
+ *  - DIGITS_ONLY      only the digits of a lettered number match       ("CutGrind 3 1-24-79" -> G03)
+ * Words and numbers are compared apart, ignoring case, punctuation and leading zeros, so machine
+ * "1-24-79", "79", "CutGrind 3" and (weakest) "G03" all match "CutGrind 3 1-24-79". A source is only offered to a
  * machine in the same department (the Admin save refuses anything else) and only when it is
  * eligible and not already used by another machine. When one source is clearly the best for one
  * machine it is proposed; otherwise the administrator picks from the candidates. Nothing is saved
@@ -54,42 +55,37 @@ export interface RoughMatchResult { machines: RoughMachine[]; sources: RoughSour
 export function canonical(value: string): string {
   return String(value ?? '').toUpperCase().replace(/[^A-Z0-9]+/g, '').replace(/[0-9]+/g, run => run.replace(/^0+(?=[0-9])/, ''));
 }
-const digitRuns = (value: string): string[] => (String(value ?? '').match(/[0-9]+/g) ?? []).map(canonical);
-const words = (value: string): string[] => String(value ?? '').toUpperCase().split(/[^A-Z0-9]+/).filter(Boolean).map(canonical);
+/** Words and numbers, apart: "CutGrind 3 1-24-79" -> CUTGRIND 3 1 24 79, "G-01" -> G 1. */
+export function nameParts(value: string): string[] {
+  return (String(value ?? '').toUpperCase().match(/[A-Z]+|[0-9]+/g) ?? []).map(part => part.replace(/^0+(?=[0-9])/, ''));
+}
+const isNumber = (part: string) => /^[0-9]+$/.test(part);
 
-/** Where in the name the machine number appears: -1 nowhere, 1 at the end, 0 elsewhere. */
-function find(number: string, name: string, ignore: string | null): -1 | 0 | 1 {
-  if (/^[0-9]+$/.test(number)) {
-    const runs = digitRuns(name);
-    if (/[0-9]+\s*$/.test(name) && runs[runs.length - 1] === number && number !== ignore) return 1;
-    return runs.some(run => run === number && run !== ignore) ? 0 : -1;
-  }
-  // A lettered number may be split over up to three words: "G 01", "LAP-3".
-  const list = words(name);
+/** Where the machine's parts appear, in order and together, in the name: -1 nowhere, 1 at the end, 0 elsewhere. */
+function find(number: readonly string[], name: readonly string[], ignore: string | null): -1 | 0 | 1 {
+  if (!number.length || (number.length === 1 && number[0] === ignore)) return -1;
   let found: -1 | 0 | 1 = -1;
-  for (let start = 0; start < list.length; start++) {
-    let joined = '';
-    for (let end = start; end < Math.min(list.length, start + 3); end++) {
-      joined += list[end];
-      if (joined === number) found = end === list.length - 1 ? 1 : (found === 1 ? 1 : 0);
-    }
+  for (let start = 0; start + number.length <= name.length; start++) {
+    if (number.every((part, i) => name[start + i] === part)) found = start + number.length === name.length ? 1 : (found === 1 ? 1 : 0);
   }
   return found;
 }
 
 /** How a DSF source's names match a machine number, or null when they do not. */
 export function roughMatch(machineNumber: string, source: { department: string; whiteboard_name: string; line_name: string }): RoughMatchReason | null {
-  const number = canonical(machineNumber);
-  if (!number) return null;
-  const inName = find(number, source.whiteboard_name, null);
+  const number = nameParts(machineNumber);
+  if (!number.length) return null;
+  const name = nameParts(source.whiteboard_name);
+  const inName = find(number, name, null);
   if (inName === 1) return 'ENDS_IN_NUMBER';
   if (inName === 0) return 'NAME_HAS_NUMBER';
   // Line names carry the department ("Line132-PIN_549"); that number never identifies a machine.
-  if (find(number, source.line_name, canonical(source.department)) >= 0) return 'LINE_HAS_NUMBER';
-  const digits = digitRuns(machineNumber);
-  if (/[A-Z]/.test(number) && digits.length === 1) {
-    const runs = digitRuns(source.whiteboard_name);
-    if (runs.length && runs[runs.length - 1] === digits[0]) return 'DIGITS_ONLY';
+  if (find(number, nameParts(source.line_name), canonical(source.department)) >= 0) return 'LINE_HAS_NUMBER';
+  // A lettered number (G03) whose digits are the number of a named machine: "CutGrind 3 1-24-79", "GRINDER 3".
+  const digits = number.filter(isNumber);
+  if (digits.length === 1 && digits.length < number.length) {
+    const at = name.map((part, i) => part === digits[0] && (i === name.length - 1 || (i > 0 && !isNumber(name[i - 1]))));
+    if (at.some(Boolean)) return 'DIGITS_ONLY';
   }
   return null;
 }

@@ -219,6 +219,8 @@ export const validationSchema = Joi.object({
   DSF_CUTTER_WRITE_ENABLED: Joi.string().valid('true', 'false', '').optional(),
   DSF_COUNT_INTERVAL_SECONDS: Joi.number().integer().min(30).max(3600).empty('').optional(),
   DSF_COUNT_MACHINES: Joi.string().allow('').pattern(/^[A-Za-z0-9-]{1,20}(\s*,\s*[A-Za-z0-9-]{1,20})*$/).optional(),
+  // DSF departments with a plain name instead of "Dept. N": NAME=code, comma separated. Empty means CUTTER GRIND=45.
+  DSF_DEPARTMENT_NAMES: Joi.string().allow('').pattern(/^\s*[^=,]{1,60}=\s*[0-9]{1,10}\s*(,\s*[^=,]{1,60}=\s*[0-9]{1,10}\s*)*$/).optional(),
   DSF_DB_HOST: Joi.string().allow('').optional(),
   DSF_DB_PORT: Joi.number().integer().min(1).max(65535).empty('').optional(),
   DSF_DB_NAME: Joi.string().allow('').optional(),

@@ -183,6 +183,7 @@ export const ENVIRONMENT_SETTING_GROUPS: readonly EnvironmentSettingGroup[] = [
       flag('DSF_CUTTER_WRITE_ENABLED', 'Credit DSF production to cutters', 'Only applies while DSF counts are read.'),
       number('DSF_COUNT_INTERVAL_SECONDS', 'Read every (seconds)', '30 to 3600.'),
       text('DSF_COUNT_MACHINES', 'Reference-mapped machines', 'Machine numbers, comma separated. Machines mapped in DSF Mappings need not be listed.'),
+      text('DSF_DEPARTMENT_NAMES', 'Named DSF departments', 'DSF departments not named like "Dept. 132", as NAME=MeshForge department, comma separated. Empty means CUTTER GRIND=45 (the CutGrind grinders).'),
       text('DSF_DB_HOST', 'DSF database host'),
       number('DSF_DB_PORT', 'DSF database port'),
       text('DSF_DB_NAME', 'DSF database name'),

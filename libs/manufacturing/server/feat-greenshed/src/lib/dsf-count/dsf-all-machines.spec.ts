@@ -45,10 +45,11 @@ describe('DSF counts across machine departments', () => {
       if (sql === SOURCE_IDENTITY_SQL) rows = [{ is_source: true, not_meshforge: true, read_only: true, now_utc: at }];
       else if (sql === ROLE_CHECK_SQL) rows = [{ can_read: true, role_safe: true, no_database_create: true, no_schema_create: true, no_source_writes: true }];
       else if (sql.includes('session_login')) rows = [{ database_name: 'dsf', session_login: 'reader', effective_login: 'reader', read_only: true }];
-      else if (sql.includes('substring(d.name')) rows = options;
+      // DSF names the grinders' department CUTTER GRIND, not "Dept. 45".
+      else if (sql.includes('substring(d.name')) rows = options.map(o => o.department === '45' ? { ...o, department: null, department_name: 'CUTTER GRIND' } : { ...o, department_name: `Dept. ${o.department}` });
       else if (sql === MAPPING_SQL) {
         const option = options.find(row => row.mapping_id === params?.[0])!;
-        rows = [{ ...option, department_name: `Dept. ${option.department}`, op_name: 'GRIND_OR_LAP', operation_line_matches: true, mapping_active: true, whiteboard_active: true, running_reasons: 1 }];
+        rows = [{ ...option, department_name: option.department === '45' ? 'CUTTER GRIND' : `Dept. ${option.department}`, op_name: 'GRIND_OR_LAP', operation_line_matches: true, mapping_active: true, whiteboard_active: true, running_reasons: 1 }];
       } else if (sql === SHIFTS_SQL) rows = [{ id: uuid(90), number: 1, starts_at: start, ends_at: end, local_date: at.slice(0,10) }];
       else if (sql === CYCLES_SQL) {
         const option = options.find(row => row.mapping_id === params?.[1])!;
@@ -66,7 +67,8 @@ describe('DSF counts across machine departments', () => {
     expect(apply).toHaveBeenLastCalledWith(expect.anything(), []);
     overrides = [];
     await (service as unknown as { poll(): Promise<void> }).poll();
-    expect((await service.adminSnapshot()).source_options).toHaveLength(3);
+    expect((await service.adminSnapshot()).source_options.map(o => o.department)).toEqual(['45', '181', '132']);
+    expect(client.query).toHaveBeenCalledWith(expect.stringContaining('substring(d.name'), [['CUTTER GRIND']]);
     expect(service.snapshot().rows.every(row => row.count === null)).toBe(true);
     expect(client.query).toHaveBeenCalledWith('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
     service.onModuleDestroy();

@@ -8,9 +8,15 @@
   button that opens them underneath, in columns: macro, name, previous → new value and the
   difference. Cycle history has its own column.
 
+- **DSF: CutGrind grinders are found.** The DSF source list only took departments named like
+  `Dept. 45`, but DSF names the grinders' department `CUTTER GRIND`, so the CutGrind machines never
+  appeared. A new setting, `DSF_DEPARTMENT_NAMES` (Admin > Server Settings > DSF), maps such names to
+  a MeshForge department; empty means `CUTTER GRIND=45`.
+
 - **DSF: Rough Match.** Admin > DSF Mappings has a **Rough Match** button that lists every DSF
   source against all your active machines, matched loosely by machine number (anywhere in the
-  whiteboard or line name, ignoring case, dashes and leading zeros). A clear best match is picked
+  whiteboard or line name, ignoring case, dashes and leading zeros: machine `1-24-79`, `79`,
+  `CutGrind 3` or `G03` all match `CutGrind 3 1-24-79`). A clear best match is picked
   for each unmapped machine; where several sources fit you choose one from a list. Already-mapped
   machines are shown, flagged when their source name does not look like the machine, and the full
   DSF source list says where each source goes. Only sources in the machine's own department can be
