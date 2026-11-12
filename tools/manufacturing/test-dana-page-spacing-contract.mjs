@@ -1,13 +1,20 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { execFileSync } from 'node:child_process';
+import path from 'node:path';
 import ts from 'typescript';
 import postcss from 'postcss';
 
 // Application component styles may arrange content; shared Dana UI owns its appearance.
 // Standalone paper/label documents are not application component styles.
-const files=execFileSync('rg',['--files','apps','libs/client','libs/manufacturing/frontend'],{encoding:'utf8'})
-  .trim().split('\n').filter(file=>/\.(css|scss|ts|html)$/.test(file)&&!file.endsWith('.spec.ts'));
+function* sourceFiles(directory){
+  for(const entry of fs.readdirSync(directory,{withFileTypes:true})){
+    const file=path.join(directory,entry.name);
+    if(entry.isDirectory())yield* sourceFiles(file);
+    else if(entry.isFile()&&/\.(css|scss|ts|html)$/.test(file)&&!file.endsWith('.spec.ts'))yield file;
+  }
+}
+// Source contracts also run in clean CI/release environments without developer CLIs.
+const files=['apps','libs/client','libs/manufacturing/frontend'].flatMap(directory=>[...sourceFiles(directory)]).sort();
 const paint=/^(?:color|background(?:-.*)?|border(?:-(?:color|radius|top|right|bottom|left|inline|block)(?:-.*)?)?|box-shadow|text-shadow|font(?:-size|-weight|-family|-style)?|line-height|letter-spacing|text-transform|outline(?:-color|-style|-width)?)$/;
 const violations=[];
 let stylesheets=0;
