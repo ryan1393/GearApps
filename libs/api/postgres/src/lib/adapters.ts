@@ -89,6 +89,9 @@ export class PostgresCycles extends PostgresCrudAdapter<MachineCycle> {
   constructor(store: PostgresLapperStore) {
     super(store, 'machine-cycle');
   }
+  findPage(page: number, pageSize: number): Promise<MachineCycle[]> {
+    return project(this.store.catalog.cyclePage(page, pageSize));
+  }
   findByMachine(id: string): Promise<MachineCycle[]> {
     return project(this.store.catalog.cycles({ machineId: id }));
   }
@@ -117,6 +120,9 @@ export class PostgresCycles extends PostgresCrudAdapter<MachineCycle> {
 export class PostgresLogs extends PostgresCrudAdapter<MacroLog> {
   constructor(store: PostgresLapperStore) {
     super(store, 'macro-log');
+  }
+  findPage(page: number, pageSize: number): Promise<MacroLog[]> {
+    return project(this.store.catalog.logs(undefined, undefined, { page, pageSize }));
   }
   lappingSummary(machine: string, gearset: string, form?: string, cycleId?: string, upToCycleId?: string): Promise<LappingSummaryRow[]> {
     return project(this.store.catalog.summary(machine, gearset, form, cycleId, upToCycleId));

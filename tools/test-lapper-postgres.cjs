@@ -472,6 +472,13 @@ test('Lapper uses the shared MeshForge PostgreSQL database', { timeout: 180000 }
           first.id,
         );
         assert.equal(first.timestamp, body.timestamp);
+        // The write response reads only what it needs; it must match the full lists.
+        assert.deepEqual(first.gearset, gears.find((g) => g.id === first.gearset_id));
+        assert.deepEqual(first.machine, machines.find((m) => m.id === first.machine_id));
+        const page = await request('GET', 'machine-cycle?page=1&pageSize=5', undefined, operator);
+        assert.ok(Array.isArray(page) && page.length <= 5);
+        assert.ok((await request('GET', 'machine-cycle', undefined, operator)).length <= 1000);
+        assert.ok((await request('GET', 'macro-log?pageSize=3', undefined, operator)).length <= 3);
         await request('POST', 'machine-cycle', { ...body, consec: 78 }, collector, 409, key);
         const logBody = { machine_cycle_id: first.id, macro_id: macros[0].id, value: -12.34567 };
         const logKey = randomUUID();
