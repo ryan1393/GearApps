@@ -4,6 +4,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, Elem
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import {
+  DanaConfirmDialogComponent,
   DanaSummaryCardDirective,
   DanaSummaryGridDirective,
   DanaTableDirective,
@@ -71,7 +72,7 @@ interface DsfRoughMatches { machines: DsfRoughMachine[]; sources: DsfRoughSource
 @Component({
   selector: 'gear-admin-dsf-machine-mappings',
   standalone: true,
-  imports: [DanaToneDirective, CommonModule, FormsModule, DanaSummaryGridDirective, DanaSummaryCardDirective, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
+  imports: [DanaConfirmDialogComponent, DanaToneDirective, CommonModule, FormsModule, DanaSummaryGridDirective, DanaSummaryCardDirective, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective],
   templateUrl: './dsf-machine-mappings.component.html',
   styleUrls: ['./dsf-machine-mappings.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -210,7 +211,7 @@ export class DsfMachineMappingsComponent implements OnInit {
     // The editor sits above a long list: bring it into view and move focus to it.
     setTimeout(() => { const el = this.editor?.nativeElement; el?.scrollIntoView({ block: 'start', behavior: 'smooth' }); el?.focus({ preventScroll: true }); });
   }
-  close(): void { this.selectedMachineId = null; this.sourceSearch = ''; this.selectedMappingId = ''; }
+  close(): void { this.confirmingUnmap = false; this.selectedMachineId = null; this.sourceSearch = ''; this.selectedMappingId = ''; }
   choose(option: DsfSourceOption): void { this.selectedMappingId = option.mapping_id; }
 
   save(): void {
@@ -223,9 +224,12 @@ export class DsfMachineMappingsComponent implements OnInit {
         error: (e: HttpErrorResponse) => { this.saving = false; this.error = this.errorText(e, 'Mapping save failed.'); this.cdr.markForCheck(); },
       });
   }
-  unmap(): void {
+  /** True while the administrator is asked to confirm unmapping the selected machine. */
+  confirmingUnmap = false;
+  unmap(confirmed = false): void {
     const row = this.selected; if (!row || this.saving) return;
-    if (!globalThis.confirm(`Unmap the DSF source from machine ${row.machine_number}? DSF counts for this machine stop until a source is selected again.`)) return;
+    if (!confirmed) { this.confirmingUnmap = true; return; }
+    this.confirmingUnmap = false;
     this.saving = true; this.error = ''; this.success = ''; this.cdr.markForCheck();
     this.http.delete(`/api/v1/greenshed/dsf-counts/admin-mappings/${encodeURIComponent(row.machine_id)}`)
       .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({

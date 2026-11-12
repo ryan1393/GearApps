@@ -90,4 +90,19 @@ describe('DsfMachineMappingsComponent: Map Unique Matches', () => {
     fixture.detectChanges();
     expect(page().textContent).toContain('2 machines mapped.');
   });
+
+  it('asks in the page before unmapping a machine and sends nothing until confirmed', () => {
+    const component = fixture.componentInstance;
+    const row = { machine_id: 'm549', machine_number: '549', department: '132', active: true, status: 'OK', count: 1, note: '', shift_number: 1,
+      as_of: null, mapping_origin: 'ADMIN', mapping: { mapping_id: 's549', whiteboard_name: '132 PIN CUTTER 549', line_name: 'Line 549' }, writer_status: '', writer_reason: '' };
+    (component as unknown as { board: unknown }).board = { ...board, rows: [row] };
+    component.open(row as never);
+    component.unmap();
+    http.expectNone(request => request.method === 'DELETE');
+    expect(component.confirmingUnmap).toBe(true);
+    component.unmap(true);
+    expect(component.confirmingUnmap).toBe(false);
+    http.expectOne(request => request.method === 'DELETE' && request.url === ADMIN + '/m549').flush(null);
+    http.match(() => true).forEach(request => request.flush(board));
+  });
 });

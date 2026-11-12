@@ -178,4 +178,7 @@
     </div>
 
   </ng-container>
+  <dana-confirm-dialog [open]="confirmingUnmap && !!selected" title="Unmap this machine?"
+    [message]="'Unmap the DSF source from machine ' + (selected?.machine_number || '') + '? DSF counts for this machine stop until a source is selected again.'"
+    confirmLabel="Unmap" [danger]="true" (confirm)="unmap(true)" (cancel)="confirmingUnmap = false" />
 </section>
