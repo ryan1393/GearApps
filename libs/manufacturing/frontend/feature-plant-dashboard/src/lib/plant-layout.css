@@ -2,7 +2,8 @@
 :host { display: block; min-height: 100vh; }
 .plant-app-header { display: flex; flex-wrap: wrap; align-items: center; gap: var(--dana-space-6); margin: 0; }
 .plant-brand { display: grid; gap: var(--dana-space-1); }
-.plant-sign-out { margin-inline-start: auto; }
+.plant-header-actions { margin-inline-start: auto; }
+.plant-refresh { align-items: center; flex-wrap: wrap; }
 .plant-filters { display: flex; align-items: end; flex-wrap: wrap; gap: var(--dana-form-gap); }
 .plant-search { flex: 1 1 16rem; max-width: 27rem; }
 .plant-checkbox { display: flex; align-items: center; align-self: center; gap: var(--dana-field-gap); }

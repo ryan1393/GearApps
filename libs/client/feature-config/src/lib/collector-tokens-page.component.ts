@@ -114,7 +114,7 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
               <button
                 type="button"
                 class="gear-btn gear-btn-primary"
-                (click)="connectDocker()"
+                (click)="requestDockerConnect()"
                 [disabled]="connecting() || docker.loading()"
               >
                 {{
@@ -296,6 +296,16 @@ import { CollectorToken, CreatedCollectorToken, DockerCollectorConnection } from
       (confirm)="revokeConfirmed()"
       (cancel)="pendingRevoke.set(null)"
     />
+
+    <dana-confirm-dialog
+      [open]="confirmReconnect()"
+      title="Reconnect the Docker collector?"
+      message="This issues a new token and revokes the one the Docker collector uses now. It switches to the new token on its next call; runs it has not sent yet stay on its machine until then."
+      confirmLabel="Reconnect"
+      [danger]="true"
+      (confirm)="connectDocker()"
+      (cancel)="confirmReconnect.set(false)"
+    />
   `,
 })
 export class CollectorTokensPageComponent implements OnInit {
@@ -329,7 +339,17 @@ export class CollectorTokensPageComponent implements OnInit {
     this.docker.load(this.api.dockerConnection());
   }
 
+  protected readonly confirmReconnect = signal(false);
+
+  /** Connecting the first time needs no confirmation; reconnecting revokes the live token, so it asks first. */
+  protected requestDockerConnect() {
+    if (this.connecting()) return;
+    if (this.docker.value().token) this.confirmReconnect.set(true);
+    else this.connectDocker();
+  }
+
   protected connectDocker() {
+    this.confirmReconnect.set(false);
     if (this.connecting()) return;
     this.connecting.set(true);
     this.api.connectDocker().subscribe({

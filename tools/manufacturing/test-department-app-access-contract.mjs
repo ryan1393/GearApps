@@ -1,4 +1,5 @@
 import { contractPath } from './lib/contract-paths.mjs';
+import { readAdminScreenHtml, readAdminScreenTs } from './lib/admin-screen-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { workspaceRoot } from './lib/contract-paths.mjs';
@@ -15,7 +16,7 @@ const jwtPayload=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing
 const frontendGuard=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/data-access-common/src/lib/guards/department-editor.guard.ts'),'utf8');
 const adminUserDto=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/server/feat-user/src/lib/admin-create-user.dto.ts'),'utf8');
 const adminUserService=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/server/feat-user/src/lib/server-feat-user.service.ts'),'utf8');
-const adminHtml=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.html'),'utf8');
+const adminHtml=readAdminScreenHtml();
 const mutationSuite=fs.readFileSync(contractPath(process.cwd(), 'tools/manufacturing/test-authenticated-backend-mutations.ps1'),'utf8');
 const backendFixture=fs.readFileSync(contractPath(process.cwd(), 'tools/manufacturing/test-data/ensure-backend-mutation-test-fixtures.mjs'),'utf8');
 const runner=fs.readFileSync(contractPath(process.cwd(), 'tools/manufacturing/run-all-tests.ps1'),'utf8');

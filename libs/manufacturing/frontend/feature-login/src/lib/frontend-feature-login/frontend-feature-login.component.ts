@@ -12,7 +12,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { REDIRECT_URL_QUERY_PARAM } from '@meshforge/manufacturing/frontend/data-access-common';
 import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
-import { PASSWORD_MIN_LENGTH } from '@meshforge/manufacturing/shared/util-constants';
 import { IUserLogin } from '@meshforge/manufacturing/shared/util-types';
 
 type LoginFormType = Record<keyof IUserLogin, FormControl<string>>;
@@ -46,7 +45,8 @@ export class FrontendFeatureLoginComponent {
   loginError = '';
   submitting = false;
   signInMethod: 'password' | 'badge' = 'password';
-  readonly minPasswordLength = PASSWORD_MIN_LENGTH;
+  /** Shown when a badge scan arrives while a sign-in is still running. */
+  badgeNotice = '';
 
   loginForm = new FormGroup<LoginFormType>({
     email: new FormControl<string>('', {
@@ -56,10 +56,8 @@ export class FrontendFeatureLoginComponent {
     }),
     password: new FormControl<string>('', {
       nonNullable: true,
-      validators: [
-        Validators.required,
-        Validators.minLength(PASSWORD_MIN_LENGTH),
-      ],
+      // Required only: accounts created under an older, shorter password policy must still sign in.
+      validators: [Validators.required],
       updateOn: 'submit',
     }),
   });
@@ -113,10 +111,15 @@ export class FrontendFeatureLoginComponent {
   }
 
   loginBadge(): void {
-    if (this.submitting) return;
+    if (this.submitting) {
+      this.badgeUid = '';
+      this.showBadgeWait();
+      return;
+    }
     const uid = this.badgeUid;
     this.badgeUid = '';
     this.loginError = '';
+    this.badgeNotice = '';
     if (!/^[!-~]{1,128}$/.test(uid)) {
       this.loginError = 'Scan a card UID, then press Enter.';
       this.focus('#badge-uid');
@@ -128,16 +131,33 @@ export class FrontendFeatureLoginComponent {
     this.session.loginBadge(uid).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.submitting = false;
+        this.badgeNotice = '';
         const redirect = this.route.snapshot.queryParamMap.get(REDIRECT_URL_QUERY_PARAM);
         void this.router.navigateByUrl(redirect || '/');
       },
       error: (error: HttpErrorResponse) => {
         this.submitting = false;
+        this.badgeNotice = '';
         this.loginError = typeof error.error?.message === 'string' ? error.error.message : 'Badge sign-in failed. Use your email and password.';
         this.cdr.markForCheck();
         this.focus('#badge-uid');
       },
     });
+  }
+
+  /**
+   * The badge field stays focusable (read-only) while signing in, so a second scan is not typed
+   * into another field; tell the operator to wait instead of losing it silently.
+   */
+  badgeKeydown(event: KeyboardEvent): void {
+    if (!this.submitting) return;
+    if (event.key === 'Enter') event.preventDefault();
+    this.showBadgeWait();
+  }
+
+  private showBadgeWait(): void {
+    this.badgeNotice = 'Wait — still signing in. Scan again once this sign-in finishes.';
+    this.cdr.markForCheck();
   }
 
   private focus(selector: string): void {

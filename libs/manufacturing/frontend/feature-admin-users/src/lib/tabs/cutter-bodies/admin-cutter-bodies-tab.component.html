@@ -1,0 +1,114 @@
+<gear-admin-feedback [tab]="this" />
+<div class="gear-admin-layout">
+  <form class="gear-panel gear-admin-form" data-admin-editor (ngSubmit)="createCutterBody()">
+    <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingCutterBodyId ? 'Edit Cutter Body' : 'Create Cutter Body' }}</span></div>
+    <label class="gear-field">MF / Manufacturer Serial<input class="gear-input" [(ngModel)]="cutterBodyForm.mf_serial_number" name="cutterMfSerial" /></label>
+    <label class="gear-field">Dana Serial (if already etched)<input class="gear-input" [(ngModel)]="cutterBodyForm.dana_serial_number" name="cutterDanaSerial" /></label>
+    <label class="gear-field">Body Definition (type)
+      <select class="gear-select" [(ngModel)]="cutterBodyForm.definition_id" name="cutterDefinition">
+        <option value="">Not linked</option>
+        <option *ngFor="let d of cutterBodyDefinitions" [value]="d.id">{{ d.definition_code }} · {{ d.hand_name }} · {{ d.blade_family_name }} · {{ d.size_code }}{{ d.enabled ? '' : ' (disabled)' }}</option>
+      </select>
+      <small class="gear-field-help">An unetched body uses its definition for 064/076/088. A 105 body needs its Dana S/N (8th character 8 = 105 Special). A Dana S/N must agree with the definition.</small>
+    </label>
+    <label class="gear-field">Description<textarea class="gear-textarea" [(ngModel)]="cutterBodyForm.description" name="cutterDescription"></textarea></label>
+    <div class="gear-admin-form-actions">
+      <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">{{ editingCutterBodyId ? 'Save Cutter Body' : 'Create Cutter Body' }}</button>
+      <button *ngIf="editingCutterBodyId" class="gear-btn gear-btn-secondary" type="button" [disabled]="busy" (click)="cancelCutterBodyEdit()">Cancel Edit</button>
+    </div>
+  </form>
+
+  <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+          <div class="gear-admin-list-header gear-admin-search-header">
+      <div>
+        <h2>Existing Cutter Bodies</h2>
+        <small>{{ filteredCutterBodies.length }} shown · {{ cutterBodies.length }} total</small>
+      </div>
+      <input
+        class="gear-input gear-admin-search-input"
+        type="search"
+        [(ngModel)]="cutterBodySearch"
+        name="adminCutterBodySearch"
+        aria-label="Search cutter bodies"
+        placeholder="Search Dana serial, MF serial, description..."
+        autocomplete="off"
+      />
+    </div>
+    <div class="gear-admin-row gear-admin-record-card gear-admin-cutter-row" data-gear-admin-record-card="cutter-body-v20" *ngFor="let body of filteredCutterBodies">
+      <div class="gear-admin-record-card-body">
+        <div class="gear-admin-record-heading">
+          <strong class="gear-admin-record-title mono">{{ body.dana_serial_number || body.mf_serial_number }}</strong>
+          <span class="gear-badge" [danaTone]="body.enabled ? 'Enabled' : 'Disabled'">{{ body.enabled ? 'Enabled' : 'Disabled' }}</span>
+        </div>
+        <div class="gear-admin-record-meta">
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Dana Serial</span>
+            <span class="gear-admin-record-value mono">{{ body.dana_serial_number || 'Not etched' }}</span>
+          </div>
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">MF Serial</span>
+            <span class="gear-admin-record-value mono">{{ body.mf_serial_number || '—' }}</span>
+          </div>
+          <ng-container *ngIf="cutterBodyDecode(body) as decoded">
+            <ng-container *ngIf="decoded.decoded as d">
+              <div class="gear-admin-record-field"><span class="gear-admin-record-label">Cutter Head</span><span class="gear-admin-record-value mono">{{ d.cutter_head_code }}</span></div>
+              <div class="gear-admin-record-field"><span class="gear-admin-record-label">Supplier</span><span class="gear-admin-record-value">{{ d.supplier_code }}{{ body.definition?.supplier_name ? ' · ' + body.definition?.supplier_name : '' }}</span></div>
+              <div class="gear-admin-record-field"><span class="gear-admin-record-label">Hand</span><span class="gear-admin-record-value">{{ d.hand_code }}{{ body.definition?.hand_name ? ' · ' + body.definition?.hand_name : '' }}</span></div>
+              <div class="gear-admin-record-field"><span class="gear-admin-record-label">Blade Family</span><span class="gear-admin-record-value">{{ d.blade_family_code }}{{ body.definition?.blade_family_name ? ' · ' + body.definition?.blade_family_name : '' }}</span></div>
+              <div class="gear-admin-record-field"><span class="gear-admin-record-label">Body Size</span><span class="gear-admin-record-value mono">{{ d.size_code }}</span></div>
+              <div class="gear-admin-record-field"><span class="gear-admin-record-label">8th Character</span><span class="gear-admin-record-value mono">{{ d.special_character }}</span></div>
+            </ng-container>
+            <div class="gear-admin-record-field" data-gear-cutter-body-definition>
+              <span class="gear-admin-record-label">Definition</span>
+              <span class="gear-admin-record-value mono">{{ body.definition?.definition_code || 'Not linked' }}{{ body.definition?.enabled === false ? ' (disabled)' : '' }}</span>
+            </div>
+            <div class="gear-admin-record-field" data-gear-cutter-body-rule>
+              <span class="gear-admin-record-label">Body Rule</span>
+              <span class="gear-admin-record-value">{{ decoded.rule?.label || 'Unresolved' }}{{ decoded.source === 'DEFINITION' ? ' (from definition, not etched)' : '' }}</span>
+            </div>
+            <div class="gear-admin-record-field" data-gear-cutter-body-required-blades>
+              <span class="gear-admin-record-label">Required Blades (read-only)</span>
+              <span class="gear-admin-record-value">{{ decoded.rule ? decoded.rule.total_blades + ' blades (' + decoded.rule.blade_sets + ' sets)' : '—' }}</span>
+            </div>
+            <div *ngIf="decoded.problem" class="gear-admin-record-field gear-admin-record-field-wide">
+              <span class="gear-admin-record-label">Decode</span>
+              <span class="gear-admin-record-value">{{ decoded.problem }}</span>
+            </div>
+          </ng-container>
+          <div class="gear-admin-record-field gear-admin-record-field-wide">
+            <span class="gear-admin-record-label">Description</span>
+            <span class="gear-admin-record-value">{{ body.description || 'No description' }}</span>
+          </div>
+        </div>
+
+        <div class="gear-admin-actions gear-admin-record-actions">
+          <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditCutterBody(body)" data-icon="edit" title="Edit">Edit</button>
+          <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleCutterBodyEnabled(body)">{{ body.enabled ? 'Disable' : 'Enable' }}</button>
+        </div>
+
+        <div *ngIf="!body.dana_serial_number" class="gear-admin-inline-edit gear-admin-record-inline-action">
+          <span class="gear-admin-record-label">Assign etched Dana serial</span>
+          <div class="gear-admin-inline-edit-controls">
+            <input
+              class="gear-input"
+              [(ngModel)]="danaAssignments[body.id]"
+              [name]="'dana-' + body.id"
+              [attr.aria-label]="'Etched Dana serial for ' + (body.mf_serial_number || 'cutter body')"
+              placeholder="Enter etched Dana S/N"
+              [disabled]="busy"
+            />
+            <button
+              type="button"
+              class="gear-btn gear-btn-secondary"
+              [disabled]="busy || !(danaAssignments[body.id] || '').trim()"
+              (click)="assignDanaSerial(body)"
+            >
+              Assign Dana S/N
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <gear-admin-list-state [list]="cutterBodiesList" noun="cutter bodies" [shown]="filteredCutterBodies.length" [total]="cutterBodies.length" (retry)="loadCutterBodies()" />
+  </div>
+</div>

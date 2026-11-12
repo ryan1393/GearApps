@@ -1,8 +1,10 @@
 import { contractPath } from './lib/contract-paths.mjs';
+import { readAdminScreenHtml, readAdminScreenTs } from './lib/admin-screen-source.mjs';
 import fs from 'node:fs';
 
 const adminApi=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-admin-users/src/lib/admin-api.service.ts'),'utf8');
-const adminComponent=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.ts'),'utf8');
+// Shell, routes, tabs and shared helpers: none of them may call HttpClient directly.
+const adminComponent=readAdminScreenTs();
 const cutterController=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/server/feat-cutter-build/src/lib/server-feat-cutter-build.controller.ts'),'utf8');
 const cutterBuildComponent=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.ts'),'utf8');
 const cutterBuildHtml=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-cutter-builder/src/lib/pages/build/cutter-build.component.html'),'utf8');

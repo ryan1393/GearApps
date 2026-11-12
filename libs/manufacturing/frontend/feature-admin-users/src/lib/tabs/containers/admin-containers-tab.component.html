@@ -1,0 +1,79 @@
+<gear-admin-feedback [tab]="this" />
+<gear-label-printer-picker labelType="ASSET_TAG" label="Print tags to" />
+<div class="gear-admin-layout" data-gear-admin-style="standard-v18">
+  <form class="gear-panel gear-admin-form" data-admin-editor data-gear-admin-create="container-v15" (ngSubmit)="createContainer()">
+    <div class="gear-step-title"><span class="gear-step-number">1</span><span>Create Container</span></div>
+    <label class="gear-field">
+      Container Serial Number
+      <input
+        class="gear-input mono"
+        [(ngModel)]="containerForm.serial_number"
+        name="adminCreateContainerSerial"
+        placeholder="C0101 or 101"
+        autocomplete="off"
+      />
+      <small class="gear-field-help">Enter the sequence with or without C. It is saved as C plus at least four digits. New containers are active and empty.</small>
+    </label>
+    <label class="gear-field" *ngIf="containerForm.serial_number.trim()">
+      Saved Serial Preview
+      <input
+        class="gear-input mono gear-admin-create-preview-input"
+        [value]="containerSerialPreview || 'Invalid serial'"
+        readonly
+        aria-live="polite"
+      />
+      <small class="gear-field-help">The backend remains authoritative and stores the canonical C-prefixed serial.</small>
+    </label>
+    <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy || !containerSerialPreview">Create Container</button>
+  </form>
+
+  <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+    <div class="gear-admin-list-header gear-admin-search-header">
+      <div>
+        <h2>Container Records</h2>
+        <small>{{ filteredContainers.length }} shown · {{ containers.length }} total</small>
+      </div>
+      <input
+        class="gear-input gear-admin-search-input"
+        type="search"
+        [(ngModel)]="containerSearch"
+        name="adminContainerSearch"
+        aria-label="Search containers"
+        placeholder="Search container serial or counts..."
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="container-v20" *ngFor="let container of filteredContainers">
+      <div class="gear-admin-record-card-body">
+        <div class="gear-admin-record-heading">
+          <strong class="gear-admin-record-title mono">{{ container.serial_number }}</strong>
+          <span class="gear-badge" [danaTone]="container.enabled ? 'Active' : 'Inactive'">{{ container.enabled ? 'Active' : 'Inactive' }}</span>
+        </div>
+        <div class="gear-admin-record-meta">
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Trays</span>
+            <span class="gear-admin-record-value gear-admin-record-value-strong">{{ container.tray_count }}</span>
+          </div>
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Blades</span>
+            <span class="gear-admin-record-value gear-admin-record-value-strong">{{ container.blade_count }}</span>
+          </div>
+        </div>
+        <div class="gear-admin-actions gear-admin-record-actions">
+          <button
+            type="button"
+            class="gear-btn gear-btn-secondary"
+            [disabled]="busy || !container.enabled || printingTagId === container.id"
+            (click)="printTag('CONTAINER', container.id, container.serial_number)"
+           data-icon="print" title="Print tag">
+            {{ printingTagId === container.id ? 'Printing…' : 'Print Tag' }}
+          </button>
+          <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleContainerEnabled(container)">{{ container.enabled ? 'Disable' : 'Enable' }}</button>
+        </div>
+      </div>
+    </div>
+
+    <gear-admin-list-state [list]="containersList" noun="containers" [shown]="filteredContainers.length" [total]="containers.length" (retry)="loadContainers()" />
+  </div>
+</div>

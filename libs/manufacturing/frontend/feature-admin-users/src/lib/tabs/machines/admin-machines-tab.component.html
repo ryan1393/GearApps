@@ -1,0 +1,79 @@
+<gear-admin-feedback [tab]="this" />
+<div class="gear-admin-layout">
+  <form class="gear-panel gear-admin-form" data-admin-editor (ngSubmit)="createMachine()">
+    <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingMachineId ? 'Edit Machine' : 'Create Machine' }}</span></div>
+    <label class="gear-field">Machine Number<input class="gear-input" [(ngModel)]="machineForm.machine_number" name="machineNumber" placeholder="520G" /></label>
+    <label class="gear-field">Department
+      <select class="gear-select" [(ngModel)]="machineForm.department_id" name="machineDepartment">
+        <option value="">Select department...</option>
+        <option *ngFor="let department of departments" [value]="department.id">
+          {{ department.code }} — {{ department.description }}
+        </option>
+      </select>
+    </label>
+    <label class="gear-field">Machine Type
+      <select class="gear-select" [(ngModel)]="machineForm.machine_type" name="machineType">
+        <option value="PRODUCTION">Production</option>
+        <option value="CUTTER_BUILDER">Cutter Builder</option><option value="GRINDER">Grinder</option>
+      </select>
+      <small class="gear-field-help">Cutter Builder build selection only offers enabled Department 45 machines with Machine Type = Cutter Builder.</small>
+    </label>
+    <div class="gear-form-grid">
+      <label class="gear-field">Cell<input class="gear-input" type="number" [(ngModel)]="machineForm.cell" name="machineCell" /></label>
+      <label class="gear-field">Description<input class="gear-input" [(ngModel)]="machineForm.description" name="machineDescription" /></label>
+    </div>
+    <div class="gear-admin-form-actions">
+      <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">{{ editingMachineId ? 'Save Machine' : 'Create Machine' }}</button>
+      <button *ngIf="editingMachineId" class="gear-btn gear-btn-secondary" type="button" [disabled]="busy" (click)="cancelMachineEdit()">Cancel Edit</button>
+    </div>
+  </form>
+
+  <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+          <div class="gear-admin-list-header gear-admin-search-header">
+      <div>
+        <h2>Existing Machines</h2>
+        <small>{{ filteredMachines.length }} shown · {{ machines.length }} total</small>
+      </div>
+      <input
+        class="gear-input gear-admin-search-input"
+        type="search"
+        [(ngModel)]="machineSearch"
+        name="adminMachineSearch"
+        aria-label="Search machines"
+        placeholder="Search machine, department, cell, description..."
+        autocomplete="off"
+      />
+    </div>
+    <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="machine-v20" *ngFor="let machine of filteredMachines">
+      <div class="gear-admin-record-card-body">
+        <div class="gear-admin-record-heading">
+          <strong class="gear-admin-record-title mono">{{ machine.machine_number }}</strong>
+          <span class="gear-badge" [danaTone]="machine.enabled && machine.active ? 'Active' : 'Inactive'">{{ machine.enabled && machine.active ? 'Active' : 'Inactive' }}</span>
+        </div>
+        <div class="gear-admin-record-meta">
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Department</span>
+            <span class="gear-admin-record-value">{{ machine.department?.code || '—' }}</span>
+          </div>
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Cell</span>
+            <span class="gear-admin-record-value">{{ machine.cell ?? '—' }}</span>
+          </div>
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Machine Type</span>
+            <span class="gear-admin-record-value">{{ machine.machine_type === 'GRINDER' ? 'Grinder' : machine.machine_type === 'CUTTER_BUILDER' ? 'Cutter Builder' : 'Production' }}</span><gear-machine-dsf-count [machineId]="machine.id" />
+          </div>
+          <div class="gear-admin-record-field gear-admin-record-field-wide">
+            <span class="gear-admin-record-label">Description</span>
+            <span class="gear-admin-record-value">{{ machine.description || 'No description' }}</span>
+          </div>
+        </div>
+        <div class="gear-admin-actions gear-admin-record-actions">
+          <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditMachine(machine)" data-icon="edit" title="Edit">Edit</button>
+          <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleMachineEnabled(machine)">{{ machine.enabled ? 'Disable' : 'Enable' }}</button>
+        </div>
+      </div>
+    </div>
+    <gear-admin-list-state [list]="machinesList" noun="machines" [shown]="filteredMachines.length" [total]="machines.length" (retry)="loadMachines()" />
+  </div>
+</div>

@@ -1,5 +1,5 @@
 import type { MachineCount, DsfMappingSnapshot, DsfSource } from '@meshforge/shared/domain';
-import { plantDepartmentCoverage, REFERENCE_DEPARTMENTS } from './plant-coverage';
+import { plantDepartmentCoverage, REFERENCE_DEPARTMENTS, referenceDepartmentsText } from './plant-coverage';
 
 const now = Date.parse('2026-11-11T16:00:00Z');
 const machines = [{ machine_id: 'grinder', machine_number: 'G1', department: '45' },
@@ -32,5 +32,14 @@ describe('plant-wide reference reconciliation', () => {
   it('withholds source totals when the DSF source catalog expires, while preserving department visibility', () => {
     const coverage = plantDepartmentCoverage(machines, board([source('777', null)]), now + 200000);
     expect(coverage.find(row => row.code === '777')).toMatchObject({ sourceMappings: null, unlinkedActiveSources: null });
+  });
+});
+
+describe('reference departments in words', () => {
+  it('names Cuttergrind and every other reference department from the list itself', () => {
+    expect(referenceDepartmentsText()).toBe('Cuttergrind and Departments 121, 131, 132, 152, 181, 191, 200, 240, 310, 341, 350, 400, 541, and 600');
+    expect(referenceDepartmentsText(['45', '121'])).toBe('Cuttergrind and Department 121');
+    expect(referenceDepartmentsText(['121', '131'])).toBe('Departments 121 and 131');
+    expect(referenceDepartmentsText(['45'])).toBe('Cuttergrind');
   });
 });

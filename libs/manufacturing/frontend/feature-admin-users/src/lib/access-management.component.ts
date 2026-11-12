@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { DanaConfirmDialogComponent, DanaHelpComponent, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
 import { firstValueFrom } from 'rxjs';
 import { AdminUser, adminApiErrorText } from './admin-api.service';
+const isAdminRole = (role?: string | null) => String(role ?? '').toLowerCase() === 'admin';
 interface Action { key: string; screen: string; action: string; method: string; path: string }
 interface Role { id: string; name: string; enabled: boolean; permissions: string[]; assigned_users: number }
 @Component({
@@ -42,6 +43,7 @@ interface Role { id: string; name: string; enabled: boolean; permissions: string
     <form (ngSubmit)="requestBadge()"><div class="gear-form-grid"><label class="gear-field">Account<select class="gear-select" name="badgeUser" [(ngModel)]="badgeUserId" [disabled]="unavailable"><option value="">Choose…</option><option *ngFor="let user of users" [value]="user.id">{{ user.email || user.fullName || 'Account without email' }}{{ hasBadge(user.id) ? ' — badge assigned' : '' }}</option></select></label>
     <label class="gear-field">Scan card UID<input class="gear-input" id="assignment-badge-uid" name="badgeUid" type="password" autocomplete="off" maxlength="128" [(ngModel)]="uid" [disabled]="unavailable" [attr.aria-invalid]="!!badgeError" aria-describedby="assignment-badge-help assignment-badge-error" /></label></div>
     <small id="assignment-badge-help" class="dana-field-hint">Choose the account, focus the UID field, then scan. Enter reviews the assignment before saving.</small>
+    <p id="assignment-badge-admin-note" *ngIf="badgeUserIsAdmin" class="gear-alert gear-alert-warning" role="status">Administrators sign in with email and password. A badge assigned to an administrator account is refused at sign-in.</p>
     <p id="assignment-badge-error" *ngIf="badgeError" class="gear-alert gear-alert-danger" role="alert">{{ badgeError }}</p>
     <div class="dana-actions"><button class="gear-btn gear-btn-primary" type="submit" [disabled]="unavailable || !badgeUserId || !uid">Assign / replace badge</button><button class="gear-btn gear-btn-danger" type="button" [disabled]="unavailable || !hasBadge(badgeUserId)" (click)="confirmation = 'revoke'">Revoke badge</button></div></form>
   </section>
@@ -70,7 +72,9 @@ export class AccessManagementComponent implements OnInit {
       + (!this.enabled || !this.selected.size ? ' Assigned users will have no access to protected actions.' : '');
   }
   accountName(id: string): string { const user = this.users.find(row => row.id === id); return user?.email || user?.fullName || 'the selected account'; }
-  get nonAdmins(): AdminUser[] { return this.users.filter(user => user.role !== 'admin'); }
+  get nonAdmins(): AdminUser[] { return this.users.filter(user => !isAdminRole(user.role)); }
+  /** The server refuses badge sign-in for administrators. */
+  get badgeUserIsAdmin(): boolean { return isAdminRole(this.users.find(user => user.id === this.badgeUserId)?.role); }
   get filtered(): Action[] { const filter = this.filter.trim().toLowerCase(); return this.actions.filter(row => `${this.screenName(row.screen)} ${this.actionName(row.action)} ${row.screen} ${row.action}`.toLowerCase().includes(filter)); }
   hasBadge(id: string): boolean { return this.badges.some(badge => badge.user_id === id); }
   ngOnInit(): void { void this.load(); }

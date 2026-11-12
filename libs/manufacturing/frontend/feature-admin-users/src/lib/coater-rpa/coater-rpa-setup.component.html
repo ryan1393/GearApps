@@ -140,4 +140,7 @@
       </div>
     </div>
   </ng-container>
+  <dana-confirm-dialog [open]="!!pendingRemoval" title="Remove this part mapping?"
+    [message]="'Remove the ' + (pendingRemoval?.summary || '') + ' ' + (pendingRemoval?.part_type === 'PINION' ? 'Pinion' : 'Ring') + ' mapping? RPA requests for this Summary cannot be filled until it is mapped again.'"
+    confirmLabel="Remove mapping" [danger]="true" (confirm)="confirmRemoval()" (cancel)="pendingRemoval = null" />
 </section>

@@ -1,5 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { ChangeDetectorRef } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DanaConfirmDialogComponent } from '@dana/ui';
@@ -101,5 +102,19 @@ describe('AccessManagementComponent', () => {
     expect(dialog.message).toContain('lead@example.com');
     expect(dialog.message).not.toContain('CARD-123');
     http.expectNone(request => request.method !== 'GET');
+  });
+
+  it('notes that an administrator account signs in with email and password, not a badge', async () => {
+    component.users = [...component.users, { id: 'admin-one', email: 'admin@example.com', role: 'ADMIN' } as AdminUser];
+    await finishLoad();
+    component.badgeUserId = 'user-one';
+    fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('#assignment-badge-admin-note')).toBeNull();
+    component.badgeUserId = 'admin-one';
+    fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('#assignment-badge-admin-note').textContent).toContain('Administrators sign in with email and password.');
+    expect(component.nonAdmins.map(user => user.id)).toEqual(['user-one']);
   });
 });

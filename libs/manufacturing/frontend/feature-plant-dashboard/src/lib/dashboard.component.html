@@ -1,39 +1,79 @@
+@if (kiosk()) {
+<main class="dana-wall plant-kiosk" aria-label="Plant wall display">
+  <header class="dana-wall-header">
+    <div class="dana-wall-title">
+      <span>MESHFORGE / PLANT OVERVIEW</span>
+      <h1>{{ department() ? departmentLabel(department()) : 'All departments' }}</h1>
+      <p>Current DSF shift · Times shown in Indianapolis</p>
+    </div>
+    <div class="dana-wall-controls">
+      <button type="button" danaButton="secondary" (click)="setKiosk(false)">Exit wall display</button>
+      <div class="dana-wall-clock" role="status">{{ updatedAgo() ? 'Updated ' + updatedAgo() : 'Waiting for data' }}</div>
+    </div>
+  </header>
+  @if (stale()) {
+    <div class="dana-wall-status" data-tone="warning" role="alert"><strong>Data may be stale — last updated {{ updatedClock() }}.</strong> {{ error() }}</div>
+  } @else if (error()) {
+    <div class="dana-wall-status" data-tone="danger" role="alert">{{ error() }}</div>
+  }
+  @if (board(); as snapshot) {
+    @if (!snapshot.configured) {
+      <div class="dana-wall-status" data-tone="warning" role="status"><strong>DSF is not connected.</strong> Production counts appear after its DSF connection and machine mappings are configured.</div>
+    }
+    <section class="dana-wall-kpis" aria-label="Machine summary">
+      <div class="dana-wall-kpi"><span>Registered machines</span><strong>{{ rows().length }}</strong><small>In this view</small></div>
+      <div class="dana-wall-kpi"><span>Reporting production</span><strong>{{ reporting() }} / {{ rows().length }}</strong><small>Fresh, verified shift counts</small></div>
+      <div class="dana-wall-kpi"><span>Reported machine output</span><strong>{{ pieces() === null ? '—' : (pieces() | number) }}</strong><small>RUN pieces · {{ reporting() !== rows().length ? 'Partial coverage' : 'Registered machines' }}</small></div>
+      <div class="dana-wall-kpi"><span>Needs data review</span><strong>{{ rows().length - reporting() }}</strong><small>Missing, stale, inactive, or unverified</small></div>
+    </section>
+    <section class="dana-wall-grid" [style.--dana-wall-columns]="kioskColumns()" aria-label="Machines">
+      @for (row of rows(); track row.machine_id) {
+        <article class="dana-wall-card" [attr.data-tone]="count(row) !== null ? null : 'warning'">
+          <div class="dana-wall-card-title"><h3>{{ row.machine_number }}</h3><span class="dana-wall-badge" [attr.data-tone]="count(row) !== null ? null : 'warning'">{{ label(row) }}</span></div>
+          <div class="dana-wall-headline">{{ count(row) === null ? '—' : (count(row) | number) }} RUN pieces</div>
+          <div class="dana-wall-detail">{{ row.department === '45' ? 'Cuttergrind · 45' : 'Dept ' + row.department }} · {{ row.shift_number === null ? 'Shift unavailable' : 'Shift ' + row.shift_number }}</div>
+        </article>
+      } @empty {
+        <article class="dana-wall-card is-summary"><strong>No matching machines</strong><span>No registered machine counts match this view.</span></article>
+      }
+    </section>
+  } @else if (loading()) {
+    <div class="dana-wall-status" role="status">Loading registered machines…</div>
+  }
+</main>
+} @else {
 <header class="dana-panel dana-panel-padded plant-app-header">
   <div class="plant-brand"><strong class="gear-eyebrow">MESHFORGE</strong><span class="gear-muted">Plant intelligence</span></div>
   <nav danaTabs aria-label="Plant views">
     <button type="button" danaTab id="plant-overview-tab" [active]="view() === 'overview'" aria-controls="plant-content" (click)="view.set('overview')">Plant overview</button>
     <button type="button" danaTab id="plant-reports-tab" [active]="view() === 'reports'" aria-controls="plant-content" (click)="view.set('reports')">Reports</button>
+    <button type="button" danaTab id="plant-quality-tab" [active]="view() === 'quality'" aria-controls="plant-content" (click)="view.set('quality')">Data quality</button>
   </nav>
-  <button type="button" danaButton="secondary" class="plant-sign-out" (click)="logout()">Sign out</button>
+  <div class="dana-toolbar plant-header-actions">
+    <button type="button" danaButton="secondary" (click)="setKiosk(true)" title="Large numbers without page controls, for a wall display. Open with ?kiosk=1 to start this way.">Wall display</button>
+    <button type="button" danaButton="secondary" (click)="logout()">Sign out</button>
+  </div>
 </header>
 <main class="dana-page gear-page plant-page">
-<section class="dana-page-stack" id="plant-content" role="tabpanel" [attr.aria-labelledby]="view() === 'overview' ? 'plant-overview-tab' : 'plant-reports-tab'">
-  <section danaPageHeader [eyebrow]="view() === 'overview' ? 'OPERATIONS / LIVE OVERVIEW' : 'OPERATIONS / PRODUCTION REPORTS'" [heading]="view() === 'overview' ? 'Plant overview' : 'Production reports'" description="Current DSF shift · Times shown in Indianapolis · Automatic refresh every 30 seconds">
-    <button danaPageHeaderAction type="button" danaButton="secondary" (click)="refresh()" [disabled]="loading()">{{ loading() ? 'Refreshing…' : 'Refresh data' }}</button>
+<section class="dana-page-stack" id="plant-content" role="tabpanel" [attr.aria-labelledby]="tabId(view())">
+  <section danaPageHeader [eyebrow]="view() === 'overview' ? 'OPERATIONS / LIVE OVERVIEW' : view() === 'reports' ? 'OPERATIONS / PRODUCTION REPORTS' : 'OPERATIONS / DATA QUALITY'" [heading]="view() === 'overview' ? 'Plant overview' : view() === 'reports' ? 'Production reports' : 'Data quality'" description="Current DSF shift · Times shown in Indianapolis · Automatic refresh every 30 seconds">
+    <div danaPageHeaderAction class="dana-toolbar plant-refresh">
+      @if (updatedAgo()) { <strong class="plant-updated">Updated {{ updatedAgo() }}</strong> }
+      <button type="button" danaButton="secondary" (click)="refresh()" [disabled]="loading()">{{ loading() ? 'Refreshing…' : 'Refresh data' }}</button>
+    </div>
   </section>
 
-  @if (error()) { <div danaAlert="warning" role="alert">{{ error() }}</div> }
+  @if (stale()) {
+    <div danaAlert="warning" role="alert"><span><strong>Data may be stale — last updated {{ updatedClock() }}.</strong> {{ error() }}</span></div>
+  } @else if (error()) {
+    <div danaAlert="warning" role="alert">{{ error() }}</div>
+  }
   @if (board(); as snapshot) {
     @if (!snapshot.configured) {
       <div danaAlert="warning" role="status"><span><strong>DSF is not connected.</strong> Machines are listed from MeshForge. Production counts will appear after its DSF connection and machine mappings are configured.</span></div>
     }
-    <div danaAlert="info"><span><strong>Plant coverage has not been verified.</strong> Machine production uses the {{ snapshot.rows.length }} machines registered in MeshForge. The coverage checks below also look for DSF sources without registered machine links.</span></div>
 
-    <details class="dana-panel" aria-label="Plant department coverage">
-      <summary danaPanelHeader><span><strong>Plant department coverage</strong> · {{ referenceDepartmentCount }} departments in your DSF reference</span><span aria-hidden="true">⌄</span></summary>
-      <div class="dana-panel-body plant-section-copy">
-      <p>The reference includes Cuttergrind and Departments 121, 131, 132, 152, 181, 191, 200, 240, 310, 341, 350, 400, 541, and 600. Additional discovered departments are included too. Source mappings describe operations, not a verified number of physical machines.</p>
-      @if (!isAdmin) { <p>Sign in as an administrator to check the live DSF source catalog. Registered machine counts alone do not establish plant coverage.</p> }
-      @if (mappingError()) { <p danaAlert="warning" role="status">{{ mappingError() }}</p> }
-      <button type="button" danaButton="secondary" (click)="exportCoverage()">Export coverage CSV</button>
-      <div danaTableShell class="report-table"><table danaTable class="gear-table"><caption>Coverage across the reference, registered catalog, and discovered DSF departments. An unknown source count is not zero equipment.</caption><thead><tr><th scope="col">Department</th><th scope="col">Registered machines</th><th scope="col">DSF source mappings</th><th scope="col">Active sources without a link</th><th scope="col">Review</th></tr></thead><tbody>
-        @for (coverage of plantCoverage(); track coverage.code) {
-          <tr><td>{{ departmentLabel(coverage.code) }}</td><td>{{ coverage.registered }}</td><td>{{ coverage.sourceMappings ?? 'Unknown' }}</td><td>{{ coverage.unlinkedActiveSources ?? 'Unknown' }}</td><td>{{ coverage.sourceMappings === null ? 'Awaiting fresh DSF catalog' : coverage.sourceMappings === 0 ? 'No sources returned; verify discovery' : coverage.unlinkedActiveSources ? 'Review machine links' : 'Source links found; verify physical inventory' }}</td></tr>
-        }
-      </tbody></table></div>
-      </div>
-    </details>
-
+    @if (view() !== 'quality') {
     <section class="dana-panel dana-panel-padded plant-filters" aria-label="Machine filters">
       <label class="gear-field">Department<select class="gear-select" [ngModel]="department()" (ngModelChange)="department.set($event)"><option value="">All departments</option>@for (dept of departments(); track dept) { <option [value]="dept">{{ departmentLabel(dept) }}</option> }</select></label>
       <label class="gear-field plant-search">Find a machine<input class="gear-input" type="search" placeholder="Machine number or department" [ngModel]="search()" (ngModelChange)="search.set($event)" /></label>
@@ -60,28 +100,7 @@
         <div><strong>{{ rows().length - reporting() }}</strong><h3>Needs data review</h3><p>Missing, stale, inactive, or unverified</p></div>
       </article>
     </section>
-    <p class="gear-field-help">Output sums each machine’s current shift. Parts may pass through multiple machines; this is not a finished-goods total. Missing counts are not zero production. “Reporting” describes data quality, not whether a machine is running.</p>
-
-    <section class="dana-panel dana-panel-padded plant-section-copy" aria-labelledby="cuttergrind-heading">
-      <div class="dana-toolbar plant-section-heading"><div><p class="gear-eyebrow">CUTTERGRIND / DEPARTMENT 45</p><h2 class="gear-panel-title" id="cuttergrind-heading">Cuttergrind machine coverage</h2></div><button type="button" danaButton="secondary" (click)="showCuttergrind()">Show Cuttergrind machines</button></div>
-      <p><strong>{{ cuttergrind().registered.length }} registered Cuttergrind machines</strong> across all catalog statuses. DSF’s CUTTER GRIND sources must be checked too; the registered list alone does not establish complete coverage.</p>
-      @if (!isAdmin) {
-        <p>An administrator can sign in here to compare DSF sources with the registered Cuttergrind machines.</p>
-      } @else if (mappingError()) {
-        <p danaAlert="warning" role="status">{{ mappingError() }} Cuttergrind coverage remains unverified.</p>
-      } @else if (!cuttergrind().fresh) {
-        <p danaAlert="warning" role="status">A fresh DSF source list is needed to verify Cuttergrind coverage. Sources shown below, if any, are from the last available catalog.</p>
-      } @else {
-        <p role="status"><strong>{{ cuttergrind().sources.length }} DSF Cuttergrind source mappings</strong> discovered; <strong>{{ cuttergrind().unlinked.length }} active sources need a registered machine link.</strong> Multiple sources can describe one physical machine, so this is not a verified machine total.</p>
-      }
-      @if (isAdmin && cuttergrind().sources.length) {
-        <div danaTableShell class="report-table"><table danaTable class="gear-table"><caption>Cuttergrind sources from DSF, including sources absent from the registered machine list. Review links in MeshForge → Admin → DSF Mappings.</caption><thead><tr><th scope="col">DSF source</th><th scope="col">Line</th><th scope="col">Source status</th><th scope="col">Registered machine</th></tr></thead><tbody>
-          @for (source of cuttergrind().sources; track source.mapping_id) {
-            <tr><td>{{ source.whiteboard_name }}</td><td>{{ source.line_name }}</td><td>{{ source.mapping_active && source.whiteboard_active ? 'Active source' : 'Inactive source' }}</td><td>{{ source.machine ? source.machine.machine_number : 'No registered machine link — review required' }}</td></tr>
-          }
-        </tbody></table></div>
-      }
-    </section>
+    }
 
     @if (view() === 'overview') {
       <section class="dana-toolbar plant-section-heading"><div><h2 class="gear-panel-title">Machine floor</h2><p class="gear-muted">Production and source health across your departments</p></div><button type="button" danaButton="secondary" (click)="exportMachines()" [disabled]="!rows().length">Export machine CSV</button></section>
@@ -97,7 +116,7 @@
           </article>
         } @empty { <div danaEmptyState class="plant-empty"><h2 class="gear-panel-title">No matching machines</h2><p>No registered machine counts match this view. Check department coverage for DSF-only sources, or clear your search and review filter.</p>@if (department() || search() || attention()) { <button type="button" danaButton="secondary" (click)="clearFilters()">Show all registered machines</button> }</div> }
       </section>
-    } @else {
+    } @else if (view() === 'reports') {
       <section class="dana-toolbar plant-section-heading"><div><h2 class="gear-panel-title">Production by department and shift</h2><p class="gear-muted">Current snapshot · Selected filters apply to all exports</p></div><div class="dana-toolbar"><button type="button" danaButton="secondary" (click)="exportDepartments()" [disabled]="!reports().length">Export shift CSV</button><button type="button" danaButton="secondary" (click)="exportMachines()" [disabled]="!rows().length">Export machine CSV</button><button type="button" danaButton="secondary" (click)="print()">Print report</button></div></section>
       <div danaTableShell class="report-table"><table danaTable class="gear-table"><caption>Current-shift production. Groups with missing counts show partial coverage.</caption><thead><tr><th scope="col">Department</th><th scope="col">Shift date / number</th><th scope="col">Shift window</th><th scope="col">Reporting machines</th><th scope="col">Reported RUN pieces</th><th scope="col">Coverage</th></tr></thead><tbody>
         @for (report of reports(); track report.key) {
@@ -105,8 +124,48 @@
         } @empty { <tr><td colspan="6">No machines match the selected filters.</td></tr> }
       </tbody></table></div>
       <section class="dana-panel dana-panel-padded plant-section-copy"><p class="gear-eyebrow">DOWNTIME & HISTORY</p><h2 class="gear-panel-title">Machine state history is needed next.</h2><p>The current MeshForge feed supplies current-shift piece counts. Downtime, downtime reasons, utilization, and past-shift reports need a verified DSF history feed. They cannot be calculated reliably from gaps between piece counts.</p><span class="dana-status-badge" data-tone="warning">Awaiting DSF history connection</span></section>
+    } @else {
+      <div danaAlert="info"><span><strong>Plant coverage has not been verified.</strong> Machine production uses the {{ snapshot.rows.length }} machines registered in MeshForge. The coverage checks below also look for DSF sources without registered machine links.</span></div>
+      <p class="gear-field-help">Output sums each machine’s current shift. Parts may pass through multiple machines; this is not a finished-goods total. Missing counts are not zero production. “Reporting” describes data quality, not whether a machine is running.</p>
+
+      <details class="dana-panel" aria-label="Plant department coverage" open>
+        <summary danaPanelHeader><span><strong>Plant department coverage</strong> · {{ referenceDepartmentCount }} departments in your DSF reference</span><span aria-hidden="true">⌄</span></summary>
+        <div class="dana-panel-body plant-section-copy">
+        <p>The reference includes {{ referenceDepartmentsText }}. Additional discovered departments are included too. Source mappings describe operations, not a verified number of physical machines.</p>
+        @if (!isAdmin) { <p>Sign in as an administrator to check the live DSF source catalog. Registered machine counts alone do not establish plant coverage.</p> }
+        @if (mappingError()) { <p danaAlert="warning" role="status">{{ mappingError() }}</p> }
+        <button type="button" danaButton="secondary" (click)="exportCoverage()">Export coverage CSV</button>
+        <div danaTableShell class="report-table"><table danaTable class="gear-table"><caption>Coverage across the reference, registered catalog, and discovered DSF departments. An unknown source count is not zero equipment.</caption><thead><tr><th scope="col">Department</th><th scope="col">Registered machines</th><th scope="col">DSF source mappings</th><th scope="col">Active sources without a link</th><th scope="col">Review</th></tr></thead><tbody>
+          @for (coverage of plantCoverage(); track coverage.code) {
+            <tr><td>{{ departmentLabel(coverage.code) }}</td><td>{{ coverage.registered }}</td><td>{{ coverage.sourceMappings ?? 'Unknown' }}</td><td>{{ coverage.unlinkedActiveSources ?? 'Unknown' }}</td><td>{{ coverage.sourceMappings === null ? 'Awaiting fresh DSF catalog' : coverage.sourceMappings === 0 ? 'No sources returned; verify discovery' : coverage.unlinkedActiveSources ? 'Review machine links' : 'Source links found; verify physical inventory' }}</td></tr>
+          }
+        </tbody></table></div>
+        </div>
+      </details>
+
+      <section class="dana-panel dana-panel-padded plant-section-copy" aria-labelledby="cuttergrind-heading">
+        <div class="dana-toolbar plant-section-heading"><div><p class="gear-eyebrow">CUTTERGRIND / DEPARTMENT 45</p><h2 class="gear-panel-title" id="cuttergrind-heading">Cuttergrind machine coverage</h2></div><button type="button" danaButton="secondary" (click)="showCuttergrind()">Show Cuttergrind machines</button></div>
+        <p><strong>{{ cuttergrind().registered.length }} registered Cuttergrind machines</strong> across all catalog statuses. DSF’s CUTTER GRIND sources must be checked too; the registered list alone does not establish complete coverage.</p>
+        @if (!isAdmin) {
+          <p>An administrator can sign in here to compare DSF sources with the registered Cuttergrind machines.</p>
+        } @else if (mappingError()) {
+          <p danaAlert="warning" role="status">{{ mappingError() }} Cuttergrind coverage remains unverified.</p>
+        } @else if (!cuttergrind().fresh) {
+          <p danaAlert="warning" role="status">A fresh DSF source list is needed to verify Cuttergrind coverage. Sources shown below, if any, are from the last available catalog.</p>
+        } @else {
+          <p role="status"><strong>{{ cuttergrind().sources.length }} DSF Cuttergrind source mappings</strong> discovered; <strong>{{ cuttergrind().unlinked.length }} active sources need a registered machine link.</strong> Multiple sources can describe one physical machine, so this is not a verified machine total.</p>
+        }
+        @if (isAdmin && cuttergrind().sources.length) {
+          <div danaTableShell class="report-table"><table danaTable class="gear-table"><caption>Cuttergrind sources from DSF, including sources absent from the registered machine list. Review links in MeshForge → Admin → DSF Mappings.</caption><thead><tr><th scope="col">DSF source</th><th scope="col">Line</th><th scope="col">Source status</th><th scope="col">Registered machine</th></tr></thead><tbody>
+            @for (source of cuttergrind().sources; track source.mapping_id) {
+              <tr><td>{{ source.whiteboard_name }}</td><td>{{ source.line_name }}</td><td>{{ source.mapping_active && source.whiteboard_active ? 'Active source' : 'Inactive source' }}</td><td>{{ source.machine ? source.machine.machine_number : 'No registered machine link — review required' }}</td></tr>
+            }
+          </tbody></table></div>
+        }
+      </section>
     }
     <footer class="gear-muted plant-page-footer"><span>Source: MeshForge / DSF</span><span>Last successful DSF read: {{ snapshot.last_success_at ? formatTime(snapshot.last_success_at, true) : 'No successful read yet' }}</span></footer>
   } @else if (loading()) { <div danaLoadingState class="plant-empty" role="status">Loading registered machines…</div> }
 </section>
 </main>
+}

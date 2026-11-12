@@ -9,6 +9,7 @@ interface Lab {
   values: Record<string,number|null>;
   working: Signal<boolean>; readError: Signal<string>;
   readFromMachine(): void; run(): void; sendToArgonaut(): void;
+  argonautConfirm: Signal<{ message: string } | null>; confirmArgonautSend(): void; cancelArgonautSend(): void;
 }
 
 describe('Cycle Test Lab request context', () => {
@@ -35,21 +36,31 @@ describe('Cycle Test Lab request context', () => {
   });
   it('sends exactly the input previewed and confirmed, even if selection changes asynchronously', () => {
     const {lab,http} = setup();
-    const confirm=jest.spyOn(globalThis,'confirm').mockImplementation(()=>{
-      lab.machineId='machine-b'; lab.serial='serial-b'; lab.values={'10020':99}; return true;
-    });
-    try {
-      lab.sendToArgonaut();
-      const preview=http.expectOne('/api/v1/admin/cycle-tests/argonaut/preview');
-      const original=preview.request.body;
-      preview.flush({url:'https://example.invalid/argonaut',payload:{request:{serialNumber:'serial-a',partNumber:'part-a',sequence:1}}});
-      const sent=http.expectOne('/api/v1/admin/cycle-tests/argonaut');
-      expect(sent.request.body).toEqual(original);
-      expect(sent.request.body.serial_number).toBe('serial-a');
-      expect(sent.request.body.machine_id).toBe('machine-a');
-      expect(sent.request.body.values).toEqual({'10020':5});
-      sent.flush({ok:true});
-      expect(lab.working()).toBe(false);
-    } finally { confirm.mockRestore(); }
+    lab.sendToArgonaut();
+    const preview=http.expectOne('/api/v1/admin/cycle-tests/argonaut/preview');
+    const original=preview.request.body;
+    preview.flush({url:'https://example.invalid/argonaut',payload:{request:{serialNumber:'serial-a',partNumber:'part-a',sequence:1}}});
+    http.expectNone('/api/v1/admin/cycle-tests/argonaut');
+    expect(lab.argonautConfirm()?.message).toContain('Serial: serial-a');
+    lab.machineId='machine-b'; lab.serial='serial-b'; lab.values={'10020':99};
+    lab.confirmArgonautSend();
+    const sent=http.expectOne('/api/v1/admin/cycle-tests/argonaut');
+    expect(sent.request.body).toEqual(original);
+    expect(sent.request.body.serial_number).toBe('serial-a');
+    expect(sent.request.body.machine_id).toBe('machine-a');
+    expect(sent.request.body.values).toEqual({'10020':5});
+    sent.flush({ok:true});
+    expect(lab.working()).toBe(false);
+  });
+  it('sends nothing when the Argonaut confirmation is cancelled', () => {
+    const {lab,http} = setup();
+    lab.sendToArgonaut();
+    http.expectOne('/api/v1/admin/cycle-tests/argonaut/preview')
+      .flush({url:'https://example.invalid/argonaut',payload:{request:{serialNumber:'serial-a',partNumber:'part-a',sequence:1}}});
+    expect(lab.working()).toBe(true);
+    lab.cancelArgonautSend();
+    http.expectNone('/api/v1/admin/cycle-tests/argonaut');
+    expect(lab.argonautConfirm()).toBeNull();
+    expect(lab.working()).toBe(false);
   });
 });

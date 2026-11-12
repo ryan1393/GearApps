@@ -39,12 +39,18 @@ describe('FrontendFeatureLoginComponent', () => {
     expect(login).not.toHaveBeenCalled();
   });
 
-  it('explains a short password instead of reporting that it is missing', () => {
+  it('accepts a short password from an account created under an older policy', () => {
     fixture.componentInstance.loginForm.setValue({ email: 'operator@example.com', password: 'short' });
+    fixture.componentInstance.login();
+    expect(login).toHaveBeenCalledWith({ email: 'operator@example.com', password: 'short' });
+  });
+
+  it('still requires a password', () => {
+    fixture.componentInstance.loginForm.setValue({ email: 'operator@example.com', password: '' });
     fixture.componentInstance.login();
     fixture.detectChanges();
     expect(document.activeElement).toBe(fixture.nativeElement.querySelector('#password'));
-    expect(fixture.nativeElement.querySelector('#password-error').textContent).toContain('at least 8 characters');
+    expect(fixture.nativeElement.querySelector('#password-error').textContent).toContain('Password is required.');
     expect(login).not.toHaveBeenCalled();
   });
 
@@ -64,6 +70,26 @@ describe('FrontendFeatureLoginComponent', () => {
     pending.complete();
   });
 
+  it('keeps the badge field focusable during sign-in and says to wait when another scan arrives', () => {
+    const pending = new Subject();
+    loginBadge.mockReturnValue(pending);
+    const component = fixture.componentInstance;
+    component.badgeUid = 'CARD-123';
+    component.loginBadge();
+    fixture.detectChanges();
+    const badge = fixture.nativeElement.querySelector('#badge-uid') as HTMLInputElement;
+    expect(badge.disabled).toBe(false);
+    expect(badge.readOnly).toBe(true);
+    expect(badge.getAttribute('aria-busy')).toBe('true');
+    const enter = new KeyboardEvent('keydown', { key: 'Enter', cancelable: true });
+    badge.dispatchEvent(enter);
+    fixture.detectChanges();
+    expect(enter.defaultPrevented).toBe(true);
+    expect(fixture.nativeElement.querySelector('#badge-notice').textContent).toContain('Wait — still signing in');
+    expect(loginBadge).toHaveBeenCalledTimes(1);
+    pending.complete();
+  });
+
   it('returns focus to the badge scanner input after a refused scan', () => {
     loginBadge.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 401, error: { message: 'Badge not recognized.' } })));
     fixture.componentInstance.badgeUid = 'CARD-123';
@@ -73,5 +99,22 @@ describe('FrontendFeatureLoginComponent', () => {
     expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain('Badge not recognized.');
     expect(fixture.componentInstance.submitting).toBe(false);
     expect(fixture.componentInstance.badgeUid).toBe('');
+  });
+
+  it('shows the server\'s wait message when sign-in is rate limited', () => {
+    login.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 429, error: { message: 'Too many sign-in attempts. Wait 15 minutes, then try again.' } })));
+    fixture.componentInstance.loginForm.setValue({ email: 'operator@example.com', password: 'Password1!' });
+    fixture.componentInstance.login();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain('Too many sign-in attempts. Wait 15 minutes');
+  });
+
+  it('shows why an administrator badge is refused', () => {
+    loginBadge.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 403, error: { message: 'Administrators sign in with email and password.' } })));
+    fixture.componentInstance.badgeUid = 'CARD-123';
+    fixture.componentInstance.loginBadge();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain('Administrators sign in with email and password.');
+    expect(document.activeElement).toBe(fixture.nativeElement.querySelector('#badge-uid'));
   });
 });
