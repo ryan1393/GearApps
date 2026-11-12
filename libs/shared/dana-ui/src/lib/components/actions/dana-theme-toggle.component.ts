@@ -64,7 +64,7 @@ export class DanaThemeService {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `<label class="dana-theme-picker"
-    >Theme
+    ><span class="dana-theme-picker-text">Theme</span>
     <select aria-label="Color theme" [value]="theme.preference()" (change)="change($event)">
       <option value="system">System</option>
       <option value="light">Light</option>

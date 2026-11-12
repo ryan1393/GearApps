@@ -24,6 +24,37 @@
   margin: 0 var(--dana-page-padding) var(--dana-page-padding) auto;
 }
 dana-theme-toggle { display: flow-root; }
+/* In a top bar or user menu: no card, no page margin, sized like the neighbouring controls. */
+dana-theme-toggle.dana-theme-toggle-inline { display: block; flex: 0 0 auto; }
+.dana-theme-toggle-inline .dana-theme-picker {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--dana-muted);
+  font-size: 13px;
+  max-width: none;
+}
+.dana-theme-toggle-inline .dana-theme-picker select {
+  min-height: 34px;
+  border-color: var(--dana-control-border);
+  border-radius: 8px;
+  padding: 0 6px;
+  /* Keep the native drop-down arrow (form resets remove it). */
+  appearance: auto;
+  -webkit-appearance: auto;
+}
+@media screen and (max-width: 760px) {
+  .dana-theme-toggle-inline .dana-theme-picker-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
 .dana-theme-picker select {
   min-height: 36px;
   background: var(--dana-surface);

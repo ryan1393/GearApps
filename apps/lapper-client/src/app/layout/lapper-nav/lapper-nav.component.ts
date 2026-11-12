@@ -2,14 +2,14 @@ import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { DanaMobileNavDirective } from '@dana/ui';
+import { DanaMobileNavDirective, DanaThemeToggleComponent } from '@dana/ui';
 import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
 import { getDanaAppUrl } from '@meshforge/manufacturing/shared/dana-app-config';
 import { MESHFORGE_VERSION } from '@meshforge/shared/domain';
 
 @Component({
   selector: 'gear-lapper-nav',
-  imports: [AsyncPipe, FormsModule, RouterLink, RouterLinkActive, DanaMobileNavDirective],
+  imports: [AsyncPipe, FormsModule, RouterLink, RouterLinkActive, DanaMobileNavDirective, DanaThemeToggleComponent],
   templateUrl: './lapper-nav.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

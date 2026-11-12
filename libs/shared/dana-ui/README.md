@@ -48,3 +48,7 @@ Keep the reason short and actionable. A disabled button is skipped by the Tab ke
 ## Toasts
 
 `dana-toast-host` (also `gear-toast-host`) renders two sibling live regions, never nested and announcing additions only: a polite one for info, success and warning notices, and an assertive one for errors. `DanaToastService.error()` and `danger()` (and `notify('error' | 'danger', …)`) are the same tone; error notices stay until the user dismisses them. Other notices dismiss themselves after their duration, but the countdown pauses while the pointer or keyboard focus is on the notice. Timers are cleared when a notice is dismissed, pushed out of the four-notice stack, or the service is destroyed.
+
+## Theme picker
+
+Place `<dana-theme-toggle class="dana-theme-toggle-inline" />` in the application's top bar or user menu; the inline variant drops the card styling and hides its visible "Theme" word on narrow screens (the select keeps its "Color theme" name). Without the class it renders as a standalone card in the page flow; it is never fixed over content. The choice is stored under the `dana-theme` key in `localStorage` and applied as `data-dana-theme` on `<html>`. Each application's `index.html` applies the stored value before Angular starts, so a dark preference does not flash light first.
