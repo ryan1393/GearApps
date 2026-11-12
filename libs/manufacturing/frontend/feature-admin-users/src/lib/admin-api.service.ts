@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { LabelPrinterChoiceService } from '@meshforge/manufacturing/frontend/util-common';
-import { IBulkCreateShelfLocations, IBulkShelfLocationsResult, ISummaryBodyRuleRow } from '@meshforge/manufacturing/shared/util-types';
+import { IBulkCreateShelfLocations, IBulkShelfLocationsResult, IPartSummarySettings, ISavePartSummaryRequest, ISummaryBodyRuleRow } from '@meshforge/manufacturing/shared/util-types';
 import { Observable } from 'rxjs';
 
 export interface PagedResponse<T> {
@@ -95,6 +95,9 @@ export interface PartRow {
   roll_master?: RollMasterRow | null;
   summary?: PartSummaryRow;
   part_type?: PartTypeRow;
+  /** From this part's own Summary + Part Type; never stored on the part. */
+  inner_blade?: string | null;
+  outer_blade?: string | null;
 }
 
 export interface DepartmentRow {
@@ -435,6 +438,15 @@ export class AdminApiService {
 
   listSummaryBodyRules() {
     return this.http.get<ISummaryBodyRuleRow[]>('/api/v1/cutter-config/summary-body-rules');
+  }
+
+  listPartSummarySettings() {
+    return this.http.get<IPartSummarySettings[]>('/api/v1/cutter-config/summary-settings');
+  }
+
+  /** Save Part Summary: one request, one transaction (see ISavePartSummaryRequest). */
+  savePartSummary(summaryId: string, body: ISavePartSummaryRequest) {
+    return this.http.put<IPartSummarySettings>(`/api/v1/cutter-config/summary-settings/${encodeURIComponent(summaryId)}`, body);
   }
 
   setSummaryBodyRule(summaryId: string, bodyRule: string) {

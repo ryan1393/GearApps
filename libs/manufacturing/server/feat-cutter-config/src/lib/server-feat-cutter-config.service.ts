@@ -19,12 +19,17 @@ import {
   cutterBodyRuleByCode,
   evaluateCutterBodyCompatibility,
   permittedCutterBodyDefinitions,
+  SUMMARY_PART_TYPE_CODES,
+  bladeLabelProblem,
+  normalizeBladeLabel,
+  normalizeSummaryHos,
+  summaryHosProblem,
   formatBladeSetQuantity,
   isApprovedBladeSetCount,
   summaryBodyRuleState,
   totalBladesForSets,
 } from '@meshforge/manufacturing/shared/util-constants';
-import { BladeStatus, ISummaryBodyRuleRow, IValidateCutterTrayResult, Uuid } from '@meshforge/manufacturing/shared/util-types';
+import { BladeStatus, IPartSummarySettings, ISummaryBodyRuleRow, ISummaryPartTypeSettings, IValidateCutterTrayResult, Uuid } from '@meshforge/manufacturing/shared/util-types';
 import {
   ConflictException,
   Injectable,
@@ -35,6 +40,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import {
   CreateCutterBladeRequirementDto,
+  SavePartSummaryDto,
   UpdateCutterBladeRequirementDto,
   ValidateCutterTrayDto,
 } from './cutter-config.dto';
@@ -131,7 +137,29 @@ export class ServerFeatCutterConfigService {
       qb.andWhere('part.active = :active', { active: true });
     }
 
-    return qb.getMany();
+    return this.withBladeSettings(await qb.getMany());
+  }
+
+  /**
+   * Inner blade and Outer blade of each part, read from its own Summary + Part Type through
+   * public.part_blade_settings. Parts hold no copy; a pair with no settings reads blank.
+   */
+  private async withBladeSettings<T extends PartOrmEntity>(parts: T[]): Promise<Array<T & { inner_blade: string | null; outer_blade: string | null }>> {
+    const result = parts as Array<T & { inner_blade: string | null; outer_blade: string | null }>;
+    if (!parts.length) return result;
+    const [view] = await this.partRepo.manager.query("SELECT to_regclass('public.part_blade_settings') IS NOT NULL AS present");
+    const rows: Array<{ part_id: string; inner_blade: string | null; outer_blade: string | null }> = view?.present
+      ? await this.partRepo.manager.query(
+        'SELECT part_id, inner_blade, outer_blade FROM public.part_blade_settings WHERE part_id = ANY($1::uuid[])',
+        [parts.map((p) => p.id)],
+      )
+      : [];
+    const byPart = new Map(rows.map((r) => [r.part_id, r]));
+    for (const part of result) {
+      part.inner_blade = byPart.get(part.id)?.inner_blade ?? null;
+      part.outer_blade = byPart.get(part.id)?.outer_blade ?? null;
+    }
+    return result;
   }
 
   async getPartByNumber(partNumber: string): Promise<PartOrmEntity> {
@@ -152,7 +180,7 @@ export class ServerFeatCutterConfigService {
       throw new NotFoundException(`Part ${normalized} not found`);
     }
 
-    return part;
+    return (await this.withBladeSettings([part]))[0];
   }
 
   async createPart(dto: CreatePartDto, userId: Uuid): Promise<PartOrmEntity> {
@@ -495,21 +523,134 @@ export class ServerFeatCutterConfigService {
     if (!summary) throw new NotFoundException('Part summary not found');
     const openTrays = await this.requirementRepo.manager.transaction(async (manager) => {
       await lockSummaryRequirements(manager, summaryId);
-      await manager.query(
-        `INSERT INTO public.cutter_summary_body_rules (summary_id, body_rule, "createdBy", "updatedBy")
-         VALUES ($1,$2,$3,$3)
-         ON CONFLICT (summary_id) DO UPDATE SET body_rule=EXCLUDED.body_rule, "updatedAt"=now(), "updatedBy"=EXCLUDED."updatedBy"`,
-        [summaryId, rule.code, userId],
-      );
-      await manager.query(
-        `UPDATE public.cutter_blade_requirements SET required_blade_count=$2, "updatedAt"=now()
-          WHERE summary_id=$1 AND required_blade_count<>$2`,
-        [summaryId, rule.blade_sets],
-      );
-      return countTraysWithOtherSnapshot(manager, summaryId, rule.blade_sets);
+      return applySummaryBodyRule(manager, summaryId, rule.code, userId);
     });
     const [row] = (await this.listSummaryBodyRules()).filter((r) => r.summary_id === summaryId);
     return { ...row, open_trays_with_other_quantity: openTrays };
+  }
+
+  /**
+   * Each Summary with its RING and PINION HOS / Inner blade / Outer blade (blank when not set)
+   * and its Body Size Rule state. One row per Summary; both Part Types are always listed.
+   */
+  async listPartSummarySettings(summaryId: string | null = null): Promise<IPartSummarySettings[]> {
+    const manager = this.requirementRepo.manager;
+    const [summaries, partTypes, settings, bodyRules] = [
+      await manager.query(
+        `SELECT id, number, revision, model_id, hos FROM public.part_summaries
+          WHERE "deletedAt" IS NULL AND ($1::uuid IS NULL OR id=$1::uuid) ORDER BY number, revision`, [summaryId],
+      ) as Array<{ id: string; number: string; revision: string; model_id: string | null; hos: string | null }>,
+      await manager.query(
+        `SELECT id, code FROM public.part_types WHERE code = ANY($1::text[]) ORDER BY sort_order, code`, [[...SUMMARY_PART_TYPE_CODES]],
+      ) as Array<{ id: string; code: string }>,
+      await manager.query(
+        `SELECT summary_id, part_type_id, hos, inner_blade, outer_blade FROM public.part_summary_part_type_blades
+          WHERE ($1::uuid IS NULL OR summary_id=$1::uuid)`, [summaryId],
+      ) as Array<{ summary_id: string; part_type_id: string; hos: string | null; inner_blade: string | null; outer_blade: string | null }>,
+      new Map((await this.listSummaryBodyRules()).map((row) => [row.summary_id, row])),
+    ];
+    const bySummary = new Map<string, typeof settings>();
+    for (const row of settings) bySummary.set(row.summary_id, [...(bySummary.get(row.summary_id) ?? []), row]);
+    return summaries.map((s) => ({
+      summary_id: s.id, summary_number: s.number, summary_revision: s.revision, model_id: s.model_id, hos: s.hos,
+      part_types: partTypes.map((pt): ISummaryPartTypeSettings => {
+        const row = bySummary.get(s.id)?.find((r) => r.part_type_id === pt.id);
+        return { part_type_id: pt.id, part_type_code: pt.code, hos: row?.hos ?? null, inner_blade: row?.inner_blade ?? null, outer_blade: row?.outer_blade ?? null };
+      }),
+      body_rule: bodyRules.get(s.id) as ISummaryBodyRuleRow,
+    }));
+  }
+
+  /**
+   * Save Part Summary: Summary fields, both RING/PINION groups and an explicit Body Size Rule
+   * change in ONE transaction. Omitted fields are unchanged; null or '' clears a field.
+   * body_rule omitted keeps the mapping; a code changes it (requirements follow, global rule
+   * totals untouched); null removes it (quantities stay). Any failure rolls everything back.
+   */
+  async savePartSummary(summaryId: Uuid, dto: SavePartSummaryDto, userId: Uuid): Promise<IPartSummarySettings> {
+    const groups = Object.entries(dto.part_types ?? {}).filter(([, v]) => v !== undefined && v !== null);
+    for (const [code, group] of groups) {
+      if (!(SUMMARY_PART_TYPE_CODES as readonly string[]).includes(code)) throw new UnprocessableEntityException(`Unknown Part Type ${code}`);
+      const problem = (group.hos !== undefined ? summaryHosProblem(group.hos) : null) ??
+        (group.inner_blade !== undefined ? bladeLabelProblem(group.inner_blade) : null) ??
+        (group.outer_blade !== undefined ? bladeLabelProblem(group.outer_blade) : null);
+      if (problem) throw new UnprocessableEntityException(`${code}: ${problem}`);
+    }
+    const rule = dto.body_rule === undefined || dto.body_rule === null ? null : cutterBodyRuleByCode(dto.body_rule);
+    if (dto.body_rule && !rule) {
+      throw new UnprocessableEntityException(`Body Size Rule must be one of ${CUTTER_BODY_RULES.map((r) => r.code).join(', ')}`);
+    }
+    if (dto.number !== undefined && !dto.number.trim()) throw new UnprocessableEntityException('Part Summary number is required');
+
+    let openTrays: number | undefined;
+    try {
+      openTrays = await this.requirementRepo.manager.transaction(async (manager) => {
+        const [summary] = await manager.query(
+          'SELECT id, number, revision FROM public.part_summaries WHERE id=$1 AND "deletedAt" IS NULL FOR UPDATE', [summaryId],
+        ) as Array<{ id: string; number: string; revision: string }>;
+        if (!summary) throw new NotFoundException('Part summary not found');
+        await lockSummaryRequirements(manager, summaryId);
+
+        const sets: string[] = [];
+        const params: unknown[] = [summaryId, userId];
+        const set = (column: string, value: unknown) => { params.push(value); sets.push(`${column}=$${params.length}`); };
+        if (dto.number !== undefined) set('number', dto.number.trim());
+        if (dto.revision !== undefined) set('revision', dto.revision.trim());
+        if (dto.model_id !== undefined) {
+          if (dto.model_id) {
+            const [model] = await manager.query('SELECT id FROM public.models WHERE id=$1', [dto.model_id]);
+            if (!model) throw new UnprocessableEntityException('Model not found');
+          }
+          set('model_id', dto.model_id || null);
+        }
+        if (dto.hos !== undefined) set('hos', dto.hos?.trim() || null);
+        if (sets.length) {
+          const number = dto.number?.trim() ?? summary.number;
+          const revision = dto.revision?.trim() ?? summary.revision;
+          const [duplicate] = await manager.query(
+            'SELECT id FROM public.part_summaries WHERE number=$1 AND revision=$2 AND id<>$3', [number, revision, summaryId],
+          );
+          if (duplicate) throw new ConflictException(`Part Summary ${number}${revision ? ` revision ${revision}` : ''} already exists`);
+          await manager.query(`UPDATE public.part_summaries SET ${sets.join(', ')}, "updatedAt"=now(), "updatedBy"=$2 WHERE id=$1`, params);
+        }
+
+        for (const [code, group] of groups) {
+          const [partType] = await manager.query('SELECT id FROM public.part_types WHERE code=$1', [code]);
+          if (!partType) throw new UnprocessableEntityException(`Part Type ${code} is not configured`);
+          const [current] = await manager.query(
+            'SELECT hos, inner_blade, outer_blade FROM public.part_summary_part_type_blades WHERE summary_id=$1 AND part_type_id=$2 FOR UPDATE',
+            [summaryId, partType.id],
+          ) as Array<{ hos: string | null; inner_blade: string | null; outer_blade: string | null }>;
+          const next = {
+            hos: group.hos !== undefined ? normalizeSummaryHos(group.hos) : current?.hos ?? null,
+            inner_blade: group.inner_blade !== undefined ? normalizeBladeLabel(group.inner_blade) : current?.inner_blade ?? null,
+            outer_blade: group.outer_blade !== undefined ? normalizeBladeLabel(group.outer_blade) : current?.outer_blade ?? null,
+          };
+          if (!current && next.hos === null && next.inner_blade === null && next.outer_blade === null) continue;
+          await manager.query(
+            `INSERT INTO public.part_summary_part_type_blades
+               (summary_id, part_type_id, hos, inner_blade, outer_blade, source, "createdBy", "updatedBy")
+             VALUES ($1,$2,$3,$4,$5,'ADMIN',$6,$6)
+             ON CONFLICT (summary_id, part_type_id) DO UPDATE
+               SET hos=EXCLUDED.hos, inner_blade=EXCLUDED.inner_blade, outer_blade=EXCLUDED.outer_blade,
+                   source='ADMIN', "updatedAt"=now(), "updatedBy"=EXCLUDED."updatedBy"`,
+            [summaryId, partType.id, next.hos, next.inner_blade, next.outer_blade, userId],
+          );
+        }
+
+        if (dto.body_rule === null) {
+          await manager.query('DELETE FROM public.cutter_summary_body_rules WHERE summary_id=$1', [summaryId]);
+        } else if (rule) {
+          return applySummaryBodyRule(manager, summaryId, rule.code, userId);
+        }
+        return undefined;
+      });
+    } catch (error) {
+      if ((error as { code?: string }).code === '23505') throw new ConflictException('A Part Summary with this number and revision already exists');
+      throw error;
+    }
+    const [row] = await this.listPartSummarySettings(summaryId);
+    return openTrays === undefined ? row : { ...row, open_trays_with_other_quantity: openTrays };
   }
 
   /** Remove a configured rule. Quantities are left exactly as they are. */
@@ -725,8 +866,10 @@ export class ServerFeatCutterConfigService {
       SELECT s.id AS summary_id, s.number AS summary_number, s.revision AS summary_revision, s.enabled AS summary_enabled,
              m.model_number::text AS model_number, s.hos, r.body_rule,
              (SELECT json_agg(json_build_object('part_type_code', pt.code, 'required_blade_count', q.required_blade_count,
-                       'enabled', q.enabled AND pt.enabled) ORDER BY pt.code)
+                       'enabled', q.enabled AND pt.enabled, 'part_type_hos', b.hos, 'inner_blade', b.inner_blade,
+                       'outer_blade', b.outer_blade) ORDER BY pt.code)
                 FROM public.cutter_blade_requirements q JOIN public.part_types pt ON pt.id=q.part_type_id
+                LEFT JOIN public.part_summary_part_type_blades b ON b.summary_id=q.summary_id AND b.part_type_id=q.part_type_id
                WHERE q.summary_id=s.id AND q."deletedAt" IS NULL) AS requirements
         FROM public.part_summaries s
         LEFT JOIN public.models m ON m.id=s.model_id
@@ -807,6 +950,24 @@ async function assertSummaryQuantity(manager: EntityManager, summaryId: string, 
       `Required quantity is Summary-based: this Summary's other Part Types use ${formatBladeSetQuantity(Number(conflict.required_blade_count))}`,
     );
   }
+}
+
+/** Set a Summary's Body Size Rule and move its RING/PINION requirement rows to the rule's quantity. */
+async function applySummaryBodyRule(manager: EntityManager, summaryId: string, ruleCode: string, userId: string): Promise<number> {
+  const rule = cutterBodyRuleByCode(ruleCode);
+  if (!rule) throw new UnprocessableEntityException(`Body Size Rule must be one of ${CUTTER_BODY_RULES.map((r) => r.code).join(', ')}`);
+  await manager.query(
+    `INSERT INTO public.cutter_summary_body_rules (summary_id, body_rule, "createdBy", "updatedBy")
+     VALUES ($1,$2,$3,$3)
+     ON CONFLICT (summary_id) DO UPDATE SET body_rule=EXCLUDED.body_rule, "updatedAt"=now(), "updatedBy"=EXCLUDED."updatedBy"`,
+    [summaryId, rule.code, userId],
+  );
+  await manager.query(
+    `UPDATE public.cutter_blade_requirements SET required_blade_count=$2, "updatedAt"=now()
+      WHERE summary_id=$1 AND required_blade_count<>$2`,
+    [summaryId, rule.blade_sets],
+  );
+  return countTraysWithOtherSnapshot(manager, summaryId, rule.blade_sets);
 }
 
 async function countTraysWithOtherSnapshot(manager: EntityManager, summaryId: string, sets: number): Promise<number> {

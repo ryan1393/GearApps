@@ -11,7 +11,8 @@
 //                           shelf bins) and COATER-STAGING are kept, empty; the rest are deleted.
 //   delete-all              every location is deleted (the API recreates COATER-STAGING when
 //                           it next starts).
-// Kept: users, departments, models, parts, part summaries, blade requirements, cutter
+// Kept: users, departments, models, parts, part summaries (with their RING/PINION HOS and
+// blade settings), blade requirements, cutter
 // body definitions, cutter bodies, roll masters, gearsets, machines, lookup lists,
 // server settings, label printers, Coater RPA setup, DSF machine mappings and all Lapper data.
 //
@@ -54,6 +55,7 @@ export const EMPTY = [
 export const KEEP = [
   'users', 'departments',
   'models', 'parts', 'part_summaries', 'part_types', 'cutter_blade_requirements', 'cutter_summary_body_rules',
+  'part_summary_part_type_blades',
   'cutter_body_definitions', 'cutter_bodies', 'roll_masters', 'gearsets', 'machines',
   'cutter_build_statuses', 'cutter_event_types', 'cutter_pull_reasons',
   'cutter_check_results', 'tray_stages',

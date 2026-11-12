@@ -109,8 +109,9 @@ npm run report:cutter-body-matrix                              # packaged base d
 Required blade quantity belongs to the Summary: its RING and PINION rows always carry the same
 quantity, and changing one moves the other. Part Type rows stay separate; handedness and blade labels
 are not inferred from Part Type (for example 30538 and 30588 PINION use LH IB + RH IB, HOS LH).
-This repository stores HOS once per Summary (`part_summaries.hos`); it has no per-Part-Type HOS and
-no Inner/Outer blade-label fields, so those are not part of any compatibility check.
+RING and PINION HOS, Inner blade and Outer blade are stored per Summary + Part Type (see
+[SUMMARY_PART_TYPE_BLADES.md](SUMMARY_PART_TYPE_BLADES.md)). They are not part of any
+compatibility check: workpiece HOS is not cutter-body hand.
 
 Admin > Part Summaries shows each Summary's Body Size Rule, its Required Blades (read-only) and
 its permitted cutter-body types:

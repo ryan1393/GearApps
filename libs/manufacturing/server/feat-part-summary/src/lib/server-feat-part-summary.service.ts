@@ -41,6 +41,7 @@ export class ServerFeatPartSummaryService extends PaginationService<PartSummaryO
 
     const partSummary = this.partSummaryRepo.create({
       ...dto,
+      revision: dto.revision?.trim() ?? '',
       createdBy: userId,
       updatedBy: userId,
     });

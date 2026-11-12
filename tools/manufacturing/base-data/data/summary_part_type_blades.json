@@ -1,0 +1,2166 @@
+{
+  "source": "Blade sheet cope.xlsx, Sheet2 (S9 in Gear-Apps-Cutter-Body-Repair-Handoff-2026-11-11.txt), read without editing on 2026-11-11",
+  "note": "RAW source evidence. Label 1 / Label 2 keep the source column order and are not Inner/Outer by themselves; see tools/manufacturing/base-data/summary-part-type-blades-plan.mjs. Raw totals are total blades and are not imported here.",
+  "rows": [
+    {
+      "Sheet_Row": 2,
+      "Summary": "1.955FC",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A2:F2"
+    },
+    {
+      "Sheet_Row": 2,
+      "Summary": "1.955FC",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G2:L2"
+    },
+    {
+      "Sheet_Row": 3,
+      "Summary": "752",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A3:F3"
+    },
+    {
+      "Sheet_Row": 3,
+      "Summary": "752",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G3:L3"
+    },
+    {
+      "Sheet_Row": 4,
+      "Summary": "969",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A4:F4"
+    },
+    {
+      "Sheet_Row": 4,
+      "Summary": "969",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G4:L4"
+    },
+    {
+      "Sheet_Row": 5,
+      "Summary": "991",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A5:F5"
+    },
+    {
+      "Sheet_Row": 5,
+      "Summary": "991",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G5:L5"
+    },
+    {
+      "Sheet_Row": 6,
+      "Summary": "1010",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A6:F6"
+    },
+    {
+      "Sheet_Row": 6,
+      "Summary": "1010",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G6:L6"
+    },
+    {
+      "Sheet_Row": 7,
+      "Summary": "1052",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A7:F7"
+    },
+    {
+      "Sheet_Row": 7,
+      "Summary": "1052",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G7:L7"
+    },
+    {
+      "Sheet_Row": 8,
+      "Summary": "1053",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A8:F8"
+    },
+    {
+      "Sheet_Row": 8,
+      "Summary": "1053",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G8:L8"
+    },
+    {
+      "Sheet_Row": 9,
+      "Summary": "1069",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A9:F9"
+    },
+    {
+      "Sheet_Row": 9,
+      "Summary": "1069",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G9:L9"
+    },
+    {
+      "Sheet_Row": 10,
+      "Summary": "1091",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A10:F10"
+    },
+    {
+      "Sheet_Row": 10,
+      "Summary": "1091",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G10:L10"
+    },
+    {
+      "Sheet_Row": 11,
+      "Summary": "1092",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A11:F11"
+    },
+    {
+      "Sheet_Row": 11,
+      "Summary": "1092",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G11:L11"
+    },
+    {
+      "Sheet_Row": 12,
+      "Summary": "1095",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A12:F12"
+    },
+    {
+      "Sheet_Row": 12,
+      "Summary": "1095",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G12:L12"
+    },
+    {
+      "Sheet_Row": 13,
+      "Summary": "1107",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A13:F13"
+    },
+    {
+      "Sheet_Row": 13,
+      "Summary": "1107",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G13:L13"
+    },
+    {
+      "Sheet_Row": 14,
+      "Summary": "1172",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A14:F14"
+    },
+    {
+      "Sheet_Row": 14,
+      "Summary": "1172",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G14:L14"
+    },
+    {
+      "Sheet_Row": 15,
+      "Summary": "30007",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A15:F15"
+    },
+    {
+      "Sheet_Row": 15,
+      "Summary": "30007",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G15:L15"
+    },
+    {
+      "Sheet_Row": 16,
+      "Summary": "30009",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A16:F16"
+    },
+    {
+      "Sheet_Row": 16,
+      "Summary": "30009",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G16:L16"
+    },
+    {
+      "Sheet_Row": 17,
+      "Summary": "30010",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A17:F17"
+    },
+    {
+      "Sheet_Row": 17,
+      "Summary": "30010",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G17:L17"
+    },
+    {
+      "Sheet_Row": 18,
+      "Summary": "30043",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A18:F18"
+    },
+    {
+      "Sheet_Row": 18,
+      "Summary": "30043",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G18:L18"
+    },
+    {
+      "Sheet_Row": 19,
+      "Summary": "30064",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A19:F19"
+    },
+    {
+      "Sheet_Row": 19,
+      "Summary": "30064",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G19:L19"
+    },
+    {
+      "Sheet_Row": 20,
+      "Summary": "30135",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A20:F20"
+    },
+    {
+      "Sheet_Row": 20,
+      "Summary": "30135",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G20:L20"
+    },
+    {
+      "Sheet_Row": 21,
+      "Summary": "30163",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A21:F21"
+    },
+    {
+      "Sheet_Row": 21,
+      "Summary": "30163",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G21:L21"
+    },
+    {
+      "Sheet_Row": 22,
+      "Summary": "30164",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A22:F22"
+    },
+    {
+      "Sheet_Row": 22,
+      "Summary": "30164",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G22:L22"
+    },
+    {
+      "Sheet_Row": 23,
+      "Summary": "30196",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A23:F23"
+    },
+    {
+      "Sheet_Row": 23,
+      "Summary": "30196",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G23:L23"
+    },
+    {
+      "Sheet_Row": 24,
+      "Summary": "30201",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A24:F24"
+    },
+    {
+      "Sheet_Row": 24,
+      "Summary": "30201",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G24:L24"
+    },
+    {
+      "Sheet_Row": 25,
+      "Summary": "30204",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A25:F25"
+    },
+    {
+      "Sheet_Row": 25,
+      "Summary": "30204",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G25:L25"
+    },
+    {
+      "Sheet_Row": 26,
+      "Summary": "30208",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A26:F26"
+    },
+    {
+      "Sheet_Row": 26,
+      "Summary": "30208",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G26:L26"
+    },
+    {
+      "Sheet_Row": 27,
+      "Summary": "30213",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A27:F27"
+    },
+    {
+      "Sheet_Row": 27,
+      "Summary": "30213",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G27:L27"
+    },
+    {
+      "Sheet_Row": 28,
+      "Summary": "30214",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A28:F28"
+    },
+    {
+      "Sheet_Row": 28,
+      "Summary": "30214",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G28:L28"
+    },
+    {
+      "Sheet_Row": 29,
+      "Summary": "30241",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A29:F29"
+    },
+    {
+      "Sheet_Row": 29,
+      "Summary": "30241",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G29:L29"
+    },
+    {
+      "Sheet_Row": 30,
+      "Summary": "30269",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A30:F30"
+    },
+    {
+      "Sheet_Row": 30,
+      "Summary": "30269",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G30:L30"
+    },
+    {
+      "Sheet_Row": 31,
+      "Summary": "30310",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A31:F31"
+    },
+    {
+      "Sheet_Row": 31,
+      "Summary": "30310",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G31:L31"
+    },
+    {
+      "Sheet_Row": 32,
+      "Summary": "30311",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A32:F32"
+    },
+    {
+      "Sheet_Row": 32,
+      "Summary": "30311",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G32:L32"
+    },
+    {
+      "Sheet_Row": 33,
+      "Summary": "30312",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A33:F33"
+    },
+    {
+      "Sheet_Row": 33,
+      "Summary": "30312",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G33:L33"
+    },
+    {
+      "Sheet_Row": 34,
+      "Summary": "30339",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A34:F34"
+    },
+    {
+      "Sheet_Row": 34,
+      "Summary": "30339",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G34:L34"
+    },
+    {
+      "Sheet_Row": 35,
+      "Summary": "30354",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A35:F35"
+    },
+    {
+      "Sheet_Row": 35,
+      "Summary": "30354",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G35:L35"
+    },
+    {
+      "Sheet_Row": 36,
+      "Summary": "30403",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A36:F36"
+    },
+    {
+      "Sheet_Row": 36,
+      "Summary": "30403",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G36:L36"
+    },
+    {
+      "Sheet_Row": 37,
+      "Summary": "30456",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A37:F37"
+    },
+    {
+      "Sheet_Row": 37,
+      "Summary": "30456",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G37:L37"
+    },
+    {
+      "Sheet_Row": 38,
+      "Summary": "30475",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A38:F38"
+    },
+    {
+      "Sheet_Row": 38,
+      "Summary": "30475",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G38:L38"
+    },
+    {
+      "Sheet_Row": 39,
+      "Summary": "30516",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A39:F39"
+    },
+    {
+      "Sheet_Row": 39,
+      "Summary": "30516",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G39:L39"
+    },
+    {
+      "Sheet_Row": 40,
+      "Summary": "30526",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A40:F40"
+    },
+    {
+      "Sheet_Row": 40,
+      "Summary": "30526",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G40:L40"
+    },
+    {
+      "Sheet_Row": 41,
+      "Summary": "30538",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A41:F41"
+    },
+    {
+      "Sheet_Row": 41,
+      "Summary": "30538",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G41:L41"
+    },
+    {
+      "Sheet_Row": 42,
+      "Summary": "30588",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A42:F42"
+    },
+    {
+      "Sheet_Row": 42,
+      "Summary": "30588",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G42:L42"
+    },
+    {
+      "Sheet_Row": 43,
+      "Summary": "30613",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A43:F43"
+    },
+    {
+      "Sheet_Row": 43,
+      "Summary": "30613",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G43:L43"
+    },
+    {
+      "Sheet_Row": 44,
+      "Summary": "30634",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A44:F44"
+    },
+    {
+      "Sheet_Row": 44,
+      "Summary": "30634",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G44:L44"
+    },
+    {
+      "Sheet_Row": 45,
+      "Summary": "30695",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A45:F45"
+    },
+    {
+      "Sheet_Row": 45,
+      "Summary": "30695",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G45:L45"
+    },
+    {
+      "Sheet_Row": 46,
+      "Summary": "30654",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A46:F46"
+    },
+    {
+      "Sheet_Row": 46,
+      "Summary": "30654",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G46:L46"
+    },
+    {
+      "Sheet_Row": 47,
+      "Summary": "30711",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 22,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A47:F47"
+    },
+    {
+      "Sheet_Row": 47,
+      "Summary": "30711",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 22,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G47:L47"
+    },
+    {
+      "Sheet_Row": 48,
+      "Summary": "30746",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A48:F48"
+    },
+    {
+      "Sheet_Row": 48,
+      "Summary": "30746",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH IB",
+      "Raw_Label_2": "RH OB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G48:L48"
+    },
+    {
+      "Sheet_Row": 49,
+      "Summary": "30841",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A49:F49"
+    },
+    {
+      "Sheet_Row": 49,
+      "Summary": "30841",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G49:L49"
+    },
+    {
+      "Sheet_Row": 50,
+      "Summary": "30901",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A50:F50"
+    },
+    {
+      "Sheet_Row": 50,
+      "Summary": "30901",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH IB",
+      "Raw_Label_2": "RH OB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G50:L50"
+    },
+    {
+      "Sheet_Row": 51,
+      "Summary": "30989",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A51:F51"
+    },
+    {
+      "Sheet_Row": 51,
+      "Summary": "30989",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G51:L51"
+    },
+    {
+      "Sheet_Row": 52,
+      "Summary": "30990",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A52:F52"
+    },
+    {
+      "Sheet_Row": 52,
+      "Summary": "30990",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G52:L52"
+    },
+    {
+      "Sheet_Row": 53,
+      "Summary": "30994",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A53:F53"
+    },
+    {
+      "Sheet_Row": 53,
+      "Summary": "30994",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G53:L53"
+    },
+    {
+      "Sheet_Row": 54,
+      "Summary": "31045",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A54:F54"
+    },
+    {
+      "Sheet_Row": 54,
+      "Summary": "31045",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G54:L54"
+    },
+    {
+      "Sheet_Row": 55,
+      "Summary": "31046",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A55:F55"
+    },
+    {
+      "Sheet_Row": 55,
+      "Summary": "31046",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G55:L55"
+    },
+    {
+      "Sheet_Row": 56,
+      "Summary": "31047",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A56:F56"
+    },
+    {
+      "Sheet_Row": 56,
+      "Summary": "31047",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G56:L56"
+    },
+    {
+      "Sheet_Row": 57,
+      "Summary": "31077",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A57:F57"
+    },
+    {
+      "Sheet_Row": 57,
+      "Summary": "31077",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G57:L57"
+    },
+    {
+      "Sheet_Row": 58,
+      "Summary": "31241",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A58:F58"
+    },
+    {
+      "Sheet_Row": 58,
+      "Summary": "31241",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G58:L58"
+    },
+    {
+      "Sheet_Row": 59,
+      "Summary": "31254",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A59:F59"
+    },
+    {
+      "Sheet_Row": 59,
+      "Summary": "31254",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G59:L59"
+    },
+    {
+      "Sheet_Row": 60,
+      "Summary": "31283",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A60:F60"
+    },
+    {
+      "Sheet_Row": 60,
+      "Summary": "31283",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G60:L60"
+    },
+    {
+      "Sheet_Row": 61,
+      "Summary": "31489",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 22,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A61:F61"
+    },
+    {
+      "Sheet_Row": 61,
+      "Summary": "31489",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 22,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G61:L61"
+    },
+    {
+      "Sheet_Row": 62,
+      "Summary": "31490",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 22,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A62:F62"
+    },
+    {
+      "Sheet_Row": 62,
+      "Summary": "31490",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 22,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G62:L62"
+    },
+    {
+      "Sheet_Row": 63,
+      "Summary": "31494",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 22,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A63:F63"
+    },
+    {
+      "Sheet_Row": 63,
+      "Summary": "31494",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 22,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G63:L63"
+    },
+    {
+      "Sheet_Row": 64,
+      "Summary": "31497",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 22,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A64:F64"
+    },
+    {
+      "Sheet_Row": 64,
+      "Summary": "31497",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 22,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G64:L64"
+    },
+    {
+      "Sheet_Row": 65,
+      "Summary": "31552",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A65:F65"
+    },
+    {
+      "Sheet_Row": 65,
+      "Summary": "31552",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G65:L65"
+    },
+    {
+      "Sheet_Row": 66,
+      "Summary": "31574",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A66:F66"
+    },
+    {
+      "Sheet_Row": 66,
+      "Summary": "31574",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G66:L66"
+    },
+    {
+      "Sheet_Row": 67,
+      "Summary": "31585",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A67:F67"
+    },
+    {
+      "Sheet_Row": 67,
+      "Summary": "31585",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G67:L67"
+    },
+    {
+      "Sheet_Row": 68,
+      "Summary": "31615",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A68:F68"
+    },
+    {
+      "Sheet_Row": 68,
+      "Summary": "31615",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G68:L68"
+    },
+    {
+      "Sheet_Row": 69,
+      "Summary": "31634",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A69:F69"
+    },
+    {
+      "Sheet_Row": 69,
+      "Summary": "31634",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G69:L69"
+    },
+    {
+      "Sheet_Row": 70,
+      "Summary": "31641",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A70:F70"
+    },
+    {
+      "Sheet_Row": 70,
+      "Summary": "31641",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G70:L70"
+    },
+    {
+      "Sheet_Row": 71,
+      "Summary": "31642",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A71:F71"
+    },
+    {
+      "Sheet_Row": 71,
+      "Summary": "31642",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G71:L71"
+    },
+    {
+      "Sheet_Row": 72,
+      "Summary": "31645",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A72:F72"
+    },
+    {
+      "Sheet_Row": 72,
+      "Summary": "31645",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G72:L72"
+    },
+    {
+      "Sheet_Row": 73,
+      "Summary": "31650",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A73:F73"
+    },
+    {
+      "Sheet_Row": 73,
+      "Summary": "31650",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G73:L73"
+    },
+    {
+      "Sheet_Row": 74,
+      "Summary": "31653",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A74:F74"
+    },
+    {
+      "Sheet_Row": 74,
+      "Summary": "31653",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G74:L74"
+    },
+    {
+      "Sheet_Row": 75,
+      "Summary": "31654",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A75:F75"
+    },
+    {
+      "Sheet_Row": 75,
+      "Summary": "31654",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G75:L75"
+    },
+    {
+      "Sheet_Row": 76,
+      "Summary": "31655",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A76:F76"
+    },
+    {
+      "Sheet_Row": 76,
+      "Summary": "31655",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G76:L76"
+    },
+    {
+      "Sheet_Row": 77,
+      "Summary": "31669",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A77:F77"
+    },
+    {
+      "Sheet_Row": 77,
+      "Summary": "31669",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G77:L77"
+    },
+    {
+      "Sheet_Row": 78,
+      "Summary": "31693",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A78:F78"
+    },
+    {
+      "Sheet_Row": 78,
+      "Summary": "31693",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G78:L78"
+    },
+    {
+      "Sheet_Row": 79,
+      "Summary": "31695",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A79:F79"
+    },
+    {
+      "Sheet_Row": 79,
+      "Summary": "31695",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G79:L79"
+    },
+    {
+      "Sheet_Row": 80,
+      "Summary": "31703",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A80:F80"
+    },
+    {
+      "Sheet_Row": 80,
+      "Summary": "31703",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G80:L80"
+    },
+    {
+      "Sheet_Row": 81,
+      "Summary": "31704",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A81:F81"
+    },
+    {
+      "Sheet_Row": 81,
+      "Summary": "31704",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G81:L81"
+    },
+    {
+      "Sheet_Row": 82,
+      "Summary": "31705",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A82:F82"
+    },
+    {
+      "Sheet_Row": 82,
+      "Summary": "31705",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G82:L82"
+    },
+    {
+      "Sheet_Row": 83,
+      "Summary": "31706",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A83:F83"
+    },
+    {
+      "Sheet_Row": 83,
+      "Summary": "31706",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G83:L83"
+    },
+    {
+      "Sheet_Row": 84,
+      "Summary": "31707",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A84:F84"
+    },
+    {
+      "Sheet_Row": 84,
+      "Summary": "31707",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G84:L84"
+    },
+    {
+      "Sheet_Row": 85,
+      "Summary": "31708",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A85:F85"
+    },
+    {
+      "Sheet_Row": 85,
+      "Summary": "31708",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G85:L85"
+    },
+    {
+      "Sheet_Row": 86,
+      "Summary": "31760",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A86:F86"
+    },
+    {
+      "Sheet_Row": 86,
+      "Summary": "31760",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G86:L86"
+    },
+    {
+      "Sheet_Row": 87,
+      "Summary": "31743",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A87:F87"
+    },
+    {
+      "Sheet_Row": 87,
+      "Summary": "31743",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G87:L87"
+    },
+    {
+      "Sheet_Row": 88,
+      "Summary": "31738",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 22,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A88:F88"
+    },
+    {
+      "Sheet_Row": 88,
+      "Summary": "31738",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 22,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G88:L88"
+    },
+    {
+      "Sheet_Row": 89,
+      "Summary": "31841",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A89:F89"
+    },
+    {
+      "Sheet_Row": 89,
+      "Summary": "31841",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G89:L89"
+    },
+    {
+      "Sheet_Row": 90,
+      "Summary": "31868",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A90:F90"
+    },
+    {
+      "Sheet_Row": 90,
+      "Summary": "31868",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G90:L90"
+    },
+    {
+      "Sheet_Row": 91,
+      "Summary": "31901",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A91:F91"
+    },
+    {
+      "Sheet_Row": 91,
+      "Summary": "31901",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G91:L91"
+    },
+    {
+      "Sheet_Row": 92,
+      "Summary": "31912",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A92:F92"
+    },
+    {
+      "Sheet_Row": 92,
+      "Summary": "31912",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G92:L92"
+    },
+    {
+      "Sheet_Row": 93,
+      "Summary": "31988",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A93:F93"
+    },
+    {
+      "Sheet_Row": 93,
+      "Summary": "31988",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G93:L93"
+    },
+    {
+      "Sheet_Row": 94,
+      "Summary": "32108",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A94:F94"
+    },
+    {
+      "Sheet_Row": 94,
+      "Summary": "32108",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G94:L94"
+    },
+    {
+      "Sheet_Row": 95,
+      "Summary": "32158",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A95:F95"
+    },
+    {
+      "Sheet_Row": 95,
+      "Summary": "32158",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G95:L95"
+    },
+    {
+      "Sheet_Row": 96,
+      "Summary": "32189",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A96:F96"
+    },
+    {
+      "Sheet_Row": 96,
+      "Summary": "32189",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 38,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G96:L96"
+    },
+    {
+      "Sheet_Row": 97,
+      "Summary": "32208",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A97:F97"
+    },
+    {
+      "Sheet_Row": 97,
+      "Summary": "32208",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G97:L97"
+    },
+    {
+      "Sheet_Row": 98,
+      "Summary": "32280",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A98:F98"
+    },
+    {
+      "Sheet_Row": 98,
+      "Summary": "32280",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G98:L98"
+    },
+    {
+      "Sheet_Row": 99,
+      "Summary": "32298",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A99:F99"
+    },
+    {
+      "Sheet_Row": 99,
+      "Summary": "32298",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G99:L99"
+    },
+    {
+      "Sheet_Row": 100,
+      "Summary": "32380",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A100:F100"
+    },
+    {
+      "Sheet_Row": 100,
+      "Summary": "32380",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G100:L100"
+    },
+    {
+      "Sheet_Row": 101,
+      "Summary": "60156",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A101:F101"
+    },
+    {
+      "Sheet_Row": 101,
+      "Summary": "60156",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G101:L101"
+    },
+    {
+      "Sheet_Row": 102,
+      "Summary": "H018472",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A102:F102"
+    },
+    {
+      "Sheet_Row": 102,
+      "Summary": "H018472",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G102:L102"
+    },
+    {
+      "Sheet_Row": 103,
+      "Summary": "H018473",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A103:F103"
+    },
+    {
+      "Sheet_Row": 103,
+      "Summary": "H018473",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 34,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G103:L103"
+    },
+    {
+      "Sheet_Row": 104,
+      "Summary": "32414",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 0,
+      "Raw_Label_1": null,
+      "Raw_Label_2": null,
+      "Raw_HOS": null,
+      "Source_Cells": "Sheet2!A104:F104"
+    },
+    {
+      "Sheet_Row": 104,
+      "Summary": "32414",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 0,
+      "Raw_Label_1": null,
+      "Raw_Label_2": null,
+      "Raw_HOS": null,
+      "Source_Cells": "Sheet2!G104:L104"
+    },
+    {
+      "Sheet_Row": 105,
+      "Summary": "32209",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 0,
+      "Raw_Label_1": null,
+      "Raw_Label_2": null,
+      "Raw_HOS": null,
+      "Source_Cells": "Sheet2!A105:F105"
+    },
+    {
+      "Sheet_Row": 105,
+      "Summary": "32209",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 0,
+      "Raw_Label_1": null,
+      "Raw_Label_2": null,
+      "Raw_HOS": null,
+      "Source_Cells": "Sheet2!G105:L105"
+    },
+    {
+      "Sheet_Row": 106,
+      "Summary": "30131",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A106:F106"
+    },
+    {
+      "Sheet_Row": 106,
+      "Summary": "30131",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G106:L106"
+    },
+    {
+      "Sheet_Row": 107,
+      "Summary": "30132",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A107:F107"
+    },
+    {
+      "Sheet_Row": 107,
+      "Summary": "30132",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G107:L107"
+    },
+    {
+      "Sheet_Row": 108,
+      "Summary": "30133",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!A108:F108"
+    },
+    {
+      "Sheet_Row": 108,
+      "Summary": "30133",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!G108:L108"
+    },
+    {
+      "Sheet_Row": 109,
+      "Summary": "30136",
+      "Part_Type_Code": "RING",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "LH IB",
+      "Raw_Label_2": "LH OB",
+      "Raw_HOS": "LH",
+      "Source_Cells": "Sheet2!A109:F109"
+    },
+    {
+      "Sheet_Row": 109,
+      "Summary": "30136",
+      "Part_Type_Code": "PINION",
+      "Raw_Total_Blades": 26,
+      "Raw_Label_1": "RH OB",
+      "Raw_Label_2": "RH IB",
+      "Raw_HOS": "RH",
+      "Source_Cells": "Sheet2!G109:L109"
+    }
+  ]
+}

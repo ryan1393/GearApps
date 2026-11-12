@@ -134,6 +134,30 @@
       },
       "cache": false
     },
+    "audit-gearsets": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/manufacturing/base-data/audit-gearsets.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "report-summary-part-type-blades": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/manufacturing/base-data/apply-summary-part-type-blades.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "apply-summary-part-type-blades": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/manufacturing/base-data/apply-summary-part-type-blades.mjs --apply",
+        "cwd": "."
+      },
+      "cache": false
+    },
     "test-cutter-dana": {
       "executor": "nx:run-commands",
       "options": {
@@ -873,7 +897,7 @@
     "test-deployment": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node --test tools/manufacturing/base-data/bootstrap-policy.test.mjs tools/manufacturing/base-data/blade-requirement-plan.test.mjs tools/manufacturing/set-version.test.mjs tools/manufacturing/test-deployment-config.cjs tools/manufacturing/deploy/deploy-layout.test.mjs tools/manufacturing/deploy/deploy-verify.test.mjs tools/manufacturing/package-release.test.mjs tools/manufacturing/gear-merge-manifest.test.mjs",
+        "command": "node --test tools/manufacturing/base-data/bootstrap-policy.test.mjs tools/manufacturing/base-data/blade-requirement-plan.test.mjs tools/manufacturing/base-data/audit-gearsets.test.mjs tools/manufacturing/base-data/summary-part-type-blades-plan.test.mjs tools/manufacturing/set-version.test.mjs tools/manufacturing/test-deployment-config.cjs tools/manufacturing/deploy/deploy-layout.test.mjs tools/manufacturing/deploy/deploy-verify.test.mjs tools/manufacturing/package-release.test.mjs tools/manufacturing/gear-merge-manifest.test.mjs",
         "cwd": "."
       },
       "cache": false

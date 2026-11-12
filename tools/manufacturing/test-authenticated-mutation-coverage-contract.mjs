@@ -28,6 +28,7 @@ const backendCrud=new Set([
   'POST /api/v1/cutter-config/validate-tray',
   'PUT /api/v1/cutter-config/summary-body-rules/:summaryId',
   'DELETE /api/v1/cutter-config/summary-body-rules/:summaryId',
+  'PUT /api/v1/cutter-config/summary-settings/:summaryId',
   'POST /api/v1/locationTrays',
   'DELETE /api/v1/locationTrays/:id',
   'PATCH /api/v1/locationTrays/:id',

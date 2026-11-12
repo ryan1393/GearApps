@@ -26,10 +26,12 @@ import {
   parseSummaryShelfTag,
   SummaryShelfTag,
   CUTTER_BODY_RULES,
+  KNOWN_BLADE_LABELS,
+  normalizeBladeLabel,
   CutterBodyRuleResolution,
   resolveCutterBodyRule,
 } from '@meshforge/manufacturing/shared/util-constants';
-import { ISummaryBodyRuleRow } from '@meshforge/manufacturing/shared/util-types';
+import { IPartSummarySettings, ISavePartSummaryRequest, ISummaryBodyRuleRow, ISummaryPartTypeSettings } from '@meshforge/manufacturing/shared/util-types';
 import {
   AdminApiService,
   AdminLocationRow,
@@ -104,7 +106,13 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   cutterBodies: CutterBodyRow[] = [];
   /** Summary Body Size Rules keyed by Summary id; the rule controls the read-only Required Blades. */
   summaryBodyRules = new Map<string, ISummaryBodyRuleRow>();
-  summaryBodyRuleEdits: Record<string, string | undefined> = {};
+  /** RING/PINION HOS, Inner blade and Outer blade of each Summary (blank when not set). */
+  summarySettings = new Map<string, IPartSummarySettings>();
+  readonly summaryPartTypes = ['RING', 'PINION'] as const;
+  readonly knownBladeLabels: readonly string[] = KNOWN_BLADE_LABELS;
+  /** Edit Part Summary draft: both Part Type groups and the Body Size choice ('KEEP' keeps the mapping). */
+  summaryTypeForm: Record<'RING' | 'PINION', { hos: string; inner_blade: string; outer_blade: string }> = this.emptySummaryTypeForm();
+  summaryBodyRuleChoice = 'KEEP';
   readonly cutterBodyRules = CUTTER_BODY_RULES;
   danaAssignments: Record<string, string | undefined> = {};
   userSearch = '';
@@ -303,18 +311,90 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       number, revision: this.summaryForm.revision.trim(), model_id: this.summaryForm.model_id || null,
       hos: this.summaryForm.hos.trim() || null,
     };
+    if (this.editingPartSummaryId) { this.savePartSummary(this.editingPartSummaryId, payload); return; }
     // Active/enabled are set on create only; an edit must not silently re-enable a disabled record.
-    const request = this.editingPartSummaryId
-      ? this.api.updatePartSummary(this.editingPartSummaryId, payload)
-      : this.api.createPartSummary({ ...payload, active: true, enabled: true });
-    this.runCreate(request, this.editingPartSummaryId ? 'Part Summary updated.' : 'Part Summary created.', () => {
-      this.resetPartSummaryForm(); this.loadPartSummaries();
+    this.runCreate(this.api.createPartSummary({ ...payload, active: true, enabled: true }), 'Part Summary created.', () => {
+      this.resetPartSummaryForm(); this.loadPartSummaries(); this.loadSummaryBodyRules();
     });
+  }
+
+  /**
+   * Save Part Summary: Summary fields, both RING/PINION groups and any Body Size change go in ONE
+   * request and one transaction. On failure nothing is saved and the draft stays in the form.
+   */
+  private savePartSummary(summaryId: string, summaryFields: { number: string; revision: string; model_id: string | null; hos: string | null }): void {
+    if (this.busy) return;
+    const body: ISavePartSummaryRequest = { ...summaryFields, part_types: {} };
+    for (const code of this.summaryPartTypes) {
+      const group = this.summaryTypeForm[code];
+      // Every field is sent: an untouched field resends its current value; a blank clears it.
+      body.part_types![code] = { hos: group.hos || null, inner_blade: normalizeBladeLabel(group.inner_blade), outer_blade: normalizeBladeLabel(group.outer_blade) };
+    }
+    const current = this.summaryBodyRuleById(summaryId);
+    if (this.summaryBodyRuleChoice !== 'KEEP' && this.summaryBodyRuleChoice !== (current?.configured_body_rule ?? '')) {
+      body.body_rule = this.summaryBodyRuleChoice || null;
+      const rule = CUTTER_BODY_RULES.find((r) => r.code === this.summaryBodyRuleChoice);
+      const existing = current?.required_blade_sets;
+      if (rule && existing != null && existing !== rule.blade_sets &&
+          !globalThis.confirm(`${rule.label} changes ${summaryFields.number}'s Required Blades from ${existing * 2} to ${rule.total_blades} for every Part Type. Trays already ground keep their quantity. Continue?`)) {
+        return;
+      }
+    }
+    this.busy = true; this.clearNotice();
+    this.api.savePartSummary(summaryId, body).subscribe({
+      next: (row) => {
+        this.busy = false;
+        const trays = row.open_trays_with_other_quantity ?? 0;
+        this.toast.success(`${row.summary_number} saved.${trays ? ` ${trays} tray(s) hold the previous quantity and need review.` : ''}`, 'Saved');
+        this.resetPartSummaryForm();
+        this.loadPartSummaries(); this.loadSummaryBodyRules(); this.loadParts();
+        this.cdr.markForCheck();
+      },
+      // The draft is kept so the administrator can correct it and save again.
+      error: (error: HttpErrorResponse) => { this.busy = false; this.toast.error(this.errorMessage(error), 'Save failed — nothing was changed'); this.cdr.markForCheck(); },
+    });
+  }
+
+  private emptySummaryTypeForm(): Record<'RING' | 'PINION', { hos: string; inner_blade: string; outer_blade: string }> {
+    return { RING: { hos: '', inner_blade: '', outer_blade: '' }, PINION: { hos: '', inner_blade: '', outer_blade: '' } };
+  }
+
+  /** One Part Type's stored HOS / Inner blade / Outer blade for a Summary. */
+  summaryPartTypeSettings(summaryId: string, code: string): ISummaryPartTypeSettings | null {
+    return this.summarySettings.get(summaryId)?.part_types.find((pt) => pt.part_type_code === code) ?? null;
+  }
+
+  /** Label choices for a blade field: the known labels plus whatever is stored or typed. */
+  bladeLabelChoices(current: string): string[] {
+    const value = normalizeBladeLabel(current);
+    return value && !this.knownBladeLabels.includes(value) ? [...this.knownBladeLabels, value] : [...this.knownBladeLabels];
+  }
+
+  /** Required Blades preview for the Body Size choice in the edit form. */
+  get summaryRequiredBladesPreview(): string {
+    if (!this.editingPartSummaryId) return '—';
+    const current = this.summaryBodyRuleById(this.editingPartSummaryId);
+    if (this.summaryBodyRuleChoice === 'KEEP') {
+      return current?.required_total_blades != null ? `${current.required_total_blades} blades (${current.required_blade_sets} sets) — current` : 'Unchanged';
+    }
+    const rule = CUTTER_BODY_RULES.find((r) => r.code === this.summaryBodyRuleChoice);
+    return rule ? `${rule.total_blades} blades (${rule.blade_sets} sets) — ${rule.label}` : 'Rule removed; quantities stay as they are';
+  }
+
+  private summaryBodyRuleById(summaryId: string): ISummaryBodyRuleRow | null {
+    return this.summaryBodyRules.get(summaryId) ?? null;
   }
 
   beginEditPartSummary(summary: PartSummaryRow): void {
     this.editingPartSummaryId = summary.id;
     this.summaryForm = { number: summary.number, revision: summary.revision || '', model_id: summary.model_id || '', hos: summary.hos || '' };
+    const form = this.emptySummaryTypeForm();
+    for (const code of this.summaryPartTypes) {
+      const stored = this.summaryPartTypeSettings(summary.id, code);
+      form[code] = { hos: stored?.hos ?? '', inner_blade: stored?.inner_blade ?? '', outer_blade: stored?.outer_blade ?? '' };
+    }
+    this.summaryTypeForm = form;
+    this.summaryBodyRuleChoice = 'KEEP';
     this.clearNotice(); this.cdr.markForCheck();
   }
 
@@ -341,32 +421,6 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       case 'CONFLICT': return `Conflict — ${row.detail}`;
       default: return 'No blade requirement';
     }
-  }
-
-  saveSummaryBodyRule(summary: PartSummaryRow): void {
-    const current = this.summaryBodyRule(summary)?.configured_body_rule ?? '';
-    const wanted = this.summaryBodyRuleEdits[summary.id] ?? current;
-    if (wanted === current) return;
-    if (!wanted) {
-      this.runCreate(this.api.clearSummaryBodyRule(summary.id), `Body Size Rule cleared for ${summary.number}; quantities unchanged.`, () => this.loadSummaryBodyRules());
-      return;
-    }
-    const rule = CUTTER_BODY_RULES.find((r) => r.code === wanted);
-    const existing = this.summaryBodyRule(summary)?.required_blade_sets;
-    if (rule && existing != null && existing !== rule.blade_sets &&
-        !globalThis.confirm(`${rule.label} changes ${summary.number}'s Required Blades from ${existing * 2} to ${rule.total_blades} for every Part Type. Trays already ground keep their quantity. Continue?`)) {
-      return;
-    }
-    this.busy = true; this.clearNotice();
-    this.api.setSummaryBodyRule(summary.id, wanted).subscribe({
-      next: (row) => {
-        this.busy = false;
-        const trays = row.open_trays_with_other_quantity ?? 0;
-        this.toast.success(`${summary.number}: ${row.effective_body_rule_label ?? wanted}.${trays ? ` ${trays} tray(s) hold the previous quantity and need review.` : ''}`, 'Saved');
-        this.loadSummaryBodyRules();
-      },
-      error: (error: HttpErrorResponse) => { this.busy = false; this.toast.error(this.errorMessage(error), 'Save failed'); this.cdr.markForCheck(); },
-    });
   }
 
   /** Body definitions this Summary's blades may be loaded into, or why none are permitted yet. */
@@ -1160,7 +1214,13 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     this.api.listSummaryBodyRules().subscribe({
       next: (rows) => {
         this.summaryBodyRules = new Map((rows ?? []).map((row) => [row.summary_id, row]));
-        this.summaryBodyRuleEdits = {};
+        this.cdr.markForCheck();
+      },
+      error: (error) => this.handleLoadError(error),
+    });
+    this.api.listPartSummarySettings().subscribe({
+      next: (rows) => {
+        this.summarySettings = new Map((rows ?? []).map((row) => [row.summary_id, row]));
         this.cdr.markForCheck();
       },
       error: (error) => this.handleLoadError(error),
@@ -1189,6 +1249,8 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   private resetPartSummaryForm(): void {
     this.editingPartSummaryId = null;
     this.summaryForm = { number: '', revision: '', model_id: '', hos: '' };
+    this.summaryTypeForm = this.emptySummaryTypeForm();
+    this.summaryBodyRuleChoice = 'KEEP';
   }
 
   private resetMachineForm(): void {
