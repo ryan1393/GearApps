@@ -156,6 +156,11 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
       ALTER TABLE lapper.machine_fanuc_variables ADD COLUMN IF NOT EXISTS in_cycle_since timestamptz;
       ALTER TABLE lapper.machine_fanuc_variables ADD COLUMN IF NOT EXISTS reported_at timestamptz;
     `);
+    // Whether a change in the macro's value is flagged on the Lapper Dashboard (Admin > Macros).
+    // Every macro starts flagged; the consec counter is never flagged whatever this says.
+    await runDatabaseMigration(manager, '20261112-lapper-macro-flag-changes-v1', `
+      ALTER TABLE lapper.macros ADD COLUMN IF NOT EXISTS flag_changes boolean NOT NULL DEFAULT true;
+    `);
   });
 }
 

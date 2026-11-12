@@ -311,6 +311,14 @@ export class MacroDto implements Macro {
   @IsString()
   @MaxLength(24)
   unit?: string | null;
+  @ApiPropertyOptional({
+    default: true,
+    description:
+      'Flag a cycle that changes this value on the Lapper Dashboard (Setting changes). The consec counter #10032 is never flagged.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  flag_changes?: boolean;
 }
 export class CreateMacroDto extends OmitType(MacroDto, ['id']) implements CreateMacro {}
 export class UpdateMacroDto extends PartialType(CreateMacroDto) implements UpdateMacro {}

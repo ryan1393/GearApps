@@ -23,6 +23,7 @@ const columns: Partial<Record<Resource, string[]>> = {
     'min_value',
     'max_value',
     'unit',
+    'flag_changes',
   ],
   'scanner-detail': [
     'model',

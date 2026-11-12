@@ -1,6 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { CreateMachineCycleDto, UpdateMachineFanucVariableDto } from './gear.dto';
+import { CreateMachineCycleDto, UpdateMacroDto, UpdateMachineFanucVariableDto } from './gear.dto';
 
 describe('Imported SQL Server GUID compatibility', () => {
   const cycle = {
@@ -68,5 +68,20 @@ describe('Machine I/O running cycle time', () => {
     for (const bad of [-1, 86401, '10']) {
       expect(await errors({ cycle_elapsed_s: bad })).toEqual(['cycle_elapsed_s']);
     }
+  });
+});
+
+describe('Macro flag changes', () => {
+  const errors = async (body: object) =>
+    (await validate(plainToInstance(UpdateMacroDto, body))).map((e) => e.property);
+
+  it('is optional and takes true or false', async () => {
+    expect(await errors({ name: 'Torque' })).toEqual([]);
+    expect(await errors({ flag_changes: false })).toEqual([]);
+    expect(await errors({ flag_changes: true })).toEqual([]);
+  });
+
+  it('rejects anything but a boolean', async () => {
+    expect(await errors({ flag_changes: 'no' })).toEqual(['flag_changes']);
   });
 });

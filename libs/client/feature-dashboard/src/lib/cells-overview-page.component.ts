@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
@@ -16,13 +16,14 @@ import {
 } from '@dana/ui';
 import { apiErrorMessage, LapperAccess, loadable, MachinesApi, MachineCyclesApi } from '@meshforge/client/core';
 import { StatusBadgeComponent } from '@meshforge/client/ui';
-import { LapperProduction, Machine } from '@meshforge/shared/domain';
+import { LapperProduction, Machine, SETTING_CHANGE_HOURS, SettingChanges } from '@meshforge/shared/domain';
 import { groupByCell } from './cells';
 
 @Component({
   selector: 'gear-cells-overview-page',
   imports: [
     DatePipe,
+    DecimalPipe,
     RouterLink,
     DanaCountBadgeDirective,
     DanaDashboardPanelComponent,
@@ -174,6 +175,89 @@ import { groupByCell } from './cells';
               aria-label="Cycle Test Lab"
             ></a>
           }
+        </div>
+      </section>
+
+      <section class="gear-panel data-panel" danaDashboardPanel data-testid="setting-changes">
+        <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
+          <div>
+            <h2>Setting changes · last {{ settingHours }} hours</h2>
+            <p>
+              @if (settingChanges.error()) {
+                Setting changes are unavailable. Refresh to retry.
+              } @else {
+                Cycles where a value other than the consec counter changed since the previous cycle of
+                that machine and gearset.
+                @if ((settingChanges.value()?.total ?? 0) > (settingChanges.value()?.items?.length ?? 0)) {
+                  Showing the newest {{ settingChanges.value()?.items?.length }} of {{ settingChanges.value()?.total }}.
+                }
+              }
+            </p>
+          </div>
+          <span
+            danaCountBadge
+            class="gear-count-badge count-chip"
+            [attr.data-tone]="settingChanges.value()?.total ? 'warning' : null"
+            >{{ settingChanges.value()?.total ?? 0 }}</span
+          >
+        </div>
+        <div danaTableShell class="table-wrap">
+          <table danaTable class="gear-table dashboard-table setting-change-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Machine</th>
+                <th>Gearset</th>
+                <th>Serial</th>
+                <th title="Cycle number (consec)">#</th>
+                <th>What changed</th>
+                <th data-dana-table-static></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (cycle of settingChanges.value()?.items ?? []; track cycle.machine_cycle_id) {
+                <tr>
+                  <td>{{ cycle.timestamp | date: 'MMM d, HH:mm' }}</td>
+                  <td class="mono strong">{{ cycle.machine_number || '—' }}</td>
+                  <td class="mono">{{ cycle.gearset_number || '—' }}</td>
+                  <td class="mono">{{ cycle.serial_number || '—' }}</td>
+                  <td>{{ cycle.consec }}</td>
+                  <td>
+                    <ul class="setting-change-list">
+                      @for (change of cycle.changes; track change.number) {
+                        <li>
+                          <gear-status-badge tone="warning" [text]="'#' + change.number" />
+                          <span class="setting-change-name">{{ change.name }}</span>
+                          <span class="mono"
+                            >{{ change.previous_value | number: '1.0-5' }} → <strong>{{ change.value | number: '1.0-5' }}</strong
+                            >{{ change.unit ? ' ' + change.unit : '' }}</span
+                          >
+                        </li>
+                      }
+                    </ul>
+                  </td>
+                  <td class="right">
+                    <a
+                      class="gear-btn gear-btn-secondary gear-btn-sm"
+                      routerLink="/lapping-summaries"
+                      [queryParams]="{ machine: cycle.machine_id, gearset: cycle.gearset_id }"
+                      >Cycle history</a
+                    >
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td danaTableEmpty colspan="7" class="empty-row">
+                    {{
+                      settingChanges.loading()
+                        ? 'Loading setting changes…'
+                        : 'No settings changed in the last ' + settingHours + ' hours: only the consec counter moved.'
+                    }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
         </div>
       </section>
 
@@ -333,11 +417,40 @@ import { groupByCell } from './cells';
       </section>
     </div>
   `,
+  styles: `
+    /* What changed gets the room; the identifying columns stay narrow. */
+    .setting-change-table th:nth-child(1) { width: 12%; }
+    .setting-change-table th:nth-child(2) { width: 12%; }
+    .setting-change-table th:nth-child(3) { width: 9%; }
+    .setting-change-table th:nth-child(4) { width: 12%; }
+    .setting-change-table th:nth-child(5) { width: 6%; }
+    .setting-change-table th:nth-child(6) { width: 37%; }
+    .setting-change-table th:nth-child(7) { width: 12%; }
+    .setting-change-list {
+      display: grid;
+      gap: 4px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .setting-change-list li {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .setting-change-name {
+      font-weight: 600;
+    }
+  `,
 })
 export class CellsOverviewPageComponent implements OnInit {
   private readonly api = inject(MachinesApi);
   private readonly cyclesApi = inject(MachineCyclesApi);
   protected readonly production = loadable<LapperProduction | null>(null);
+  protected readonly settingHours = SETTING_CHANGE_HOURS;
+  /** Cycles that changed a setting (anything but the consec counter) recently. */
+  protected readonly settingChanges = loadable<SettingChanges | null>(null);
   protected readonly access = inject(LapperAccess);
   protected readonly machines = loadable<Machine[]>([]);
   protected readonly cells = computed(() => groupByCell(this.machines.value()));
@@ -359,6 +472,7 @@ export class CellsOverviewPageComponent implements OnInit {
   protected reload() {
     this.machines.load(this.api.list());
     this.production.load(this.cyclesApi.production());
+    this.settingChanges.load(this.cyclesApi.settingChanges(SETTING_CHANGE_HOURS));
   }
 
   protected scannersIn(machines: Machine[]): number {

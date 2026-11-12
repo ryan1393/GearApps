@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { DataSource, EntityManager } from 'typeorm';
-import { CYCLE_TIME_AVERAGE_OF } from '@meshforge/shared/domain';
+import { CYCLE_TIME_AVERAGE_OF, PER_CYCLE_MACROS } from '@meshforge/shared/domain';
 
 export type Row = Record<string, unknown>;
 export type Resource =
@@ -421,6 +421,76 @@ export class PostgresLapperCatalog {
       macro: macroById.get(l.macro_id),
       machine_cycle: cycleById.get(l.machine_cycle_id),
     }));
+  }
+
+  /**
+   * Cycles of the past `hours`, on every machine, that changed a flagged macro (Admin > Macros >
+   * Flag changes; never the per-cycle counters in PER_CYCLE_MACROS) since the previous reading of
+   * that value on the same machine and gearset. A value's first reading has no previous one and is
+   * not a change. Newest first.
+   */
+  async settingChanges(hours: number, limit: number) {
+    const rows = await this.db.query(
+      `WITH recent AS (
+         SELECT c.id, c.machine_id, c.gearset_id, c.consec, c.serial_number,
+                COALESCE(c.recorded_at, c.timestamp AT TIME ZONE $1) AS occurred_at
+           FROM lapper.machine_cycles c
+          WHERE COALESCE(c.recorded_at, c.timestamp AT TIME ZONE $1) >= now() - make_interval(hours => $2::int)
+       ), changed AS (
+         SELECT r.id, m.number, m.name, m.unit, l.value, previous.value AS previous_value
+           FROM recent r
+           JOIN lapper.macro_logs l ON l.machine_cycle_id = r.id
+           JOIN lapper.macros m ON m.id = l.macro_id
+           CROSS JOIN LATERAL (
+             SELECT pl.value
+               FROM lapper.macro_logs pl
+               JOIN lapper.machine_cycles pc ON pc.id = pl.machine_cycle_id
+              WHERE pl.macro_id = l.macro_id AND pc.machine_id = r.machine_id AND pc.gearset_id = r.gearset_id
+                AND (COALESCE(pc.recorded_at, pc.timestamp AT TIME ZONE $1), pc.id) < (r.occurred_at, r.id)
+              ORDER BY COALESCE(pc.recorded_at, pc.timestamp AT TIME ZONE $1) DESC, pc.id DESC
+              LIMIT 1
+           ) previous
+          WHERE m.flag_changes AND m.number <> ALL($3::int[]) AND previous.value IS DISTINCT FROM l.value
+       ), flagged AS (
+         SELECT r.*, json_agg(json_build_object('number', ch.number, 'name', ch.name, 'unit', ch.unit,
+                  'previous_value', ch.previous_value, 'value', ch.value) ORDER BY ch.number) AS changes
+           FROM recent r JOIN changed ch ON ch.id = r.id
+          GROUP BY r.id, r.machine_id, r.gearset_id, r.consec, r.serial_number, r.occurred_at
+       )
+       SELECT f.id AS machine_cycle_id, f.consec, f.serial_number, f.occurred_at AS timestamp, f.changes,
+              lm.public_machine_id AS machine_id, ${resolvedGearset} AS gearset_id,
+              COUNT(*) OVER () AS total
+         FROM flagged f
+         JOIN lapper.machines lm ON lm.id = f.machine_id
+         JOIN lapper.gearsets g ON g.id = f.gearset_id
+        ORDER BY f.occurred_at DESC, f.id DESC
+        LIMIT $4`,
+      [this.timeZone, hours, PER_CYCLE_MACROS, limit],
+    );
+    const [machines, gearsets] = await readBatch(() => this.machines(), () => this.gearsets());
+    const machineById = new Map(machines.map((m) => [m.id, m]));
+    const gearById = new Map(gearsets.map((g) => [g.id, g]));
+    return {
+      hours,
+      total: Number(rows[0]?.total ?? 0),
+      items: rows.map((row: Row) => ({
+        machine_cycle_id: row.machine_cycle_id,
+        machine_id: row.machine_id,
+        machine_number: machineById.get(text(row.machine_id))?.number ?? null,
+        gearset_id: row.gearset_id,
+        gearset_number: gearById.get(text(row.gearset_id))?.number ?? null,
+        serial_number: row.serial_number,
+        consec: row.consec,
+        timestamp: row.timestamp,
+        changes: (row.changes as Row[]).map((change) => ({
+          number: Number(change.number),
+          name: change.name,
+          unit: change.unit ?? null,
+          previous_value: Number(change.previous_value),
+          value: Number(change.value),
+        })),
+      })),
+    };
   }
 
   /** One page of a machine and gearset's cycles, newest first, optionally filtered by serial. */

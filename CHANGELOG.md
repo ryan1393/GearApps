@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **Setting changes on the Lapper Dashboard.** A new panel lists the cycles of the last 8 hours, on
+  every machine, where a controller value changed since the previous cycle of the same machine and
+  gearset: time, machine, gearset, serial, cycle number and each changed value with its previous
+  and new value (#10035 Backlash axial 0.12 → 0.15), with a link to that cycle history. Every
+  macro is flagged except the consec counter (#10032), which is never flagged. **Admin > Macros**
+  has a new **Flag changes** tick (and column) to leave out a value that changes every cycle by
+  design, such as a controller cycle time. A value's first reading on a machine and gearset is not
+  a change, and machines are never compared with each other. New column
+  `lapper.macros.flag_changes` (boolean, default true, migration `20261112-lapper-macro-flag-changes-v1`)
+  and read-only endpoint `GET /api/v1/machine-cycle/setting-changes?hours=8` (1 to 168 hours,
+  newest 100 cycles; `total` counts all of them).
 - **Live cycle timer.** While a lapper is in cycle, Lapper Dashboard's machine cards (Machine I/O >
   Cycle time) and Lapping Summaries (Machine now) count up how long the cycle has been running,
   every second. Between cycles they show Not in cycle; when the collector started mid-cycle, In

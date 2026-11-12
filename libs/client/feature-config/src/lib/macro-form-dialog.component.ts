@@ -9,16 +9,28 @@ import {
   signal,
   untracked,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { apiErrorMessage, MacrosApi } from '@meshforge/client/core';
 import { DialogComponent, SegmentedComponent } from '@meshforge/client/ui';
-import { Macro } from '@meshforge/shared/domain';
+import { Macro, PER_CYCLE_MACROS } from '@meshforge/shared/domain';
 import { MACRO_FORM_OPTIONS, MACRO_STATUS_OPTIONS, MACRO_TYPES } from './options';
+
+/** #10032, the consecutive cycle counter. */
+const CONSEC_MACRO = PER_CYCLE_MACROS[0];
 
 @Component({
   selector: 'gear-macro-form-dialog',
   imports: [ReactiveFormsModule, DialogComponent, SegmentedComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: `
+    .gear-macro-flag-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+  `,
   template: `
     <gear-dialog
       [open]="open()"
@@ -96,6 +108,17 @@ import { MACRO_FORM_OPTIONS, MACRO_STATUS_OPTIONS, MACRO_TYPES } from './options
             >
           }
         </label>
+        <label class="gear-field dana-field-full gear-macro-flag">
+          <span class="gear-macro-flag-row">
+            <input type="checkbox" formControlName="flag_changes" data-testid="macro-flag-changes" />
+            Flag changes on the Lapper Dashboard
+          </span>
+          <small class="gear-field-help">{{
+            isConsec()
+              ? 'The consec counter (#10032) goes up every cycle, so it is never flagged.'
+              : 'A cycle that changes this value from the previous cycle of the same machine and gearset is listed under Setting changes. Untick a value that changes every cycle by design, such as a cycle time.'
+          }}</small>
+        </label>
         <label class="gear-field dana-field-full">
           Extra
           <input
@@ -158,10 +181,22 @@ export class MacroFormDialogComponent {
     min_value: new FormControl<number | null>(null),
     max_value: new FormControl<number | null>(null),
     unit: new FormControl<string | null>(null),
+    flag_changes: new FormControl<boolean>(true, { nonNullable: true }),
     status: new FormControl<number>(1, { nonNullable: true }),
   });
 
+  /** The consec counter is never flagged, so its tick is shown off and cannot be changed. */
+  protected isConsec(): boolean {
+    return Number(this.form.controls.number.value) === CONSEC_MACRO;
+  }
+
   constructor() {
+    // The consec counter is never flagged: its tick is off and cannot be changed.
+    this.form.controls.number.valueChanges.pipe(takeUntilDestroyed()).subscribe(() => {
+      const flag = this.form.controls.flag_changes;
+      if (this.isConsec()) flag.disable({ emitEvent: false });
+      else flag.enable({ emitEvent: false });
+    });
     effect(() => {
       const m = this.macro();
       const isOpen = this.open();
@@ -172,10 +207,11 @@ export class MacroFormDialogComponent {
           type: 'real',
           l60_table: 'L60',
           status: 1,
+          flag_changes: true,
           used_form: this.defaultForm(),
         });
         if (m) {
-          this.form.patchValue({ ...m, status: m.status ?? 0 });
+          this.form.patchValue({ ...m, status: m.status ?? 0, flag_changes: m.flag_changes ?? true });
         }
       });
     });
