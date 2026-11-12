@@ -31,7 +31,8 @@ or administrators; other accounts get HTTP 403 ("Only Lapper Read collector toke
 and MeshForge administrators can send machine data"). The rules follow the route
 the API matched, never the request URL text. Shared deletions and manufacturing inventory changes use
 the existing guarded workflows. Cycle and macro retries use transactional request
-keys and natural database uniqueness. Conflicting snapshots return HTTP 409.
+keys and natural database uniqueness. Request keys (lapper.ingest_requests) are
+kept for 90 days; older ones are removed in batches at startup and daily. Conflicting snapshots return HTTP 409.
 
 Keep all collector checkpoint/state files. The
 [collector README](../apps/lapper-read-py/README.md) explains build and configuration.

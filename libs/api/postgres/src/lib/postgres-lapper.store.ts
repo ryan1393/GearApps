@@ -2,8 +2,10 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
   OnApplicationBootstrap,
+  OnModuleDestroy,
 } from '@nestjs/common';
 import { createHash, randomUUID } from 'node:crypto';
 import { EntityManager } from 'typeorm';
@@ -70,11 +72,77 @@ export const ingestFingerprint = (body: Row): string =>
     .update(JSON.stringify(normalize(body)))
     .digest('hex');
 
+/**
+ * How long a collector's Idempotency-Key is remembered. A retry of a request older than this
+ * is still harmless: cycles and macro values are also matched by their natural keys.
+ */
+export const INGEST_REQUEST_RETENTION_DAYS = 90;
+/** Rows removed per statement, so pruning never holds long locks or one huge transaction. */
+export const INGEST_PRUNE_BATCH = 5_000;
+/** Batches per run; whatever is left is removed by the next daily run. */
+export const INGEST_PRUNE_MAX_BATCHES = 200;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 @Injectable()
-export class PostgresLapperStore implements OnApplicationBootstrap {
+export class PostgresLapperStore implements OnApplicationBootstrap, OnModuleDestroy {
+  private readonly logger = new Logger(PostgresLapperStore.name);
+  private pruneTimer?: ReturnType<typeof setInterval>;
+  private pruning?: Promise<number>;
+
   constructor(readonly catalog: PostgresLapperCatalog) {}
   async onApplicationBootstrap(): Promise<void> {
     await migrateLapperPostgres(this.catalog.db);
+    this.schedulePruning();
+  }
+  onModuleDestroy(): void {
+    if (this.pruneTimer) clearInterval(this.pruneTimer);
+    this.pruneTimer = undefined;
+  }
+
+  /** Prunes the ingest log now (in the background, not on a request) and then once a day. */
+  schedulePruning(): void {
+    if (this.pruneTimer) return;
+    const run = () => void this.pruneIngestRequests();
+    setTimeout(run, 0).unref?.();
+    this.pruneTimer = setInterval(run, DAY_MS);
+    this.pruneTimer.unref?.();
+  }
+
+  /**
+   * Deletes lapper.ingest_requests rows older than the retention period in bounded batches.
+   * Recent keys are untouched, so collector retries keep returning their first response.
+   * Never throws: a failure is logged and the next run tries again.
+   */
+  pruneIngestRequests(days = INGEST_REQUEST_RETENTION_DAYS): Promise<number> {
+    this.pruning ??= this.prune(days).finally(() => (this.pruning = undefined));
+    return this.pruning;
+  }
+
+  private async prune(days: number): Promise<number> {
+    let removed = 0;
+    try {
+      for (let batch = 0; batch < INGEST_PRUNE_MAX_BATCHES; batch++) {
+        const [row] = (await this.catalog.db.query(
+          `WITH expired AS (
+             SELECT scope, request_key FROM lapper.ingest_requests
+              WHERE created_at < now() - make_interval(days => $1::int)
+              ORDER BY created_at LIMIT $2
+           ), gone AS (
+             DELETE FROM lapper.ingest_requests r USING expired e
+              WHERE r.scope = e.scope AND r.request_key = e.request_key RETURNING 1
+           )
+           SELECT count(*)::int AS deleted FROM gone`,
+          [days, INGEST_PRUNE_BATCH],
+        )) as Array<{ deleted: number }>;
+        const deleted = Number(row?.deleted ?? 0);
+        removed += deleted;
+        if (deleted < INGEST_PRUNE_BATCH) break;
+      }
+      if (removed) this.logger.log(`Removed ${removed} collector request keys older than ${days} days`);
+    } catch (error) {
+      this.logger.warn(`Pruning old collector request keys failed: ${error instanceof Error ? error.message : error}`);
+    }
+    return removed;
   }
   list(kind: Resource): Promise<Row[]> {
     return this.catalog.list(kind);

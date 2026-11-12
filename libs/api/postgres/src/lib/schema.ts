@@ -161,6 +161,11 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
     await runDatabaseMigration(manager, '20261112-lapper-macro-flag-changes-v1', `
       ALTER TABLE lapper.macros ADD COLUMN IF NOT EXISTS flag_changes boolean NOT NULL DEFAULT true;
     `);
+    // Collector Idempotency-Keys are kept for INGEST_REQUEST_RETENTION_DAYS; the daily prune
+    // finds expired ones by age.
+    await runDatabaseMigration(manager, '20261112-lapper-ingest-requests-created-v1', `
+      CREATE INDEX IF NOT EXISTS ix_lapper_ingest_requests_created ON lapper.ingest_requests(created_at);
+    `);
   });
 }
 
