@@ -1,0 +1,104 @@
+<section class="gear-page machines-board-page">
+  <header class="gear-page-header" danaPageHeader eyebrow="GREENSHED / GEAR QUALITY" heading="Running Machines Board"
+    description="Every machine as a card, by department. Tap a running cutter for its checks and pull, or an empty machine to set one up.">
+    <div danaPageHeaderAction class="board-actions">
+      <div class="board-filter" role="group" aria-label="Machine active filter">
+        @for (filter of filters; track filter.value) {
+          <button type="button" class="dana-btn" [class.gear-btn-primary]="activeFilter === filter.value" [class.dana-btn-primary]="activeFilter === filter.value"
+            [class.gear-btn-secondary]="activeFilter !== filter.value" [attr.aria-pressed]="activeFilter === filter.value"
+            (click)="setActiveFilter(filter.value)"><span class="text-base">{{ filter.label }}</span></button>
+        }
+      </div>
+      <button type="button" class="dana-btn gear-btn-secondary" (click)="refresh()" [disabled]="busy"><span class="text-base">{{ busy ? 'Refreshing…' : 'Refresh' }}</span></button>
+    </div>
+  </header>
+
+  <div class="board-meta text-base gear-muted" role="status" aria-live="polite">
+    @if (board?.current_shift; as shift) { <span class="font-bold">{{ shift.label }}</span> }
+    @if (board) { <span>Last refreshed {{ board.refreshed_at | date:'M/d/y h:mm a' }}</span> }
+    @if (partialShift) { <span>Partial shift: counting began during this shift, so shift counts start from then.</span> }
+    @if (dsfShown && dsfTransportFailed) { <span>DSF counts could not be refreshed; showing the last values.</span> }
+  </div>
+
+  @if (error) { <div class="gear-alert gear-alert-danger text-base" role="alert">{{ error }}</div> }
+  @if (busy && !board) { <p class="gear-panel dana-panel-padded text-base" role="status">Loading Running Machines…</p> }
+  @if (board && !error && board.departments.length === 0) {
+    <p class="gear-panel dana-panel-padded text-base" role="status">No machines match the {{ filterLabel }} filter.</p>
+  }
+
+  @if (board; as b) {
+    @for (dept of b.departments; track dept.department_code) {
+      <section class="gear-panel board-department" [attr.aria-labelledby]="'board-dept-' + dept.department_code">
+        <h2 class="board-department-title text-xl font-bold" [id]="'board-dept-' + dept.department_code">Department {{ dept.department_code }}
+          <span class="text-base font-normal gear-muted">{{ dept.machines.length }} {{ dept.machines.length === 1 ? 'machine' : 'machines' }}</span></h2>
+        <ul class="board-grid">
+          @for (machine of sortedMachines(dept.machines); track machine.machine_id) {
+            <li>
+              <!-- The whole card is the tap target (its action button stretches over it); its details stay readable text. -->
+              <article class="gear-panel board-card text-base" [attr.aria-label]="'Machine ' + machine.machine_number">
+                <span class="card-accent" aria-hidden="true" [style.background-color]="machine.machine_background_color || null"></span>
+                <div class="card-head">
+                  <div class="card-machine"><span class="gear-muted">Machine</span><strong class="text-3xl font-black">{{ machine.machine_number }}</strong></div>
+                  <span class="card-cell font-bold">{{ machine.cell === null || machine.cell === undefined ? 'No cell' : 'Cell ' + machine.cell }}</span>
+                </div>
+                @if (checkStatus(machine); as status) {
+                  <span danaStatusBadge class="dana-status-badge card-badge" [attr.data-tone]="status.tone"><span class="text-base font-bold">{{ status.label }}</span></span>
+                }
+                @if (!machine.machine_active) { <p class="card-note font-bold">Inactive machine</p> }
+                @if (machine.has_cutter) {
+                  <dl class="card-facts">
+                    <div><dt class="gear-muted">Build ID</dt><dd class="font-mono font-bold">{{ machine.build_number }}</dd></div>
+                    <div><dt class="gear-muted">Part</dt><dd class="font-bold">{{ machine.part_number || '—' }}</dd></div>
+                    <div><dt class="gear-muted">Part count</dt><dd class="font-bold">{{ machine.current_piece_count | number:'1.0-0' }}</dd></div>
+                    <div><dt class="gear-muted">Shift count</dt><dd class="font-bold">{{ machine.shift_piece_count === null || machine.shift_piece_count === undefined ? '—' : (machine.shift_piece_count | number:'1.0-0') }}
+                      @if (partialShift) { <span class="card-sub font-normal gear-muted">Partial shift</span> }</dd></div>
+                    @if (dsfShown) {
+                      @if (dsfCell(machine); as dsf) {
+                        <div class="card-wide"><dt class="gear-muted">DSF count</dt><dd class="font-bold">{{ dsf.value === null ? '—' : (dsf.value | number:'1.0-0') }} · {{ dsf.label }}{{ dsf.warning ? ' (check)' : '' }}
+                          <span class="card-sub font-normal gear-muted">{{ dsf.title }}</span></dd></div>
+                      }
+                    }
+                    <div class="card-wide"><dt class="gear-muted">Last check</dt><dd class="font-bold">
+                      @if (machine.last_check_at) { {{ machine.last_check_at | date:'M/d/y h:mm a' }} · }
+                      {{ checkKind(machine) || 'None' }}@if (machine.last_check_result && machine.last_check_code !== 'CS') { · {{ machine.last_check_result }} }
+                    </dd></div>
+                  </dl>
+                  <button type="button" class="dana-btn gear-btn-secondary card-action" (click)="openMachine(machine)"><span class="text-base">Frequency, ZEISS / CMM or Pull</span></button>
+                } @else {
+                  <p class="card-empty font-bold">No cutter running</p>
+                  @if (machine.machine_active) {
+                    <button type="button" class="dana-btn gear-btn-secondary card-action" (click)="openMachine(machine)"><span class="text-base">Set up a cutter</span></button>
+                  }
+                }
+              </article>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+  }
+
+  <div class="board-legend text-base gear-muted">
+    <span><strong>CHECK DUE</strong>, <strong>FAIL</strong>, <strong>HOLD</strong>: a quality check is due, or the last check failed or is on hold.</span>
+    <span><strong>SETUP — NO CHECK YET</strong>: the cutter is set up and has no quality check yet.</span>
+    <span><strong>PASS</strong>: the last quality check passed.</span>
+    <span>Shift count: recorded increases this shift (ET).</span>
+    @if (dsfShown) {
+      <span>DSF count: RUN production for the machine in the current DSF shift, read every {{ dsfBoard?.interval_seconds }} seconds. {{ dsfBoard?.cutter_write_enabled ? 'It is credited to the installed cutter (Part count).' : 'Shown for comparison only; Part count is unchanged.' }}</span>
+    }
+  </div>
+</section>
+
+<dialog #machineActions class="dana-confirm-dialog board-actions-dialog" aria-labelledby="board-actions-title" (cancel)="closeActions()" (pointerup)="closeFromBackdrop($event)">
+  <h2 id="board-actions-title" class="text-xl font-bold">Machine {{ selectedMachine?.machine_number }}</h2>
+  <p class="text-base">Build ID <strong class="font-mono">{{ selectedMachine?.build_number }}</strong></p>
+  @if (selectedMachine; as machine) {
+    <div class="dana-dialog-actions board-dialog-actions">
+      <button type="button" class="dana-btn dana-btn-primary gear-btn-primary" (click)="act('frequency', machine)"><span class="text-base">Frequency Check</span></button>
+      <button type="button" class="dana-btn gear-btn-secondary" (click)="act('cmm', machine)"><span class="text-base">ZEISS / CMM Check</span></button>
+      <button type="button" class="dana-btn gear-btn-secondary" (click)="act('changeover', machine)"><span class="text-base">Cutter Change Over</span></button>
+      <button type="button" class="dana-btn gear-btn-secondary" (click)="act('death-certificate', machine)"><span class="text-base">Cutter Death Certificate</span></button>
+      <button type="button" #closeActionsButton class="dana-btn gear-btn-secondary" (click)="closeActions()"><span class="text-base">Close</span></button>
+    </div>
+  }
+</dialog>

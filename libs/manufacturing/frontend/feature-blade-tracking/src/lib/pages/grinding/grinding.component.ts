@@ -3,9 +3,9 @@ import { Subject, takeUntil } from 'rxjs';
 import { COATER_STAGING_LOCATION_SERIAL, isPendingGrindingStatus, parseCuttergrindRoughShelfTag, cuttergrindRoughShelfForPartType } from '@meshforge/manufacturing/shared/util-constants';
 import { autoShelfFor } from '../../shared/auto-shelf/auto-shelf';
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MachineDsfCountComponent, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
+import { MachineDsfCountComponent, GearToastService, ScanMessage, CountStepperComponent, OptionPickerComponent, PickerOption, ScanPanelComponent, StationStatusComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { BladeStatus } from '@meshforge/manufacturing/shared/util-types';
 import {
   BladeTrackingApiService,
@@ -16,11 +16,6 @@ import {
   InventoryContainerRow,
   apiErrorText,
 } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
-import { ScanMessage } from '../../models/scan-message';
-import { CountStepperComponent } from '../../shared/count-stepper/count-stepper.component';
-import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/option-picker.component';
-import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
-import { StationStatusComponent } from '../../shared/station-status/station-status.component';
 import { StationOperation } from '../operations-station/operations-station.operations';
 import { DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
 
@@ -59,6 +54,7 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
         let saved = this.grinderId;
         try { saved ||= localStorage.getItem('gear.grinding.machine') || ''; } catch { /* browser storage may be disabled */ }
         this.grinderId = rows.some(machine => machine.id === saved) ? saved : '';
+        this.openRequestedTray();
       },
       error: error => { this.grinderLoading = false; this.grinders = []; this.grinderError = apiErrorText(error, 'Could not load grinders.'); },
     });
@@ -69,6 +65,28 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
     this.grinderId = id; this.changingGrinder = false; this.machineHistory = []; this.machineHistoryVersion++; this.loadMachineHistory();
     try { localStorage.setItem('gear.grinding.machine', id); } catch { /* selection still works without storage */ }
     this.trayScanner?.clearAndFocus();
+    this.openRequestedTray();
+  }
+
+  /** A tray another screen asked for (`?tray=` on the station), waiting for this workstation's grinder. */
+  waitingTraySerial = '';
+  private lastRequestedTray = '';
+  /**
+   * Another app (Cutter Builder's Waiting For Grinding list) opens the station with a tray. It is
+   * scanned as if the operator had scanned it, once the grinder is known; nothing is started.
+   */
+  @Input() set requestedTray(value: string | null | undefined) {
+    const serial = value?.trim().toUpperCase() ?? '';
+    if (!serial || serial === this.lastRequestedTray) return;
+    this.lastRequestedTray = serial;
+    this.waitingTraySerial = serial;
+    this.openRequestedTray();
+  }
+  private openRequestedTray(): void {
+    const serial = this.waitingTraySerial;
+    if (!serial || !this.grinder || this.busy) return;
+    this.waitingTraySerial = '';
+    this.scanTray(serial);
   }
   scanGrinder(number: string): void {
     const machine = this.grinders.find(machine => machine.machine_number.toUpperCase() === number.trim().toUpperCase());
@@ -140,7 +158,11 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
   /** What the operator should do next, shown when there is no message. */
   get prompt(): string {
     if (this.busy) return 'Working…';
-    if (!this.grinder || this.changingGrinder) return 'Scan or choose this workstation’s grinder.';
+    if (!this.grinder || this.changingGrinder) {
+      return this.waitingTraySerial
+        ? `Scan or choose this workstation’s grinder. Tray ${this.waitingTraySerial} opens next.`
+        : 'Scan or choose this workstation’s grinder.';
+    }
     const tray = this.tray;
     if (!tray) return this.selectedTraySerial ? `Tray ${this.selectedTraySerial} did not load. Tap Retry, or scan the next tray.` : 'Scan the next tray for grinding.';
     if (!tray.workflow_eligibility?.grinding) return this.bladesShort > 0 ? `Tray ${tray.serial_number} needs ${this.bladesShort} replacement blade(s): add them on Blade Intake.` : 'Grinding recorded. Scan the next tray.';
@@ -156,6 +178,7 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
     if (!this.grinder) return 'Select this workstation’s grinder first.';
     if (!this.grinderMatchesTray) return `This pass was started on ${this.assignedGrinderNumber}. Select that grinder to complete it.`;
     if (this.waitingToStart) return '';
+    if (this.completeLocked) return 'Grinding just started. Complete Grinding is ready in a moment; tap it when the pass is done.';
     if (this.pendingGrindingCount === 0) return 'No blades in this tray are waiting for grinding.';
     if (!this.grindingScrapValid) return `Scrap must be a whole number from 0 to ${this.pendingGrindingCount}.`;
     if (this.requirementLoading) return 'Loading the blade requirement…';
@@ -173,7 +196,7 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
   }
 
   ngOnInit(): void { this.refreshGrinders(); this.refreshPickers(); this.refreshShelves(); this.refreshContainers(); }
-  ngOnDestroy(): void { this.selectionVersion++; this.shelfRequestVersion++; this.containerRequestVersion++; this.destroyed$.next(); this.destroyed$.complete(); }
+  ngOnDestroy(): void { this.unlockComplete(); this.pickerVersion++; this.selectionVersion++; this.shelfRequestVersion++; this.containerRequestVersion++; this.destroyed$.next(); this.destroyed$.complete(); }
   get filteredTrays() { const q=this.traySearch.trim().toLowerCase(); return this.availableTrays.filter(t=>!q||t.serial_number.toLowerCase().includes(q)); }
   get pendingGrindingCount(): number { return this.tray?.blades.filter(b => isPendingGrindingStatus(b.status)).length ?? 0; }
   get previouslyReadyCount(): number { return this.tray?.blades.filter(b => b.status === BladeStatus.READY_FOR_COATING).length ?? 0; }
@@ -199,9 +222,27 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
     });
   }
   get hasSelectedRoughShelf(): boolean { return this.matchingRoughShelves.some(shelf => shelf.serial_number === this.roughShelfSerial); }
+  /**
+   * Complete Grinding appears where Start Grinding was. For a moment after a start it does not
+   * respond, so a double tap on Start can never also complete the pass (with scrap 0).
+   */
+  completeLocked = false;
+  private completeLockTimer: ReturnType<typeof setTimeout> | null = null;
+  static readonly COMPLETE_LOCK_MS = 1500;
+  private lockCompleteBriefly(): void {
+    this.unlockComplete();
+    this.completeLocked = true;
+    this.completeLockTimer = setTimeout(() => this.unlockComplete(), GrindingComponent.COMPLETE_LOCK_MS);
+  }
+  private unlockComplete(): void {
+    if (this.completeLockTimer) clearTimeout(this.completeLockTimer);
+    this.completeLockTimer = null;
+    this.completeLocked = false;
+  }
+
   get canRecordGrinding(): boolean {
     return Boolean(this.grinder && this.grinderMatchesTray && !this.busy && this.tray?.workflow_eligibility?.grinding && (this.waitingToStart ||
-      (this.tray.current_stage?.code === 'GRINDING' && this.pendingGrindingCount > 0 && this.grindingScrapValid && !this.requirementLoading &&
+      (this.tray.current_stage?.code === 'GRINDING' && !this.completeLocked && this.pendingGrindingCount > 0 && this.grindingScrapValid && !this.requirementLoading &&
        this.requiredBlades !== null && this.previouslyReadyCount + this.returnedAfterGrinding <= this.requiredBlades && (!this.fullAfterGrinding || this.packingReady))));
   }
   /** Blades still missing after grinding was recorded; a short tray is not ready for coating whatever its stored stage says. */
@@ -315,11 +356,14 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
     }
   }
 
+  private pickerVersion = 0;
+  /** Only the newest list answer is shown: a slow earlier refresh never replaces a newer list. */
   refreshPickers(): void {
+    const version = ++this.pickerVersion;
     this.pickerLoading=true; this.pickerError='';
     this.api.getWorkflowTrays('grinding').pipe(takeUntil(this.destroyed$)).subscribe({
-      next: rows => { this.availableTrays=rows; this.pickerLoading=false; },
-      error: e => { this.availableTrays=[]; this.pickerLoading=false; this.pickerError=apiErrorText(e,'Could not load trays available for grinding.'); },
+      next: rows => { if (version !== this.pickerVersion) return; this.availableTrays=rows; this.pickerLoading=false; },
+      error: e => { if (version !== this.pickerVersion) return; this.availableTrays=[]; this.pickerLoading=false; this.pickerError=apiErrorText(e,'Could not load trays available for grinding.'); },
     });
   }
   chooseTray(serial: string): void { this.scanTray(serial); }
@@ -365,7 +409,7 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
     const tray=this.tray; if(!tray||!this.canRecordGrinding) return; const serial=tray.serial_number; this.busy=true;
     if(this.waitingToStart){
       this.api.startTrayGrinding(tray.id, this.grinderId).pipe(takeUntil(this.destroyed$)).subscribe({
-        next:()=>{ this.toast.success(`Grinding started for ${serial}.`,'Grinding started'); this.message={tone:'success',text:`Grinding started for ${serial}. When the pass is done, scan it again to record scrap.`}; this.refreshPickers(); this.loadTray(serial,false); },
+        next:()=>{ this.lockCompleteBriefly(); this.toast.success(`Grinding started for ${serial}.`,'Grinding started'); this.message={tone:'success',text:`Grinding started for ${serial}. When the pass is done, scan it again to record scrap.`}; this.refreshPickers(); this.loadTray(serial,false); },
         error:e=>{ this.busy=false; this.message={tone:'error',text:apiErrorText(e,'Grinding was not started. Try again, or refresh the tray.')}; },
       }); return;
     }

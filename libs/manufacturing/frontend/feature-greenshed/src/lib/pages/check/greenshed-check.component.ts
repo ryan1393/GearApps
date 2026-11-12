@@ -4,7 +4,15 @@ import { Component, DestroyRef, ElementRef, OnInit, ViewChild, inject } from '@a
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
+import {
+  GearToastService,
+  OptionPickerComponent,
+  PickerOption,
+  ScanPanelComponent,
+  StationStatusComponent,
+  createStatusLine,
+  heldScanIgnoredText,
+} from '@meshforge/manufacturing/frontend/util-common';
 import {
   GreenshedApiService, GreenshedBuild, GreenshedReferenceData,
   FREQUENCY_MEASUREMENT_FIELDS, CMM_MEASUREMENT_FIELDS,
@@ -14,8 +22,9 @@ import { DanaPageHeaderComponent } from '@dana/ui';
 
 @Component({
   selector: 'gear-greenshed-check', standalone: true,
-  imports: [CommonModule, GearScannerFocusDirective, FormsModule, RouterLink, DanaPageHeaderComponent],
+  imports: [CommonModule, FormsModule, RouterLink, DanaPageHeaderComponent, ScanPanelComponent, StationStatusComponent, OptionPickerComponent],
   templateUrl: './greenshed-check.component.html',
+  styleUrls: ['../station-page.css'],
   styles: [`
     .quality-check-entry{display:grid;gap:var(--dana-form-gap);border:0;padding:0;margin:0;min-width:0}
     .check-measurement-heading{margin:0}
@@ -50,6 +59,8 @@ export class GreenshedCheckComponent implements OnInit {
   lockedToRunningMachine = false;
   error = '';
   message = '';
+  /** After a FAIL or HOLD check: the cutter the operator may want to pull next. */
+  pullOffer: { build: string; result: string } | null = null;
 
   ngOnInit(): void {
     this.api.getDashboard().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -63,6 +74,7 @@ export class GreenshedCheckComponent implements OnInit {
       this.build = null;
       this.contextValid = false;
       this.error = this.message = '';
+      this.pullOffer = null;
       this.requestedType = params.get('type')?.toUpperCase() === 'CMM' ? 'CMM' : 'FC';
       this.buildNumber = params.get('build')?.trim().toUpperCase() || '';
       this.lockedToRunningMachine = params.get('origin') === 'running-machines';
@@ -119,6 +131,7 @@ export class GreenshedCheckComponent implements OnInit {
     this.build = null;
     this.contextValid = false;
     this.error = this.message = '';
+    this.pullOffer = null;
     this.resetCheckEntry(true);
     if (!value) return;
     this.busy = true;
@@ -152,6 +165,60 @@ export class GreenshedCheckComponent implements OnInit {
     });
   }
 
+  // ---- Station layout: a numbered scan-or-pick step, one status line, a reason on a blocked action ----
+
+  private readonly statusLine = createStatusLine();
+  /** Shown when there is no error or result: e.g. a scan made too early. */
+  notice = '';
+  get status() {
+    return this.statusLine(this.error, this.message, this.notice);
+  }
+  dismissStatus(): void {
+    this.error = '';
+    this.message = '';
+    this.notice = '';
+  }
+  scanIgnored(scan: string): void {
+    if (!this.error) this.notice = heldScanIgnoredText(scan);
+  }
+
+  get buildOptions(): PickerOption[] {
+    return this.availableRunningBuilds.map((row) => ({
+      value: row.build_number,
+      cells: [row.build_number, `Machine ${row.machine_number}`, `${row.summary_number} ${row.part_type_code}`, row.check_due ? 'CHECK DUE' : 'Not due'],
+    }));
+  }
+
+  /** What to do next, shown in the status line when there is no message. */
+  get prompt(): string {
+    if (this.busy) return 'Working…';
+    if (!this.build) return this.lockedToRunningMachine ? 'Checking the cutter chosen on Running Machines…' : 'Scan or choose the active cutter to check.';
+    if (!this.contextValid) return 'This cutter cannot take a check. Scan a RUNNING cutter.';
+    return 'Enter the count and measurements, choose the result, then tap Save Quality Check. Enter never saves.';
+  }
+
+  /** Why Save Quality Check is not available (apart from a field to correct), in operator terms. */
+  get saveBlockedReason(): string {
+    if (this.busy) return '';
+    if (this.loadingChoices) return 'Loading the check choices…';
+    if (!this.refs) return 'The check choices did not load. Tap Retry choices.';
+    if (!this.build) return 'Scan or choose the active cutter first (step 1).';
+    if (!this.contextValid) return 'Scan a RUNNING cutter (step 1).';
+    return '';
+  }
+
+  /** A build scanned or picked: the same lookup and run checks as before. */
+  useBuild(value: string): void {
+    if (this.busy || this.lockedToRunningMachine || !value.trim()) return;
+    this.notice = '';
+    this.buildNumber = value.trim();
+    this.scan();
+  }
+  /** Change on step 1: start over with another cutter, as Record Check For Another Cutter did. */
+  changeBuild(): void {
+    this.startAnother();
+  }
+
   /** True when DSF credits production to cutters, so the running count moves without a check. */
   get dsfCounts(): boolean { return this.refs?.dsf_cutter_counts === true; }
 
@@ -182,6 +249,7 @@ export class GreenshedCheckComponent implements OnInit {
     const generation = this.generation;
     this.busy = true;
     this.error = this.message = '';
+    this.pullOffer = null;
     this.api.qualityCheck({
       buildNumber: build.build_number, checkTypeCode: this.checkType,
       resultCode: this.resultCode, pieceCount: this.pieceCount, comments: this.comments,
@@ -200,6 +268,9 @@ export class GreenshedCheckComponent implements OnInit {
         this.message = r.check_type_code + ' ' + r.result_code + ' saved at piece ' + r.piece_count + '. Next check: ' + r.next_check_piece_count + '.';
         if (r.result_code === 'PASS') this.toast.success(this.message, 'Quality check saved');
         else this.toast.warning(this.message + ' Review whether the cutter needs to be pulled.', 'Quality check needs attention');
+        if (['FAIL', 'HOLD'].includes(String(r.result_code).toUpperCase())) {
+          this.pullOffer = { build: build.build_number, result: String(r.result_code).toUpperCase() };
+        }
       },
       error: (e: HttpErrorResponse) => {
         if (generation !== this.generation) return;
@@ -208,6 +279,17 @@ export class GreenshedCheckComponent implements OnInit {
         this.toast.error(this.error, 'Quality check failed');
       },
     });
+  }
+
+  /**
+   * Enter in a check field must never save: a numeric barcode scanned into a measurement ends with
+   * Enter, and PASS is the default result. Only Save Quality Check saves. A comment keeps Enter for
+   * new lines, and a focused button still answers Enter as a keyboard press.
+   */
+  blockEnterSubmit(event: Event): void {
+    const target = event.target;
+    if (target instanceof HTMLTextAreaElement || target instanceof HTMLButtonElement) return;
+    event.preventDefault();
   }
 
   resetCheckEntry(preserveType = false): void {
@@ -226,6 +308,7 @@ export class GreenshedCheckComponent implements OnInit {
     this.buildNumber = '';
     this.contextValid = false;
     this.resetCheckEntry();
-    this.error = this.message = '';
+    this.error = this.message = this.notice = '';
+    this.pullOffer = null;
   }
 }

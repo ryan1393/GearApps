@@ -4,7 +4,16 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
+import {
+  CountStepperComponent,
+  GearToastService,
+  OptionPickerComponent,
+  PickerOption,
+  ScanPanelComponent,
+  StationStatusComponent,
+  createStatusLine,
+  heldScanIgnoredText,
+} from '@meshforge/manufacturing/frontend/util-common';
 import {
   CutterBuildCard,
   CutterTeardownResult,
@@ -25,8 +34,9 @@ import {
 @Component({
   selector: 'gear-cutter-teardown',
   standalone: true,
-  imports: [CommonModule, GearScannerFocusDirective, FormsModule, DanaPageHeaderComponent, DanaConfirmDialogComponent],
+  imports: [CommonModule, CountStepperComponent, FormsModule, DanaPageHeaderComponent, DanaConfirmDialogComponent, ScanPanelComponent, StationStatusComponent, OptionPickerComponent],
   templateUrl: './cutter-teardown.component.html',
+  styleUrl: '../station-page.css',
 })
 export class CutterTeardownComponent implements OnInit, OnDestroy {
   private readonly destroyed$ = new Subject<void>();
@@ -63,20 +73,102 @@ export class CutterTeardownComponent implements OnInit, OnDestroy {
   selectedBuildNumber = ''; selectedTraySerial = ''; selectedShelfSerial = '';
 
   constructor() { this.refreshEligibleSelections(); }
-  private rows<T>(value:any):T[]{ return Array.isArray(value)?value:Array.isArray(value?.data)?value.data:Array.isArray(value?.items)?value.items:Array.isArray(value?.rows)?value.rows:[]; }
   refreshEligibleSelections():void{
     this.api.getDashboard().pipe(takeUntil(this.destroyed$)).subscribe({next:d=>this.availablePulledBuilds=d.pulled_builds??[],error:()=>this.availablePulledBuilds=[]});
-    this.api.getSelectionTrays().pipe(takeUntil(this.destroyed$)).subscribe({next:v=>this.availableEmptyTrays=this.rows<ITray>(v).filter(t=>t.blade_count===0&&!(t as any).current_container&&!(t as any).current_cutter_build&&(t as any).active!==false&&(t as any).enabled!==false),error:()=>this.availableEmptyTrays=[]});
-    this.api.getSelectionLocations().pipe(takeUntil(this.destroyed$)).subscribe({next:v=>this.availableLocations=this.rows<ILocation>(v),error:()=>this.availableLocations=[]});
+    this.api.getSelectionTrays().pipe(takeUntil(this.destroyed$)).subscribe({next:trays=>this.availableEmptyTrays=trays.filter(t=>t.enabled&&t.blade_count===0&&!t.current_container&&!t.current_cutter_build),error:()=>this.availableEmptyTrays=[]});
+    this.api.getSelectionLocations().pipe(takeUntil(this.destroyed$)).subscribe({next:locations=>this.availableLocations=locations,error:()=>this.availableLocations=[]});
   }
   get eligibleDullShelves():ILocation[]{
     const expected=this.build?.part_type_code?.trim().toUpperCase(); if(!expected||!this.requiresDullShelf)return [];
-    return this.availableLocations.filter(location=>{const tag=parseCuttergrindNumberedShelfTag(location.serial_number);return tag?.kind==='CUTTERGRIND_DULL'&&tag.partTypeCode===expected&&location.location_type==='SHELF'&&location.department===DEPARTMENT_CUTTERGRIND&&(location as any).active!==false&&(location as any).enabled!==false;});
+    return this.availableLocations.filter(location=>{const tag=parseCuttergrindNumberedShelfTag(location.serial_number);return tag?.kind==='CUTTERGRIND_DULL'&&tag.partTypeCode===expected&&location.location_type==='SHELF'&&location.department===DEPARTMENT_CUTTERGRIND&&location.enabled;});
   }
 
   selectPulledBuild():void{if(this.selectedBuildNumber){this.buildNumber=this.selectedBuildNumber;this.scanBuild();}else this.buildChanged('');}
   selectEmptyTray():void{if(this.selectedTraySerial){this.traySerial=this.selectedTraySerial;this.scanTray();}else this.trayChanged('');}
   selectDullShelf():void{if(this.selectedShelfSerial){this.shelfLocationSerial=this.selectedShelfSerial;this.scanShelf();}else this.shelfChanged('');}
+
+  // ---- Station layout: numbered scan-or-pick steps, one status line, a reason on a blocked action ----
+
+  private readonly statusLine = createStatusLine();
+  /** Shown when there is no error or success: e.g. a scan made too early. */
+  notice = '';
+  get status() {
+    return this.statusLine(this.error, this.message, this.notice);
+  }
+  dismissStatus(): void {
+    this.clearFeedback();
+  }
+  scanIgnored(scan: string): void {
+    if (!this.error) this.notice = heldScanIgnoredText(scan);
+  }
+
+  get buildOptions(): PickerOption[] {
+    return this.availablePulledBuilds.map((row) => ({
+      value: row.build_number,
+      cells: [row.build_number, `${row.summary_number} ${row.part_type_code}`, row.machine_number || 'No machine'],
+    }));
+  }
+  get trayOptions(): PickerOption[] {
+    return this.availableEmptyTrays.map((row) => ({ value: row.serial_number, cells: [row.serial_number, 'Empty'] }));
+  }
+  get shelfOptions(): PickerOption[] {
+    return this.eligibleDullShelves.map((location) => ({ value: location.serial_number, cells: [location.serial_number, location.description || 'Available shelf'] }));
+  }
+
+  /** What to do next, shown in the status line when there is no message. */
+  get prompt(): string {
+    if (this.busy) return 'Working…';
+    if (this.result) return 'Teardown recorded. Tap Start Another Teardown for the next cutter.';
+    if (!this.build) return 'Scan or choose the pulled cutter build.';
+    if (!this.tray) return 'Scan or choose the empty tray the blades go into.';
+    if (this.requiresDullShelf && !this.shelfLocation) return 'Set the scrap count, then scan or choose the dull shelf.';
+    return 'Check the scrap count, then tap Complete Cutter Teardown.';
+  }
+
+  /** Why Complete Cutter Teardown is not available, in operator terms. Empty when it is (or while working). */
+  get teardownBlockedReason(): string {
+    if (this.busy || this.result || this.canTeardown) return '';
+    const build = this.build;
+    if (!build) return 'Scan or choose the pulled cutter build first (step 1).';
+    if (build.status_code !== 'PULLED') return `Build ${build.build_number} must be PULLED before Cutter Builder can tear it down.`;
+    if (!this.tray) return 'Scan or choose an empty teardown tray (step 2).';
+    if (this.tray.blade_count !== 0) return `Tray ${this.tray.serial_number} is not empty.`;
+    if (!this.scrapCountValid) return `Scrap must be a whole number from 0 to ${build.blade_count}.`;
+    if (this.requiresDullShelf && !this.shelfLocation) return 'Scan or choose the dull shelf for the returned blades (step 4).';
+    return 'Scan the build and tray again before completing.';
+  }
+
+  /** A build, tray or shelf scanned or picked: the same lookups and checks as before. */
+  useBuild(value: string): void {
+    if (this.busy || !value.trim()) return;
+    this.notice = '';
+    this.buildNumber = value.trim();
+    this.scanBuild();
+  }
+  changeBuild(): void {
+    if (this.busy) return;
+    this.buildChanged('');
+  }
+  useTray(value: string): void {
+    if (this.busy || !value.trim()) return;
+    this.notice = '';
+    this.traySerial = value.trim();
+    this.scanTray();
+  }
+  changeTray(): void {
+    if (this.busy) return;
+    this.trayChanged('');
+  }
+  useShelf(value: string): void {
+    if (this.busy || !value.trim()) return;
+    this.notice = '';
+    this.shelfLocationSerial = value.trim();
+    this.scanShelf();
+  }
+  changeShelf(): void {
+    if (this.busy) return;
+    this.shelfChanged('');
+  }
 
   get returnedBladeCount(): number {
     if (!this.build) return 0;
@@ -263,7 +355,7 @@ export class CutterTeardownComponent implements OnInit, OnDestroy {
         const message = result.tray_available_for_use
           ? `Teardown complete: all ${result.scrapped_blade_count} blades scrapped. Tray ${result.teardown_tray_serial_number} is Available / Ready to Use with no location required.`
           : `Teardown complete: ${result.returned_blade_count} returned, ${result.scrapped_blade_count} scrapped.`;
-        this.message = '';
+        this.message = message;
         this.toast.success(message, 'Cutter teardown complete');
         this.refreshEligibleSelections();
       },
@@ -308,5 +400,6 @@ export class CutterTeardownComponent implements OnInit, OnDestroy {
   private clearFeedback(): void {
     this.error = '';
     this.message = '';
+    this.notice = '';
   }
 }

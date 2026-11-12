@@ -1,31 +1,28 @@
-<section class="gear-page gear-workflow-page">
+<section class="gear-page gear-workflow-page op-page">
   <header class="gear-page-header" danaPageHeader eyebrow="GREENSHED / QUALITY" heading="Quality Check"
     description="Record a Frequency or ZEISS / CMM check for the active cutter."></header>
-  <div *ngIf="error" class="gear-feedback" role="alert">{{ error }}</div>
-  <div *ngIf="message" class="gear-feedback" role="status" aria-live="polite">{{ message }}</div>
+  <gear-station-status class="station-status-line" [message]="status" [prompt]="prompt" (dismiss)="dismissStatus()" />
+  <div *ngIf="pullOffer" class="gear-workflow-state gear-workflow-state-danger" data-testid="check-pull-offer">
+    <strong>{{ pullOffer.result }} recorded for {{ pullOffer.build }}.</strong>
+    <p class="gear-workflow-help">Review whether this cutter needs to be pulled.</p>
+    <a routerLink="/greenshed/pull" [queryParams]="{ build: pullOffer.build }" class="gear-btn gear-btn-primary">Pull this cutter</a>
+  </div>
   <div *ngIf="loadingChoices" class="gear-feedback" role="status">Loading quality check choices and piece-count settings…</div>
   <div *ngIf="choicesError" class="gear-feedback" role="alert">{{ choicesError }} Quality checks cannot be saved until these choices load. <button type="button" class="gear-btn gear-btn-secondary" (click)="loadChoices()" [disabled]="loadingChoices">Retry choices</button></div>
 
-  <section *ngIf="!lockedToRunningMachine" class="gear-workflow-section">
-    <div class="gear-workflow-section-header"><div><h2>Scan Active Cutter</h2><p>Open the current machine run before recording quality.</p></div></div>
-    <div class="gear-workflow-section-body">
-      <form class="gear-workflow-scan-row" (ngSubmit)="scan()">
-        <label class="gear-field">Build ID<input gearScannerFocus [(ngModel)]="buildNumber" (ngModelChange)="onBuildInput()" name="build" class="gear-input font-mono" placeholder="Scan active cutter build..." [disabled]="busy" /></label>
-        <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy">{{ busy ? 'Checking…' : 'Scan' }}</button>
-      </form>
-      <div class="gear-workflow-divider">OR</div>
-      <label class="gear-field">Select Active Cutter
-        <select [(ngModel)]="buildNumber" name="buildPicker" class="gear-select" (change)="selectBuild()" [disabled]="busy">
-          <option value="">Choose active cutter...</option>
-          <option *ngFor="let row of availableRunningBuilds" [value]="row.build_number">{{row.build_number}} · Machine {{row.machine_number}} · {{row.summary_number}} · {{row.part_type_code}}{{row.check_due ? ' · CHECK DUE' : ''}}</option>
-        </select>
-      </label>
-    </div>
+  <section class="gear-workflow-section" aria-label="Step 1: active cutter">
+    <gear-scan-panel [step]="1" label="Scan Active Cutter" placeholder="Scan active cutter build..." changeText="Check another cutter"
+      [help]="lockedToRunningMachine ? 'Machine and Build ID are locked to your Running Machines selection.' : 'Open the current machine run before recording quality.'"
+      [doneValue]="build?.build_number ?? null" [disabled]="lockedToRunningMachine" [busy]="busy"
+      (scanned)="useBuild($event)" (reopen)="changeBuild()" (heldScanIgnored)="scanIgnored($event)">
+      @if (lockedToRunningMachine) {
+        <a routerLink="/greenshed/machines" class="gear-btn gear-btn-secondary mt-3">Back to Running Machines</a>
+      } @else {
+        <gear-option-picker placeholder="Choose an active cutter…" [headers]="['Build', 'Machine', 'Part', 'Check']" [options]="buildOptions" [disabled]="busy"
+          emptyText="No cutters are running." (picked)="useBuild($event)" />
+      }
+    </gear-scan-panel>
   </section>
-  <div *ngIf="lockedToRunningMachine" class="gear-workflow-actions">
-    <a routerLink="/greenshed/machines" class="gear-btn gear-btn-secondary">Back to Running Machines</a>
-    <p>Machine and Build ID are locked to your Running Machines selection.</p>
-  </div>
 
   <div *ngIf="build" class="gear-workflow-page">
     <section class="gear-workflow-section">
@@ -39,8 +36,9 @@
       </div>
     </section>
 
-    <form #checkFormElement #checkForm="ngForm" (ngSubmit)="save()" class="gear-workflow-section">
-      <div class="gear-workflow-section-header"><div><h2>Check Result</h2><p>Your logged-in user is recorded with this check.</p></div></div>
+    <!-- Only the Save button saves: Enter, including the one a scanner sends after a number, never submits a check. -->
+    <form #checkFormElement #checkForm="ngForm" (keydown.enter)="blockEnterSubmit($event)" (submit)="$event.preventDefault()" class="gear-workflow-section">
+      <div class="gear-workflow-section-header"><span class="gear-workflow-step">2</span><div><h2>Check Result</h2><p>Your logged-in user is recorded with this check.</p></div></div>
       <div class="gear-workflow-section-body">
         <fieldset class="quality-check-entry" [disabled]="busy || !contextValid || !refs || loadingChoices">
           <div *ngIf="resultCode === 'FAIL' || resultCode === 'HOLD'" class="gear-workflow-state gear-workflow-state-danger" role="alert">
@@ -73,9 +71,14 @@
             </label>
           </div>
           <label class="gear-field">Comments<textarea [(ngModel)]="comments" name="comments" maxlength="2000" rows="3" class="gear-textarea"></textarea></label>
-          <div class="gear-workflow-actions">
-            <button type="submit" [disabled]="busy || !contextValid || !refs || checkForm.invalid" class="gear-btn gear-btn-primary">{{ busy ? 'Saving…' : 'Save Quality Check' }}</button>
-            <button type="button" (click)="resetCheckEntry(true)" class="gear-btn gear-btn-secondary">Reset</button>
+          <div class="op-primary">
+            <div class="gear-workflow-actions">
+              <button type="button" (click)="save()" [disabled]="busy || !contextValid || !refs || checkForm.invalid" class="gear-btn gear-btn-primary">{{ busy ? 'Saving…' : 'Save Quality Check' }}</button>
+              <button type="button" (click)="resetCheckEntry(true)" class="gear-btn gear-btn-secondary">Reset</button>
+            </div>
+            @if (saveBlockedReason || (checkForm.invalid && contextValid && refs && !busy)) {
+              <p class="op-blocked gear-workflow-help" role="status">{{ saveBlockedReason || 'Correct the highlighted count or measurement before saving.' }}</p>
+            }
           </div>
         </fieldset>
       </div>

@@ -1,4 +1,4 @@
-<section class="gear-page gear-workflow-page">
+<section class="gear-page gear-workflow-page op-page">
   <header
     class="gear-page-header"
     danaPageHeader
@@ -7,26 +7,22 @@
     description="Pull an active cutter for changeover, quality, dullness, damage, or another approved reason."
   ></header>
 
-  <div *ngIf="error" class="gear-feedback" role="alert">{{ error }}</div>
-  <div *ngIf="message" class="gear-feedback" role="status" aria-live="polite">{{ message }}</div>
+  <gear-station-status class="station-status-line" [message]="status" [prompt]="prompt" (dismiss)="dismissStatus()" />
+  <div *ngIf="refsError" class="gear-feedback" role="alert">{{ refsError }} A pull cannot be recorded until the reasons load. <button type="button" class="gear-btn gear-btn-secondary" (click)="loadReferenceData()">Retry</button></div>
 
   <div *ngIf="!result" class="gear-workflow-grid">
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header"><span class="gear-workflow-step">1</span><div><h2>Active Cutter</h2><p>Scan the cutter build currently assigned to a machine.</p></div></div>
-      <div class="gear-workflow-section-body">
-        <form class="gear-workflow-scan-row" (ngSubmit)="scanBuild()">
-          <label class="gear-field">Build number<input gearScannerFocus [(ngModel)]="buildNumber" (ngModelChange)="onBuildInput()" [disabled]="busy || lockedToRunningMachine" name="build" class="gear-input font-mono" placeholder="Scan cutter build..." autocomplete="off" /></label>
-          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy || lockedToRunningMachine">Scan</button>
-        </form>
-        <div class="gear-workflow-divider">OR</div>
-        <label class="gear-field">Select Active Cutter
-          <select [(ngModel)]="buildNumber" name="buildPicker" class="gear-select" (change)="selectBuild()" [disabled]="busy || lockedToRunningMachine">
-            <option value="">Choose active cutter...</option>
-            <option *ngFor="let row of availableRunningBuilds" [value]="row.build_number">{{row.build_number}} · Machine {{row.machine_number}} · {{row.summary_number}} · {{row.part_type_code}}</option>
-          </select>
-        </label>
-        <div *ngIf="build" class="gear-workflow-selection">
-          <div class="gear-workflow-selection-title font-mono">{{ build.build_number }}</div>
+    <section class="gear-workflow-section" aria-label="Step 1: active cutter">
+      <gear-scan-panel [step]="1" label="Scan Active Cutter" placeholder="Scan cutter build..." changeText="Change cutter"
+        [help]="lockedToRunningMachine ? 'Machine and Build ID are locked to your Running Machines selection.' : 'The cutter build currently running on a machine.'"
+        [doneValue]="build?.build_number ?? null" [disabled]="lockedToRunningMachine" [busy]="busy"
+        (scanned)="useBuild($event)" (reopen)="changeBuild()" (heldScanIgnored)="scanIgnored($event)">
+        @if (!lockedToRunningMachine) {
+          <gear-option-picker placeholder="Choose an active cutter…" [headers]="['Build', 'Machine', 'Part']" [options]="buildOptions" [disabled]="busy"
+            emptyText="No cutters are running." (picked)="useBuild($event)" />
+        }
+      </gear-scan-panel>
+      <div *ngIf="build" class="gear-workflow-section-body">
+        <div class="gear-workflow-selection">
           <p class="gear-workflow-help">Machine <strong>{{ build.machine_run?.machine_number }}</strong> · Pieces <strong>{{ build.machine_run?.current_piece_count }}</strong></p>
         </div>
       </div>
@@ -46,22 +42,16 @@
       </div>
     </section>
 
-    <section *ngIf="reason?.returns_to_shelf" class="gear-workflow-section gear-workflow-span-full">
-      <div class="gear-workflow-section-header"><span class="gear-workflow-step">3</span><div><h2>Greenshed Shelf</h2><p>Return the intact cutter to its part-specific Green Shed shelf.</p></div></div>
-      <div class="gear-workflow-section-body">
-        <p class="gear-workflow-help">Changeover keeps the cutter intact. Scan the part-specific Green Shed shelf: GSR- + Summary for RING or GSP- + Summary for PINION.</p>
-        <form class="gear-workflow-scan-row" (ngSubmit)="scanShelf()">
-          <label class="gear-field">Shelf tag<input [gearScannerFocus]="2" [(ngModel)]="shelfSerial" (ngModelChange)="onShelfInput()" [disabled]="busy || !contextValid" name="shelf" class="gear-input" placeholder="Scan Greenshed shelf tag..." autocomplete="off" /></label>
-          <button type="submit" class="gear-btn gear-btn-primary">Scan</button>
-        </form>
-        <div class="gear-workflow-divider">OR</div>
-        <label class="gear-field">Compatible Greenshed Shelf
-          <select [(ngModel)]="shelfSerial" name="shelfPicker" class="gear-select" (change)="selectShelf()" [disabled]="busy || !expectedShelfSerial">
-            <option value="">Choose compatible shelf...</option>
-            <option *ngIf="expectedShelfSerial" [value]="expectedShelfSerial">{{expectedShelfSerial}} · exact {{build?.summary_number}} {{build?.part_type_code}} shelf</option>
-          </select>
-        </label>
-        <div *ngIf="shelf" class="gear-workflow-state gear-workflow-state-success">
+    <section *ngIf="reason?.returns_to_shelf" class="gear-workflow-section gear-workflow-span-full" aria-label="Step 3: Greenshed shelf">
+      <gear-scan-panel [step]="3" label="Scan Greenshed Shelf" placeholder="Scan Greenshed shelf tag..." changeText="Change shelf"
+        help="Changeover keeps the cutter intact. Scan the part-specific Green Shed shelf: GSR- + Summary for RING or GSP- + Summary for PINION."
+        [doneValue]="shelf?.serial_number ?? null" [disabled]="!contextValid" [busy]="busy"
+        (scanned)="useShelf($event)" (reopen)="changeShelf()" (heldScanIgnored)="scanIgnored($event)">
+        <gear-option-picker placeholder="Choose the compatible Greenshed shelf…" [headers]="['Shelf', 'Holds']" [options]="shelfOptions" [disabled]="busy || !expectedShelfSerial"
+          emptyText="Scan the cutter build first." (picked)="useShelf($event)" />
+      </gear-scan-panel>
+      <div *ngIf="shelf" class="gear-workflow-section-body">
+        <div class="gear-workflow-state gear-workflow-state-success">
           <strong>{{ shelf.serial_number }}</strong>
           <p *ngIf="shelf.description" class="gear-workflow-help">{{ shelf.description }}</p>
         </div>
@@ -69,8 +59,8 @@
     </section>
 
     <section class="gear-workflow-section gear-workflow-span-full">
-      <div class="gear-workflow-section-header"><div><h2>Finish Pull</h2><p>Record comments and confirm the next destination.</p></div></div>
-      <div class="gear-workflow-section-body">
+      <div class="gear-workflow-section-header"><span class="gear-workflow-step">{{ reason?.returns_to_shelf ? 4 : 3 }}</span><div><h2>Finish Pull</h2><p>Record comments and confirm the next destination.</p></div></div>
+      <div class="gear-workflow-section-body station-step-details">
         <label class="gear-field">Comments<textarea [(ngModel)]="comments" name="comments" rows="3" class="gear-textarea"></textarea></label>
         <div
           *ngIf="reason"
@@ -80,14 +70,17 @@
         >
           <strong>{{ reason.requires_teardown ? 'After pull: Send to Cutter Builder for teardown' : 'After pull: Return intact cutter to Greenshed shelf' }}</strong>
         </div>
-        <button
-          type="button"
-          (click)="pull()"
-          [disabled]="busy || !contextValid || !build || build.status_code !== 'RUNNING' || !reason || (reason.returns_to_shelf && !shelf)"
-          class="gear-btn gear-btn-primary gear-workflow-submit"
-        >
-          {{ busy ? 'Pulling…' : 'Pull Cutter' }}
-        </button>
+        <div class="op-primary">
+          <button
+            type="button"
+            (click)="pull()"
+            [disabled]="busy || !contextValid || !build || build.status_code !== 'RUNNING' || !reason || (reason.returns_to_shelf && !shelf)"
+            class="gear-btn gear-btn-primary gear-workflow-submit"
+          >
+            {{ busy ? 'Pulling…' : 'Pull Cutter' }}
+          </button>
+          @if (pullBlockedReason) { <p class="op-blocked gear-workflow-help" role="status">{{ pullBlockedReason }}</p> }
+        </div>
       </div>
     </section>
   </div>
@@ -106,4 +99,6 @@
       <button type="button" (click)="reset()" class="gear-btn gear-btn-dark">Pull Another Cutter</button>
     </div>
   </div>
+  <dana-confirm-dialog [open]="pullConfirmation" [title]="'Pull cutter ' + (build?.build_number ?? '') + '?'" [message]="pullConfirmationMessage"
+    confirmLabel="Pull Cutter" (confirm)="confirmPull()" (cancel)="pullConfirmation = false" />
 </section>

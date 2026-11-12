@@ -1,4 +1,4 @@
-<section class="gear-page gear-workflow-page">
+<section class="gear-page gear-workflow-page op-page">
   <header
     class="gear-page-header"
     danaPageHeader
@@ -7,45 +7,19 @@
     description="Scan the Cutter Body and a ready blade tray. MeshForge validates Summary, part type, blade identity, quantity, tray stage, and active assignments before a build can be created."
   ></header>
 
-  <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert">{{ error }}</div>
+  <gear-station-status class="station-status-line" [message]="status" [prompt]="prompt" (dismiss)="dismissStatus()" />
   <div *ngIf="selectionsFailed" class="gear-alert gear-alert-warning" role="alert">Could not load every pick list (cutter bodies, ready trays, or Cutter Builder machines). Scanning still works. <button type="button" class="gear-btn gear-btn-secondary" (click)="refreshAvailableSelections()" [disabled]="busy">Retry</button></div>
 
   <div *ngIf="!result" class="gear-workflow-grid">
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header">
-        <span class="gear-workflow-step">1</span>
-        <div>
-          <h2>Cutter Body</h2>
-          <p>Scan the Dana S/N. MF S/N remains available as the transition fallback.</p>
-        </div>
-      </div>
-      <div class="gear-workflow-section-body">
-        <form class="gear-workflow-scan-row" (ngSubmit)="scanCutterBody()">
-          <label class="gear-field">
-            Cutter Body
-            <input
-              gearScannerFocus
-              [ngModel]="cutterBodySerial" (ngModelChange)="cutterBodyChanged($event)" [disabled]="busy"
-              name="cutterBodySerial"
-              class="gear-input font-mono"
-              placeholder="Scan Dana S/N or enter MF S/N..."
-              autocomplete="off"
-            />
-          </label>
-          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy">Scan</button>
-        </form>
-        <div class="gear-workflow-divider">OR</div>
-        <label class="gear-field">
-          Select Available Cutter Body
-          <select [(ngModel)]="selectedCutterBodyId" name="selectedCutterBodyId" class="gear-select" (change)="selectAvailableCutterBody()" [disabled]="busy">
-            <option value="">Choose available cutter body...</option>
-            <option *ngFor="let body of availableCutterBodies" [value]="body.id" [disabled]="!cutterBodyRule(body).rule">
-              {{ body.dana_serial_number || body.mf_serial_number }}{{ body.definition?.definition_code ? ' · ' + body.definition?.definition_code : '' }} · {{ cutterBodyCapacityText(body) }}
-            </option>
-          </select>
-        </label>
-
-
+    <section class="gear-workflow-section" aria-label="Step 1: cutter body">
+      <gear-scan-panel [step]="1" label="Scan Cutter Body" help="Scan the Dana S/N. MF S/N remains available as the transition fallback."
+        placeholder="Scan Dana S/N or enter MF S/N..." changeText="Change body" [doneValue]="cutterBody ? bodyDisplaySerial : null" [busy]="busy"
+        (scanned)="useBody($event)" (reopen)="changeBody()" (heldScanIgnored)="scanIgnored($event)">
+        <gear-option-picker placeholder="Choose an available cutter body…" [headers]="['Body', 'Definition', 'Rule / capacity']" [options]="bodyOptions"
+          [loading]="selectionState.bodies === 'loading'" [error]="selectionState.bodies === 'failed' ? 'Could not load the cutter bodies. Scan the body, or tap Retry.' : ''" [disabled]="busy"
+          emptyText="No enabled cutter bodies with a known blade capacity. Scan the body, or check it in Admin." (picked)="useBody($event)" />
+      </gear-scan-panel>
+      <div *ngIf="cutterBody" class="gear-workflow-section-body">
         <div *ngIf="cutterBody as body" class="gear-workflow-selection">
           <span class="gear-workflow-kicker">Selected Cutter Body</span>
           <div class="gear-workflow-selection-title font-mono">{{ bodyDisplaySerial }}</div>
@@ -79,43 +53,15 @@
       </div>
     </section>
 
-    <section class="gear-workflow-section">
-      <div class="gear-workflow-section-header">
-        <span class="gear-workflow-step">2</span>
-        <div>
-          <h2>Ready Blade Tray</h2>
-          <p>Tray validation is authoritative. The exact required blades must be ready for cutter use.</p>
-        </div>
-      </div>
-      <div class="gear-workflow-section-body">
-        <form class="gear-workflow-scan-row" (ngSubmit)="scanTray()">
-          <label class="gear-field">
-            Tray serial
-            <input
-              [gearScannerFocus]="2"
-              [ngModel]="traySerial" (ngModelChange)="trayChanged($event)"
-              name="traySerial"
-              class="gear-input font-mono"
-              placeholder="Scan ready tray..."
-              autocomplete="off"
-              [disabled]="busy || !cutterBody"
-            />
-          </label>
-          <button type="submit" class="gear-btn gear-btn-primary" [disabled]="busy || !cutterBody">Scan</button>
-        </form>
-        <div class="gear-workflow-divider">OR</div>
-        <label class="gear-field">
-          Select Compatible Ready Tray
-          <select [(ngModel)]="selectedTraySerial" name="selectedTraySerial" class="gear-select"
-                  (change)="selectAvailableTray()" [disabled]="busy || !cutterBody">
-            <option value="">Choose compatible ready tray...</option>
-            <option *ngFor="let ready of compatibleReadyTrays" [value]="ready.tray_serial_number">
-              {{ ready.tray_serial_number }} · {{ ready.summary_number || 'No Summary' }} · {{ ready.part_type_code || 'No Part Type' }} · {{ bladeSetText(ready.blade_count) }}
-            </option>
-          </select>
-        </label>
-
-
+    <section class="gear-workflow-section" aria-label="Step 2: ready blade tray">
+      <gear-scan-panel [step]="2" label="Scan Ready Blade Tray" help="Tray validation is authoritative. The exact required blades must be ready for cutter use."
+        placeholder="Scan ready tray..." changeText="Change tray" [doneValue]="tray?.serial_number ?? null" [disabled]="!cutterBody" [busy]="busy"
+        (scanned)="useTray($event)" (reopen)="changeTray()" (heldScanIgnored)="scanIgnored($event)">
+        <gear-option-picker placeholder="Choose a compatible ready tray…" [headers]="['Tray', 'Summary', 'Type', 'Blades']" [options]="trayOptions"
+          [loading]="selectionState.trays === 'loading'" [error]="selectionState.trays === 'failed' ? 'Could not load the ready trays. Scan the tray, or tap Retry.' : ''" [disabled]="busy || !cutterBody"
+          emptyText="No ready trays match this body." (picked)="useTray($event)" />
+      </gear-scan-panel>
+      <div *ngIf="tray || trayValidation" class="gear-workflow-section-body">
         <div *ngIf="tray as selectedTray" class="gear-workflow-selection">
           <span class="gear-workflow-kicker">Selected Tray</span>
           <div class="gear-workflow-selection-title font-mono">{{ selectedTray.serial_number }}</div>
@@ -206,11 +152,14 @@
         <!-- The card prints by itself when the build is created, so the printer is chosen before building. -->
         <gear-label-printer-picker labelType="CUTTER_CARD" label="Print cards to" />
 
-        <div class="gear-workflow-actions">
-          <button type="button" class="gear-btn gear-btn-secondary" (click)="reset()" [disabled]="busy">Reset</button>
-          <button type="button" class="gear-btn gear-btn-primary gear-workflow-submit" (click)="build()" [disabled]="!canBuild">
-            Create Cutter Build
-          </button>
+        <div class="op-primary">
+          <div class="gear-workflow-actions">
+            <button type="button" class="gear-btn gear-btn-secondary" (click)="reset()" [disabled]="busy">Reset</button>
+            <button type="button" class="gear-btn gear-btn-primary gear-workflow-submit" (click)="build()" [disabled]="!canBuild">
+              {{ busy ? 'Working…' : 'Create Cutter Build' }}
+            </button>
+          </div>
+          @if (buildBlockedReason) { <p class="op-blocked gear-workflow-help" role="status">{{ buildBlockedReason }}</p> }
         </div>
       </div>
     </section>

@@ -6,10 +6,11 @@ import { Observable, Subject, takeUntil } from 'rxjs';
 import { CoaterAvailableContainer, CoaterShipment, CoaterShipmentContainer, CoaterShipmentList } from '@meshforge/manufacturing/shared/util-types';
 import { CoaterShipmentsApiService, apiErrorText } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
 import { DanaPageHeaderComponent, DanaStatusBadgeDirective, DanaSummaryCardDirective, DanaSummaryGridDirective, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
-import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/option-picker.component';
+import { coaterShipmentStatusLabel, coaterShipmentStatusTone } from './coater-shipment-status';
 import { StationOperation } from '../operations-station/operations-station.operations';
 import { coaterPackingSlipHtml, coaterContainerLabelsHtml } from './coater-packing-slip';
 import { createCoaterRequestId } from './coater-request-id';
+import { OptionPickerComponent, PickerOption } from '@meshforge/manufacturing/frontend/util-common';
 
 @Component({
   selector: 'gear-coater-shipments', standalone: true,
@@ -49,6 +50,8 @@ export class CoaterShipmentsComponent implements OnDestroy, StationOperation {
   get canReview() { return this.canEdit && !this.dirty && !!this.active?.manifest.totals.containers && !this.active.manifest.issues.length; }
   get canPrint() { return !!this.active && this.active.status!=='CANCELED' && !this.busy && !this.stale && !this.dirty && (this.active.status==='DISPATCHED' || this.active.reviewed); }
   get canSend() { return this.canReview && this.active!.reviewed && this.active!.print_requested; }
+  readonly statusLabel = coaterShipmentStatusLabel;
+  readonly statusTone = coaterShipmentStatusTone;
   time(value: string) { return new Intl.DateTimeFormat('en-US',{timeZone:'America/Indiana/Indianapolis',dateStyle:'medium',timeStyle:'short'}).format(new Date(value)); }
   /** After the view has rendered and re-enabled the scan box (a microtask runs too early for either). */
   focus() { setTimeout(()=>{const el=this.scanner?.nativeElement;if(el&&!el.disabled&&(!document.activeElement||document.activeElement===document.body))el.focus();}); }

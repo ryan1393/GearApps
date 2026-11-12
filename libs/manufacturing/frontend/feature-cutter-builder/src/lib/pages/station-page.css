@@ -1,0 +1,29 @@
+/*
+ * Layout of the station-style Cutter Builder workflows (Build Cutter, Tear Down Cutter), after
+ * Blade Tracking's Operations Station: one status line that stays in view under the top bar, numbered
+ * scan-or-pick steps, and the main action with the reason it is blocked right below it.
+ * Layout only: appearance comes from the shared Dana workflow and station classes.
+ */
+:host {
+  display: block;
+}
+
+.station-status-line {
+  position: sticky;
+  top: var(--dana-topbar-height, 0px);
+  z-index: 2;
+}
+
+.station-step-details {
+  display: grid;
+  gap: var(--dana-form-gap);
+}
+
+.op-primary {
+  display: grid;
+  gap: var(--dana-space-2);
+}
+
+.op-blocked {
+  margin: 0;
+}

@@ -5,7 +5,7 @@
 
     <div class="gear-panel op-step">
       <gear-scan-panel #containerScanner [step]="1" label="Scan Returned Container" buttonText="Select" changeText="Stop / change container"
-        [doneValue]="container?.serial_number ?? null" [disabled]="busy" (scanned)="scanContainer($event)" (reopen)="stopReceiving()">
+        [doneValue]="container?.serial_number ?? null" [busy]="busy" (scanned)="scanContainer($event)" (reopen)="stopReceiving()">
         <gear-option-picker placeholder="Choose container…" [headers]="['Container', 'Blades', 'Trays']" [options]="containerOptions"
           emptyText="No containers are waiting to come back from the coater." [disabled]="busy" (picked)="chooseContainer($event)" />
       </gear-scan-panel>
@@ -14,7 +14,7 @@
     @if (container && (expected.length || pendingTray || receivingSet)) {
       <div class="gear-panel op-step">
         <gear-scan-panel #trayScanner [step]="2" [label]="bladeSet ? 'Scan Empty Tray For The Set' : 'Scan Tray Out'" changeText="Choose another tray"
-          [doneValue]="pendingTray?.serial_number ?? null" [disabled]="busy" (scanned)="scanTray($event)" (reopen)="cancelPendingTray()">
+          [doneValue]="pendingTray?.serial_number ?? null" [busy]="busy" (scanned)="scanTray($event)" (reopen)="cancelPendingTray()">
           <gear-option-picker placeholder="Choose tray…" [headers]="['Tray', 'Part', 'Blades']" [options]="trayOptions"
             [emptyText]="bladeSet ? 'Scan any empty tray.' : 'Every expected tray is received.'" [disabled]="busy" (picked)="chooseTray($event)" />
         </gear-scan-panel>
@@ -25,7 +25,7 @@
       <div class="gear-panel op-step">
         <gear-scan-panel #shelfScanner [step]="3" [label]="'Scan ' + shelfPrefix + ' Finished Shelf'"
           [help]="'Tray ' + pendingTray.serial_number + ' (' + (receivingPartType || 'no part type') + ') is ready for cutter. Put it on an empty ' + shelfPrefix + ' shelf bin, such as ' + shelfPrefix + '-A1A (shelf, layer, bin).'"
-          [disabled]="busy" (scanned)="scanShelf($event)">
+          [busy]="busy" (scanned)="scanShelf($event)">
           <gear-option-picker [placeholder]="'Choose empty ' + shelfPrefix + ' shelf…'" [headers]="['Shelf', 'Description']" [options]="shelfOptions"
             [emptyText]="'No empty ' + shelfPrefix + ' shelves are available. Free one up, or ask a supervisor.'" [disabled]="busy" (picked)="chooseShelf($event)" />
         </gear-scan-panel>

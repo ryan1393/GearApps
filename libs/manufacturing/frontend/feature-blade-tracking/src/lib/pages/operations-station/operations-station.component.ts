@@ -11,8 +11,8 @@ import { IntakeComponent } from '../intake/intake.component';
 import { InternalMovementComponent } from '../internal-movement/internal-movement.component';
 import { LoadContainerComponent } from '../load-container/load-container.component';
 import { ReceiveContainerComponent } from '../receive-container/receive-container.component';
-import { focusExpectedScan } from '../../shared/focus-expected-scan';
 import { BLADE_OPERATIONS, BladeOperationKey, StationOperation, isBladeOperation } from './operations-station.operations';
+import { focusExpectedScan } from '@meshforge/manufacturing/frontend/util-common';
 
 const LAST_OPERATION_KEY = 'meshforge.blade-tracking.operations-station';
 const HIDDEN_TABS_KEY = 'meshforge.blade-tracking.operations-station.hidden-tabs';
@@ -72,6 +72,11 @@ export class OperationsStationComponent {
   }
   private readonly requested = toSignal(this.route.queryParamMap.pipe(map((params) => params.get('op'))), {
     initialValue: this.route.snapshot.queryParamMap.get('op'),
+  });
+
+  /** `?tray=` from another app (e.g. Cutter Builder's Waiting For Grinding list): the tray to open on Grinding. */
+  readonly requestedTray = toSignal(this.route.queryParamMap.pipe(map((params) => params.get('tray'))), {
+    initialValue: this.route.snapshot.queryParamMap.get('tray'),
   });
 
   readonly active = computed<BladeOperationKey>(() => {

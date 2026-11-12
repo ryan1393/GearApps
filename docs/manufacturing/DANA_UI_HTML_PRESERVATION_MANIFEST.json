@@ -83,7 +83,7 @@
       "sha256": "B00E5734BEF4069CEC613E20C96857FEDC1C514283C8296D8F06EA0561E9858F"
     },
     {
-      "path": "libs/manufacturing/frontend/feature-blade-tracking/src/lib/shared/scan-panel/scan-panel.component.html",
+      "path": "libs/manufacturing/frontend/util-common/src/lib/station/scan-panel/scan-panel.component.html",
       "sha256": "EA38FF96FD7FD775F3E5057B34D67DDC8EC07231558A08F3C98AD851B4BDEA83"
     },
     {
