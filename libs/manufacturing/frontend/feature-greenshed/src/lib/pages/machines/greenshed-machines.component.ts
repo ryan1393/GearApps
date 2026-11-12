@@ -7,7 +7,7 @@ import {
   RunningMachinesBoard,
 } from '@meshforge/manufacturing/frontend/data-access-greenshed';
 import { RunningMachinesFeed } from './running-machines-feed';
-import { MachineAction, machineActionRoute } from './running-machines.logic';
+import { MachineAction, machineActionRoute, sameRunOnBoard } from './running-machines.logic';
 import {
   DanaTableDirective,
   DanaTableShellDirective,
@@ -59,8 +59,8 @@ export class GreenshedMachinesComponent extends RunningMachinesFeed {
   protected override applyBoard(board: RunningMachinesBoard): void {
     super.applyBoard(board);
     if (!this.selectedMachine) return;
-    const current = board.departments.flatMap(department => department.machines).find(machine => machine.machine_id === this.selectedMachine?.machine_id);
-    if (!current || !current.has_cutter || current.run_id !== this.selectedMachine.run_id || current.build_number !== this.selectedMachine.build_number) this.closeActions();
+    const current = sameRunOnBoard(board, this.selectedMachine);
+    if (!current) this.closeActions();
     else this.selectedMachine = { ...current };
   }
 

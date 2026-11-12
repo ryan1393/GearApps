@@ -4,6 +4,14 @@ import path from 'node:path';
 
 const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8');
 const exists=(p)=>fs.existsSync(contractPath(process.cwd(), p));
+// A component that extends a base class from its own feature (e.g. RunningMachinesFeed) also owns
+// that class's methods, so they count when checking its template's handlers.
+const withLocalBaseClass=(file,text)=>{
+  const base=text.match(/\bextends\s+([A-Z]\w*)/)?.[1];
+  const from=base && text.match(new RegExp(`import\\s*\\{[^}]*\\b${base}\\b[^}]*\\}\\s*from\\s*'(\\.[^']+)'`))?.[1];
+  const baseFile=from && path.join(path.dirname(file),`${from}.ts`);
+  return baseFile && exists(baseFile) ? `${text}\n${read(baseFile)}` : text;
+};
 
 const apps={
   blade:{
@@ -22,7 +30,7 @@ const apps={
     app:'apps/greenshed',
     feature:'libs/manufacturing/frontend/feature-greenshed',
     base:'/greenshed',
-    routes:['','machines','setup','check','pull','lookup','cutter-requests','cancel-last'],
+    routes:['','machines','machines-board','setup','check','pull','lookup','cutter-requests','cancel-last'],
   },
 };
 
@@ -32,6 +40,12 @@ if(!/path:\s*'requests'/.test(read('libs/manufacturing/frontend/feature-cutter-b
 }
 if(!/path:\s*'cutter-requests'/.test(read('libs/manufacturing/frontend/feature-greenshed/src/lib/greenshed.routes.ts'))){
   throw new Error('Greenshed navigation requires its restored cutter-requests route.');
+}
+// The touch board sits beside the Running Machines table; both stay registered.
+for (const route of ['machines', 'machines-board']) {
+  if(!new RegExp(`path:\\s*'${route}'`).test(read('libs/manufacturing/frontend/feature-greenshed/src/lib/greenshed.routes.ts'))){
+    throw new Error(`Greenshed navigation requires its ${route} route.`);
+  }
 }
 
 function walk(dir,ext,out=[]){
@@ -97,7 +111,7 @@ for(const cfg of Object.values(apps)){
     for(const htmlFile of walk(root,'.component.html')){
       const tsFile=htmlFile.replace(/\.html$/,'.ts');
       if(!exists(tsFile)) continue;
-      const html=read(htmlFile); const ts=read(tsFile);
+      const html=read(htmlFile); const ts=withLocalBaseClass(tsFile,read(tsFile));
       for(const m of html.matchAll(/\((?:click|ngSubmit|scanned|change|input|keydown\.enter)\)="\s*([A-Za-z_]\w*)\s*\(/g)){
         if(!new RegExp(`\\b${m[1]}\\s*\\(`).test(ts)){
           throw new Error(`${htmlFile}: template calls missing method ${m[1]}()`);

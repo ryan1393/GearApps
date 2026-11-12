@@ -1,4 +1,4 @@
-import { DsfCountRow, DsfCountsBoard, RunningMachineRow } from '@meshforge/manufacturing/frontend/data-access-greenshed';
+import { DsfCountRow, DsfCountsBoard, RunningMachineRow, RunningMachinesBoard } from '@meshforge/manufacturing/frontend/data-access-greenshed';
 
 /**
  * The rules behind the Running Machines screens: the table at /greenshed/machines and the touch
@@ -94,4 +94,13 @@ export function machineActionRoute(action: MachineAction, machine: RunningMachin
     case 'setup': return { commands: ['/greenshed/setup'], queryParams: { machine: machine.machine_number, origin: 'running-machines' } };
     case 'lookup': return { commands: ['/greenshed/lookup'], queryParams: { build: machine.build_number } };
   }
+}
+
+/**
+ * The selected running cutter as it is on a refreshed board, or null when that machine no longer
+ * runs the same build on the same run (its open actions must then close).
+ */
+export function sameRunOnBoard(board: RunningMachinesBoard, selected: RunningMachineRow): RunningMachineRow | null {
+  const current = board.departments.flatMap((department) => department.machines).find((machine) => machine.machine_id === selected.machine_id);
+  return current && current.has_cutter && current.run_id === selected.run_id && current.build_number === selected.build_number ? current : null;
 }
