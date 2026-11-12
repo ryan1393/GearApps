@@ -404,7 +404,11 @@ export interface CutterBodyMatrixSummaryInput {
   /** Summary-level Hand of Spiral (part_summaries.hos). There is no per-Part-Type HOS column. */
   hos?: string | null;
   configured_body_rule: string | null;
-  requirements: Array<{ part_type_code: string; required_blade_count: number; enabled: boolean }>;
+  requirements: Array<{
+    part_type_code: string; required_blade_count: number; enabled: boolean;
+    /** HOS / blades of this Summary + Part Type; informational, never a body restriction. */
+    part_type_hos?: string | null; inner_blade?: string | null; outer_blade?: string | null;
+  }>;
 }
 
 /** One row of "for this Summary and Part Type, which body definitions can these blades go into?". */
@@ -415,6 +419,10 @@ export interface CutterBodyMatrixRow {
   model_number: string | null;
   hos: string | null;
   part_type_code: string;
+  /** HOS, Inner blade and Outer blade of this Summary + Part Type (blank when not set). */
+  part_type_hos: string | null;
+  inner_blade: string | null;
+  outer_blade: string | null;
   required_blade_sets: number;
   required_total_blades: number | null;
   body_rule: CutterBodyRuleCode | null;
@@ -443,6 +451,9 @@ export function buildCutterBodyCompatibilityMatrix(
         summary_id: summary.summary_id, summary_number: summary.summary_number, summary_revision: summary.summary_revision,
         model_number: summary.model_number ?? null, hos: summary.hos ?? null,
         part_type_code: String(requirement.part_type_code ?? '').trim().toUpperCase(),
+        part_type_hos: requirement.part_type_hos ?? null,
+        inner_blade: requirement.inner_blade ?? null,
+        outer_blade: requirement.outer_blade ?? null,
         required_blade_sets: sets, required_total_blades: totalBladesForSets(sets),
       };
       const disabled = summary.summary_enabled === false ? 'Summary is disabled' : !requirement.enabled ? 'Blade requirement is disabled' : null;

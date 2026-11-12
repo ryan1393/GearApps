@@ -5,6 +5,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -16,6 +17,7 @@ import { ApiTags } from '@nestjs/swagger';
 import {
   CreateCutterBladeRequirementDto,
   CutterBodyCompatibilityQueryDto,
+  SavePartSummaryDto,
   SetSummaryBodyRuleDto,
   UpdateCutterBladeRequirementDto,
   ValidateCutterTrayDto,
@@ -89,6 +91,31 @@ export class ServerFeatCutterConfigController {
   @Auth([RoleType.ADMIN])
   clearSummaryBodyRule(@Param('summaryId', new ParseUUIDPipe()) summaryId: Uuid) {
     return this.service.clearSummaryBodyRule(summaryId);
+  }
+
+  @Get('summary-settings')
+  @Auth([RoleType.ADMIN, RoleType.USER])
+  listPartSummarySettings() {
+    return this.service.listPartSummarySettings();
+  }
+
+  @Get('summary-settings/:summaryId')
+  @Auth([RoleType.ADMIN, RoleType.USER])
+  async getPartSummarySettings(@Param('summaryId', new ParseUUIDPipe()) summaryId: Uuid) {
+    const [row] = await this.service.listPartSummarySettings(summaryId);
+    if (!row) throw new NotFoundException('Part summary not found');
+    return row;
+  }
+
+  /** Save Part Summary: Summary fields, RING/PINION HOS and blades, and an explicit Body Size Rule change in one transaction. */
+  @Put('summary-settings/:summaryId')
+  @Auth([RoleType.ADMIN])
+  savePartSummary(
+    @Param('summaryId', new ParseUUIDPipe()) summaryId: Uuid,
+    @Body() dto: SavePartSummaryDto,
+    @ReqUserId() userId: Uuid,
+  ) {
+    return this.service.savePartSummary(summaryId, dto, userId);
   }
 
   @Get('body-compatibility')

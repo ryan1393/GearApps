@@ -121,11 +121,46 @@
           </option>
         </select>
       </label>
-      <label class="gear-field">HOS<select [(ngModel)]="summaryForm.hos" name="summaryHos" class="gear-select">
+      <label class="gear-field">Summary HOS<select [(ngModel)]="summaryForm.hos" name="summaryHos" class="gear-select">
             <option value="">Select hand...</option>
             <option value="LH">Left Hand</option>
             <option value="RH">Right Hand</option>
           </select></label>
+      <ng-container *ngIf="editingPartSummaryId">
+        <fieldset class="gear-field" *ngFor="let code of summaryPartTypes" [attr.data-gear-summary-part-type]="code">
+          <legend>{{ code }}</legend>
+          <div class="gear-form-grid">
+            <label class="gear-field">{{ code }} HOS
+              <select class="gear-select" [(ngModel)]="summaryTypeForm[code].hos" [name]="'summaryHos' + code">
+                <option value="">Not set</option>
+                <option value="RH">RH</option>
+                <option value="LH">LH</option>
+              </select>
+            </label>
+            <label class="gear-field">Inner blade
+              <select class="gear-select" [(ngModel)]="summaryTypeForm[code].inner_blade" [name]="'summaryInner' + code">
+                <option value="">Not set</option>
+                <option *ngFor="let label of bladeLabelChoices(summaryTypeForm[code].inner_blade)" [value]="label">{{ label }}</option>
+              </select>
+            </label>
+            <label class="gear-field">Outer blade
+              <select class="gear-select" [(ngModel)]="summaryTypeForm[code].outer_blade" [name]="'summaryOuter' + code">
+                <option value="">Not set</option>
+                <option *ngFor="let label of bladeLabelChoices(summaryTypeForm[code].outer_blade)" [value]="label">{{ label }}</option>
+              </select>
+            </label>
+          </div>
+        </fieldset>
+        <small class="gear-field-help">Each Part Type keeps its own values; the field is the position (an IB label can be the Outer blade). Parts show the Inner and Outer blade of their own Summary and Part Type.</small>
+        <label class="gear-field">Body Size
+          <select class="gear-select" [(ngModel)]="summaryBodyRuleChoice" name="summaryBodyRuleChoice">
+            <option value="KEEP">Keep current Body Size rule</option>
+            <option *ngFor="let rule of cutterBodyRules" [value]="rule.code">{{ rule.label }} · {{ rule.total_blades }} blades</option>
+            <option value="">Remove Body Size rule (quantities stay)</option>
+          </select>
+        </label>
+        <div class="gear-field" data-gear-summary-required-preview>Required Blades (read-only)<strong>{{ summaryRequiredBladesPreview }}</strong></div>
+      </ng-container>
       <div class="gear-admin-form-actions">
         <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">{{ editingPartSummaryId ? 'Save Part Summary' : 'Create Part Summary' }}</button>
         <button *ngIf="editingPartSummaryId" class="gear-btn gear-btn-secondary" type="button" [disabled]="busy" (click)="cancelPartSummaryEdit()">Cancel Edit</button>
@@ -174,21 +209,17 @@
               <span class="gear-admin-record-label">Required Blades (read-only)</span>
               <span class="gear-admin-record-value">{{ summaryRequiredBladesText(summary) }}</span>
             </div>
+            <div *ngFor="let code of summaryPartTypes" class="gear-admin-record-field gear-admin-record-field-wide" [attr.data-gear-summary-blades]="code">
+              <span class="gear-admin-record-label">{{ code }}</span>
+              <span class="gear-admin-record-value">
+                HOS {{ summaryPartTypeSettings(summary.id, code)?.hos || '—' }} ·
+                Inner blade {{ summaryPartTypeSettings(summary.id, code)?.inner_blade || '—' }} ·
+                Outer blade {{ summaryPartTypeSettings(summary.id, code)?.outer_blade || '—' }}
+              </span>
+            </div>
             <div class="gear-admin-record-field gear-admin-record-field-wide" data-gear-summary-permitted-bodies>
               <span class="gear-admin-record-label">Permitted Cutter Body Types (RING and PINION)</span>
               <span class="gear-admin-record-value">{{ summaryPermittedBodiesText(summary) }}</span>
-            </div>
-          </div>
-          <div *ngIf="summaryBodyRule(summary)" class="gear-admin-inline-edit gear-admin-record-inline-action">
-            <span class="gear-admin-record-label">Set Body Size Rule (controls Required Blades for RING and PINION)</span>
-            <div class="gear-admin-inline-edit-controls">
-              <select class="gear-select" [name]="'body-rule-' + summary.id" [disabled]="busy"
-                      [ngModel]="summaryBodyRuleEdits[summary.id] ?? (summaryBodyRule(summary)?.configured_body_rule || '')"
-                      (ngModelChange)="summaryBodyRuleEdits[summary.id] = $event">
-                <option value="">Not configured</option>
-                <option *ngFor="let rule of cutterBodyRules" [value]="rule.code">{{ rule.label }} · {{ rule.total_blades }} blades</option>
-              </select>
-              <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="saveSummaryBodyRule(summary)">Save Rule</button>
             </div>
           </div>
           <div class="gear-admin-actions gear-admin-record-actions">
@@ -290,6 +321,14 @@
             <div class="gear-admin-record-field">
               <span class="gear-admin-record-label">Teeth</span>
               <span class="gear-admin-record-value">{{ part.teeth ?? '—' }}</span>
+            </div>
+            <div class="gear-admin-record-field" data-gear-part-inner-blade>
+              <span class="gear-admin-record-label">Inner blade</span>
+              <span class="gear-admin-record-value">{{ part.inner_blade || '—' }}</span>
+            </div>
+            <div class="gear-admin-record-field" data-gear-part-outer-blade>
+              <span class="gear-admin-record-label">Outer blade</span>
+              <span class="gear-admin-record-value">{{ part.outer_blade || '—' }}</span>
             </div>
           </div>
           <div class="gear-admin-actions gear-admin-record-actions">

@@ -91,3 +91,47 @@ export interface ISummaryBodyRuleRow {
   requirements: ISummaryBodyRuleRequirement[];
   open_trays_with_other_quantity?: number;
 }
+
+/** HOS, Inner blade and Outer blade of one Summary + Part Type; null = not set. */
+export interface ISummaryPartTypeSettings {
+  part_type_id: Uuid;
+  part_type_code: string;
+  hos: string | null;
+  inner_blade: string | null;
+  outer_blade: string | null;
+}
+
+/** Fields of one Part Type group in a Save Part Summary request: omitted = unchanged, null or '' = clear. */
+export interface ISavePartTypeSettings {
+  hos?: string | null;
+  inner_blade?: string | null;
+  outer_blade?: string | null;
+}
+
+/**
+ * One Save Part Summary request: every submitted field is saved in one transaction.
+ * Omitted fields are unchanged. body_rule omitted keeps the current Body Size Rule;
+ * a rule code changes it (RING/PINION requirements follow); null clears it (quantities stay).
+ */
+export interface ISavePartSummaryRequest {
+  number?: string;
+  revision?: string;
+  model_id?: Uuid | null;
+  /** Summary-level HOS (part_summaries.hos), kept for existing screens and Lapper. */
+  hos?: string | null;
+  part_types?: Partial<Record<'RING' | 'PINION', ISavePartTypeSettings>>;
+  body_rule?: string | null;
+}
+
+/** A Summary with its RING and PINION settings and its Body Size Rule state. */
+export interface IPartSummarySettings {
+  summary_id: Uuid;
+  summary_number: string;
+  summary_revision: string;
+  model_id: Uuid | null;
+  hos: string | null;
+  part_types: ISummaryPartTypeSettings[];
+  body_rule: ISummaryBodyRuleRow;
+  /** Present after a save that changed the Body Size Rule. */
+  open_trays_with_other_quantity?: number;
+}

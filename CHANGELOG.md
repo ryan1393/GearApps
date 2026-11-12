@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+- **RING / PINION HOS, Inner blade and Outer blade per Summary.** Each Summary now has separate
+  RING and PINION HOS, Inner blade and Outer blade (table `part_summary_part_type_blades`,
+  migration `20261112-summary-part-type-blades-v1`, additive). Parts show the Inner and Outer
+  blade of their own Summary + Part Type (view `part_blade_settings`, no copies on parts). A label
+  is kept in the field it was assigned to: PINION 30538 keeps Outer blade `RH IB`.
+  See `docs/manufacturing/SUMMARY_PART_TYPE_BLADES.md`.
+  - **One Save Part Summary.** Admin > Part Summaries > Edit has one form and one button for the
+    Summary fields, both Part Type groups and the Body Size rule (Required Blades preview), saved
+    in one request and one transaction (`PUT /api/v1/cutter-config/summary-settings/:summaryId`).
+    Omitting the Body Size keeps it; any failure saves nothing and keeps the draft. The per-card
+    Save Rule button is removed.
+  - **Opt-in source import** of the 216 Blade sheet cope.xlsx Sheet2 rows:
+    `npm run report:summary-part-type-blades` (dry run), then `npm run apply:summary-part-type-blades`.
+    Fills blank fields only, skips 30588/32414 and zero rows, creates no Summary.
+  - **Fix:** a partial `PATCH /api/v1/part-summaries/:id` that left out `revision` blanked the
+    Summary's revision (the update DTO inherited the create default). Revision now changes only
+    when sent.
+
 - **Gearsets: master fields visible, relationships and administrator states kept on import.**
   See `docs/manufacturing/GEARSETS.md`.
   - **A manual `npm run import:base-data` no longer undoes administrator changes.** It used to

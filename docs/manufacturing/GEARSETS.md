@@ -72,3 +72,6 @@ requirement rows and its Body Size Rule (see [CUTTER_BODY_BLADE_RULES.md](CUTTER
 Tooth counts are never used for blade quantities. A 26-blade Summary stays unresolved (076
 Standard or 105 Special) until its rule is set; the audit lists gearsets whose Summary is
 unresolved or has no requirement.
+
+RING/PINION HOS and Inner/Outer blades belong to Summary + Part Type, not to the gearset; a
+gearset's ring and pinion each resolve their own (see [SUMMARY_PART_TYPE_BLADES.md](SUMMARY_PART_TYPE_BLADES.md)).
