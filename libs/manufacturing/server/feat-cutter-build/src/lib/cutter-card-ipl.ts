@@ -1,3 +1,4 @@
+import { CARD_IPL_FINISH, CARD_IPL_SETUP, CardAdjustment, ETX, STX, moveCardIpl, safeIplField } from '@meshforge/manufacturing/server/feat-tray';
 import { CardElement, CardLanguage, CutterCardFields, cutterCardLayout } from './cutter-card-layout';
 
 /*
@@ -19,15 +20,6 @@ const ACROSS_OFFSET = 42;
 /** @deprecated Use CutterCardFields. */
 export type CutterCardIplFields = CutterCardFields;
 
-function safeIplField(value: string | null | undefined, maxLength = 80): string {
-  return String(value ?? '')
-    // eslint-disable-next-line no-control-regex -- Printer fields must not contain command control bytes.
-    .replace(/[\x00-\x1f\x7f;,]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, maxLength);
-}
-
 /**
  * The card is read on the shop floor, so the build date is printed in plant time. The API host
  * usually runs in UTC, which would put an evening build on the next day's date.
@@ -45,36 +37,6 @@ function formatDate(value: string | Date): string {
   const part = Object.fromEntries(cardDateParts.formatToParts(date).map(({ type, value: text }) => [type, text]));
   return `${part['year']}-${part['month']}-${part['day']} ${part['hour']}:${part['minute']}`;
 }
-
-const STX = '\x02';
-const ETX = '\x03';
-const ESC = '\x1b';
-const SI = '\x0f';
-
-const SETUP = [`${STX}R${ETX}`, `${STX}${ESC}k${ETX}`, `${STX}${ESC}C0${ETX}`, `${STX}${ESC}P;${ETX}`, `${STX}E*;F*;${ETX}`];
-const FINISH = [
-  `${STX}R${ETX}`,
-  `${STX}R${ETX}`,
-  `${STX}${ESC}k${ETX}`,
-  `${STX}${ESC}C0`,
-  `${SI}L1320`,
-  `${SI}g0,424`,
-  `${SI}T1`,
-  `${SI}R0${SI}r0`,
-  `${SI}D0`,
-  `${SI}c0${SI}t0`,
-  `${SI}l0`,
-  `${SI}F2`,
-  `${SI}f0`,
-  `${SI}L1000`,
-  `${SI}I5`,
-  `${SI}i0`,
-  `${SI}W914;${SI}S60`,
-  `${SI}d0`,
-  ETX,
-  `${STX}${ESC}E*\x18${ETX}`,
-  `${STX}\x1e1${ETX}${STX}\x1f1${ETX}${STX}\x17${ETX}`,
-];
 
 /*
  * Text is the scalable font 26, the one the asset tag uses. Its h and w are about three
@@ -101,15 +63,12 @@ function iplElement(element: CardElement, index: number): string {
 }
 
 export function buildCutterCardIpl(fields: CutterCardFields): Buffer {
-  const commands = [...SETUP, ...cutterCardLayout(fields, IPL).map(iplElement), ...FINISH];
+  const commands = [...CARD_IPL_SETUP, ...cutterCardLayout(fields, IPL).map(iplElement), ...CARD_IPL_FINISH];
   return Buffer.from(commands.join('\r\n') + '\r\n\r\n', 'latin1');
 }
 
 /** How far to move the whole card on one printer's stock, in dots (203 per inch). */
-export interface CutterCardAdjustment {
-  right: number;
-  down: number;
-}
+export type CutterCardAdjustment = CardAdjustment;
 
 /**
  * Moves every field of an IPL card. The card's fields read across the web with their top at
@@ -117,13 +76,7 @@ export interface CutterCardAdjustment {
  * first. Field data cannot contain `;` (see safeIplField), so each `;o` is a real origin.
  */
 export function moveCutterCardIpl(card: Buffer, adjustment: CutterCardAdjustment): Buffer {
-  if (!adjustment.right && !adjustment.down) return card;
-  return Buffer.from(
-    card.toString('latin1').replace(/;o(\d+),(\d+);/g, (_origin, feed: string, across: string) =>
-      `;o${Math.max(0, Number(feed) - adjustment.down)},${Math.max(0, Number(across) + adjustment.right)};`,
-    ),
-    'latin1',
-  );
+  return moveCardIpl(card, adjustment);
 }
 
 export function cutterCardBuildDate(value: string | Date): string {

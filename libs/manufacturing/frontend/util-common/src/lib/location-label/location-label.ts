@@ -1,12 +1,14 @@
 /*
- * The 4 x 6 in location label, printed landscape (6 in across, 4 in tall). Read from across
+ * The 4 x 6.5 in location label, printed landscape (6.5 in across, 4 in tall). Read from across
  * the aisle: the Summary kept at the location fills the top row, the part type and the
  * location number share the row under it, each as large as its width allows, and the
  * location's own barcode runs across the bottom (Code 128 of its serial, the same value its
  * small tag carries, so a scan finds the location).
  *
- * It is a browser print, like the 4 x 6 coater container labels, so it goes to whatever 4 x 6
- * printer the workstation has installed. Print at actual size, landscape, with no margins.
+ * Normally the label is printed by the API on a 4 x 6.5 card printer (POST
+ * /asset-tags/location-label, the same printers as the Cutter Build card). This browser print
+ * is the fallback when no card printer is set up or it does not take the label: choose a 4 x 6.5
+ * printer in the dialog and print at actual size, landscape, with no margins.
  */
 
 import { code128BLayout } from '../barcodes';
@@ -26,7 +28,7 @@ export interface LocationLabelInput {
 export type LocationLabelOpenResult = { ok: true } | { ok: false; reason: string };
 
 /** Width inside the 0.25 in margins, in inches, less a little for the rule between columns. */
-const CONTENT_WIDTH_IN = 5.4;
+const CONTENT_WIDTH_IN = 5.9;
 const PX_PER_IN = 96;
 
 /** The largest type each row's height leaves room for, in CSS pixels. */
@@ -83,18 +85,18 @@ function labelSection(input: LocationLabelInput): string {
   </section>`;
 }
 
-/** One printable document, one 4 x 6 page per location. */
+/** One printable document, one 4 x 6.5 page per location. */
 export function locationLabelsHtml(labels: readonly LocationLabelInput[]): string {
   if (!labels.length) throw new Error('Choose at least one location to print.');
   const title = labels.length === 1 ? `${clean(labels[0].serial_number).toUpperCase()} · Location label` : `${labels.length} location labels`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(title)}</title><style>
-  @page{size:6in 4in;margin:0}
+  @page{size:6.5in 4in;margin:0}
   *{box-sizing:border-box}
   body{font:14px Arial,Helvetica,sans-serif;margin:0;color:#000;background:#fff}
   .toolbar{text-align:center;padding:12px;background:#eee}
   .toolbar button{padding:8px 16px;font:inherit}
   .toolbar p{margin:8px 0 0}
-  .label{width:6in;height:4in;padding:.25in;margin:12px auto;page-break-after:always;break-after:page;border:1px solid #999;display:flex;flex-direction:column;overflow:hidden}
+  .label{width:6.5in;height:4in;padding:.25in;margin:12px auto;page-break-after:always;break-after:page;border:1px solid #999;display:flex;flex-direction:column;overflow:hidden}
   .label:last-child{page-break-after:auto;break-after:auto}
   .summary{flex:1 1 0;min-height:0;overflow:hidden}
   .row{display:flex;flex:1 1 0;min-height:0;border-top:3px solid #000}
@@ -108,7 +110,7 @@ export function locationLabelsHtml(labels: readonly LocationLabelInput[]): strin
   .serial{font:bold 16px "Courier New",monospace;letter-spacing:1px;margin-top:3px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .serial span{font:12px Arial,Helvetica,sans-serif;letter-spacing:0}
   @media print{.toolbar{display:none}.label{border:0;margin:0}}
-  </style></head><body><div class="toolbar"><button type="button" id="print-labels">Print ${labels.length === 1 ? 'label' : 'labels'}</button><p>4 × 6 label · Landscape · Actual size (100%) · No margins</p></div>${labels.map(labelSection).join('')}</body></html>`;
+  </style></head><body><div class="toolbar"><button type="button" id="print-labels">Print ${labels.length === 1 ? 'label' : 'labels'}</button><p>4 × 6.5 label · Landscape · Actual size (100%) · No margins</p></div>${labels.map(labelSection).join('')}</body></html>`;
 }
 
 /**
@@ -123,7 +125,7 @@ export function openLocationLabels(labels: readonly LocationLabelInput[], host: 
     return { ok: false, reason: error instanceof Error ? error.message : 'The label could not be prepared.' };
   }
   const popup = host.open('', '_blank');
-  if (!popup) return { ok: false, reason: 'Allow pop-ups for this site, then select Print 4×6 Label again.' };
+  if (!popup) return { ok: false, reason: 'Allow pop-ups for this site, then select Print 4×6.5 Label again.' };
   popup.opener = null;
   popup.document.open();
   popup.document.write(html);

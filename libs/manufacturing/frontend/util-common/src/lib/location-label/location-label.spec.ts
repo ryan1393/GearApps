@@ -28,9 +28,9 @@ describe('location label', () => {
     expect(() => code128BSymbols('BINé')).toThrow();
   });
 
-  it('prints the Summary, part type, location number and the location barcode on a landscape 4 x 6 page', () => {
+  it('prints the Summary, part type, location number and the location barcode on a landscape 4 x 6.5 page', () => {
     const html = locationLabelsHtml([LOCATION]);
-    expect(html).toContain('@page{size:6in 4in;margin:0}');
+    expect(html).toContain('@page{size:6.5in 4in;margin:0}');
     expect(html).toContain('>1.955FC</div>');
     expect(html).toContain('>RING</div>');
     expect(html).toContain('>14</div>');

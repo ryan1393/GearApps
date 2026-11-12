@@ -13,7 +13,7 @@
   <ng-container *ngIf="board as current">
     <dl class="gear-panel dana-panel-padded label-printers-defaults" aria-label="Default printers">
       <div><dt class="dana-detail-label">Tags print to</dt><dd class="dana-detail-value">{{ defaultSummary('ASSET_TAG') }}</dd></div>
-      <div><dt class="dana-detail-label">Cutter cards print to</dt><dd class="dana-detail-value">{{ defaultSummary('CUTTER_CARD') }}</dd></div>
+      <div><dt class="dana-detail-label">Cutter cards and location labels print to</dt><dd class="dana-detail-value">{{ defaultSummary('CUTTER_CARD') }}</dd></div>
     </dl>
 
     <form class="gear-panel dana-panel-padded label-printers-form" (ngSubmit)="save()" aria-label="Printer details">
@@ -37,7 +37,7 @@
         <label class="gear-field">Loaded with
           <select class="gear-select" name="printerLabelType" [(ngModel)]="form.label_type">
             <option value="ASSET_TAG">Tags, 2.125 × 0.625 in</option>
-            <option value="CUTTER_CARD">Cutter cards, 4 × 6.5 in</option>
+            <option value="CUTTER_CARD">Cutter cards and location labels, 4 × 6.5 in</option>
           </select>
         </label>
       </div>
