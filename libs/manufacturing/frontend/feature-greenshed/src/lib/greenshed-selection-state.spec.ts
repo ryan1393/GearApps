@@ -311,7 +311,7 @@ describe('Greenshed selected context safety', () => {
     c.scanShelf();
     expect(c.busy).toBe(true);
     // Late reference data re-applies the requested reason as a new object.
-    c.refs = { ...c.refs!, pull_reasons: reasons.map((reason) => ({ ...reason })) };
+    c.refs = { check_types: [], check_results: [], check_interval: 25, pull_reasons: reasons.map((reason) => ({ ...reason })) };
     pending.next({ serial_number: 'GSR-123' } as never);
     expect(c.busy).toBe(false);
     expect(c.shelf).toBeNull();

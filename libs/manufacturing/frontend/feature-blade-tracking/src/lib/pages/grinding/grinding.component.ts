@@ -195,7 +195,7 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
   }
 
   ngOnInit(): void { this.refreshGrinders(); this.refreshPickers(); this.refreshShelves(); this.refreshContainers(); }
-  ngOnDestroy(): void { this.selectionVersion++; this.shelfRequestVersion++; this.containerRequestVersion++; this.destroyed$.next(); this.destroyed$.complete(); }
+  ngOnDestroy(): void { this.pickerVersion++; this.selectionVersion++; this.shelfRequestVersion++; this.containerRequestVersion++; this.destroyed$.next(); this.destroyed$.complete(); }
   get filteredTrays() { const q=this.traySearch.trim().toLowerCase(); return this.availableTrays.filter(t=>!q||t.serial_number.toLowerCase().includes(q)); }
   get pendingGrindingCount(): number { return this.tray?.blades.filter(b => isPendingGrindingStatus(b.status)).length ?? 0; }
   get previouslyReadyCount(): number { return this.tray?.blades.filter(b => b.status === BladeStatus.READY_FOR_COATING).length ?? 0; }
@@ -337,11 +337,14 @@ export class GrindingComponent implements OnInit, OnDestroy, StationOperation {
     }
   }
 
+  private pickerVersion = 0;
+  /** Only the newest list answer is shown: a slow earlier refresh never replaces a newer list. */
   refreshPickers(): void {
+    const version = ++this.pickerVersion;
     this.pickerLoading=true; this.pickerError='';
     this.api.getWorkflowTrays('grinding').pipe(takeUntil(this.destroyed$)).subscribe({
-      next: rows => { this.availableTrays=rows; this.pickerLoading=false; },
-      error: e => { this.availableTrays=[]; this.pickerLoading=false; this.pickerError=apiErrorText(e,'Could not load trays available for grinding.'); },
+      next: rows => { if (version !== this.pickerVersion) return; this.availableTrays=rows; this.pickerLoading=false; },
+      error: e => { if (version !== this.pickerVersion) return; this.availableTrays=[]; this.pickerLoading=false; this.pickerError=apiErrorText(e,'Could not load trays available for grinding.'); },
     });
   }
   chooseTray(serial: string): void { this.scanTray(serial); }
