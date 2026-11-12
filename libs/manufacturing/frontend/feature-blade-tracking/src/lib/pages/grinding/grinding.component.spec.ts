@@ -8,12 +8,12 @@ describe('scan workstation', () => {
   let component: GrindingComponent;
   let history: Subject<unknown[]>;
   let start: Subject<unknown>;
-  let api: { scanTray: jest.Mock; getTrayGrindingRuns: jest.Mock; startTrayGrinding: jest.Mock };
+  let api: { scanTray: jest.Mock; getTrayGrindingRuns: jest.Mock; startTrayGrinding: jest.Mock; getMachineGrindingRuns: jest.Mock };
   beforeEach(() => {
     history = new Subject(); start = new Subject();
     api = {
       scanTray: jest.fn(() => of({ id:'tray',serial_number:'T0001',blades:[],blade_count:10,required_blade_count:10,current_stage:{code:'WAITING_FOR_GRINDING'},workflow_eligibility:{grinding:true} })),
-      getTrayGrindingRuns: jest.fn(() => history), startTrayGrinding: jest.fn(() => start),
+      getTrayGrindingRuns: jest.fn(() => history), startTrayGrinding: jest.fn(() => start), getMachineGrindingRuns: jest.fn(() => of([])),
     };
     TestBed.configureTestingModule({providers:[
       {provide:BladeTrackingApiService,useValue:api},
@@ -62,5 +62,17 @@ describe('scan workstation', () => {
     component.scanTray('T0001'); history.error(new Error('history unavailable'));
     expect(component.historyError).toBeTruthy();
     expect(component.canRecordGrinding).toBe(true);
+  });
+  it('opens a tray requested by another app once the grinder is known, without starting it', () => {
+    component.grinderId = '';
+    component.requestedTray = 't0001';
+    expect(api.scanTray).not.toHaveBeenCalled();
+    expect(component.prompt).toContain('Tray T0001 opens next');
+    component.selectGrinder('grinder-1');
+    expect(api.scanTray).toHaveBeenCalledWith('T0001');
+    expect(component.waitingTraySerial).toBe('');
+    expect(api.startTrayGrinding).not.toHaveBeenCalled();
+    component.requestedTray = 'T0001';
+    expect(api.scanTray).toHaveBeenCalledTimes(1);
   });
 });

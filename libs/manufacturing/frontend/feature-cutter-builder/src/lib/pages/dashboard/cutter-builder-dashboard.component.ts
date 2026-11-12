@@ -9,6 +9,7 @@ import {
   cutterApiErrorText,
 } from '@meshforge/manufacturing/frontend/data-access-cutter-builder';
 import { canEditMeshForgeApp } from '@meshforge/manufacturing/shared/util-constants';
+import { getDanaAppUrl } from '@meshforge/manufacturing/shared/dana-app-config';
 import {
   DanaCountBadgeDirective,
   DanaDashboardGridComponent,
@@ -55,20 +56,24 @@ export class CutterBuilderDashboardComponent implements OnInit {
     this.refresh();
   }
 
-  startGrinding(trayId: string, traySerial: string): void {
-    this.loading = true;
-    this.error = '';
+  /** Starting grinding is a Blade Tracking transaction: it needs that app's edit rights and a grinder. */
+  get canEditBladeTracking(): boolean {
+    const user = this.session.currentUser;
+    return canEditMeshForgeApp(
+      'BLADE_TRACKING',
+      user?.role,
+      user?.departmentCode,
+      user?.permissions,
+    );
+  }
 
-    this.api.startGrinding(trayId).subscribe({
-      next: () => this.refresh(),
-      error: (err: HttpErrorResponse) => {
-        this.loading = false;
-        this.error = cutterApiErrorText(
-          err,
-          `Could not start grinding for ${traySerial}.`,
-        );
-      },
-    });
+  /**
+   * Opens Blade Tracking's Operations Station on Grinding with the tray already chosen, through the
+   * same app URL the sidebar's Shared Apps link uses. The operator confirms the grinder there.
+   */
+  grindingStationUrl(traySerial: string): string {
+    const query = new URLSearchParams({ op: 'grinding', tray: traySerial });
+    return `${getDanaAppUrl('bladeTracking')}/blades/operations?${query.toString()}`;
   }
 
   refresh(): void {

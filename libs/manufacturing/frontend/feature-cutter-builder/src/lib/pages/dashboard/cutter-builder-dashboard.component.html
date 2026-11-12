@@ -36,7 +36,7 @@
           <col class="cutter-col-tail" />
         </colgroup>
         <thead><tr><th>Tray</th><th>Summary</th><th>Type</th><th>Blades</th><th></th></tr></thead><tbody>
-        <tr *ngFor="let row of d.waiting_for_grinding"><td class="mono strong">{{ row.tray_serial_number }}</td><td>{{ row.summary_number || '—' }}</td><td>{{ row.part_type_code || '—' }}</td><td>{{ row.blade_count }}</td><td class="right"><button *ngIf="canEdit" type="button" class="gear-btn gear-btn-secondary gear-btn-sm" (click)="startGrinding(row.tray_id, row.tray_serial_number)" [disabled]="loading">Start Grinding</button></td></tr>
+        <tr *ngFor="let row of d.waiting_for_grinding"><td class="mono strong">{{ row.tray_serial_number }}</td><td>{{ row.summary_number || '—' }}</td><td>{{ row.part_type_code || '—' }}</td><td>{{ row.blade_count }}</td><td class="right"><a *ngIf="canEditBladeTracking" class="gear-btn gear-btn-secondary gear-btn-sm" [href]="grindingStationUrl(row.tray_serial_number)" [attr.aria-label]="'Start grinding tray ' + row.tray_serial_number + ' in Blade Tracking'">Start in Grinding</a></td></tr>
         <tr *ngIf="d.waiting_for_grinding.length === 0"><td danaTableEmpty colspan="5" class="empty-row">No trays waiting for grinding.</td></tr>
       </tbody></table></div>
     </article>

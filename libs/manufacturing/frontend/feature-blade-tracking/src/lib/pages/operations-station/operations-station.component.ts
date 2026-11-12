@@ -74,6 +74,11 @@ export class OperationsStationComponent {
     initialValue: this.route.snapshot.queryParamMap.get('op'),
   });
 
+  /** `?tray=` from another app (e.g. Cutter Builder's Waiting For Grinding list): the tray to open on Grinding. */
+  readonly requestedTray = toSignal(this.route.queryParamMap.pipe(map((params) => params.get('tray'))), {
+    initialValue: this.route.snapshot.queryParamMap.get('tray'),
+  });
+
   readonly active = computed<BladeOperationKey>(() => {
     const requested = this.requested();
     const preferred = isBladeOperation(requested) ? requested : (lastOperation() ?? 'intake');

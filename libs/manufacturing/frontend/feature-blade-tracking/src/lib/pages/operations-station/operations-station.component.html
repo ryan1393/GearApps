@@ -41,7 +41,7 @@
       <div class="ops-station-op" data-operation-panel="intake" [hidden]="active() !== 'intake'"><gear-blade-intake /></div>
     }
     @if (allowed('grinding') && visited().has('grinding')) {
-      <div class="ops-station-op" data-operation-panel="grinding" [hidden]="active() !== 'grinding'"><gear-blade-grinding /></div>
+      <div class="ops-station-op" data-operation-panel="grinding" [hidden]="active() !== 'grinding'"><gear-blade-grinding [requestedTray]="active() === 'grinding' ? requestedTray() : null" /></div>
     }
     @if (allowed('load-container') && visited().has('load-container')) {
       <div class="ops-station-op" data-operation-panel="load-container" [hidden]="active() !== 'load-container'"><gear-load-container /></div>

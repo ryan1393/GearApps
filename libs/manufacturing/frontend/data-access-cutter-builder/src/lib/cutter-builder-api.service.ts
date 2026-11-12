@@ -263,13 +263,6 @@ export class CutterBuilderApiService {
   }
 
 
-  startGrinding(trayId: string) {
-    return this.http.post(
-      `/api/v1/trays/${encodeURIComponent(trayId)}/start-grinding`,
-      {},
-    );
-  }
-
   getDashboard() {
     return this.http.get<CutterDashboardData>('/api/v1/cutter-builder/dashboard');
   }
