@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
@@ -76,6 +76,7 @@ describe('Greenshed selected context safety', () => {
       getDsfCounts: jest.fn(() => of({ format: 'DSFCOUNT1', configured: false, rows: [] })),
       getMachine: jest.fn(),
       getPartByNumber: jest.fn(),
+      listParts: jest.fn(() => of([])),
       setupCutter: jest.fn(() => of({})),
     };
     TestBed.configureTestingModule({
@@ -91,7 +92,6 @@ describe('Greenshed selected context safety', () => {
             warning: jest.fn(),
           },
         },
-        { provide: HttpClient, useValue: { get: jest.fn(() => of([])) } },
       ],
     });
   }
@@ -350,5 +350,16 @@ describe('Greenshed selected context safety', () => {
     second.next({ ...build('BUILD-B'), status_code: 'READY' });
     expect(c.busy).toBe(false);
     expect(c.build?.build_number).toBe('BUILD-B');
+  });
+  it('loads the Setup part list through the Greenshed API service', () => {
+    setup();
+    api['listParts'].mockReturnValue(of([
+      { part_number: 'P2', active: true, enabled: true },
+      { part_number: 'P1', active: true, enabled: true },
+      { part_number: 'OFF', active: false, enabled: true },
+    ]));
+    const c = TestBed.runInInjectionContext(() => new GreenshedSetupComponent());
+    expect(api['listParts']).toHaveBeenCalled();
+    expect(c.availableParts.map((part) => part.part_number)).toEqual(['P1', 'P2']);
   });
 });

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -24,7 +24,6 @@ import { DanaPageHeaderComponent, DanaButtonDirective } from '@dana/ui';
 export class GreenshedSetupComponent {
   private readonly api = inject(GreenshedApiService);
   private readonly route = inject(ActivatedRoute);
-  private readonly http = inject(HttpClient);
   private readonly toast = inject(GearToastService);
   private readonly destroyRef = inject(DestroyRef);
   private selectedMachineNumber = '';
@@ -147,8 +146,8 @@ export class GreenshedSetupComponent {
           }
         },
       });
-    this.http
-      .get<PartMasterRow[]>('/api/v1/parts?active=ALL')
+    this.api
+      .listParts()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (parts) => {
