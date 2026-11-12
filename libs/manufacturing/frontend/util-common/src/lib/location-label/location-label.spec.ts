@@ -27,21 +27,20 @@ describe('location label', () => {
     expect(() => code128BSymbols('BINé')).toThrow();
   });
 
-  it('prints the Summary, part type, location number and the location barcode on a 4 x 6 page', () => {
+  it('prints the Summary, part type, location number and the location barcode on a landscape 4 x 6 page', () => {
     const html = locationLabelsHtml([LOCATION]);
-    expect(html).toContain('@page{size:4in 6in;margin:0}');
+    expect(html).toContain('@page{size:6in 4in;margin:0}');
     expect(html).toContain('>1.955FC</div>');
     expect(html).toContain('>RING</div>');
     expect(html).toContain('>14</div>');
     expect(html).toContain('aria-label="GSR-1.955FC-RING"');
-    expect(html).toContain('<div class="serial">GSR-1.955FC-RING</div>');
-    expect(html).toContain('Green Shed rough shelf · GREENSHED');
+    expect(html).toContain('<div class="serial">GSR-1.955FC-RING <span>· Green Shed rough shelf · GREENSHED</span></div>');
   });
 
   it('says what is not set rather than printing a blank', () => {
     const html = locationLabelsHtml([{ serial_number: 'BIN-01', number: 'BIN-01' }]);
     expect(html.match(/Not set/g)).toHaveLength(2);
-    expect(html).not.toContain('<footer>');
+    expect(html).toContain('<div class="serial">BIN-01</div>');
   });
 
   it('escapes what it prints', () => {
@@ -55,10 +54,11 @@ describe('location label', () => {
     expect(html).toContain('Print labels');
   });
 
-  it('shrinks a long value to stay on one line across the label', () => {
-    expect(fittedFontSize('RING', 72)).toBe(72);
-    expect(fittedFontSize('PINION-SPECIAL-LONG', 72)).toBeLessThan(72);
-    expect(fittedFontSize('PINION-SPECIAL-LONG', 72) * 0.64 * 19).toBeLessThanOrEqual(3.5 * 96);
+  it('shrinks a long value to stay on one line in its column', () => {
+    const column = 3.15 * 96;
+    expect(fittedFontSize('RING', 56, column)).toBe(56);
+    expect(fittedFontSize('PINION-SPECIAL-LONG', 56, column)).toBeLessThan(56);
+    expect(fittedFontSize('PINION-SPECIAL-LONG', 56, column) * 0.64 * 19).toBeLessThanOrEqual(column);
   });
 
   it('opens the label and the print dialog', () => {

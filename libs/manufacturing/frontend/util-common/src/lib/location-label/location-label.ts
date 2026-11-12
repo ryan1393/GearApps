@@ -1,10 +1,11 @@
 /*
- * The 4 x 6 in location label: the Summary and part type kept at the location in large type,
- * the location number, and the location's own barcode (Code 128 of its serial, the same value
- * its small tag carries, so a scan finds the location).
+ * The 4 x 6 in location label, printed landscape (6 in across, 4 in tall): the Summary and part
+ * type kept at the location in large type on the left, the location number on the right, and
+ * the location's own barcode across the bottom (Code 128 of its serial, the same value its
+ * small tag carries, so a scan finds the location).
  *
  * It is a browser print, like the 4 x 6 coater container labels, so it goes to whatever 4 x 6
- * printer the workstation has installed. Print at actual size with no margins.
+ * printer the workstation has installed. Print at actual size, landscape, with no margins.
  */
 
 /** What one label shows. Values come from the location record the page already loaded. */
@@ -36,8 +37,9 @@ const CODE128_PATTERNS: readonly string[] = [
 /** Code 128 needs at least ten modules of white either side to scan. */
 const QUIET_ZONE_MODULES = 10;
 
-/** Printable width inside the 0.25 in margins, in CSS pixels (96 per inch). */
-const CONTENT_WIDTH_PX = 3.5 * 96;
+/** Column widths inside the 0.25 in margins, in CSS pixels (96 per inch). */
+const SUMMARY_COLUMN_PX = 3.15 * 96;
+const NUMBER_COLUMN_PX = 2.1 * 96;
 
 /** Arial bold averages a little over 0.6 of its size per character. */
 const CHARACTER_WIDTH = 0.64;
@@ -49,9 +51,9 @@ const esc = (value: unknown): string =>
 
 const clean = (value: string | null | undefined): string => String(value ?? '').replace(/\s+/g, ' ').trim();
 
-/** The largest size, up to `preferred`, that keeps `value` on one line across the label. */
-export function fittedFontSize(value: string, preferred: number, smallest = 18): number {
-  const widest = Math.floor(CONTENT_WIDTH_PX / (Math.max(value.length, 1) * CHARACTER_WIDTH));
+/** The largest size, up to `preferred`, that keeps `value` on one line `available` pixels wide. */
+export function fittedFontSize(value: string, preferred: number, available: number, smallest = 16): number {
+  const widest = Math.floor(available / (Math.max(value.length, 1) * CHARACTER_WIDTH));
   return Math.max(smallest, Math.min(preferred, widest));
 }
 
@@ -87,20 +89,23 @@ function labelSection(input: LocationLabelInput): string {
   const footer = [clean(input.description), clean(input.department)].filter(Boolean).join(' · ');
   const value = (text: string, preferred: number) =>
     text
-      ? `<div class="value" style="font-size:${fittedFontSize(text, preferred)}px">${esc(text)}</div>`
+      ? `<div class="value" style="font-size:${fittedFontSize(text, preferred, SUMMARY_COLUMN_PX)}px">${esc(text)}</div>`
       : '<div class="value unset">Not set</div>';
 
   return `<section class="label">
     <header><span>MESHFORGE</span><span>LOCATION</span></header>
-    <div class="field"><div class="caption">SUMMARY</div>${value(summary, 96)}</div>
-    <div class="field"><div class="caption">PART TYPE</div>${value(partType, 72)}</div>
-    <div class="location">
-      <div class="caption">LOCATION #</div>
-      <div class="number" style="font-size:${fittedFontSize(number, 64)}px">${esc(number)}</div>
-      <div class="barcode">${code128Svg(serial)}</div>
-      <div class="serial">${esc(serial)}</div>
+    <div class="top">
+      <div class="part">
+        <div class="caption">SUMMARY</div>${value(summary, 72)}
+        <div class="caption">PART TYPE</div>${value(partType, 56)}
+      </div>
+      <div class="location">
+        <div class="caption">LOCATION #</div>
+        <div class="number" style="font-size:${fittedFontSize(number, 72, NUMBER_COLUMN_PX)}px">${esc(number)}</div>
+      </div>
     </div>
-    ${footer ? `<footer>${esc(footer)}</footer>` : ''}
+    <div class="barcode">${code128Svg(serial)}</div>
+    <div class="serial">${esc(serial)}${footer ? ` <span>· ${esc(footer)}</span>` : ''}</div>
   </section>`;
 }
 
@@ -109,27 +114,28 @@ export function locationLabelsHtml(labels: readonly LocationLabelInput[]): strin
   if (!labels.length) throw new Error('Choose at least one location to print.');
   const title = labels.length === 1 ? `${clean(labels[0].serial_number).toUpperCase()} · Location label` : `${labels.length} location labels`;
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>${esc(title)}</title><style>
-  @page{size:4in 6in;margin:0}
+  @page{size:6in 4in;margin:0}
   *{box-sizing:border-box}
   body{font:14px Arial,Helvetica,sans-serif;margin:0;color:#000;background:#fff}
   .toolbar{text-align:center;padding:12px;background:#eee}
   .toolbar button{padding:8px 16px;font:inherit}
   .toolbar p{margin:8px 0 0}
-  .label{width:4in;height:6in;padding:.25in;margin:12px auto;page-break-after:always;break-after:page;border:1px solid #999;display:flex;flex-direction:column;overflow:hidden}
+  .label{width:6in;height:4in;padding:.25in;margin:12px auto;page-break-after:always;break-after:page;border:1px solid #999;display:flex;flex-direction:column;overflow:hidden}
   .label:last-child{page-break-after:auto;break-after:auto}
   header{display:flex;justify-content:space-between;font-weight:bold;letter-spacing:2px;font-size:13px;border-bottom:3px solid #000;padding-bottom:6px}
-  .caption{font-size:13px;font-weight:bold;letter-spacing:1.5px;margin-top:10px}
-  .value{font-weight:bold;line-height:1.05;white-space:nowrap;overflow:hidden}
-  .value.unset{font-size:28px;font-weight:normal;font-style:italic}
-  .location{margin-top:auto;border-top:3px solid #000;padding-top:4px;text-align:center}
-  .location .caption{text-align:left}
-  .number{font-weight:bold;line-height:1.05;white-space:nowrap;overflow:hidden}
-  .barcode{margin-top:8px}
-  .barcode svg{display:block;width:100%;height:1in}
-  .serial{font:bold 18px "Courier New",monospace;letter-spacing:1px;margin-top:4px;overflow-wrap:anywhere}
-  footer{margin-top:8px;font-size:12px;text-align:center;overflow-wrap:anywhere;max-height:2.6em;overflow:hidden}
+  .top{display:flex;flex:1;min-height:0}
+  .part{flex:0 0 3.25in;min-width:0;padding-right:.1in}
+  .location{flex:1;min-width:0;border-left:3px solid #000;padding-left:.1in;display:flex;flex-direction:column}
+  .caption{font-size:12px;font-weight:bold;letter-spacing:1.5px;margin-top:6px}
+  .value{font-weight:bold;line-height:1;white-space:nowrap;overflow:hidden}
+  .value.unset{font-size:26px;font-weight:normal;font-style:italic}
+  .number{font-weight:bold;line-height:1;white-space:nowrap;overflow:hidden;margin:auto 0;text-align:center}
+  .barcode{border-top:3px solid #000;padding-top:6px}
+  .barcode svg{display:block;width:100%;height:.8in}
+  .serial{font:bold 16px "Courier New",monospace;letter-spacing:1px;margin-top:3px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .serial span{font:12px Arial,Helvetica,sans-serif;letter-spacing:0}
   @media print{.toolbar{display:none}.label{border:0;margin:0}}
-  </style></head><body><div class="toolbar"><button type="button" id="print-labels">Print ${labels.length === 1 ? 'label' : 'labels'}</button><p>4 × 6 label · Actual size (100%) · No margins</p></div>${labels.map(labelSection).join('')}</body></html>`;
+  </style></head><body><div class="toolbar"><button type="button" id="print-labels">Print ${labels.length === 1 ? 'label' : 'labels'}</button><p>4 × 6 label · Landscape · Actual size (100%) · No margins</p></div>${labels.map(labelSection).join('')}</body></html>`;
 }
 
 /**
