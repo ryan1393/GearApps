@@ -141,6 +141,11 @@ class MeshForgeApi:
             status, payload = self._raw(method, path, body, used, idempotency_key)
         if allow_404 and status == 404:
             return None
+        if status == 403 and not self._collector_token and method != "GET":
+            # MeshForge accepts machine data only from collector tokens and administrators.
+            raise ApiError(method, path, status,
+                           "this account may not send machine data; use a collector token (MESHFORGE_API_TOKEN, "
+                           "or Connect Docker collector in Lapper > Configuration > Collector Tokens)")
         if not 200 <= status < 300:
             raise ApiError(method, path, status, payload if isinstance(payload, str) else "")
         return payload

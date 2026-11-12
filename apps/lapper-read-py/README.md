@@ -53,7 +53,10 @@ Unsent runs stay in `/data` and are retried after network or API outages and res
   volume shared only with this container (`/run/meshforge/collector/token`) and revokes the
   previous one; the collector reads it there and picks up a replacement by itself. The token
   never expires, can only send machine data, is never shown, and is revoked from the same page.
-  `LAPPER_READ_API_TOKEN` (a pasted token) or an account's email and password still override it.
+  `LAPPER_READ_API_TOKEN` (a pasted token) overrides it. **A collector token is required**: the API
+  only accepts machine data from collector tokens and administrators, so the older sign-in with a
+  regular account's email and password (`MESHFORGE_API_EMAIL` / `MESHFORGE_API_PASSWORD`) is
+  refused with HTTP 403. It still works with an administrator's account, but use a token instead.
 - Network access from the Docker host to the controller (8193) and scanner (9004).
 
 ## Run
@@ -90,7 +93,7 @@ single worker without the supervisor.
 | `LAPPER_STATE_DIR` | /data | Checkpoint, heartbeat and FOCAS log |
 | `MESHFORGE_API_BASE_URL` | http://meshforge-server:3333 | Shared MeshForge API |
 | `MESHFORGE_API_TOKEN` | | Collector token (`glr_…`); replaces email and password |
-| `MESHFORGE_API_EMAIL` / `MESHFORGE_API_PASSWORD` | | Collector account, when no token is set |
+| `MESHFORGE_API_EMAIL` / `MESHFORGE_API_PASSWORD` | | Legacy sign-in when no token is set; must be an administrator account (regular accounts get HTTP 403). Use a token |
 | `ARGONAUT_ENABLED` | false | Also send each finished cycle to Argonaut (see below) |
 | `ARGONAUT_URL` | | Argonaut `trigger-transaction` URL (required when enabled) |
 | `ARGONAUT_LOCATION_ID` | | Sent as `?locationId=` |

@@ -121,6 +121,10 @@ test('Lapper uses the shared MeshForge PostgreSQL database', { timeout: 180000 }
         password,
       })
     ).accessToken;
+    // Machine data comes from collector tokens (Lapper Read) or administrators, never user accounts.
+    const collector = (
+      await request('POST', 'collector-token', { name: 'Lapper integration test' }, admin, 201)
+    ).token;
     await t.test('shared login, closed registration and token purpose', async () => {
       assert.deepEqual(await request('GET', 'auth/capabilities'), { registrationEnabled: false });
       await request(
@@ -458,27 +462,29 @@ test('Lapper uses the shared MeshForge PostgreSQL database', { timeout: 180000 }
         };
         const key = randomUUID();
         const [first, second] = await Promise.all([
-          request('POST', 'machine-cycle', body, operator, 201, key),
-          request('POST', 'machine-cycle', body, operator, 201, key),
+          request('POST', 'machine-cycle', body, collector, 201, key),
+          request('POST', 'machine-cycle', body, collector, 201, key),
         ]);
+        await request('POST', 'machine-cycle', body, operator, 403, randomUUID());
         assert.equal(first.id, second.id);
         assert.equal(
-          (await request('POST', 'machine-cycle', body, operator, 201, randomUUID())).id,
+          (await request('POST', 'machine-cycle', body, collector, 201, randomUUID())).id,
           first.id,
         );
         assert.equal(first.timestamp, body.timestamp);
-        await request('POST', 'machine-cycle', { ...body, consec: 78 }, operator, 409, key);
+        await request('POST', 'machine-cycle', { ...body, consec: 78 }, collector, 409, key);
         const logBody = { machine_cycle_id: first.id, macro_id: macros[0].id, value: -12.34567 };
         const logKey = randomUUID();
-        const log = await request('POST', 'macro-log', logBody, operator, 201, logKey);
+        await request('POST', 'macro-log', logBody, operator, 403, randomUUID());
+        const log = await request('POST', 'macro-log', logBody, collector, 201, logKey);
         assert.equal(log.value, logBody.value);
         assert.equal(
-          (await request('POST', 'macro-log', logBody, operator, 201, randomUUID())).id,
+          (await request('POST', 'macro-log', logBody, collector, 201, randomUUID())).id,
           log.id,
         );
-        await request('POST', 'macro-log', { ...logBody, value: 77 }, operator, 409, randomUUID());
+        await request('POST', 'macro-log', { ...logBody, value: 77 }, collector, 409, randomUUID());
         assert.equal(
-          (await request('POST', 'macro-log', logBody, operator, 201, logKey)).id,
+          (await request('POST', 'macro-log', logBody, collector, 201, logKey)).id,
           log.id,
         );
         const [persisted] = await query(
@@ -486,7 +492,9 @@ test('Lapper uses the shared MeshForge PostgreSQL database', { timeout: 180000 }
           [log.id],
         );
         assert.equal(persisted.value, '-12.34567');
-        await request('POST', 'macro-log', { ...logBody, extra: true }, operator, 422);
+        await request('POST', 'macro-log', { ...logBody, extra: true }, collector, 422);
+        // Beyond numeric(13,5): rejected before the database, never a 500.
+        await request('POST', 'macro-log', { ...logBody, value: 1e8 }, collector, 422, randomUUID());
         await request(
           'POST',
           'department',
@@ -497,7 +505,7 @@ test('Lapper uses the shared MeshForge PostgreSQL database', { timeout: 180000 }
         await request('DELETE', `machine-cycle/${first.id}`, undefined, admin, 409);
       },
     );
-    await t.test('operator scanner telemetry preserves setup and machine signals', async () => {
+    await t.test('collector scanner telemetry preserves setup and machine signals', async () => {
       const scanners = await request('GET', 'scanner-detail', undefined, operator);
       if (scanners.length) {
         scannerBefore = scanners[0];
@@ -505,7 +513,22 @@ test('Lapper uses the shared MeshForge PostgreSQL database', { timeout: 180000 }
           'PATCH',
           `scanner-detail/${scannerBefore.id}/serial-numbers`,
           { sn_procces: 'PROCESS', sn_queue: null, sn_scanner: 'SCANNED' },
+          collector,
+        );
+        await request(
+          'PATCH',
+          `scanner-detail/${scannerBefore.id}/serial-numbers`,
+          { sn_procces: 'PROCESS', sn_queue: null, sn_scanner: 'SCANNED' },
           operator,
+          403,
+        );
+        // The matched route decides, not the URL text.
+        await request(
+          'PATCH',
+          `scanner-detail/${scannerBefore.id}?x=/serial-number/`,
+          { ip: '127.0.0.1' },
+          operator,
+          403,
         );
         assert.equal(scanner.machine_id, scannerBefore.machine_id);
         assert.equal(scanner.ip, scannerBefore.ip);
@@ -525,15 +548,23 @@ test('Lapper uses the shared MeshForge PostgreSQL database', { timeout: 180000 }
         y03_2_stack_inCycle: false,
       };
       const [a, b] = await Promise.all([
-        request('POST', 'machine-fanuc-variable', snapshotBody, operator, 201),
-        request('POST', 'machine-fanuc-variable', snapshotBody, operator, 201),
+        request('POST', 'machine-fanuc-variable', snapshotBody, collector, 201),
+        request('POST', 'machine-fanuc-variable', snapshotBody, collector, 201),
       ]);
+      await request('POST', 'machine-fanuc-variable', snapshotBody, operator, 403);
       assert.equal(a.id, b.id);
       const snapshot = await request(
         'PATCH',
         `machine-fanuc-variable/${a.id}`,
         { x01_2_start_cycle: true, y03_2_stack_inCycle: false },
+        collector,
+      );
+      await request(
+        'PATCH',
+        `machine-fanuc-variable/${a.id}`,
+        { x01_2_start_cycle: true, y03_2_stack_inCycle: false },
         operator,
+        403,
       );
       assert.equal(snapshot.x01_2_start_cycle, true);
       assert.equal(snapshot.y03_2_stack_inCycle, false);
@@ -563,11 +594,12 @@ test('Lapper uses the shared MeshForge PostgreSQL database', { timeout: 180000 }
           operator,
           403,
         );
+        await request('POST', 'gearset', { number, status: 'Active' }, operator, 403);
         const pending = await request(
           'POST',
           'gearset',
           { number, status: 'Active' },
-          operator,
+          collector,
           201,
         );
         const pendingCycle = await request(
@@ -580,7 +612,7 @@ test('Lapper uses the shared MeshForge PostgreSQL database', { timeout: 180000 }
             consec: 78,
             timestamp: '2026-11-09T18:45:00Z',
           },
-          operator,
+          collector,
           201,
           randomUUID(),
         );
@@ -652,7 +684,7 @@ test('Lapper uses the shared MeshForge PostgreSQL database', { timeout: 180000 }
             consec: 79,
             timestamp: '2026-11-09T18:46:00Z',
           },
-          operator,
+          collector,
           201,
           randomUUID(),
         );
@@ -695,6 +727,7 @@ test('Lapper uses the shared MeshForge PostgreSQL database', { timeout: 180000 }
     for (const id of fixtures.departments)
       await query('DELETE FROM public.departments WHERE id=$1', [id]);
     for (const { id } of fixtures.users) {
+      await query('DELETE FROM lapper.collector_tokens WHERE created_by=$1', [id]);
       await query('UPDATE lapper.gearsets SET user_id=NULL WHERE user_id=$1', [id]);
       await query('DELETE FROM public.users WHERE id=$1', [id]);
     }

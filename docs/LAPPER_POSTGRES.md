@@ -18,14 +18,18 @@ Unknown collector gearsets remain pending until a shared assembly is defined.
 Historical timestamps use LAPPER_TIME_ZONE (default America/Indianapolis); their
 original values and new offset-aware collector timestamps are preserved.
 
-Sign in with an existing MeshForge email/password. Both web clients and collectors
-use POST /api/v1/auth/email/login, camel-case accessToken/refreshToken responses,
-and the existing JWT_ACCESS_SECRET / JWT_REFRESH_SECRET. Shared account role,
+Web clients sign in with an existing MeshForge email/password through
+POST /api/v1/auth/email/login (camel-case accessToken/refreshToken responses,
+the existing JWT_ACCESS_SECRET / JWT_REFRESH_SECRET). Collectors use a collector
+token (Lapper > Configuration > Collector Tokens) instead. Shared account role,
 department and authVersion determine access. Account management is in MeshForge.
 The separate Lapper JWT secret, local registration and standalone API are removed.
 
-Administrators manage setup; operators can record cycles, macro snapshots and
-scanner serial slots. Shared deletions and manufacturing inventory changes use
+Administrators manage setup. Machine data (cycles, macro values, Fanuc I/O
+snapshots, scanner serial slots and pending gearsets) is sent by collector tokens
+or administrators; other accounts get HTTP 403 ("Only Lapper Read collector tokens
+and MeshForge administrators can send machine data"). The rules follow the route
+the API matched, never the request URL text. Shared deletions and manufacturing inventory changes use
 the existing guarded workflows. Cycle and macro retries use transactional request
 keys and natural database uniqueness. Conflicting snapshots return HTTP 409.
 
