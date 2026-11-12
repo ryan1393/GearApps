@@ -39,7 +39,8 @@
       </div>
     </section>
 
-    <form #checkFormElement #checkForm="ngForm" (ngSubmit)="save()" class="gear-workflow-section">
+    <!-- Only the Save button saves: Enter, including the one a scanner sends after a number, never submits a check. -->
+    <form #checkFormElement #checkForm="ngForm" (keydown.enter)="blockEnterSubmit($event)" (submit)="$event.preventDefault()" class="gear-workflow-section">
       <div class="gear-workflow-section-header"><div><h2>Check Result</h2><p>Your logged-in user is recorded with this check.</p></div></div>
       <div class="gear-workflow-section-body">
         <fieldset class="quality-check-entry" [disabled]="busy || !contextValid || !refs || loadingChoices">
@@ -74,7 +75,7 @@
           </div>
           <label class="gear-field">Comments<textarea [(ngModel)]="comments" name="comments" maxlength="2000" rows="3" class="gear-textarea"></textarea></label>
           <div class="gear-workflow-actions">
-            <button type="submit" [disabled]="busy || !contextValid || !refs || checkForm.invalid" class="gear-btn gear-btn-primary">{{ busy ? 'Saving…' : 'Save Quality Check' }}</button>
+            <button type="button" (click)="save()" [disabled]="busy || !contextValid || !refs || checkForm.invalid" class="gear-btn gear-btn-primary">{{ busy ? 'Saving…' : 'Save Quality Check' }}</button>
             <button type="button" (click)="resetCheckEntry(true)" class="gear-btn gear-btn-secondary">Reset</button>
           </div>
         </fieldset>

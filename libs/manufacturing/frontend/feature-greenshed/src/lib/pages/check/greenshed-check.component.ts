@@ -210,6 +210,17 @@ export class GreenshedCheckComponent implements OnInit {
     });
   }
 
+  /**
+   * Enter in a check field must never save: a numeric barcode scanned into a measurement ends with
+   * Enter, and PASS is the default result. Only Save Quality Check saves. A comment keeps Enter for
+   * new lines, and a focused button still answers Enter as a keyboard press.
+   */
+  blockEnterSubmit(event: Event): void {
+    const target = event.target;
+    if (target instanceof HTMLTextAreaElement || target instanceof HTMLButtonElement) return;
+    event.preventDefault();
+  }
+
   resetCheckEntry(preserveType = false): void {
     this.resultCode = 'PASS';
     this.comments = '';
