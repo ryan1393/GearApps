@@ -64,4 +64,14 @@ describe('ReceiveContainerComponent', () => {
       expect(component.prompt).toContain('scan the shelf tag');
     });
   });
+
+  it('offers only enabled, empty finished shelves, by the fields the locations list returns', () => {
+    const component = create([
+      finished('CGFR-A1A', null),
+      { ...finished('CGFR-A1B', null), enabled: false },
+      finished('CGFR-A1C', null, 2),
+    ]);
+    component.pendingTray = { id: 'T-1', serial_number: 'T-1', part_type: { code: 'RING' } } as never;
+    expect(component.eligibleFinishedShelves.map((shelf) => shelf.serial_number)).toEqual(['CGFR-A1A']);
+  });
 });

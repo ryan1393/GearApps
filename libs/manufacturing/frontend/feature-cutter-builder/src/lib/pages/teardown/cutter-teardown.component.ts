@@ -63,15 +63,14 @@ export class CutterTeardownComponent implements OnInit, OnDestroy {
   selectedBuildNumber = ''; selectedTraySerial = ''; selectedShelfSerial = '';
 
   constructor() { this.refreshEligibleSelections(); }
-  private rows<T>(value:any):T[]{ return Array.isArray(value)?value:Array.isArray(value?.data)?value.data:Array.isArray(value?.items)?value.items:Array.isArray(value?.rows)?value.rows:[]; }
   refreshEligibleSelections():void{
     this.api.getDashboard().pipe(takeUntil(this.destroyed$)).subscribe({next:d=>this.availablePulledBuilds=d.pulled_builds??[],error:()=>this.availablePulledBuilds=[]});
-    this.api.getSelectionTrays().pipe(takeUntil(this.destroyed$)).subscribe({next:v=>this.availableEmptyTrays=this.rows<ITray>(v).filter(t=>t.blade_count===0&&!(t as any).current_container&&!(t as any).current_cutter_build&&(t as any).active!==false&&(t as any).enabled!==false),error:()=>this.availableEmptyTrays=[]});
-    this.api.getSelectionLocations().pipe(takeUntil(this.destroyed$)).subscribe({next:v=>this.availableLocations=this.rows<ILocation>(v),error:()=>this.availableLocations=[]});
+    this.api.getSelectionTrays().pipe(takeUntil(this.destroyed$)).subscribe({next:trays=>this.availableEmptyTrays=trays.filter(t=>t.enabled&&t.blade_count===0&&!t.current_container&&!t.current_cutter_build),error:()=>this.availableEmptyTrays=[]});
+    this.api.getSelectionLocations().pipe(takeUntil(this.destroyed$)).subscribe({next:locations=>this.availableLocations=locations,error:()=>this.availableLocations=[]});
   }
   get eligibleDullShelves():ILocation[]{
     const expected=this.build?.part_type_code?.trim().toUpperCase(); if(!expected||!this.requiresDullShelf)return [];
-    return this.availableLocations.filter(location=>{const tag=parseCuttergrindNumberedShelfTag(location.serial_number);return tag?.kind==='CUTTERGRIND_DULL'&&tag.partTypeCode===expected&&location.location_type==='SHELF'&&location.department===DEPARTMENT_CUTTERGRIND&&(location as any).active!==false&&(location as any).enabled!==false;});
+    return this.availableLocations.filter(location=>{const tag=parseCuttergrindNumberedShelfTag(location.serial_number);return tag?.kind==='CUTTERGRIND_DULL'&&tag.partTypeCode===expected&&location.location_type==='SHELF'&&location.department===DEPARTMENT_CUTTERGRIND&&location.enabled;});
   }
 
   selectPulledBuild():void{if(this.selectedBuildNumber){this.buildNumber=this.selectedBuildNumber;this.scanBuild();}else this.buildChanged('');}

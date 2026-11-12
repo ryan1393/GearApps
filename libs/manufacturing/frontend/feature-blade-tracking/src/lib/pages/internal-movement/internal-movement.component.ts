@@ -23,8 +23,7 @@ export class InternalMovementComponent implements OnDestroy, StationOperation {
   destination: ILocation | null = null;
   availableTrays:InventoryTrayRow[]=[]; availableLocations:InventoryLocationRow[]=[]; selectedTraySerial=''; traySearch=''; locationSearch=''; trayLocationLabels:Record<string,string>={}; pickerOpen=false;
   get filteredTrays(){const q=this.traySearch.trim().toLowerCase();return q?this.availableTrays.filter(x=>(x.serial_number+' '+(this.trayLocationLabels[x.id]||'Unassigned')).toLowerCase().includes(q)):this.availableTrays;}
-  get eligibleLocations(){const currentId=this.current?.location?.id;const q=this.locationSearch.trim().toLowerCase();return this.availableLocations.filter(x=>x.id!==currentId && this.locationEnabled(x) && (!q || (x.serial_number+' '+(x.description??'')+' '+(x.department??'')+' '+(x.location_type??'')).toLowerCase().includes(q)));}
-  private locationEnabled(x:InventoryLocationRow):boolean{return (x as any).active!==false && (x as any).enabled!==false;}
+  get eligibleLocations(){const currentId=this.current?.location?.id;const q=this.locationSearch.trim().toLowerCase();return this.availableLocations.filter(x=>x.id!==currentId && x.enabled && (!q || (x.serial_number+' '+(x.description??'')+' '+(x.department??'')+' '+(x.location_type??'')).toLowerCase().includes(q)));}
   trayOptionLabel(tray:ITray){return tray.serial_number+' - Current: '+(this.trayLocationLabels[tray.id]||'Unassigned');}
   pickerError = '';
   private pickerVersion = 0;

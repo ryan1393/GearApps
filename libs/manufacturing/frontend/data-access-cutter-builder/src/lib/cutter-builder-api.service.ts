@@ -239,6 +239,15 @@ export interface CutterTrayValidation {
   reason?: string;
 }
 
+/**
+ * A row of the /api/v1/trays list: the tray plus where it currently is. A tray in a coater
+ * container or still assigned to a cutter build is not free for a teardown.
+ */
+export interface CutterSelectionTray extends ITray {
+  current_container: { id: string; serial_number: string } | null;
+  current_cutter_build: { id: string } | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CutterBuilderApiService {
   private readonly http = inject(HttpClient);
@@ -340,7 +349,7 @@ export class CutterBuilderApiService {
     });
   }
 
-  getSelectionTrays() { return this.allPages<ITray>('/api/v1/trays'); }
+  getSelectionTrays() { return this.allPages<CutterSelectionTray>('/api/v1/trays'); }
   getSelectionLocations() { return this.allPages<ILocation>('/api/v1/locations'); }
 
   scanCutterBody(serialNumber: string) {

@@ -18,6 +18,7 @@ import {
   BladeTrackingApiService,
   ContainerBladeSetRow,
   InventoryContainerRow,
+  InventoryLocationRow,
   apiErrorText,
 } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
 import { AutoShelfResult, autoShelfFor } from '../../shared/auto-shelf/auto-shelf';
@@ -151,12 +152,12 @@ export class ReceiveContainerComponent implements OnDestroy, StationOperation {
     };
   }
   availableContainers: InventoryContainerRow[] = [];
-  availableLocations: ILocation[] = [];
+  availableLocations: InventoryLocationRow[] = [];
   selectedContainerSerial = '';
   selectedTraySerial = '';
   containerSearch = '';
   traySearch = '';
-  get eligibleFinishedShelves(): ILocation[] {
+  get eligibleFinishedShelves(): InventoryLocationRow[] {
     const type = this.receivingPartType;
     if (!type) return [];
     return this.availableLocations.filter((location) => {
@@ -166,9 +167,8 @@ export class ReceiveContainerComponent implements OnDestroy, StationOperation {
         shelf.partTypeCode === type &&
         location.location_type === 'SHELF' &&
         location.department === DEPARTMENT_CUTTERGRIND &&
-        (location as any).active !== false &&
-        (location as any).enabled !== false &&
-        Number((location as any).tray_count ?? 0) === 0
+        location.enabled &&
+        location.tray_count === 0
       );
     });
   }
