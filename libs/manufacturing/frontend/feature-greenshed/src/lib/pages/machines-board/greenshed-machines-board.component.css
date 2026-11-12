@@ -35,7 +35,9 @@
 }
 
 .board-department {
-  padding: var(--dana-panel-padding);
+  /* A heading and its cards. Not a gear-panel itself: Dana flattens panels nested in panels,
+     which would strip the cards' own padding. */
+  min-width: 0;
 }
 
 .board-department-title {

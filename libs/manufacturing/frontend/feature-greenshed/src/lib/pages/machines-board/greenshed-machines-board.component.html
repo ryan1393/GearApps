@@ -28,7 +28,7 @@
 
   @if (board; as b) {
     @for (dept of b.departments; track dept.department_code) {
-      <section class="gear-panel board-department" [attr.aria-labelledby]="'board-dept-' + dept.department_code">
+      <section class="board-department" [attr.aria-labelledby]="'board-dept-' + dept.department_code">
         <h2 class="board-department-title text-xl font-bold" [id]="'board-dept-' + dept.department_code">Department {{ dept.department_code }}
           <span class="text-base font-normal gear-muted">{{ dept.machines.length }} {{ dept.machines.length === 1 ? 'machine' : 'machines' }}</span></h2>
         <ul class="board-grid">
