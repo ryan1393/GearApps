@@ -48,6 +48,20 @@ export class GreenshedSetupComponent {
   part: PartMasterRow | null = null;
   machine: GreenshedMachine | null = null;
   busy = false;
+
+  /** The request that owns `busy`; a stale response never leaves the page busy, nor clears a newer request. */
+  private busyOwner = 0;
+  private beginBusy(): number {
+    this.busy = true;
+    return ++this.busyOwner;
+  }
+  private endBusy(owner: number): void {
+    if (owner === this.busyOwner) this.busy = false;
+  }
+  private resetBusy(): void {
+    this.busyOwner++;
+    this.busy = false;
+  }
   error = '';
   message = '';
   result: GreenshedSetupResult | null = null;
@@ -187,7 +201,7 @@ export class GreenshedSetupComponent {
       this.buildRequest++;
       this.choicesRequest++;
       this.build = null;
-      this.busy = false;
+      this.resetBusy();
       this.error = '';
       this.resetSetupDownstream();
       this.availableMachineNumbers = [];
@@ -223,7 +237,7 @@ export class GreenshedSetupComponent {
     const request = ++this.buildRequest;
     this.build = null;
     this.resetSetupDownstream();
-    this.busy = true;
+    const owner = this.beginBusy();
     this.error = '';
     this.message = '';
     this.api
@@ -231,10 +245,10 @@ export class GreenshedSetupComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (b) => {
+          this.endBusy(owner);
           if (request !== this.buildRequest) return;
           this.build = b;
           this.buildNumber = b.build_number;
-          this.busy = false;
           this.loadSetupChoices();
           // An intact cutter returning from a Greenshed shelf continues the count of its last run; the API enforces it.
           this.startingPieceCount = this.carriedPieceCount ?? 0;
@@ -245,8 +259,8 @@ export class GreenshedSetupComponent {
           if (this.machineLocked) this.scanMachine();
         },
         error: (e: HttpErrorResponse) => {
+          this.endBusy(owner);
           if (request !== this.buildRequest) return;
-          this.busy = false;
           this.error = greenshedApiErrorText(e, 'Build not found.');
         },
       });
@@ -258,7 +272,7 @@ export class GreenshedSetupComponent {
     const request = ++this.machineRequest;
     const build = this.build;
     const requested = this.selectedMachineNumber || this.machineNumber.trim();
-    this.busy = true;
+    const owner = this.beginBusy();
     this.error = '';
     this.machine = null;
     this.api
@@ -266,8 +280,8 @@ export class GreenshedSetupComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (m) => {
+          this.endBusy(owner);
           if (request !== this.machineRequest || build !== this.build) return;
-          this.busy = false;
           this.machineNumber = this.selectedMachineNumber || m.machine_number;
           if (!m.machine_active) {
             this.error = `Machine ${m.machine_number} is inactive.`;
@@ -290,8 +304,8 @@ export class GreenshedSetupComponent {
           this.machine = m;
         },
         error: (e: HttpErrorResponse) => {
+          this.endBusy(owner);
           if (request !== this.machineRequest) return;
-          this.busy = false;
           this.error = greenshedApiErrorText(e, 'Machine not found.');
         },
       });
@@ -302,7 +316,7 @@ export class GreenshedSetupComponent {
     if (!this.build || !this.partNumber.trim()) return;
     const request = ++this.partRequest;
     const build = this.build;
-    this.busy = true;
+    const owner = this.beginBusy();
     this.error = '';
     this.part = null;
     this.api
@@ -310,9 +324,9 @@ export class GreenshedSetupComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (p) => {
+          this.endBusy(owner);
           if (request !== this.partRequest || build !== this.build) return;
           this.partNumber = p.part_number;
-          this.busy = false;
           if (!p.active) {
             this.error = `Part ${p.part_number} is inactive.`;
             return;
@@ -327,8 +341,8 @@ export class GreenshedSetupComponent {
           this.part = p;
         },
         error: (e: HttpErrorResponse) => {
+          this.endBusy(owner);
           if (request !== this.partRequest) return;
-          this.busy = false;
           this.error = greenshedApiErrorText(e, 'Part not found.');
         },
       });
@@ -352,7 +366,7 @@ export class GreenshedSetupComponent {
       return;
     }
     const request = this.buildRequest;
-    this.busy = true;
+    const owner = this.beginBusy();
     this.error = '';
     this.message = '';
     this.api
@@ -367,16 +381,16 @@ export class GreenshedSetupComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (r) => {
+          this.endBusy(owner);
           if (request !== this.buildRequest) return;
           this.result = r;
-          this.busy = false;
           const message = `${r.build_number} setup on ${r.machine_number}.`;
           this.message = '';
           this.toast.success(message, 'Cutter setup complete');
         },
         error: (e: HttpErrorResponse) => {
+          this.endBusy(owner);
           if (request !== this.buildRequest) return;
-          this.busy = false;
           const message = greenshedApiErrorText(e, 'Could not setup cutter.');
           this.error = message;
           this.toast.error(message, 'Cutter setup failed');
@@ -387,7 +401,7 @@ export class GreenshedSetupComponent {
   startAnother() {
     this.buildRequest++;
     this.choicesRequest++;
-    this.busy = false;
+    this.resetBusy();
     this.buildNumber = '';
     this.build = null;
     this.resetSetupDownstream();

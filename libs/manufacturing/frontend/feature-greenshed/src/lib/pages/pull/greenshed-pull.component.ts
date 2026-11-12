@@ -54,6 +54,20 @@ export class GreenshedPullComponent implements OnInit {
   shelf: ILocation | null = null;
   comments = '';
   busy = false;
+
+  /** The request that owns `busy`; a stale response never leaves the page busy, nor clears a newer request. */
+  private busyOwner = 0;
+  private beginBusy(): number {
+    this.busy = true;
+    return ++this.busyOwner;
+  }
+  private endBusy(owner: number): void {
+    if (owner === this.busyOwner) this.busy = false;
+  }
+  private resetBusy(): void {
+    this.busyOwner++;
+    this.busy = false;
+  }
   contextValid = false;
   lockedToRunningMachine = false;
   error = '';
@@ -81,7 +95,7 @@ export class GreenshedPullComponent implements OnInit {
       .subscribe((params) => {
         ++this.generation;
         ++this.shelfRequest;
-        this.busy = false;
+        this.resetBusy();
         this.lockedToRunningMachine =
           params.get('origin') === 'running-machines';
         this.buildNumber = params.get('build')?.trim().toUpperCase() || '';
@@ -174,14 +188,14 @@ export class GreenshedPullComponent implements OnInit {
     this.resetPullDownstream();
     this.error = this.message = '';
     if (!value) return;
-    this.busy = true;
+    const owner = this.beginBusy();
     this.api
       .getBuild(value)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (build) => {
+          this.endBusy(owner);
           if (generation !== this.generation) return;
-          this.busy = false;
           const run = build.machine_run;
           if (build.status_code !== 'RUNNING' || !run) {
             this.error = `Build ${build.build_number} is not RUNNING.`;
@@ -203,8 +217,8 @@ export class GreenshedPullComponent implements OnInit {
           this.contextValid = true;
         },
         error: (e: HttpErrorResponse) => {
+          this.endBusy(owner);
           if (generation !== this.generation) return;
-          this.busy = false;
           this.error = greenshedApiErrorText(e, 'Build not found.');
         },
       });
@@ -218,19 +232,19 @@ export class GreenshedPullComponent implements OnInit {
     this.shelf = null;
     this.error = '';
     if (!value || !build || !reason?.returns_to_shelf) return;
-    this.busy = true;
+    const owner = this.beginBusy();
     this.api
       .scanLocation(value)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (shelf) => {
+          this.endBusy(owner);
           if (
             request !== this.shelfRequest ||
             build !== this.build ||
             reason !== this.reason
           )
             return;
-          this.busy = false;
           const expected = buildSummaryShelfTag(
             'GREENSHED',
             build.summary_number,
@@ -252,8 +266,8 @@ export class GreenshedPullComponent implements OnInit {
           this.shelfSerial = shelf.serial_number;
         },
         error: (e: HttpErrorResponse) => {
+          this.endBusy(owner);
           if (request !== this.shelfRequest) return;
-          this.busy = false;
           this.error = greenshedApiErrorText(e, 'Shelf location not found.');
         },
       });
@@ -323,7 +337,7 @@ export class GreenshedPullComponent implements OnInit {
     // Revalidate: the selection may have changed while the dialog was open.
     if (!this.pullReady || !build || !run || !reason) return;
     const generation = this.generation;
-    this.busy = true;
+    const owner = this.beginBusy();
     this.error = '';
     this.api
       .pullCutter({
@@ -339,8 +353,8 @@ export class GreenshedPullComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (result) => {
+          this.endBusy(owner);
           if (generation !== this.generation) return;
-          this.busy = false;
           this.result = result;
           this.resultReasonName = reason.name;
           this.contextValid = false;
@@ -352,8 +366,8 @@ export class GreenshedPullComponent implements OnInit {
           this.refreshChoices();
         },
         error: (e: HttpErrorResponse) => {
+          this.endBusy(owner);
           if (generation !== this.generation) return;
-          this.busy = false;
           const message = greenshedApiErrorText(e, 'Could not pull cutter.');
           this.error = message;
           this.toast.error(message, 'Cutter pull failed');

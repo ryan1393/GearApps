@@ -302,5 +302,53 @@ describe('Greenshed selected context safety', () => {
     a.next({ active_filter: 'ACTIVE', departments: [] } as never); expect(c.board).toBeNull(); expect(c.busy).toBe(true);
     b.next({ active_filter: 'INACTIVE', departments: [] } as never); expect(c.board?.active_filter).toBe('INACTIVE'); expect(c.busy).toBe(false);
   });
-
+  it('never leaves Pull busy when a shelf answer is stale because the reason changed meanwhile', () => {
+    setup({ build: 'BUILD-A', reason: 'CHANGEOVER' });
+    const c = pull();
+    const pending = new Subject<never>();
+    api['scanLocation'].mockReturnValue(pending);
+    c.shelfSerial = 'GSR-123';
+    c.scanShelf();
+    expect(c.busy).toBe(true);
+    // Late reference data re-applies the requested reason as a new object.
+    c.refs = { ...c.refs!, pull_reasons: reasons.map((reason) => ({ ...reason })) };
+    pending.next({ serial_number: 'GSR-123' } as never);
+    expect(c.busy).toBe(false);
+    expect(c.shelf).toBeNull();
+  });
+  it('never leaves Setup busy when a machine or part answer is stale', () => {
+    setup();
+    const c = TestBed.runInInjectionContext(() => new GreenshedSetupComponent());
+    const machine = new Subject<never>(), part = new Subject<never>();
+    api['getMachine'].mockReturnValue(machine);
+    api['getPartByNumber'].mockReturnValue(part);
+    c.build = { ...build(), status_code: 'READY' };
+    c.machineNumber = 'M1';
+    c.scanMachine();
+    expect(c.busy).toBe(true);
+    c.build = { ...build('BUILD-B'), status_code: 'READY' };
+    machine.next({ machine_number: 'M1', machine_active: true, active_run: null, department_code: '152' } as never);
+    expect(c.busy).toBe(false);
+    expect(c.machine).toBeNull();
+    c.partNumber = 'P1';
+    c.scanPart();
+    c.build = { ...build('BUILD-C'), status_code: 'READY' };
+    part.next({ part_number: 'P1', active: true } as never);
+    expect(c.busy).toBe(false);
+    expect(c.part).toBeNull();
+  });
+  it('does not let a superseded Setup answer clear the busy state of the newer request', () => {
+    setup();
+    const first = new Subject<GreenshedBuild>(), second = new Subject<GreenshedBuild>();
+    api['getBuild'].mockReturnValueOnce(first).mockReturnValueOnce(second);
+    const c = TestBed.runInInjectionContext(() => new GreenshedSetupComponent());
+    c.buildNumber = 'BUILD-A'; c.scanBuild();
+    query.next(convertToParamMap({}));
+    c.buildNumber = 'BUILD-B'; c.scanBuild();
+    first.next(build());
+    expect(c.busy).toBe(true);
+    second.next({ ...build('BUILD-B'), status_code: 'READY' });
+    expect(c.busy).toBe(false);
+    expect(c.build?.build_number).toBe('BUILD-B');
+  });
 });
