@@ -102,9 +102,12 @@ class Channel:
 class Scanner:
     def __init__(self, host: str, input1_port: int, timeout_s: float):
         self._input1 = Channel(host, input1_port, timeout_s)
+        #: Input 1 (the photoeye) at the last poll: True on, False off, None unknown.
+        self.photoeye: bool | None = None
 
     def close(self) -> None:
         self._input1.close()
+        self.photoeye = None
 
     def command(self, op: str) -> str:
         """Sends a dashboard op code (Tune, Focus, outputs, trigger, test) on the connection the
@@ -121,6 +124,7 @@ class Scanner:
         # A serial in place of the input state is still taken as a scan, as before.
         response = self._input1.exchange(
             "INCHK,1", expect=lambda f: "INCHK" in f or _is_error(f) or SERIAL_PATTERN.search(f) is not None)
+        self.photoeye = True if "OK,INCHK,ON" in response else False if "OK,INCHK,OFF" in response else None
         if "OK,INCHK,OFF" in response:
             if previous.serial is not None and previous.queue is None:
                 return ScannerState(None, previous.serial)

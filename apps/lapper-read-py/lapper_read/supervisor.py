@@ -335,6 +335,8 @@ class Supervisor:
                 "scanner": status.get("scanner"),
                 "scanner_ping": status.get("scanner_ping"),
                 "scanner_last_seen": status.get("scanner_last_seen"),
+                # The scanner's input 1 (photoeye): the live view refreshes the image fast while on.
+                "photoeye": status.get("photoeye"),
             }
             for slot in self._slots.values()
             for status in [slot.status()]

@@ -37,7 +37,8 @@ Full detail, including IPs and errors, is at `http://<docker-host>:8090/status`.
    writes the run to disk, then posts it with an Idempotency-Key.
 4. **Change log**: only macros whose value changed since the previous run of that
    gearset on that machine are posted, so each run records what changed.
-5. **Live view**: keeps the scanner serials and Fanuc I/O on the Lapper live view current.
+5. **Live view**: keeps the scanner serials and Fanuc I/O on the Lapper live view current, and reports
+   the scanner's photoeye (input 1). While it is on, the live view refreshes that scanner's image every second.
 6. **Scanner controls**: a scanner accepts one command connection, and the worker holds it, so the
    dashboard's scanner buttons (Tune, Focus, outputs, trigger, test) are sent through the worker:
    MeshForge posts them to `POST /scanners/<scanner ip>/command` with this collector's token, and

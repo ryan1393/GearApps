@@ -8,14 +8,19 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { DanaPageHeaderComponent } from '@dana/ui';
-import { apiErrorMessage, loadable, MachinesApi } from '@meshforge/client/core';
+import { apiErrorMessage, CollectorApi, CollectorStatus, loadable, MachinesApi } from '@meshforge/client/core';
 import { EmptyStateComponent } from '@meshforge/client/ui';
 import { Machine } from '@meshforge/shared/domain';
+import { catchError, exhaustMap, filter, interval, of, startWith } from 'rxjs';
 import { groupByCell } from './cells';
 import { MachineLiveCardComponent } from './machine-live-card.component';
+
+/** How often the page asks Lapper Read which scanners' photoeyes are on. */
+export const PHOTOEYE_POLL_MS = 1_000;
 
 @Component({
   selector: 'gear-cell-live-page',
@@ -31,7 +36,7 @@ import { MachineLiveCardComponent } from './machine-live-card.component';
           machines().length +
           ' machine' +
           (machines().length === 1 ? '' : 's') +
-          ' · live scanner image, serial numbers and machine I/O.'
+          ' · live scanner image, serial numbers and machine I/O. The image refreshes every second while a photoeye is on.'
         "
       >
         <div danaPageHeaderAction class="dana-toolbar">
@@ -72,7 +77,7 @@ import { MachineLiveCardComponent } from './machine-live-card.component';
       } @else {
         <div class="gear-live-grid">
           @for (m of machines(); track m.id) {
-            <gear-machine-live-card [machine]="m" [pollMs]="pollMs()" />
+            <gear-machine-live-card [machine]="m" [pollMs]="pollMs()" [photoeye]="photoeyes().has(m.id)" />
           }
         </div>
       }
@@ -93,6 +98,8 @@ import { MachineLiveCardComponent } from './machine-live-card.component';
 })
 export class CellLivePageComponent implements OnInit {
   private readonly api = inject(MachinesApi);
+  private readonly collector = inject(CollectorApi);
+  private readonly doc = inject(DOCUMENT);
   private readonly destroy = inject(DestroyRef);
   readonly cell = input.required<string>();
 
@@ -108,8 +115,23 @@ export class CellLivePageComponent implements OnInit {
     { label: '5 s', ms: 5000 },
   ];
 
+  /** Machines whose scanner photoeye (input 1) is on, from Lapper Read; empty without the collector. */
+  protected readonly photoeyes = signal<ReadonlySet<string>>(new Set());
+
   ngOnInit() {
     this.reload();
+    interval(PHOTOEYE_POLL_MS)
+      .pipe(
+        startWith(0),
+        filter(() => this.doc.visibilityState === 'visible'),
+        exhaustMap(() => this.collector.status().pipe(catchError(() => of(null as CollectorStatus | null)))),
+        takeUntilDestroyed(this.destroy),
+      )
+      .subscribe((status) => {
+        const on = new Set((status?.machines ?? []).filter((m) => m.photoeye === true).map((m) => m.machine_id));
+        const now = this.photoeyes();
+        if (on.size !== now.size || [...on].some((id) => !now.has(id))) this.photoeyes.set(on);
+      });
   }
   protected reload(): void {
     this.all.load(this.api.list().pipe(takeUntilDestroyed(this.destroy)));

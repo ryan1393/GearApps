@@ -55,7 +55,7 @@ class FakeWorker:
         self.stopped.set()
 
     def status(self):
-        return {"phase": self.phase}
+        return {"phase": self.phase, "photoeye": True}
 
     def scanner_command(self, op, timeout_s=20.0):
         from lapper_read.worker import ScannerCommandError
@@ -146,6 +146,11 @@ class SupervisorTests(unittest.TestCase):
         summary = self.supervisor.summary()["machines"]
         self.assertEqual(summary, [{"machine_id": "m1", "worker": False, "phase": "machine is inactive"}])
         self.assertNotIn("10.16", str(summary))
+
+    def test_the_ui_summary_carries_the_photoeye_for_the_live_view(self):
+        self.api.machines = [machine("m1")]
+        self.supervisor.discover_once()
+        self._wait(lambda: self.supervisor.summary()["machines"][0].get("photoeye") is True)
 
     def test_a_failing_worker_is_rebuilt_without_affecting_others(self):
         self.fail_next = True

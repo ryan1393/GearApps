@@ -69,10 +69,14 @@ class ScannerTests(unittest.TestCase):
         scanner = Scanner("127.0.0.1", fake.port, 2)
         self.addCleanup(scanner.close)
 
+        self.assertIsNone(scanner.photoeye)
         idle = scanner.read(ScannerState(None, None))
+        self.assertIs(scanner.photoeye, False)
         scanned = scanner.read(idle)
+        self.assertIs(scanner.photoeye, True)
         held = scanner.read(scanned)
         released = scanner.read(held)
+        self.assertIs(scanner.photoeye, False)
 
         self.assertEqual(idle, ScannerState(None, None))
         self.assertEqual(scanned, ScannerState(serial, None))

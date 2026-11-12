@@ -126,8 +126,15 @@ class Worker:
             "in_cycle_serial": active.serial if active else None,
             "serials": "scanned" if self.scanner else "none (no scanner)",
             **(self.scanner_monitor.status() if self.scanner_monitor else {"scanner": "none"}),
+            "photoeye": self._photoeye(),
             **argonaut,
         }
+
+    def _photoeye(self) -> bool | None:
+        """The scanner's input 1 (photoeye) at the last poll; None without a scanner or while offline."""
+        if not self.scanner or (self.scanner_monitor and not self.scanner_monitor.should_read()):
+            return None
+        return getattr(self.scanner, "photoeye", None)
 
     def _new_tracker(self, state: CycleState) -> CycleTracker:
         # A cycle's start or end is timed only when the previous sample was a few polls before it.

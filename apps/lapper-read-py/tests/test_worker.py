@@ -58,6 +58,12 @@ class WorkerTests(unittest.TestCase):
         with self.assertRaisesRegex(ScannerCommandError, "scanner 10.0.0.2: scanner offline"):
             self.worker.scanner_command("FTUNE", timeout_s=5)
 
+    def test_status_reports_the_photoeye_only_while_the_scanner_is_online(self):
+        self.scanner.photoeye = True
+        self.assertIs(self.worker.status()["photoeye"], True)
+        self.worker.scanner_monitor.read_failed(OSError("gone"))
+        self.assertIsNone(self.worker.status()["photoeye"])
+
     def test_a_machine_without_a_scanner_refuses_scanner_commands(self):
         fanuc = Fanuc(self.transport, "10.0.0.1", 1000, self.api)
         worker = Worker(self.settings, self.api, fanuc, None, CycleStateStore(self.settings.state_file))
