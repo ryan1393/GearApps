@@ -35,7 +35,7 @@ must(/withInterceptors\(\[truckLogAdminInterceptor, truckLogStationInterceptor\]
 
 // Routes and admin coverage.
 must(/path: 'station\/setup', component: StationSetupComponent/.test(routes) && !/path: 'station\/setup'[^\n]*canActivate/.test(routes), '/station/setup is public');
-must(/path: 'admin\/stations', component: StationsAdminComponent, canActivate: \[truckLogAdminGuard\]/.test(routes), '/admin/stations is admin-guarded');
+must(/path: 'admin\/stations', component: StationsAdminComponent, canActivate: \[(?:truckLogRoleGuard, )?truckLogAdminGuard\]/.test(routes), '/admin/stations is admin-guarded');
 must(/scheduled-loads\|stations\|rxo/.test(adminAuth), 'adminMutation covers /api/v1/stations');
 must(adminAuth.includes("'/admin/stations'"), 'safeAdminReturn allows /admin/stations');
 must(read('libs/truck-log/web/auth/admin/src/lib/admin-access.component.ts').includes('routerLink="/admin/stations"'), 'admin navigation links to Stations');
@@ -56,7 +56,16 @@ for (const text of ['Waiting for pairing (code expires', 'Active (last seen', "'
 must(admin.includes('tlDialog="tl-revoke-title"'), 'revoke confirmation is an accessible dialog');
 
 // Shell.
-must(shell.includes('this.station.load()') && shell.includes("paired.kind === 'DISPLAY'") && shell.includes('Admin session'), 'shell shows the paired station, TV badge or admin session');
+must(shell.includes('this.station.load()') && shell.includes('kindLabel(paired.kind)') && shell.includes('Admin session'), 'shell shows the paired station, its role label or admin session');
+// Roles: the navigation and routes follow the station kind; dock handhelds get their two screens as tabs.
+must(shell.includes('[attr.data-role]="station.role()"') && shell.includes("@if (can('check-in'))") && shell.includes("station.role() === 'DOCK'"), 'shell navigation follows the role');
+for (const screen of ['dashboard', 'check-in', 'dock-board', 'active-trucks', 'history', 'rxo', 'rxo-expedite', 'admin', 'tv']) {
+  must(routes.includes(`screen: '${screen}'`), `route for ${screen} names its screen for the role guard`);
+}
+must((routes.match(/truckLogRoleGuard/g) || []).length >= 14, 'every operational route is role-guarded');
+const roles = read('libs/truck-log/web/auth/station/src/lib/station-roles.ts');
+must(roles.includes("DOCK: ['dock-board', 'history']") && roles.includes("DISPLAY: ['tv']"), 'dock handhelds open only the Dock Board and Records; TVs only TV boards');
+for (const text of ['Dock handheld', 'Management (view only)']) must(admin.includes(text), `stations admin page offers ${text}`);
 must(shell.includes('{{ version }}') && shell.includes('TRUCK_LOG_VERSION'), 'shell keeps the shared version');
 
 console.log('[PASS] Station sign-in web client follows the shared station-access contract.');

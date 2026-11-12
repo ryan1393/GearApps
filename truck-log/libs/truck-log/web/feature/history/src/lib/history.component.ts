@@ -32,7 +32,7 @@ export class MaterialsAccessTokenStore {
 
   <section class="dana-panel">
     <div class="dana-panel-header"><h2>Find a Truck Visit</h2></div>
-    <form class="dana-panel-body dana-filter-row" (submit)="$event.preventDefault(); load()">
+    <form class="dana-panel-body dana-filter-row tl-records-filters" (submit)="$event.preventDefault(); load()">
       <label class="tl-records-search">Search<input name="q" [(ngModel)]="q" placeholder="Load, visit, SAP Delivery Number, driver, carrier, trailer…"></label>
       <label>Status<select name="status" [(ngModel)]="status"><option value="ALL">All records</option><option value="ACTIVE">On site</option><option value="DOCK_ASSIGNED">At / sent to dock</option><option value="DOCK_COMPLETE">Dock complete / awaiting guard</option><option value="GUARD_CHECKED_OUT">Checked out</option></select></label>
       <label>Check-in date<input name="date" [(ngModel)]="date" type="date"></label>
@@ -63,7 +63,7 @@ export class MaterialsAccessTokenStore {
   <section id="recordDetail" class="dana-panel" *ngIf="selected">
     <div class="dana-panel-header">
       <div><h2>{{selected.loadNumber || selected.visitReference}}</h2><p>{{selected.visitReference}}</p></div>
-      <div class="dana-actions"><a class="dana-btn" [href]="api.slipUrl(selected.id)" target="_blank">Print Slip</a><button class="dana-btn" type="button" (click)="closeRecord()">Close</button></div>
+      <div class="dana-actions"><a class="dana-btn tl-guard-only" [href]="api.slipUrl(selected.id)" target="_blank">Print Slip</a><button class="dana-btn" type="button" (click)="closeRecord()">Close</button></div>
     </div>
     <div class="dana-panel-body tl-stack tl-scroll">
       <div class="dana-detail-grid">
@@ -82,7 +82,7 @@ export class MaterialsAccessTokenStore {
       <p class="dana-note" *ngIf="selected.scannedDeliveryNumbers?.length"><b>SAP Delivery Number(s):</b> {{selected.scannedDeliveryNumbers?.join(', ')}} — recorded by scan or typing, separately from any PDF.</p>
 
       <section *ngIf="selected.driverPrintPackage as printPackage" class="tl-stack">
-        <div class="dana-form-section"><h3>Driver Print Package</h3><div class="dana-actions"><span class="dana-status-badge">{{printPackage.status}}</span><button class="dana-btn dana-btn-sm" type="button" *ngIf="printPackage.frozenRxoDocumentId" [disabled]="reprintingRxo" (click)="reprintRxoDocument()">{{reprintingRxo ? 'Queuing Reprint…' : 'Reprint RXO Document'}}</button></div></div>
+        <div class="dana-form-section"><h3>Driver Print Package</h3><div class="dana-actions"><span class="dana-status-badge">{{printPackage.status}}</span><button class="dana-btn dana-btn-sm tl-write tl-guard-only" type="button" *ngIf="printPackage.frozenRxoDocumentId" [disabled]="reprintingRxo" (click)="reprintRxoDocument()">{{reprintingRxo ? 'Queuing Reprint…' : 'Reprint RXO Document'}}</button></div></div>
         <p class="dana-muted" *ngIf="printPackage.frozenRxoDocumentId">Package {{printPackage.packageId}} · RXO document version {{printPackage.frozenRxoDocumentVersion || '—'}} · {{printPackage.frozenRxoDocumentFileName || ('Document #' + printPackage.frozenRxoDocumentId)}}</p>
         <div class="dana-table-shell"><table class="dana-table"><thead><tr><th>Item</th><th>Status</th><th>Printed</th></tr></thead><tbody>
           <tr *ngFor="let item of printPackage.items"><td><b>{{printItemLabel(item)}}</b><span class="dana-field-error" *ngIf="item.error">{{item.error}}</span></td><td>{{printItemStatusLabel(item)}}</td><td class="dana-nowrap">{{item.printedAt ? (item.printedAt | date:'short') : '—'}}</td></tr>
@@ -92,13 +92,13 @@ export class MaterialsAccessTokenStore {
       <div class="tl-record-columns">
         <section class="tl-stack">
           <div class="dana-form-section"><h3>Paperwork <span class="dana-count-badge">{{selected.documents?.length || 0}}</span></h3>
-            <label class="dana-btn dana-btn-primary dana-btn-sm tl-file-button" [attr.aria-disabled]="uploading">{{uploading ? 'Adding files…' : 'Add Paperwork'}}<input type="file" [disabled]="uploading" multiple accept=".pdf,.jpg,.jpeg,.png,.tif,.tiff,.bmp" (change)="addPaperwork($event)"></label></div>
+            <label class="dana-btn dana-btn-primary dana-btn-sm tl-file-button tl-write" [attr.aria-disabled]="uploading">{{uploading ? 'Adding files…' : 'Add Paperwork'}}<input type="file" [disabled]="uploading" multiple accept=".pdf,.jpg,.jpeg,.png,.tif,.tiff,.bmp" (change)="addPaperwork($event)"></label></div>
           <p class="dana-field-hint" *ngIf="uploading" role="status">Uploading paperwork…</p>
           <ul class="dana-file-list" *ngIf="selected.documents?.length">
             <li *ngFor="let d of selected.documents"><div><b>{{d.fileName}}</b>
               <span *ngIf="d.documentType==='PACKING_SLIP' && d.extractedDocumentId">Packing slip · SAP Delivery ID {{d.extractedDocumentId}}</span><span *ngIf="d.documentType==='PACKING_SLIP' && !d.extractedDocumentId">Packing slip · {{d.extractionMessage || 'SAP ID not detected'}}</span><span *ngIf="d.documentType==='RXO_DRIVER_DOCUMENT'">RXO driver document · version {{d.rxoDocumentVersion || '—'}}{{d.rxoIsActive ? ' · Active' : ' · Superseded'}}</span>
               <span>Scanned {{d.scannedAt | date:'short'}}{{d.scannedBy ? ' by ' + d.scannedBy : ''}}</span></div>
-              <div class="dana-actions"><a class="dana-btn dana-btn-sm" *ngIf="d.documentType!=='RXO_DRIVER_DOCUMENT'" [href]="api.documentUrl(d.id)" target="_blank">Open</a><button class="dana-btn dana-btn-sm" type="button" *ngIf="d.documentType==='RXO_DRIVER_DOCUMENT'" [disabled]="openingRxoDocumentId===d.id" (click)="openRxoDocument(d.id)">{{openingRxoDocumentId===d.id ? 'Opening…' : 'Open'}}</button><button class="dana-btn dana-btn-sm" type="button" *ngIf="d.documentType==='RXO_DRIVER_DOCUMENT'" [disabled]="reprintingRxo" (click)="reprintRxoDocument(d.id)">Reprint</button></div></li>
+              <div class="dana-actions"><a class="dana-btn dana-btn-sm" *ngIf="d.documentType!=='RXO_DRIVER_DOCUMENT'" [href]="api.documentUrl(d.id)" target="_blank">Open</a><button class="dana-btn dana-btn-sm" type="button" *ngIf="d.documentType==='RXO_DRIVER_DOCUMENT'" [disabled]="openingRxoDocumentId===d.id" (click)="openRxoDocument(d.id)">{{openingRxoDocumentId===d.id ? 'Opening…' : 'Open'}}</button><button class="dana-btn dana-btn-sm tl-write tl-guard-only" type="button" *ngIf="d.documentType==='RXO_DRIVER_DOCUMENT'" [disabled]="reprintingRxo" (click)="reprintRxoDocument(d.id)">Reprint</button></div></li>
           </ul>
           <div class="dana-empty-state" *ngIf="!selected.documents?.length">No paperwork attached.</div>
           <details class="dana-muted"><summary>Storage reference</summary><code>{{selected.documentFolderKey}}</code></details>

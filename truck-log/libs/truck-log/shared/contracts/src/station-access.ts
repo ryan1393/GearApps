@@ -1,13 +1,20 @@
 /**
  * Station sign-in.
  *
- * Every guard PC and TV is a "station". An administrator registers it and gets
- * a one-time pairing code; the station enters the code once and receives a
- * long-lived HttpOnly cookie. Every guard API route then requires either a
- * paired station or a signed-in administrator.
+ * Every guard PC, dock handheld, management PC and TV is a "station". An
+ * administrator registers it and gets a one-time pairing code; the station enters
+ * the code once and receives a long-lived HttpOnly cookie. Every guard API route
+ * then requires either a paired station or a signed-in administrator.
  *
- *   GUARD    full guard workflow (check in, dock board, checkout, uploads)
- *   DISPLAY  read-only (TV boards); any non-GET request is refused
+ * The station's kind is its role (enforced by the server, mirrored by the web app):
+ *
+ *   GUARD       full guard workflow (check in, dock board, checkout, uploads)
+ *   DOCK        dock handheld (CK65): Dock Board (Dock Complete, delivery numbers,
+ *               packing slips) and Records & Paperwork; every other route is refused
+ *   MANAGEMENT  view-only: every operational screen, no changes
+ *   DISPLAY     read-only (TV boards); any non-GET request is refused
+ *
+ * A signed-in administrator may do everything on any browser, whatever its kind.
  *
  * HTTP API (all under /api/v1):
  *
@@ -25,13 +32,33 @@
  *
  *   Errors on every other guard route:
  *     401 {code: 'STATION_REQUIRED'}   this browser is not a paired station and no admin is signed in
- *     403 {code: 'STATION_READ_ONLY'}  a DISPLAY station tried to change something
+ *     403 {code: 'STATION_READ_ONLY'}  a DISPLAY or MANAGEMENT station tried to change something
+ *     403 {code: 'STATION_ROLE'}       a DOCK station used a route outside dock work
  */
 export const StationKinds = {
   GUARD: 'GUARD',
+  DOCK: 'DOCK',
+  MANAGEMENT: 'MANAGEMENT',
   DISPLAY: 'DISPLAY',
 } as const;
 export type StationKind = (typeof StationKinds)[keyof typeof StationKinds];
+
+/** Every station kind, in the order the Stations screen offers them. */
+export const STATION_KIND_LIST: readonly StationKind[] = [StationKinds.GUARD, StationKinds.DOCK, StationKinds.MANAGEMENT, StationKinds.DISPLAY];
+
+export function isStationKind(value: unknown): value is StationKind {
+  return typeof value === 'string' && (STATION_KIND_LIST as readonly string[]).includes(value);
+}
+
+/** What a browser may do: its station's kind, or ADMIN when an administrator is signed in. */
+export type TruckLogRole = StationKind | 'ADMIN';
+
+export const STATION_KIND_LABELS: Record<StationKind, string> = {
+  GUARD: 'Guard station',
+  DOCK: 'Dock handheld',
+  MANAGEMENT: 'Management',
+  DISPLAY: 'TV display',
+};
 
 export type StationStatus = 'WAITING_FOR_PAIRING' | 'ACTIVE' | 'REVOKED';
 

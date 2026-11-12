@@ -547,8 +547,8 @@ export type { DockScanCandidate, DockScanLookup } from './dock-packing-scan';
 
 export type { DockDeliveryScanReceipt } from './dock-delivery-scan';
 
-export { StationKinds, STATION_PAIRING_CODE_PATTERN, STATION_NAME_MAX } from './station-access';
-export type { StationKind, StationStatus, StationIdentity, StationSession, StationRecord, StationPairingResult } from './station-access';
+export { StationKinds, STATION_KIND_LIST, STATION_KIND_LABELS, isStationKind, STATION_PAIRING_CODE_PATTERN, STATION_NAME_MAX } from './station-access';
+export type { StationKind, TruckLogRole, StationStatus, StationIdentity, StationSession, StationRecord, StationPairingResult } from './station-access';
 
 export {
     PACKING_SLIP_ROUTE_COUNT, PACKING_SLIP_ROUTE_NAME_MAX, PACKING_SLIP_ROUTE_QUEUE_MAX, PACKING_SLIP_ROUTE_PRINTER_MAX,

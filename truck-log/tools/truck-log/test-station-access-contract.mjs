@@ -19,7 +19,8 @@ const moduleSource = read(`${lib}/station-access.module.ts`);
 check(moduleSource.includes('{ provide: APP_GUARD, useClass: StationAccessGuard }'), 'station guard is global');
 check(read('libs/truck-log/server/core/src/lib/truck-log-server.module.ts').includes('StationAccessModule'), 'server registers station access');
 const guard = read(`${lib}/station-access.guard.ts`);
-check(guard.includes("'STATION_REQUIRED'") && guard.includes("'STATION_READ_ONLY'") && guard.includes('StationKinds.DISPLAY'), 'guard refuses unpaired browsers and read-only displays');
+check(guard.includes("'STATION_REQUIRED'") && guard.includes("'STATION_READ_ONLY'") && guard.includes("'STATION_ROLE'"), 'guard refuses unpaired browsers, read-only stations and out-of-role dock handhelds');
+check(guard.includes('stationRoleDecision(station.kind, req.method') && guard.includes('this.administratorSignedIn(req)'), 'every paired request goes through the role policy; only a signed-in administrator overrides it');
 check(guard.includes('this.admin.session('), 'a signed-in administrator may use guard screens without pairing');
 check(guard.includes('originAllowed('), 'cookie-authenticated changes must come from a Truck Log origin');
 check(/LOOPBACK\.has\(req\.socket\?\.remoteAddress[\s\S]{0,120}!req\.headers\['x-forwarded-for'\] && !req\.headers\['x-real-ip'\] && !req\.headers\.origin/.test(guard),
@@ -58,7 +59,7 @@ check((visits.match(/stationActor\(req,/g) || []).length === 5, 'visit actions r
 
 // --- schema
 for (const marker of ['CREATE TABLE truck_log_stations', 'token_sha256 CHAR(64) UNIQUE', 'pairing_code_sha256 CHAR(64) UNIQUE',
-  "kind IN ('GUARD', 'DISPLAY')", 'ux_truck_log_stations_name', 'CREATE TABLE truck_log_station_events']) {
+  "kind IN ('GUARD', 'DISPLAY')", "kind IN ('GUARD', 'DOCK', 'MANAGEMENT', 'DISPLAY')", 'ux_truck_log_stations_name', 'CREATE TABLE truck_log_station_events']) {
   check(schemaIncludes(marker), `migrations define ${marker}`);
 }
 
@@ -120,7 +121,40 @@ if (!ts) {
     assert.throws(() => m.stationName(''), /Station name is required/); count++;
     assert.throws(() => m.stationName('a\u0007b'), /Station name is required/); count++;
     check(m.stationName('  Guard   Shack 1 ') === 'Guard Shack 1', 'station names are trimmed and spaces collapsed');
-    assert.throws(() => m.stationKind('ADMIN'), /GUARD or DISPLAY/); count++;
+    assert.throws(() => m.stationKind('ADMIN'), /must be one of GUARD, DOCK, MANAGEMENT, DISPLAY/); count++;
+    check(['GUARD', 'DOCK', 'MANAGEMENT', 'DISPLAY'].every((kind) => m.stationKind(kind) === kind), 'every role is a valid station kind');
+
+    // --- role policy, executed: what each kind of station may call
+    transpile(`${lib}/station-roles.ts`, 'roles.mjs', (s) => s.replace(/from '@truck-log\/shared\/contracts'/g, "from './contracts.mjs'"));
+    const r = await import(pathToFileURL(path.join(temp, 'roles.mjs')).href);
+    const decide = (kind, method, url) => r.stationRoleDecision(kind, method, url);
+    check(r.apiRoute('/api/v1/visits/12/?x=1') === '/visits/12' && r.apiRoute('/api/v1') === '/', 'routes are matched without the /api/v1 prefix, query or trailing slash');
+    const dockAllowed = [
+      ['GET', '/api/v1/visits/dock-board'], ['GET', '/api/v1/visits/dock-board?r=1'], ['GET', '/api/v1/visits/history'],
+      ['GET', '/api/v1/visits/42'], ['GET', '/api/v1/visits/42/driver-print-package'], ['GET', '/api/v1/visits/documents/7/download'],
+      ['GET', '/api/v1/settings/dock-aging'], ['PATCH', '/api/v1/visits/42/dock-complete'],
+      ['POST', '/api/v1/visits/42/delivery-number/scan'], ['POST', '/api/v1/visits/42/delivery-number/manual'],
+      ['POST', '/api/v1/visits/42/packing-slip'], ['POST', '/api/v1/visits/42/packing-slip/scan'],
+      ['POST', '/api/v1/visits/42/packing-slip/scan/preview'], ['POST', '/api/v1/visits/42/packing-slip/scan/attach'],
+      ['POST', '/api/v1/visits/42/documents'], ['HEAD', '/api/v1/visits/dock-board'], ['POST', '/api/v1/admin-auth/login'],
+    ];
+    for (const [method, url] of dockAllowed) check(decide('DOCK', method, url) === 'ALLOW', `dock handheld may ${method} ${url}`);
+    const dockRefused = [
+      ['POST', '/api/v1/visits'], ['PATCH', '/api/v1/visits/42/final-checkout'], ['GET', '/api/v1/visits/42/slip'],
+      ['GET', '/api/v1/visits/dashboard'], ['GET', '/api/v1/visits'], ['GET', '/api/v1/visits/check-in-config'],
+      ['POST', '/api/v1/driver-print/visits/42/reprint-rxo'], ['GET', '/api/v1/rxo/control'], ['GET', '/api/v1/rxo/data'],
+      ['GET', '/api/v1/reference-data/check-in'], ['PATCH', '/api/v1/settings/dock-aging'], ['GET', '/api/v1/tv/board'],
+      ['POST', '/api/v1/docks'], ['GET', '/api/v1/stations'], ['PATCH', '/api/v1/visits/42/dock-complete/extra'],
+      ['GET', '/api/v1/visits/abc'], ['DELETE', '/api/v1/visits/42/documents'], ['HEAD', '/api/v1/visits/42/slip'],
+    ];
+    for (const [method, url] of dockRefused) check(decide('DOCK', method, url) === 'ROLE', `dock handheld may not ${method} ${url}`);
+    check(['GET', 'HEAD'].every((m) => decide('MANAGEMENT', m, '/api/v1/visits/dashboard') === 'ALLOW') && decide('MANAGEMENT', 'GET', '/api/v1/rxo/data') === 'ALLOW', 'management can view every screen');
+    check(['POST', 'PATCH', 'PUT', 'DELETE'].every((m) => decide('MANAGEMENT', m, '/api/v1/visits/42/dock-complete') === 'READ_ONLY'), 'management can change nothing');
+    check(decide('MANAGEMENT', 'POST', '/api/v1/admin-auth/login') === 'ALLOW', 'an administrator can sign in on a management PC');
+    check(decide('DISPLAY', 'GET', '/api/v1/tv/board') === 'ALLOW' && decide('DISPLAY', 'POST', '/api/v1/admin-auth/login') === 'READ_ONLY'
+      && decide('DISPLAY', 'PATCH', '/api/v1/visits/42/dock-complete') === 'READ_ONLY', 'TV displays stay read-only, as before');
+    check(['GET', 'POST', 'PATCH', 'PUT'].every((m) => decide('GUARD', m, '/api/v1/visits/42/final-checkout') === 'ALLOW'), 'guard stations keep the full guard workflow');
+    check(decide('SUPERVISOR', 'GET', '/api/v1/visits/dock-board') === 'ROLE', 'an unknown kind gets no access');
   } finally {
     fs.rmSync(temp, { recursive: true, force: true });
   }

@@ -34,7 +34,8 @@
     "0002_stations.sql",
     "0003_late_print_agent_results.sql",
     "0004_packing_slip_watcher_routes.sql",
-    "0005_print_workflow_recovery.sql"
+    "0005_print_workflow_recovery.sql",
+    "0006_station_roles.sql"
   ],
   "persistentVolumes": [
     "truck-log-postgres-data",

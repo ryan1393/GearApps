@@ -71,7 +71,9 @@ export function clockTime(iso: string | null | undefined): string {
         <label class="tl-admin-grow">Name<input name="stationName" [(ngModel)]="newName" [attr.maxlength]="nameMax" placeholder="Example: East gate guard PC" autocomplete="off" required></label>
         <label>Kind
           <select name="stationKind" [(ngModel)]="newKind">
-            <option [ngValue]="kinds.GUARD">Guard station</option>
+            <option [ngValue]="kinds.GUARD">Guard station (guard shack PC)</option>
+            <option [ngValue]="kinds.DOCK">Dock handheld (CK65: Dock Board and Records)</option>
+            <option [ngValue]="kinds.MANAGEMENT">Management (view only)</option>
             <option [ngValue]="kinds.DISPLAY">TV display</option>
           </select>
         </label>
@@ -93,7 +95,7 @@ export function clockTime(iso: string | null | undefined): string {
         <tbody>
           <tr *ngFor="let station of stations; trackBy: trackById">
             <td><b>{{station.name}}</b><span class="dana-cell-sub">Added {{station.createdAt | date:'M/d/yy h:mm a'}}{{station.createdBy ? ' by ' + station.createdBy : ''}}</span></td>
-            <td><span class="dana-status-badge is-plain" [attr.data-tone]="station.kind === kinds.DISPLAY ? 'info' : 'neutral'">{{kindLabel(station.kind)}}</span></td>
+            <td><span class="dana-status-badge is-plain" [attr.data-tone]="station.kind === kinds.GUARD ? 'neutral' : 'info'">{{kindLabel(station.kind)}}</span></td>
             <td><span class="dana-status-badge" [attr.data-tone]="station.status === 'ACTIVE' ? 'success' : (station.status === 'REVOKED' ? 'danger' : 'warning')">{{statusLabel(station)}}</span></td>
             <td>
               <div class="dana-table-actions">
