@@ -34,6 +34,21 @@ export class DsfCountController {
     @ReqUserId() userId: Uuid,
   ) { return this.counts.applyUniqueMatches(body?.matches, userId); }
 
+  // Every DSF source against every active machine, paired loosely by machine number. Changes nothing.
+  @Get('admin-mappings/rough-matches')
+  @Header('Cache-Control', 'no-store')
+  @Auth([RoleType.ADMIN])
+  getRoughMatches() { return this.counts.roughMatches(); }
+
+  // Maps the rough matches an administrator picked, each still a candidate, through the normal Admin save.
+  @Post('admin-mappings/rough-matches')
+  @HttpCode(200)
+  @Auth([RoleType.ADMIN])
+  applyRoughMatches(
+    @Body() body: { matches?: unknown },
+    @ReqUserId() userId: Uuid,
+  ) { return this.counts.applyRoughMatches(body?.matches, userId); }
+
   @Put('admin-mappings/:machineId')
   @Auth([RoleType.ADMIN])
   saveAdminMapping(

@@ -77,6 +77,17 @@ Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operati
   machines with cutter-crediting history are left out, and the preview says why each unmatched
   machine was skipped. Confirming saves each match through the normal Admin save, with its
   checks and audit row.
+- **Rough Match** (Admin > DSF Mappings). Lists every DSF source against every active machine,
+  matched loosely by machine number: the number anywhere in the whiteboard name, or in the line
+  name (not counting the department number), ignoring case, punctuation and leading zeros
+  (`G01` = `GRINDER G-1`); a lettered number whose digits alone match is the weakest match. Only
+  free, eligible sources in the machine's own department are offered. When one source is clearly
+  the best for one machine it is picked; otherwise the administrator chooses from the candidates.
+  Machines that already have a working source are shown (flagged when the source name does not
+  look like the machine) but not changed; machines unmapped in Admin and machines with
+  cutter-crediting history are left to map by hand. The full DSF source list says where each
+  source goes, including sources whose number belongs to a machine in another department.
+  Confirming saves each pick through the normal Admin save, with its checks and audit row.
 - **Admin > DSF Mappings.** An administrator can choose the source for a machine from the live
   DSF source list. An admin mapping replaces the reference; unmapping a machine stops its
   counts. Every change is audited. A machine that already has crediting history can only be

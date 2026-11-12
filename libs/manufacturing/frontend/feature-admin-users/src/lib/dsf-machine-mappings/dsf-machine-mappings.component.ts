@@ -53,6 +53,17 @@ interface DsfUniqueMatchApplyResult {
   skipped: { machine_id: string; machine_number: string | null; reason: string }[];
 }
 
+interface DsfRoughCandidate { mapping_id: string; whiteboard_name: string; line_name: string; reason: string }
+interface DsfRoughMachine {
+  machine_id: string; machine_number: string; department: string; status: string;
+  current_source: string | null; current_looks_right: boolean | null; proposed_mapping_id: string | null; candidates: DsfRoughCandidate[];
+}
+interface DsfRoughSource {
+  mapping_id: string; department: string; whiteboard_name: string; line_name: string; outcome: string;
+  machine_numbers: string[]; other_departments: string[];
+}
+interface DsfRoughMatches { machines: DsfRoughMachine[]; sources: DsfRoughSource[] }
+
 /**
  * Admin view of the DSF source for each physical machine across departments.
  * Saving changes MeshForge only; nothing is ever written to DSF.
@@ -77,6 +88,11 @@ export class DsfMachineMappingsComponent implements OnInit {
   /** The "Map unique matches" preview, while it is open. */
   uniqueMatches: DsfUniqueMatches | null = null;
   @ViewChild('matchPanel') private matchPanel?: ElementRef<HTMLElement>;
+  /** The "Rough match" preview, while it is open, and the source picked for each machine ('' = leave it). */
+  roughMatches: DsfRoughMatches | null = null;
+  roughPicks: Record<string, string> = {};
+  roughShowAll = false;
+  @ViewChild('roughPanel') private roughPanel?: ElementRef<HTMLElement>;
 
   ngOnInit(): void { this.refresh(); }
 
@@ -189,7 +205,7 @@ export class DsfMachineMappingsComponent implements OnInit {
   }
 
   open(row: AdminMappingRow): void {
-    this.uniqueMatches = null;
+    this.uniqueMatches = null; this.roughMatches = null;
     this.selectedMachineId = row.machine_id; this.sourceSearch = ''; this.selectedMappingId = row.mapping?.mapping_id || ''; this.error = ''; this.success = '';
     // The editor sits above a long list: bring it into view and move focus to it.
     setTimeout(() => { const el = this.editor?.nativeElement; el?.scrollIntoView({ block: 'start', behavior: 'smooth' }); el?.focus({ preventScroll: true }); });
@@ -226,7 +242,7 @@ export class DsfMachineMappingsComponent implements OnInit {
         this.saving = false;
         if (!Array.isArray(result?.matches) || !Array.isArray(result?.skipped)) this.error = 'Unexpected DSF match response.';
         else {
-          this.uniqueMatches = result;
+          this.roughMatches = null; this.uniqueMatches = result;
           setTimeout(() => { const el = this.matchPanel?.nativeElement; el?.scrollIntoView({ block: 'start', behavior: 'smooth' }); el?.focus({ preventScroll: true }); });
         }
         this.cdr.markForCheck();
@@ -252,6 +268,83 @@ export class DsfMachineMappingsComponent implements OnInit {
         },
         error: (e: HttpErrorResponse) => { this.saving = false; this.error = this.errorText(e, 'Mapping the matches failed.'); this.cdr.markForCheck(); },
       });
+  }
+  /** Pair every DSF source with every active machine, loosely by number, for review. Saves nothing. */
+  previewRoughMatches(): void {
+    if (this.loading || this.saving) return;
+    this.saving = true; this.error = ''; this.success = ''; this.close(); this.cdr.markForCheck();
+    this.http.get<DsfRoughMatches>('/api/v1/greenshed/dsf-counts/admin-mappings/rough-matches').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: result => {
+        this.saving = false;
+        if (!Array.isArray(result?.machines) || !Array.isArray(result?.sources)) this.error = 'Unexpected DSF match response.';
+        else {
+          this.uniqueMatches = null; this.roughMatches = result; this.roughShowAll = false;
+          this.roughPicks = Object.fromEntries(result.machines.filter(m => this.roughPickable(m)).map(m => [m.machine_id, m.proposed_mapping_id || '']));
+          setTimeout(() => { const el = this.roughPanel?.nativeElement; el?.scrollIntoView({ block: 'start', behavior: 'smooth' }); el?.focus({ preventScroll: true }); });
+        }
+        this.cdr.markForCheck();
+      },
+      error: (e: HttpErrorResponse) => { this.saving = false; this.error = this.errorText(e, 'Unable to match DSF sources.'); this.cdr.markForCheck(); },
+    });
+  }
+  closeRoughMatches(): void { this.roughMatches = null; this.roughPicks = {}; }
+  roughPickable(machine: DsfRoughMachine): boolean { return machine.status === 'PROPOSED' || machine.status === 'CHOOSE'; }
+  get roughVisibleMachines(): DsfRoughMachine[] {
+    const machines = this.roughMatches?.machines || [];
+    return this.roughShowAll ? machines : machines.filter(m => this.roughPickable(m) || (m.status === 'MAPPED' && m.current_looks_right === false));
+  }
+  roughCount(status: string): number { return (this.roughMatches?.machines || []).filter(m => m.status === status).length; }
+  get roughLooksWrongCount(): number { return (this.roughMatches?.machines || []).filter(m => m.status === 'MAPPED' && m.current_looks_right === false).length; }
+  get roughPairs(): { machine_id: string; mapping_id: string }[] {
+    return Object.entries(this.roughPicks).filter(([, mapping_id]) => !!mapping_id).map(([machine_id, mapping_id]) => ({ machine_id, mapping_id }));
+  }
+  /** A source picked for more than one machine; the API refuses that, so the page says so first. */
+  roughPickedTwice(mappingId: string): boolean { return !!mappingId && this.roughPairs.filter(pair => pair.mapping_id === mappingId).length > 1; }
+  get roughHasDuplicate(): boolean { return this.roughPairs.some(pair => this.roughPickedTwice(pair.mapping_id)); }
+  /** Map every picked pair. The API checks each one again and saves it like a single Admin save. */
+  applyRoughMatches(): void {
+    const pairs = this.roughPairs;
+    if (!pairs.length || this.saving || this.roughHasDuplicate) return;
+    this.saving = true; this.error = ''; this.success = ''; this.cdr.markForCheck();
+    this.http.post<DsfUniqueMatchApplyResult>('/api/v1/greenshed/dsf-counts/admin-mappings/rough-matches', { matches: pairs })
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: result => {
+          this.saving = false; this.closeRoughMatches();
+          const mapped = result?.mapped?.length || 0, skipped = result?.skipped || [];
+          this.success = `${mapped} machine${mapped === 1 ? '' : 's'} mapped. A fresh DSF read was requested.`;
+          if (skipped.length) this.error = 'Not mapped: ' + skipped.map(s => (s.machine_number ? 'machine ' + s.machine_number : 'a machine') + ' (' + s.reason + ')').join('; ');
+          this.refreshAfterSave();
+        },
+        error: (e: HttpErrorResponse) => { this.saving = false; this.error = this.errorText(e, 'Mapping the matches failed.'); this.cdr.markForCheck(); },
+      });
+  }
+  roughReasonText(reason: string): string {
+    const text: Record<string, string> = {
+      ENDS_IN_NUMBER: 'name ends in the number',
+      NAME_HAS_NUMBER: 'number is in the name',
+      LINE_HAS_NUMBER: 'number is in the line name',
+      DIGITS_ONLY: 'only the digits match',
+    };
+    return text[reason] || reason.replace(/_/g, ' ').toLowerCase();
+  }
+  roughStatusText(machine: DsfRoughMachine): string {
+    switch (machine.status) {
+      case 'MAPPED': return (machine.current_looks_right === false ? 'Mapped to a source that does not look like it: ' : 'Mapped: ') + machine.current_source;
+      case 'LEFT_UNMAPPED': return 'Unmapped in Admin on purpose; map it by hand';
+      case 'CREDITING_HISTORY': return 'Has cutter-crediting history; map it by hand' + (machine.candidates.length ? ' (looks like ' + machine.candidates[0].whiteboard_name + ')' : '');
+      case 'NO_CANDIDATE': return 'No free DSF source in its department has this number';
+      default: return '';
+    }
+  }
+  sourceOutcomeText(source: DsfRoughSource): string {
+    const numbers = source.machine_numbers.join(', ');
+    switch (source.outcome) {
+      case 'IN_USE': return 'Used by machine ' + numbers;
+      case 'PROPOSED': return 'Proposed for machine ' + numbers;
+      case 'CANDIDATE': return 'Could be machine ' + numbers;
+      case 'NOT_ELIGIBLE': return 'Not eligible (inactive, or no running reason)';
+      default: return 'No machine' + (source.other_departments.length ? ': the number is a machine in Dept ' + source.other_departments.join(', ') : '');
+    }
   }
   skipText(reason: string): string {
     const text: Record<string, string> = {

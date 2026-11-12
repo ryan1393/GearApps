@@ -8,6 +8,15 @@
   button that opens them underneath, in columns: macro, name, previous → new value and the
   difference. Cycle history has its own column.
 
+- **DSF: Rough Match.** Admin > DSF Mappings has a **Rough Match** button that lists every DSF
+  source against all your active machines, matched loosely by machine number (anywhere in the
+  whiteboard or line name, ignoring case, dashes and leading zeros). A clear best match is picked
+  for each unmapped machine; where several sources fit you choose one from a list. Already-mapped
+  machines are shown, flagged when their source name does not look like the machine, and the full
+  DSF source list says where each source goes. Only sources in the machine's own department can be
+  picked, and each pick is saved through the normal Admin save (same checks, audited). New
+  `GET`/`POST /api/v1/greenshed/dsf-counts/admin-mappings/rough-matches` (Admin only).
+
 - **DSF: Map Unique Matches.** Admin > DSF Mappings has a **Map Unique Matches** button. It lists
   each machine whose DSF source is the only active one in its department with a whiteboard name
   ending in the machine number (`132 PIN CUTTER 549` -> machine 549), and no other machine has that

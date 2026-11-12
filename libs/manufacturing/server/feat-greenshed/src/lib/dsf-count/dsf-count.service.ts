@@ -18,6 +18,7 @@ import { DANA_MACHINES_SQL, SOURCE_IDENTITY_SQL, ROLE_CHECK_SQL, MAPPING_SQL, SH
 import { grinderStateRows, collectGrinderBatches, commitGrinderBatches, GrinderBatch, GrinderStateRow } from './dsf-grinder-balance';
 import { ensureDsfCutterSchema } from './dsf-schema';
 import { findUniqueMatches, UniqueMatchResult } from './dsf-unique-matches';
+import { findRoughMatches, RoughMatchResult } from './dsf-rough-matches';
 
 type Machine = {machine_id:string;machine_number:string;department:string;machine_type:string;active:boolean};
 type SourceClient = { connect():Promise<void>;query(text:string,values?:unknown[]):Promise<{rows:any[]}>;end():Promise<void>;on(event:string,fn:(e:unknown)=>void):void; };
@@ -365,20 +366,30 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
     this.mappingOverrides.set(machineId,saved);this.invalidateMachine(machineId);
     return {status:'SAVED',machine_id:machineId,mapping_id:mappingId,refresh_requested:true};
   }
-  /** DSF sources that match exactly one machine by department and the machine number their whiteboard name ends in. */
-  async uniqueMatches():Promise<UniqueMatchResult & {source_options_refreshed_at:string|null}> {
+  /** What both match previews need: Admin decisions, the source each machine uses, and crediting history. */
+  private async matchContext() {
     this.requireFreshSources();
     if (this.db.options.type === 'postgres') this.machines = await this.db.query(DANA_MACHINES_SQL);
     const overrides=await this.loadOverrides(this.db);
     const assigned=new Map<string,string>();
+    const current=new Map<string,{mapping_id:string;whiteboard_name:string;line_name:string}>();
+    const leftUnmapped=new Set<string>();
     for(const machine of this.machines) {
-      const mapping=this.effectiveFor(machine,overrides.get(machine.machine_id));
+      const override=overrides.get(machine.machine_id);
+      const mapping=this.effectiveFor(machine,override);
       if(mapping)assigned.set(mapping.mapping_id,machine.machine_id);
+      if(mapping&&!mapping.blocked)current.set(machine.machine_id,{mapping_id:mapping.mapping_id,whiteboard_name:mapping.whiteboard_name,line_name:mapping.line_name});
+      else if(override&&!(override.enabled&&override.mapping_id))leftUnmapped.add(machine.machine_id);
     }
     const history=await this.db.query(`SELECT machine_id::text FROM public.dana_dsf_cutter_machine_state_v1
       UNION SELECT machine_id::text FROM public.dana_dsf_cutter_run_shifts_v1`) as {machine_id:string}[];
-    const result=findUniqueMatches({machines:this.machines,sources:this.sourceOptions,adminDecided:new Set(overrides.keys()),
-      assigned,withHistory:new Set(history.map(row=>row.machine_id))});
+    return {overrides,assigned,current,leftUnmapped,withHistory:new Set(history.map(row=>row.machine_id))};
+  }
+  /** DSF sources that match exactly one machine by department and the machine number their whiteboard name ends in. */
+  async uniqueMatches():Promise<UniqueMatchResult & {source_options_refreshed_at:string|null}> {
+    const context=await this.matchContext();
+    const result=findUniqueMatches({machines:this.machines,sources:this.sourceOptions,adminDecided:new Set(context.overrides.keys()),
+      assigned:context.assigned,withHistory:context.withHistory});
     return {...result,source_options_refreshed_at:this.sourceOptionsRefreshedAt};
   }
   /**
@@ -386,24 +397,56 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
    * unique matches, then saved through the normal Admin save (its own transaction, checks and audit).
    */
   async applyUniqueMatches(pairs:unknown,userId:string) {
+    const wanted=this.confirmedPairs(pairs);
+    const current=await this.uniqueMatches();
+    return this.saveConfirmedPairs(wanted,userId,pair=>{
+      const match=current.matches.find(m=>m.machine_id===pair.machine_id);
+      return match&&match.mapping_id===pair.mapping_id?match:{machine_number:match?.machine_number??null,reason:'No longer the only match. Refresh and try again.'};
+    });
+  }
+  /** Every DSF source and every active machine, paired loosely by machine number. Changes nothing. */
+  async roughMatches():Promise<RoughMatchResult & {source_options_refreshed_at:string|null}> {
+    const context=await this.matchContext();
+    const result=findRoughMatches({machines:this.machines,sources:this.sourceOptions,current:context.current,
+      leftUnmapped:context.leftUnmapped,assigned:context.assigned,withHistory:context.withHistory});
+    return {...result,source_options_refreshed_at:this.sourceOptionsRefreshedAt};
+  }
+  /**
+   * Saves the rough matches an administrator picked. Each pair must still be one of that machine's
+   * candidates, then it is saved through the normal Admin save (its own transaction, checks and audit).
+   */
+  async applyRoughMatches(pairs:unknown,userId:string) {
+    const wanted=this.confirmedPairs(pairs);
+    if(new Set(wanted.map(pair=>pair.mapping_id)).size!==wanted.length)throw new BadRequestException('A DSF source is chosen for more than one machine.');
+    const current=await this.roughMatches();
+    return this.saveConfirmedPairs(wanted,userId,pair=>{
+      const machine=current.machines.find(m=>m.machine_id===pair.machine_id);
+      const candidate=machine&&['PROPOSED','CHOOSE'].includes(machine.status)?machine.candidates.find(c=>c.mapping_id===pair.mapping_id):undefined;
+      return machine&&candidate?{machine_number:machine.machine_number,whiteboard_name:candidate.whiteboard_name}
+        :{machine_number:machine?.machine_number??null,reason:'No longer a match for this machine. Refresh and try again.'};
+    });
+  }
+  private confirmedPairs(pairs:unknown):{machine_id:string;mapping_id:string}[] {
     if(!Array.isArray(pairs)||pairs.length===0||pairs.length>1000)throw new BadRequestException('Send the matches to map.');
     const wanted=pairs.map(pair=>({machine_id:String((pair as {machine_id?:unknown})?.machine_id||''),mapping_id:String((pair as {mapping_id?:unknown})?.mapping_id||'')}));
     if(wanted.some(pair=>!this.uuid(pair.machine_id)||!this.uuid(pair.mapping_id)))throw new BadRequestException('Invalid match.');
     if(new Set(wanted.map(pair=>pair.machine_id)).size!==wanted.length)throw new BadRequestException('A machine is listed twice.');
-    const current=await this.uniqueMatches();
+    return wanted;
+  }
+  /** Saves each still-valid pair through the normal Admin save; reports the rest. */
+  private async saveConfirmedPairs(wanted:{machine_id:string;mapping_id:string}[],userId:string,
+    check:(pair:{machine_id:string;mapping_id:string})=>{machine_number:string;whiteboard_name:string}|{machine_number:string|null;reason:string}) {
     const mapped:{machine_id:string;machine_number:string;whiteboard_name:string}[]=[];
     const skipped:{machine_id:string;machine_number:string|null;reason:string}[]=[];
     for(const pair of wanted) {
-      const match=current.matches.find(m=>m.machine_id===pair.machine_id);
-      if(!match||match.mapping_id!==pair.mapping_id) {
-        skipped.push({machine_id:pair.machine_id,machine_number:match?.machine_number??null,reason:'No longer the only match. Refresh and try again.'});continue;
-      }
+      const ok=check(pair);
+      if('reason' in ok) { skipped.push({machine_id:pair.machine_id,machine_number:ok.machine_number,reason:ok.reason});continue; }
       try {
-        await this.saveAdminMapping(match.machine_id,match.mapping_id,userId);
-        mapped.push({machine_id:match.machine_id,machine_number:match.machine_number,whiteboard_name:match.whiteboard_name});
+        await this.saveAdminMapping(pair.machine_id,pair.mapping_id,userId);
+        mapped.push({machine_id:pair.machine_id,machine_number:ok.machine_number,whiteboard_name:ok.whiteboard_name});
       } catch(e) {
         const message=(e as {message?:unknown})?.message;
-        skipped.push({machine_id:match.machine_id,machine_number:match.machine_number,
+        skipped.push({machine_id:pair.machine_id,machine_number:ok.machine_number,
           reason:typeof message==='string'&&message.length<300?message:'Mapping save failed.'});
       }
     }
