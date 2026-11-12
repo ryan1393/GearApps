@@ -70,6 +70,13 @@ Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operati
 
 - **Reference list.** The archived identities in `dsf-mappings.ts`. A reference mapping is used
   only for machine numbers listed in `DSF_COUNT_MACHINES`, and never when it is marked blocked.
+- **Map Unique Matches** (Admin > DSF Mappings). Lists every machine whose DSF source is the
+  only active one in its department with a whiteboard name ending in the machine number
+  (`132 PIN CUTTER 549` -> machine 549 in Department 132), where no other machine has that number.
+  Machines already mapped or unmapped in Admin, sources already used by another machine and
+  machines with cutter-crediting history are left out, and the preview says why each unmatched
+  machine was skipped. Confirming saves each match through the normal Admin save, with its
+  checks and audit row.
 - **Admin > DSF Mappings.** An administrator can choose the source for a machine from the live
   DSF source list. An admin mapping replaces the reference; unmapping a machine stops its
   counts. Every change is audited. A machine that already has crediting history can only be
