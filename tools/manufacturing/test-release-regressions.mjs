@@ -62,7 +62,7 @@ try {
   blades.push(...added.blade_ids);
   const assignment=await one('SELECT id FROM blade_tray WHERE blade_id=$1 AND enabled',[blades[0]]);
   await expect('Assigned blade deletion is rejected','DELETE',`/blades/${blades[0]}`,undefined,g.accessToken,[409]);
-  await expect('Assigned blade status edit is rejected','PATCH',`/blades/${blades[0]}`,{status:'scrapped'},g.accessToken,[409]);
+  await expect('Generic blade edit is administrator-only','PATCH',`/blades/${blades[0]}`,{status:'scrapped'},g.accessToken,[403]);
   await expect('Generic blade assignment PATCH is rejected','PATCH',`/bladeTrays/${assignment.id}`,{enabled:false},g.accessToken,[422]);
   await expect('Occupied tray deactivation is rejected','DELETE',`/trays/${tray}`,undefined,g.accessToken,[409]);
   const state=await one('SELECT t.blade_count,b.status,bt.enabled FROM trays t JOIN blade_tray bt ON bt.tray_id=t.id JOIN blades b ON b.id=bt.blade_id WHERE t.id=$1',[tray]);
