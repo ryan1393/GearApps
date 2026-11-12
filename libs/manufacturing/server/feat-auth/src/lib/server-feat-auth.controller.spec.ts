@@ -5,6 +5,7 @@ import { Test } from '@nestjs/testing';
 import { randPassword } from '@ngneat/falso';
 
 import { ServerFeatAuthController } from './server-feat-auth.controller';
+import { AuthAttemptLimits } from './auth-attempt-limits';
 import { ServerFeatAuthService } from './server-feat-auth.service';
 
 describe('ServerFeatAuthController', () => {
@@ -22,6 +23,7 @@ describe('ServerFeatAuthController', () => {
       ],
       providers: [
         ServerFeatAuthService,
+        AuthAttemptLimits,
         {
           provide: ServerFeatUserService,
           useValue: {
