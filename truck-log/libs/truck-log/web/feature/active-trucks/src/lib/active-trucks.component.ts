@@ -19,9 +19,9 @@ import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService } 
   </header>
   <tl-stale-data-notice [stale]="poller.hasData() && poller.stale()" [lastUpdated]="lastUpdated" subject="Active Trucks"></tl-stale-data-notice>
 
-  <section class="dana-panel">
+  <section class="dana-panel tl-cap">
     <div class="dana-panel-header"><h2>Ready for Final Guard Checkout</h2><span class="dana-count-badge" [attr.data-tone]="awaitingExit.length > 0 ? 'warning' : null">{{awaitingExit.length}}</span></div>
-    <ul class="dana-action-list" *ngIf="awaitingExit.length">
+    <ul class="dana-action-list tl-scroll" *ngIf="awaitingExit.length">
       <li class="dana-action-row" *ngFor="let v of awaitingExit">
         <div class="dana-action-main"><strong>{{v.loadNumber || v.visitReference}}</strong><span>{{v.driverName}} · {{v.carrierName}} · Trailer {{v.trailerId}}</span></div>
         <div class="dana-action-meta"><span>Dock</span><strong>{{v.dockCode}}</strong></div>
@@ -31,7 +31,7 @@ import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService } 
     <p class="dana-list-empty" *ngIf="!awaitingExit.length && poller.hasData()">No trucks ready for final checkout in this view.{{q ? ' Clear the search to see all on-site visits.' : ''}}</p>
   </section>
 
-  <section class="dana-panel">
+  <section class="dana-panel tl-fill">
     <div class="dana-panel-header">
       <h2>All On-Site Visits</h2>
       <form class="tl-search" role="search" (submit)="$event.preventDefault(); load()">

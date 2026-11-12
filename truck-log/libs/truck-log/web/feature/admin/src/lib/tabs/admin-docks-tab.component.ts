@@ -15,7 +15,7 @@ import { AdminDataStore } from '../admin-data.store';
     <div class="dana-panel-header">
       <div><h2>Docks</h2><small>{{data.activeDockCount}} active / {{data.docks.length - data.activeDockCount}} disabled</small></div>
     </div>
-    <div class="dana-panel-body tl-stack">
+    <div class="dana-panel-body tl-stack tl-scroll">
       <p class="dana-page-description">Add the dock codes used at check-in. Disable a dock instead of deleting it so past assignments stay intact.</p>
       <form class="dana-filter-row" (ngSubmit)="addDock()">
         <label>Dock code<input name="dockCode" [(ngModel)]="newCode" placeholder="Example: 25"></label>

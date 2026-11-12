@@ -58,20 +58,20 @@ import { AdminWorkflowTabComponent } from './tabs/admin-workflow-tab.component';
       (click)="activeAdminTab = 'printing'">Printing</button>
   </nav>
 
-  <div id="truck-log-printing-panel" role="tabpanel" aria-labelledby="truck-log-printing-tab" [hidden]="activeAdminTab !== \'printing\'">
-    <div class="tl-stack">
+  <div id="truck-log-printing-panel" class="tl-fill" role="tabpanel" aria-labelledby="truck-log-printing-tab" [hidden]="activeAdminTab !== \'printing\'">
+    <div class="tl-stack tl-scroll">
       <tl-gate-printing></tl-gate-printing>
       <tl-packing-slip-watcher></tl-packing-slip-watcher>
     </div>
   </div>
 
-  <div tlAdminDriversTab [hidden]="activeAdminTab !== \'drivers\'" role="tabpanel"></div>
-  <div tlAdminCarriersTab [hidden]="activeAdminTab !== \'carriers\'" role="tabpanel"></div>
-  <div tlAdminLocationsTab [hidden]="activeAdminTab !== \'locations\'" role="tabpanel"></div>
-  <section tlAdminDocksTab class="dana-panel" [hidden]="activeAdminTab !== \'docks\'" role="tabpanel"></section>
-  <section tlAdminAlertsTab class="dana-panel" [hidden]="activeAdminTab !== \'alerts\'" role="tabpanel"></section>
-  <section tlAdminScheduleTab class="dana-panel" [hidden]="activeAdminTab !== \'schedule\'" role="tabpanel"></section>
-  <section tlAdminWorkflowTab class="dana-panel" [hidden]="activeAdminTab !== \'workflow\'" role="tabpanel"></section>
+  <div tlAdminDriversTab class="tl-fill" [hidden]="activeAdminTab !== \'drivers\'" role="tabpanel"></div>
+  <div tlAdminCarriersTab class="tl-fill" [hidden]="activeAdminTab !== \'carriers\'" role="tabpanel"></div>
+  <div tlAdminLocationsTab class="tl-fill" [hidden]="activeAdminTab !== \'locations\'" role="tabpanel"></div>
+  <section tlAdminDocksTab class="dana-panel tl-fill" [hidden]="activeAdminTab !== \'docks\'" role="tabpanel"></section>
+  <section tlAdminAlertsTab class="dana-panel tl-fill" [hidden]="activeAdminTab !== \'alerts\'" role="tabpanel"></section>
+  <section tlAdminScheduleTab class="dana-panel tl-fill" [hidden]="activeAdminTab !== \'schedule\'" role="tabpanel"></section>
+  <section tlAdminWorkflowTab class="dana-panel tl-fill" [hidden]="activeAdminTab !== \'workflow\'" role="tabpanel"></section>
   </div>`
 })
 // Tabs stay mounted ([hidden], not *ngIf) so unsaved row edits survive switching tabs.

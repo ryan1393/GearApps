@@ -86,6 +86,7 @@
   </section>
 
   <!-- RXO operator overview: read-only; saved values only. -->
+  <div class="tl-rxo-kpis">
   <section class="dana-kpi-grid" aria-label="RXO scan and import summary">
     <div class="dana-kpi-card" [attr.data-tone]="view.scanNeedsReview ? 'danger' : (view.scanRecoveryActive || view.timerStatusStale ? 'warning' : null)">
       <div class="dana-kpi-label">{{view.scanTimerTitle}}</div>
@@ -116,6 +117,7 @@
     <div class="dana-kpi-card"><div class="dana-kpi-label">Freight on the move</div><div class="dana-kpi-value">{{view.siteCounts?.freight_visible ?? 0}}</div><div class="dana-kpi-note">Yesterday through tomorrow</div></div>
     <div class="dana-kpi-card"><div class="dana-kpi-label">Scheduled loads</div><div class="dana-kpi-value">{{importStatus?.rxoScheduledLoads ?? 0}}</div><div class="dana-kpi-note">Active RXO loads, same window</div></div>
   </section>
+  </div>
 
   <div class="dana-tabs tl-rxo-tabs" role="tablist" aria-label="RXO Control Center sections">
     <button #dataTabButton id="rxo-tab-data" class="dana-tab" type="button" role="tab" aria-controls="rxo-panel-data"
@@ -132,10 +134,10 @@
             (keydown.home)="dataTabButton.focus(); $event.preventDefault()" (keydown.end)="settingsTabButton.focus(); $event.preventDefault()">Settings &amp; Login</button>
   </div>
 
-  <section tlRxoDataTable *ngIf="activeTab === 'data'" id="rxo-panel-data" role="tabpanel" aria-labelledby="rxo-tab-data" tabindex="0" class="dana-panel">
+  <section tlRxoDataTable *ngIf="activeTab === 'data'" id="rxo-panel-data" role="tabpanel" aria-labelledby="rxo-tab-data" tabindex="0" class="dana-panel tl-fill">
   </section>
 
-  <div *ngIf="activeTab === 'health'" id="rxo-panel-health" role="tabpanel" aria-labelledby="rxo-tab-health" tabindex="0" class="tl-stack">
+  <div *ngIf="activeTab === 'health'" id="rxo-panel-health" role="tabpanel" aria-labelledby="rxo-tab-health" tabindex="0" class="tl-stack tl-fill tl-scroll">
     <section class="dana-panel" aria-label="RXO timer diagnostics">
       <div class="dana-panel-header">
         <div>
@@ -223,7 +225,7 @@
     </div>
   </div>
 
-  <div *ngIf="activeTab === 'settings' && !adminAuth.canWrite()" id="rxo-panel-settings" role="tabpanel" aria-labelledby="rxo-tab-settings" tabindex="0">
+  <div *ngIf="activeTab === 'settings' && !adminAuth.canWrite()" id="rxo-panel-settings" role="tabpanel" aria-labelledby="rxo-tab-settings" tabindex="0" class="tl-fill tl-scroll">
     <section class="dana-panel">
       <div class="dana-panel-header"><div><h2>RXO settings &amp; login</h2><small>Scan controls and credentials</small></div></div>
       <div class="dana-panel-body tl-stack">
@@ -233,7 +235,7 @@
     </section>
   </div>
 
-  <div *ngIf="activeTab === 'settings' && adminAuth.canWrite()" id="rxo-panel-settings" role="tabpanel" aria-labelledby="rxo-tab-settings" tabindex="0" class="tl-stack">
+  <div *ngIf="activeTab === 'settings' && adminAuth.canWrite()" id="rxo-panel-settings" role="tabpanel" aria-labelledby="rxo-tab-settings" tabindex="0" class="tl-stack tl-fill tl-scroll">
     <div class="tl-rxo-columns" tlRxoSettingsPanel [form]="settingsForm" [control]="control" [busy]="busy" (busyChange)="setBusy($event)" (saved)="refreshControl(false)"></div>
 
     <section class="dana-panel">
