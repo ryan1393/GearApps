@@ -76,7 +76,7 @@ export function dockBoardCounts(
   </header>
 
   <section class="dana-panel" aria-label="Find and filter dock trucks">
-    <div class="dana-panel-body dana-filter-row">
+    <div class="dana-panel-body dana-filter-row tl-dock-filters">
       <label class="tl-dock-search">Find a truck<input id="dock-board-search" type="search" autocomplete="off" [value]="searchTerm" (input)="onSearchInput($event)" placeholder="Load, dock, driver, trailer, SAP number…" aria-label="Find a truck by load, dock, driver, carrier, trailer, tractor, visit or SAP delivery number"></label>
       <label>Direction<select id="dock-board-direction" [value]="directionFilter" (change)="onDirectionChange($event)"><option value="ALL">All directions</option><option value="INBOUND">Inbound</option><option value="OUTBOUND">Outbound</option></select></label>
       <label>Dock wait<select id="dock-board-urgency" [value]="urgencyFilter" (change)="onUrgencyChange($event)"><option value="ALL">All wait times</option><option value="AGING">Aging + overdue</option><option value="OVERDUE">Overdue only</option></select></label>
@@ -137,7 +137,7 @@ export function dockBoardCounts(
         </ng-template>
       </section>
 
-      <button class="dana-btn dana-btn-success dana-btn-block" type="button" [disabled]="busy || uploadingVisitId===visit.id" (click)="askComplete(visit)">Dock Complete — Send to Guard</button>
+      <button class="dana-btn dana-btn-success dana-btn-block tl-write" type="button" [disabled]="busy || uploadingVisitId===visit.id" (click)="askComplete(visit)">Dock Complete — Send to Guard</button>
     </article>
     <div class="dana-empty-state tl-dock-grid-empty" *ngIf="!filteredVisits.length && visits.length"><b>No trucks match the current filters.</b> Change the search or filters to see other docks. <button class="dana-btn dana-btn-sm" type="button" (click)="clearFilters()">Clear filters</button></div>
     <div class="dana-empty-state tl-dock-grid-empty" *ngIf="!visits.length && !lastUpdated && !refreshError">Loading assigned docks…</div>

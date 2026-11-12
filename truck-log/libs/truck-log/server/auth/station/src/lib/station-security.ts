@@ -3,7 +3,7 @@
  * Only SHA-256 digests of pairing codes and station tokens are ever stored.
  */
 import { createHash, randomBytes, randomInt } from 'node:crypto';
-import { STATION_NAME_MAX, STATION_PAIRING_CODE_PATTERN, StationKinds } from '@truck-log/shared/contracts';
+import { STATION_KIND_LIST, STATION_NAME_MAX, STATION_PAIRING_CODE_PATTERN, isStationKind } from '@truck-log/shared/contracts';
 import type { StationKind } from '@truck-log/shared/contracts';
 
 /** No 0/O, 1/I/L: codes are read aloud and typed on guard PCs. */
@@ -61,8 +61,8 @@ export function stationName(input: unknown): string {
 }
 
 export function stationKind(input: unknown): StationKind {
-  if (input === StationKinds.GUARD || input === StationKinds.DISPLAY) return input;
-  return stationFail(400, 'STATION_KIND', 'Station type must be GUARD or DISPLAY.');
+  if (isStationKind(input)) return input;
+  return stationFail(400, 'STATION_KIND', `Station type must be one of ${STATION_KIND_LIST.join(', ')}.`);
 }
 
 /** Cookie settings follow the admin transport: Secure + __Host- prefix unless explicitly running internal HTTP. */

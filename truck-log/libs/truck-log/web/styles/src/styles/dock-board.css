@@ -27,3 +27,11 @@
 .tl-count-jump { border: 0; cursor: pointer; }
 .tl-count-jump:hover { filter: brightness(.96); }
 .tl-count-jump[aria-pressed="true"] { box-shadow: inset 0 0 0 1.5px currentColor; }
+/* Phones and handhelds (CK65): search on its own row, the two filters side by side, counts beside Clear. */
+@media (max-width: 560px) {
+  .tl-dock-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 12px; }
+  .tl-dock-filters > .tl-dock-search { grid-column: 1 / -1; }
+  .tl-dock-filters > .dana-btn { align-self: center; }
+  .tl-dock-filters > .tl-dock-counts { justify-content: flex-end; }
+  .tl-dock-grid { gap: 10px; }
+}

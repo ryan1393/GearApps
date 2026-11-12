@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { STATION_PAIRING_CODE_PATTERN } from '@truck-log/shared/contracts';
+import { roleHome } from './station-roles';
 import {
   STATION_SETUP_PATH,
   TruckLogStationAccess,
@@ -109,8 +110,8 @@ export class StationSetupComponent implements OnInit {
       next: (session) => {
         this.busy = false;
         const returnTo = safeStationReturn(this.route.snapshot.queryParamMap.get('returnTo'));
-        // A TV has nothing to do on the guard dashboard; send it straight to the dock board TV.
-        const home = session.station?.kind === 'DISPLAY' ? '/tv/docks' : '/';
+        // Each kind starts on its own screen: TVs on the dock board TV, dock handhelds on the Dock Board.
+        const home = roleHome(session.station?.kind);
         void this.router.navigateByUrl(returnTo === STATION_SETUP_PATH || returnTo === '/' ? home : returnTo);
       },
       error: (e) => {

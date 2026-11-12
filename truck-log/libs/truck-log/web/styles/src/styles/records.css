@@ -8,3 +8,19 @@
 .tl-file-button { position: relative; overflow: hidden; }
 .tl-file-button input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 @media (max-width: 1100px) { .tl-record-columns { grid-template-columns: 1fr; } }
+/* Phones and handhelds (CK65): the list keeps Load / Visit, Dock, Status and Open; the open record
+   shows its facts two across. Everything hidden here is in the open record. */
+@media (max-width: 560px) {
+  .tl-records-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 12px; }
+  .tl-records-filters > .tl-records-search,
+  .tl-records-filters > .tl-filter-actions { grid-column: 1 / -1; }
+  /* Must out-rank Dana's phone rule (.dana-table-shell > table.dana-table { min-width: 680px }). */
+  .tl-records-body .dana-table-shell > table.tl-wide-table { min-width: 0; }
+  .tl-records-body .tl-wide-table :is(th, td):is(:nth-child(1), :nth-child(3), :nth-child(4), :nth-child(5), :nth-child(8)) { display: none; }
+  .tl-records-body .tl-wide-table :is(th, td) { padding: 8px 6px; }
+  .tl-records-body .tl-wide-table .dana-status-badge { border-radius: 8px; white-space: normal; }
+  .tl-records-body .tl-wide-table .dana-status-badge::before { display: none; }
+  .tl-records-body .dana-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .tl-records-body .dana-detail { padding: 8px 10px; }
+  .tl-records-body .dana-detail-value { font-size: 13px; }
+}

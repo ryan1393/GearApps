@@ -1,16 +1,18 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, catchError, map, of, tap, throwError, timeout } from 'rxjs';
 import {
+  STATION_KIND_LABELS,
   STATION_NAME_MAX,
   STATION_PAIRING_CODE_PATTERN,
-  StationKinds,
+  isStationKind,
   type StationIdentity,
   type StationKind,
   type StationPairingResult,
   type StationRecord,
   type StationSession,
+  type TruckLogRole,
 } from '@truck-log/shared/contracts';
 import { ToastService } from '@truck-log/web/ui';
 
@@ -73,11 +75,11 @@ function isStationIdentity(value: unknown): value is StationIdentity {
   const station = value as Partial<StationIdentity>;
   return typeof station.id === 'string'
     && typeof station.name === 'string'
-    && (station.kind === StationKinds.GUARD || station.kind === StationKinds.DISPLAY);
+    && isStationKind(station.kind);
 }
 
 export function stationKindLabel(kind: StationKind | string | null | undefined): string {
-  return kind === StationKinds.DISPLAY ? 'TV display' : 'Guard station';
+  return isStationKind(kind) ? STATION_KIND_LABELS[kind] : 'Guard station';
 }
 
 /** Operator-facing text for station-access error responses. */
@@ -106,6 +108,16 @@ export class TruckLogStationAccess {
   /** The station session for this browser; null until loaded or when the API is unavailable. */
   readonly session = signal<StationSession | null>(null);
   readonly state = signal<StationSessionState>('loading');
+  /**
+   * What this browser may do: ADMIN while an administrator is signed in, otherwise the paired
+   * station's kind; null while unknown (loading, unreachable API, or not paired yet).
+   */
+  readonly role = computed<TruckLogRole | null>(() => {
+    const session = this.session();
+    if (!session) return null;
+    if (session.admin) return 'ADMIN';
+    return session.station?.kind ?? null;
+  });
 
   /** GET /station-access/session. Never errors: an unreachable API leaves state 'unavailable'. */
   load(): Observable<StationSession | null> {
@@ -181,7 +193,15 @@ export class TruckLogStationAccess {
     const now = Date.now();
     if (now - this.lastReadOnlyNotice < 10000) return;
     this.lastReadOnlyNotice = now;
-    this.toast.warning('This is a display-only station.', 'Read-only station');
+    if (this.role() === 'MANAGEMENT') this.toast.warning('Management stations can view everything but not change it.', 'View-only station');
+    else this.toast.warning('This is a display-only station.', 'Read-only station');
+  }
+
+  notifyRoleLimit() {
+    const now = Date.now();
+    if (now - this.lastReadOnlyNotice < 10000) return;
+    this.lastReadOnlyNotice = now;
+    this.toast.warning('This dock handheld can only use the Dock Board and Records & Paperwork.', 'Dock handheld');
   }
 }
 
@@ -202,7 +222,7 @@ function isTruckLogApi(url: string): boolean {
 
 /**
  * 401 STATION_REQUIRED -> /station/setup?returnTo=<current page>;
- * 403 STATION_READ_ONLY -> "This is a display-only station." toast.
+ * 403 STATION_READ_ONLY -> display-only / view-only toast; 403 STATION_ROLE -> dock handheld toast.
  * The error is always re-thrown so the calling page still settles its busy state.
  */
 export const truckLogStationInterceptor: HttpInterceptorFn = (req, next) => {
@@ -212,6 +232,7 @@ export const truckLogStationInterceptor: HttpInterceptorFn = (req, next) => {
     const code = error?.error?.code;
     if (error?.status === 401 && code === 'STATION_REQUIRED') station.redirectToSetup();
     else if (error?.status === 403 && code === 'STATION_READ_ONLY') station.notifyReadOnly();
+    else if (error?.status === 403 && code === 'STATION_ROLE') station.notifyRoleLimit();
     return throwError(() => error);
   }));
 };

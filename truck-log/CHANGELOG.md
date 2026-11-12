@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased — Role-based stations and the CK65 dock handheld
+
+- Station types are now roles enforced by the server: **Guard station** (unchanged), **Dock handheld** (new; Honeywell CK65: Dock Board and Records & Paperwork only), **Management** (new; every screen, view only) and **TV display** (unchanged). A signed-in administrator can still do everything. See [Stations](docs/truck-log/STATIONS.md).
+- Dock handhelds may only call an explicit list of dock routes (Dock Complete, delivery numbers, packing slips, paperwork, records); anything else is refused with `403 STATION_ROLE`. Management stations may only read.
+- The navigation, route guard and buttons follow the role, and each station opens on its own start screen. On the CK65, the Dock Board and Records & Paperwork are two large tabs, with a phone layout for filters, cards and records.
+- Every screen fits the window on desktop and landscape tablets. Long lists scroll inside their card, and RXO summary tiles and Dock Board counts jump to the section they describe.
+- Database migration `0006_station_roles.sql` adds the two new station types. Existing stations keep their type.
+
 ## 1.0.5 — Scan Now in both RXO control centers
 
 - Expose **Scan Now** on both standard RXO and RXO Expedite, with administrator authorization and pending/running feedback.

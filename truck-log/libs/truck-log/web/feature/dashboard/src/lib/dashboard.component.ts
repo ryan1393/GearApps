@@ -14,7 +14,7 @@ import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService, j
   template: `
   <header class="dana-page-header">
     <div><h1>Guard Dashboard</h1><p *ngIf="lastUpdated">Updated {{lastUpdated | date:'shortTime'}}</p></div>
-    <div class="dana-actions"><button class="dana-btn" type="button" (click)="load()">Refresh</button><a class="dana-btn dana-btn-primary" routerLink="/check-in">+ Check In Truck</a></div>
+    <div class="dana-actions"><button class="dana-btn" type="button" (click)="load()">Refresh</button><a class="dana-btn dana-btn-primary tl-write" routerLink="/check-in">+ Check In Truck</a></div>
   </header>
   <tl-stale-data-notice [stale]="!!data && poller.stale()" [lastUpdated]="lastUpdated" subject="The Guard Dashboard"></tl-stale-data-notice>
 
@@ -34,7 +34,7 @@ import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService, j
       <li class="dana-action-row" *ngFor="let visit of awaitingExit">
         <div class="dana-action-main"><strong>{{visit.loadNumber || visit.visitReference}}</strong><span>{{visit.driverName}} · Trailer {{visit.trailerId}} · Dock {{visit.dockCode}}</span></div>
         <div class="dana-action-meta"><span>Dock complete</span><strong>{{visit.dockCompletedAt | date:'shortTime'}}</strong></div>
-        <button class="dana-btn dana-btn-success" type="button" (click)="askCheckout(visit)">Final Checkout</button>
+        <button class="dana-btn dana-btn-success tl-write" type="button" (click)="askCheckout(visit)">Final Checkout</button>
       </li>
     </ul>
   </section>
@@ -93,7 +93,8 @@ export class DashboardComponent implements OnInit {
   /** "Needs guard checkout" tile: focus the first Final Checkout button, or the queue when it is empty. */
   jumpToQueue() {
     const first = document.querySelector<HTMLElement>('#guard-checkout-queue .dana-btn-success');
-    if (first) { first.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); first.focus({ preventScroll: true }); }
+    // offsetParent is null when the button is hidden (view-only Management stations).
+    if (first?.offsetParent) { first.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); first.focus({ preventScroll: true }); }
     else jumpToSection('guard-checkout-queue');
   }
 

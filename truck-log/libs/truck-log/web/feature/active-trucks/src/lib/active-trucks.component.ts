@@ -25,7 +25,7 @@ import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService } 
       <li class="dana-action-row" *ngFor="let v of awaitingExit">
         <div class="dana-action-main"><strong>{{v.loadNumber || v.visitReference}}</strong><span>{{v.driverName}} · {{v.carrierName}} · Trailer {{v.trailerId}}</span></div>
         <div class="dana-action-meta"><span>Dock</span><strong>{{v.dockCode}}</strong></div>
-        <button class="dana-btn dana-btn-success" type="button" (click)="askCheckout(v)">Final Checkout</button>
+        <button class="dana-btn dana-btn-success tl-write" type="button" (click)="askCheckout(v)">Final Checkout</button>
       </li>
     </ul>
     <p class="dana-list-empty" *ngIf="!awaitingExit.length && poller.hasData()">No trucks ready for final checkout in this view.{{q ? ' Clear the search to see all on-site visits.' : ''}}</p>
@@ -44,7 +44,7 @@ import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService } 
     <div class="dana-table-shell" tabindex="0" role="region" aria-label="On-site truck visits"><table class="dana-table tl-active-table tl-wide-table"><thead><tr><th>Load / Visit</th><th>Carrier</th><th>Driver</th><th>Trailer</th><th>Dock</th><th>Status</th><th>On Site</th><th><span class="dana-nowrap">Quick actions</span></th></tr></thead><tbody>
     <tr *ngFor="let v of visits" [attr.data-tone]="ageTone(v)"><td><b class="dana-nowrap">{{v.loadNumber || 'No load #'}}</b><span class="dana-cell-sub">{{v.visitReference}}</span></td><td>{{v.carrierName || '—'}}</td><td>{{v.driverName}}</td><td class="dana-nowrap">{{v.trailerId || '—'}}</td><td><b class="dana-nowrap">{{v.dockCode || '—'}}</b></td>
     <td><span class="dana-status-badge" [attr.data-tone]="v.status === 'DOCK_COMPLETE' ? 'warning' : 'info'">{{label(v.status)}}</span></td><td class="dana-nowrap">{{elapsed(v.guardCheckInAt)}}</td>
-    <td><div class="tl-row-actions"><button *ngIf="v.status==='DOCK_COMPLETE'" class="dana-btn dana-btn-success dana-btn-sm" type="button" (click)="askCheckout(v)">Final Checkout</button><a class="dana-btn dana-btn-sm" [href]="api.slipUrl(v.id)" target="_blank">Slip</a><a class="dana-btn dana-btn-sm" routerLink="/history" [queryParams]="{q:v.visitReference}">Record</a></div></td></tr>
+    <td><div class="tl-row-actions"><button *ngIf="v.status==='DOCK_COMPLETE'" class="dana-btn dana-btn-success dana-btn-sm tl-write" type="button" (click)="askCheckout(v)">Final Checkout</button><a class="dana-btn dana-btn-sm" [href]="api.slipUrl(v.id)" target="_blank">Slip</a><a class="dana-btn dana-btn-sm" routerLink="/history" [queryParams]="{q:v.visitReference}">Record</a></div></td></tr>
     <tr *ngIf="!visits.length && !poller.hasData() && !poller.stale()"><td colspan="8" class="dana-table-empty">Loading on-site visits…</td></tr>
     <tr *ngIf="!visits.length && !poller.hasData() && poller.stale()"><td colspan="8" class="dana-table-empty" role="alert">On-site visits could not be loaded. Retrying automatically; select Refresh to try now.</td></tr>
     <tr *ngIf="!visits.length && poller.hasData()"><td colspan="8" class="dana-table-empty">{{q ? 'No on-site visits in the current search results.' : 'No active truck visits.'}}</td></tr></tbody></table></div>

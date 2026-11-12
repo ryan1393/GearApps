@@ -3,7 +3,7 @@ import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/rou
 import { TruckLogApi } from '@truck-log/web/data-access';
 import { ToastHostComponent } from '@truck-log/web/ui';
 import { TRUCK_LOG_VERSION } from '@truck-log/shared/contracts';
-import { TruckLogStationAccess, isStationPublicPath } from '@truck-log/web/auth/station';
+import { TruckLogStationAccess, isStationPublicPath, roleCanOpen, roleHome, stationKindLabel, type TruckLogScreen } from '@truck-log/web/auth/station';
 
 type HealthState = 'checking' | 'good' | 'warning' | 'bad';
 type CoreReadiness = 'checking' | 'ready' | 'degraded' | 'offline';
@@ -43,45 +43,58 @@ const WARNING_RXO_PHASE_LABELS: Record<string, string> = {
   @if (adminLoginPageMode || stationSetupPageMode) {
     <router-outlet />
   } @else {
-  <div class="dana-app-shell" [class.is-fullscreen]="tvDisplayMode">
+  <div class="dana-app-shell" [class.is-fullscreen]="tvDisplayMode" [attr.data-role]="station.role()">
     <aside class="dana-sidebar" [class.is-open]="mobileNavOpen" aria-label="Truck Log navigation">
-      <a routerLink="/" class="dana-brand-row" (click)="closeMobileNav()">
+      <a [routerLink]="home" class="dana-brand-row" (click)="closeMobileNav()">
         <span class="dana-brand-mark" aria-hidden="true"><img src="assets/branding/dana-diamond.png" alt=""></span>
         <span class="dana-brand-copy"><strong>Truck Log</strong><span>Guard Shack</span></span>
       </a>
 
       <nav aria-label="Truck Log" (click)="closeMobileNav()">
+        <!-- Links follow the browser's role (station kind or administrator); see web/auth/station station-roles.ts. -->
+        @if (can('dashboard')) {
         <a routerLink="/" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">G</span><span>Guard Dashboard</span></a>
+        }
 
+        @if (can('check-in') || can('dock-board') || can('active-trucks')) {
         <div class="dana-nav-group">
           <div class="dana-nav-heading">Operations</div>
-          <a routerLink="/check-in" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">+</span><span>Check In Truck</span></a>
-          <a routerLink="/dock-board" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">D</span><span>Dock Board</span></a>
-          <a routerLink="/active-trucks" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">T</span><span>Active Trucks</span></a>
+          @if (can('check-in')) { <a routerLink="/check-in" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">+</span><span>Check In Truck</span></a> }
+          @if (can('dock-board')) { <a routerLink="/dock-board" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">D</span><span>Dock Board</span></a> }
+          @if (can('active-trucks')) { <a routerLink="/active-trucks" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">T</span><span>Active Trucks</span></a> }
         </div>
+        }
 
+        @if (can('history')) {
         <div class="dana-nav-group">
           <div class="dana-nav-heading">Records</div>
           <a routerLink="/history" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">R</span><span>Records &amp; Paperwork</span></a>
         </div>
+        }
 
+        @if (can('rxo') || can('rxo-expedite')) {
         <div class="dana-nav-group">
           <div class="dana-nav-heading">Integrations</div>
-          <a routerLink="/rxo" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">X</span><span>RXO Control Center</span></a>
-          <a routerLink="/rxo-expedite" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">E</span><span>RXO Expedite</span></a>
+          @if (can('rxo')) { <a routerLink="/rxo" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">X</span><span>RXO Control Center</span></a> }
+          @if (can('rxo-expedite')) { <a routerLink="/rxo-expedite" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">E</span><span>RXO Expedite</span></a> }
         </div>
+        }
 
+        @if (can('admin')) {
         <div class="dana-nav-group">
           <div class="dana-nav-heading">Administration</div>
           <a routerLink="/admin" routerLinkActive="is-active" ariaCurrentWhenActive="page" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">A</span><span>Administration</span></a>
         </div>
+        }
 
         <!-- TV displays: read-only, no operational actions -->
+        @if (can('tv')) {
         <div class="dana-nav-group">
           <div class="dana-nav-heading">TV Displays</div>
           <a routerLink="/tv/docks" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">TV</span><span>Dockworker TV</span></a>
           <a routerLink="/tv/management" class="dana-side-link"><span class="dana-nav-icon" aria-hidden="true">TV</span><span>Management TV</span></a>
         </div>
+        }
       </nav>
 
       <div class="dana-sidebar-footer">
@@ -89,7 +102,7 @@ const WARNING_RXO_PHASE_LABELS: Record<string, string> = {
           @if (access.station; as paired) {
             <div class="dana-sidebar-identity" [title]="'This browser is paired as ' + paired.name">
               <strong>{{ paired.name }}</strong>
-              <span>{{ paired.kind === 'DISPLAY' ? 'TV display' : 'Guard station' }}</span>
+              <span>{{ kindLabel(paired.kind) }}</span>
             </div>
           } @else if (access.admin) {
             <div class="dana-sidebar-identity" title="No station is paired; an administrator session authorizes this browser.">
@@ -119,6 +132,13 @@ const WARNING_RXO_PHASE_LABELS: Record<string, string> = {
         </button>
       </header>
 
+      <!-- Dock handheld (CK65): its two screens as tabs under the top bar, thumb-reachable on small screens. -->
+      @if (station.role() === 'DOCK') {
+        <nav class="tl-role-tabs" aria-label="Dock handheld screens">
+          <a routerLink="/dock-board" routerLinkActive="is-active" ariaCurrentWhenActive="page">Dock Board</a>
+          <a routerLink="/history" routerLinkActive="is-active" ariaCurrentWhenActive="page">Records &amp; Paperwork</a>
+        </nav>
+      }
       <main class="dana-page"><router-outlet /></main>
     </div>
 
@@ -174,6 +194,16 @@ export class AppComponent implements OnInit, OnDestroy {
       : { ...detail, receivedAt: detail.receivedAt ?? Date.now() };
     this.updateHealthPresentation();
   }
+
+  /** Whether the navigation offers a screen. Hidden while the role loads; everything shows if it cannot be read. */
+  can(screen: TruckLogScreen): boolean {
+    const role = this.station.role();
+    return role ? roleCanOpen(role, screen) : this.station.state() === 'unavailable';
+  }
+
+  get home(): string { return roleHome(this.station.role()); }
+
+  readonly kindLabel = stationKindLabel;
 
   toggleMobileNav() {
     this.mobileNavOpen = !this.mobileNavOpen;

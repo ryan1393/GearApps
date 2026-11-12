@@ -2,9 +2,10 @@ import { CanActivate, ExecutionContext, HttpException, Injectable } from '@nestj
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { TruckLogAdminService } from '@truck-log/server/auth/admin';
-import { StationKinds } from '@truck-log/shared/contracts';
+import { STATION_KIND_LABELS, StationKinds, type StationIdentity } from '@truck-log/shared/contracts';
 import { STATION_PUBLIC_METADATA, StationAuthorizedRequest } from './station-policy';
 import { StationAccessService } from './station-access.service';
+import { stationRoleDecision } from './station-roles';
 import { allowedOrigins, cookieSettings, developmentOpenAccess, originAllowed, stationTokenFromCookie } from './station-security';
 
 const READ_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
@@ -24,7 +25,9 @@ function fromServerConsole(req: Request): boolean {
 /**
  * Global guard: every API route needs a paired station or a signed-in
  * administrator, unless the route is marked @StationPublic().
- * DISPLAY stations (TV boards) may only read.
+ * The station's kind is its role (station-roles.ts): DISPLAY and MANAGEMENT
+ * stations may only read; DOCK handhelds may only do dock work. A signed-in
+ * administrator on the same browser overrides those limits.
  */
 @Injectable()
 export class StationAccessGuard implements CanActivate {
@@ -58,14 +61,16 @@ export class StationAccessGuard implements CanActivate {
     const token = stationTokenFromCookie(req.headers.cookie, this.cookie);
     const station = token ? await this.stations.safe(() => this.stations.identify(token)) : null;
     if (station) {
-      if (station.kind === StationKinds.DISPLAY && !reading) {
-        throw new HttpException({ code: 'STATION_READ_ONLY', message: 'This is a display-only station.' }, 403);
+      const decision = stationRoleDecision(station.kind, req.method, req.path || req.url);
+      if (decision !== 'ALLOW' && !(await this.administratorSignedIn(req))) {
+        throw this.refusal(decision, station);
       }
       req.truckLogStation = station;
       return true;
     }
 
     // No paired station: a signed-in administrator may use the guard screens too.
+    // (A browser with a paired station reaches this only when the station is unknown or revoked.)
     try {
       const session = await this.admin.session(req as never);
       req.truckLogAdminName = session.user.displayName || session.user.username;
@@ -76,5 +81,27 @@ export class StationAccessGuard implements CanActivate {
         message: 'This browser is not a registered Truck Log station. Ask an administrator for a pairing code.',
       }, 401);
     }
+  }
+
+  /** True when an administrator is also signed in on this browser; records who for the audit trail. */
+  private async administratorSignedIn(req: Request & StationAuthorizedRequest): Promise<boolean> {
+    try {
+      const session = await this.admin.session(req as never);
+      req.truckLogAdminName = session.user.displayName || session.user.username;
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  private refusal(decision: 'READ_ONLY' | 'ROLE', station: StationIdentity): HttpException {
+    if (decision === 'READ_ONLY') {
+      const what = station.kind === StationKinds.MANAGEMENT ? 'a view-only management station' : 'a display-only station';
+      return new HttpException({ code: 'STATION_READ_ONLY', message: `This is ${what}.` }, 403);
+    }
+    return new HttpException({
+      code: 'STATION_ROLE',
+      message: `This ${STATION_KIND_LABELS[station.kind]?.toLowerCase() || 'station'} can only use the Dock Board and Records & Paperwork.`,
+    }, 403);
   }
 }

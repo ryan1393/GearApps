@@ -13,3 +13,4 @@ export {
 } from './lib/station-access.service';
 export { StationSetupComponent } from './lib/station-setup.component';
 export { StationsAdminComponent } from './lib/stations-admin.component';
+export { roleCanOpen, roleHome, roleIsViewOnly, truckLogRoleGuard, type TruckLogScreen } from './lib/station-roles';
