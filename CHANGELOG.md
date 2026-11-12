@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Setting changes are one line each.** The Lapper Dashboard's Setting changes panel showed every
+  changed value of a cycle in its row, so a cycle with a dozen changes filled the screen. Each
+  cycle now shows how many values changed (12 changes, every name on hover) with a Show details
+  button that opens them underneath, in columns: macro, name, previous → new value and the
+  difference. Cycle history has its own column.
+
 ## 70.7.0 (2026-11-12)
 
 Lappers get their cycle time recorded and shown in Lapping Summaries, a live timer while a cycle
