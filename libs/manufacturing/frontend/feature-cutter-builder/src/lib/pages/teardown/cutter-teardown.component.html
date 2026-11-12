@@ -88,10 +88,8 @@
       </div>
       <div class="gear-workflow-section-body">
         <div class="gear-workflow-form-grid">
-          <label class="gear-field">
-            Number of Scrapped Blades
-            <input type="number" min="0" step="1" [max]="build?.blade_count ?? 0" [(ngModel)]="scrappedBladeCount" name="scrappedBladeCount" class="gear-input" [disabled]="busy || !build" />
-          </label>
+          <gear-count-stepper class="gear-field" label="Number of Scrapped Blades" [(value)]="scrappedBladeCount" [min]="0"
+            [max]="build?.blade_count ?? 0" [disabled]="busy || !build" />
           <label class="gear-field">
             Comments
             <textarea rows="3" [(ngModel)]="comments" name="comments" class="gear-textarea" maxlength="2000" [disabled]="busy"></textarea>

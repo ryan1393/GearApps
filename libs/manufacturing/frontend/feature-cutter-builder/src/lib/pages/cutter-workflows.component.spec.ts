@@ -63,6 +63,18 @@ describe('Cutter workflow selection safety', () => {
     expect(component.availableEmptyTrays.map((row) => row.serial_number)).toEqual(['FREE']);
     expect(component.eligibleDullShelves.map((row) => row.serial_number)).toEqual(['CGDR-A1A']);
   });
+  it('sets the teardown scrap count with the − / + count stepper, within the build blade count', () => {
+    const fixture = TestBed.createComponent(CutterTeardownComponent);
+    fixture.componentInstance.build = build;
+    fixture.detectChanges();
+    const stepper = fixture.nativeElement.querySelector('gear-count-stepper') as HTMLElement;
+    expect(stepper.textContent).toContain('Number of Scrapped Blades');
+    const [minus, plus] = Array.from(stepper.querySelectorAll('button')) as HTMLButtonElement[];
+    plus.click(); plus.click(); minus.click();
+    expect(fixture.componentInstance.scrappedBladeCount).toBe(1);
+    expect(fixture.componentInstance.returnedBladeCount).toBe(10);
+    fixture.destroy();
+  });
   it('rejects fractional scrap quantities', () => {
     const component = teardown(); component.build = build; component.scrappedBladeCount = 0.5;
     expect(component.scrapCountValid).toBe(false);

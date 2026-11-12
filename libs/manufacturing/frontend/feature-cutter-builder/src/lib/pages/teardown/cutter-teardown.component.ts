@@ -4,7 +4,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
+import { CountStepperComponent, GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 import {
   CutterBuildCard,
   CutterTeardownResult,
@@ -25,7 +25,7 @@ import {
 @Component({
   selector: 'gear-cutter-teardown',
   standalone: true,
-  imports: [CommonModule, GearScannerFocusDirective, FormsModule, DanaPageHeaderComponent, DanaConfirmDialogComponent],
+  imports: [CommonModule, CountStepperComponent, GearScannerFocusDirective, FormsModule, DanaPageHeaderComponent, DanaConfirmDialogComponent],
   templateUrl: './cutter-teardown.component.html',
 })
 export class CutterTeardownComponent implements OnInit, OnDestroy {
