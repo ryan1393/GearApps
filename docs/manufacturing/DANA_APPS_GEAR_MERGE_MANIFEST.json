@@ -21,7 +21,7 @@
     "package.json": "8739576CDF093380711B8177C11B7BF805028B496A482C41B22AC19FD922D717",
     "package-lock.json": "512B24B7C147E1F056C83F83D5E9D5740B710ACE9DD59BB603266A60FAFB80B4",
     "nx.json": "73A2F6BD253030EAD5B14930871A240C60AFD9B5378940CC224689ABC36E5ACD",
-    "tsconfig.base.json": "AADAF6162D209B5BBEAB81399F1B391DEE4A83D70854CE0B8BB7EF7B2D64359F"
+    "tsconfig.base.json": "6A9E5E1D5D20CA726D0653BADAEE41D8C9357B18164EE089DF020DE1F34EF9A2"
   },
   "composeFiles": [
     {
@@ -168,16 +168,6 @@
     {
       "name": "api-data-access",
       "root": "libs/api/data-access",
-      "projectType": "library",
-      "tags": [],
-      "targets": [],
-      "hasBuildTarget": false,
-      "hasServeTarget": false,
-      "hasTestTarget": false
-    },
-    {
-      "name": "api-feature-cutter-tracking",
-      "root": "libs/api/feature-cutter-tracking",
       "projectType": "library",
       "tags": [],
       "targets": [],
