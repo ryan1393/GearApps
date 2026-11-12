@@ -1,5 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   DanaCountBadgeDirective,
@@ -16,7 +16,7 @@ import {
 } from '@dana/ui';
 import { apiErrorMessage, LapperAccess, loadable, MachinesApi, MachineCyclesApi } from '@meshforge/client/core';
 import { StatusBadgeComponent } from '@meshforge/client/ui';
-import { LapperProduction, Machine, SETTING_CHANGE_HOURS, SettingChanges } from '@meshforge/shared/domain';
+import { LapperProduction, Machine, SETTING_CHANGE_HOURS, SettingChangeCycle, SettingChanges } from '@meshforge/shared/domain';
 import { groupByCell } from './cells';
 
 @Component({
@@ -216,25 +216,25 @@ import { groupByCell } from './cells';
             </thead>
             <tbody>
               @for (cycle of settingChanges.value()?.items ?? []; track cycle.machine_cycle_id) {
-                <tr>
+                <tr [attr.data-dana-table-group]="cycle.machine_cycle_id">
                   <td>{{ cycle.timestamp | date: 'MMM d, HH:mm' }}</td>
                   <td class="mono strong">{{ cycle.machine_number || '—' }}</td>
                   <td class="mono">{{ cycle.gearset_number || '—' }}</td>
                   <td class="mono">{{ cycle.serial_number || '—' }}</td>
                   <td>{{ cycle.consec }}</td>
                   <td>
-                    <ul class="setting-change-list">
-                      @for (change of cycle.changes; track change.number) {
-                        <li>
-                          <gear-status-badge tone="warning" [text]="'#' + change.number" />
-                          <span class="setting-change-name">{{ change.name }}</span>
-                          <span class="mono"
-                            >{{ change.previous_value | number: '1.0-5' }} → <strong>{{ change.value | number: '1.0-5' }}</strong
-                            >{{ change.unit ? ' ' + change.unit : '' }}</span
-                          >
-                        </li>
-                      }
-                    </ul>
+                    <div class="setting-change-summary" [title]="changeNames(cycle)">
+                      <gear-status-badge tone="warning" [text]="changeCount(cycle)" />
+                      <button
+                        type="button"
+                        class="gear-btn gear-btn-secondary gear-btn-sm"
+                        [attr.aria-expanded]="isExpanded(cycle)"
+                        [attr.aria-controls]="'setting-change-' + cycle.machine_cycle_id"
+                        (click)="toggleDetails(cycle)"
+                      >
+                        {{ isExpanded(cycle) ? 'Hide details' : 'Show details' }}
+                      </button>
+                    </div>
                   </td>
                   <td class="right">
                     <a
@@ -245,6 +245,25 @@ import { groupByCell } from './cells';
                     >
                   </td>
                 </tr>
+                @if (isExpanded(cycle)) {
+                  <tr class="setting-change-detail-row" data-dana-table-detail [attr.data-dana-table-group]="cycle.machine_cycle_id">
+                    <td colspan="7" [id]="'setting-change-' + cycle.machine_cycle_id">
+                      <ul class="setting-change-grid" [attr.aria-label]="changeCount(cycle) + ' on ' + (cycle.machine_number || 'this machine')">
+                        @for (change of cycle.changes; track change.number) {
+                          <li>
+                            <span class="setting-change-macro mono">#{{ change.number }}</span>
+                            <span class="setting-change-name">{{ change.name }}</span>
+                            <span class="setting-change-values mono"
+                              >{{ change.previous_value | number: '1.0-5' }} → <strong>{{ change.value | number: '1.0-5' }}</strong
+                              >{{ change.unit ? ' ' + change.unit : '' }}</span
+                            >
+                            <span class="setting-change-delta mono gear-muted">{{ deltaText(change) }}</span>
+                          </li>
+                        }
+                      </ul>
+                    </td>
+                  </tr>
+                }
               } @empty {
                 <tr>
                   <td danaTableEmpty colspan="7" class="empty-row">
@@ -418,29 +437,53 @@ import { groupByCell } from './cells';
     </div>
   `,
   styles: `
-    /* What changed gets the room; the identifying columns stay narrow. */
+    /* The identifying columns stay narrow; each row is one line until its details are opened. */
     .setting-change-table th:nth-child(1) { width: 12%; }
     .setting-change-table th:nth-child(2) { width: 12%; }
-    .setting-change-table th:nth-child(3) { width: 9%; }
-    .setting-change-table th:nth-child(4) { width: 12%; }
-    .setting-change-table th:nth-child(5) { width: 6%; }
-    .setting-change-table th:nth-child(6) { width: 37%; }
-    .setting-change-table th:nth-child(7) { width: 12%; }
-    .setting-change-list {
+    .setting-change-table th:nth-child(3) { width: 10%; }
+    .setting-change-table th:nth-child(4) { width: 11%; }
+    .setting-change-table th:nth-child(5) { width: 7%; }
+    .setting-change-table th:nth-child(6) { width: 32%; }
+    .setting-change-table th:nth-child(7) { width: 16%; }
+    .setting-change-summary {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+    .setting-change-summary > * { flex: none; }
+    .setting-change-detail-row > td {
+      background: var(--dana-neutral-soft);
+      padding: 10px 14px !important;
+    }
+    .setting-change-grid {
       display: grid;
-      gap: 4px;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 6px 18px;
       margin: 0;
       padding: 0;
       list-style: none;
     }
-    .setting-change-list li {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 6px;
+    .setting-change-grid li {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto auto;
+      align-items: baseline;
+      gap: 8px;
+      font-size: 13px;
     }
+    .setting-change-macro { color: var(--dana-muted); font-size: 12px; }
     .setting-change-name {
       font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .setting-change-values, .setting-change-delta { white-space: nowrap; }
+    /* On a phone the values go under the name, so names are never cut short. */
+    @media (max-width: 600px) {
+      .setting-change-grid li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+      /* The name fills the rest of the first line, so values and difference share the second. */
+      .setting-change-name { flex: 1 1 60%; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
     }
   `,
 })
@@ -451,6 +494,34 @@ export class CellsOverviewPageComponent implements OnInit {
   protected readonly settingHours = SETTING_CHANGE_HOURS;
   /** Cycles that changed a setting (anything but the consec counter) recently. */
   protected readonly settingChanges = loadable<SettingChanges | null>(null);
+  /** Setting-change cycles whose details are open, by cycle id. */
+  private readonly expanded = signal<ReadonlySet<string>>(new Set());
+
+  protected isExpanded(cycle: SettingChangeCycle): boolean {
+    return this.expanded().has(cycle.machine_cycle_id);
+  }
+
+  protected toggleDetails(cycle: SettingChangeCycle): void {
+    const next = new Set(this.expanded());
+    if (!next.delete(cycle.machine_cycle_id)) next.add(cycle.machine_cycle_id);
+    this.expanded.set(next);
+  }
+
+  protected changeCount(cycle: SettingChangeCycle): string {
+    const n = cycle.changes.length;
+    return `${n} ${n === 1 ? 'change' : 'changes'}`;
+  }
+
+  /** Every changed value's name, shown on hover. */
+  protected changeNames(cycle: SettingChangeCycle): string {
+    return cycle.changes.map((change) => change.name || '#' + change.number).join(', ');
+  }
+
+  /** How much a value moved: +0.002, -0.004. */
+  protected deltaText(change: { previous_value: number; value: number }): string {
+    const delta = Math.round((change.value - change.previous_value) * 100000) / 100000;
+    return (delta > 0 ? '+' : '') + delta;
+  }
   protected readonly access = inject(LapperAccess);
   protected readonly machines = loadable<Machine[]>([]);
   protected readonly cells = computed(() => groupByCell(this.machines.value()));

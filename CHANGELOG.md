@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Setting changes are one line each.** The Lapper Dashboard's Setting changes panel showed every
+  changed value of a cycle in its row, so a cycle with a dozen changes filled the screen. Each
+  cycle now shows how many values changed (12 changes, every name on hover) with a Show details
+  button that opens them underneath, in columns: macro, name, previous → new value and the
+  difference. Cycle history has its own column.
+
 - **DSF: Map Unique Matches.** Admin > DSF Mappings has a **Map Unique Matches** button. It lists
   each machine whose DSF source is the only active one in its department with a whiteboard name
   ending in the machine number (`132 PIN CUTTER 549` -> machine 549), and no other machine has that
@@ -9,6 +15,7 @@
   Machines already mapped or unmapped in Admin, sources in use and machines with cutter-crediting
   history are left alone, and the preview says why each unmatched machine was skipped. New
   `GET`/`POST /api/v1/greenshed/dsf-counts/admin-mappings/unique-matches` (Admin only).
+
 ## 70.7.0 (2026-11-12)
 
 Lappers get their cycle time recorded and shown in Lapping Summaries, a live timer while a cycle
