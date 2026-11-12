@@ -4,7 +4,15 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
+import {
+  GearToastService,
+  OptionPickerComponent,
+  PickerOption,
+  ScanPanelComponent,
+  StationStatusComponent,
+  createStatusLine,
+  heldScanIgnoredText,
+} from '@meshforge/manufacturing/frontend/util-common';
 import {
   buildSummaryShelfTag,
   normalizeSummaryNumber,
@@ -22,8 +30,17 @@ import { DanaConfirmDialogComponent, DanaPageHeaderComponent } from '@dana/ui';
 @Component({
   selector: 'gear-greenshed-pull',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaPageHeaderComponent, DanaConfirmDialogComponent, GearScannerFocusDirective],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DanaPageHeaderComponent,
+    DanaConfirmDialogComponent,
+    ScanPanelComponent,
+    StationStatusComponent,
+    OptionPickerComponent,
+  ],
   templateUrl: './greenshed-pull.component.html',
+  styleUrl: '../station-page.css',
 })
 export class GreenshedPullComponent implements OnInit {
   private readonly api = inject(GreenshedApiService);
@@ -74,22 +91,12 @@ export class GreenshedPullComponent implements OnInit {
   message = '';
   result: GreenshedPullResult | null = null;
 
+  /** The pull reasons could not be loaded; a pull cannot be recorded until they are. */
+  refsError = '';
+
   ngOnInit(): void {
     this.refreshChoices();
-    this.api
-      .getReferenceData()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (refs) => {
-          this.refs = refs;
-          this.setRequestedReason();
-        },
-        error: (e: HttpErrorResponse) =>
-          (this.error = greenshedApiErrorText(
-            e,
-            'Could not load pull reasons.',
-          )),
-      });
+    this.loadReferenceData();
     this.route.queryParamMap
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
@@ -120,6 +127,98 @@ export class GreenshedPullComponent implements OnInit {
         else if (this.buildNumber) this.scanBuild();
       });
   }
+  loadReferenceData(): void {
+    this.refsError = '';
+    this.api
+      .getReferenceData()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (refs) => {
+          this.refs = refs;
+          this.setRequestedReason();
+        },
+        error: (e: HttpErrorResponse) =>
+          (this.refsError = greenshedApiErrorText(
+            e,
+            'Could not load pull reasons.',
+          )),
+      });
+  }
+
+  // ---- Station layout: numbered scan-or-pick steps, one status line, a reason on a blocked action ----
+
+  private readonly statusLine = createStatusLine();
+  /** Shown when there is no error or result: e.g. a scan made too early. */
+  notice = '';
+  get status() {
+    return this.statusLine(this.error, this.message, this.notice);
+  }
+  dismissStatus(): void {
+    this.error = '';
+    this.message = '';
+    this.notice = '';
+  }
+  scanIgnored(scan: string): void {
+    if (!this.error) this.notice = heldScanIgnoredText(scan);
+  }
+
+  get buildOptions(): PickerOption[] {
+    return this.availableRunningBuilds.map((row) => ({
+      value: row.build_number,
+      cells: [row.build_number, `Machine ${row.machine_number}`, `${row.summary_number} ${row.part_type_code}`],
+    }));
+  }
+  get shelfOptions(): PickerOption[] {
+    const serial = this.expectedShelfSerial;
+    return serial ? [{ value: serial, cells: [serial, `Exact ${this.build?.summary_number} ${this.build?.part_type_code} shelf`] }] : [];
+  }
+
+  /** What to do next, shown in the status line when there is no message. */
+  get prompt(): string {
+    if (this.busy) return 'Working…';
+    if (this.result) return 'Pull recorded. Tap Pull Another Cutter for the next one.';
+    if (!this.build || !this.contextValid) {
+      return this.lockedToRunningMachine ? 'Checking the cutter chosen on Running Machines…' : 'Scan or choose the active cutter to pull.';
+    }
+    if (!this.reason) return 'Choose the pull reason.';
+    if (this.reason.returns_to_shelf && !this.shelf) return this.expectedShelfSerial ? `Scan the Green Shed shelf ${this.expectedShelfSerial}.` : 'Scan the Green Shed shelf.';
+    return 'Check the destination, then tap Pull Cutter.';
+  }
+
+  /** Why Pull Cutter is not available, in operator terms. Empty when it is (or while working). */
+  get pullBlockedReason(): string {
+    if (this.busy || this.pullReady) return '';
+    if (!this.build || !this.contextValid) return 'Scan or choose the active cutter first (step 1).';
+    if (this.build.status_code !== 'RUNNING') return `Build ${this.build.build_number} is not RUNNING.`;
+    if (!this.reason) return 'Choose the pull reason (step 2).';
+    if (this.reason.returns_to_shelf && !this.shelf) return `Scan its Green Shed shelf${this.expectedShelfSerial ? ' ' + this.expectedShelfSerial : ''} (step 3).`;
+    return '';
+  }
+
+  /** A build scanned or picked: the same lookup and run checks as before. */
+  useBuild(value: string): void {
+    if (this.busy || this.lockedToRunningMachine || !value.trim()) return;
+    this.notice = '';
+    this.buildNumber = value.trim();
+    this.scanBuild();
+  }
+  changeBuild(): void {
+    if (this.busy || this.lockedToRunningMachine) return;
+    this.buildNumber = '';
+    this.onBuildInput();
+  }
+  useShelf(value: string): void {
+    if (this.busy || !value.trim()) return;
+    this.notice = '';
+    this.shelfSerial = value.trim();
+    this.scanShelf();
+  }
+  changeShelf(): void {
+    if (this.busy) return;
+    this.shelfSerial = '';
+    this.onShelfInput();
+  }
+
   private refreshChoices(): void {
     this.api
       .getDashboard()
@@ -289,7 +388,7 @@ export class GreenshedPullComponent implements OnInit {
     this.build = null;
     this.contextValid = false;
     this.buildNumber = '';
-    this.error = this.message = '';
+    this.error = this.message = this.notice = '';
     this.resetPullDownstream();
   }
   private resetPullDownstream(): void {
@@ -361,7 +460,7 @@ export class GreenshedPullComponent implements OnInit {
           const message = reason.returns_to_shelf
             ? `Cutter returned intact to ${shelf?.serial_number}.`
             : 'Cutter pulled and is ready to return to Cutter Builder.';
-          this.message = '';
+          this.message = message;
           this.toast.success(message, 'Cutter pull complete');
           this.refreshChoices();
         },
