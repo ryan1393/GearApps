@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
-  ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, HostListener,
+  ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter,
   Input, OnChanges, OnDestroy, Output, ViewChild, forwardRef,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
@@ -147,7 +147,8 @@ export class DanaComboboxComponent<T = any> implements ControlValueAccessor, OnC
 
   private onChange: (value: string) => void = () => undefined;
   private onTouched: () => void = () => undefined;
-  private scrollCleanup?: () => void;
+  /** Document/window listeners exist only while the list is open. */
+  private openCleanup?: () => void;
   private destroyed = false;
 
   constructor(private readonly host: ElementRef<HTMLElement>, private readonly cdr: ChangeDetectorRef) {}
@@ -251,11 +252,19 @@ export class DanaComboboxComponent<T = any> implements ControlValueAccessor, OnC
     if (this.disabled || this.open) return;
     if (showAll) this.query = '';
     this.open = true;
-    // Scroll events from overflow panels do not bubble to the window.
     const document = this.host.nativeElement.ownerDocument;
+    const view = document.defaultView;
     const reposition = () => this.onViewportChange();
+    const outside = (event: MouseEvent) => this.onDocumentMouseDown(event);
+    // Scroll events from overflow panels do not bubble to the window.
     document.addEventListener('scroll', reposition, true);
-    this.scrollCleanup = () => document.removeEventListener('scroll', reposition, true);
+    document.addEventListener('mousedown', outside);
+    view?.addEventListener('resize', reposition);
+    this.openCleanup = () => {
+      document.removeEventListener('scroll', reposition, true);
+      document.removeEventListener('mousedown', outside);
+      view?.removeEventListener('resize', reposition);
+    };
     this.place();
     this.refilter();
     const selected = this.filtered.findIndex((row) => !this.freeText && this.keyOf(row) === this.selectedKey);
@@ -265,8 +274,8 @@ export class DanaComboboxComponent<T = any> implements ControlValueAccessor, OnC
   }
 
   close(): void {
-    this.scrollCleanup?.();
-    this.scrollCleanup = undefined;
+    this.openCleanup?.();
+    this.openCleanup = undefined;
     if (!this.open) return;
     this.open = false;
     this.activeIndex = -1;
@@ -302,7 +311,6 @@ export class DanaComboboxComponent<T = any> implements ControlValueAccessor, OnC
     this.refilter();
   }
 
-  @HostListener('window:resize')
   onViewportChange(): void {
     if (!this.open) return;
     this.place();
@@ -329,14 +337,14 @@ export class DanaComboboxComponent<T = any> implements ControlValueAccessor, OnC
     };
   }
 
-  @HostListener('document:mousedown', ['$event'])
   onDocumentMouseDown(event: MouseEvent): void {
     if (this.open && !this.host.nativeElement.contains(event.target as Node)) this.close();
   }
 
   ngOnDestroy(): void {
     this.destroyed = true;
-    this.scrollCleanup?.();
+    this.openCleanup?.();
+    this.openCleanup = undefined;
   }
 
   private move(index: number): void {

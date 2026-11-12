@@ -6,7 +6,7 @@
   z-index: 2200;
   display: grid;
   width: min(420px, calc(100vw - 32px));
-  gap: 10px;
+  gap: 0;
   pointer-events: none;
 }
 
@@ -92,4 +92,4 @@
 }
 
 /* Dana naming aliases are emitted by DanaToastHostComponent; legacy gear-* classes stay during migration. */
-.dana-toast-stack{position:fixed;right:22px;bottom:22px;z-index:1200;display:grid;gap:10px;width:min(390px,calc(100vw - 32px))}
+.dana-toast-stack{position:fixed;right:22px;bottom:22px;z-index:1200;display:grid;gap:0;width:min(390px,calc(100vw - 32px))}

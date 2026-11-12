@@ -19,8 +19,9 @@
 
   --gear-heading: #1e2229;
   --gear-text: #303743;
-  --gear-muted: #707886;
-  --gear-muted-soft: #89909d;
+  /* Quiet text: both pass 4.5:1 on white and on the page grey. */
+  --gear-muted: #5b6573;
+  --gear-muted-soft: #687080;
   --gear-text-muted: var(--gear-muted);
   --gear-border: #dee1e4;
   --gear-border-soft: #ebecee;
@@ -92,7 +93,8 @@
   --gear-panel-header-pad-x: 16px;
 
   --gear-control-height: 44px;
-  --gear-control-border: var(--gear-border-strong);
+  /* Field outlines need 3:1 against the surface; --dana-control-border carries that value. */
+  --gear-control-border: var(--dana-control-border, var(--gear-border-strong));
   --gear-control-radius: var(--gear-radius-md);
   --gear-control-bg: var(--gear-surface);
 

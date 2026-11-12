@@ -2,6 +2,10 @@
 :root {
   --dana-help-surface: var(--dana-surface);
   --dana-theme-accent: var(--dana-primary);
+  /* Disabled actions are neutral, never a faded brand colour; the label stays at 4.5:1. */
+  --dana-disabled-bg: #eceef1;
+  --dana-disabled-border: #d3d7dc;
+  --dana-disabled-text: #5b6573;
 }
 .dana-theme-picker {
   position: static;
@@ -20,6 +24,37 @@
   margin: 0 var(--dana-page-padding) var(--dana-page-padding) auto;
 }
 dana-theme-toggle { display: flow-root; }
+/* In a top bar or user menu: no card, no page margin, sized like the neighbouring controls. */
+dana-theme-toggle.dana-theme-toggle-inline { display: block; flex: 0 0 auto; }
+.dana-theme-toggle-inline .dana-theme-picker {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--dana-muted);
+  font-size: 13px;
+  max-width: none;
+}
+.dana-theme-toggle-inline .dana-theme-picker select {
+  min-height: 34px;
+  border-color: var(--dana-control-border);
+  border-radius: 8px;
+  padding: 0 6px;
+  /* Keep the native drop-down arrow (form resets remove it). */
+  appearance: auto;
+  -webkit-appearance: auto;
+}
+@media screen and (max-width: 760px) {
+  .dana-theme-toggle-inline .dana-theme-picker-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
 .dana-theme-picker select {
   min-height: 36px;
   background: var(--dana-surface);
@@ -78,12 +113,15 @@ dana-theme-toggle { display: flow-root; }
 html:root[data-dana-theme='dark'] {
   --dana-text: #e5eaf1;
   --dana-muted: #b0bbca;
-  --dana-border: #485465;
+  --dana-border: #6e7c90;
   --dana-page: #131a23;
   --dana-surface: #202a37;
   --dana-primary: #ffb27c;
   --dana-primary-dark: #653113;
-  --dana-control-border: #627186;
+  --dana-control-border: #8391a6;
+  --dana-disabled-bg: #2b3747;
+  --dana-disabled-border: var(--dana-border);
+  --dana-disabled-text: #b0bbca;
   --dana-placeholder: #a7b3c3;
   --dana-neutral-soft: #2b3747;
   --dana-info: #a5ceff;
@@ -303,4 +341,25 @@ html:root[data-dana-theme='dark'] body :is(.gear-btn-primary, .dana-btn-primary,
   background: var(--dana-primary) !important;
   border-color: var(--dana-primary) !important;
   color: var(--dana-page) !important;
+}
+/* Disabled primary/secondary actions: neutral surface, readable label, not-allowed cursor. */
+html:root body :is(.dana-btn-primary, .dana-btn-secondary):is(:disabled, [aria-disabled='true']) {
+  background: var(--dana-disabled-bg) !important;
+  border-color: var(--dana-disabled-border) !important;
+  color: var(--dana-disabled-text) !important;
+  opacity: 1 !important;
+  box-shadow: none !important;
+  transform: none !important;
+  cursor: not-allowed !important;
+}
+/* Optional visible reason next to a disabled action (see README: danaDisabledReason). */
+.dana-disabled-reason {
+  display: block;
+  margin-block-start: 0.25rem;
+  color: var(--dana-muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+html:root[data-dana-theme='dark'] body .dana-card[data-tone='warning'] {
+  border-left-color: var(--dana-warning) !important;
 }
