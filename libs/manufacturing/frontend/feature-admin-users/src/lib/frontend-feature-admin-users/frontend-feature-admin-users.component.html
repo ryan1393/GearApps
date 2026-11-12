@@ -1,15 +1,6 @@
 <section class="gear-page gear-admin-page" [class.gear-roll-master-page]="activeTab === 'roll-masters'">
   <header class="gear-page-header" danaPageHeader eyebrow="ADMIN / MASTER DATA" heading="MeshForge Administration" description="Create the reference records that drive Blade Tracking, Cutter Builder, Greenshed, and Lapping. Changes here are shared across every MeshForge frontend."></header>
 
-  <div *ngIf="error" class="gear-alert gear-alert-danger mb-4" role="alert">
-    <strong>Unable to continue.</strong>
-    <span>{{ error }}</span>
-  </div>
-  <div *ngIf="message" class="gear-alert gear-alert-success mb-4" role="status">
-    <strong>Saved.</strong>
-    <span>{{ message }}</span>
-  </div>
-
   <label class="gear-field gear-admin-mobile-section" for="admin-section">Administration section
     <select id="admin-section" class="gear-select" [ngModel]="activeTab" (ngModelChange)="openTabByName($event)" [disabled]="busy">
       <optgroup label="People"><option value="users">Users</option></optgroup>
@@ -27,6 +18,21 @@
     <section class="gear-admin-section"><h2>System</h2><div class="gear-admin-tabs"><button type="button" [class.active]="activeTab === 'access'" [attr.aria-current]="activeTab === 'access' ? 'page' : null" (click)="setTab('access')">Roles &amp; Badges</button><button type="button" [attr.aria-current]="activeTab === 'launch' ? 'page' : null" [class.active]="activeTab === 'launch'" (click)="setTab('launch')">Launch Setup</button><button type="button" [attr.aria-current]="activeTab === 'dsf-mappings' ? 'page' : null" [class.active]="activeTab === 'dsf-mappings'" (click)="setTab('dsf-mappings')">DSF Mappings</button><button type="button" [attr.aria-current]="activeTab === 'label-printers' ? 'page' : null" [class.active]="activeTab === 'label-printers'" (click)="setTab('label-printers')">Label Printers</button><button type="button" [attr.aria-current]="activeTab === 'coater-rpa' ? 'page' : null" [class.active]="activeTab === 'coater-rpa'" (click)="setTab('coater-rpa')">Coater RPA</button><button type="button" [attr.aria-current]="activeTab === 'server-settings' ? 'page' : null" [class.active]="activeTab === 'server-settings'" (click)="setTab('server-settings')">Server Settings</button></div></section>
   </nav>
 
+  <div class="dana-page-stack">
+  <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert">
+    <strong>Unable to continue.</strong>
+    <span>{{ error }}</span>
+  </div>
+  <div *ngIf="message" class="gear-alert gear-alert-success" role="status">
+    <strong>Saved.</strong>
+    <span>{{ message }}</span>
+  </div>
+  <div *ngIf="failedChoices.length" class="gear-alert gear-alert-warning" role="alert">
+    <strong>Some choices could not be loaded.</strong>
+    <span>{{ failedChoices.join(', ') }} — the form may be missing options.</span>
+    <button type="button" class="gear-btn gear-btn-secondary" (click)="retryFailedChoices()">Retry</button>
+  </div>
+
   <gear-cycle-tests-page *ngIf="activeTab === 'cycle-tests'" />
   <gear-scanners-page *ngIf="activeTab === 'scanners'" />
   <gear-macros-page *ngIf="activeTab === 'macros'" />
@@ -43,7 +49,7 @@
   <gear-label-printer-picker *ngIf="activeTab === 'trays' || activeTab === 'containers' || activeTab === 'locations'" labelType="ASSET_TAG" label="Print tags to" />
 
   <div class="gear-admin-layout" *ngIf="activeTab === 'users'">
-    <form class="gear-panel gear-admin-form" #userEditor="ngForm" (ngSubmit)="createUser()" [attr.aria-busy]="busy">
+    <form class="gear-panel gear-admin-form" data-admin-editor #userEditor="ngForm" (ngSubmit)="createUser()" [attr.aria-busy]="busy">
       <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingUserId ? 'Edit User' : 'Create User' }}</span></div>
       <label class="gear-field">Email{{ editingUserId ? '' : ' (required)' }}<input id="admin-user-email" class="gear-input" type="email" email [(ngModel)]="userForm.email" #userEmail="ngModel" name="userEmail" autocomplete="off" [required]="!editingUserId" [disabled]="busy" [attr.aria-invalid]="userEmail.invalid && (userEmail.touched || userEditor.submitted)" aria-describedby="admin-user-email-error" /><small id="admin-user-email-error" *ngIf="userEmail.invalid && (userEmail.touched || userEditor.submitted)" class="gear-field-help">Enter a valid email address.</small></label>
       <label *ngIf="!editingUserId" class="gear-field">Temporary Password (required)<input id="admin-user-password" class="gear-input" type="password" [(ngModel)]="userForm.password" #userPassword="ngModel" name="userPassword" autocomplete="new-password" required [minlength]="minPasswordLength" maxlength="128" [disabled]="busy" [attr.aria-invalid]="userPassword.invalid && (userPassword.touched || userEditor.submitted)" aria-describedby="admin-user-password-help" /><small id="admin-user-password-help" class="gear-field-help">Use at least {{ minPasswordLength }} characters with uppercase and lowercase letters, a number, and a symbol.</small></label>
@@ -114,11 +120,12 @@
           </div>
         </div>
       </div>
+      <gear-admin-list-state [list]="usersList" noun="users" [shown]="filteredUsers.length" [total]="users.length" (retry)="loadUsers()" />
     </div>
   </div>
 
   <div class="gear-admin-layout" *ngIf="activeTab === 'part-summaries'">
-    <form class="gear-panel gear-admin-form" (ngSubmit)="createPartSummary()">
+    <form class="gear-panel gear-admin-form" data-admin-editor (ngSubmit)="createPartSummary()">
       <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingPartSummaryId ? 'Edit Part Summary' : 'Create Part Summary' }}</span></div>
       <div class="gear-form-grid">
         <label class="gear-field">Summary Number<input class="gear-input" [(ngModel)]="summaryForm.number" name="summaryNumber" placeholder="1.955FC" /></label>
@@ -240,11 +247,12 @@
           </div>
         </div>
       </div>
+      <gear-admin-list-state [list]="partSummariesList" noun="Part Summaries" [shown]="filteredPartSummaries.length" [total]="partSummaries.length" (retry)="loadPartSummaries()" />
     </div>
   </div>
 
   <div class="gear-admin-layout" *ngIf="activeTab === 'parts'">
-    <form class="gear-panel gear-admin-form" (ngSubmit)="createPart()">
+    <form class="gear-panel gear-admin-form" data-admin-editor (ngSubmit)="createPart()">
       <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingPartId ? 'Edit Part' : 'Create Part' }}</span></div>
 
       <label class="gear-field">
@@ -351,6 +359,7 @@
           </div>
         </div>
       </div>
+      <gear-admin-list-state [list]="partsList" noun="parts" [shown]="filteredParts.length" [total]="parts.length" (retry)="loadParts()" />
     </div>
   </div>
 
@@ -383,12 +392,13 @@
           </div>
         </div>
       </div>
-      <div *ngIf="!filteredRollMasterParts.length" class="gear-empty-state gear-admin-empty">No parts match this search.</div>
+      <gear-admin-list-state [list]="partsList" noun="parts" [shown]="filteredRollMasterParts.length" [total]="parts.length" (retry)="loadParts()" />
+      <div *ngIf="rollMastersList.error() !== null" class="gear-alert gear-alert-danger" role="alert"><strong>Could not load Roll Master quantities.</strong> <span>Quantities shown may be out of date.</span> <button type="button" class="gear-btn gear-btn-secondary" (click)="loadRollMasters()">Retry</button></div>
     </div>
   </div>
 
   <div class="gear-admin-layout" *ngIf="activeTab === 'models'">
-    <form class="gear-panel gear-admin-form" (ngSubmit)="createModel()">
+    <form class="gear-panel gear-admin-form" data-admin-editor (ngSubmit)="createModel()">
       <div class="gear-step-title"><span class="gear-step-number">1</span><span>Create Model</span></div>
       <label class="gear-field">Model Number<input class="gear-input" [(ngModel)]="modelForm.model_number" name="modelNumber" maxlength="100" placeholder="e.g. 174 or S-110" /></label>
       <label class="gear-field">Model Type<input class="gear-input" [(ngModel)]="modelForm.model_type" name="modelType" placeholder="Optional type / family" /></label>
@@ -429,11 +439,12 @@
           </div>
         </div>
       </div>
+      <gear-admin-list-state [list]="modelsList" noun="models" [shown]="filteredModels.length" [total]="models.length" (retry)="loadModels()" />
     </div>
   </div>
 
   <div class="gear-admin-layout" *ngIf="activeTab === 'machines'">
-    <form class="gear-panel gear-admin-form" (ngSubmit)="createMachine()">
+    <form class="gear-panel gear-admin-form" data-admin-editor (ngSubmit)="createMachine()">
       <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingMachineId ? 'Edit Machine' : 'Create Machine' }}</span></div>
       <label class="gear-field">Machine Number<input class="gear-input" [(ngModel)]="machineForm.machine_number" name="machineNumber" placeholder="520G" /></label>
       <label class="gear-field">Department
@@ -507,11 +518,12 @@
           </div>
         </div>
       </div>
+      <gear-admin-list-state [list]="machinesList" noun="machines" [shown]="filteredMachines.length" [total]="machines.length" (retry)="loadMachines()" />
     </div>
   </div>
 
   <div class="gear-admin-layout" data-gear-admin-style="standard-v18" *ngIf="activeTab === 'trays'">
-    <form class="gear-panel gear-admin-form" data-gear-admin-create="tray-v15" (ngSubmit)="createTray()">
+    <form class="gear-panel gear-admin-form" data-admin-editor data-gear-admin-create="tray-v15" (ngSubmit)="createTray()">
       <div class="gear-step-title"><span class="gear-step-number">1</span><span>Create Tray</span></div>
       <label class="gear-field">
         Tray Serial Number
@@ -600,12 +612,12 @@
         </div>
       </div>
 
-      <div *ngIf="!filteredTrays.length" class="gear-empty-state gear-admin-empty">No trays match this search.</div>
+      <gear-admin-list-state [list]="traysList" noun="trays" [shown]="filteredTrays.length" [total]="trays.length" (retry)="loadTrays()" />
     </div>
   </div>
 
   <div class="gear-admin-layout" data-gear-admin-style="standard-v18" *ngIf="activeTab === 'containers'">
-    <form class="gear-panel gear-admin-form" data-gear-admin-create="container-v15" (ngSubmit)="createContainer()">
+    <form class="gear-panel gear-admin-form" data-admin-editor data-gear-admin-create="container-v15" (ngSubmit)="createContainer()">
       <div class="gear-step-title"><span class="gear-step-number">1</span><span>Create Container</span></div>
       <label class="gear-field">
         Container Serial Number
@@ -678,14 +690,14 @@
         </div>
       </div>
 
-      <div *ngIf="!filteredContainers.length" class="gear-empty-state gear-admin-empty">No containers match this search.</div>
+      <gear-admin-list-state [list]="containersList" noun="containers" [shown]="filteredContainers.length" [total]="containers.length" (retry)="loadContainers()" />
     </div>
   </div>
 
   <gear-location-editor *ngIf="activeTab === 'locations'" [locations]="locations" (saved)="reloadLocations()" />
   <gear-admin-bulk-locations *ngIf="activeTab === 'locations'" (created)="reloadLocations()" />
   <div class="gear-admin-layout" *ngIf="activeTab === 'locations'">
-    <form class="gear-panel gear-admin-form" (ngSubmit)="saveLocation()">
+    <form class="gear-panel gear-admin-form" data-admin-editor (ngSubmit)="saveLocation()">
       <div class="gear-step-title">
         <span class="gear-step-number">1</span>
         <span>{{ editingLocationId ? 'Edit Location' : 'Create Location' }}</span>
@@ -911,12 +923,12 @@
         </div>
       </div>
 
-      <div *ngIf="!filteredLocations.length" class="gear-empty-state gear-admin-empty">No locations match this search.</div>
+      <gear-admin-list-state [list]="locationsList" noun="locations" [shown]="filteredLocations.length" [total]="locations.length" (retry)="loadLocations()" />
     </div>
   </div>
 
   <div class="gear-admin-layout" *ngIf="activeTab === 'cutter-bodies'">
-    <form class="gear-panel gear-admin-form" (ngSubmit)="createCutterBody()">
+    <form class="gear-panel gear-admin-form" data-admin-editor (ngSubmit)="createCutterBody()">
       <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingCutterBodyId ? 'Edit Cutter Body' : 'Create Cutter Body' }}</span></div>
       <label class="gear-field">MF / Manufacturer Serial<input class="gear-input" [(ngModel)]="cutterBodyForm.mf_serial_number" name="cutterMfSerial" /></label>
       <label class="gear-field">Dana Serial (if already etched)<input class="gear-input" [(ngModel)]="cutterBodyForm.dana_serial_number" name="cutterDanaSerial" /></label>
@@ -1025,7 +1037,10 @@
           </div>
         </div>
       </div>
+      <gear-admin-list-state [list]="cutterBodiesList" noun="cutter bodies" [shown]="filteredCutterBodies.length" [total]="cutterBodies.length" (retry)="loadCutterBodies()" />
     </div>
   </div>
+  </div>
   <dana-confirm-dialog [open]="!!userToDisable" title="Disable this account?" [message]="'Disable ' + (userToDisable?.email || userToDisable?.fullName || 'this account') + '? The user will be signed out and cannot sign in until the account is enabled again.'" confirmLabel="Disable account" [danger]="true" (confirm)="confirmDisableUser()" (cancel)="userToDisable = null" />
+  <dana-confirm-dialog [open]="!!confirmation.request" [title]="confirmation.request?.title || 'Confirm'" [message]="confirmation.request?.message || ''" [confirmLabel]="confirmation.request?.confirmLabel || 'Confirm'" [danger]="!!confirmation.request?.danger" (confirm)="confirmation.accept()" (cancel)="confirmation.dismiss()" />
 </section>

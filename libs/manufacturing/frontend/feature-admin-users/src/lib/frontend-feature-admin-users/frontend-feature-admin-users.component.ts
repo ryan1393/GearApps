@@ -8,12 +8,14 @@ import {
   Component,
   ElementRef,
   inject,
+  OnDestroy,
   OnInit,
   } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, Validators } from '@angular/forms';
 import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint, openLocationLabels } from '@meshforge/manufacturing/frontend/util-common';
-import { Observable } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
+import { Loadable, loadable } from '@meshforge/client/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
@@ -32,6 +34,7 @@ import {
   CutterBodyRuleResolution,
   resolveCutterBodyRule,
   PASSWORD_MIN_LENGTH,
+  isStrongPassword,
 } from '@meshforge/manufacturing/shared/util-constants';
 import { IPartSummarySettings, ISavePartSummaryRequest, ISummaryBodyRuleRow, ISummaryPartTypeSettings } from '@meshforge/manufacturing/shared/util-types';
 import {
@@ -61,6 +64,8 @@ import { LocationEditorComponent } from '../bulk-locations/location-editor.compo
 import { BulkLocationsComponent } from '../bulk-locations/bulk-locations.component';
 import { LappingGearsetsComponent } from '../lapping/lapping-gearsets.component';
 import { LappingMachinesComponent } from '../lapping/lapping-machines.component';
+import { AdminConfirmation, adminSearchMatches, allPages, failedLists } from '../shared/admin-data';
+import { AdminListStateComponent } from '../shared/admin-list-state.component';
 import {
   DanaPageHeaderComponent,
   DanaConfirmDialogComponent,
@@ -73,16 +78,46 @@ type AdminTab = 'access' | 'cycle-tests' | 'scanners' | 'macros' | 'fanuc-variab
 // Every tab, for ?tab= deep links; `satisfies` keeps it in step with AdminTab.
 const ADMIN_TABS = ['access', 'cycle-tests', 'scanners', 'macros', 'fanuc-variables', 'collector-tokens', 'users', 'part-summaries', 'parts', 'gearsets', 'roll-masters', 'models', 'machines', 'lapping-machines', 'dsf-mappings', 'label-printers', 'coater-rpa', 'launch', 'server-settings', 'trays', 'containers', 'locations', 'cutter-bodies'] as const satisfies readonly AdminTab[];
 const isAdminTab = (value: unknown): value is AdminTab => ADMIN_TABS.includes(value as AdminTab);
+const isAdminRole = (role?: string | null) => String(role ?? '').toLowerCase() === 'admin';
+
+/** The lists a tab shows or chooses from; only these load while it is open. */
+type AdminList = 'users' | 'departments' | 'models' | 'partSummaries' | 'summaryBodyRules' | 'summarySettings' | 'partTypes'
+  | 'parts' | 'rollMasters' | 'machines' | 'trays' | 'containers' | 'locations' | 'cutterBodies' | 'cutterBodyDefinitions';
+const TAB_LISTS: Partial<Record<AdminTab, readonly AdminList[]>> = {
+  users: ['users', 'departments'],
+  access: ['users'],
+  'part-summaries': ['partSummaries', 'models', 'summaryBodyRules', 'summarySettings'],
+  parts: ['parts', 'partSummaries', 'partTypes'],
+  'roll-masters': ['parts', 'rollMasters'],
+  models: ['models'],
+  machines: ['machines', 'departments'],
+  'lapping-machines': ['machines'],
+  trays: ['trays'],
+  containers: ['containers'],
+  locations: ['locations', 'partSummaries', 'partTypes'],
+  'cutter-bodies': ['cutterBodies', 'cutterBodyDefinitions'],
+};
+/** The list a tab is about; its own list-state shows its failures. */
+const TAB_OWN_LIST: Partial<Record<AdminTab, AdminList>> = {
+  users: 'users', 'part-summaries': 'partSummaries', parts: 'parts', 'roll-masters': 'parts', models: 'models',
+  machines: 'machines', trays: 'trays', containers: 'containers', locations: 'locations', 'cutter-bodies': 'cutterBodies',
+};
+const LIST_NAMES: Record<AdminList, string> = {
+  users: 'users', departments: 'departments', models: 'models', partSummaries: 'Part Summaries',
+  summaryBodyRules: 'Body Size Rules', summarySettings: 'Part Summary settings', partTypes: 'Part Types', parts: 'parts',
+  rollMasters: 'Roll Master quantities', machines: 'machines', trays: 'trays', containers: 'containers', locations: 'locations',
+  cutterBodies: 'cutter bodies', cutterBodyDefinitions: 'cutter body definitions',
+};
 
 @Component({
   selector: 'gear-admin-users-page',
   standalone: true,
-  imports: [DanaConfirmDialogComponent, AccessManagementComponent, LocationEditorComponent, CoaterRpaSetupComponent, LaunchSetupComponent, BulkLocationsComponent, DanaToneDirective, MachineDsfCountComponent,CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent, CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, ServerSettingsComponent, GearLabelPrinterPickerComponent, LappingGearsetsComponent, LappingMachinesComponent],
+  imports: [DanaConfirmDialogComponent, AdminListStateComponent, AccessManagementComponent, LocationEditorComponent, CoaterRpaSetupComponent, LaunchSetupComponent, BulkLocationsComponent, DanaToneDirective, MachineDsfCountComponent,CycleTestsPageComponent, ScannersPageComponent, MacrosPageComponent, FanucVariablesPageComponent, CollectorTokensPageComponent, CommonModule, FormsModule, DanaPageHeaderComponent, DsfMachineMappingsComponent, LabelPrintersComponent, ServerSettingsComponent, GearLabelPrinterPickerComponent, LappingGearsetsComponent, LappingMachinesComponent],
   templateUrl: './frontend-feature-admin-users.component.html',
   styleUrls: ['./frontend-feature-admin-users.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class FrontendFeatureAdminUsersComponent implements OnInit {
+export class FrontendFeatureAdminUsersComponent implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly api = inject(AdminApiService);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -99,23 +134,71 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   error = '';
   readonly minPasswordLength = PASSWORD_MIN_LENGTH;
   userToDisable: AdminUser | null = null;
+  /** In-page confirmations for disabling records and granting administrator access. */
+  readonly confirmation = new AdminConfirmation();
 
-  users: AdminUser[] = [];
-  partSummaries: PartSummaryRow[] = [];
-  partTypes: PartTypeRow[] = [];
-  parts: PartRow[] = [];
-  rollMasters: RollMasterRow[] = [];
-  models: ModelRow[] = [];
-  departments: DepartmentRow[] = [];
-  machines: MachineRow[] = [];
-  trays: AdminTrayRow[] = [];
-  containers: AdminContainerRow[] = [];
-  locations: AdminLocationRow[] = [];
-  cutterBodies: CutterBodyRow[] = [];
+  // Each list loads when a tab that needs it opens; a newer load cancels an older one.
+  readonly usersList = loadable<AdminUser[]>([]);
+  readonly partSummariesList = loadable<PartSummaryRow[]>([]);
+  readonly partTypesList = loadable<PartTypeRow[]>([]);
+  readonly partsList = loadable<PartRow[]>([]);
+  readonly rollMastersList = loadable<RollMasterRow[]>([]);
+  readonly modelsList = loadable<ModelRow[]>([]);
+  readonly departmentsList = loadable<DepartmentRow[]>([]);
+  readonly machinesList = loadable<MachineRow[]>([]);
+  readonly traysList = loadable<AdminTrayRow[]>([]);
+  readonly containersList = loadable<AdminContainerRow[]>([]);
+  readonly locationsList = loadable<AdminLocationRow[]>([]);
+  readonly cutterBodiesList = loadable<CutterBodyRow[]>([]);
+  readonly cutterBodyDefinitionsList = loadable<CutterBodyDefinitionRow[]>([]);
   /** Summary Body Size Rules keyed by Summary id; the rule controls the read-only Required Blades. */
-  summaryBodyRules = new Map<string, ISummaryBodyRuleRow>();
+  readonly summaryBodyRulesList = loadable(new Map<string, ISummaryBodyRuleRow>());
   /** RING/PINION HOS, Inner blade and Outer blade of each Summary (blank when not set). */
-  summarySettings = new Map<string, IPartSummarySettings>();
+  readonly summarySettingsList = loadable(new Map<string, IPartSummarySettings>());
+
+  get users(): AdminUser[] { return this.usersList.value(); }
+  get partSummaries(): PartSummaryRow[] { return this.partSummariesList.value(); }
+  get partTypes(): PartTypeRow[] { return this.partTypesList.value(); }
+  get parts(): PartRow[] { return this.partsList.value(); }
+  get rollMasters(): RollMasterRow[] { return this.rollMastersList.value(); }
+  get models(): ModelRow[] { return this.modelsList.value(); }
+  get departments(): DepartmentRow[] { return this.departmentsList.value(); }
+  get machines(): MachineRow[] { return this.machinesList.value(); }
+  get trays(): AdminTrayRow[] { return this.traysList.value(); }
+  get containers(): AdminContainerRow[] { return this.containersList.value(); }
+  get locations(): AdminLocationRow[] { return this.locationsList.value(); }
+  get cutterBodies(): CutterBodyRow[] { return this.cutterBodiesList.value(); }
+  get cutterBodyDefinitions(): CutterBodyDefinitionRow[] { return this.cutterBodyDefinitionsList.value(); }
+  get summaryBodyRules(): Map<string, ISummaryBodyRuleRow> { return this.summaryBodyRulesList.value(); }
+  get summarySettings(): Map<string, IPartSummarySettings> { return this.summarySettingsList.value(); }
+
+  private readonly lists: Record<AdminList, { list: Loadable<unknown>; load: () => void }> = {
+    users: { list: this.usersList, load: () => this.loadUsers() },
+    departments: { list: this.departmentsList, load: () => this.loadDepartments() },
+    models: { list: this.modelsList, load: () => this.loadModels() },
+    partSummaries: { list: this.partSummariesList, load: () => this.loadPartSummaries() },
+    summaryBodyRules: { list: this.summaryBodyRulesList, load: () => this.loadSummaryBodyRules() },
+    summarySettings: { list: this.summarySettingsList, load: () => this.loadSummarySettings() },
+    partTypes: { list: this.partTypesList, load: () => this.loadPartTypes() },
+    parts: { list: this.partsList, load: () => this.loadParts() },
+    rollMasters: { list: this.rollMastersList, load: () => this.loadRollMasters() },
+    machines: { list: this.machinesList, load: () => this.loadMachines() },
+    trays: { list: this.traysList, load: () => this.loadTrays() },
+    containers: { list: this.containersList, load: () => this.loadContainers() },
+    locations: { list: this.locationsList, load: () => this.loadLocations() },
+    cutterBodies: { list: this.cutterBodiesList, load: () => this.loadCutterBodies() },
+    cutterBodyDefinitions: { list: this.cutterBodyDefinitionsList, load: () => this.loadCutterBodyDefinitions() },
+  };
+
+  /** Choices the open tab's form needs that could not be loaded. */
+  get failedChoices(): string[] {
+    const lists = (TAB_LISTS[this.activeTab] ?? []).filter((name) => name !== TAB_OWN_LIST[this.activeTab]);
+    return failedLists(Object.fromEntries(lists.map((name) => [LIST_NAMES[name], this.lists[name].list])));
+  }
+
+  retryFailedChoices(): void {
+    for (const name of TAB_LISTS[this.activeTab] ?? []) if (this.lists[name].list.error() !== null) this.lists[name].load();
+  }
   readonly summaryPartTypes = ['RING', 'PINION'] as const;
   readonly knownBladeLabels: readonly string[] = KNOWN_BLADE_LABELS;
   /** Edit Part Summary draft: both Part Type groups and the Body Size choice ('KEEP' keeps the mapping). */
@@ -139,6 +222,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   editingMachineId: string | null = null;
   editingLocationId: string | null = null;
   editingCutterBodyId: string | null = null;
+  /** Typed Roll Master quantities per part, created when parts or Roll Masters load (never while rendering). */
   rollMasterEdits: Record<string, { current_quantity: number; minimum_quantity: number }> = {};
   printingTagId: string | null = null;
 
@@ -217,7 +301,6 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     description: '',
     definition_id: '',
   };
-  cutterBodyDefinitions: CutterBodyDefinitionRow[] = [];
 
   ngOnInit(): void {
     // ?tab= deep links, e.g. the old Lapping master-data pages redirect to /admin?tab=gearsets.
@@ -225,9 +308,22 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     if (isAdminTab(requested)) this.activeTab = requested;
     this.route?.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
       const tab = params.get('tab');
-      if (isAdminTab(tab)) { this.activeTab = tab; this.cdr.markForCheck(); }
+      if (isAdminTab(tab) && tab !== this.activeTab) { this.activeTab = tab; this.loadTab(); this.cdr.markForCheck(); }
     });
-    this.refreshAll();
+    this.loadTab();
+  }
+
+  ngOnDestroy(): void {
+    for (const { list } of Object.values(this.lists)) list.dispose();
+  }
+
+  /** Loads the open tab's lists and cancels loads the other tabs started. */
+  private loadTab(): void {
+    const needed = new Set(TAB_LISTS[this.activeTab] ?? []);
+    for (const [name, entry] of Object.entries(this.lists) as [AdminList, { list: Loadable<unknown>; load: () => void }][]) {
+      if (needed.has(name)) entry.load();
+      else entry.list.dispose();
+    }
   }
 
   /** Two enabled models with one number are usually the same model entered with and without a type. */
@@ -248,14 +344,18 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   }
 
   setTab(tab: AdminTab): void {
+    const changed = tab !== this.activeTab;
     this.activeTab = tab;
     this.clearNotice();
+    this.confirmation.dismiss();
+    if (changed) this.loadTab();
     if (this.route && this.router) {
       void this.router.navigate([], { relativeTo: this.route, queryParams: { tab }, queryParamsHandling: 'merge', replaceUrl: true });
     }
   }
 
-  createUser(): void {
+  /** `confirmed`: the administrator already agreed to grant administrator access. */
+  createUser(confirmed = false): void {
     if (this.busy) return;
     const email = this.userForm.email.trim();
     if (this.editingUserId ? !this.userForm.departmentId : (!email || !this.userForm.departmentId || !this.userForm.password)) {
@@ -271,13 +371,28 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       this.focusUserField('#admin-user-email');
       return;
     }
-    if (!this.editingUserId && this.userForm.password.length < PASSWORD_MIN_LENGTH) {
+    if (!this.editingUserId && !isStrongPassword(this.userForm.password)) {
       this.error = `Temporary password must have at least ${PASSWORD_MIN_LENGTH} characters, uppercase and lowercase letters, a number, and a symbol.`;
       this.focusUserField('#admin-user-password');
       return;
     }
     if (this.editingUserId && this.isSelf(this.editingUserId) && this.userForm.role !== 'admin') {
       this.error = 'You cannot remove your own administrator role. Ask another administrator.';
+      return;
+    }
+
+    const grantsAdmin = isAdminRole(this.userForm.role) &&
+      (!this.editingUserId || !isAdminRole(this.users.find((user) => user.id === this.editingUserId)?.role));
+    if (grantsAdmin && !confirmed) {
+      const who = email || 'This account';
+      this.confirmation.ask({
+        title: this.editingUserId ? 'Make this user an administrator?' : 'Create an administrator?',
+        message: `${who} will be able to change every MeshForge setting, account and record. Administrators sign in with email and password, not a badge.`,
+        confirmLabel: this.editingUserId ? 'Make administrator' : 'Create administrator',
+        danger: true,
+        run: () => this.createUser(true),
+      });
+      this.cdr.markForCheck();
       return;
     }
 
@@ -309,9 +424,9 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     this.editingUserId = user.id;
     this.userForm = {
       email: user.email || '', password: '', firstName: user.firstName || '', lastName: user.lastName || '',
-      role: user.role || 'user', departmentId: user.departmentId || '',
+      role: isAdminRole(user.role) ? 'admin' : 'user', departmentId: user.departmentId || '',
     };
-    this.clearNotice(); this.cdr.markForCheck();
+    this.clearNotice(); this.focusEditor();
   }
 
   cancelUserEdit(): void { this.resetUserForm(); this.clearNotice(); this.cdr.markForCheck(); }
@@ -329,6 +444,15 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     const user = this.userToDisable;
     this.userToDisable = null;
     if (user) this.toggleUserEnabled(user);
+  }
+
+  /** Brings the tab's form into view and focuses its first field, e.g. after Edit is clicked below it. */
+  private focusEditor(): void {
+    this.cdr.detectChanges();
+    const form = this.element.nativeElement.querySelector<HTMLElement>('form[data-admin-editor]');
+    if (!form) return;
+    form.scrollIntoView?.({ block: 'start', behavior: 'smooth' });
+    form.querySelector<HTMLElement>('input:not([type=hidden]):not([disabled]), select:not([disabled]), textarea:not([disabled])')?.focus({ preventScroll: true });
   }
 
   private focusUserField(selector: string): void {
@@ -353,7 +477,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     if (this.editingPartSummaryId) { this.savePartSummary(this.editingPartSummaryId, payload); return; }
     // Active/enabled are set on create only; an edit must not silently re-enable a disabled record.
     this.runCreate(this.api.createPartSummary({ ...payload, active: true, enabled: true }), 'Part Summary created.', () => {
-      this.resetPartSummaryForm(); this.loadPartSummaries(); this.loadSummaryBodyRules();
+      this.resetPartSummaryForm(); this.loadPartSummaries(); this.loadSummaryBodyRules(); this.loadSummarySettings();
     });
   }
 
@@ -361,7 +485,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
    * Save Part Summary: Summary fields, both RING/PINION groups and any Body Size change go in ONE
    * request and one transaction. On failure nothing is saved and the draft stays in the form.
    */
-  private savePartSummary(summaryId: string, summaryFields: { number: string; revision: string; model_id: string | null; hos: string | null }): void {
+  private savePartSummary(summaryId: string, summaryFields: { number: string; revision: string; model_id: string | null; hos: string | null }, confirmed = false): void {
     if (this.busy) return;
     const body: ISavePartSummaryRequest = { ...summaryFields, part_types: {} };
     for (const code of this.summaryPartTypes) {
@@ -374,8 +498,14 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       body.body_rule = this.summaryBodyRuleChoice || null;
       const rule = CUTTER_BODY_RULES.find((r) => r.code === this.summaryBodyRuleChoice);
       const existing = current?.required_blade_sets;
-      if (rule && existing != null && existing !== rule.blade_sets &&
-          !globalThis.confirm(`${rule.label} changes ${summaryFields.number}'s Required Blades from ${existing * 2} to ${rule.total_blades} for every Part Type. Trays already ground keep their quantity. Continue?`)) {
+      if (rule && existing != null && existing !== rule.blade_sets && !confirmed) {
+        this.confirmation.ask({
+          title: 'Change Required Blades?',
+          message: `${rule.label} changes ${summaryFields.number}'s Required Blades from ${existing * 2} to ${rule.total_blades} for every Part Type. Trays already ground keep their quantity.`,
+          confirmLabel: 'Save Part Summary',
+          run: () => this.savePartSummary(summaryId, summaryFields, true),
+        });
+        this.cdr.markForCheck();
         return;
       }
     }
@@ -384,13 +514,13 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       next: (row) => {
         this.busy = false;
         const trays = row.open_trays_with_other_quantity ?? 0;
-        this.toast.success(`${row.summary_number} saved.${trays ? ` ${trays} tray(s) hold the previous quantity and need review.` : ''}`, 'Saved');
+        this.message = `${row.summary_number} saved.${trays ? ` ${trays} tray(s) hold the previous quantity and need review.` : ''}`;
         this.resetPartSummaryForm();
-        this.loadPartSummaries(); this.loadSummaryBodyRules(); this.loadParts();
+        this.loadPartSummaries(); this.loadSummaryBodyRules(); this.loadSummarySettings();
         this.cdr.markForCheck();
       },
       // The draft is kept so the administrator can correct it and save again.
-      error: (error: HttpErrorResponse) => { this.busy = false; this.toast.error(this.errorMessage(error), 'Save failed — nothing was changed'); this.cdr.markForCheck(); },
+      error: (error: HttpErrorResponse) => { this.busy = false; this.error = `Nothing was changed. ${this.errorMessage(error)}`; this.cdr.markForCheck(); },
     });
   }
 
@@ -434,7 +564,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     }
     this.summaryTypeForm = form;
     this.summaryBodyRuleChoice = 'KEEP';
-    this.clearNotice(); this.cdr.markForCheck();
+    this.clearNotice(); this.focusEditor();
   }
 
   cancelPartSummaryEdit(): void { this.resetPartSummaryForm(); this.clearNotice(); this.cdr.markForCheck(); }
@@ -476,8 +606,9 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     return resolveCutterBodyRule(body);
   }
 
-  togglePartSummaryEnabled(summary: PartSummaryRow): void {
+  togglePartSummaryEnabled(summary: PartSummaryRow, confirmed = false): void {
     const enabled = !summary.enabled;
+    if (!enabled && !confirmed) { this.askDisable(`Part Summary ${summary.number}`, 'Parts, locations and new work can no longer choose it until it is enabled again.', () => this.togglePartSummaryEnabled(summary, true)); return; }
     this.runCreate(this.api.updatePartSummary(summary.id, { enabled, active: enabled }), `Part Summary ${summary.number} ${enabled ? 'enabled' : 'disabled'}.`, () => this.loadPartSummaries());
   }
 
@@ -515,7 +646,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       part_type_id: part.part_type_id,
       teeth: part.teeth,
     };
-    this.clearNotice(); this.cdr.markForCheck();
+    this.clearNotice(); this.focusEditor();
   }
 
   cancelPartEdit(): void { this.resetPartForm(); this.clearNotice(); this.cdr.markForCheck(); }
@@ -534,9 +665,10 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     this.partForm = { part_number: '', summary_id: '', part_type_id: '', teeth: null };
   }
 
-  togglePartEnabled(part: PartRow): void {
+  togglePartEnabled(part: PartRow, confirmed = false): void {
     const enabled = !part.enabled;
-    this.runCreate(this.api.updatePart(part.id, { enabled, active: enabled }), `Part ${part.part_number} ${enabled ? 'enabled' : 'disabled'}.`, () => { this.loadParts(); this.loadRollMasters(); });
+    if (!enabled && !confirmed) { this.askDisable(`part ${part.part_number}`, 'It can no longer be chosen for new work until it is enabled again.', () => this.togglePartEnabled(part, true)); return; }
+    this.runCreate(this.api.updatePart(part.id, { enabled, active: enabled }), `Part ${part.part_number} ${enabled ? 'enabled' : 'disabled'}.`, () => this.loadParts());
   }
 
   createModel(): void {
@@ -587,25 +719,26 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       machine_number: machine.machine_number, department_id: machine.department_id, cell: machine.cell,
       description: machine.description || '', machine_type: machine.machine_type === 'GRINDER' ? 'GRINDER' : machine.machine_type === 'CUTTER_BUILDER' ? 'CUTTER_BUILDER' : 'PRODUCTION',
     };
-    this.clearNotice(); this.cdr.markForCheck();
+    this.clearNotice(); this.focusEditor();
   }
 
   cancelMachineEdit(): void { this.resetMachineForm(); this.clearNotice(); this.cdr.markForCheck(); }
 
-  toggleMachineEnabled(machine: MachineRow): void {
+  toggleMachineEnabled(machine: MachineRow, confirmed = false): void {
     const enabled = !machine.enabled;
+    if (!enabled && !confirmed) { this.askDisable(`machine ${machine.machine_number}`, 'It can no longer be chosen for builds, counts or lapping until it is enabled again.', () => this.toggleMachineEnabled(machine, true)); return; }
     this.runCreate(this.api.updateMachine(machine.id, { enabled, active: enabled }), `Machine ${machine.machine_number} ${enabled ? 'enabled' : 'disabled'}.`, () => this.loadMachines());
   }
 
   private adminSearchMatches(searchText: string, values: unknown[]): boolean {
-    const search = searchText.trim().toUpperCase();
-    if (!search) return true;
+    return adminSearchMatches(searchText, values);
+  }
 
-    return values
-      .filter((value) => value !== null && value !== undefined && String(value).trim())
-      .join(' ')
-      .toUpperCase()
-      .includes(search);
+  /** Disabling waits for an in-page confirmation; `send` runs once it is given. */
+  private askDisable(what: string, consequence: string, send: () => void): void {
+    if (this.busy) return;
+    this.confirmation.ask({ title: `Disable ${what}?`, message: `Disable ${what}? ${consequence}`, confirmLabel: 'Disable', danger: true, run: send });
+    this.cdr.markForCheck();
   }
 
   get filteredUsers(): AdminUser[] {
@@ -690,14 +823,22 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   }
 
   rollMasterEdit(part: PartRow): { current_quantity: number; minimum_quantity: number } {
-    if (!this.rollMasterEdits[part.id]) {
-      const configured = this.rollMasters.find((row) => row.part_id === part.id) ?? part.roll_master ?? null;
-      this.rollMasterEdits[part.id] = {
-        current_quantity: configured?.current_quantity ?? 0,
-        minimum_quantity: configured?.minimum_quantity ?? configured?.required_count ?? 0,
-      };
-    }
-    return this.rollMasterEdits[part.id];
+    return this.rollMasterEdits[part.id] ?? this.rollMasterDefaults(part);
+  }
+
+  private rollMasterDefaults(part: PartRow, rollMasters = this.rollMasters): { current_quantity: number; minimum_quantity: number } {
+    const configured = rollMasters.find((row) => row.part_id === part.id) ?? part.roll_master ?? null;
+    return {
+      current_quantity: configured?.current_quantity ?? 0,
+      minimum_quantity: configured?.minimum_quantity ?? configured?.required_count ?? 0,
+    };
+  }
+
+  /** Gives every part an editable quantity; typed values that have not been saved are kept. */
+  private syncRollMasterEdits(parts = this.parts, rollMasters = this.rollMasters): void {
+    const edits: Record<string, { current_quantity: number; minimum_quantity: number }> = {};
+    for (const part of parts) edits[part.id] = this.rollMasterEdits[part.id] ?? this.rollMasterDefaults(part, rollMasters);
+    this.rollMasterEdits = edits;
   }
 
   rollMasterRecord(part: PartRow): RollMasterRow | null {
@@ -783,13 +924,15 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     );
   }
 
-  toggleTrayEnabled(tray: AdminTrayRow): void {
+  toggleTrayEnabled(tray: AdminTrayRow, confirmed = false): void {
     const enabled = !tray.enabled;
+    if (!enabled && !confirmed) { this.askDisable(`tray ${tray.serial_number}`, 'Scans of it are refused until it is enabled again.', () => this.toggleTrayEnabled(tray, true)); return; }
     this.runCreate(this.api.updateTray(tray.id, { enabled }), `Tray ${tray.serial_number} ${enabled ? 'enabled' : 'disabled'}.`, () => this.loadTrays());
   }
 
-  toggleContainerEnabled(container: AdminContainerRow): void {
+  toggleContainerEnabled(container: AdminContainerRow, confirmed = false): void {
     const enabled = !container.enabled;
+    if (!enabled && !confirmed) { this.askDisable(`container ${container.serial_number}`, 'Scans of it are refused until it is enabled again.', () => this.toggleContainerEnabled(container, true)); return; }
     this.runCreate(this.api.updateContainer(container.id, { enabled }), `Container ${container.serial_number} ${enabled ? 'enabled' : 'disabled'}.`, () => this.loadContainers());
   }
 
@@ -968,7 +1111,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       part_type_id: location.part_type_id || '',
     };
     this.clearNotice();
-    this.cdr.markForCheck();
+    this.focusEditor();
   }
 
   cancelLocationEdit(): void {
@@ -977,8 +1120,9 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
-  toggleLocationEnabled(location: AdminLocationRow): void {
+  toggleLocationEnabled(location: AdminLocationRow, confirmed = false): void {
     const nextEnabled = !location.enabled;
+    if (!nextEnabled && !confirmed) { this.askDisable(`location ${location.serial_number}`, 'Trays and cutters can no longer be placed there until it is enabled again.', () => this.toggleLocationEnabled(location, true)); return; }
     this.runCreate(
       this.api.updateLocation(location.id, { enabled: nextEnabled }),
       `Location ${location.serial_number} ${nextEnabled ? 'enabled' : 'disabled'}.`,
@@ -1008,11 +1152,8 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
       },
       error: (error: HttpErrorResponse) => {
         this.printingTagId = null;
-        this.error = adminApiErrorText(error);
-        if (!this.error) {
-          this.error = `Could not print ${serialNumber} tag.`;
-        }
-        this.toast.error(this.error, 'Tag not printed');
+        // Shown once, in the page banner.
+        this.error = adminApiErrorText(error) || `Could not print ${serialNumber} tag.`;
         this.cdr.markForCheck();
       },
     });
@@ -1031,10 +1172,7 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
         department: location.department,
       },
     ]);
-    if (!opened.ok) {
-      this.error = opened.reason;
-      this.toast.error(opened.reason, 'Label not printed');
-    }
+    if (!opened.ok) this.error = opened.reason;
     this.cdr.markForCheck();
   }
 
@@ -1057,13 +1195,14 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
   beginEditCutterBody(body: CutterBodyRow): void {
     this.editingCutterBodyId = body.id;
     this.cutterBodyForm = { mf_serial_number: body.mf_serial_number || '', dana_serial_number: body.dana_serial_number || '', description: body.description || '', definition_id: body.definition_id || body.definition?.id || '' };
-    this.clearNotice(); this.cdr.markForCheck();
+    this.clearNotice(); this.focusEditor();
   }
 
   cancelCutterBodyEdit(): void { this.resetCutterBodyForm(); this.clearNotice(); this.cdr.markForCheck(); }
 
-  toggleCutterBodyEnabled(body: CutterBodyRow): void {
+  toggleCutterBodyEnabled(body: CutterBodyRow, confirmed = false): void {
     const enabled = !body.enabled;
+    if (!enabled && !confirmed) { this.askDisable(`cutter body ${body.dana_serial_number || body.mf_serial_number || ''}`.trim(), 'It can no longer be used for new builds until it is enabled again.', () => this.toggleCutterBodyEnabled(body, true)); return; }
     this.runCreate(this.api.updateCutterBody(body.id, { enabled }), `Cutter body ${enabled ? 'enabled' : 'disabled'}.`, () => this.loadCutterBodies());
   }
 
@@ -1093,156 +1232,49 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     );
   }
 
-  private refreshAll(): void {
-    this.loadUsers();
-    this.loadModels();
-    this.loadDepartments();
-    this.loadPartSummaries();
-    this.loadSummaryBodyRules();
-    this.loadPartTypes();
-    this.loadParts();
-    this.loadRollMasters();
-    this.loadMachines();
-    this.loadTrays();
-    this.loadContainers();
-    this.loadLocations();
-    this.loadCutterBodies();
+  loadUsers(): void {
+    this.usersList.load(allPages((page) => this.api.listUsers(page, 50)));
   }
 
-  private loadUsers(page = 1, accumulated: AdminUser[] = []): void {
-    this.api.listUsers(page, 50).subscribe({
-        next: (response) => {
-          const rows = response.data ?? [];
-          const combined = [...accumulated, ...rows];
-          if (response.meta?.hasNextPage) {
-            this.loadUsers(page + 1, combined);
-            return;
-          }
-          this.users = combined;
-          this.cdr.markForCheck();
-        },
-        error: (error) => this.handleLoadError(error),
-      });
+  loadPartSummaries(): void {
+    this.partSummariesList.load(allPages((page) => this.api.listPartSummaries(page, 50)));
   }
 
-  private loadPartSummaries(
-    page = 1,
-    accumulated: PartSummaryRow[] = [],
-  ): void {
-    this.api.listPartSummaries(page, 50).subscribe({
-        next: (response) => {
-          const rows = response.data ?? [];
-          const combined = [...accumulated, ...rows];
-          if (response.meta?.hasNextPage) {
-            this.loadPartSummaries(page + 1, combined);
-            return;
-          }
-          this.partSummaries = combined;
-          this.cdr.markForCheck();
-        },
-        error: (error) => this.handleLoadError(error),
-      });
+  loadPartTypes(): void {
+    this.partTypesList.load(this.api.listPartTypes());
   }
 
-  private loadPartTypes(): void {
-    this.api.listPartTypes().subscribe({
-      next: (rows) => {
-        this.partTypes = rows ?? [];
-        this.cdr.markForCheck();
-      },
-      error: (error) => this.handleLoadError(error),
-    });
-  }
-
-  private loadParts(): void {
-    this.api.listParts().subscribe({
-      next: (rows) => {
-        this.parts = rows ?? [];
-        this.cdr.markForCheck();
-      },
-      error: (error) => this.handleLoadError(error),
-    });
+  loadParts(): void {
+    this.partsList.load(this.api.listParts().pipe(tap((rows) => this.syncRollMasterEdits(rows ?? []))));
   }
 
   /** `savedPartId`: only that part's typed values are now saved; keep the unsaved edits typed for other parts. */
-  private loadRollMasters(savedPartId?: string): void {
-    this.api.listRollMasters().subscribe({
-      next: (rows) => {
-        this.rollMasters = rows ?? [];
-        if (savedPartId) delete this.rollMasterEdits[savedPartId];
-        else this.rollMasterEdits = {};
-        this.cdr.markForCheck();
-      },
-      error: (error) => this.handleLoadError(error),
-    });
+  loadRollMasters(savedPartId?: string): void {
+    this.rollMastersList.load(this.api.listRollMasters().pipe(tap((rows) => {
+      if (savedPartId) delete this.rollMasterEdits[savedPartId];
+      else this.rollMasterEdits = {};
+      this.syncRollMasterEdits(this.parts, rows ?? []);
+    })));
   }
 
-  private loadModels(): void {
-    this.api.listModels().subscribe({
-      next: (rows) => {
-        this.models = rows ?? [];
-        this.cdr.markForCheck();
-      },
-      error: (error) => this.handleLoadError(error),
-    });
+  loadModels(): void {
+    this.modelsList.load(this.api.listModels());
   }
 
-  private loadDepartments(): void {
-    this.api.listDepartments().subscribe({
-        next: (rows) => {
-          this.departments = rows ?? [];
-          this.cdr.markForCheck();
-        },
-        error: (error) => this.handleLoadError(error),
-      });
+  loadDepartments(): void {
+    this.departmentsList.load(this.api.listDepartments());
   }
 
-  private loadMachines(): void {
-    this.api.listMachines().subscribe({
-      next: (rows) => {
-        this.machines = rows ?? [];
-        this.cdr.markForCheck();
-      },
-      error: (error) => this.handleLoadError(error),
-    });
+  loadMachines(): void {
+    this.machinesList.load(this.api.listMachines());
   }
 
-  private loadTrays(
-    page = 1,
-    accumulated: AdminTrayRow[] = [],
-  ): void {
-    this.api.listTrays(page, 50).subscribe({
-      next: (response) => {
-        const rows = response.data ?? [];
-        const combined = [...accumulated, ...rows];
-        if (response.meta?.hasNextPage) {
-          this.loadTrays(page + 1, combined);
-          return;
-        }
-        this.trays = combined;
-        this.cdr.markForCheck();
-      },
-      error: (error) => this.handleLoadError(error),
-    });
+  loadTrays(): void {
+    this.traysList.load(allPages((page) => this.api.listTrays(page, 50)));
   }
 
-  private loadContainers(
-    page = 1,
-    accumulated: AdminContainerRow[] = [],
-  ): void {
-    this.api.listContainers(page, 50).subscribe({
-      next: (response) => {
-        const rows = response.data ?? [];
-        const combined = [...accumulated, ...rows];
-        if (response.meta?.hasNextPage) {
-          this.loadContainers(page + 1, combined);
-          return;
-        }
-        this.containers = combined;
-        this.cdr.markForCheck();
-      },
-      error: (error) => this.handleLoadError(error),
-    });
+  loadContainers(): void {
+    this.containersList.load(allPages((page) => this.api.listContainers(page, 50)));
   }
 
   /** The bulk shelf panel made locations: show them in the list. */
@@ -1250,54 +1282,28 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     this.loadLocations();
   }
 
-  private loadLocations(
-    page = 1,
-    accumulated: AdminLocationRow[] = [],
-  ): void {
-    this.api.listLocations(page, 50).subscribe({
-      next: (response) => {
-        const rows = response.data ?? [];
-        const combined = [...accumulated, ...rows];
-        if (response.meta?.hasNextPage) {
-          this.loadLocations(page + 1, combined);
-          return;
-        }
-        this.locations = combined;
-        this.cdr.markForCheck();
-      },
-      error: (error) => this.handleLoadError(error),
-    });
+  loadLocations(): void {
+    this.locationsList.load(allPages((page) => this.api.listLocations(page, 50)));
   }
 
-  private loadSummaryBodyRules(): void {
-    this.api.listSummaryBodyRules().subscribe({
-      next: (rows) => {
-        this.summaryBodyRules = new Map((rows ?? []).map((row) => [row.summary_id, row]));
-        this.cdr.markForCheck();
-      },
-      error: (error) => this.handleLoadError(error),
-    });
-    this.api.listPartSummarySettings().subscribe({
-      next: (rows) => {
-        this.summarySettings = new Map((rows ?? []).map((row) => [row.summary_id, row]));
-        this.cdr.markForCheck();
-      },
-      error: (error) => this.handleLoadError(error),
-    });
+  loadSummaryBodyRules(): void {
+    this.summaryBodyRulesList.load(this.api.listSummaryBodyRules().pipe(
+      map((rows) => new Map((rows ?? []).map((row) => [row.summary_id, row]))),
+    ));
   }
 
-  private loadCutterBodies(): void {
-    this.api.listCutterBodyDefinitions().subscribe({
-      next: (rows) => { this.cutterBodyDefinitions = rows ?? []; this.cdr.markForCheck(); },
-      error: (error) => this.handleLoadError(error),
-    });
-    this.api.listCutterBodies().subscribe({
-        next: (rows) => {
-          this.cutterBodies = rows ?? [];
-          this.cdr.markForCheck();
-        },
-        error: (error) => this.handleLoadError(error),
-      });
+  loadSummarySettings(): void {
+    this.summarySettingsList.load(this.api.listPartSummarySettings().pipe(
+      map((rows) => new Map((rows ?? []).map((row) => [row.summary_id, row]))),
+    ));
+  }
+
+  loadCutterBodies(): void {
+    this.cutterBodiesList.load(this.api.listCutterBodies());
+  }
+
+  loadCutterBodyDefinitions(): void {
+    this.cutterBodyDefinitionsList.load(this.api.listCutterBodyDefinitions());
   }
 
   private resetUserForm(): void {
@@ -1347,26 +1353,17 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
     request.subscribe({
       next: () => {
         this.busy = false;
-        this.message = '';
-        this.toast.success(successMessage, 'Saved');
+        this.message = successMessage;
         onSuccess();
         this.cdr.markForCheck();
       },
+      // Shown once, in the banner beside the form; the typed draft is kept.
       error: (error: HttpErrorResponse) => {
         this.busy = false;
-        const message = this.errorMessage(error);
-        this.error = message;
-        this.toast.error(message, 'Save failed');
+        this.error = this.errorMessage(error);
         this.cdr.markForCheck();
       },
     });
-  }
-
-  private handleLoadError(error: HttpErrorResponse): void {
-    if (!this.error) {
-      this.error = this.errorMessage(error);
-    }
-    this.cdr.markForCheck();
   }
 
   private errorMessage(error: HttpErrorResponse): string {

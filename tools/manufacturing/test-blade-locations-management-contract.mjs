@@ -109,10 +109,10 @@ for(const marker of [
 
 for(const marker of [
   "'locations' | 'cutter-bodies'",
-  'locations: AdminLocationRow[] = []',
+  'loadable<AdminLocationRow[]>([])',
   'saveLocation(): void',
   'beginEditLocation(location: AdminLocationRow)',
-  'toggleLocationEnabled(location: AdminLocationRow)',
+  'toggleLocationEnabled(location: AdminLocationRow',
   'parseSummaryShelfTag(this.locationForm.serial_number)',
   'this.loadLocations();',
 ]){

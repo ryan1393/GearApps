@@ -1,10 +1,11 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
+import { GearToastService } from '@meshforge/manufacturing/frontend/util-common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { IPartSummarySettings, ISummaryBodyRuleRow } from '@meshforge/manufacturing/shared/util-types';
 
-import { AdminApiService, AdminLocationRow, AdminUser, PartSummaryRow } from '../admin-api.service';
+import { AdminApiService, AdminLocationRow, AdminTrayRow, AdminUser, PartSummaryRow } from '../admin-api.service';
 
 import { FrontendFeatureAdminUsersComponent } from './frontend-feature-admin-users.component';
 
@@ -104,13 +105,13 @@ describe('FrontendFeatureAdminUsersComponent', () => {
     it('lists each Summary number once, without revisions', () => {
       const row = (id: string, number: string, revision: string, active = true, enabled = true) =>
         ({ id, number, revision, active, enabled, model_id: null, hos: null });
-      component.partSummaries = [
+      component.partSummariesList.set([
         row('a-1', '1.955FC', '1'),
         row('a-2', '1.955FC', '2'),
         row('a-3', '1.955FC', '3', false),
         row('b-1', '1.500FC', 'A'),
         row('c-1', '2.000FC', 'A', true, false),
-      ];
+      ]);
       component.locationForm = { ...component.locationForm, summary_id: '' };
       expect(component.locationSummaryChoices.map((s) => s.id)).toEqual(['b-1', 'a-2']);
 
@@ -136,8 +137,8 @@ describe('FrontendFeatureAdminUsersComponent', () => {
       body_rule: { summary_id: 's30538', required_blade_sets: 19, required_total_blades: 38, configured_body_rule: null } as ISummaryBodyRuleRow,
     };
     beforeEach(() => {
-      component.summarySettings = new Map([[summary.id, settings]]);
-      component.summaryBodyRules = new Map([[summary.id, settings.body_rule]]);
+      component.summarySettingsList.set(new Map([[summary.id, settings]]));
+      component.summaryBodyRulesList.set(new Map([[summary.id, settings.body_rule]]));
       component.beginEditPartSummary(summary);
     });
 
@@ -167,11 +168,20 @@ describe('FrontendFeatureAdminUsersComponent', () => {
 
     it('includes an explicit Body Size change and previews its Required Blades', () => {
       const save = jest.spyOn(TestBed.inject(AdminApiService), 'savePartSummary').mockReturnValue(of(settings));
-      jest.spyOn(globalThis, 'confirm').mockReturnValue(true);
       component.summaryBodyRuleChoice = '105';
       expect(component.summaryRequiredBladesPreview).toContain('38 blades');
       component.createPartSummary();
       expect(save.mock.calls[0][1].body_rule).toBe('105');
+    });
+
+    it('asks in the page before a Body Size change alters Required Blades', () => {
+      const save = jest.spyOn(TestBed.inject(AdminApiService), 'savePartSummary').mockReturnValue(of(settings));
+      component.summaryBodyRuleChoice = '088';
+      component.createPartSummary();
+      expect(save).not.toHaveBeenCalled();
+      expect(component.confirmation.request?.message).toContain('Required Blades from 38 to 34');
+      component.confirmation.accept();
+      expect(save.mock.calls[0][1].body_rule).toBe('088');
     });
 
     it('keeps the draft when the save fails', () => {
@@ -183,6 +193,128 @@ describe('FrontendFeatureAdminUsersComponent', () => {
       expect(component.summaryForm.revision).toBe('C');
       expect(component.summaryTypeForm.PINION.outer_blade).toBe('RH IB');
       expect(component.busy).toBe(false);
+    });
+  });
+
+  describe('confirmations, feedback and loading', () => {
+    it('holds a weak temporary password to the same policy as password reset', () => {
+      const create = jest.spyOn(TestBed.inject(AdminApiService), 'createUser');
+      component.userForm = { email: 'lead@example.com', password: 'longenough', firstName: '', lastName: '', departmentId: 'department-one', role: 'user' };
+      component.createUser();
+      expect(create).not.toHaveBeenCalled();
+      expect(component.error).toContain('uppercase and lowercase letters, a number, and a symbol');
+    });
+
+    it('asks before creating an administrator and only then sends the request', () => {
+      const create = jest.spyOn(TestBed.inject(AdminApiService), 'createUser').mockReturnValue(of({} as AdminUser));
+      component.userForm = { email: 'boss@example.com', password: 'Valid-Password1!', firstName: '', lastName: '', departmentId: 'department-one', role: 'admin' };
+      component.createUser();
+      expect(create).not.toHaveBeenCalled();
+      expect(component.confirmation.request?.title).toBe('Create an administrator?');
+      component.confirmation.dismiss();
+      expect(create).not.toHaveBeenCalled();
+      component.createUser();
+      component.confirmation.accept();
+      expect(create).toHaveBeenCalledWith(expect.objectContaining({ email: 'boss@example.com', role: 'admin' }));
+      expect(component.message).toBe('User created.');
+    });
+
+    it('asks before promoting an existing user, but not when saving an administrator again', () => {
+      const update = jest.spyOn(TestBed.inject(AdminApiService), 'updateUser').mockReturnValue(of({} as AdminUser));
+      component.usersList.set([
+        { id: 'user-one', email: 'lead@example.com', role: 'user', active: true, departmentId: 'd' } as AdminUser,
+        { id: 'admin-one', email: 'boss@example.com', role: 'ADMIN', active: true, departmentId: 'd' } as AdminUser,
+      ]);
+      component.beginEditUser(component.users[0]);
+      component.userForm.role = 'admin';
+      component.createUser();
+      expect(update).not.toHaveBeenCalled();
+      expect(component.confirmation.request?.title).toBe('Make this user an administrator?');
+      component.confirmation.dismiss();
+      component.beginEditUser(component.users[1]);
+      component.createUser();
+      expect(component.confirmation.request).toBeNull();
+      expect(update).toHaveBeenCalledWith('admin-one', expect.objectContaining({ role: 'admin' }));
+    });
+
+    it.each([
+      ['togglePartSummaryEnabled', 'updatePartSummary', { id: 's', number: '1.955FC', enabled: true, active: true }],
+      ['togglePartEnabled', 'updatePart', { id: 'p', part_number: 'P-1', enabled: true, active: true }],
+      ['toggleMachineEnabled', 'updateMachine', { id: 'm', machine_number: '520G', enabled: true, active: true }],
+      ['toggleLocationEnabled', 'updateLocation', { id: 'l', serial_number: 'CGRR-A1A', enabled: true }],
+      ['toggleTrayEnabled', 'updateTray', { id: 't', serial_number: 'T0001', enabled: true }],
+      ['toggleContainerEnabled', 'updateContainer', { id: 'c', serial_number: 'C0001', enabled: true }],
+      ['toggleCutterBodyEnabled', 'updateCutterBody', { id: 'b', mf_serial_number: 'MF-1', enabled: true }],
+    ] as const)('%s confirms before disabling, and enables without asking', (method, apiMethod, row) => {
+      const api = TestBed.inject(AdminApiService) as unknown as Record<string, (...args: unknown[]) => unknown>;
+      const send = jest.spyOn(api, apiMethod).mockReturnValue(of({}));
+      const toggle = (component as unknown as Record<string, (record: unknown) => void>)[method].bind(component);
+      toggle(row);
+      expect(send).not.toHaveBeenCalled();
+      expect(component.confirmation.request?.confirmLabel).toBe('Disable');
+      expect(component.confirmation.request?.danger).toBe(true);
+      component.confirmation.accept();
+      expect(send).toHaveBeenCalledTimes(1);
+      expect(send.mock.calls[0][1]).toMatchObject({ enabled: false });
+      toggle({ ...row, enabled: false });
+      expect(component.confirmation.request).toBeNull();
+      expect(send).toHaveBeenCalledTimes(2);
+    });
+
+    it('shows a failed save once, in the page banner, not also as a toast', () => {
+      const toast = TestBed.inject(GearToastService);
+      const error = jest.spyOn(toast, 'error');
+      jest.spyOn(TestBed.inject(AdminApiService), 'createModel').mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409, error: { message: 'Model exists.' } })));
+      component.setTab('models');
+      component.modelForm = { model_number: '174', model_type: '' };
+      component.createModel();
+      fixture.detectChanges();
+      expect(error).not.toHaveBeenCalled();
+      expect(fixture.nativeElement.querySelectorAll('[role="alert"]').length).toBe(1);
+      expect(fixture.nativeElement.querySelector('[role="alert"]').textContent).toContain('Model exists.');
+    });
+
+    it('loads only the open tab, keeps a newer reload over an older one, and says when it is loading', () => {
+      const api = TestBed.inject(AdminApiService);
+      const older = new Subject<AdminTrayRow[]>();
+      const pages: Subject<{ data: AdminTrayRow[]; meta: { hasNextPage: boolean } }>[] = [];
+      const listTrays = jest.spyOn(api, 'listTrays').mockImplementation(() => { const page = new Subject<{ data: AdminTrayRow[]; meta: { hasNextPage: boolean } }>(); pages.push(page); return page; });
+      const listUsers = jest.spyOn(api, 'listUsers');
+      component.setTab('trays');
+      fixture.detectChanges();
+      expect(listUsers).not.toHaveBeenCalled();
+      expect(fixture.nativeElement.textContent).toContain('Loading trays…');
+      expect(fixture.nativeElement.textContent).not.toContain('No trays');
+      component.loadTrays();
+      expect(listTrays).toHaveBeenCalledTimes(2);
+      pages[1].next({ data: [{ id: 'new', serial_number: 'T0002', blade_count: 0, enabled: true }], meta: { hasNextPage: false } });
+      pages[1].complete();
+      pages[0].next({ data: [{ id: 'old', serial_number: 'T0001', blade_count: 0, enabled: true }], meta: { hasNextPage: false } });
+      pages[0].complete();
+      older.complete();
+      expect(component.trays.map((tray) => tray.id)).toEqual(['new']);
+    });
+
+    it('reads every page of a paged list before showing it', () => {
+      const api = TestBed.inject(AdminApiService);
+      jest.spyOn(api, 'listContainers').mockImplementation((page: number) => of({
+        data: [{ id: `c${page}`, serial_number: `C000${page}`, tray_count: 0, blade_count: 0, enabled: true }],
+        meta: { hasNextPage: page < 3 },
+      }));
+      component.setTab('containers');
+      expect(component.containers.map((row) => row.id)).toEqual(['c1', 'c2', 'c3']);
+    });
+
+    it('fills Roll Master quantities when the lists load, not while rendering', () => {
+      const api = TestBed.inject(AdminApiService);
+      const part = { id: 'p1', part_number: 'P-1', summary_id: 's', part_type_id: 't', teeth: null, active: true, enabled: true };
+      jest.spyOn(api, 'listParts').mockReturnValue(of([part]));
+      jest.spyOn(api, 'listRollMasters').mockReturnValue(of([{ id: 'r1', part_id: 'p1', required_count: 0, current_quantity: 4, minimum_quantity: 2, active: true, enabled: true, notes: null }]));
+      component.setTab('roll-masters');
+      expect(component.rollMasterEdits['p1']).toEqual({ current_quantity: 4, minimum_quantity: 2 });
+      const before = { ...component.rollMasterEdits };
+      component.rollMasterEdit({ ...part, id: 'unknown' });
+      expect(component.rollMasterEdits).toEqual(before);
     });
   });
 });
