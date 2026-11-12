@@ -4,7 +4,7 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource, EntityManager } from 'typeorm';
 import { CoaterManifest, CoaterShipment, CoaterPackingSlip, CoaterShipmentList, CoaterAvailableContainer } from '@meshforge/manufacturing/shared/util-types';
 import { lockCoaterInventory } from '@meshforge/manufacturing/server/data-access';
-import { coaterContentHash, readCoaterManifest } from './coater-manifest';
+import { availableCoaterContainers, coaterContentHash, readCoaterManifest } from './coater-manifest';
 import { CoaterRpaService } from './coater-rpa.service';
 
 const dateText = (date: any): string => new Date(date).toISOString();
@@ -97,13 +97,9 @@ export class CoaterShipmentsService {
             OR EXISTS (SELECT 1 FROM container_sets cs WHERE cs.container_id=c.id AND cs.enabled))
           AND NOT EXISTS (SELECT 1 FROM dana_coater_shipment_containers_v1 sc WHERE sc.container_id=c.id AND sc.reserved)
         ORDER BY c.serial_number LIMIT 100`,[term]);
-      const result: CoaterAvailableContainer[]=[];
-      for (const c of candidates) {
-        const manifest=await readCoaterManifest(m,[c.id]);
-        if (manifest.issues.length || manifest.totals.containers !== 1) continue;
-        result.push({id:c.id,serial:c.serial_number,trays:manifest.totals.trays,blades:manifest.totals.blades,summary:manifest.summary});
-      }
-      return result;
+      if (!candidates.length) return [];
+      // One manifest read for all candidates (a fixed handful of queries), not one per container.
+      return availableCoaterContainers(await readCoaterManifest(m,candidates.map((c: { id: string }) => c.id)),candidates);
     });
   }
   async get(id: string) {

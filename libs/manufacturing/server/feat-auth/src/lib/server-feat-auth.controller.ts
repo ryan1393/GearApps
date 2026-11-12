@@ -28,6 +28,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
+import { AuthAttemptLimits, clientAddress } from './auth-attempt-limits';
 import { ServerFeatAuthService } from './server-feat-auth.service';
 
 @Controller({
@@ -37,7 +38,10 @@ import { ServerFeatAuthService } from './server-feat-auth.service';
 @ApiTags('Authentication')
 export class ServerFeatAuthController {
   private logger = new Logger('AuthController');
-  constructor(private authService: ServerFeatAuthService) {}
+  constructor(
+    private authService: ServerFeatAuthService,
+    private limits: AuthAttemptLimits,
+  ) {}
 
   @Get('capabilities')
   @SkipAuth()
@@ -54,11 +58,16 @@ export class ServerFeatAuthController {
   @ApiOkResponse({
     type: TokenResponseDto,
   })
-  async emailLogin(@Body() dto: UserLoginDto): Promise<TokenResponseDto> {
-    const user = await this.authService.validateUser({
-      email: dto.email,
-      password: dto.password,
-    });
+  async emailLogin(
+    @Body() dto: UserLoginDto,
+    @Req() req: Request,
+  ): Promise<TokenResponseDto> {
+    const user = await this.limits.signIn(clientAddress(req), dto.email, req.res, () =>
+      this.authService.validateUser({
+        email: dto.email,
+        password: dto.password,
+      }),
+    );
     return this.authService.getTokens(user);
   }
 
@@ -68,7 +77,9 @@ export class ServerFeatAuthController {
   async verifyEmail(
     @Query('code') code: string,
     @Query('email') email: string,
+    @Req() req: Request,
   ): Promise<void> {
+    this.limits.assertCodeAttempt(clientAddress(req), req.res);
     return await this.authService.verifyUserEmail(email, code);
   }
 
@@ -94,7 +105,11 @@ export class ServerFeatAuthController {
 
   @Post('email/forgot-password')
   @SkipAuth()
-  async forgotPassword(@Body() dto: ForgotPasswordDto): Promise<void> {
+  async forgotPassword(
+    @Body() dto: ForgotPasswordDto,
+    @Req() req: Request,
+  ): Promise<void> {
+    this.limits.assertForgotPassword(clientAddress(req), dto.email, req.res);
     this.logger.debug(`${dto.email} is requesting to change their password`);
     return this.authService.forgotPassword(dto);
   }
@@ -104,7 +119,9 @@ export class ServerFeatAuthController {
   async resetPassword(
     @Body() dto: ResetPasswordDto,
     @Query('code') code: string,
+    @Req() req: Request,
   ): Promise<void> {
+    this.limits.assertCodeAttempt(clientAddress(req), req.res);
     this.logger.debug(`Updating password for ${dto.email}`);
     return this.authService.resetPassword({ ...dto, code });
   }

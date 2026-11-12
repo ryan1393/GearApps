@@ -565,7 +565,7 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
     message: string,
     manager = this.locationRepo.manager,
   ): Promise<void> {
-    const [trayCount, cutterCount, bodyPlacements] = await Promise.all([
+    const [trayCount, cutterCount, bodyPlacements, containerSets] = await Promise.all([
       manager.getRepository(LocationTrayOrmEntity).count({
         where: { location_id: locationId, enabled: true },
       }),
@@ -575,11 +575,16 @@ export class ServerFeatLocationService extends PaginationService<LocationOrmEnti
       manager.query(
         'SELECT id FROM cutter_body_shelf_placements WHERE location_id=$1 AND enabled=true', [locationId],
       ),
+      // Coater containers holding a packed set sit at a location until they ship.
+      manager.query(
+        'SELECT id FROM container_sets WHERE location_id=$1 AND enabled=true AND "deletedAt" IS NULL', [locationId],
+      ),
     ]);
 
-    if (trayCount || cutterCount || bodyPlacements.length) {
+    if (trayCount || cutterCount || bodyPlacements.length || containerSets.length) {
+      const sets = containerSets.length ? `, ${containerSets.length} packed container(s)` : '';
       throw new ConflictException(
-        `${message} Active placements: ${trayCount} tray(s), ${cutterCount} cutter(s).`,
+        `${message} Active placements: ${trayCount} tray(s), ${cutterCount} cutter(s)${sets}.`,
       );
     }
   }

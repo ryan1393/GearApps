@@ -8,6 +8,7 @@ import {
   PartOrmEntity,
   RollMasterOrmEntity,
   TrayOrmEntity,
+  lockSummaryRequirements,
   readSummaryBodyRule,
 } from '@meshforge/manufacturing/server/data-access';
 import {
@@ -929,10 +930,6 @@ function assertApprovedBladeSets(sets: number): void {
       `Required quantity is counted in matched inner/outer blade sets and must be an approved body rule: ${allowed}`,
     );
   }
-}
-
-async function lockSummaryRequirements(manager: EntityManager, summaryId: string): Promise<void> {
-  await manager.query("SELECT pg_advisory_xact_lock(hashtext('cutter-summary-requirement:' || $1::text))", [summaryId]);
 }
 
 async function assertSummaryQuantity(manager: EntityManager, summaryId: string, sets: number, exceptId: string | null): Promise<void> {

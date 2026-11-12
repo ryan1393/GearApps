@@ -1,7 +1,11 @@
-import { warnOnWeakJwtSecrets } from '@meshforge/manufacturing/server/util-common';
+import {
+  setServerErrorReporter,
+  warnOnWeakJwtSecrets,
+} from '@meshforge/manufacturing/server/util-common';
 import {
   ENV_API_PREFIX,
   ENV_ENABLE_SWAGGER,
+  ENV_SENTRY_DSN,
   ENV_SERVER_PORT,
 } from '@meshforge/manufacturing/shared/util-constants';
 import { Logger } from '@nestjs/common';
@@ -14,6 +18,14 @@ import { configureApi } from './configure-api';
 import { adoptLegacyDatabaseName } from './adopt-legacy-database';
 import { applySavedEnvironmentSettings } from './load-saved-settings';
 
+/** Error reporting starts before the application is created, so startup failures are reported too. */
+function startErrorReporting(): void {
+  const dsn = process.env[ENV_SENTRY_DSN]?.trim();
+  if (!dsn) return;
+  Sentry.init({ dsn });
+  setServerErrorReporter((exception) => Sentry.captureException(exception));
+}
+
 async function bootstrap() {
   // A database from before the rename to MeshForge is renamed in place before anything connects.
   await adoptLegacyDatabaseName();
@@ -21,14 +33,12 @@ async function bootstrap() {
   // module validates and reads the environment as it is imported, so it is loaded afterwards.
   await applySavedEnvironmentSettings();
   const { AppModule } = await import(/* webpackMode: "eager" */ './app/app.module');
+  // Importing the module loaded .env into the environment, so SENTRY_DSN is known here.
+  startErrorReporting();
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
   warnOnWeakJwtSecrets();
-
-  Sentry.init({
-    dsn: process.env.SENTRY_DSN,
-  });
 
   configureApi(app);
   const globalPrefix = configService.get(ENV_API_PREFIX);
@@ -45,4 +55,8 @@ async function bootstrap() {
   );
 }
 
-bootstrap();
+bootstrap().catch(async (error) => {
+  Sentry.captureException(error);
+  await Sentry.flush(2000).catch(() => false);
+  throw error;
+});

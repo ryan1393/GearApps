@@ -3,8 +3,10 @@ import {
   Body,
   ConflictException,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
+  HttpException,
   Injectable,
   Param,
   ParseUUIDPipe,
@@ -15,8 +17,14 @@ import {
 import { InjectDataSource } from '@nestjs/typeorm';
 import { IsString, Matches, MaxLength, MinLength } from 'class-validator';
 import { DataSource } from 'typeorm';
-import { Request } from 'express';
-import { Auth, ReqUserId, SkipAuth } from '@meshforge/manufacturing/server/util-common';
+import { Request, Response } from 'express';
+import {
+  assertWithinLimit,
+  Auth,
+  RateLimiter,
+  ReqUserId,
+  SkipAuth,
+} from '@meshforge/manufacturing/server/util-common';
 import { RoleType, Uuid } from '@meshforge/manufacturing/shared/util-types';
 import { ServerFeatAuthService } from '@meshforge/manufacturing/server/feat-auth';
 import { ServerFeatUserService } from '@meshforge/manufacturing/server/feat-user';
@@ -29,23 +37,49 @@ export function badgeHash(uid: string): string {
   return createHash('sha256').update(uid.toUpperCase()).digest('hex');
 }
 
+/** Rejected badge sign-ins allowed per client address, and on the whole server, per minute. */
+export const BADGE_FAILURES_PER_ADDRESS = 10;
+export const BADGE_FAILURES_PER_SERVER = 100;
+const BADGE_GLOBAL_KEY = 'all';
+
 @Injectable()
 export class BadgeAccessService {
-  private readonly attempts = new Map<string, { count: number; until: number }>();
+  // Only rejected attempts count, and a successful sign-in clears nothing: one valid badge
+  // must not reset the counter for someone trying other UIDs. The server-wide limit stops
+  // enumeration spread over many (or spoofed) addresses.
+  private readonly failuresPerAddress = new RateLimiter({ limit: BADGE_FAILURES_PER_ADDRESS, windowMs: 60_000 });
+  private readonly failuresOnServer = new RateLimiter({ limit: BADGE_FAILURES_PER_SERVER, windowMs: 60_000 });
   constructor(
     @InjectDataSource() private readonly source: DataSource,
     private readonly users: ServerFeatUserService,
     private readonly auth: ServerFeatAuthService,
     private readonly access: AccessManagementService,
   ) {}
-  async login(dto: BadgeUidDto, ip: string) {
-    const now = Date.now();
-    for (const [key, value] of this.attempts) if (value.until <= now) this.attempts.delete(key);
-    const entry = this.attempts.get(ip) ?? { count: 0, until: now + 60_000 };
-    if (entry.count >= 10 || (!this.attempts.has(ip) && this.attempts.size >= 10_000))
-      throw new UnauthorizedException('Too many badge attempts. Wait one minute, then try again.');
-    entry.count++;
-    this.attempts.set(ip, entry);
+  async login(dto: BadgeUidDto, ip: string, response?: Response | null) {
+    assertWithinLimit(
+      this.failuresPerAddress.peek(ip),
+      (wait) => `Too many badge attempts. Wait ${wait}, then try again.`,
+      response,
+    );
+    assertWithinLimit(
+      this.failuresOnServer.peek(BADGE_GLOBAL_KEY),
+      (wait) => `Too many badge attempts on this server. Wait ${wait}, then try again, or use your password.`,
+      response,
+    );
+    let user: Awaited<ReturnType<BadgeAccessService['resolve']>>;
+    try {
+      user = await this.resolve(dto);
+    } catch (error) {
+      if (error instanceof HttpException) {
+        this.failuresPerAddress.hit(ip);
+        this.failuresOnServer.hit(BADGE_GLOBAL_KEY);
+      }
+      throw error;
+    }
+    return this.auth.getTokens(user);
+  }
+  /** The active, non-administrator account the badge belongs to. */
+  private async resolve(dto: BadgeUidDto) {
     const [badge] = await this.source.query(
       `SELECT user_id,revoked_at FROM meshforge_badges WHERE uid_hash=$1 ORDER BY revoked_at NULLS FIRST,created_at DESC LIMIT 1`,
       [badgeHash(dto.uid)],
@@ -58,7 +92,7 @@ export class BadgeAccessService {
       throw new UnauthorizedException(
         'This badge has been revoked. Use your password or contact an administrator.',
       );
-    const user = await this.source.transaction(async (manager) => {
+    return this.source.transaction(async (manager) => {
       // Assignment/revocation lock this same account before changing its badge and authVersion.
       // Recheck the badge after acquiring the lock so a revoked UID cannot sign in using a
       // newer account version read after the first lookup. Issue tokens outside the lock:
@@ -77,11 +111,12 @@ export class BadgeAccessService {
         throw new UnauthorizedException(
           'This badge account is inactive. Contact an administrator.',
         );
+      // A badge is something you have, not something you know: it is not enough for an
+      // administrator account.
+      if (account.role === RoleType.ADMIN)
+        throw new ForbiddenException('Administrators sign in with email and password.');
       return account;
     });
-    const tokens = await this.auth.getTokens(user);
-    this.attempts.delete(ip);
-    return tokens;
   }
   list() {
     return this.source.query(
@@ -139,7 +174,7 @@ export class BadgeLoginController {
   @SkipAuth()
   @HttpCode(200)
   login(@Body() dto: BadgeUidDto, @Req() req: Request) {
-    return this.service.login(dto, req.ip ?? 'unknown');
+    return this.service.login(dto, req.ip ?? req.socket?.remoteAddress ?? 'unknown', req.res);
   }
 }
 @Controller({ path: 'admin/access/badges', version: '1' })

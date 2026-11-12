@@ -309,29 +309,37 @@ export class ServerFeatBladeService extends PaginationService<BladeOrmEntity> {
     });
   }
 
+  /**
+   * Administrator correction of a loose blade (in no tray, coater set or cutter). Status is not
+   * editable here: it changes only through the intake, grinding, coater, cutter and scrap
+   * workflows, which record its history, so a scrapped blade can never come back this way.
+   */
   async updateBlade(bladeId: Uuid, data: Partial<IBladeEntity>, userId: Uuid) {
     return this.bladeRepo.manager.transaction(async (manager) => {
       const repo = manager.getRepository(BladeOrmEntity);
       const existing = await repo.findOneOrFail({ where: { id: bladeId }, lock: { mode: 'pessimistic_write' } });
       await this.assertBladeUnassigned(manager, bladeId);
-      const nextStatus = data.status ?? existing.status;
-      const updated = await repo.save({ ...existing, ...data, id: bladeId, updatedBy: userId });
-      if (nextStatus !== existing.status) {
-        const historyRepo = manager.getRepository(BladeHistoryOrmEntity);
-        await historyRepo.save(historyRepo.create({ blade_id: bladeId, event_type: BladeHistoryEvent.STATUS_CHANGED,
-          from_status: existing.status, to_status: nextStatus, service_cycle: updated.service_cycle,
-          createdBy: userId, updatedBy: userId }));
+      if (data.status !== undefined && data.status !== existing.status) {
+        throw new UnprocessableEntityException(
+          'Blade status changes only through the intake, grinding, coater, cutter and scrap workflows.',
+        );
       }
-      return updated;
+      const changes = Object.fromEntries(
+        Object.entries(data).filter(([key, value]) => value !== undefined && !['id', 'status'].includes(key)),
+      );
+      return repo.save({ ...existing, ...changes, id: bladeId, updatedBy: userId });
     });
   }
 
   private async assertBladeUnassigned(manager: import('typeorm').EntityManager, bladeId: Uuid): Promise<void> {
-    const [tray, build] = await Promise.all([
+    const [tray, build, packedSets] = await Promise.all([
       manager.getRepository(BladeTrayOrmEntity).count({ where: { blade_id: bladeId, enabled: true } }),
       manager.getRepository(CutterBuildBladeOrmEntity).count({ where: { blade_id: bladeId, enabled: true } }),
+      manager.query(
+        'SELECT id FROM public.container_set_blades WHERE blade_id=$1 AND enabled AND "deletedAt" IS NULL', [bladeId],
+      ) as Promise<unknown[]>,
     ]);
-    if (tray || build) throw new ConflictException('Remove this blade through its tray or cutter workflow before editing or deleting it');
+    if (tray || build || packedSets.length) throw new ConflictException('Remove this blade through its tray or cutter workflow before editing or deleting it');
   }
 
   async deleteBlade(bladeId: Uuid, userId: Uuid): Promise<void> {

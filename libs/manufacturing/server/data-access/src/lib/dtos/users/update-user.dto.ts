@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsString,
   IsUrl,
+  IsUUID,
 } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -21,9 +22,9 @@ export class UpdateUserDto {
   @IsString()
   employeeNumber?: string | null;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ format: 'uuid', description: 'An enabled department.' })
   @IsOptional()
-  @IsString()
+  @IsUUID()
   departmentId?: string | null;
 
   @ApiPropertyOptional()

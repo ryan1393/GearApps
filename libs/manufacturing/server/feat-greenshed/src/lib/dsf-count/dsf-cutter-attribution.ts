@@ -155,8 +155,9 @@ async function applyMachine(db: DataSource, item: CutterAttributionInput):Promis
     if (runs.length!==1) throw new AttributionReview('ACTIVE_RUN_AMBIGUOUS');
     const run=runs[0];
     const before=safeInteger(run.current_piece_count,'INVALID_RUN_COUNT');
-    const lastCheck=safeInteger(run.last_check_piece_count,'INVALID_CHECK_COUNT');
-    if (before<lastCheck) throw new AttributionReview('COUNT_BELOW_QUALITY_CHECK');
+    // A quality check leaves the DSF-credited count alone and may be taken at a count DSF has
+    // not credited yet, so the last check point can be above the running count.
+    safeInteger(run.last_check_piece_count,'INVALID_CHECK_COUNT');
     if (timestampUs(run.installed_at_utc)>timestampUs(cache.as_of))
       return {status:'PENDING_NEW_RUN',reason:'DSF_READ_PREDATES_SETUP'};
     if (before>2147483647) throw new AttributionReview('COUNT_EXCEEDS_INT4');

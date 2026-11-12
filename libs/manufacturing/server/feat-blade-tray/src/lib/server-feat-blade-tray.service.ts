@@ -38,6 +38,9 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 
+/** Tray stages an administrator may take a blade out of (see deleteBladeTray). */
+export const BLADE_REMOVABLE_TRAY_STAGES: readonly string[] = ['WAITING_FOR_GRINDING', 'READY_FOR_COATING'];
+
 @Injectable()
 export class ServerFeatBladeTrayService extends PaginationService<BladeTrayOrmEntity> {
   private readonly logger = new Logger(ServerFeatBladeTrayService.name);
@@ -422,35 +425,68 @@ export class ServerFeatBladeTrayService extends PaginationService<BladeTrayOrmEn
     throw new UnprocessableEntityException('Blade assignments cannot be patched directly. Use the validated intake, transfer, or removal workflow.');
   }
 
+  /**
+   * Administrator correction: take one blade out of its tray outside the operator workflows.
+   * Only while the tray waits for grinding or holds a completed pass (READY_FOR_COATING, which
+   * then needs replacement blades through intake); never during a grinding pass, for a tray
+   * READY_FOR_CUTTER, packed in a coater container, at the coater, or linked to a cutter build.
+   * The blade keeps its status, gets a REMOVED_FROM_TRAY history entry, and the tray count
+   * follows its active assignments.
+   */
   async deleteBladeTray(bladeTrayId: Uuid, userId: Uuid): Promise<void> {
     await this.bladeTrayRepo.manager.transaction(async (manager) => {
       const repo = manager.getRepository(BladeTrayOrmEntity);
-      const assignment = await repo.findOne({ where: { id: bladeTrayId } });
+      const found = await repo.findOne({ where: { id: bladeTrayId } });
 
-      if (!assignment) {
+      if (!found) {
         this.logger.log(`Blade-tray assignment ${bladeTrayId} does not exist`);
         throw new UnprocessableEntityException('Error removing blade from tray');
       }
 
-      const tray = await manager.getRepository(TrayOrmEntity).findOne({ where: { id: assignment.tray_id }, lock: { mode: 'pessimistic_write' } });
+      // Same lock order as the workflows: tray, then its assignment, then the blade.
+      const tray = await manager.getRepository(TrayOrmEntity).findOne({ where: { id: found.tray_id }, lock: { mode: 'pessimistic_write' } });
       if (!tray) throw new NotFoundException('Tray not found');
-      if (!assignment.enabled) return;
+      const assignment = await repo.findOne({ where: { id: bladeTrayId }, lock: { mode: 'pessimistic_write' } });
+      if (!assignment?.enabled || assignment.tray_id !== tray.id) return;
+      const blade = await manager.getRepository(BladeOrmEntity).findOne({ where: { id: assignment.blade_id }, lock: { mode: 'pessimistic_write' } });
+      if (!blade) throw new NotFoundException('Blade not found');
 
-      const activeContainer = await manager
-        .getRepository(ContainerTrayOrmEntity)
-        .findOne({
-          where: { tray_id: assignment.tray_id, enabled: true },
-        });
+      const [activeContainer, trayInBuild, bladeInBuild, stage] = await Promise.all([
+        manager.getRepository(ContainerTrayOrmEntity).count({ where: { tray_id: tray.id, enabled: true } }),
+        manager.getRepository(CutterBuildTrayOrmEntity).count({ where: { tray_id: tray.id, enabled: true } }),
+        manager.getRepository(CutterBuildBladeOrmEntity).count({ where: { blade_id: blade.id, enabled: true } }),
+        tray.current_stage_id
+          ? manager.getRepository(TrayStageOrmEntity).findOne({ where: { id: tray.current_stage_id } })
+          : Promise.resolve(null),
+      ]);
       if (activeContainer) {
         throw new ConflictException(
           'Blade cannot be removed while its tray is loaded in a Coater container',
         );
       }
+      if (trayInBuild || bladeInBuild) {
+        throw new ConflictException('Blade cannot be removed while it or its tray is linked to a cutter build');
+      }
+      if (!stage || !BLADE_REMOVABLE_TRAY_STAGES.includes(stage.code)) {
+        throw new ConflictException(
+          `Blades can be taken out only of a tray waiting for grinding or ready for coating. This tray is ${stage?.name ?? stage?.code ?? 'in no known stage'}; use its workflow.`,
+        );
+      }
 
-      const journal = await beginWorkflowJournal(manager, { app: 'BLADE_TRACKING', trayIds: [tray.id], bladeIds: [assignment.blade_id] }, userId);
+      const journal = await beginWorkflowJournal(manager, { app: 'BLADE_TRACKING', trayIds: [tray.id], bladeIds: [blade.id] }, userId);
       assignment.enabled = false;
       assignment.updatedBy = userId;
       await repo.save(assignment);
+      const historyRepo = manager.getRepository(BladeHistoryOrmEntity);
+      await historyRepo.save(historyRepo.create({
+        blade_id: blade.id,
+        event_type: BladeHistoryEvent.REMOVED_FROM_TRAY,
+        service_cycle: blade.service_cycle ?? 0,
+        tray_id: tray.id,
+        notes: 'Removed from tray by an administrator',
+        createdBy: userId,
+        updatedBy: userId,
+      }));
 
       await this.resetTrayIfEmpty(manager, assignment.tray_id, userId);
       await journal.commit(tray.serial_number, 'Remove blade from tray');
