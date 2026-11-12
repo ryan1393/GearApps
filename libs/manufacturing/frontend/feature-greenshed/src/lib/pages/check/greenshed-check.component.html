@@ -3,6 +3,11 @@
     description="Record a Frequency or ZEISS / CMM check for the active cutter."></header>
   <div *ngIf="error" class="gear-feedback" role="alert">{{ error }}</div>
   <div *ngIf="message" class="gear-feedback" role="status" aria-live="polite">{{ message }}</div>
+  <div *ngIf="pullOffer" class="gear-workflow-state gear-workflow-state-danger" data-testid="check-pull-offer">
+    <strong>{{ pullOffer.result }} recorded for {{ pullOffer.build }}.</strong>
+    <p class="gear-workflow-help">Review whether this cutter needs to be pulled.</p>
+    <a routerLink="/greenshed/pull" [queryParams]="{ build: pullOffer.build }" class="gear-btn gear-btn-primary">Pull this cutter</a>
+  </div>
   <div *ngIf="loadingChoices" class="gear-feedback" role="status">Loading quality check choices and piece-count settings…</div>
   <div *ngIf="choicesError" class="gear-feedback" role="alert">{{ choicesError }} Quality checks cannot be saved until these choices load. <button type="button" class="gear-btn gear-btn-secondary" (click)="loadChoices()" [disabled]="loadingChoices">Retry choices</button></div>
 

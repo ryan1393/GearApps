@@ -50,6 +50,8 @@ export class GreenshedCheckComponent implements OnInit {
   lockedToRunningMachine = false;
   error = '';
   message = '';
+  /** After a FAIL or HOLD check: the cutter the operator may want to pull next. */
+  pullOffer: { build: string; result: string } | null = null;
 
   ngOnInit(): void {
     this.api.getDashboard().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -63,6 +65,7 @@ export class GreenshedCheckComponent implements OnInit {
       this.build = null;
       this.contextValid = false;
       this.error = this.message = '';
+      this.pullOffer = null;
       this.requestedType = params.get('type')?.toUpperCase() === 'CMM' ? 'CMM' : 'FC';
       this.buildNumber = params.get('build')?.trim().toUpperCase() || '';
       this.lockedToRunningMachine = params.get('origin') === 'running-machines';
@@ -119,6 +122,7 @@ export class GreenshedCheckComponent implements OnInit {
     this.build = null;
     this.contextValid = false;
     this.error = this.message = '';
+    this.pullOffer = null;
     this.resetCheckEntry(true);
     if (!value) return;
     this.busy = true;
@@ -182,6 +186,7 @@ export class GreenshedCheckComponent implements OnInit {
     const generation = this.generation;
     this.busy = true;
     this.error = this.message = '';
+    this.pullOffer = null;
     this.api.qualityCheck({
       buildNumber: build.build_number, checkTypeCode: this.checkType,
       resultCode: this.resultCode, pieceCount: this.pieceCount, comments: this.comments,
@@ -200,6 +205,9 @@ export class GreenshedCheckComponent implements OnInit {
         this.message = r.check_type_code + ' ' + r.result_code + ' saved at piece ' + r.piece_count + '. Next check: ' + r.next_check_piece_count + '.';
         if (r.result_code === 'PASS') this.toast.success(this.message, 'Quality check saved');
         else this.toast.warning(this.message + ' Review whether the cutter needs to be pulled.', 'Quality check needs attention');
+        if (['FAIL', 'HOLD'].includes(String(r.result_code).toUpperCase())) {
+          this.pullOffer = { build: build.build_number, result: String(r.result_code).toUpperCase() };
+        }
       },
       error: (e: HttpErrorResponse) => {
         if (generation !== this.generation) return;
@@ -238,5 +246,6 @@ export class GreenshedCheckComponent implements OnInit {
     this.contextValid = false;
     this.resetCheckEntry();
     this.error = this.message = '';
+    this.pullOffer = null;
   }
 }

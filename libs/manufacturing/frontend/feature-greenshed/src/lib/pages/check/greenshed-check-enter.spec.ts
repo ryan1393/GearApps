@@ -68,5 +68,22 @@ describe('Greenshed Quality Check: only Save saves', () => {
     save.click();
     expect(api['qualityCheck']).toHaveBeenCalledTimes(1);
     expect(api['qualityCheck']).toHaveBeenCalledWith(expect.objectContaining({ resultCode: 'PASS', buildNumber: 'BUILD-A' }));
+    fixture.detectChanges();
+    expect(host.querySelector('[data-testid="check-pull-offer"]')).toBeNull();
+  });
+
+  it.each(['FAIL', 'HOLD'])('offers to pull the cutter after a %s check', async (result) => {
+    const fixture = await render();
+    api['qualityCheck'].mockReturnValue(of({ check_type_code: 'FC', result_code: result, piece_count: 25, next_check_piece_count: 50 }));
+    fixture.componentInstance.resultCode = result;
+    fixture.componentInstance.save();
+    fixture.detectChanges();
+    const offer = fixture.nativeElement.querySelector('[data-testid="check-pull-offer"]') as HTMLElement;
+    expect(offer.textContent).toContain(`${result} recorded for BUILD-A`);
+    const link = offer.querySelector('a') as HTMLAnchorElement;
+    expect(link.textContent).toContain('Pull this cutter');
+    expect(link.getAttribute('href')).toBe('/greenshed/pull?build=BUILD-A');
+    fixture.componentInstance.startAnother();
+    expect(fixture.componentInstance.pullOffer).toBeNull();
   });
 });
