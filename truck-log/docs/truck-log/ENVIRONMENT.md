@@ -62,6 +62,8 @@ or the correct plant time zone.
 
 Truck Log uses `TZ` for operator-facing date filters and “checked out today” database calculations.
 
+Every screen shows dates and times in this zone too: the API reports it on `/api/v1/health`, and guard PCs, dock handhelds and TVs format times in it regardless of their own clock settings (an Android handheld left on UTC still shows plant time).
+
 ## Paperwork
 
 ```text

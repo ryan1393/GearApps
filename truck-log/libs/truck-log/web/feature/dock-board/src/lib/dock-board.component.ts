@@ -11,7 +11,7 @@ import {
 import { elapsedSince } from '@truck-log/web/domain';
 import { DEFAULT_DOCK_AGING_SETTINGS, dockAgeClass, dockAgeMinutes, dockAgeTone } from '@truck-log/web/domain';
 import { DockScanComponent } from './dock-scan/dock-scan.component';
-import { ToastService, TruckLogDialogDirective, jumpToSection } from '@truck-log/web/ui';
+import { ToastService, TruckLogDialogDirective, jumpToSection, PlantDatePipe } from '@truck-log/web/ui';
 
 type DockDirectionFilter = 'ALL' | 'INBOUND' | 'OUTBOUND';
 type DockUrgencyFilter = 'ALL' | 'AGING' | 'OVERDUE';
@@ -68,10 +68,10 @@ export function dockBoardCounts(
 
 @Component({
   standalone: true,
-  imports: [CommonModule, DockScanComponent, TruckLogDialogDirective],
+  imports: [CommonModule, DockScanComponent, TruckLogDialogDirective, PlantDatePipe],
   template: `
   <header class="dana-page-header">
-    <div><h1>Dock Board</h1><p><span *ngIf="lastUpdated">Updated {{lastUpdated | date:'shortTime'}} · refreshes automatically · </span>Packing slips are optional; the guard prints them at Final Checkout.</p></div>
+    <div><h1>Dock Board</h1><p><span *ngIf="lastUpdated">Updated {{lastUpdated | plantDate:'shortTime'}} · refreshes automatically · </span>Packing slips are optional; the guard prints them at Final Checkout.</p></div>
     <div class="dana-actions"><button class="dana-btn" type="button" (click)="load()">Refresh</button></div>
   </header>
 
@@ -88,7 +88,7 @@ export function dockBoardCounts(
       </div>
     </div>
   </section>
-  <p *ngIf="refreshError" class="dana-alert dana-alert-warning tl-notice" role="alert">Dock Board refresh failed. Showing last confirmed data<span *ngIf="lastUpdated"> from {{lastUpdated | date:'shortTime'}}</span>. Select Refresh to retry.</p>
+  <p *ngIf="refreshError" class="dana-alert dana-alert-warning tl-notice" role="alert">Dock Board refresh failed. Showing last confirmed data<span *ngIf="lastUpdated"> from {{lastUpdated | plantDate:'shortTime'}}</span>. Select Refresh to retry.</p>
 
   <div class="tl-dock-grid" id="dock-board-grid" role="region" aria-label="Assigned docks" tabindex="0">
     <article class="dana-card" *ngFor="let visit of filteredVisits; trackBy: trackDockVisit" [attr.data-tone]="ageTone(visit)">
@@ -104,7 +104,7 @@ export function dockBoardCounts(
         <div class="dana-detail"><span class="dana-detail-label">Driver</span><span class="dana-detail-value">{{visit.driverName}}</span></div>
         <div class="dana-detail"><span class="dana-detail-label">Carrier</span><span class="dana-detail-value">{{visit.carrierName || '—'}}</span></div>
         <div class="dana-detail"><span class="dana-detail-label">Trailer</span><span class="dana-detail-value">{{visit.trailerId || '—'}}</span></div>
-        <div class="dana-detail"><span class="dana-detail-label">Checked in</span><span class="dana-detail-value">{{visit.guardCheckInAt | date:'shortTime'}}</span></div>
+        <div class="dana-detail"><span class="dana-detail-label">Checked in</span><span class="dana-detail-value">{{visit.guardCheckInAt | plantDate:'smartTime'}}</span></div>
         <div class="dana-detail"><span class="dana-detail-label">On site</span><span class="dana-detail-value">{{elapsed(visit.guardCheckInAt)}}</span></div>
         <div class="dana-detail"><span class="dana-detail-label">At dock</span><span class="dana-detail-value">{{visit.dockAssignedAt ? elapsed(visit.dockAssignedAt) : '—'}}</span></div>
       </div>
@@ -120,16 +120,16 @@ export function dockBoardCounts(
           <div class="tl-stack">
             <span *ngIf="packingSlipReady(visit)">SAP Document / Delivery ID <strong>{{slip.extractedDocumentId}}</strong></span>
             <span class="dana-field-error" *ngIf="!packingSlipReady(visit)">{{slip.extractionMessage || 'SAP Document/Delivery ID is still in review.'}}</span>
-            <small class="dana-muted">{{slip.originalFileName || slip.fileName}} · {{slip.scannedAt | date:'short'}}{{slip.scannedBy ? ' · ' + slip.scannedBy : ''}}</small>
+            <small class="dana-muted">{{slip.originalFileName || slip.fileName}} · {{slip.scannedAt | plantDate:'short'}}{{slip.scannedBy ? ' · ' + slip.scannedBy : ''}}</small>
           </div>
           <div class="dana-actions">
             <a *ngIf="packingSlipAvailable(visit)" class="dana-btn dana-btn-sm" [href]="packingSlipUrl(slip)" target="_blank" rel="noopener">View PDF</a>
-            <button class="dana-btn dana-btn-sm" type="button" [disabled]="uploadingVisitId !== null || busy" (click)="packingSlipInput.click()">{{uploadingVisitId===visit.id ? 'Reading PDF…' : 'Replace PDF'}}</button>
-            <button class="dana-btn dana-btn-sm" type="button" [disabled]="busy || uploadingVisitId !== null" (click)="openScanner(visit)">Scan Delivery Number</button>
+            <button class="dana-btn dana-btn-sm tl-write" type="button" [disabled]="uploadingVisitId !== null || busy" (click)="packingSlipInput.click()">{{uploadingVisitId===visit.id ? 'Reading PDF…' : 'Replace PDF'}}</button>
+            <button class="dana-btn dana-btn-sm tl-write" type="button" [disabled]="busy || uploadingVisitId !== null" (click)="openScanner(visit)">Scan Delivery Number</button>
           </div>
         </ng-container>
         <ng-template #noPackingSlip>
-          <div class="dana-actions">
+          <div class="dana-actions tl-write">
             <button type="button" class="dana-btn dana-btn-primary" [disabled]="busy || uploadingVisitId !== null" (click)="openScanner(visit)">Scan Document</button>
             <button type="button" class="dana-btn" [disabled]="busy || uploadingVisitId !== null" (click)="openScanner(visit, true)">Find PDF</button>
             <button class="dana-btn" type="button" [disabled]="uploadingVisitId !== null || busy" (click)="packingSlipInput.click()">{{uploadingVisitId===visit.id ? 'Reading PDF…' : 'Upload PDF'}}</button>
@@ -170,6 +170,8 @@ export class DockBoardComponent implements OnInit, OnDestroy {
   uploadingVisitId: number | null = null;
   aging: DockAgingSettingsRecord = { ...DEFAULT_DOCK_AGING_SETTINGS };
   private timer?: number;
+  private boardRequestPending = false;
+  private agingRequestPending = false;
 
   constructor(public readonly api: TruckLogApi, private readonly toast: ToastService) {}
 
@@ -214,12 +216,18 @@ export class DockBoardComponent implements OnInit, OnDestroy {
 
   load(showError = true) {
     if (this.packingBoardDestroyed || this.uploadingVisitId !== null || this.scanTarget) return;
+    // A background tick never starts a second request while one is pending: on slow dock Wi-Fi each
+    // new tick would otherwise supersede the last, every answer would be discarded, and the board
+    // would freeze without ever showing its refresh warning. A manual Refresh still supersedes.
+    if (!showError && this.boardRequestPending) return;
     const request = ++this.packingBoardRequest;
+    this.boardRequestPending = true;
     // Recompute urgency from the local clock even if an HTTP refresh is delayed or fails.
     this.updateFilteredVisits();
     this.loadAgingSettings();
     this.api.dockBoard(Date.now().toString(36) + '-' + request).subscribe({
       next: (visits) => {
+        if (request === this.packingBoardRequest) this.boardRequestPending = false;
         if (this.packingBoardDestroyed || request !== this.packingBoardRequest || this.uploadingVisitId !== null || this.scanTarget) return;
         this.visits = [...visits].sort((left, right) => {
           const leftAge = dockAgeMinutes(left) ?? -1;
@@ -230,14 +238,16 @@ export class DockBoardComponent implements OnInit, OnDestroy {
         this.refreshError = false;
         this.updateFilteredVisits();
       },
-      error: () => { if (this.packingBoardDestroyed || request !== this.packingBoardRequest || this.uploadingVisitId !== null || this.scanTarget) return; this.refreshError = true; if (showError) this.toast.error('Could not refresh the dock board. Check System status.', 'Dock Board refresh failed'); },
+      error: () => { if (request === this.packingBoardRequest) this.boardRequestPending = false; if (this.packingBoardDestroyed || request !== this.packingBoardRequest || this.uploadingVisitId !== null || this.scanTarget) return; this.refreshError = true; if (showError) this.toast.error('Could not refresh the dock board. Check System status.', 'Dock Board refresh failed'); },
     });
   }
 
   private loadAgingSettings() {
+    if (this.agingRequestPending) return;
+    this.agingRequestPending = true;
     this.api.dockAgingSettings().subscribe({
-      next: (aging) => { if (this.packingBoardDestroyed) return; this.aging = aging; this.updateFilteredVisits(); },
-      error: () => undefined,
+      next: (aging) => { this.agingRequestPending = false; if (this.packingBoardDestroyed) return; this.aging = aging; this.updateFilteredVisits(); },
+      error: () => { this.agingRequestPending = false; },
     });
   }
 

@@ -3,9 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TruckLogApi } from '@truck-log/web/data-access';
 import { CarrierReferenceRecord, CheckInConfigRecord, DriverReferenceRecord, DockRecord, LocationReferenceRecord, RxoFreightRecord, ScheduledLoadLookupRecord, TruckVisitRecord } from '@truck-log/shared/contracts';
-import { CheckInForm, CheckInRxoSelection, UppercaseCheckInField, emptyCheckInForm, toCreateTruckVisitRequest } from '@truck-log/web/domain';
-import { ToastService } from '@truck-log/web/ui';
+import { CheckInForm, CheckInRxoSelection, UppercaseCheckInField, emptyCheckInForm, formatPlantDate, toCreateTruckVisitRequest } from '@truck-log/web/domain';
+import { ToastService, PlantDatePipe } from '@truck-log/web/ui';
 import { DanaComboboxComponent, type DanaComboboxColumn } from '@dana/ui';
+import { ComboboxExactEnterDirective } from './combobox-exact-enter.directive';
 import { DockStatusWidgetComponent } from './dock-status-widget.component';
 
 /** The control each "missing required item" chip jumps to (labels match missingRequiredItems). */
@@ -27,7 +28,7 @@ import { FreightLoadPicker } from './freight-load-picker.service';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule, DockStatusWidgetComponent, DanaComboboxComponent],
+  imports: [CommonModule, FormsModule, DockStatusWidgetComponent, DanaComboboxComponent, ComboboxExactEnterDirective, PlantDatePipe],
   // Load picker and print-package tracking are scoped to this page.
   providers: [FreightLoadPicker, DriverPrintTracker],
   templateUrl: './check-in.component.html'
@@ -43,8 +44,12 @@ export class CheckInComponent implements OnInit, OnDestroy {
   docks: DockRecord[] = [];
   activeDocks: DockRecord[] = [];
   docksLoaded = false;
+  docksLoadError = false;
   files: File[] = [];
+  /** Paperwork that did not upload, and the saved visit it belongs to (not necessarily the latest check-in). */
   retryFiles: File[] = [];
+  retryVisit: TruckVisitRecord | null = null;
+  retryingPaperwork = false;
   saving = false;
   printingConfigLoading = true;
   printingUnavailableReason = '';
@@ -63,6 +68,8 @@ export class CheckInComponent implements OnInit, OnDestroy {
   referenceLocations: LocationReferenceRecord[] = [];
   manualLoadEntry = false;
   phoneTouched = false;
+  /** The phone came from a saved driver (not typed), so a driver change may replace it. */
+  private phoneAutoFilled = false;
   selectedFreightKey = '';
   selectedFreight: RxoFreightRecord | null = null;
   private pendingCheckInRequestId = '';
@@ -124,16 +131,38 @@ export class CheckInComponent implements OnInit, OnDestroy {
   /** Picking a saved driver fills the phone saved with them. */
   driverPicked(driver: DriverReferenceRecord | null) {
     if (this.formDisabled) return;
-    if (driver?.phoneNumber?.trim()) this.form.driverPhone = driver.phoneNumber.trim();
+    this.fillSavedPhone(driver?.phoneNumber);
+  }
+
+  /**
+   * A saved driver's phone fills the field only when it is empty or was itself filled in from a
+   * saved driver: a number the guard typed is never replaced by an older saved one.
+   */
+  private fillSavedPhone(phone: string | null | undefined) {
+    const saved = phone?.trim() || '';
+    if (!saved || (this.form.driverPhone.trim() && !this.phoneAutoFilled)) return;
+    this.form.driverPhone = saved;
+    this.phoneAutoFilled = true;
+  }
+
+  phoneTyped() {
+    this.phoneTouched = true;
+    this.phoneAutoFilled = false;
   }
   get lastVisitId() { return this.print.lastVisitId; }
+
+  /** A failed read is not "no docks configured": say so and offer a retry instead of sending the guard to Administration. */
+  loadDocks() {
+    this.docksLoadError = false;
+    this.api.docks().subscribe({
+      next: (docks) => { this.docks = docks; this.activeDocks = docks.filter((d) => d.active); this.docksLoaded = true; },
+      error: () => { this.docksLoadError = !this.docksLoaded; this.toast.error('Could not load docks. Check System status.', 'Check-In setup failed'); },
+    });
+  }
   get lastVisit() { return this.print.lastVisit; }
 
   ngOnInit() {
-    this.api.docks().subscribe({
-      next: (docks) => { this.docks = docks; this.activeDocks = docks.filter((d) => d.active); this.docksLoaded = true; },
-      error: () => { this.docksLoaded = true; this.toast.error('Could not load docks. Check System status.', 'Check-In setup failed'); },
-    });
+    this.loadDocks();
 
     this.api.checkInConfig().subscribe({
       next: (config: CheckInConfigRecord) => {
@@ -224,10 +253,13 @@ export class CheckInComponent implements OnInit, OnDestroy {
 
   driverNameChanged() {
     if (this.formDisabled) return;
-    // Driver and carrier are independent. Clear any prior driver's phone as soon
-    // as the operator changes the driver identity, then refill only on an exact
-    // reusable Driver match.
-    this.form.driverPhone = '';
+    // Driver and carrier are independent. Clear a phone that was filled in from the
+    // previous saved driver as soon as the driver identity changes, then refill only on
+    // an exact reusable Driver match. A phone the guard typed stays.
+    if (this.phoneAutoFilled) {
+      this.form.driverPhone = '';
+      this.phoneAutoFilled = false;
+    }
   }
 
   driverSelectionChanged() {
@@ -235,7 +267,7 @@ export class CheckInComponent implements OnInit, OnDestroy {
     const needle = this.form.driverName.trim().toLocaleLowerCase();
     if (!needle) return;
     const match = this.referenceDrivers.find((driver) => driver.name.trim().toLocaleLowerCase() === needle);
-    if (match) this.form.driverPhone = match.phoneNumber?.trim() || '';
+    if (match) this.fillSavedPhone(match.phoneNumber);
   }
 
   private phoneDigits(value: string) {
@@ -479,47 +511,85 @@ export class CheckInComponent implements OnInit, OnDestroy {
         this.printWindow?.close();
         this.printWindow = null;
         if (e?.status === 409) this.loads.loadFreightLoads();
+        const connectionLost = e?.name === 'TimeoutError' || e?.status === 0;
+        if (connectionLost) {
+          // The server may have saved it. The form keeps its request key, so pressing Check In
+          // again returns the saved visit instead of creating a second one; clearing would not.
+          this.toast.error('Connection to Truck Log was lost; the check-in may already be saved. Press Check In again without changing or clearing the form — it will not create a duplicate.', 'Check-In not confirmed');
+          return;
+        }
         this.toast.error(e?.error?.message || 'Check-in failed.', 'Check-In failed');
       },
     });
   }
 
-  private uploadQueue(visit: TruckVisitRecord, queue: File[], notifyComplete = false) {
+  /**
+   * Uploads paperwork for a saved visit. After a new check-in (retry=false) the form is always
+   * released for the next truck, even when an upload fails: the saved visit keeps its failed files
+   * in retryFiles/retryVisit so they can be retried (or attached later from Records) without
+   * blocking the gate. A retry never touches the form, which may hold the next truck by then.
+   */
+  private uploadQueue(visit: TruckVisitRecord, queue: File[], retry = false) {
     const next = () => {
       const file = queue.shift();
       if (!file) {
-        this.saving = false;
-        this.retryFiles = [];
-        this.files = [];
-        this.visitLocked = false;
-        this.form = emptyCheckInForm();
-        this.selectedFreightKey = '';
-        this.selectedFreight = null;
-        this.phoneTouched = false;
-        this.resetSchedulePreview();
-        this.loadReferenceData();
-        if (notifyComplete) this.toast.success('All remaining paperwork uploaded successfully.', 'Paperwork complete');
+        if (retry) {
+          this.retryingPaperwork = false;
+          this.retryFiles = [];
+          this.retryVisit = null;
+          this.toast.success('All remaining paperwork uploaded successfully.', 'Paperwork complete');
+        } else {
+          this.releaseFormForNextTruck();
+        }
         return;
       }
       this.api.uploadDocument(visit.id, file).subscribe({
         next,
         error: (e) => {
-          this.saving = false;
           this.retryFiles = [file, ...queue];
-          this.files = [];
-          this.toast.warning(`Check-in is saved, but paperwork upload stopped at ${file.name}: ${e?.error?.message || 'upload error'}. Use Retry Paperwork.`, 'Paperwork needs attention');
+          this.retryVisit = visit;
+          if (retry) this.retryingPaperwork = false;
+          else this.releaseFormForNextTruck();
+          this.toast.warning(`Check-in ${visit.visitReference} is saved, but paperwork upload stopped at ${file.name}: ${e?.error?.message || 'upload error'}. Use Retry Paperwork, or attach it later from Records & Paperwork.`, 'Paperwork needs attention');
         },
       });
     };
     next();
   }
 
+  private releaseFormForNextTruck() {
+    this.saving = false;
+    this.files = [];
+    this.visitLocked = false;
+    this.form = emptyCheckInForm();
+    this.selectedFreightKey = '';
+    this.selectedFreight = null;
+    this.phoneTouched = false;
+    this.phoneAutoFilled = false;
+    this.resetSchedulePreview();
+    this.loadReferenceData();
+    // Start the next truck at the top: the saved-visit notice and the Load Number field.
+    window.setTimeout(() => {
+      if (typeof document === 'undefined') return;
+      document.querySelectorAll('.tl-checkin-layout > .dana-panel > .dana-panel-body').forEach((el) => el.scrollTo({ top: 0 }));
+      document.querySelector('.dana-page > *')?.scrollTo({ top: 0 });
+      window.scrollTo({ top: 0 });
+    });
+  }
+
   retryPaperwork() {
-    if (!this.lastVisit || !this.retryFiles.length || this.saving) return;
-    this.saving = true;
+    if (!this.retryVisit || !this.retryFiles.length || this.retryingPaperwork) return;
+    this.retryingPaperwork = true;
     const retry = [...this.retryFiles];
     this.retryFiles = [];
-    this.uploadQueue(this.lastVisit, retry, true);
+    this.uploadQueue(this.retryVisit, retry, true);
+  }
+
+  /** The guard chose to attach the paperwork later from Records & Paperwork. */
+  dismissPaperworkRetry() {
+    if (this.retryingPaperwork) return;
+    this.retryFiles = [];
+    this.retryVisit = null;
   }
 
   printLastSlip() {
@@ -538,6 +608,7 @@ export class CheckInComponent implements OnInit, OnDestroy {
     this.selectedFreightKey = '';
     this.selectedFreight = null;
     this.phoneTouched = false;
+    this.phoneAutoFilled = false;
     this.files = [];
     this.resetSchedulePreview();
   }
@@ -567,13 +638,9 @@ export class CheckInComponent implements OnInit, OnDestroy {
 }
 
 function shortDateTime(value?: string | null): string {
-  if (!value) return '';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  return formatPlantDate(value, 'MMM d, h:mm a');
 }
 
 function shortDate(value?: string | null): string {
-  if (!value) return '';
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? '' : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  return formatPlantDate(value, 'MMM d');
 }

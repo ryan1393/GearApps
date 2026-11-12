@@ -7,14 +7,14 @@ import { Poller, TruckLogApi, createPoller } from '@truck-log/web/data-access';
 import { DockAgingSettingsRecord, TruckVisitRecord } from '@truck-log/shared/contracts';
 import { elapsedSince, visitStatusLabel } from '@truck-log/web/domain';
 import { DEFAULT_DOCK_AGING_SETTINGS, dockAgeTone } from '@truck-log/web/domain';
-import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService } from '@truck-log/web/ui';
+import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService, PlantDatePipe } from '@truck-log/web/ui';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, FinalCheckoutDialogComponent, StaleDataNoticeComponent],
+  imports: [CommonModule, FormsModule, RouterLink, FinalCheckoutDialogComponent, StaleDataNoticeComponent, PlantDatePipe],
   template: `
   <header class="dana-page-header">
-    <div><h1>Active Trucks</h1><p>{{visits.length}} on site · {{awaitingExit.length}} ready for checkout<span *ngIf="lastUpdated"> · Updated {{lastUpdated | date:'shortTime'}}</span></p></div>
+    <div><h1>Active Trucks</h1><p>{{visits.length}} on site · {{awaitingExit.length}} ready for checkout<span *ngIf="lastUpdated"> · Updated {{lastUpdated | plantDate:'shortTime'}}</span></p></div>
     <div class="dana-actions"><button class="dana-btn" type="button" (click)="load()">Refresh</button></div>
   </header>
   <tl-stale-data-notice [stale]="poller.hasData() && poller.stale()" [lastUpdated]="lastUpdated" subject="Active Trucks"></tl-stale-data-notice>
@@ -43,7 +43,7 @@ import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService } 
     <p *ngIf="q" class="dana-note tl-panel-note">A typed search pauses automatic refresh. Press Search or Enter to apply it.</p>
     <div class="dana-table-shell" tabindex="0" role="region" aria-label="On-site truck visits"><table class="dana-table tl-active-table tl-wide-table"><thead><tr><th>Load / Visit</th><th>Carrier</th><th>Driver</th><th>Trailer</th><th>Dock</th><th>Status</th><th>On Site</th><th><span class="dana-nowrap">Quick actions</span></th></tr></thead><tbody>
     <tr *ngFor="let v of visits" [attr.data-tone]="ageTone(v)"><td><b class="dana-nowrap">{{v.loadNumber || 'No load #'}}</b><span class="dana-cell-sub">{{v.visitReference}}</span></td><td>{{v.carrierName || '—'}}</td><td>{{v.driverName}}</td><td class="dana-nowrap">{{v.trailerId || '—'}}</td><td><b class="dana-nowrap">{{v.dockCode || '—'}}</b></td>
-    <td><span class="dana-status-badge" [attr.data-tone]="v.status === 'DOCK_COMPLETE' ? 'warning' : 'info'">{{label(v.status)}}</span></td><td class="dana-nowrap">{{elapsed(v.guardCheckInAt)}}</td>
+    <td><span class="dana-status-badge" [attr.data-tone]="v.status === 'DOCK_COMPLETE' ? 'warning' : 'info'">{{label(v.status)}}</span></td><td class="dana-nowrap">{{elapsed(v.guardCheckInAt)}}<span class="dana-cell-sub tl-age-text" *ngIf="ageTone(v) as tone" [attr.data-tone]="tone">{{tone === 'danger' ? 'Overdue at dock' : 'Aging at dock'}}</span></td>
     <td><div class="tl-row-actions"><button *ngIf="v.status==='DOCK_COMPLETE'" class="dana-btn dana-btn-success dana-btn-sm tl-write" type="button" (click)="askCheckout(v)">Final Checkout</button><a class="dana-btn dana-btn-sm" [href]="api.slipUrl(v.id)" target="_blank">Slip</a><a class="dana-btn dana-btn-sm" routerLink="/history" [queryParams]="{q:v.visitReference}">Record</a></div></td></tr>
     <tr *ngIf="!visits.length && !poller.hasData() && !poller.stale()"><td colspan="8" class="dana-table-empty">Loading on-site visits…</td></tr>
     <tr *ngIf="!visits.length && !poller.hasData() && poller.stale()"><td colspan="8" class="dana-table-empty" role="alert">On-site visits could not be loaded. Retrying automatically; select Refresh to try now.</td></tr>
@@ -85,7 +85,11 @@ export class ActiveTrucksComponent implements OnInit {
 
   get lastUpdated() { return this.poller.lastUpdated(); }
 
-  get awaitingExit() { return this.visits.filter((v) => v.status === 'DOCK_COMPLETE'); }
+  /** Longest wait first, the same order as the Guard Dashboard's "Needs Guard Action" list. */
+  get awaitingExit() {
+    const completedAt = (v: TruckVisitRecord) => Date.parse(v.dockCompletedAt ?? v.guardCheckInAt ?? '') || 0;
+    return this.visits.filter((v) => v.status === 'DOCK_COMPLETE').sort((a, b) => completedAt(a) - completedAt(b));
+  }
 
   load() {
     this.poller.refresh();

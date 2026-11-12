@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import type { TruckVisitRecord } from '@truck-log/shared/contracts';
 import { TruckLogApi } from '@truck-log/web/data-access';
+import { PlantDatePipe } from '@truck-log/web/ui';
 
 /**
  * Read-only "who is at this dock" preview for the selected dock on Check-In.
@@ -10,16 +11,16 @@ import { TruckLogApi } from '@truck-log/web/data-access';
 @Component({
   selector: 'div[tlCheckinDockStatus]',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PlantDatePipe],
   host: { class: 'dana-alert tl-dock-status', '[class.dana-alert-warning]': 'dockStatusCheckedAt && dockAssignedVisits.length > 0' },
   template: `
     <div class="tl-dock-status-head"><b>Dock {{dockCode}} activity</b><button type="button" class="dana-btn dana-btn-sm" [disabled]="dockStatusLoading" (click)="refreshDockStatus()">{{dockStatusLoading ? 'Checking…' : 'Refresh'}}</button></div>
     <p *ngIf="dockStatusLoading">Reading assigned trucks from the Dock Board…</p>
     <p *ngIf="!dockStatusLoading && dockStatusError" class="dana-field-error">{{dockStatusError}}</p>
-    <p *ngIf="!dockStatusLoading && !dockStatusError && dockStatusCheckedAt && dockAssignedVisits.length">{{dockAssignedVisits.length}} truck(s) at Dock {{dockCode}}. Confirm before assigning another.</p>
+    <p *ngIf="!dockStatusLoading && !dockStatusError && dockStatusCheckedAt && dockAssignedVisits.length">{{dockAssignedVisits.length}} {{dockAssignedVisits.length === 1 ? 'truck' : 'trucks'}} at Dock {{dockCode}}. Confirm before assigning another.</p>
     <p *ngIf="!dockStatusLoading && !dockStatusError && dockStatusCheckedAt && !dockAssignedVisits.length">No trucks at Dock {{dockCode}}.</p>
-    <div class="dana-chip-list" *ngIf="!dockStatusLoading && dockStatusCheckedAt && dockAssignedVisits.length"><span class="dana-chip" *ngFor="let visit of dockAssignedVisits | slice:0:3">{{visit.loadNumber || visit.visitReference}} · {{visit.driverName || 'Driver unknown'}}</span><span class="dana-chip" *ngIf="dockAssignedVisits.length > 3">+{{dockAssignedVisits.length - 3}} additional truck(s)</span></div>
-    <small>Checked<ng-container *ngIf="dockStatusCheckedAt"> {{dockStatusCheckedAt | date:'shortTime'}}</ng-container>. Information only; it doesn't reserve the dock.</small>`,
+    <div class="dana-chip-list" *ngIf="!dockStatusLoading && dockStatusCheckedAt && dockAssignedVisits.length"><span class="dana-chip" *ngFor="let visit of dockAssignedVisits | slice:0:3">{{visit.loadNumber || visit.visitReference}} · {{visit.driverName || 'Driver unknown'}}</span><span class="dana-chip" *ngIf="dockAssignedVisits.length > 3">+{{dockAssignedVisits.length - 3}} more</span></div>
+    <small>Checked<ng-container *ngIf="dockStatusCheckedAt"> {{dockStatusCheckedAt | plantDate:'shortTime'}}</ng-container>. Information only; it doesn't reserve the dock.</small>`,
 })
 export class DockStatusWidgetComponent implements OnChanges, OnDestroy {
   /** The dock selected on the Check-In form. */

@@ -35,6 +35,9 @@ function load(file, extraMocks = {}) {
   return module.exports;
 }
 const feature = 'libs/truck-log/web/feature';
+// Plant-time formatting (web/domain) is real code here; its zone default comes from contracts.
+mocks['@truck-log/shared/contracts'].PLANT_TIME_ZONE_DEFAULT = 'America/Indiana/Indianapolis';
+mocks['@truck-log/web/domain'] = load('libs/truck-log/web/domain/src/lib/plant-time.ts');
 const scanModule = load(`${feature}/rxo-expedite-control-center/src/lib/rxo-expedite/expedite-scan-action.ts`);
 const { ExpediteScanAction } = scanModule;
 const run = (status = 'QUEUED', overrides = {}) => ({

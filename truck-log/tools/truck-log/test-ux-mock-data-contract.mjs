@@ -35,7 +35,7 @@ must(dock.includes('Not attached (optional)') && dock.includes("'Upload PDF'"), 
 must(dock.includes("a missing PDF doesn't block completion") && !dock.includes('|| !packingSlip(visit)'), 'Missing packing slip remains non-blocking for Dock Complete');
 must(/\.tl-dock-grid \{[^}]*repeat\(auto-fill, minmax\(\d+px, 1fr\)\)/.test(dockCss) && /@media \(max-width: 760px\) \{[^}]*\.tl-dock-grid \{ grid-template-columns: 1fr; \}/.test(dockCss), 'Dock Board uses wide responsive desktop cards');
 must(dock.includes('[attr.data-tone]="ageTone(visit)"') && danaCss.includes('.dana-card[data-tone="danger"]') && danaCss.includes('.dana-card[data-tone="warning"]'), 'Dock Board exposes warning/critical visual states');
-must(/<ng-template #noPackingSlip>\s*<div class="dana-actions">\s*<button type="button" class="dana-btn dana-btn-primary"/.test(dock) && dock.includes('(click)="packingSlipInput.click()">{{uploadingVisitId===visit.id ? \'Reading PDF…\' : \'Upload PDF\'}}'), 'Missing packing-slip actions retain a visible primary button without becoming a workflow gate');
+must(/<ng-template #noPackingSlip>\s*<div class="dana-actions(?: tl-write)?">\s*<button type="button" class="dana-btn dana-btn-primary"/.test(dock) && dock.includes('(click)="packingSlipInput.click()">{{uploadingVisitId===visit.id ? \'Reading PDF…\' : \'Upload PDF\'}}'), 'Missing packing-slip actions retain a visible primary button without becoming a workflow gate');
 
 must(dockerfile.split('\n').some((line) => line.startsWith('COPY ') && line.includes('tools/truck-log/mock-data.mjs ')), 'Server runtime image contains mock-data tool');
 must(helper.includes('docker exec -i truck-log-server node /app/tools/truck-log/mock-data.mjs %ACTION%'), 'Mock-data commands run inside the server container');

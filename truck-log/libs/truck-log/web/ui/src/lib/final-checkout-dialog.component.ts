@@ -19,7 +19,8 @@ import { TruckLogDialogDirective } from './dialog.directive';
   <div class="dana-dialog-backdrop" (click)="cancel()">
     <div class="dana-dialog tl-checkout-dialog" [tlDialog]="titleId" [tlDialogEscape]="!busy" (tlDialogClose)="cancel()" (click)="$event.stopPropagation()">
       <div class="dana-dialog-header">
-        <h2 [id]="titleId">Final Guard Checkout</h2>
+        <!-- Focus starts on the title: while the visit loads the only enabled button is Return, and a reflexive Enter would close the dialog. -->
+        <h2 [id]="titleId" tabindex="-1" autofocus>Final Guard Checkout</h2>
         <p>Print the attached packing slip when there is one. A missing PDF doesn't block checkout.</p>
       </div>
       <div class="dana-dialog-body tl-stack">
@@ -29,7 +30,7 @@ import { TruckLogDialogDirective } from './dialog.directive';
           <div class="dana-detail"><span class="dana-detail-label">Driver</span><span class="dana-detail-value">{{target.driverName}}</span></div>
           <div class="dana-detail"><span class="dana-detail-label">Trailer</span><span class="dana-detail-value">{{target.trailerId || '—'}}</span></div>
         </div>
-        <p class="dana-note" *ngIf="target.scannedDeliveryNumbers?.length"><b>SAP Delivery Number(s):</b> {{target.scannedDeliveryNumbers?.join(', ')}} — saved to this visit; this doesn't mean a PDF is attached.</p>
+        <p class="dana-note" *ngIf="target.scannedDeliveryNumbers?.length"><b>SAP Delivery {{target.scannedDeliveryNumbers?.length === 1 ? 'Number' : 'Numbers'}}:</b> {{target.scannedDeliveryNumbers?.join(', ')}} — saved to this visit; this doesn't mean a PDF is attached.</p>
 
         <section class="dana-card-section tl-stack" [attr.data-tone]="packingSlipAvailable && !loadError ? 'success' : null">
           <div class="dana-card-header">
@@ -37,12 +38,12 @@ import { TruckLogDialogDirective } from './dialog.directive';
             <span class="dana-status-badge is-plain" [attr.data-tone]="packingSlipAvailable && !loadError ? 'success' : (detailsFailed ? 'warning' : 'neutral')">{{packingSlipAvailable && !loadError ? 'Ready' : (detailsFailed ? 'Retry' : 'Missing')}}</span>
           </div>
           <div *ngIf="packingSlip"><span class="dana-card-eyebrow">SAP Document / Delivery ID</span><b>{{packingSlip.extractedDocumentId || 'Needs review'}}</b><span class="dana-cell-sub" *ngIf="!packingSlip.extractedDocumentId">{{packingSlip.extractionMessage || 'SAP ID was not detected; print the saved PDF and finish checkout.'}}</span></div>
-          <p class="dana-field-error" *ngIf="loadError">{{loadError}}</p>
-          <button class="dana-btn dana-btn-primary dana-btn-block" type="button" [disabled]="loading || busy || !packingSlipAvailable" (click)="openPackingSlip()">{{slipOpened ? 'Open / Print Again' : 'Open / Print Packing Slip'}}</button>
+          <p class="dana-field-error" *ngIf="loadError" role="alert">{{loadError}}</p>
+          <button class="dana-btn dana-btn-primary dana-btn-block" type="button" *ngIf="loading || packingSlipAvailable" [disabled]="loading || busy || !packingSlipAvailable" (click)="openPackingSlip()">{{slipOpened ? 'Open / Print Again' : 'Open / Print Packing Slip'}}</button>
           <p class="dana-field-hint" *ngIf="slipOpened">Packing slip opened for printing. Finish printing, then complete checkout.</p>
         </section>
 
-        <p class="dana-alert" [class.dana-alert-success]="!detailsFailed && (!packingSlipAvailable || slipOpened)" [class.dana-alert-warning]="detailsFailed">
+        <p class="dana-alert" role="status" *ngIf="!loading" [class.dana-alert-success]="!detailsFailed && (!packingSlipAvailable || slipOpened)" [class.dana-alert-warning]="detailsFailed">
           <b>{{detailsFailed ? 'Visit refresh required.' : (!packingSlipAvailable ? 'No PDF — checkout allowed.' : (slipOpened ? 'Print step done.' : 'Print the packing slip first.'))}}</b>
           {{detailsFailed ? 'Return and retry to verify the visit.' : (!packingSlipAvailable ? 'Missing paperwork stays marked missing; it does not stop the truck leaving.' : (slipOpened ? 'You can finish Final Checkout now.' : 'Open the packing slip for printing before finishing.'))}}
         </p>
@@ -83,9 +84,7 @@ export class FinalCheckoutDialogComponent implements OnInit, OnDestroy {
         if (this.destroyed || request !== this.request) return;
         this.target = fullVisit;
         this.loading = false;
-        if (!this.packingSlipAvailable) {
-          this.loadError = 'No available packing-slip PDF. You may finish checkout; paperwork remains marked missing.';
-        }
+        // No PDF is a normal case, not an error: the "No PDF — checkout allowed" note below says so.
       },
       error: () => {
         if (this.destroyed || request !== this.request) return;

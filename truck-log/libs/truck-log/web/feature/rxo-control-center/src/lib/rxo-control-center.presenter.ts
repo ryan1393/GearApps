@@ -1,3 +1,4 @@
+import { formatPlantDate } from '@truck-log/web/domain';
 import type {
   RxoControlStatusData,
   RxoFreightRecord,
@@ -180,7 +181,7 @@ export function formatDateTime(value: string | null | undefined): string {
   if (!value) return '-';
   const parsed = Date.parse(value);
   return Number.isFinite(parsed)
-    ? new Date(parsed).toLocaleString()
+    ? formatPlantDate(parsed, 'M/d/yy, h:mm:ss a')
     : '-';
 }
 
@@ -441,8 +442,9 @@ export function buildRxoControlView(input: RxoControlInputs) {
     if (scanNeedsReview) return recoveryReasonLabel;
     if (scanRecoveryActive) return `Automatic recovery ${exporterAttemptLabel.toLowerCase()}. ${recoveryReasonLabel}`;
     if (scanTimerRunning) return `${schedulerTriggerLabel} / ${schedulerPhaseLabel} - last completed scan ${durationLabel}`;
-    if (nextRunAt) return `Next automatic scan ${new Date(nextRunAt).toLocaleString()}`;
-    return `Automatic interval: every ${control?.settings?.syncIntervalMinutes ?? input.fallbackSettings.syncIntervalMinutes} minute(s)`;
+    if (nextRunAt) return `Next automatic scan ${formatPlantDate(nextRunAt, 'M/d/yy, h:mm:ss a')}`;
+    const minutes = control?.settings?.syncIntervalMinutes ?? input.fallbackSettings.syncIntervalMinutes;
+    return `Automatic interval: every ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
   })();
 
   const runFailed =
@@ -507,7 +509,7 @@ export function buildRxoControlView(input: RxoControlInputs) {
   })();
 
   const integrationUpdated = input.lastUpdated
-    ? `Updated ${input.lastUpdated.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' })}`
+    ? `Updated ${formatPlantDate(input.lastUpdated, 'h:mm:ss a')}`
     : 'Waiting for status';
 
   const configuredInterval =
@@ -563,8 +565,8 @@ export function buildRxoControlView(input: RxoControlInputs) {
     nextScheduledLabel: formatDateTime(nextRunAt),
     lastCompletedDurationLabel: lastCompletedSeconds ? formatClockDuration(lastCompletedSeconds * 1000) : '-',
     lastCompletedLabel: formatDateTime(scheduler?.lastCompletedAt ?? control?.exporterHealth?.lastSuccessAt ?? null),
-    browserTimeLabel: new Date(input.clockNow).toLocaleTimeString(),
-    serverTimeLabel: new Date(remoteNow).toLocaleTimeString(),
+    browserTimeLabel: formatPlantDate(input.clockNow, 'h:mm:ss a'),
+    serverTimeLabel: formatPlantDate(remoteNow, 'h:mm:ss a'),
     clockOffsetLabel: `${offsetSeconds >= 0 ? '+' : '-'}${Math.abs(offsetSeconds).toFixed(1)}s`,
     schedulerProcessLabel: scheduler?.schedulerProcessId ? `PID ${scheduler.schedulerProcessId}` : 'Not reported',
     schedulerStartedLabel: scheduler?.schedulerStartedAt

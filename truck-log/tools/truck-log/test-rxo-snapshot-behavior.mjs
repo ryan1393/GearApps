@@ -139,6 +139,10 @@ try {
     } }, { success() {}, error() {} }, { canWrite: () => true });
     panel.form = exports.emptyRxoSettingsForm();
     assert.equal(panel.settingsValid, true);
+    // Placeholder defaults are never saved before the live settings have been read.
+    panel.saveSettings();
+    assert.equal(payload, undefined);
+    panel.form.loaded = true;
     panel.saveSettings();
     assert.deepEqual(JSON.parse(JSON.stringify(payload)), { syncIntervalMinutes: 30, maxScanDurationMinutes: 30, noProgressTimeoutMinutes: 15 });
     const html = fs.readFileSync(file.replace('.ts', '.html'), 'utf8');

@@ -70,7 +70,7 @@
               </button>
             </div>
             <span class="dana-cell-sub" *ngIf="row.driverDocument?.fileName" [attr.title]="row.driverDocument?.fileName">{{row.driverDocument?.fileName}}{{row.driverDocument?.version ? ' · v' + row.driverDocument?.version : ''}}</span>
-            <span class="dana-cell-sub" *ngIf="row.driverDocument?.status === 'PRINTED' && row.driverDocument?.printedAt">Printed {{row.driverDocument?.printedAt | date:'short'}}</span>
+            <span class="dana-cell-sub" *ngIf="row.driverDocument?.status === 'PRINTED' && row.driverDocument?.printedAt">Printed {{row.driverDocument?.printedAt | plantDate:'short'}}</span>
           </td>
         </tr>
         <tr [hidden]="!data.rxoDetailsOpen('shipments', row)" [id]="data.rxoDetailsId('shipments', row)">

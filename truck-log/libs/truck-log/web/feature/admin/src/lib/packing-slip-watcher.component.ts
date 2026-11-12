@@ -20,7 +20,7 @@ import {
 } from '@truck-log/shared/contracts';
 import { TruckLogAdminAuth } from '@truck-log/web/auth/admin';
 import { TruckLogApi } from '@truck-log/web/data-access';
-import { TruckLogDialogDirective } from '@truck-log/web/ui';
+import { TruckLogDialogDirective, PlantDatePipe } from '@truck-log/web/ui';
 
 const MODE_LABELS: Record<PackingSlipRouteMode, string> = { OFF: 'Off', TEST: 'Test', LIVE: 'Live' };
 const MODE_TONES: Record<PackingSlipRouteMode, string> = { OFF: 'neutral', TEST: 'info', LIVE: 'success' };
@@ -33,7 +33,7 @@ const MODE_TONES: Record<PackingSlipRouteMode, string> = { OFF: 'neutral', TEST:
 @Component({
   selector: 'tl-packing-slip-watcher',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, TruckLogDialogDirective],
+  imports: [CommonModule, FormsModule, RouterLink, TruckLogDialogDirective, PlantDatePipe],
   template: `
   <section class="dana-panel" data-truck-log-printing="packing-slip-watcher">
     <div class="dana-panel-header">
@@ -45,7 +45,7 @@ const MODE_TONES: Record<PackingSlipRouteMode, string> = { OFF: 'neutral', TEST:
     </div>
     <div class="dana-panel-body tl-stack">
       <p class="dana-page-description">The watcher reads these routes from Truck Log about once a minute and applies a change between captures. <b>Off</b> ignores the route. <b>Test</b> checks and files each packing slip, and uploads it when Upload is on, but never prints. <b>Live</b> also prints verified slips on the output printer.</p>
-      <p class="dana-field-hint" *ngIf="saved">Last changed by <b>{{saved.updatedBy}}</b> at {{saved.updatedAt | date:'M/d/yy h:mm a'}}</p>
+      <p class="dana-field-hint" *ngIf="saved">Last changed by <b>{{saved.updatedBy}}</b> at {{saved.updatedAt | plantDate:'M/d/yy h:mm a'}}</p>
       <p class="dana-loading-state" *ngIf="loading" role="status">Loading watcher routes…</p>
       <div class="dana-alert dana-alert-danger tl-admin-retry" *ngIf="loadError" role="alert">
         <span>{{loadError}}</span>

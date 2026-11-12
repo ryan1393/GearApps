@@ -14,7 +14,6 @@
 .tl-kpi-jump:focus-visible { outline: 2px solid var(--dana-primary); outline-offset: 2px; }
 /* Roles (data-role on the shell): hide what a role cannot use. The server enforces the same limits. */
 .dana-app-shell[data-role="MANAGEMENT"] .tl-write,
-.dana-app-shell[data-role="MANAGEMENT"] .tl-dock-grid .dana-card-section .dana-actions,
 .dana-app-shell[data-role="DOCK"] .tl-guard-only { display: none; }
 /* Dock handheld (CK65): its two screens as big tabs under the top bar on small screens. */
 .tl-role-tabs { display: none; }
@@ -34,3 +33,7 @@
 }
 /* The narrowest handhelds (320px): a little more width for tables and cards. */
 @media (max-width: 400px) { .dana-page { padding: 10px; } }
+/* Aging/overdue rows say so in words too, not only with the row tint (Dashboard, Active Trucks). */
+.tl-age-text { font-weight: 700; }
+.tl-age-text[data-tone="danger"] { color: var(--dana-danger); }
+.tl-age-text[data-tone="warning"] { color: var(--dana-warning); }

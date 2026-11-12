@@ -34,7 +34,7 @@
     </div>
     <div class="tl-tv-dock-layout" *ngIf="!management">
       <section class="dana-wall-panel" aria-label="Docks with assigned trucks only">
-        <div class="dana-wall-panel-title"><h2>Dock assignments</h2><span>Page {{pageNumber(tilePages)}} / {{tilePages.length}} · {{board.atDock}} assigned trucks</span></div>
+        <div class="dana-wall-panel-title"><h2>Dock assignments</h2><span>Page {{pageNumber(tilePages)}} / {{tilePages.length}} · {{board.atDock}} assigned {{board.atDock === 1 ? 'truck' : 'trucks'}}</span></div>
         <div class="dana-wall-grid" [style.--dana-wall-columns]="dockColumns">
           <article class="dana-wall-card tl-tv-dock-card" *ngFor="let tile of tiles; trackBy: trackTile" [attr.data-tone]="tile.visit ? urgencyTone(tile.visit) : null">
             <div class="dana-wall-card-title"><h3>{{tile.dock.code}}</h3><span class="dana-wall-badge" *ngIf="tile.visit && urgencyTone(tile.visit)" [attr.data-tone]="urgencyTone(tile.visit)">{{urgency(tile.visit) === 'overdue' ? 'OVERDUE' : 'AGING'}}</span><span class="dana-wall-badge" *ngIf="!tile.dock.active">{{tile.unlisted ? 'UNLISTED' : 'INACTIVE'}}</span></div>
@@ -54,7 +54,7 @@
         </div>
       </section>
       <section class="dana-wall-panel tl-tv-wait-panel" aria-label="Trucks awaiting final checkout or status review">
-        <div class="dana-wall-panel-title"><h2>Still on site — dock complete / needs review</h2><span>{{board.waiting.length}} trucks · Page {{pageNumber(waitPages)}} / {{waitPages.length}}</span></div>
+        <div class="dana-wall-panel-title"><h2>Still on site — dock complete / needs review</h2><span>{{board.waiting.length}} {{board.waiting.length === 1 ? 'truck' : 'trucks'}} · Page {{pageNumber(waitPages)}} / {{waitPages.length}}</span></div>
         <div class="dana-wall-grid" [style.--dana-wall-columns]="waitingCapacity">
           <article class="dana-wall-card is-compact" *ngFor="let visit of waiting; trackBy: trackVisit">
             <strong>{{visit.loadNumber || visit.visitReference}}</strong><span>{{visit.visitReference}} · Last dock {{visit.dockCode || '—'}} · Trailer {{visit.trailerId || '—'}}</span>
@@ -76,13 +76,13 @@
             <td data-label="On site"><ng-container *ngTemplateOutlet="ageDisplay; context: { $implicit: visit.guardCheckInAt, caption: 'On site' }"></ng-container></td>
             <td data-label="Stage time"><ng-container *ngTemplateOutlet="ageDisplay; context: { $implicit: phase(visit) === 'checkout' ? visit.dockCompletedAt : phase(visit) === 'dock' ? visit.dockAssignedAt : null, caption: phase(visit) === 'checkout' ? 'Awaiting checkout' : phase(visit) === 'dock' ? 'At dock' : 'Stage time' }"></ng-container><small>{{phase(visit) === 'checkout' ? 'Awaiting checkout' : phase(visit) === 'dock' ? 'At dock' : 'Verify visit status'}}</small></td>
           </tr>
-          <tr *ngIf="!rows.length"><td colspan="6" class="dana-wall-empty">No trucks are currently awaiting final checkout.</td></tr>
+          <tr *ngIf="!rows.length"><td colspan="6" class="dana-wall-empty">Every truck is fully checked out.</td></tr>
         </tbody></table>
       </section>
       <section class="dana-wall-panel tl-tv-summary-panel" aria-label="Occupied docks only">
         <div class="dana-wall-panel-title"><h2>Occupied docks</h2><span>{{pageNumber(summaryPages)}} / {{summaryPages.length}}</span></div>
         <div class="tl-tv-dock-summary">
-          <article class="dana-wall-card is-summary" *ngFor="let tile of dockSummary; trackBy: trackTile"><strong>{{tile.dock.code}}</strong><span>{{tile.occupants}} assigned truck(s)</span><small *ngIf="tile.unlisted">Not in dock master</small></article>
+          <article class="dana-wall-card is-summary" *ngFor="let tile of dockSummary; trackBy: trackTile"><strong>{{tile.dock.code}}</strong><span>{{tile.occupants}} assigned {{tile.occupants === 1 ? 'truck' : 'trucks'}}</span><small *ngIf="tile.unlisted">Not in dock master</small></article>
           <p class="dana-wall-empty" *ngIf="!dockSummary.length">No trucks are currently assigned to docks.</p>
         </div>
       </section>
@@ -96,5 +96,5 @@
       <b *ngIf="!duration.valid" aria-hidden="true">—</b>
     </span>
   </ng-template>
-  <footer class="dana-wall-footer"><span>Assigned trucks only · Dock complete is not final checkout · ET</span><div><button type="button" class="dana-btn dana-btn-sm" (click)="step(-1)" [disabled]="cycle === 0">Previous</button><span>{{paused ? 'Page rotation paused' : rotationEditing ? 'Editing rotation interval' : 'Pages rotate every ' + rotationSeconds + 's'}}</span><button type="button" class="dana-btn dana-btn-sm" (click)="step(1)">Next</button><button type="button" class="dana-btn dana-btn-sm" (click)="refresh()">Refresh</button></div></footer>
+  <footer class="dana-wall-footer"><span>{{management ? 'Every truck not fully checked out' : 'Assigned trucks only'}} · Dock complete is not final checkout · ET</span><div><button type="button" class="dana-btn dana-btn-sm" (click)="step(-1)" [disabled]="cycle === 0">Previous</button><span>{{paused ? 'Page rotation paused' : rotationEditing ? 'Editing rotation interval' : 'Pages rotate every ' + rotationSeconds + 's'}}</span><button type="button" class="dana-btn dana-btn-sm" (click)="step(1)">Next</button><button type="button" class="dana-btn dana-btn-sm" (click)="refresh()">Refresh</button></div></footer>
 </section>

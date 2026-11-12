@@ -17,11 +17,18 @@
   <div><b>{{lastVisit.visitReference}} saved for manual printing.</b> No automatic print job was queued. Open and print the Dock Assignment Slip; RXO paperwork is available from Records &amp; Paperwork.</div>
   <button type="button" class="dana-btn" (click)="printLastSlip()">Open / Print Slip</button>
 </section>
-<div class="dana-alert dana-alert-warning tl-notice tl-notice-action" *ngIf="retryFiles.length">
-  <div><b>Paperwork still needs attention.</b> {{retryFiles.length}} file(s) did not finish uploading for {{lastVisit?.visitReference}}.</div>
-  <button class="dana-btn dana-btn-warning" type="button" [disabled]="saving" (click)="retryPaperwork()">Retry Paperwork</button>
+<div class="dana-alert dana-alert-warning tl-notice tl-notice-action" *ngIf="retryFiles.length && retryVisit" role="status">
+  <div><b>Paperwork still needs attention.</b> {{retryFiles.length}} {{retryFiles.length === 1 ? 'file' : 'files'}} did not finish uploading for {{retryVisit.visitReference}}. The visit itself is saved.</div>
+  <div class="dana-actions">
+    <button class="dana-btn dana-btn-warning" type="button" [disabled]="retryingPaperwork" (click)="retryPaperwork()">{{retryingPaperwork ? 'Retrying…' : 'Retry Paperwork'}}</button>
+    <button class="dana-btn dana-btn-ghost" type="button" [disabled]="retryingPaperwork" (click)="dismissPaperworkRetry()">Attach later in Records</button>
+  </div>
 </div>
 <p class="dana-alert dana-alert-warning tl-notice" *ngIf="docksLoaded && !activeDocks.length"><b>No active docks are configured.</b> Go to Administration → Docks before checking in a truck.</p>
+<div class="dana-alert dana-alert-danger tl-notice tl-notice-action" *ngIf="docksLoadError" role="alert">
+  <div><b>Docks could not be loaded.</b> A dock must be chosen to check in a truck.</div>
+  <button class="dana-btn" type="button" (click)="loadDocks()">Try again</button>
+</div>
 
 <!-- Post-save print package status and retry controls. -->
 <section class="dana-panel tl-checkin-print" *ngIf="print.lastPrintPackage && (print.rxoPrintItem || print.lastPrintPackage.automaticDockAssignment)">
@@ -43,10 +50,11 @@
             </div>
           </td>
           <td>{{print.printItemStatusLabel(item)}}</td>
-          <td class="dana-nowrap">{{item.printedAt ? (item.printedAt | date:'short') : '—'}}</td>
+          <td class="dana-nowrap">{{item.printedAt ? (item.printedAt | plantDate:'short') : '—'}}</td>
         </tr>
       </tbody>
     </table>
+    <p class="dana-alert dana-alert-danger" role="alert" *ngIf="print.printStatusUnreachable">Can't reach Truck Log to check print status — the network or the Truck Log server is down, not necessarily the printer. Check System status at the top right; print status updates again when the connection returns.</p>
     <p class="dana-alert dana-alert-warning" role="status" *ngIf="print.printerNotResponding">Printer not responding — the print status has not changed for 3 minutes. Check the gate printer and Print Agent, then select Refresh Print Status.</p>
     <div class="dana-actions">
       <ng-container *ngIf="!print.lastPrintPackage?.automaticDockAssignment && print.dockPrintItem?.status === 'PENDING_CONFIRMATION'">
@@ -84,6 +92,7 @@
             </div>
             <dana-combobox
               *ngIf="!manualLoadEntry"
+              tlExactEnter
               class="tl-load-picker"
               ariaLabel="RXO or Expedite load"
               [options]="freightLoads"
@@ -104,6 +113,7 @@
               [(ngModel)]="form.loadNumber"
               (ngModelChange)="loadNumberChanged()"
               (blur)="upper('loadNumber'); lookupSchedule()"
+              (keydown.enter)="$event.preventDefault(); upper('loadNumber'); lookupSchedule()"
               placeholder="Scan or enter load number">
           </div>
           <p class="dana-field-hint" *ngIf="freightLoadsError && freightLoadsNoticeOnly">{{freightLoadsError}}</p>
@@ -122,7 +132,7 @@
           <div class="dana-field-static">
             <span *ngIf="!form.loadNumber.trim()">Shown after a load number is entered.</span>
             <span *ngIf="form.loadNumber.trim() && scheduleChecking">Checking scheduled loads…</span>
-            <strong *ngIf="form.loadNumber.trim() && !scheduleChecking && scheduleLookup?.found">{{scheduleLookup?.scheduledAt | date:'EEE M/d h:mm a'}}</strong>
+            <strong *ngIf="form.loadNumber.trim() && !scheduleChecking && scheduleLookup?.found">{{scheduleLookup?.scheduledAt | plantDate:'EEE M/d h:mm a'}}</strong>
             <span *ngIf="form.loadNumber.trim() && !scheduleChecking && scheduleLookup && !scheduleLookup.found">No matching scheduled load; this visit counts as unscheduled.</span>
             <span *ngIf="form.loadNumber.trim() && !scheduleChecking && scheduleLookupError">{{scheduleLookupError}}</span>
             <span *ngIf="form.loadNumber.trim() && !scheduleChecking && !scheduleLookup && !scheduleLookupError">Leave the Load Number field to check.</span>
@@ -132,12 +142,12 @@
         <div class="dana-field">
           <div class="dana-field-head"><span class="dana-label">Origin</span><span class="dana-field-tag" data-tone="info" *ngIf="selectedFreight && form.originName.trim()">From RXO</span><span class="dana-field-tag is-required">Required</span></div>
           <input *ngIf="form.direction==='OUTBOUND'" class="dana-input" aria-label="Origin" [value]="plantLocationName" readonly>
-          <dana-combobox *ngIf="form.direction!=='OUTBOUND'" [freeText]="true" [disabled]="formDisabled" ariaLabel="Origin" placeholder="Search or type origin" [options]="referenceLocations" [columns]="locationColumns" [keyOf]="referenceKey" [textOf]="referenceName" [(ngModel)]="form.originName"></dana-combobox>
+          <dana-combobox tlExactEnter *ngIf="form.direction!=='OUTBOUND'" [freeText]="true" [disabled]="formDisabled" ariaLabel="Origin" placeholder="Search or type origin" [options]="referenceLocations" [columns]="locationColumns" [keyOf]="referenceKey" [textOf]="referenceName" [(ngModel)]="form.originName"></dana-combobox>
         </div>
         <div class="dana-field">
           <div class="dana-field-head"><span class="dana-label">Destination</span><span class="dana-field-tag" data-tone="info" *ngIf="selectedFreight && form.destinationName.trim()">From RXO</span><span class="dana-field-tag is-required">Required</span></div>
           <input *ngIf="form.direction==='INBOUND'" class="dana-input" aria-label="Destination" [value]="plantLocationName" readonly>
-          <dana-combobox *ngIf="form.direction!=='INBOUND'" [freeText]="true" [disabled]="formDisabled" ariaLabel="Destination" placeholder="Search or type destination" [options]="referenceLocations" [columns]="locationColumns" [keyOf]="referenceKey" [textOf]="referenceName" [(ngModel)]="form.destinationName"></dana-combobox>
+          <dana-combobox tlExactEnter *ngIf="form.direction!=='INBOUND'" [freeText]="true" [disabled]="formDisabled" ariaLabel="Destination" placeholder="Search or type destination" [options]="referenceLocations" [columns]="locationColumns" [keyOf]="referenceKey" [textOf]="referenceName" [(ngModel)]="form.destinationName"></dana-combobox>
         </div>
       </div>
 
@@ -149,7 +159,7 @@
       <div class="dana-form-grid">
         <div class="dana-field">
           <div class="dana-field-head"><span class="dana-label">Driver Name</span><span class="dana-field-tag is-required">Required</span></div>
-          <dana-combobox [freeText]="true" [disabled]="formDisabled" ariaLabel="Driver name" placeholder="Search or type driver" [options]="referenceDrivers" [columns]="driverColumns" [keyOf]="referenceKey" [textOf]="referenceName"
+          <dana-combobox tlExactEnter [freeText]="true" [disabled]="formDisabled" ariaLabel="Driver name" placeholder="Search or type driver" [options]="referenceDrivers" [columns]="driverColumns" [keyOf]="referenceKey" [textOf]="referenceName"
             [(ngModel)]="form.driverName" (ngModelChange)="driverNameChanged()" (picked)="driverPicked($event)" (focusout)="driverSelectionChanged()"></dana-combobox>
         </div>
         <div class="dana-field" [class.is-invalid]="phoneTouched && !driverPhoneValid">
@@ -163,7 +173,7 @@
             maxlength="30"
             pattern="[0-9+() .-]{7,30}"
             [(ngModel)]="form.driverPhone"
-            (ngModelChange)="phoneTouched=true"
+            (ngModelChange)="phoneTyped()"
             (blur)="phoneTouched=true; normalizeDriverPhone()"
             [attr.aria-invalid]="phoneTouched && !driverPhoneValid ? 'true' : null"
             placeholder="(260) 555-1212">
@@ -171,7 +181,7 @@
         </div>
         <div class="dana-field">
           <div class="dana-field-head"><span class="dana-label">Carrier</span><span class="dana-field-tag" data-tone="info" *ngIf="selectedFreight && form.carrierName.trim()">From RXO</span><span class="dana-field-tag is-required">Required</span></div>
-          <dana-combobox [freeText]="true" [disabled]="formDisabled" ariaLabel="Carrier" placeholder="Search or type carrier" [options]="referenceCarriers" [columns]="carrierColumns" [keyOf]="referenceKey" [textOf]="referenceName" [(ngModel)]="form.carrierName"></dana-combobox>
+          <dana-combobox tlExactEnter [freeText]="true" [disabled]="formDisabled" ariaLabel="Carrier" placeholder="Search or type carrier" [options]="referenceCarriers" [columns]="carrierColumns" [keyOf]="referenceKey" [textOf]="referenceName" [(ngModel)]="form.carrierName"></dana-combobox>
         </div>
         <div class="dana-field">
           <div class="dana-field-head"><label for="checkin-tractor">Tractor ID</label><span class="dana-field-tag is-required">Required</span></div>
@@ -198,7 +208,7 @@
       <div class="dana-form-grid">
         <div class="dana-field dana-field-full">
           <div class="dana-field-head"><span class="dana-label">Dock</span><span class="dana-field-tag is-required">Required</span></div>
-          <dana-combobox [disabled]="formDisabled" ariaLabel="Dock" placeholder="Search docks…" emptyText="No active dock matches" [options]="activeDocks" [columns]="dockColumns" [keyOf]="dockKey" [textOf]="dockText" [(ngModel)]="form.dockCode"></dana-combobox>
+          <dana-combobox tlExactEnter [disabled]="formDisabled" ariaLabel="Dock" placeholder="Search docks…" emptyText="No active dock matches" [options]="activeDocks" [columns]="dockColumns" [keyOf]="dockKey" [textOf]="dockText" [(ngModel)]="form.dockCode"></dana-combobox>
         </div>
         <div class="dana-field-full" tlCheckinDockStatus *ngIf="form.dockCode" [dockCode]="form.dockCode" role="status" aria-live="polite"></div>
       </div>
@@ -225,7 +235,7 @@
           </select>
         </label>
         <p id="checkin-print-help" class="dana-field-hint">{{printMode === 'AUTOMATIC' ? 'The gate printer receives the Dock Assignment Slip and available RXO paperwork after check-in.' : 'Save the visit, then open the slip to print it. No automatic print job will be queued.'}}</p>
-        <button class="dana-btn dana-btn-primary dana-btn-lg dana-btn-block" type="button" [disabled]="!canSave || formDisabled || printingConfigLoading" (click)="save()">{{saving ? 'Saving Check-In…' : (printMode === 'AUTOMATIC' ? 'Check In & Print Slip' : 'Check In — Print Manually')}}</button>
+        <button class="dana-btn dana-btn-primary dana-btn-lg dana-btn-block" type="button" [disabled]="!canSave || formDisabled || printingConfigLoading" (click)="save()">{{saving ? (visitLocked ? 'Uploading paperwork…' : 'Saving Check-In…') : (printMode === 'AUTOMATIC' ? 'Check In & Print Slip' : 'Check In — Print Manually')}}</button>
         <button class="dana-btn dana-btn-block" type="button" [disabled]="saving || visitLocked" (click)="clearForm()">Clear Form</button>
         <div class="tl-last-checkin" *ngIf="lastVisitId && lastVisit">
           <span class="dana-muted">Last check-in: <b>{{lastVisit.loadNumber}}</b> → Dock <b>{{lastVisit.dockCode}}</b></span>

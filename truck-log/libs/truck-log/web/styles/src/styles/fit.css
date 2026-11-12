@@ -62,6 +62,10 @@ table.dana-table td { padding: 9px 12px; }
   :where(.dana-page > :not(router-outlet)) > * { flex: 0 0 auto; }
   /* Page wrappers pass their children straight to the screen column. */
   .tl-rxo, .tl-admin { display: contents; }
+  /* Their children sit in the screen column too, so they need the same no-shrink default:
+     otherwise a panel with overflow:hidden (the RXO recovery card, admin tables) absorbs the
+     whole height shortfall and collapses to a sliver. Only .tl-fill takes the leftover height. */
+  .tl-rxo > :not(.tl-fill), .tl-admin > :not(.tl-fill) { flex: 0 0 auto; }
   /* KPI rows stay one row of four on landscape tablets too (Dana drops to two below 1100px). */
   .dana-page .dana-kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .dana-page .dana-kpi-grid,

@@ -25,7 +25,8 @@ export class RxoDataStore implements OnDestroy {
   currentPage = 1;
   readonly pageSize = 100;
   dataPage: RxoDataPage<RxoRow> | null = null;
-  dataLoading = false;
+  /** True from the start: the first load always follows, so the table never flashes "no data" before it. */
+  dataLoading = true;
   documentUploadTarget: RxoShipmentRecord | null = null;
   documentUploadingKey = '';
   private readonly uploadIdempotency = new UploadIdempotency();

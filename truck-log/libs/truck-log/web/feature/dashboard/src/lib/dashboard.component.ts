@@ -6,14 +6,14 @@ import { Poller, TruckLogApi, createPoller } from '@truck-log/web/data-access';
 import { DashboardData, DockAgingSettingsRecord, TruckVisitRecord } from '@truck-log/shared/contracts';
 import { elapsedSince, visitStatusLabel } from '@truck-log/web/domain';
 import { DEFAULT_DOCK_AGING_SETTINGS, dockAgeTone } from '@truck-log/web/domain';
-import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService, jumpToSection } from '@truck-log/web/ui';
+import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService, jumpToSection, PlantDatePipe } from '@truck-log/web/ui';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, RouterLink, FinalCheckoutDialogComponent, StaleDataNoticeComponent],
+  imports: [CommonModule, RouterLink, FinalCheckoutDialogComponent, StaleDataNoticeComponent, PlantDatePipe],
   template: `
   <header class="dana-page-header">
-    <div><h1>Guard Dashboard</h1><p *ngIf="lastUpdated">Updated {{lastUpdated | date:'shortTime'}}</p></div>
+    <div><h1>Guard Dashboard</h1><p *ngIf="lastUpdated">Updated {{lastUpdated | plantDate:'shortTime'}}</p></div>
     <div class="dana-actions"><button class="dana-btn" type="button" (click)="load()">Refresh</button><a class="dana-btn dana-btn-primary tl-write" routerLink="/check-in">+ Check In Truck</a></div>
   </header>
   <tl-stale-data-notice [stale]="!!data && poller.stale()" [lastUpdated]="lastUpdated" subject="The Guard Dashboard"></tl-stale-data-notice>
@@ -33,7 +33,7 @@ import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService, j
     <ul class="dana-action-list tl-scroll" *ngIf="awaitingExit.length">
       <li class="dana-action-row" *ngFor="let visit of awaitingExit">
         <div class="dana-action-main"><strong>{{visit.loadNumber || visit.visitReference}}</strong><span>{{visit.driverName}} · Trailer {{visit.trailerId}} · Dock {{visit.dockCode}}</span></div>
-        <div class="dana-action-meta"><span>Dock complete</span><strong>{{visit.dockCompletedAt | date:'shortTime'}}</strong></div>
+        <div class="dana-action-meta"><span>Dock complete</span><strong>{{visit.dockCompletedAt | plantDate:'smartTime'}}</strong></div>
         <button class="dana-btn dana-btn-success tl-write" type="button" (click)="askCheckout(visit)">Final Checkout</button>
       </li>
     </ul>
@@ -47,7 +47,7 @@ import { FinalCheckoutDialogComponent, StaleDataNoticeComponent, ToastService, j
     <div class="dana-table-shell"><table class="dana-table tl-wide-table"><thead><tr><th>Load / Visit</th><th>Driver</th><th>Carrier</th><th>Trailer</th><th>Dock</th><th>Status</th><th>Guard In</th><th>On Site</th></tr></thead>
     <tbody><tr *ngFor="let visit of data?.activeTrucks" [attr.data-tone]="ageTone(visit)"><td><b>{{visit.loadNumber || 'No load #'}}</b><span class="dana-cell-sub">{{visit.visitReference}}</span></td>
     <td>{{visit.driverName}}</td><td>{{visit.carrierName || '—'}}</td><td class="dana-nowrap">{{visit.trailerId || '—'}}</td><td><b class="dana-nowrap">{{visit.dockCode || '—'}}</b></td>
-    <td><span class="dana-status-badge" [attr.data-tone]="visit.status === 'DOCK_COMPLETE' ? 'warning' : 'info'">{{label(visit.status)}}</span></td><td class="dana-nowrap">{{visit.guardCheckInAt | date:'shortTime'}}</td><td class="dana-nowrap">{{elapsed(visit.guardCheckInAt)}}</td></tr>
+    <td><span class="dana-status-badge" [attr.data-tone]="visit.status === 'DOCK_COMPLETE' ? 'warning' : 'info'">{{label(visit.status)}}</span></td><td class="dana-nowrap">{{visit.guardCheckInAt | plantDate:'smartTime'}}</td><td class="dana-nowrap">{{elapsed(visit.guardCheckInAt)}}<span class="dana-cell-sub tl-age-text" *ngIf="ageTone(visit) as tone" [attr.data-tone]="tone">{{tone === 'danger' ? 'Overdue at dock' : 'Aging at dock'}}</span></td></tr>
     <tr *ngIf="data && !data.activeTrucks.length"><td colspan="8" class="dana-table-empty">No trucks are currently on site.</td></tr>
     <tr *ngIf="!data && !poller.stale()"><td colspan="8" class="dana-table-empty">Loading on-site trucks…</td></tr>
     <tr *ngIf="!data && poller.stale()"><td colspan="8" class="dana-table-empty">On-site trucks could not be loaded. Retrying automatically.</td></tr></tbody></table></div>

@@ -1,14 +1,14 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TruckLogApi } from '@truck-log/web/data-access';
-import { ToastService } from '@truck-log/web/ui';
+import { ToastService, PlantDatePipe } from '@truck-log/web/ui';
 import { AdminDataStore } from '../admin-data.store';
 
 /** Administration > Scheduled Loads (Excel template download and import). */
 @Component({
   selector: 'section[tlAdminScheduleTab]',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, PlantDatePipe],
   template: `
     <div class="dana-panel-header">
       <div><h2>Scheduled loads</h2><small>{{data.scheduledLoads.length}} active scheduled load{{data.scheduledLoads.length === 1 ? '' : 's'}}</small></div>
@@ -25,10 +25,10 @@ import { AdminDataStore } from '../admin-data.store';
     </div>
     <div class="dana-table-shell" *ngIf="data.scheduledLoads.length">
       <table class="dana-table"><thead><tr><th scope="col">Load number</th><th scope="col">Scheduled</th><th scope="col">Source</th></tr></thead><tbody>
-        <tr *ngFor="let load of data.scheduledLoads"><td><b>{{load.loadNumber}}</b></td><td>{{load.scheduledAt | date:'M/d/yy h:mm a'}}</td><td>{{load.source || 'Manual/System'}}</td></tr>
+        <tr *ngFor="let load of data.scheduledLoads"><td><b>{{load.loadNumber}}</b></td><td>{{load.scheduledAt | plantDate:'M/d/yy h:mm a'}}</td><td>{{load.source || 'Manual/System'}}</td></tr>
       </tbody></table>
     </div>
-    <div class="dana-empty-state" *ngIf="!data.scheduledLoads.length">No active scheduled loads have been imported yet.</div>`,
+    <div class="dana-empty-state" *ngIf="!data.scheduledLoads.length" role="status">{{data.state.scheduledLoads === 'ready' ? 'No active scheduled loads have been imported yet.' : data.emptyText('scheduledLoads', 'scheduled loads', '')}}</div>`,
 })
 export class AdminScheduleTabComponent {
   scheduleFile: File | null = null;

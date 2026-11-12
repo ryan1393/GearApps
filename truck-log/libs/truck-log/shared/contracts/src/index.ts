@@ -262,7 +262,12 @@ export interface HealthData {
     database: string;
     documentStorage: string;
     time: string;
+    /** The plant time zone (server TZ); every screen shows times in it. */
+    timeZone?: string;
 }
+
+/** Plant time zone when the server does not report one (matches the TZ default in docker-compose.yml). */
+export const PLANT_TIME_ZONE_DEFAULT = 'America/Indiana/Indianapolis';
 
 export interface RxoDataStatusSummaryRecord {
     status: string;

@@ -101,7 +101,7 @@ export class DockScanComponent implements OnDestroy {
     }).format(parsed) + ' ET' : 'Time unavailable';
   }
   resetBurst(): void { this.input.reset(); this.dialogScanPending = false; }
-  rejectManual(event: Event): void { event.preventDefault(); this.resetBurst(); this.message = 'Use the scanner here, or choose Manual Entry to type the number.'; }
+  rejectManual(event: Event): void { event.preventDefault(); this.resetBurst(); this.message = 'Use the scanner here, or choose Type It to type the number.'; }
   setEntryMode(mode: 'SCAN' | 'MANUAL'): void {
     if (this.destroyed || this.busy || this.saving || this.attaching || (mode !== 'SCAN' && mode !== 'MANUAL')) return;
     this.entryMode = mode;

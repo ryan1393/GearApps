@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import type { RxoFreightRecord, RxoOrderRecord, RxoShipmentRecord } from '@truck-log/shared/contracts';
 import * as rxoPresenter from './rxo-control-center.presenter';
 import { RxoDataStore, type RxoRow } from './rxo-data.store';
+import { PlantDatePipe } from '@truck-log/web/ui';
 
 /**
  * RXO Data tab body: dataset tabs, filters, the Shipments / Orders / Freight
@@ -13,7 +14,7 @@ import { RxoDataStore, type RxoRow } from './rxo-data.store';
 @Component({
   selector: 'section[tlRxoDataTable]',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PlantDatePipe],
   templateUrl: './rxo-data-table.component.html',
 })
 export class RxoDataTableComponent {

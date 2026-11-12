@@ -55,8 +55,9 @@ export class ToastService {
 
     const next = [...this.noticesSubject.value, notice];
     while (next.length > MAX_VISIBLE) {
-      // Make room by dropping the oldest transient notice before any sticky error.
-      const transient = next.findIndex((item) => item.durationMs > 0);
+      // Make room by dropping the oldest transient notice before any sticky error, but never the
+      // notice being added: with only sticky errors on screen, the oldest error gives way instead.
+      const transient = next.findIndex((item) => item.durationMs > 0 && item !== notice);
       next.splice(transient >= 0 ? transient : 0, 1);
     }
     this.noticesSubject.next(next);

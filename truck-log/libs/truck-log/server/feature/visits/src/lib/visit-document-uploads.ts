@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { createHash } from 'node:crypto';
 import { unlinkSync, writeFileSync } from 'node:fs';
 import { extname, join } from 'node:path';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { removeIfUncommitted } from '@truck-log/server/infrastructure/sap-documents';
 import { VisitStatuses } from '@truck-log/shared/contracts';
 import { TruckVisit } from '@truck-log/server/data-access';
@@ -48,18 +48,30 @@ export class VisitDocumentUploads {
             throw new BadRequestException('Only PDF, JPEG, PNG, TIFF, or BMP paperwork files are allowed.');
         }
         const visit = await this.getVisit(visitId);
+        // The same file sent again to the same visit is the same paperwork: a retry after a lost
+        // response, or a guard re-adding files after a partial failure, returns the saved copy
+        // instead of attaching a duplicate.
+        const sha256 = createHash('sha256').update(file.buffer).digest('hex');
+        const existing = await this.findSameUpload(this.dataSource.manager, visitId, sha256);
+        if (existing)
+            return existing;
         const folder = this.files.ensureVisitFolder(visit.documentFolderKey);
         const { fileName, storedFileName } = this.files.sanitizeDocumentFileName(file.originalname);
         const absolutePath = join(folder, storedFileName);
         writeFileSync(absolutePath, file.buffer);
         const relativePath = [...visit.documentFolderKey.split('/'), storedFileName].join('/');
         const normalizedActor = normalizeActor(actor);
+        let duplicateOf: VisitDocument | null = null;
         try {
-            return await this.dataSource.transaction(async (manager) => {
+            const saved = await this.dataSource.transaction(async (manager) => {
+                // Serialise uploads per visit so two identical concurrent requests cannot both insert.
+                await manager.query('SELECT pg_advisory_xact_lock(hashtextextended($1, 0))', ['truck-log:visit-document-upload:' + visitId]);
+                duplicateOf = await this.findSameUpload(manager, visitId, sha256);
+                if (duplicateOf)
+                    return duplicateOf;
                 const documentRepository = manager.getRepository(VisitDocument);
                 const eventRepository = manager.getRepository(VisitEvent);
                 const now = new Date();
-                const sha256 = createHash('sha256').update(file.buffer).digest('hex');
                 const document = await documentRepository.save(documentRepository.create({
                     truckVisitId: visitId,
                     fileName,
@@ -103,12 +115,24 @@ export class VisitDocumentUploads {
                 }));
                 return document;
             });
+            // Lost the race to an identical upload: the file written above is not referenced.
+            if (duplicateOf)
+                await removeIfUncommitted(this.dataSource, relativePath, () => unlinkSync(absolutePath));
+            return saved;
         }
         catch (error) {
             // Keep the file if the commit may have succeeded (see removeIfUncommitted).
             await removeIfUncommitted(this.dataSource, relativePath, () => unlinkSync(absolutePath));
             throw error;
         }
+    }
+
+    /** An active document already uploaded to this visit with exactly the same bytes. */
+    private findSameUpload(manager: EntityManager, visitId: number, sha256: string) {
+        return manager.getRepository(VisitDocument).findOne({
+            where: { truckVisitId: visitId, sha256, sourceKind: 'VISIT_UPLOAD', retentionStatus: 'ACTIVE' },
+            order: { id: 'ASC' },
+        });
     }
     async addPackingSlip(visitId: number, file: UploadedPaperworkFile, actor?: string) {
         if (!file)

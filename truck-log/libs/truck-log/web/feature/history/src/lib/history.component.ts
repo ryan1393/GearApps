@@ -7,7 +7,7 @@ import { filter } from 'rxjs';
 import { TruckLogApi } from '@truck-log/web/data-access';
 import { DriverPrintItemRecord, TruckVisitRecord } from '@truck-log/shared/contracts';
 import { recordStatusLabel, visitEventLabel } from '@truck-log/web/domain';
-import { ToastService, TruckLogDialogDirective } from '@truck-log/web/ui';
+import { ToastService, TruckLogDialogDirective, PlantDatePipe } from '@truck-log/web/ui';
 
 /**
  * The Materials access token for RXO driver documents. Held in memory for this
@@ -24,7 +24,7 @@ export class MaterialsAccessTokenStore {
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule, TruckLogDialogDirective],
+  imports: [CommonModule, FormsModule, TruckLogDialogDirective, PlantDatePipe],
   template: `
   <header class="dana-page-header">
     <div><h1>Records &amp; Paperwork</h1><p>Shows the 250 newest matches. Search by load, SAP Delivery Number, driver or date to find older visits.</p></div>
@@ -34,7 +34,7 @@ export class MaterialsAccessTokenStore {
     <div class="dana-panel-header"><h2>Find a Truck Visit</h2></div>
     <form class="dana-panel-body dana-filter-row tl-records-filters" (submit)="$event.preventDefault(); load()">
       <label class="tl-records-search">Search<input name="q" [(ngModel)]="q" placeholder="Load, visit, SAP Delivery Number, driver, carrier, trailer…"></label>
-      <label>Status<select name="status" [(ngModel)]="status"><option value="ALL">All records</option><option value="ACTIVE">On site</option><option value="DOCK_ASSIGNED">At / sent to dock</option><option value="DOCK_COMPLETE">Dock complete / awaiting guard</option><option value="GUARD_CHECKED_OUT">Checked out</option></select></label>
+      <label>Status<select name="status" [(ngModel)]="status"><option value="ALL">All records</option><option value="ACTIVE">On site</option><option value="DOCK_ASSIGNED">At / Sent to Dock</option><option value="DOCK_COMPLETE">Dock Complete — Awaiting Guard</option><option value="GUARD_CHECKED_OUT">Checked out</option></select></label>
       <label>Check-in date<input name="date" [(ngModel)]="date" type="date"></label>
       <div class="dana-actions tl-filter-actions"><button type="submit" class="dana-btn dana-btn-primary" [disabled]="loading" [attr.aria-busy]="loading">{{loading ? 'Searching…' : 'Search'}}</button><button type="button" class="dana-btn" (click)="clearFilters()">Clear</button></div>
     </form>
@@ -48,7 +48,7 @@ export class MaterialsAccessTokenStore {
     </div>
     <p class="dana-note tl-panel-note" *ngIf="!loading && !searchError && visits.length >= 250" role="note">Showing only the newest 250 matching visits. Narrow the search or date to find older ones.</p>
     <div class="dana-table-shell" role="region" aria-label="Visit records" tabindex="0"><table class="dana-table tl-wide-table"><thead><tr><th>Guard in</th><th>Load / Visit</th><th>Driver</th><th>Carrier</th><th>Trailer</th><th>Dock</th><th>Status</th><th>Paperwork</th><th><span class="dana-nowrap">Record</span></th></tr></thead><tbody>
-      <tr *ngFor="let v of pageVisits"><td class="dana-nowrap">{{v.guardCheckInAt | date:'short'}}</td><td><b class="dana-nowrap">{{v.loadNumber || 'No load #'}}</b><span class="dana-cell-sub">{{v.visitReference}}</span><span class="dana-cell-sub" *ngIf="v.scannedDeliveryNumbers?.length">SAP {{v.scannedDeliveryNumbers?.join(', ')}}</span></td><td>{{v.driverName}}</td><td>{{v.carrierName || '—'}}</td><td class="dana-nowrap">{{v.trailerId || '—'}}</td><td><b class="dana-nowrap">{{v.dockCode || '—'}}</b></td><td><span class="dana-status-badge" [attr.data-tone]="v.status === 'DOCK_COMPLETE' ? 'warning' : v.status === 'GUARD_CHECKED_OUT' ? 'success' : 'info'">{{statusLabel(v.status)}}</span></td><td><span class="dana-count-badge" [attr.data-tone]="v.documentCount ? 'success' : null">{{v.documentCount || 0}} file{{v.documentCount === 1 ? '' : 's'}}</span></td><td><button class="dana-btn dana-btn-sm" type="button" (click)="openRecord(v)">Open</button></td></tr>
+      <tr *ngFor="let v of pageVisits"><td class="dana-nowrap">{{v.guardCheckInAt | plantDate:'short'}}</td><td><b class="dana-nowrap">{{v.loadNumber || 'No load #'}}</b><span class="dana-cell-sub">{{v.visitReference}}</span><span class="dana-cell-sub" *ngIf="v.scannedDeliveryNumbers?.length">SAP {{v.scannedDeliveryNumbers?.join(', ')}}</span></td><td>{{v.driverName}}</td><td>{{v.carrierName || '—'}}</td><td class="dana-nowrap">{{v.trailerId || '—'}}</td><td><b class="dana-nowrap">{{v.dockCode || '—'}}</b></td><td><span class="dana-status-badge" [attr.data-tone]="v.status === 'DOCK_COMPLETE' ? 'warning' : v.status === 'GUARD_CHECKED_OUT' ? 'success' : 'info'">{{statusLabel(v.status)}}</span></td><td><span class="dana-count-badge" [attr.data-tone]="v.documentCount ? 'success' : null">{{v.documentCount || 0}} file{{v.documentCount === 1 ? '' : 's'}}</span></td><td><button class="dana-btn dana-btn-sm" type="button" (click)="openRecord(v)">Open</button></td></tr>
       <tr *ngIf="loading"><td colspan="9" class="dana-table-empty" role="status">Searching visit records…</td></tr>
       <tr *ngIf="!loading && searchError"><td colspan="9" class="dana-table-empty" role="alert">{{searchError}} <button type="button" class="dana-btn dana-btn-sm" (click)="load()">Retry Search</button></td></tr>
       <tr *ngIf="!loading && !searchError && !visits.length"><td colspan="9" class="dana-table-empty">No matching visits. Try another load number, SAP Delivery Number, date or status.</td></tr>
@@ -74,18 +74,18 @@ export class MaterialsAccessTokenStore {
         <div class="dana-detail"><span class="dana-detail-label">Dock</span><span class="dana-detail-value">{{selected.dockCode || '—'}}</span></div>
         <div class="dana-detail"><span class="dana-detail-label">Trailer</span><span class="dana-detail-value">{{selected.trailerId || '—'}}</span></div>
         <div class="dana-detail"><span class="dana-detail-label">Tractor</span><span class="dana-detail-value">{{selected.tractorId || '—'}}</span></div>
-        <div class="dana-detail"><span class="dana-detail-label">Guard in</span><span class="dana-detail-value">{{selected.guardCheckInAt | date:'short'}}</span></div>
-        <div class="dana-detail"><span class="dana-detail-label">Dock complete</span><span class="dana-detail-value">{{selected.dockCompletedAt ? (selected.dockCompletedAt | date:'short') : '—'}}</span></div>
-        <div class="dana-detail"><span class="dana-detail-label">Final exit</span><span class="dana-detail-value">{{selected.guardCheckOutAt ? (selected.guardCheckOutAt | date:'short') : 'Still on site'}}</span></div>
+        <div class="dana-detail"><span class="dana-detail-label">Guard in</span><span class="dana-detail-value">{{selected.guardCheckInAt | plantDate:'short'}}</span></div>
+        <div class="dana-detail"><span class="dana-detail-label">Dock complete</span><span class="dana-detail-value">{{selected.dockCompletedAt ? (selected.dockCompletedAt | plantDate:'short') : '—'}}</span></div>
+        <div class="dana-detail"><span class="dana-detail-label">Final exit</span><span class="dana-detail-value">{{selected.guardCheckOutAt ? (selected.guardCheckOutAt | plantDate:'short') : 'Still on site'}}</span></div>
         <div class="dana-detail" *ngIf="selected.rxoShipmentId"><span class="dana-detail-label">RXO shipment</span><span class="dana-detail-value">{{selected.rxoShipmentId}} · {{selected.rxoDirection}}</span><span class="dana-cell-sub">{{selected.rxoSiteKey}}</span></div>
       </div>
-      <p class="dana-note" *ngIf="selected.scannedDeliveryNumbers?.length"><b>SAP Delivery Number(s):</b> {{selected.scannedDeliveryNumbers?.join(', ')}} — recorded by scan or typing, separately from any PDF.</p>
+      <p class="dana-note" *ngIf="selected.scannedDeliveryNumbers?.length"><b>SAP Delivery {{selected.scannedDeliveryNumbers?.length === 1 ? 'Number' : 'Numbers'}}:</b> {{selected.scannedDeliveryNumbers?.join(', ')}} — recorded by scan or typing, separately from any PDF.</p>
 
       <section *ngIf="selected.driverPrintPackage as printPackage" class="tl-stack">
         <div class="dana-form-section"><h3>Driver Print Package</h3><div class="dana-actions"><span class="dana-status-badge">{{printPackage.status}}</span><button class="dana-btn dana-btn-sm tl-write tl-guard-only" type="button" *ngIf="printPackage.frozenRxoDocumentId" [disabled]="reprintingRxo" (click)="reprintRxoDocument()">{{reprintingRxo ? 'Queuing Reprint…' : 'Reprint RXO Document'}}</button></div></div>
         <p class="dana-muted" *ngIf="printPackage.frozenRxoDocumentId">Package {{printPackage.packageId}} · RXO document version {{printPackage.frozenRxoDocumentVersion || '—'}} · {{printPackage.frozenRxoDocumentFileName || ('Document #' + printPackage.frozenRxoDocumentId)}}</p>
         <div class="dana-table-shell"><table class="dana-table"><thead><tr><th>Item</th><th>Status</th><th>Printed</th></tr></thead><tbody>
-          <tr *ngFor="let item of printPackage.items"><td><b>{{printItemLabel(item)}}</b><span class="dana-field-error" *ngIf="item.error">{{item.error}}</span></td><td>{{printItemStatusLabel(item)}}</td><td class="dana-nowrap">{{item.printedAt ? (item.printedAt | date:'short') : '—'}}</td></tr>
+          <tr *ngFor="let item of printPackage.items"><td><b>{{printItemLabel(item)}}</b><span class="dana-field-error" *ngIf="item.error">{{item.error}}</span></td><td>{{printItemStatusLabel(item)}}</td><td class="dana-nowrap">{{item.printedAt ? (item.printedAt | plantDate:'short') : '—'}}</td></tr>
         </tbody></table></div>
       </section>
 
@@ -97,8 +97,8 @@ export class MaterialsAccessTokenStore {
           <ul class="dana-file-list" *ngIf="selected.documents?.length">
             <li *ngFor="let d of selected.documents"><div><b>{{d.fileName}}</b>
               <span *ngIf="d.documentType==='PACKING_SLIP' && d.extractedDocumentId">Packing slip · SAP Delivery ID {{d.extractedDocumentId}}</span><span *ngIf="d.documentType==='PACKING_SLIP' && !d.extractedDocumentId">Packing slip · {{d.extractionMessage || 'SAP ID not detected'}}</span><span *ngIf="d.documentType==='RXO_DRIVER_DOCUMENT'">RXO driver document · version {{d.rxoDocumentVersion || '—'}}{{d.rxoIsActive ? ' · Active' : ' · Superseded'}}</span>
-              <span>Scanned {{d.scannedAt | date:'short'}}{{d.scannedBy ? ' by ' + d.scannedBy : ''}}</span></div>
-              <div class="dana-actions"><a class="dana-btn dana-btn-sm" *ngIf="d.documentType!=='RXO_DRIVER_DOCUMENT'" [href]="api.documentUrl(d.id)" target="_blank">Open</a><button class="dana-btn dana-btn-sm" type="button" *ngIf="d.documentType==='RXO_DRIVER_DOCUMENT'" [disabled]="openingRxoDocumentId===d.id" (click)="openRxoDocument(d.id)">{{openingRxoDocumentId===d.id ? 'Opening…' : 'Open'}}</button><button class="dana-btn dana-btn-sm tl-write tl-guard-only" type="button" *ngIf="d.documentType==='RXO_DRIVER_DOCUMENT'" [disabled]="reprintingRxo" (click)="reprintRxoDocument(d.id)">Reprint</button></div></li>
+              <span>Scanned {{d.scannedAt | plantDate:'short'}}{{d.scannedBy ? ' by ' + d.scannedBy : ''}}</span></div>
+              <div class="dana-actions"><a class="dana-btn dana-btn-sm" *ngIf="d.documentType!=='RXO_DRIVER_DOCUMENT'" [href]="api.documentUrl(d.id)" target="_blank">Open</a><button class="dana-btn dana-btn-sm tl-guard-only" type="button" *ngIf="d.documentType==='RXO_DRIVER_DOCUMENT'" [disabled]="openingRxoDocumentId===d.id" (click)="openRxoDocument(d.id)">{{openingRxoDocumentId===d.id ? 'Opening…' : 'Open'}}</button><button class="dana-btn dana-btn-sm tl-write tl-guard-only" type="button" *ngIf="d.documentType==='RXO_DRIVER_DOCUMENT'" [disabled]="reprintingRxo" (click)="reprintRxoDocument(d.id)">Reprint</button></div></li>
           </ul>
           <div class="dana-empty-state" *ngIf="!selected.documents?.length">No paperwork attached.</div>
           <details class="dana-muted"><summary>Storage reference</summary><code>{{selected.documentFolderKey}}</code></details>
@@ -106,7 +106,7 @@ export class MaterialsAccessTokenStore {
         <section class="tl-stack">
           <div class="dana-form-section"><h3>Visit Timeline</h3></div>
           <div class="dana-table-shell"><table class="dana-table"><thead><tr><th>When</th><th>Event</th><th>By</th></tr></thead><tbody>
-            <tr *ngFor="let event of selected.events"><td class="dana-nowrap">{{event.occurredAt | date:'short'}}</td><td><b>{{eventLabel(event)}}</b><span class="dana-cell-sub" *ngIf="event.notes">{{event.notes}}</span></td><td>{{event.actor || '—'}}</td></tr>
+            <tr *ngFor="let event of selected.events"><td class="dana-nowrap">{{event.occurredAt | plantDate:'short'}}</td><td><b>{{eventLabel(event)}}</b><span class="dana-cell-sub" *ngIf="event.notes">{{event.notes}}</span></td><td>{{event.actor || '—'}}</td></tr>
           </tbody></table></div>
         </section>
       </div>
@@ -166,6 +166,10 @@ export class HistoryComponent implements OnInit {
     // The global search sets ?q=; an empty global search clears it.
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       this.q = params.get('q') ?? '';
+      // A search from the top bar looks through every record: leftover Status/Date filters from an
+      // earlier visit to this page would otherwise hide the truck the guard is looking for.
+      this.status = 'ALL';
+      this.date = '';
       this.load();
     });
     // Repeating the same global search (same URL) re-runs it instead of doing nothing.
@@ -242,7 +246,7 @@ export class HistoryComponent implements OnInit {
   private uploadFiles(visitId: number, files: File[], index: number) {
     if (index >= files.length) {
       this.uploading = false;
-      this.toast.success(`${files.length} paperwork file(s) added.`, 'Paperwork added');
+      this.toast.success(`${files.length} paperwork ${files.length === 1 ? 'file' : 'files'} added.`, 'Paperwork added');
       this.api.visit(visitId).subscribe({
         next: (detail) => { if (this.selected?.id === visitId) this.selected = detail; this.load(); },
         error: () => this.load(),
@@ -253,7 +257,10 @@ export class HistoryComponent implements OnInit {
       next: () => this.uploadFiles(visitId, files, index + 1),
       error: (e) => {
         this.uploading = false;
-        this.toast.error(`Paperwork upload stopped at ${files[index].name}: ${e?.error?.message || 'upload error'}`, 'Paperwork upload failed');
+        const saved = index ? ` ${index} earlier ${index === 1 ? 'file was' : 'files were'} saved; add only the rest again.` : '';
+        this.toast.error(`Paperwork upload stopped at ${files[index].name}: ${e?.error?.message || 'upload error'}.${saved}`, 'Paperwork upload failed');
+        // Show the files that did upload, so they are not added a second time.
+        if (index) this.api.visit(visitId).subscribe({ next: (detail) => { if (this.selected?.id === visitId) this.selected = detail; }, error: () => undefined });
       },
     });
   }
