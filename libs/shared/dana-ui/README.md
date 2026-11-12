@@ -44,3 +44,7 @@ Keep the reason short and actionable. A disabled button is skipped by the Tab ke
 ## Sortable tables
 
 `danaTable` moves each sortable header's own text into a real `<button type="button" class="dana-table-sort-button">` and keeps `aria-sort` on the `<th>`; it does not rename the header or make the cell itself focusable. Controls the application puts in a header stay outside that button. Header controls are rebuilt only when the header row changes; body edits are coalesced for 50 ms before rows are re-sorted and re-filtered. Document and window listeners exist only while a filter popover is open.
+
+## Toasts
+
+`dana-toast-host` (also `gear-toast-host`) renders two sibling live regions, never nested and announcing additions only: a polite one for info, success and warning notices, and an assertive one for errors. `DanaToastService.error()` and `danger()` (and `notify('error' | 'danger', …)`) are the same tone; error notices stay until the user dismisses them. Other notices dismiss themselves after their duration, but the countdown pauses while the pointer or keyboard focus is on the notice. Timers are cleared when a notice is dismissed, pushed out of the four-notice stack, or the service is destroyed.

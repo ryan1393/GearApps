@@ -1290,7 +1290,7 @@ html body .gear-summary-card {
   justify-content: flex-start !important;
   align-items: stretch !important;
   align-content: start !important;
-  gap: 0.625rem !important;
+  gap: 0 !important;
   box-sizing: border-box !important;
   width: min(24rem, calc(100vw - 2rem)) !important;
   max-width: calc(100vw - 2rem) !important;
@@ -1323,6 +1323,15 @@ html body .gear-summary-card {
 :is(dana-toast-host, gear-toast-host) .dana-toast.gear-toast > * {
   align-self: start;
   min-width: 0;
+}
+/* Polite (info/success/warning) and assertive (error) live regions share the stack. */
+:is(dana-toast-host, gear-toast-host) .dana-toast-region {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+:is(dana-toast-host, gear-toast-host) .dana-toast-region:not(:empty) ~ .dana-toast-region:not(:empty) {
+  margin-top: 0.625rem;
 }
 /* END DANA-R35R5-COMPACT-TOAST */
 

@@ -8,7 +8,7 @@ import {
   DanaComboboxComponent, DanaConfirmDialogComponent, DanaTableDirective,
   DanaKpiGridDirective, DanaKpiCardDirective, DanaOperationGridDirective,
   DanaOperationCardComponent, DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaMobileNavDirective,
-  DanaButtonDirective,
+  DanaButtonDirective, DanaToastHostComponent, DanaToastService,
 } from '../../../../../dist/libs/shared/dana-ui/fesm2022/dana-ui.mjs';
 
 class Fixture {
@@ -39,7 +39,7 @@ Component({
   imports: [CommonModule, FormsModule, ReactiveFormsModule, DanaComboboxComponent,
     DanaConfirmDialogComponent, DanaTableDirective, DanaKpiGridDirective,
     DanaKpiCardDirective, DanaOperationGridDirective, DanaOperationCardComponent,
-    DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaMobileNavDirective, DanaButtonDirective],
+    DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaMobileNavDirective, DanaButtonDirective, DanaToastHostComponent],
   template: `
     <a class="dana-skip-link" id="skip-link" href="#fixture-main">Skip to content</a>
     <nav danaMobileNav #defaultNav="danaMobileNav"><button id="default-nav-toggle" (click)="defaultNav.toggle()">{{ defaultNav.open }}</button></nav>
@@ -80,6 +80,7 @@ Component({
       <button id="drawer-last" type="button">Last navigation action</button>
     </aside>
     <main id="fixture-main" tabindex="-1"><h1>Fixture content</h1></main>
+    <dana-toast-host></dana-toast-host>
   `,
 })(Fixture);
 
@@ -92,4 +93,5 @@ Component({
   app.attachView(ref.hostView);
   ref.changeDetectorRef.detectChanges();
   window.fixture = ref;
+  window.toast = ref.injector.get(DanaToastService);
 })().catch(error => { window.fixtureError = String(error); });

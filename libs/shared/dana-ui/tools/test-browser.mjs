@@ -259,6 +259,36 @@ try {
   await page.locator('#background').focus();
   assert.equal(await page.locator('#background').evaluate(el => el === document.activeElement), true);
 
+  // Toasts: two sibling live regions, additions only; errors stay, other notices pause while held.
+  const regions = page.locator('.dana-toast-stack > .dana-toast-region');
+  assert.deepEqual(await regions.evaluateAll(list => list.map(el => [el.getAttribute('aria-live'), el.getAttribute('aria-relevant')])),
+    [['polite', 'additions'], ['assertive', 'additions']]);
+  assert.equal(await page.locator('.dana-toast-stack [aria-live] [aria-live], .dana-toast-stack [role="alert"], .dana-toast-stack [role="status"]').count(), 0);
+  await page.evaluate(() => { window.toast.info('Saved draft', 'Notice', 300); window.toast.notify('danger', 'Printer offline', 'Print failed', 200); });
+  const infoToast = page.locator('.dana-toast-region[aria-live="polite"] .dana-toast');
+  const errorToast = page.locator('.dana-toast-region[aria-live="assertive"] .dana-toast');
+  await infoToast.waitFor();
+  assert.equal(await errorToast.count(), 1);
+  assert.equal(await errorToast.evaluate(el => el.classList.contains('toast-error')), true);
+  await infoToast.hover();
+  await page.waitForTimeout(600);
+  assert.equal(await infoToast.count(), 1, 'hovering a notice pauses its dismissal');
+  await page.mouse.move(1, 1);
+  await infoToast.waitFor({ state: 'detached' });
+  await page.evaluate(() => window.toast.success('Tray moved', 'Done', 300));
+  await infoToast.locator('button').focus();
+  await page.waitForTimeout(600);
+  assert.equal(await infoToast.count(), 1, 'focusing a notice pauses its dismissal');
+  await page.locator('#background').focus();
+  await infoToast.waitFor({ state: 'detached' });
+  assert.equal(await errorToast.count(), 1, 'errors stay until dismissed');
+  await errorToast.locator('button').click();
+  assert.equal(await errorToast.count(), 0);
+  await page.evaluate(() => window.toast.error('Scan rejected'));
+  await errorToast.waitFor();
+  await page.evaluate(() => window.toast.dismiss(window.toast['noticesSubject'].value[0].id));
+  assert.equal(await errorToast.count(), 0);
+
   await page.setViewportSize({ width: 390, height: 844 });
   assert.equal(await page.locator('[danaKpiGrid]').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 1);
   assert.equal(await page.locator('[danaOperationGrid]').evaluate(el => getComputedStyle(el).gridTemplateColumns.split(' ').length), 1);
