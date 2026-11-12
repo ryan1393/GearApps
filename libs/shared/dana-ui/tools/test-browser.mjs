@@ -126,6 +126,17 @@ try {
     return types.filter(type => ['keydown', 'scroll', 'resize'].includes(type)).length;
   };
   const listenersWhileClosed = await popoverListeners();
+  // A closed combobox keeps no document/window listeners; an open one listens for outside presses.
+  const comboboxListeners = async () => [...await listenerTypes('document'), ...await listenerTypes('window')]
+    .filter(type => ['mousedown', 'scroll', 'resize'].includes(type)).length;
+  const closedComboboxListeners = await comboboxListeners();
+  await page.locator('#reactive input').evaluate(el => el.blur());
+  await page.locator('#direct .dana-combobox-toggle').click();
+  await page.locator('#direct .dana-combobox-panel').waitFor({ state: 'visible' });
+  assert.equal(await comboboxListeners(), closedComboboxListeners + 3);
+  await page.mouse.click(5, 5);
+  await page.locator('#direct .dana-combobox-panel').waitFor({ state: 'detached' });
+  assert.equal(await comboboxListeners(), closedComboboxListeners);
 
   // Use the generated filter to filter real rows, then close with Escape and restore focus.
   assert.equal(await page.locator('.dana-table-filter-popover').count(), 2);
