@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@meshforge/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint, openLocationLabels } from '@meshforge/manufacturing/frontend/util-common';
 
 import {
   AssetTagKind,
@@ -140,6 +140,25 @@ export class BladeLocationsComponent implements OnInit {
         this.toast.error(this.error, 'Tag not printed');
       },
     });
+  }
+
+  /** Opens the location's 4 x 6 label in the browser print dialog. */
+  printLocationLabel(location: InventoryLocationRow): void {
+    this.error = '';
+    const opened = openLocationLabels([
+      {
+        serial_number: location.serial_number,
+        number: location.number,
+        summary: location.summary?.number,
+        part_type: location.part_type?.code,
+        description: location.description,
+        department: location.department,
+      },
+    ]);
+    if (!opened.ok) {
+      this.error = opened.reason;
+      this.toast.error(opened.reason, 'Label not printed');
+    }
   }
 
   refresh(): void {

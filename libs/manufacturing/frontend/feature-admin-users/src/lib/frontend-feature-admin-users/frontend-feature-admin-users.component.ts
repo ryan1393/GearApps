@@ -12,7 +12,7 @@ import {
   } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, FormsModule, Validators } from '@angular/forms';
-import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@meshforge/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint, openLocationLabels } from '@meshforge/manufacturing/frontend/util-common';
 import { Observable } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -1016,6 +1016,26 @@ export class FrontendFeatureAdminUsersComponent implements OnInit {
         this.cdr.markForCheck();
       },
     });
+  }
+
+  /** Opens the location's 4 x 6 label in the browser print dialog. */
+  printLocationLabel(location: AdminLocationRow): void {
+    this.clearNotice();
+    const opened = openLocationLabels([
+      {
+        serial_number: location.serial_number,
+        number: location.number,
+        summary: location.summary?.number,
+        part_type: location.part_type?.code,
+        description: location.description,
+        department: location.department,
+      },
+    ]);
+    if (!opened.ok) {
+      this.error = opened.reason;
+      this.toast.error(opened.reason, 'Label not printed');
+    }
+    this.cdr.markForCheck();
   }
 
   createCutterBody(): void {
