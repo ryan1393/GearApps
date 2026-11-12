@@ -2,7 +2,16 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DanaToneDirective } from '@dana/ui';
-import { GearLabelPrinterPickerComponent, openLocationLabels } from '@meshforge/manufacturing/frontend/util-common';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  GearLabelPrinterPickerComponent,
+  LabelPrinterChoices,
+  LocationLabelFallback,
+  LocationLabelInput,
+  locationLabelFallbackReason,
+  locationLabelFromResult,
+  openLocationLabels,
+} from '@meshforge/manufacturing/frontend/util-common';
 import {
   CuttergrindNumberedShelfTag,
   CuttergrindRoughShelfTag,
@@ -14,7 +23,7 @@ import {
   SummaryShelfTag,
 } from '@meshforge/manufacturing/shared/util-constants';
 
-import { AdminLocationRow, PartSummaryRow, PartTypeRow } from '../../admin-api.service';
+import { AdminLocationRow, adminApiErrorText, PartSummaryRow, PartTypeRow } from '../../admin-api.service';
 import { BulkLocationsComponent } from '../../bulk-locations/bulk-locations.component';
 import { LocationEditorComponent } from '../../bulk-locations/location-editor.component';
 import { allPages } from '../../shared/admin-data';
@@ -43,6 +52,10 @@ export class AdminLocationsTabComponent extends AdminTabBase implements OnInit {
   get partTypes(): PartTypeRow[] { return this.partTypesList.value(); }
 
   locationSearch = '';
+  /** Null until the card printer list has loaded. */
+  cardPrintersSetUp: boolean | null = null;
+  /** A label the card printer did not take, offered as a browser print. */
+  labelFallback: LocationLabelFallback | null = null;
   editingLocationId: string | null = null;
   locationForm = this.emptyLocationForm();
 
@@ -226,21 +239,75 @@ export class AdminLocationsTabComponent extends AdminTabBase implements OnInit {
     );
   }
 
-  /** Opens the location's 4 x 6 label in the browser print dialog. */
+  /**
+   * Prints the location's 4 x 6.5 label on the card printer chosen here (or the default card
+   * printer). With no card printer set up it opens the browser print straight away; when the
+   * printer does not take it, a notice offers the browser print instead.
+   */
   printLocationLabel(location: AdminLocationRow): void {
+    if (this.printingTagId) return;
     this.clearNotice();
-    const opened = openLocationLabels([
-      {
-        serial_number: location.serial_number,
-        number: location.number,
-        summary: location.summary?.number,
-        part_type: location.part_type?.code,
-        description: location.description,
-        department: location.department,
+    this.labelFallback = null;
+    if (this.cardPrintersSetUp === false) {
+      this.printLabelInBrowser(this.labelInput(location), 'No 4×6.5 card printer is set up, so the label opened in the browser to print.');
+      return;
+    }
+    this.printingTagId = `${location.id}:label`;
+    this.api.printLocationLabel(location.id).subscribe({
+      next: (result) => {
+        this.printingTagId = null;
+        if (result.printed) {
+          this.toast.success(`Location label for ${result.serial_number} sent to ${result.printer_name}.`, 'Label printed');
+        } else {
+          this.labelFallback = { serial: result.serial_number, reason: locationLabelFallbackReason(result), label: locationLabelFromResult(result) };
+        }
+        this.cdr.markForCheck();
       },
-    ]);
+      error: (error: HttpErrorResponse) => {
+        this.printingTagId = null;
+        this.labelFallback = {
+          serial: location.serial_number,
+          reason: adminApiErrorText(error) || 'The label could not be sent to the card printer.',
+          label: this.labelInput(location),
+        };
+        this.cdr.markForCheck();
+      },
+    });
+  }
+
+  /** The card printers found for "Print 4×6.5 labels to"; with none, labels print from the browser. */
+  cardPrintersLoaded(choices: LabelPrinterChoices): void {
+    this.cardPrintersSetUp = choices.printers.length > 0 || Boolean(choices.default_printer_name);
+  }
+
+  /** "Print in browser" on the notice: opens the 4 x 6.5 browser print for the label that was not printed. */
+  printFallbackInBrowser(): void {
+    const fallback = this.labelFallback;
+    if (!fallback) return;
+    this.labelFallback = null;
+    this.printLabelInBrowser(fallback.label, '');
+  }
+
+  dismissLabelFallback(): void {
+    this.labelFallback = null;
+  }
+
+  private printLabelInBrowser(label: LocationLabelInput, message: string): void {
+    const opened = openLocationLabels([label]);
     if (!opened.ok) this.error = opened.reason;
+    else if (message) this.message = message;
     this.cdr.markForCheck();
+  }
+
+  private labelInput(location: AdminLocationRow): LocationLabelInput {
+    return {
+      serial_number: location.serial_number,
+      number: location.number,
+      summary: location.summary?.number,
+      part_type: location.part_type?.code,
+      description: location.description,
+      department: location.department,
+    };
   }
 
   private emptyLocationForm() {

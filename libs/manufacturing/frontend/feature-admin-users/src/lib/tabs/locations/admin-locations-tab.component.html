@@ -1,5 +1,18 @@
 <gear-admin-feedback [tab]="this" />
 <gear-label-printer-picker labelType="ASSET_TAG" label="Print tags to" />
+<gear-label-printer-picker
+  labelType="CUTTER_CARD"
+  label="Print 4×6.5 labels to"
+  nounOverride="4×6.5 card"
+  noPrinterNote="No 4×6.5 card printer is set up, so location labels open in the browser to print. An administrator can add one in Admin › Label Printers."
+  (choicesLoaded)="cardPrintersLoaded($event)" />
+<div *ngIf="labelFallback as fallback" class="gear-alert gear-alert-warning" role="status">
+  <span>Location label for {{ fallback.serial }} was not printed. {{ fallback.reason }}</span>
+  <span class="gear-actions">
+    <button type="button" class="gear-btn gear-btn-primary" (click)="printFallbackInBrowser()" data-icon="print">Print in browser</button>
+    <button type="button" class="gear-btn gear-btn-secondary" (click)="dismissLabelFallback()">Dismiss</button>
+  </span>
+</div>
 <gear-location-editor [locations]="locations" (saved)="reloadLocations()" />
 <gear-admin-bulk-locations (created)="reloadLocations()" />
 <div class="gear-admin-layout">
@@ -215,11 +228,11 @@
           <button
             type="button"
             class="gear-btn gear-btn-secondary"
-            [disabled]="busy || !location.enabled"
+            [disabled]="busy || !location.enabled || printingTagId === location.id + ':label'"
             (click)="printLocationLabel(location)"
             data-icon="print"
-            title="Print a 4 × 6 label with the Summary, part type, location number and location barcode">
-            Print 4×6 Label
+            title="Print a 4 × 6.5 label with the Summary, part type, location number and location barcode">
+            {{ printingTagId === location.id + ':label' ? 'Printing…' : 'Print 4×6.5 Label' }}
           </button>
           <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditLocation(location)" data-icon="edit" title="Edit">Edit</button>
           <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleLocationEnabled(location)">

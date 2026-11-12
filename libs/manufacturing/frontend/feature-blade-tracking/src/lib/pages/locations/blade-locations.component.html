@@ -6,9 +6,22 @@
 </header>
 
   <gear-label-printer-picker labelType="ASSET_TAG" label="Print tags to" />
+  <gear-label-printer-picker
+    labelType="CUTTER_CARD"
+    label="Print 4×6.5 labels to"
+    nounOverride="4×6.5 card"
+    noPrinterNote="No 4×6.5 card printer is set up, so location labels open in the browser to print. An administrator can add one in Admin › Label Printers."
+    (choicesLoaded)="cardPrintersLoaded($event)" />
 
   <div *ngIf="error" danaAlert="danger">{{ error }}</div>
   <div *ngIf="printMessage" [danaAlert]="printTone">{{ printMessage }}</div>
+  <div *ngIf="labelFallback as fallback" danaAlert="warning" role="status">
+    <span>Location label for {{ fallback.serial }} was not printed. {{ fallback.reason }}</span>
+    <span class="gear-actions">
+      <button type="button" class="gear-btn gear-btn-primary" (click)="printFallbackInBrowser()" data-icon="print">Print in browser</button>
+      <button type="button" class="gear-btn gear-btn-secondary" (click)="dismissLabelFallback()">Dismiss</button>
+    </span>
+  </div>
 
   <section danaSummaryGrid class="blade-location-summary-grid" aria-label="Location inventory summary">
     <article danaSummaryCard class="gear-metric-card blade-location-summary-card">
@@ -125,10 +138,11 @@
                 <button
                   type="button"
                   class="gear-btn gear-btn-secondary gear-btn-sm inventory-detail-button"
+                  [disabled]="printingTagSerial !== null"
                   (click)="printLocationLabel(location)"
                   data-icon="print"
-                  title="Print a 4 × 6 label with the Summary, part type, location number and location barcode">
-                  Print 4×6 Label
+                  title="Print a 4 × 6.5 label with the Summary, part type, location number and location barcode">
+                  {{ printingTagSerial === location.serial_number + ':label' ? 'Printing…' : 'Print 4×6.5 Label' }}
                 </button>
               </td>
               <td>

@@ -3,7 +3,7 @@ import { RoleType } from '@meshforge/manufacturing/shared/util-types';
 import { Body, Controller, HttpCode, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 
-import { PrintAssetTagDto } from './asset-tag-print.dto';
+import { PrintAssetTagDto, PrintLocationLabelDto } from './asset-tag-print.dto';
 import { ServerFeatAssetTagService } from './server-feat-asset-tag.service';
 
 @Controller({ path: 'asset-tags', version: '1' })
@@ -17,6 +17,15 @@ export class ServerFeatAssetTagController {
   @ApiOkResponse({ description: 'Sends a native IPL Code 128 tag or returns the .prn payload as a fallback.' })
   async printTag(@Body() dto: PrintAssetTagDto) {
     return this.assetTagService.printTag(dto);
+  }
+
+  @Post('location-label')
+  @HttpCode(200)
+  @DepartmentAppEdit('BLADE_TRACKING')
+  @Auth([RoleType.ADMIN, RoleType.USER])
+  @ApiOkResponse({ description: 'Prints a location\'s 4 x 6.5 in landscape label on a card printer, or returns the label to print from the browser.' })
+  async printLocationLabel(@Body() dto: PrintLocationLabelDto) {
+    return this.assetTagService.printLocationLabel(dto);
   }
 
   @Post('test-print/:printerId')

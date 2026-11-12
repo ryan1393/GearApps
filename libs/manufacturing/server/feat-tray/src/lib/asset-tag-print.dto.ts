@@ -19,3 +19,13 @@ export class PrintAssetTagDto {
   @IsUUID()
   printer_id?: string;
 }
+
+export class PrintLocationLabelDto {
+  @IsUUID()
+  record_id!: string;
+
+  /** The card printer chosen on this computer. Omitted: the default 4 x 6.5 card printer. */
+  @IsOptional()
+  @IsUUID()
+  printer_id?: string;
+}

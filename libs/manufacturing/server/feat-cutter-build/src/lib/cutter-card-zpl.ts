@@ -1,21 +1,12 @@
 import { CardLanguage, CARD_LENGTH_DOTS, CARD_WIDTH_DOTS, CardElement, CutterCardFields, cutterCardLayout } from './cutter-card-layout';
 import { CutterCardAdjustment } from './cutter-card-ipl';
+import { safeZplField } from '@meshforge/manufacturing/server/feat-tray';
 
 /*
  * The Cutter Build card in Zebra ZPL II, for sites whose card printer is a Zebra. The layout
  * is shared with the IPL card (see cutter-card-layout.ts). ^FO is across the web, then down
  * the card, the same as the layout's own positions.
  */
-
-/** ZPL reads ^ and ~ as the start of a command, so they never reach a field. */
-function safeZplField(value: string | null | undefined, maxLength: number): string {
-  return String(value ?? '')
-    // eslint-disable-next-line no-control-regex -- Printer fields must not contain command or control characters.
-    .replace(/[\x00-\x1f\x7f^~\\]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, maxLength);
-}
 
 /** Font 0 averages about 0.6 of its height per character. */
 const ZPL: CardLanguage = { clean: safeZplField, characterWidth: 0.6 };

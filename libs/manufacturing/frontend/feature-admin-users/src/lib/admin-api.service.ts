@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { LabelPrinterChoiceService } from '@meshforge/manufacturing/frontend/util-common';
+import { LabelPrinterChoiceService, LocationLabelPrintResult } from '@meshforge/manufacturing/frontend/util-common';
 import { IBulkCreateShelfLocations, IBulkShelfLocationsResult, IPartSummarySettings, ISavePartSummaryRequest, ISummaryBodyRuleRow } from '@meshforge/manufacturing/shared/util-types';
 import { Observable } from 'rxjs';
 
@@ -368,6 +368,14 @@ export class AdminApiService {
     return this.http.get<PagedResponse<AdminContainerRow>>(
       `/api/v1/containers?perPage=${perPage}&page=${page}`,
     );
+  }
+
+  /** Prints a location's 4 x 6.5 label on the card printer chosen on this computer (or the default card printer). */
+  printLocationLabel(recordId: string) {
+    return this.http.post<LocationLabelPrintResult>('/api/v1/asset-tags/location-label', {
+      record_id: recordId,
+      printer_id: this.printerChoice.selectedId('CUTTER_CARD') ?? undefined,
+    });
   }
 
   printAssetTag(kind: AssetTagKind, recordId: string) {

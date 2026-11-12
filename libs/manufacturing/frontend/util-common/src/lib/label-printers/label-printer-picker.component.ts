@@ -1,9 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, Input, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 
-import { LabelPrinterChoice, LabelPrinterChoiceService, LabelType } from './label-printer-choice.service';
+import { LabelPrinterChoice, LabelPrinterChoiceService, LabelPrinterChoices, LabelType } from './label-printer-choice.service';
 
 /**
  * "Print to" for one kind of label. Shows the default printer and lets this computer choose
@@ -27,7 +27,7 @@ import { LabelPrinterChoice, LabelPrinterChoiceService, LabelType } from './labe
         <p class="gear-printer-picker-note dana-field-hint" role="status" *ngIf="!loading">
           <ng-container *ngIf="failed">Printers could not be loaded. The default printer is used.</ng-container>
           <ng-container *ngIf="!failed && defaultName">{{ label }}: {{ defaultName }}</ng-container>
-          <ng-container *ngIf="!failed && !defaultName">No {{ noun }} printer is set up, so {{ noun }}s download as files. An administrator can add one in Admin › Label Printers.</ng-container>
+          <ng-container *ngIf="!failed && !defaultName">{{ noPrinterNote || 'No ' + noun + ' printer is set up, so ' + noun + 's download as files. An administrator can add one in Admin › Label Printers.' }}</ng-container>
         </p>
       </ng-template>
     </div>
@@ -46,6 +46,12 @@ export class GearLabelPrinterPickerComponent implements OnInit {
 
   @Input() labelType: LabelType = 'ASSET_TAG';
   @Input() label = 'Print tags to';
+  /** What this picker prints, when it is not the label type's usual name (e.g. location labels on card printers). */
+  @Input() nounOverride: string | null = null;
+  /** Shown when no printer of this type is set up; defaults to the "download as files" note. */
+  @Input() noPrinterNote: string | null = null;
+  /** The printers that were found, so a page can tell whether any is set up. */
+  @Output() readonly choicesLoaded = new EventEmitter<LabelPrinterChoices>();
 
   printers: LabelPrinterChoice[] = [];
   defaultName: string | null = null;
@@ -54,7 +60,7 @@ export class GearLabelPrinterPickerComponent implements OnInit {
   failed = false;
 
   get noun(): string {
-    return this.labelType === 'CUTTER_CARD' ? 'cutter card' : 'tag';
+    return this.nounOverride ?? (this.labelType === 'CUTTER_CARD' ? 'cutter card' : 'tag');
   }
 
   ngOnInit(): void {
@@ -66,6 +72,7 @@ export class GearLabelPrinterPickerComponent implements OnInit {
         // A printer that was removed or switched off is forgotten, so printing falls back to the default.
         if (this.selectedId && !choices.printers.some((printer) => printer.id === this.selectedId)) this.choose('');
         this.loading = false;
+        this.choicesLoaded.emit(choices);
         this.cdr.markForCheck();
       },
       error: () => {

@@ -2,7 +2,17 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint, openLocationLabels } from '@meshforge/manufacturing/frontend/util-common';
+import {
+  GearLabelPrinterPickerComponent,
+  GearToastService,
+  LabelPrinterChoices,
+  LocationLabelFallback,
+  LocationLabelInput,
+  announceAssetTagPrint,
+  locationLabelFallbackReason,
+  locationLabelFromResult,
+  openLocationLabels,
+} from '@meshforge/manufacturing/frontend/util-common';
 
 import {
   AssetTagKind,
@@ -38,6 +48,10 @@ export class BladeLocationsComponent implements OnInit {
   printMessage = '';
   printTone: 'success' | 'warning' | 'info' = 'success';
   printingTagSerial: string | null = null;
+  /** Null until the card printer list has loaded. */
+  cardPrintersSetUp: boolean | null = null;
+  /** A label the card printer did not take, offered as a browser print. */
+  labelFallback: LocationLabelFallback | null = null;
   searchValue = '';
   expandedLocationId: string | null = null;
   expandedTrayId: string | null = null;
@@ -142,23 +156,80 @@ export class BladeLocationsComponent implements OnInit {
     });
   }
 
-  /** Opens the location's 4 x 6 label in the browser print dialog. */
+  /**
+   * Prints the location's 4 x 6.5 label on the card printer chosen here (or the default card
+   * printer). With no card printer set up it opens the browser print straight away; when the
+   * printer does not take it, a notice offers the browser print instead.
+   */
   printLocationLabel(location: InventoryLocationRow): void {
+    if (this.printingTagSerial) return;
     this.error = '';
-    const opened = openLocationLabels([
-      {
-        serial_number: location.serial_number,
-        number: location.number,
-        summary: location.summary?.number,
-        part_type: location.part_type?.code,
-        description: location.description,
-        department: location.department,
+    this.printMessage = '';
+    this.labelFallback = null;
+    if (this.cardPrintersSetUp === false) {
+      this.printLabelInBrowser(this.labelInput(location), 'No 4×6.5 card printer is set up, so the label opened in the browser to print.');
+      return;
+    }
+    this.printingTagSerial = `${location.serial_number}:label`;
+    this.api.printLocationLabel(location.id).subscribe({
+      next: (result) => {
+        this.printingTagSerial = null;
+        if (result.printed) {
+          this.printMessage = `Location label for ${result.serial_number} sent to ${result.printer_name}.`;
+          this.printTone = 'success';
+          this.toast.success(this.printMessage, 'Label printed');
+        } else {
+          this.labelFallback = { serial: result.serial_number, reason: locationLabelFallbackReason(result), label: locationLabelFromResult(result) };
+        }
       },
-    ]);
+      error: (error: HttpErrorResponse) => {
+        this.printingTagSerial = null;
+        this.labelFallback = {
+          serial: location.serial_number,
+          reason: apiErrorText(error, 'The label could not be sent to the card printer.'),
+          label: this.labelInput(location),
+        };
+      },
+    });
+  }
+
+  /** The card printers found for "Print 4×6.5 labels to"; with none, labels print from the browser. */
+  cardPrintersLoaded(choices: LabelPrinterChoices): void {
+    this.cardPrintersSetUp = choices.printers.length > 0 || Boolean(choices.default_printer_name);
+  }
+
+  /** "Print in browser" on the notice: opens the 4 x 6.5 browser print for the label that was not printed. */
+  printFallbackInBrowser(): void {
+    const fallback = this.labelFallback;
+    if (!fallback) return;
+    this.labelFallback = null;
+    this.printLabelInBrowser(fallback.label, '');
+  }
+
+  dismissLabelFallback(): void {
+    this.labelFallback = null;
+  }
+
+  private printLabelInBrowser(label: LocationLabelInput, message: string): void {
+    const opened = openLocationLabels([label]);
     if (!opened.ok) {
       this.error = opened.reason;
       this.toast.error(opened.reason, 'Label not printed');
+    } else if (message) {
+      this.printMessage = message;
+      this.printTone = 'info';
     }
+  }
+
+  private labelInput(location: InventoryLocationRow): LocationLabelInput {
+    return {
+      serial_number: location.serial_number,
+      number: location.number,
+      summary: location.summary?.number,
+      part_type: location.part_type?.code,
+      description: location.description,
+      department: location.department,
+    };
   }
 
   refresh(): void {

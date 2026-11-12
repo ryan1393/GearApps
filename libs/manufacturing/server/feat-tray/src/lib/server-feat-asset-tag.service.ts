@@ -7,9 +7,10 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { AssetTagKind, PrintAssetTagDto } from './asset-tag-print.dto';
+import { AssetTagKind, PrintAssetTagDto, PrintLocationLabelDto } from './asset-tag-print.dto';
 import { ASSET_TAG_MAX_SERIAL_LENGTH, assetTagFileName, buildAssetTag } from './label-printers/asset-tag-label';
 import { LabelLanguage } from './label-printers/label-printer.dto';
+import { LocationCardFields, buildLocationCardIpl, buildLocationCardZpl, locationCardFileName } from './label-printers/location-card-label';
 import { LabelPrinterService } from './label-printers/label-printer.service';
 
 export interface AssetTagPrintResult {
@@ -27,6 +28,22 @@ export interface AssetTagPrintResult {
   file_name: string;
   prn_base64: string;
   message: string;
+}
+
+export interface LocationLabelPrintResult {
+  record_id: string;
+  serial_number: string;
+  language: LabelLanguage;
+  printed: boolean;
+  printer_configured: boolean;
+  /** The card printer the label was sent to, or was meant for. Null when none is set up. */
+  printer_name: string | null;
+  /** Why the printer did not take the label, in words an operator can act on. */
+  failure_reason: string | null;
+  file_name: string;
+  file_base64: string;
+  /** What the label shows, for printing it from the browser instead. */
+  label: LocationCardFields;
 }
 
 type TagAsset = TrayOrmEntity | ContainerOrmEntity | LocationOrmEntity;
@@ -57,6 +74,45 @@ export class ServerFeatAssetTagService {
 
     const result = await this.sendTag(serialNumber, dto.printer_id);
     return { kind, record_id: dto.record_id, serial_number: serialNumber, symbology: 'CODE128', ...result };
+  }
+
+  /**
+   * The 4 x 6.5 in location label (Summary, part type, location number and barcode), printed
+   * landscape on the card printer chosen on this computer or the default card printer.
+   */
+  async printLocationLabel(dto: PrintLocationLabelDto): Promise<LocationLabelPrintResult> {
+    const location = await this.locationRepo.findOne({
+      where: { id: dto.record_id, enabled: true },
+      relations: { summary: true, part_type: true },
+    });
+    if (!location) throw new NotFoundException('Location record could not be found or is disabled.');
+    // Database truth wins: the client sends only the location's id.
+    const label: LocationCardFields = {
+      serial: location.serial_number.trim().toUpperCase(),
+      number: location.number,
+      summary: location.summary?.number ?? null,
+      partType: location.part_type?.code ?? null,
+      description: location.description,
+      department: location.department,
+    };
+    const printer = await this.printers.resolve('CUTTER_CARD', dto.printer_id);
+    const language: LabelLanguage = printer?.language ?? 'IPL';
+    // The same per-printer adjustment as the Cutter Build card on that printer (Admin > Label Printers).
+    const adjustment = { right: printer?.offset_right ?? 0, down: printer?.offset_down ?? 0 };
+    const payload = language === 'ZPL' ? buildLocationCardZpl(label, adjustment) : buildLocationCardIpl(label, adjustment);
+    const sent = printer ? await this.printers.send(printer, payload) : null;
+    return {
+      record_id: location.id,
+      serial_number: label.serial,
+      language,
+      printed: sent?.ok === true,
+      printer_configured: Boolean(printer),
+      printer_name: printer?.name ?? null,
+      failure_reason: sent && !sent.ok ? sent.reason : null,
+      file_name: locationCardFileName(label.serial, language),
+      file_base64: payload.toString('base64'),
+      label,
+    };
   }
 
   /** Prints a tag reading TEST so an administrator can check a printer's language and alignment. */
