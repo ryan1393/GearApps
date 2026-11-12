@@ -53,6 +53,10 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
+import { IsNumericColumn } from './numeric-column';
+
+/** PostgreSQL integer, the type of lapper.machine_cycles.consec. */
+const INT4_MAX = 2_147_483_647;
 
 const uuidExample = 'DCA76BCC-F6CD-4211-A9F5-CD4E24381EC8';
 // SQL Server uniqueidentifier values need not carry RFC UUID version bits.
@@ -123,7 +127,7 @@ export class GearsetDto implements Gearset {
   @ApiProperty({ readOnly: true, example: uuidExample }) @IsUUID('loose') id!: string;
   @ApiProperty({ example: 'GS-100' }) @IsString() @IsNotEmpty() number!: string;
   @ApiPropertyOptional({ nullable: true }) @IsOptional() @IsString() rev!: string | null;
-  @ApiPropertyOptional({ nullable: true, example: 3.73 }) @IsOptional() @IsNumber() ratio!:
+  @ApiPropertyOptional({ nullable: true, example: 3.73 }) @IsOptional() @IsNumber() @IsNumericColumn(20, 8) ratio!:
     number | null;
   @ApiProperty({ example: 'Active' }) @IsString() @IsNotEmpty() status!: string;
   @ApiPropertyOptional({ nullable: true, example: uuidExample })
@@ -253,7 +257,11 @@ export class MachineCycleDto implements MachineCycle {
   @IsOptional()
   @IsString()
   serial_number!: string | null;
-  @ApiProperty({ example: 42 }) @IsInt() consec!: number;
+  @ApiProperty({ example: 42, minimum: -INT4_MAX - 1, maximum: INT4_MAX })
+  @IsInt()
+  @Min(-INT4_MAX - 1)
+  @Max(INT4_MAX)
+  consec!: number;
   @ApiProperty({ type: String, format: 'date-time' }) @Type(() => Date) @IsDate() timestamp!: Date;
   @ApiPropertyOptional({
     nullable: true,
@@ -320,10 +328,12 @@ export class MacroDto implements Macro {
   @ApiPropertyOptional({ nullable: true, example: 0, description: 'Lowest acceptable value' })
   @IsOptional()
   @IsNumber({ allowNaN: false, allowInfinity: false })
+  @IsNumericColumn(13, 5)
   min_value?: number | null;
   @ApiPropertyOptional({ nullable: true, example: 12.5, description: 'Highest acceptable value' })
   @IsOptional()
   @IsNumber({ allowNaN: false, allowInfinity: false })
+  @IsNumericColumn(13, 5)
   max_value?: number | null;
   @ApiPropertyOptional({ nullable: true, example: 'mm' })
   @IsOptional()
@@ -346,7 +356,15 @@ export class MacroLogDto implements MacroLog {
   @ApiProperty({ readOnly: true, example: uuidExample }) @IsUUID('loose') id!: string;
   @ApiProperty({ example: uuidExample }) @IsUUID('loose') machine_cycle_id!: string;
   @ApiProperty({ example: uuidExample }) @IsUUID('loose') macro_id!: string;
-  @ApiProperty({ example: 12.5 }) @IsNumber() value!: number;
+  @ApiProperty({
+    example: 12.5,
+    minimum: -99999999.99999,
+    maximum: 99999999.99999,
+    description: 'Stored as numeric(13,5): up to 5 decimal places (further places are rounded)',
+  })
+  @IsNumber()
+  @IsNumericColumn(13, 5)
+  value!: number;
 }
 export class CreateMacroLogDto extends OmitType(MacroLogDto, ['id']) implements CreateMacroLog {}
 export class UpdateMacroLogDto

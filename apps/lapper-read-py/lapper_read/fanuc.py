@@ -8,6 +8,7 @@ import threading
 from decimal import Decimal
 from typing import Protocol
 
+from .api import ApiError
 from .focas import PMC_X, PMC_Y
 from .state import MachineState
 
@@ -123,10 +124,23 @@ class Fanuc:
         for macro_id, value in values.items():
             if baseline.get(macro_id) == value:
                 continue
-            self._api.post_macro_log(cycle["id"], macro_id, value, f"{request_id}:{macro_id}")
+            try:
+                self._api.post_macro_log(cycle["id"], macro_id, value, f"{request_id}:{macro_id}")
+            except ApiError as error:
+                if not error.permanent:
+                    raise  # outage, sign-in, throttling: the whole cycle is retried
+                # The API refused this value (e.g. outside numeric(13,5)); sending it again cannot
+                # succeed. Skip it, keep its old baseline, and record the rest of the cycle.
+                log.warning("[%s] MeshForge refused macro %s = %s for cycle %s; skipped: %s",
+                            cycle["machine_id"], self._macro_label(macro_id), value, cycle["id"], error)
+                continue
             baseline[macro_id] = value  # only acknowledged values advance the baseline
             written += 1
         return written
+
+    def _macro_label(self, macro_id: str) -> str:
+        number = next((m.get("number") for m in self._macros if m.get("id") == macro_id), None)
+        return f"#{number} ({macro_id})" if number is not None else macro_id
 
 
 def _counter(value: Decimal | None) -> bool:

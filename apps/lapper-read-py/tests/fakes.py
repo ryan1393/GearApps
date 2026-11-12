@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from lapper_read.api import ApiError
 from lapper_read.state import MachineState
 
 
@@ -42,6 +43,8 @@ class FakeApi:
         self.macro_logs: dict[str, tuple] = {}  # idempotency key -> (cycle, macro, value)
         self.fail_cycle = 0
         self.fail_macro: set[str] = set()
+        #: macro id -> HTTP status the API answers every post of that macro with.
+        self.reject_macro: dict[str, int] = {}
         self.summary: list[dict] = []
 
     def macros(self):
@@ -73,6 +76,8 @@ class FakeApi:
         if macro_id in self.fail_macro:
             self.fail_macro.discard(macro_id)
             raise IOError("API down")
+        if macro_id in self.reject_macro:
+            raise ApiError("POST", "/api/v1/macro-log", self.reject_macro[macro_id], "value out of range")
         self.macro_logs[key] = (cycle_id, macro_id, value)
         return {"id": key}
 

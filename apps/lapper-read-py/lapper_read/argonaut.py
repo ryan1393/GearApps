@@ -15,6 +15,8 @@ import urllib.parse
 import urllib.request
 from decimal import Decimal, InvalidOperation
 
+from .api import is_permanent_rejection
+
 #: floatData, in the order Argonaut expects. floatData[0], before these, is the cycle time in seconds.
 FLOAT_MACROS: tuple[int, ...] = (
     10039, 10040, 10042, 10043, 10045, 10046, 10047, 10049, 10050, 10051, 10053, 10054, 10055,
@@ -37,7 +39,7 @@ class ArgonautError(IOError):
     @property
     def permanent(self) -> bool:
         """A rejected request (bad data) is not retried; outages, timeouts and throttling are."""
-        return self.status is not None and 400 <= self.status < 500 and self.status not in (401, 403, 408, 429)
+        return is_permanent_rejection(self.status)
 
 
 def _decimal(text: str | None) -> Decimal:

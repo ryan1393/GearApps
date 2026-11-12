@@ -1,6 +1,13 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
-import { CreateMachineCycleDto, UpdateMacroDto, UpdateMachineFanucVariableDto } from './gear.dto';
+import {
+  CreateGearsetDto,
+  CreateMachineCycleDto,
+  CreateMacroLogDto,
+  UpdateMacroDto,
+  UpdateMacroLogDto,
+  UpdateMachineFanucVariableDto,
+} from './gear.dto';
 
 describe('Imported SQL Server GUID compatibility', () => {
   const cycle = {
@@ -83,5 +90,56 @@ describe('Macro flag changes', () => {
 
   it('rejects anything but a boolean', async () => {
     expect(await errors({ flag_changes: 'no' })).toEqual(['flag_changes']);
+  });
+});
+
+describe('Values bounded by their database column', () => {
+  const log = { machine_cycle_id: '01234567-89ab-cdef-0123-456789abcdef', macro_id: 'fedcba98-7654-3210-fedc-ba9876543210' };
+  const logErrors = async (value: unknown) => validate(plainToInstance(CreateMacroLogDto, { ...log, value }));
+
+  it('accepts macro values numeric(13,5) stores, rounding extra decimal places as before', async () => {
+    for (const value of [0, -12.34567, 99999999.99999, -99999999.99999, 1.234567891, 12]) {
+      expect(await logErrors(value)).toEqual([]);
+    }
+  });
+
+  it('refuses macro values numeric(13,5) cannot store, with a clear message', async () => {
+    for (const value of [1e8, -1e8, 123456789, 99999999.999996, Number.POSITIVE_INFINITY, Number.NaN]) {
+      const errors = await logErrors(value);
+      expect(errors.map((e) => e.property)).toEqual(['value']);
+    }
+    const [error] = await logErrors(1e8);
+    expect(Object.values(error.constraints ?? {})).toContain(
+      'value must be a number between -99999999.99999 and 99999999.99999 (stored with 5 decimal places; further places are rounded)',
+    );
+    const [update] = await validate(plainToInstance(UpdateMacroLogDto, { value: 1e9 }));
+    expect(update.property).toBe('value');
+  });
+
+  it('bounds macro limits like macro values', async () => {
+    const errors = async (body: object) => (await validate(plainToInstance(UpdateMacroDto, body))).map((e) => e.property);
+    expect(await errors({ min_value: -5, max_value: 99999999 })).toEqual([]);
+    expect(await errors({ max_value: 1e8 })).toEqual(['max_value']);
+    expect(await errors({ min_value: -1e8 })).toEqual(['min_value']);
+  });
+
+  it('keeps the consec counter within a PostgreSQL integer', async () => {
+    const cycle = {
+      machine_id: '01234567-89ab-cdef-0123-456789abcdef',
+      gearset_id: 'fedcba98-7654-3210-fedc-ba9876543210',
+      serial_number: 'TEST',
+      timestamp: '2026-11-09T12:00:00Z',
+    };
+    const errors = async (consec: number) =>
+      (await validate(plainToInstance(CreateMachineCycleDto, { ...cycle, consec }))).map((e) => e.property);
+    expect(await errors(2_147_483_647)).toEqual([]);
+    expect(await errors(2_147_483_648)).toEqual(['consec']);
+  });
+
+  it('keeps a gearset ratio within numeric(20,8)', async () => {
+    const errors = async (ratio: number) =>
+      (await validate(plainToInstance(CreateGearsetDto, { number: '410', status: 'active', ratio }))).map((e) => e.property);
+    expect(await errors(3.73)).toEqual([]);
+    expect(await errors(1e12)).toEqual(['ratio']);
   });
 });

@@ -17,10 +17,20 @@ from typing import Any
 log = logging.getLogger(__name__)
 
 
+def is_permanent_rejection(status: int | None) -> bool:
+    """A request the server refused for its content (HTTP 4xx): sending it again cannot succeed.
+    Sign-in problems (401/403), timeouts (408) and throttling (429) can, so they are retried."""
+    return status is not None and 400 <= status < 500 and status not in (401, 403, 408, 429)
+
+
 class ApiError(IOError):
     def __init__(self, method: str, path: str, status: int, body: str = ""):
         super().__init__(f"{method} {path} failed with HTTP {status} {body[:200]}".strip())
         self.status = status
+
+    @property
+    def permanent(self) -> bool:
+        return is_permanent_rejection(self.status)
 
 
 def _number(value: Decimal) -> int | float:
