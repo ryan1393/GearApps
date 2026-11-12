@@ -1,5 +1,12 @@
 import * as crypto from 'crypto';
-import { FindOptionsWhere, IsNull, MoreThan, Raw, Repository } from 'typeorm';
+import {
+  EntityManager,
+  FindOptionsWhere,
+  IsNull,
+  MoreThan,
+  Raw,
+  Repository,
+} from 'typeorm';
 
 import {
   CreateUserDto,
@@ -197,7 +204,11 @@ export class ServerFeatUserService extends PaginationService<UserOrmEntity> {
     return user;
   }
 
-  async updateUser(userId: Uuid, data: Partial<IUserEntity>) {
+  async updateUser(
+    userId: Uuid,
+    data: Partial<IUserEntity>,
+    repo: Repository<UserOrmEntity> = this.userRepo,
+  ) {
     const normalized = { ...data };
     if (typeof normalized.email === 'string') {
       normalized.email = normalized.email.trim().toLowerCase();
@@ -205,41 +216,80 @@ export class ServerFeatUserService extends PaginationService<UserOrmEntity> {
       if (existing && existing.id !== userId)
         throw new ConflictException('User email already exists');
     }
-    await this.userRepo.save({ id: userId, ...normalized });
-    return this.userRepo.findOneOrFail({ where: { id: userId } });
+    await repo.save({ id: userId, ...normalized });
+    return repo.findOneOrFail({ where: { id: userId } });
   }
 
   /**
    * Admin edit of a user. An administrator cannot disable or demote their own account, and the
    * last active administrator cannot be disabled or demoted by anyone: either would leave the
-   * system with no way to manage users short of editing the database.
+   * system with no way to manage users short of editing the database. The check and the change
+   * run in one transaction holding the active administrators' rows, so two administrators
+   * demoting each other at the same time cannot leave none.
    */
   async updateUserAsAdmin(
     actorId: Uuid,
     userId: Uuid,
     data: Partial<IUserEntity>,
   ) {
+    if (data.departmentId) await this.assertEnabledDepartment(data.departmentId);
     const deactivating = data.active === false;
     const demoting = data.role !== undefined && data.role !== RoleType.ADMIN;
-    if (deactivating || demoting) {
-      const target = await this.userRepo.findOne({ where: { id: userId } });
-      if (target?.role === RoleType.ADMIN && target.active) {
-        if (userId === actorId) {
-          throw new ConflictException(
-            'You cannot disable or demote your own administrator account. Ask another administrator.',
-          );
-        }
-        const otherAdmins = await this.userRepo.count({
-          where: { role: RoleType.ADMIN, active: true },
-        });
-        if (otherAdmins <= 1) {
-          throw new ConflictException(
-            'This is the last active administrator. Make another user an administrator first.',
-          );
-        }
-      }
+    if (!deactivating && !demoting) return this.updateUser(userId, data);
+    return this.userRepo.manager.transaction(async (manager) => {
+      await this.assertAdministratorsRemain(manager, actorId, userId, 'update');
+      return this.updateUser(userId, data, manager.getRepository(UserOrmEntity));
+    });
+  }
+
+  private async assertEnabledDepartment(departmentId: string): Promise<void> {
+    const department = await this.departmentRepo.findOne({
+      where: { id: departmentId, enabled: true },
+    });
+    if (!department) {
+      throw new UnprocessableEntityException(
+        'User department was not found or is disabled',
+      );
     }
-    return this.updateUser(userId, data);
+  }
+
+  /**
+   * Locks the active administrators (PostgreSQL row locks, held to the end of the transaction)
+   * and refuses removing yourself or the last one. SQLite, used by tests, serializes writes.
+   */
+  private async assertAdministratorsRemain(
+    manager: EntityManager,
+    actorId: Uuid,
+    userId: Uuid,
+    change: 'update' | 'delete',
+  ): Promise<void> {
+    if (change === 'delete' && userId === actorId) {
+      throw new ConflictException(
+        'You cannot delete your own account. Ask another administrator.',
+      );
+    }
+    const query = manager
+      .getRepository(UserOrmEntity)
+      .createQueryBuilder('user')
+      .select('user.id', 'id')
+      .where('user.role = :role AND user.active = :active', {
+        role: RoleType.ADMIN,
+        active: true,
+      })
+      .orderBy('user.id');
+    if (manager.connection.options.type === 'postgres') query.setLock('pessimistic_write');
+    const admins = (await query.getRawMany<{ id: Uuid }>()).map((row) => row.id);
+    if (!admins.includes(userId)) return;
+    if (userId === actorId) {
+      throw new ConflictException(
+        'You cannot disable or demote your own administrator account. Ask another administrator.',
+      );
+    }
+    if (admins.length <= 1) {
+      throw new ConflictException(
+        'This is the last active administrator. Make another user an administrator first.',
+      );
+    }
   }
 
   /** Atomic compare-and-swap allows only one winner when refreshes race. */
@@ -340,14 +390,19 @@ export class ServerFeatUserService extends PaginationService<UserOrmEntity> {
     if (result.affected !== 1) throw invalid();
   }
 
-  async deleteUser(userId: Uuid): Promise<void> {
-    const user = await this.userRepo.findOne({ where: { id: userId } });
-    if (!user) {
-      this.logger.log(
-        `Request received to delete user ${userId} - but user does not exist!`,
-      );
-      throw new UnprocessableEntityException(`Error deleting user`);
-    }
-    await user.remove();
+  /** Deletes a user. Never your own account, and never the last active administrator. */
+  async deleteUser(actorId: Uuid, userId: Uuid): Promise<void> {
+    await this.userRepo.manager.transaction(async (manager) => {
+      await this.assertAdministratorsRemain(manager, actorId, userId, 'delete');
+      const repo = manager.getRepository(UserOrmEntity);
+      const user = await repo.findOne({ where: { id: userId } });
+      if (!user) {
+        this.logger.log(
+          `Request received to delete user ${userId} - but user does not exist!`,
+        );
+        throw new UnprocessableEntityException(`Error deleting user`);
+      }
+      await repo.remove(user);
+    });
   }
 }

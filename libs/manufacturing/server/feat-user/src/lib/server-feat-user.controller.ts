@@ -98,7 +98,10 @@ export class ServerFeatUserController {
   @ApiOkResponse({
     type: UserDto,
   })
-  async deleteUser(@Param('id', new ParseUUIDPipe()) id: string) {
-    return this.userService.deleteUser(id);
+  async deleteUser(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @ReqUserId() adminUserId: Uuid,
+  ) {
+    return this.userService.deleteUser(adminUserId, id);
   }
 }
