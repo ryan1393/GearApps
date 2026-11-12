@@ -1,4 +1,5 @@
 export * from './lib/asset-tags';
+export * from './lib/barcodes';
 export * from './lib/directives';
 export * from './lib/label-printers';
 export * from './lib/location-label';
