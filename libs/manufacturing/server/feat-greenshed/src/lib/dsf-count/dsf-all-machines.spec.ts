@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { DsfCountService } from './dsf-count.service';
+import { DsfCountService, LAPPER_MAPPING_TABLES_SQL, REMOVE_LAPPER_MAPPINGS_SQL } from './dsf-count.service';
 import { CYCLES_SQL, DANA_MACHINES_NO_LAPPER_SCHEMA_SQL, DANA_MACHINES_SQL, LAPPER_MACHINES_TABLE_SQL, MAPPING_SQL, ROLE_CHECK_SQL, SHIFTS_SQL, SOURCE_IDENTITY_SQL } from './dsf-sql';
 import * as writer from './dsf-cutter-attribution';
 
@@ -104,5 +104,27 @@ describe('DSF counts across machine departments', () => {
       sourceOptionsRefreshedAt: new Date().toISOString() });
     await expect(service.saveAdminMapping(lapper.machine_id, options[1].mapping_id, uuid(99))).rejects.toThrow('Lapper machines do not use DSF counts.');
     expect(manager.query).not.toHaveBeenCalledWith(expect.stringContaining('INSERT INTO public.dana_dsf_machine_mapping_v1'), expect.anything());
+  });
+  it('deletes mappings saved for Lapper machines at start-up, auditing each, under the mapping lock', async () => {
+    process.env['DSF_COUNT_ENABLED'] = 'false';
+    const run = (present: boolean) => {
+      const manager = { query: jest.fn(async (sql: string) =>
+        sql === LAPPER_MAPPING_TABLES_SQL ? [{ present }] : sql === REMOVE_LAPPER_MAPPINGS_SQL ? [{ machine_id: uuid(5) }] : []) };
+      const db = { options: { type: 'postgres' }, query: catalog(machines),
+        transaction: jest.fn(async (work: (m: typeof manager) => Promise<unknown>) => work(manager)) };
+      return { manager, service: new DsfCountService(db as unknown as DataSource) };
+    };
+    const ready = run(true);
+    await ready.service.onModuleInit();
+    const sql = ready.manager.query.mock.calls.map(([text]) => text);
+    expect(sql.indexOf(REMOVE_LAPPER_MAPPINGS_SQL)).toBeGreaterThan(sql.findIndex(text => text.includes('dana-dsf-mapping-admin-v1')));
+    expect(REMOVE_LAPPER_MAPPINGS_SQL).toContain("'UNMAP'");
+    const missing = run(false);
+    await missing.service.onModuleInit();
+    expect(missing.manager.query).not.toHaveBeenCalledWith(REMOVE_LAPPER_MAPPINGS_SQL);
+    const failing = new DsfCountService({ options: { type: 'postgres' }, query: catalog(machines),
+      transaction: jest.fn().mockRejectedValue(new Error('down')) } as unknown as DataSource);
+    await expect(failing.onModuleInit()).resolves.toBeUndefined();
+    expect(failing.snapshot().rows).toHaveLength(machines.length);
   });
 });

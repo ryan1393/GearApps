@@ -27,6 +27,22 @@ async function readDsfMachines(runner:QueryRunnerLike):Promise<Machine[]> {
   const lapper=(await runner.query(LAPPER_MACHINES_TABLE_SQL))[0];
   return runner.query(lapper?.present===true?DANA_MACHINES_SQL:DANA_MACHINES_NO_LAPPER_SCHEMA_SQL);
 }
+/**
+ * Deletes every DSF mapping saved for a Lapper machine, recording each as a system UNMAP in the
+ * mapping audit. Lapper machines do not use DSF counts. Runs once at start-up whether or not DSF is
+ * enabled; it does nothing when the tables are missing (no Lapper machines, or no mappings yet).
+ */
+export const LAPPER_MAPPING_TABLES_SQL = `SELECT to_regclass('lapper.machines') IS NOT NULL
+ AND to_regclass('public.dana_dsf_machine_mapping_v1') IS NOT NULL
+ AND to_regclass('public.dana_dsf_machine_mapping_audit_v1') IS NOT NULL AS present`;
+export const REMOVE_LAPPER_MAPPINGS_SQL = `WITH removed AS (
+ DELETE FROM public.dana_dsf_machine_mapping_v1 x
+ WHERE EXISTS (SELECT 1 FROM lapper.machines l WHERE l.public_machine_id=x.machine_id)
+ RETURNING x.machine_id,x.mapping_id
+) INSERT INTO public.dana_dsf_machine_mapping_audit_v1
+ (machine_id,action,previous_mapping_id,new_mapping_id,changed_by,source_snapshot)
+ SELECT machine_id,'UNMAP',mapping_id,NULL,NULL,'{"reason":"LAPPER_MACHINE"}'::jsonb FROM removed
+ RETURNING machine_id::text`;
 type SourceClient = { connect():Promise<void>;query(text:string,values?:unknown[]):Promise<{rows:any[]}>;end():Promise<void>;on(event:string,fn:(e:unknown)=>void):void; };
 interface Config { enabled:boolean; valid:boolean; interval:number; machines:Set<string>; client:Record<string,unknown>; privilegedAccountAcknowledged?:boolean;
   /** DSF department names (normalised, see dsfDepartmentKey) that stand for a MeshForge department code. */
@@ -212,7 +228,10 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
   private readonly logger=new Logger('DsfCount');
   private lastFailure:{reason:string;code:string|null;at:string}|null=null;
   async onModuleInit():Promise<void> {
-    if (this.db.options.type === 'postgres') this.machines = await readDsfMachines(this.db);
+    if (this.db.options.type === 'postgres') {
+      await this.removeLapperMappings();
+      this.machines = await readDsfMachines(this.db);
+    }
     if(!this.config.enabled)return;
     if(!this.config.valid) {
       // Enabled but unusable settings must be visible, not a silent "not configured".
@@ -226,6 +245,21 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       this.logger.error('DSF tables could not be prepared in the MeshForge database; the DSF reader is not running.'+(code?' ('+code+')':''));return;
     }
     this.schemaReady=true;this.readerState='WAITING';this.schedule(1000);
+  }
+  /** Never blocks start-up: a failure leaves the rows, which the reader already ignores. */
+  private async removeLapperMappings():Promise<void> {
+    try {
+      const removed=await this.db.transaction(async manager=>{
+        if((await manager.query(LAPPER_MAPPING_TABLES_SQL))[0]?.present!==true)return [];
+        await manager.query("SET LOCAL lock_timeout='2s'");await manager.query("SET LOCAL statement_timeout='8s'");
+        await manager.query("SELECT pg_advisory_xact_lock(hashtext('dana-dsf-mapping-admin-v1'))");
+        return await manager.query(REMOVE_LAPPER_MAPPINGS_SQL) as {machine_id:string}[];
+      });
+      if(removed.length)this.logger.log('Removed '+removed.length+' DSF mapping(s) saved for Lapper machines.');
+    } catch(e) {
+      const code=dsfFailureCode(e);
+      this.logger.warn('DSF mappings saved for Lapper machines could not be removed'+(code?' ('+code+')':'')+'; they stay ignored.');
+    }
   }
   private schemaReady=false;
   private schemaProblem:string|null=null;

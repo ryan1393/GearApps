@@ -66,7 +66,7 @@ DSF migrations, so a database that already has them keeps its mappings and ledge
 
 ## Machine mapping
 
-Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operation + line). Admin mappings allow every numeric DSF department and its approved operation, including grinding. Lapper machines are not listed and a mapping for one is refused; a mapping saved for one before this change stays in the table but is ignored, and its DSF source is free to map to another machine. Source discovery works before the first mapping is configured. The machine and source departments must match.
+Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operation + line). Admin mappings allow every numeric DSF department and its approved operation, including grinding. Lapper machines are not listed and a mapping for one is refused; any mapping saved for one is deleted when the API starts, recorded as an `UNMAP` (reason `LAPPER_MACHINE`) in `dana_dsf_machine_mapping_audit_v1`, and its DSF source is free to map to another machine. Until that start-up runs, such a mapping is ignored. Source discovery works before the first mapping is configured. The machine and source departments must match.
 
 DSF departments are named like `Dept. 132`. Some have a plain name instead: the CutGrind
 grinders (`CutGrind 3 1-24-79`) are in the DSF department `CUTTER GRIND`, which is MeshForge

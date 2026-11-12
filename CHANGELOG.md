@@ -6,8 +6,9 @@
   get DSF counts. They are left out of the DSF reader, Machine DSF Counts, the plant dashboard and
   Admin > DSF Mappings, a mapping for one is refused, and the DSF badge is gone from the Lapper
   live machine cards and Lapping Summary. The Lapper app no longer has the Machine DSF Counts
-  menu link or page; an old /machine-counts bookmark there opens the Dashboard. Mappings saved earlier for Lapper machines are ignored,
-  not deleted, and their DSF sources can be mapped to other machines.
+  menu link or page; an old /machine-counts bookmark there opens the Dashboard. Mappings saved earlier for Lapper machines are deleted
+  when the API starts (each recorded as an `UNMAP` in the mapping audit), and their DSF sources can
+  be mapped to other machines.
 
 - **Setting changes are one line each.** The Lapper Dashboard's Setting changes panel showed every
   changed value of a cycle in its row, so a cycle with a dozen changes filled the screen. Each
