@@ -9,6 +9,14 @@ export const REFERENCE_DEPARTMENTS: readonly string[] = [
   '240', '310', '341', '350', '400', '541', '600',
 ];
 
+/** The reference in words, e.g. "Cuttergrind and Departments 121, 131, … and 600". */
+export function referenceDepartmentsText(codes: readonly string[] = REFERENCE_DEPARTMENTS): string {
+  const others = codes.filter(code => code !== '45');
+  const list = others.length > 2 ? `${others.slice(0, -1).join(', ')}, and ${others[others.length - 1]}` : others.join(' and ');
+  const departments = others.length ? `${others.length === 1 ? 'Department' : 'Departments'} ${list}` : '';
+  return codes.includes('45') ? (departments ? `Cuttergrind and ${departments}` : 'Cuttergrind') : departments;
+}
+
 export function plantDepartmentCoverage(machines: MachineCount[], snapshot: DsfMappingSnapshot | null, now: number): DepartmentCoverage[] {
   const fresh = sourceCatalogFresh(snapshot, now);
   const codes = new Set([...REFERENCE_DEPARTMENTS, ...machines.map(machine => machine.department),

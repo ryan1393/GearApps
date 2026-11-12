@@ -8,6 +8,22 @@ export function formatPlantTime(value: string | null, seconds = false): string {
   }).format(new Date(value));
 }
 
+/** A clock time such as 3:04:05 PM, in the plant's time zone. */
+export function formatPlantClock(epochMs: number): string {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Indianapolis', hour: 'numeric', minute: '2-digit', second: '2-digit',
+  }).format(new Date(epochMs));
+}
+
+/** How long ago a reading arrived, for a glance: "12 s ago", "3 min ago", "2 h ago". */
+export function formatAge(sinceMs: number, nowMs: number): string {
+  const seconds = Math.max(0, Math.floor((nowMs - sinceMs) / 1000));
+  if (seconds < 60) return `${seconds} s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes} min ago`;
+  return `${Math.floor(minutes / 60)} h ago`;
+}
+
 // A count of zero is valid. Missing or stale evidence never becomes zero output.
 export function freshCount(row: MachineCount, snapshot: ProductionSnapshot, now: number): number | null {
   const refreshed = Date.parse(row.refreshed_at ?? '');

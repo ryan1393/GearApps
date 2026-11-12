@@ -542,11 +542,12 @@
         "type:feature"
       ],
       "targets": [
-        "lint"
+        "lint",
+        "test"
       ],
       "hasBuildTarget": false,
       "hasServeTarget": false,
-      "hasTestTarget": false
+      "hasTestTarget": true
     },
     {
       "name": "frontend-util-common",
