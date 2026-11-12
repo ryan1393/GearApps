@@ -1,7 +1,7 @@
 import { ErrorResponseDto, ScannerCommandDto } from '@meshforge/api/data-access';
 import { ScannerDetailsService } from '@meshforge/api/feature-gear';
 import { LapperWritePolicy, ReqUser, RequestUser, scannerConfig } from '@meshforge/api/core';
-import { ScannerCommand, ScannerFtpListing, ScannerLogEntry, ScannerSummary } from '@meshforge/shared/domain';
+import { ScannerCommand, ScannerFtpListing, ScannerImageDefaults, ScannerLogEntry, ScannerSummary } from '@meshforge/shared/domain';
 import {
   UseInterceptors,
   BadRequestException,
@@ -56,6 +56,14 @@ export class ScannerController {
     if (user?.role !== 'admin' || 'collectorTokenId' in (user ?? {}))
       throw new ForbiddenException('Only MeshForge administrators can browse the scanner FTP drop');
     return this.client.listFtpFolder(path);
+  }
+
+  @Get('image-defaults')
+  @ApiOperation({
+    summary: 'Default capture location: a scanner without its own image folder is read from <root>/<scanner IP>/<imageFile>',
+  })
+  imageDefaults(): ScannerImageDefaults {
+    return this.client.imageDefaults();
   }
 
   // ----- by scanner id -----

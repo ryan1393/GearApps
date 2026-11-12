@@ -1,7 +1,7 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { FanucVariablesApi, LapperAccess, ScannerApi, ScannerDetailsApi } from '@meshforge/client/core';
-import { Machine, MachineFanucVariable } from '@meshforge/shared/domain';
+import { Machine, MachineFanucVariable, ScannerDetail } from '@meshforge/shared/domain';
 import { NEVER, Observable, of } from 'rxjs';
 import { LIVE_FEED_MS, LIVE_REQUEST_TIMEOUT_MS, MachineLiveCardComponent } from './machine-live-card.component';
 
@@ -20,7 +20,7 @@ describe('Live machine card polling', () => {
       imports: [MachineLiveCardComponent],
       providers: [
         { provide: LapperAccess, useValue: { canEditSetup: () => false } },
-        { provide: ScannerApi, useValue: { image: jest.fn() } },
+        { provide: ScannerApi, useValue: { image: jest.fn(), imageDefaults: () => of({ root: '181-lapper-scanners', imageFile: 'scanner-current.jpg' }) } },
         { provide: ScannerDetailsApi, useValue: { get: jest.fn() } },
         { provide: FanucVariablesApi, useValue: { byMachine } },
       ],
@@ -63,7 +63,7 @@ describe('Live machine card polling', () => {
       imports: [MachineLiveCardComponent],
       providers: [
         { provide: LapperAccess, useValue: { canEditSetup: () => false } },
-        { provide: ScannerApi, useValue: { image } },
+        { provide: ScannerApi, useValue: { image, imageDefaults: () => of({ root: '181-lapper-scanners', imageFile: 'scanner-current.jpg' }) } },
         { provide: ScannerDetailsApi, useValue: { get: jest.fn(() => of(null)) } },
         { provide: FanucVariablesApi, useValue: { byMachine: jest.fn(() => of(snapshot(false))) } },
       ],
@@ -96,6 +96,34 @@ describe('Live machine card polling', () => {
     expect(image).toHaveBeenCalledTimes(6);
     fixture.detectChanges();
     expect(text()).not.toContain('Live · photoeye on');
+    fixture.destroy();
+  });
+
+  it('shows the FTP folder and file the image is read from, and whether it is the default', async () => {
+    const scanner = { id: 's1', ip: '10.16.81.235', image_folder: null, image_file: null } as unknown as ScannerDetail;
+    TestBed.configureTestingModule({
+      imports: [MachineLiveCardComponent],
+      providers: [
+        { provide: LapperAccess, useValue: { canEditSetup: () => false } },
+        { provide: ScannerApi, useValue: { image: jest.fn(() => NEVER), imageDefaults: () => of({ root: '181-lapper-scanners', imageFile: 'scanner-current.jpg' }) } },
+        { provide: ScannerDetailsApi, useValue: { get: jest.fn(() => NEVER) } },
+        { provide: FanucVariablesApi, useValue: { byMachine: jest.fn(() => NEVER) } },
+      ],
+    });
+    TestBed.overrideComponent(MachineLiveCardComponent, { set: { imports: [], schemas: [NO_ERRORS_SCHEMA] } });
+    const fixture = TestBed.createComponent(MachineLiveCardComponent);
+    fixture.componentRef.setInput('machine', { ...machine, scanner_id: 's1', scanner } as unknown as Machine);
+    fixture.detectChanges();
+    const path = () => (fixture.nativeElement as HTMLElement).querySelector('.gear-live-path')?.textContent?.replace(/\s+/g, ' ').trim();
+    expect(path()).toBe('FTP 181-lapper-scanners/10.16.81.235/scanner-current.jpg (default)');
+
+    fixture.componentRef.setInput('machine', {
+      ...machine,
+      scanner_id: 's1',
+      scanner: { ...scanner, image_folder: '181-lapper-scanners/53711922' },
+    } as unknown as Machine);
+    fixture.detectChanges();
+    expect(path()).toBe('FTP 181-lapper-scanners/53711922/scanner-current.jpg');
     fixture.destroy();
   });
 });
