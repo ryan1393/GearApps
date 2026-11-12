@@ -4,7 +4,15 @@ import { Component, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { GearToastService } from '@meshforge/manufacturing/frontend/util-common';
+import {
+  GearToastService,
+  OptionPickerComponent,
+  PickerOption,
+  ScanPanelComponent,
+  StationStatusComponent,
+  createStatusLine,
+  heldScanIgnoredText,
+} from '@meshforge/manufacturing/frontend/util-common';
 import {
   GreenshedApiService,
   GreenshedBuild,
@@ -18,8 +26,17 @@ import { DanaPageHeaderComponent, DanaButtonDirective } from '@dana/ui';
 @Component({
   selector: 'gear-greenshed-setup',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaPageHeaderComponent, DanaButtonDirective],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DanaPageHeaderComponent,
+    DanaButtonDirective,
+    ScanPanelComponent,
+    StationStatusComponent,
+    OptionPickerComponent,
+  ],
   templateUrl: './greenshed-setup.component.html',
+  styleUrl: '../station-page.css',
 })
 export class GreenshedSetupComponent {
   private readonly api = inject(GreenshedApiService);
@@ -78,6 +95,101 @@ export class GreenshedSetupComponent {
 
   get machineLocked(): boolean {
     return !!this.selectedMachineNumber;
+  }
+
+  // ---- Station layout: numbered scan-or-pick steps, one status line, a reason on a blocked action ----
+
+  private readonly statusLine = createStatusLine();
+  /** Shown when there is no error or result: e.g. a scan made too early. */
+  notice = '';
+  get status() {
+    return this.statusLine(this.error, this.message, this.notice);
+  }
+  dismissStatus(): void {
+    this.error = '';
+    this.message = '';
+    this.notice = '';
+  }
+  /** A scan made while a lookup was running could not be used. */
+  scanIgnored(scan: string): void {
+    if (!this.error) this.notice = heldScanIgnoredText(scan);
+  }
+
+  get buildReady(): boolean {
+    return Boolean(this.build && ['READY', 'SHELF'].includes(this.build.status_code));
+  }
+
+  /** What to do next, shown in the status line when there is no message. */
+  get prompt(): string {
+    if (this.busy) return 'Working…';
+    if (!this.build) return 'Scan or choose the cutter build to put on a machine.';
+    if (!this.buildReady) return `Build ${this.build.build_number} cannot be set up. Change the build.`;
+    if (!this.machine) {
+      return this.machineLocked
+        ? `Machine ${this.selectedMachineNumber} was chosen on Running Machines.`
+        : 'Scan or choose the machine this cutter goes on.';
+    }
+    if (!this.part) return 'Scan or choose the part the machine will run.';
+    return 'Check the starting piece count, then tap Setup Cutter.';
+  }
+
+  /** Why Setup Cutter is not available, in operator terms. Empty when it is (or while working). */
+  get setupBlockedReason(): string {
+    if (this.busy) return '';
+    if (!this.build) return 'Scan or choose the cutter build first (step 1).';
+    if (!this.buildReady) return `Build ${this.build.build_number} is ${this.build.status_code}; only READY or SHELF cutters can be set up.`;
+    if (!this.machine) return 'Scan or choose a validated machine (step 2).';
+    if (!this.part) return 'Scan or choose a matching production part (step 3).';
+    return '';
+  }
+
+  get buildOptions(): PickerOption[] {
+    return this.availableBuilds.map((row) => ({
+      value: row.build_number,
+      cells: [row.build_number, `Summary ${row.summary_number}`, row.part_type_code],
+    }));
+  }
+  get machineOptions(): PickerOption[] {
+    return this.availableMachineNumbers.map((number) => ({ value: number, cells: [number] }));
+  }
+  get partOptions(): PickerOption[] {
+    return this.matchingParts.map((row) => ({ value: row.part_number, cells: [row.part_number, row.part_type?.name ?? ''] }));
+  }
+
+  /** A build scanned or picked: the same lookup and checks as before. */
+  useBuild(value: string): void {
+    if (this.busy || !value.trim()) return;
+    this.notice = '';
+    this.buildNumber = value.trim();
+    this.scanBuild();
+  }
+  useMachine(value: string): void {
+    if (this.busy || this.machineLocked || !value.trim()) return;
+    this.notice = '';
+    this.machineNumber = value.trim();
+    this.scanMachine();
+  }
+  usePart(value: string): void {
+    if (this.busy || !value.trim()) return;
+    this.notice = '';
+    this.partNumber = value.trim();
+    this.scanPart();
+  }
+  /** Change on a completed step clears it and everything after it, as choosing the empty option did. */
+  changeBuild(): void {
+    if (this.busy) return;
+    this.buildNumber = '';
+    this.selectBuild();
+  }
+  changeMachine(): void {
+    if (this.busy || this.machineLocked) return;
+    this.machineNumber = '';
+    this.selectMachine();
+  }
+  changePart(): void {
+    if (this.busy) return;
+    this.partNumber = '';
+    this.selectPart();
   }
 
   /** The count a shelf cutter resumes from, or null for a cutter new to a machine. */
@@ -384,7 +496,7 @@ export class GreenshedSetupComponent {
           if (request !== this.buildRequest) return;
           this.result = r;
           const message = `${r.build_number} setup on ${r.machine_number}.`;
-          this.message = '';
+          this.message = message;
           this.toast.success(message, 'Cutter setup complete');
         },
         error: (e: HttpErrorResponse) => {
@@ -409,6 +521,7 @@ export class GreenshedSetupComponent {
     this.result = null;
     this.error = '';
     this.message = '';
+    this.notice = '';
   }
 
   /** After a completed setup the machine now has a cutter: release a machine locked from the board and reload every list. */

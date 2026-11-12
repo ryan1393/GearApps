@@ -12,7 +12,7 @@
       <p *ngIf="help" [id]="inputId + '-help'" class="gear-muted mt-1">{{ help }}</p>
       <div class="mt-4 flex gap-2">
         <!-- While the station is busy the box keeps the cursor (read-only), so a fast next scan is held, not lost. -->
-        <input #input [id]="inputId" [attr.aria-describedby]="describedBy" [attr.data-gear-scan-step]="step" [(ngModel)]="value" (keydown)="onKeydown($event)" (focus)="selectOnFocus()" autocomplete="off" autocapitalize="characters" [spellcheck]="false" enterkeyhint="go"
+        <input #input [id]="inputId" [attr.aria-describedby]="describedBy" [attr.data-gear-scan-step]="step" [(ngModel)]="value" (keydown)="onKeydown($event)" (focus)="selectOnFocus()" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go"
           class="gear-input min-w-0 flex-1"
           [placeholder]="placeholder" [disabled]="disabled" [readonly]="busy" [attr.aria-busy]="busy ? 'true' : null" />
         <button type="button" (click)="submit()" [disabled]="disabled || busy || !value.trim()"
