@@ -32,6 +32,10 @@ interface DsfMappingBoard {
   format: string; status: string; enabled: boolean; configured: boolean; interval_seconds: number;
   last_success_at: string | null; served_at: string; cutter_write_enabled: boolean;
   last_failure: { reason: string; code: string | null; at: string } | null;
+  /** Why DSF is switched on but the reader is not running. Names the setting, never its value. Absent on older APIs. */
+  config_problem?: string | null;
+  /** Why the DSF source list is empty after a read. Absent on older APIs. */
+  source_options_problem?: { reason: string; code: string | null } | null;
   source_options_status: string; source_options_refreshed_at: string | null;
   source_options: DsfSourceOption[]; rows: AdminMappingRow[];
 }
@@ -105,10 +109,12 @@ export class DsfMachineMappingsComponent implements OnInit {
     const board = this.board;
     if (!board) return { tone: 'waiting', text: '' };
     if (!board.enabled) return { tone: 'off', text: 'DSF counts are switched off for this API (DSF_COUNT_ENABLED). Nothing is read from DSF and existing counters are unchanged.' };
+    if (board.config_problem) return { tone: 'problem', text: 'DSF counts are switched on but the reader is not running: ' + board.config_problem + ' Fix it in Admin > Server Settings or the server .env, then restart the API.' };
     if (!board.configured) return { tone: 'problem', text: 'DSF counts are switched on but the DSF_* connection settings are incomplete or invalid, so the reader is not running. See the API start-up log.' };
     if (board.last_failure) {
       const code = board.last_failure.code ? ' (' + board.last_failure.code + ')' : '';
-      return { tone: 'problem', text: 'The last DSF read failed: ' + this.failureText(board.last_failure.reason) + code + '. Last good read: ' + this.safeTime(board.last_success_at) + '.' };
+      const hint = this.codeHint(board.last_failure.code);
+      return { tone: 'problem', text: 'The last DSF read failed: ' + this.failureText(board.last_failure.reason) + code + '. ' + (hint ? hint + ' ' : '') + 'Last good read: ' + this.safeTime(board.last_success_at) + '.' };
     }
     if (!board.last_success_at) return { tone: 'waiting', text: 'Waiting for the first DSF read.' };
     return { tone: 'ok', text: 'Reading DSF every ' + board.interval_seconds + ' seconds. Last good read: ' + this.safeTime(board.last_success_at) + '.' };
@@ -124,6 +130,46 @@ export class DsfMachineMappingsComponent implements OnInit {
       READ_DEADLINE: 'the read took too long',
     };
     return text[reason] || reason.replace(/_/g, ' ').toLowerCase();
+  }
+  /** What to check for the common driver, network and TLS codes of a failed DSF connection. */
+  codeHint(code: string | null | undefined): string {
+    if (!code) return '';
+    const hints: Record<string, string> = {
+      ECONNREFUSED: 'Nothing accepted the connection: check DSF_DB_HOST and DSF_DB_PORT.',
+      ETIMEDOUT: 'No reply from the DSF server: check DSF_DB_HOST and that the API server can reach it through the firewall.',
+      CONNECT_TIMEOUT: 'No reply from the DSF server within 5 seconds: check DSF_DB_HOST, DSF_DB_PORT and the firewall.',
+      EHOSTUNREACH: 'The DSF server cannot be reached from the API server: check DSF_DB_HOST and the network route.',
+      ENETUNREACH: 'The DSF network cannot be reached from the API server (inside Docker, check the container can reach the plant network).',
+      ENOTFOUND: 'DSF_DB_HOST is not a known host name: use the server IP address or a resolvable name.',
+      EAI_AGAIN: 'DSF_DB_HOST could not be looked up: use the server IP address or check DNS.',
+      ECONNRESET: 'The DSF server closed the connection: often an SSL mismatch, so try the other DSF_DB_SSL_MODE.',
+      CONNECTION_TERMINATED: 'The DSF server closed the connection: often an SSL mismatch, so try the other DSF_DB_SSL_MODE.',
+      SSL_NOT_SUPPORTED: 'The DSF server does not offer SSL: set DSF_DB_SSL_MODE=disable.',
+      DEPTH_ZERO_SELF_SIGNED_CERT: 'The DSF server certificate is self-signed: supply it in DSF_DB_SSL_CA_PEM, or set DSF_DB_SSL_MODE=disable on a trusted plant network.',
+      SELF_SIGNED_CERT_IN_CHAIN: 'The DSF certificate authority is not trusted: supply it in DSF_DB_SSL_CA_PEM.',
+      UNABLE_TO_VERIFY_LEAF_SIGNATURE: 'The DSF certificate authority is not trusted: supply it in DSF_DB_SSL_CA_PEM.',
+      UNABLE_TO_GET_ISSUER_CERT_LOCALLY: 'The DSF certificate authority is not trusted: supply it in DSF_DB_SSL_CA_PEM.',
+      ERR_TLS_CERT_ALTNAME_INVALID: 'The DSF certificate does not name DSF_DB_HOST: connect by the name on the certificate.',
+      CERT_HAS_EXPIRED: 'The DSF server certificate has expired.',
+      '28P01': 'DSF rejected the password for DSF_DB_USER.',
+      '28000': 'DSF refused this login from the API server (pg_hba.conf): check DSF_DB_USER, and try the other DSF_DB_SSL_MODE.',
+      '3D000': 'DSF_DB_NAME is not a database on the DSF server.',
+      '42P01': 'A DSF table is missing: check DSF_DB_NAME is the DSF (Ignition) database.',
+      '42501': 'DSF_DB_USER cannot read the DSF tables: grant it SELECT on them.',
+      '53300': 'The DSF server has no free connections.',
+      '57P01': 'The DSF server was shutting down.',
+    };
+    return hints[code] || '';
+  }
+  /** Why no DSF sources can be chosen, when the API says. */
+  get sourceListProblem(): string {
+    const problem = this.board?.source_options_problem;
+    if (!problem) return '';
+    if (problem.reason === 'NO_SOURCES') return 'DSF returned no machine sources in a department named like "Dept. 132".';
+    if (problem.reason === 'NO_VALID_SOURCES') return 'DSF returned machine sources, but none had complete identifiers.';
+    const code = problem.code ? ' (' + problem.code + ')' : '';
+    const hint = this.codeHint(problem.code);
+    return 'The DSF source list could not be read: ' + this.failureText(problem.reason) + code + '.' + (hint ? ' ' + hint : '');
   }
 
   open(row: AdminMappingRow): void {
