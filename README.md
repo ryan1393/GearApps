@@ -7,6 +7,7 @@ port 3333**, one authentication service and the same PostgreSQL database.
 | Application    | Project / source                                   | Browser port                             |
 | -------------- | -------------------------------------------------- | ---------------------------------------- |
 | Shared API     | meshforge-server / apps/server        | 3333 (API)                               |
+| Plant dashboard (development) | plant-dashboard / apps/plant-dashboard | 4204 |
 | Lapper         | lapper-client / apps/lapper-client                 | 4203                                     |
 | Blade Tracking | blade-tracking / apps/blade-tracking | 4200                                     |
 | Cutter Builder | cutter-builder / apps/cutter-builder | 4201                                     |
@@ -52,7 +53,8 @@ the API and all four web images.
 nvm use
 npm ci
 npm run serve:api
-# In separate terminals, start the clients you need:
+# In separate terminals, start the clients you need (all share the same API):
+npm run serve:plant-dashboard
 npm run serve:lapper-client
 npm run serve:blade-tracking
 npm run serve:cutter-builder
@@ -86,3 +88,7 @@ npm run build
 ```
 
 The database suites require disposable restores and explicit fixture authorization.
+
+## Plant dashboard workspace structure
+
+The plant dashboard is a separate frontend inside this MeshForge Nx monorepo. It shares the existing API, authentication, Dana UI, root dependency manifest and lockfile. Its thin application shell is `apps/plant-dashboard`; routes/screens are in `libs/manufacturing/frontend/feature-plant-dashboard`, polling is in `data-access-plant-dashboard`, pure reporting/coverage logic is in `util-plant-dashboard`, and DTOs are in `libs/shared/domain`. Cross-project imports use public `@meshforge/...` aliases. See [dashboard setup and architecture](apps/plant-dashboard/README.md). The development app is not deployed by the existing Docker Compose stack; full historical/downtime/capacity parity with DSF is still pending source validation.

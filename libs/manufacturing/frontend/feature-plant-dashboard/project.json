@@ -1,0 +1,21 @@
+{
+  "name": "frontend-feature-plant-dashboard",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/manufacturing/frontend/feature-plant-dashboard/src",
+  "projectType": "library",
+  "tags": [
+    "type:feature",
+    "scope:frontend",
+    "domain:meshforge"
+  ],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "libs/manufacturing/frontend/feature-plant-dashboard"
+      },
+      "cache": true
+    }
+  }
+}

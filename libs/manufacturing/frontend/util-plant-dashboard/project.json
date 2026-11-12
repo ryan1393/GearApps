@@ -1,0 +1,29 @@
+{
+  "name": "frontend-util-plant-dashboard",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/manufacturing/frontend/util-plant-dashboard/src",
+  "projectType": "library",
+  "tags": [
+    "type:util",
+    "scope:frontend",
+    "domain:meshforge"
+  ],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "libs/manufacturing/frontend/util-plant-dashboard"
+      },
+      "cache": true
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "jest --config libs/manufacturing/frontend/util-plant-dashboard/jest.config.cts --runInBand",
+        "cwd": "."
+      },
+      "cache": true
+    }
+  }
+}

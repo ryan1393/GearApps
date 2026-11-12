@@ -141,7 +141,9 @@
     "test:release-regressions": "nx run manufacturing-tools:test-release-regressions",
     "test:ui": "nx test dana-ui",
     "package:release": "node tools/package-release.mjs",
-    "serve:api": "nx serve meshforge-server"
+    "serve:api": "nx serve meshforge-server",
+    "serve:plant-dashboard": "nx serve plant-dashboard",
+    "build:plant-dashboard": "nx build plant-dashboard"
   },
   "devDependencies": {
     "@angular-devkit/core": "20.3.42",

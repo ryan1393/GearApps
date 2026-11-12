@@ -1,0 +1,79 @@
+{
+  "name": "plant-dashboard",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/plant-dashboard/src",
+  "tags": ["type:app", "scope:frontend", "framework:angular", "domain:meshforge"],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{workspaceRoot}/dist/apps/plant-dashboard"],
+      "options": {
+        "outputPath": "dist/apps/plant-dashboard",
+        "browser": "apps/plant-dashboard/src/main.ts",
+        "index": "apps/plant-dashboard/src/index.html",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/plant-dashboard/tsconfig.app.json",
+        "styles": [
+          "apps/plant-dashboard/src/styles.css",
+          "libs/shared/dana-ui/src/styles/gear-compat.css",
+          "libs/shared/dana-ui/src/styles/gear-compat-features.css",
+          "libs/shared/dana-ui/src/styles/dana-ui.css",
+          "libs/shared/dana-ui/src/styles/gear-compat-overrides.css"
+        ]
+      },
+      "defaultConfiguration": "production",
+      "configurations": {
+        "production": {
+          "outputHashing": "all",
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "1mb",
+              "maximumError": "2mb"
+            }
+          ]
+        },
+        "development": {
+          "optimization": false,
+          "sourceMap": true,
+          "extractLicenses": false
+        }
+      }
+    },
+    "serve": {
+      "executor": "@angular/build:dev-server",
+      "continuous": true,
+      "options": {
+        "port": 4204,
+        "host": "127.0.0.1",
+        "proxyConfig": "apps/plant-dashboard/proxy.conf.json"
+      },
+      "defaultConfiguration": "development",
+      "configurations": {
+        "development": {
+          "buildTarget": "plant-dashboard:build:development"
+        },
+        "production": {
+          "buildTarget": "plant-dashboard:build:production"
+        }
+      }
+    },
+    "test": {
+      "executor": "nx:noop",
+      "dependsOn": [
+        {
+          "target": "test",
+          "projects": ["frontend-util-plant-dashboard", "frontend-data-access-plant-dashboard"]
+        }
+      ]
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "apps/plant-dashboard"
+      }
+    }
+  }
+}

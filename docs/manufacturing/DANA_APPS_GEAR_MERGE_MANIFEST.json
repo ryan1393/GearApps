@@ -18,10 +18,10 @@
     "typescript": "5.9.3"
   },
   "rootHashes": {
-    "package.json": "86F36E910DCD063EB344D81B7788956E50AFD2887BEBFA6DAD5D761E96B9E87A",
+    "package.json": "8739576CDF093380711B8177C11B7BF805028B496A482C41B22AC19FD922D717",
     "package-lock.json": "512B24B7C147E1F056C83F83D5E9D5740B710ACE9DD59BB603266A60FAFB80B4",
     "nx.json": "73A2F6BD253030EAD5B14930871A240C60AFD9B5378940CC224689ABC36E5ACD",
-    "tsconfig.base.json": "EF99605E3A43A47E3E88FE368966A8ACD1E27E5EC70BDC985FC8F2056694FA3F"
+    "tsconfig.base.json": "AADAF6162D209B5BBEAB81399F1B391DEE4A83D70854CE0B8BB7EF7B2D64359F"
   },
   "composeFiles": [
     {
@@ -411,6 +411,23 @@
       "hasTestTarget": true
     },
     {
+      "name": "frontend-data-access-plant-dashboard",
+      "root": "libs/manufacturing/frontend/data-access-plant-dashboard",
+      "projectType": "library",
+      "tags": [
+        "domain:meshforge",
+        "scope:frontend",
+        "type:data-access"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
       "name": "frontend-data-access-user",
       "root": "libs/manufacturing/frontend/data-access-user",
       "projectType": "library",
@@ -516,12 +533,45 @@
       "hasTestTarget": true
     },
     {
+      "name": "frontend-feature-plant-dashboard",
+      "root": "libs/manufacturing/frontend/feature-plant-dashboard",
+      "projectType": "library",
+      "tags": [
+        "domain:meshforge",
+        "scope:frontend",
+        "type:feature"
+      ],
+      "targets": [
+        "lint"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": false
+    },
+    {
       "name": "frontend-util-common",
       "root": "libs/manufacturing/frontend/util-common",
       "projectType": "library",
       "tags": [
         "domain:shared",
         "framework:angular",
+        "scope:frontend",
+        "type:util"
+      ],
+      "targets": [
+        "lint",
+        "test"
+      ],
+      "hasBuildTarget": false,
+      "hasServeTarget": false,
+      "hasTestTarget": true
+    },
+    {
+      "name": "frontend-util-plant-dashboard",
+      "root": "libs/manufacturing/frontend/util-plant-dashboard",
+      "projectType": "library",
+      "tags": [
+        "domain:meshforge",
         "scope:frontend",
         "type:util"
       ],
@@ -626,6 +676,26 @@
       "hasBuildTarget": false,
       "hasServeTarget": false,
       "hasTestTarget": false
+    },
+    {
+      "name": "plant-dashboard",
+      "root": "apps/plant-dashboard",
+      "projectType": "application",
+      "tags": [
+        "domain:meshforge",
+        "framework:angular",
+        "scope:frontend",
+        "type:app"
+      ],
+      "targets": [
+        "build",
+        "lint",
+        "serve",
+        "test"
+      ],
+      "hasBuildTarget": true,
+      "hasServeTarget": true,
+      "hasTestTarget": true
     },
     {
       "name": "server-data-access",
@@ -964,7 +1034,11 @@
       "name": "shared-domain",
       "root": "libs/shared/domain",
       "projectType": "library",
-      "tags": [],
+      "tags": [
+        "domain:meshforge",
+        "scope:shared",
+        "type:domain"
+      ],
       "targets": [],
       "hasBuildTarget": false,
       "hasServeTarget": false,

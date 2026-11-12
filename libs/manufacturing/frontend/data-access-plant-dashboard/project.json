@@ -1,0 +1,29 @@
+{
+  "name": "frontend-data-access-plant-dashboard",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/manufacturing/frontend/data-access-plant-dashboard/src",
+  "projectType": "library",
+  "tags": [
+    "type:data-access",
+    "scope:frontend",
+    "domain:meshforge"
+  ],
+  "targets": {
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "eslint .",
+        "cwd": "libs/manufacturing/frontend/data-access-plant-dashboard"
+      },
+      "cache": true
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "jest --config libs/manufacturing/frontend/data-access-plant-dashboard/jest.config.cts --runInBand",
+        "cwd": "."
+      },
+      "cache": true
+    }
+  }
+}

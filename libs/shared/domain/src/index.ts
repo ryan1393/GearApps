@@ -25,3 +25,5 @@ export * from './lib/app-version';
 
 export * from './lib/gear/argonaut';
 export * from './lib/gear/cycle-test';
+
+export * from './lib/plant-dashboard';

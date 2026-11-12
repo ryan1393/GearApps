@@ -132,7 +132,10 @@
       "@meshforge/manufacturing/shared/dana-app-config": [
         "./libs/manufacturing/shared/dana-app-config/src/index.ts"
       ],
-      "@dana/ui": ["./libs/shared/dana-ui/src/index.ts"]
+      "@dana/ui": ["./libs/shared/dana-ui/src/index.ts"],
+      "@meshforge/manufacturing/frontend/feature-plant-dashboard": ["./libs/manufacturing/frontend/feature-plant-dashboard/src/index.ts"],
+      "@meshforge/manufacturing/frontend/data-access-plant-dashboard": ["./libs/manufacturing/frontend/data-access-plant-dashboard/src/index.ts"],
+      "@meshforge/manufacturing/frontend/util-plant-dashboard": ["./libs/manufacturing/frontend/util-plant-dashboard/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
