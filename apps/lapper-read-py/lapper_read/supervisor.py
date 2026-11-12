@@ -28,9 +28,9 @@ from typing import Callable
 
 from .api import MeshForgeApi, utc_now
 from .fanuc import Fanuc
-from .scanner import Scanner
+from .scanner import COMMAND_PATTERN, Scanner
 from .state import CycleStateStore, InvalidCheckpoint
-from .worker import MacroReadError, Worker
+from .worker import MacroReadError, ScannerCommandError, Worker
 
 log = logging.getLogger("lapper_read.supervisor")
 
@@ -335,6 +335,8 @@ class Supervisor:
                 "scanner": status.get("scanner"),
                 "scanner_ping": status.get("scanner_ping"),
                 "scanner_last_seen": status.get("scanner_last_seen"),
+                # The scanner's input 1 (photoeye): the live view refreshes the image fast while on.
+                "photoeye": status.get("photoeye"),
             }
             for slot in self._slots.values()
             for status in [slot.status()]
@@ -348,12 +350,16 @@ class Supervisor:
     #: Macro numbers one request may read (Argonaut's 68 plus the active Admin > Macros).
     MAX_MACRO_READ = 500
 
+    def _is_collector(self, authorization: str) -> bool:
+        """Whether the request carries this collector's own token, which only the API also holds."""
+        token = authorization[7:].strip() if authorization.startswith("Bearer ") else ""
+        checker = getattr(self.api, "is_collector_token", None)
+        return bool(token) and checker is not None and checker(token)
+
     def read_macros(self, machine_id: str, query: str, authorization: str) -> tuple[int, dict]:
         """GET /machines/<id>/macros?numbers=… for MeshForge's Cycle Test Lab: the controller's
         current values. Only a caller holding this collector's own token (the API) may ask."""
-        token = authorization[7:].strip() if authorization.startswith("Bearer ") else ""
-        checker = getattr(self.api, "is_collector_token", None)
-        if not token or checker is None or not checker(token):
+        if not self._is_collector(authorization):
             return 401, {"message": "Reading macros needs this collector's token. Connect the Docker collector "
                                     "in Admin > Collector Tokens."}
         raw = urllib.parse.parse_qs(query).get("numbers", [""])[0]
@@ -373,6 +379,29 @@ class Supervisor:
             return 503, {"message": f"Machine {slot.spec.number or machine_id}: {error}"}
         log.info("[%s] Read %d macros for the Cycle Test Lab", slot.spec.number or slot.spec.controller_ip, len(values))
         return 200, {"machine_id": machine_id, "read_at": utc_now(), "values": values}
+
+    def scanner_command(self, scanner_ip: str, body: bytes, authorization: str) -> tuple[int, dict]:
+        """POST /scanners/<ip>/command {"command": "TUNE01"} for the dashboard's scanner controls.
+        A scanner accepts one command connection, which the worker holds, so MeshForge sends the
+        controls here. 404 means no worker holds this scanner, and MeshForge connects itself."""
+        if not self._is_collector(authorization):
+            return 401, {"message": "Scanner commands need this collector's token. Connect the Docker collector "
+                                    "in Admin > Collector Tokens."}
+        try:
+            op = json.loads(body or b"{}").get("command")
+        except (ValueError, AttributeError):
+            op = None
+        if not isinstance(op, str) or not COMMAND_PATTERN.fullmatch(op):
+            return 400, {"message": "command must be an upper-case scanner op code"}
+        slot = next((slot for slot in self._slots.values()
+                     if scanner_ip and slot.spec.scanner_ip == scanner_ip and slot.worker is not None), None)
+        if slot is None:
+            return 404, {"message": f"No collector worker holds scanner {scanner_ip}."}
+        try:
+            reply = slot.worker.scanner_command(op)
+        except ScannerCommandError as error:
+            return 502, {"message": f"Machine {slot.spec.number or slot.spec.machine_id}: {error}"}
+        return 200, {"scanner_ip": scanner_ip, "command": op, "reply": reply}
 
     def _heartbeat(self) -> None:
         os.makedirs(self.settings.state_dir, exist_ok=True)
@@ -400,6 +429,23 @@ class Supervisor:
                     payload, code = supervisor.status(), 200
                 else:
                     payload, code = {"message": "not found"}, 404
+                self._reply(code, payload)
+
+            def do_POST(self):  # noqa: N802
+                path = self.path.partition("?")[0]
+                parts = path.strip("/").split("/")
+                raw_length = self.headers.get("Content-Length") or "0"
+                length = int(raw_length) if raw_length.isdigit() else -1
+                if not 0 <= length <= 1024:
+                    payload, code = {"message": "request too large"}, 413
+                elif len(parts) == 3 and parts[0] == "scanners" and parts[2] == "command":
+                    code, payload = supervisor.scanner_command(urllib.parse.unquote(parts[1]), self.rfile.read(length),
+                                                               self.headers.get("Authorization", ""))
+                else:
+                    payload, code = {"message": "not found"}, 404
+                self._reply(code, payload)
+
+            def _reply(self, code, payload):
                 body = json.dumps(payload, indent=2).encode()
                 self.send_response(code)
                 self.send_header("Content-Type", "application/json")

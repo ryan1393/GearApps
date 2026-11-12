@@ -1,3 +1,4 @@
+import { dockerCollectorTokenFile } from '@meshforge/api/core';
 import { CollectorTokensService } from '@meshforge/api/feature-gear';
 import {
   COLLECTOR_TOKEN_PREFIX,
@@ -41,12 +42,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS collector_tokens_one_active_purpose
 
 const DOCKER_TOKEN_NAME = 'Docker collector';
 
-/**
- * Where the API hands the Docker collector its token: a file on a volume only the API and the
- * lapper-read container mount (compose sets LAPPER_READ_TOKEN_FILE). Empty outside Docker.
- */
-export const dockerCollectorTokenFile = (env: NodeJS.ProcessEnv = process.env): string =>
-  (env['LAPPER_READ_TOKEN_FILE'] ?? '').trim();
+// The token file's path now lives in @meshforge/api/core (the scanner client reads it too).
+export { dockerCollectorTokenFile };
 
 /** Usage is recorded at most this often per token, so busy collectors don't write on every call. */
 const LAST_USED_RESOLUTION_MS = 60_000;

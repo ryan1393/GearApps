@@ -1,4 +1,4 @@
-import { scannerConfig } from '@meshforge/api/core';
+import { dockerCollectorTokenFile, isPrivateAddress, privateNetworkLookup, scannerConfig } from '@meshforge/api/core';
 import {
   ScannerCommand,
   ScannerFtpListing,
@@ -11,7 +11,9 @@ import { ConfigType } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 import { Client as FtpClient, FTPError } from 'basic-ftp';
 import * as https from 'https';
-import { createConnection } from 'node:net';
+import { readFile } from 'node:fs/promises';
+import { Agent as HttpAgent } from 'node:http';
+import { createConnection, isIP } from 'node:net';
 import { Writable } from 'stream';
 
 /** A scanner's own image folder and file; empty values use the defaults. */
@@ -45,6 +47,8 @@ export class ScannerClientService {
   static readonly IMAGE_TTL_MS = 1_500;
   private static readonly MAX_IMAGE_BYTES = 16 * 1024 * 1024;
   private static readonly MAX_LISTING = 2000;
+  /** Above the collector's own 20 s wait, so its answer (or its timeout message) arrives first. */
+  static readonly COLLECTOR_TIMEOUT_MS = 25_000;
 
   constructor(@Inject(scannerConfig.KEY) private readonly cfg: ConfigType<typeof scannerConfig>) {
     this.http = axios.create({
@@ -64,7 +68,14 @@ export class ScannerClientService {
     return data?.event_object ?? [];
   }
 
+  /**
+   * Sends a dashboard op code. A scanner accepts one command connection, and Lapper Read holds it
+   * for every scanner it reads, so the command goes through the collector first. A scanner the
+   * collector does not read (or no collector) is reached directly, as before.
+   */
   async sendCommand(host: string, command: ScannerCommand): Promise<ScannerCommand> {
+    const viaCollector = await this.sendViaCollector(host, command.data);
+    if (viaCollector) return viaCollector;
     if (command.data === 'TUNE01' || command.data === 'FTUNE') {
       return this.sendTuningCommand(host, command.data);
     }
@@ -75,6 +86,56 @@ export class ScannerClientService {
     const url = `https://${host}/command.cgi?op=${encodeURIComponent(command.data)}`;
     const { data } = await this.request<unknown>(host, url);
     return { data: typeof data === 'string' ? data : JSON.stringify(data) };
+  }
+
+  /** The collector's reply, or null when it does not hold this scanner (or cannot be asked). */
+  private async sendViaCollector(host: string, op: string): Promise<ScannerCommand | null> {
+    const file = dockerCollectorTokenFile();
+    const token = file ? (await readFile(file, 'utf8').catch(() => '')).trim() : '';
+    if (!token) return null;
+    const base = this.cfg.collectorUrl.replace(/\/+$/, '');
+    let collectorHost: string;
+    try {
+      collectorHost = new URL(base).hostname.replace(/^\[|\]$/g, '');
+    } catch {
+      return null;
+    }
+    // The request carries the collector token, so it only goes to this host or the private network.
+    if (isIP(collectorHost) && !isPrivateAddress(collectorHost)) {
+      this.logger.warn(`LAPPER_READ_STATUS_URL (${base}) is outside the private network; scanner ${host} is reached directly`);
+      return null;
+    }
+    let reply;
+    try {
+      reply = await axios.post(
+        `${base}/scanners/${encodeURIComponent(host)}/command`,
+        { command: op },
+        {
+          timeout: ScannerClientService.COLLECTOR_TIMEOUT_MS,
+          proxy: false,
+          httpAgent: new HttpAgent({ lookup: privateNetworkLookup() } as never),
+          maxRedirects: 0,
+          headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
+          validateStatus: () => true,
+        },
+      );
+    } catch (error) {
+      this.logger.debug(`Lapper Read not reachable for scanner ${host} (${(error as Error).message}); connecting directly`);
+      return null;
+    }
+    if (reply.status === 404) return null;
+    if (reply.status === 401) {
+      this.logger.warn(`Lapper Read refused the collector token; scanner ${host} is reached directly`);
+      return null;
+    }
+    const data = reply.data as { reply?: unknown; message?: unknown } | undefined;
+    if (reply.status !== 200 || typeof data?.reply !== 'string') {
+      const message = typeof data?.message === 'string' ? data.message : `Lapper Read answered HTTP ${reply.status}`;
+      this.logger.warn(`${op} via Lapper Read: ${message}`);
+      throw new BadGatewayException(message);
+    }
+    if (/^ER/.test(data.reply)) throw new BadGatewayException(`Scanner ${host} rejected the command (${data.reply})`);
+    return { data: data.reply };
   }
 
   private async sendTuningCommand(host: string, op: 'TUNE01' | 'FTUNE'): Promise<ScannerCommand> {

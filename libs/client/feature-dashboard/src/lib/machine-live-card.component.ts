@@ -12,7 +12,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import {
   FanucVariablesApi,
   LapperAccess,
@@ -23,6 +23,8 @@ import { LiveCycleTimerComponent, StatusBadgeComponent, ValueFieldComponent } fr
 import { Machine, MachineFanucVariable, ScannerDetail } from '@meshforge/shared/domain';
 import {
   catchError,
+  combineLatest,
+  distinctUntilChanged,
   exhaustMap,
   filter,
   forkJoin,
@@ -40,6 +42,11 @@ import { ScannerControlsComponent } from './scanner-controls.component';
 /** How long one live request (image, scanner slots, machine I/O) may take before it counts as failed. */
 export const LIVE_REQUEST_TIMEOUT_MS = 6_000;
 const NOT_REFRESHED = 'not-refreshed' as const;
+/**
+ * Refresh period while the scanner's photoeye is on. The API keeps each capture for its 1 s cache,
+ * and the scanner uploads one image per read, so refreshing faster would show nothing new.
+ */
+export const LIVE_FEED_MS = 1_000;
 
 /**
  * Live tile for one machine: scanner capture, serial-number slots and Fanuc I/O.
@@ -74,6 +81,9 @@ const NOT_REFRESHED = 'not-refreshed' as const;
 
       <div class="gear-live-body">
         <div class="dana-media-frame gear-live-image">
+          @if (live()) {
+            <span class="gear-live-feed dana-status-badge" data-tone="success" role="status">Live · photoeye on</span>
+          }
           @if (imageUrl()) {
             <img [src]="imageUrl()" alt="Latest scanner capture for {{ machine().number }}" />
             @if (imageError()) {
@@ -190,6 +200,24 @@ const NOT_REFRESHED = 'not-refreshed' as const;
       place-items: center;
       position: relative;
     }
+    .gear-live-feed {
+      position: absolute;
+      inset: var(--dana-space-2) auto auto var(--dana-space-2);
+      z-index: 1;
+    }
+    .gear-live-feed::before {
+      animation: gear-live-pulse 1s ease-in-out infinite;
+    }
+    @keyframes gear-live-pulse {
+      50% {
+        opacity: 0.25;
+      }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .gear-live-feed::before {
+        animation: none;
+      }
+    }
     .gear-live-stale {
       position: absolute;
       inset: auto 0 0 0;
@@ -232,6 +260,11 @@ export class MachineLiveCardComponent implements OnDestroy {
   readonly machine = input.required<Machine>();
   /** Refresh period in ms. */
   readonly pollMs = input(2000);
+  /** The scanner's photoeye is on: the image refreshes now and every LIVE_FEED_MS until it clears. */
+  readonly photoeye = input(false);
+  protected readonly live = computed(() => this.photoeye() && !!this.scannerId());
+  private readonly period = computed(() => (this.live() ? Math.min(LIVE_FEED_MS, this.pollMs()) : this.pollMs()));
+  private readonly period$ = toObservable(this.period);
 
   protected readonly scanner = signal<ScannerDetail | null>(null);
   protected readonly fanuc = signal<MachineFanucVariable | null>(null);
@@ -256,16 +289,18 @@ export class MachineLiveCardComponent implements OnDestroy {
     effect((onCleanup) => {
       const machine = this.machine();
       const scannerId = this.scannerId();
-      const period = this.pollMs();
       untracked(() => {
         this.revokeImage();
         this.scanner.set(machine.scanner ?? null);
         this.imageError.set(false);
       });
 
-      const sub = visible$
+      // A new period (the photoeye tripping or clearing, or another refresh rate) refreshes at once
+      // and restarts the timer, without clearing the image on screen. Subscribed untracked: a reply
+      // that arrives synchronously must not make this effect depend on the signals it sets.
+      const sub = untracked(() => combineLatest([visible$, this.period$.pipe(distinctUntilChanged())])
         .pipe(
-          switchMap((visible) => (visible ? interval(period).pipe(startWith(0)) : of())),
+          switchMap(([visible, period]) => (visible ? interval(period).pipe(startWith(0)) : of())),
           filter(() => this.doc.visibilityState === 'visible'),
           // exhaustMap, not switchMap: a scanner image slower than the poll period would be
           // cancelled by every tick, so the card (and its serials and machine I/O) never updated.
@@ -307,7 +342,7 @@ export class MachineLiveCardComponent implements OnDestroy {
             this.fanucError.set(fanuc === null);
           }
           this.lastUpdate.set(new Date().toLocaleTimeString());
-        });
+        }));
 
       onCleanup(() => sub.unsubscribe());
     });

@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { FanucVariablesApi, LapperAccess, ScannerApi, ScannerDetailsApi } from '@meshforge/client/core';
 import { Machine, MachineFanucVariable } from '@meshforge/shared/domain';
 import { NEVER, Observable, of } from 'rxjs';
-import { LIVE_REQUEST_TIMEOUT_MS, MachineLiveCardComponent } from './machine-live-card.component';
+import { LIVE_FEED_MS, LIVE_REQUEST_TIMEOUT_MS, MachineLiveCardComponent } from './machine-live-card.component';
 
 describe('Live machine card polling', () => {
   const machine = { id: 'm1', number: '01-094-101', ip: '10.0.0.1', status: 'active', scanner_id: null, scanner: null } as unknown as Machine;
@@ -50,6 +50,52 @@ describe('Live machine card polling', () => {
     expect(byMachine).toHaveBeenCalledTimes(3);
     expect(card.fanucStale()).toBe(false);
     expect(card.fanuc()?.y03_2_stack_inCycle).toBe(false);
+    fixture.destroy();
+  });
+
+  it('refreshes the image at once and every second while the photoeye is on, keeping the image shown', async () => {
+    jest.useFakeTimers();
+    const withScanner = { ...machine, scanner_id: 's1' } as unknown as Machine;
+    const image = jest.fn(() => of(new Blob(['jpeg'], { type: 'image/jpeg' })));
+    URL.createObjectURL = jest.fn(() => 'blob:capture');
+    URL.revokeObjectURL = jest.fn();
+    TestBed.configureTestingModule({
+      imports: [MachineLiveCardComponent],
+      providers: [
+        { provide: LapperAccess, useValue: { canEditSetup: () => false } },
+        { provide: ScannerApi, useValue: { image } },
+        { provide: ScannerDetailsApi, useValue: { get: jest.fn(() => of(null)) } },
+        { provide: FanucVariablesApi, useValue: { byMachine: jest.fn(() => of(snapshot(false))) } },
+      ],
+    });
+    TestBed.overrideComponent(MachineLiveCardComponent, { set: { imports: [], schemas: [NO_ERRORS_SCHEMA] } });
+    const fixture = TestBed.createComponent(MachineLiveCardComponent);
+    fixture.componentRef.setInput('machine', withScanner);
+    fixture.componentRef.setInput('pollMs', 5000);
+    fixture.detectChanges();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(image).toHaveBeenCalledTimes(1);
+    const text = () => (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text()).not.toContain('Live · photoeye on');
+
+    // The photoeye trips: refresh now, then every second instead of every 5 s.
+    fixture.componentRef.setInput('photoeye', true);
+    fixture.detectChanges();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(image).toHaveBeenCalledTimes(2);
+    await jest.advanceTimersByTimeAsync(3 * LIVE_FEED_MS);
+    expect(image).toHaveBeenCalledTimes(5);
+    fixture.detectChanges();
+    expect(text()).toContain('Live · photoeye on');
+    expect((fixture.nativeElement as HTMLElement).querySelector('img')?.getAttribute('src')).toBe('blob:capture');
+
+    // It clears: back to the chosen 5 s refresh.
+    fixture.componentRef.setInput('photoeye', false);
+    fixture.detectChanges();
+    await jest.advanceTimersByTimeAsync(4000);
+    expect(image).toHaveBeenCalledTimes(6);
+    fixture.detectChanges();
+    expect(text()).not.toContain('Live · photoeye on');
     fixture.destroy();
   });
 });

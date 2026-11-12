@@ -21,6 +21,8 @@ export interface CollectorMachine {
   scanner?: 'online' | 'offline' | 'none' | null;
   scanner_ping?: 'answers' | 'no answer' | 'unknown' | null;
   scanner_last_seen?: string | null;
+  /** The scanner's input 1 (photoeye) at the last poll; null without a scanner or while offline. */
+  photoeye?: boolean | null;
 }
 
 export interface CollectorStatus {
