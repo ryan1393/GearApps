@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **DSF: Map Unique Matches.** Admin > DSF Mappings has a **Map Unique Matches** button. It lists
+  each machine whose DSF source is the only active one in its department with a whiteboard name
+  ending in the machine number (`132 PIN CUTTER 549` -> machine 549), and no other machine has that
+  number, then maps the ones you confirm through the normal Admin save (same checks, audited).
+  Machines already mapped or unmapped in Admin, sources in use and machines with cutter-crediting
+  history are left alone, and the preview says why each unmatched machine was skipped. New
+  `GET`/`POST /api/v1/greenshed/dsf-counts/admin-mappings/unique-matches` (Admin only).
 ## 70.7.0 (2026-11-12)
 
 Lappers get their cycle time recorded and shown in Lapping Summaries, a live timer while a cycle

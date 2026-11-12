@@ -40,6 +40,19 @@ interface DsfMappingBoard {
   source_options: DsfSourceOption[]; rows: AdminMappingRow[];
 }
 
+interface DsfUniqueMatch {
+  machine_id: string; machine_number: string; department: string;
+  mapping_id: string; whiteboard_name: string; line_name: string;
+}
+interface DsfUniqueMatches {
+  matches: DsfUniqueMatch[];
+  skipped: { machine_id: string; machine_number: string; department: string; reason: string }[];
+}
+interface DsfUniqueMatchApplyResult {
+  mapped: { machine_id: string; machine_number: string; whiteboard_name: string }[];
+  skipped: { machine_id: string; machine_number: string | null; reason: string }[];
+}
+
 /**
  * Admin view of the DSF source for each physical machine across departments.
  * Saving changes MeshForge only; nothing is ever written to DSF.
@@ -61,6 +74,9 @@ export class DsfMachineMappingsComponent implements OnInit {
   department = 'all'; statusFilter = 'active'; search = '';
   @ViewChild('editor') private editor?: ElementRef<HTMLElement>;
   selectedMachineId: string | null = null; sourceSearch = ''; selectedMappingId = '';
+  /** The "Map unique matches" preview, while it is open. */
+  uniqueMatches: DsfUniqueMatches | null = null;
+  @ViewChild('matchPanel') private matchPanel?: ElementRef<HTMLElement>;
 
   ngOnInit(): void { this.refresh(); }
 
@@ -173,6 +189,7 @@ export class DsfMachineMappingsComponent implements OnInit {
   }
 
   open(row: AdminMappingRow): void {
+    this.uniqueMatches = null;
     this.selectedMachineId = row.machine_id; this.sourceSearch = ''; this.selectedMappingId = row.mapping?.mapping_id || ''; this.error = ''; this.success = '';
     // The editor sits above a long list: bring it into view and move focus to it.
     setTimeout(() => { const el = this.editor?.nativeElement; el?.scrollIntoView({ block: 'start', behavior: 'smooth' }); el?.focus({ preventScroll: true }); });
@@ -199,6 +216,52 @@ export class DsfMachineMappingsComponent implements OnInit {
         next: () => { this.saving = false; this.success = `Machine ${row.machine_number} is unmapped. A fresh DSF read was requested.`; this.refreshAfterSave(); },
         error: (e: HttpErrorResponse) => { this.saving = false; this.error = this.errorText(e, 'Unmap failed.'); this.cdr.markForCheck(); },
       });
+  }
+  /** Fetch the machines whose DSF source is the only match, and show them for confirmation. Saves nothing. */
+  previewUniqueMatches(): void {
+    if (this.loading || this.saving) return;
+    this.saving = true; this.error = ''; this.success = ''; this.close(); this.cdr.markForCheck();
+    this.http.get<DsfUniqueMatches>('/api/v1/greenshed/dsf-counts/admin-mappings/unique-matches').pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: result => {
+        this.saving = false;
+        if (!Array.isArray(result?.matches) || !Array.isArray(result?.skipped)) this.error = 'Unexpected DSF match response.';
+        else {
+          this.uniqueMatches = result;
+          setTimeout(() => { const el = this.matchPanel?.nativeElement; el?.scrollIntoView({ block: 'start', behavior: 'smooth' }); el?.focus({ preventScroll: true }); });
+        }
+        this.cdr.markForCheck();
+      },
+      error: (e: HttpErrorResponse) => { this.saving = false; this.error = this.errorText(e, 'Unable to find matching DSF sources.'); this.cdr.markForCheck(); },
+    });
+  }
+  closeUniqueMatches(): void { this.uniqueMatches = null; }
+  /** Map every proposed match. The API checks each one again and saves it like a single Admin save. */
+  applyUniqueMatches(): void {
+    const matches = this.uniqueMatches?.matches || [];
+    if (!matches.length || this.saving) return;
+    this.saving = true; this.error = ''; this.success = ''; this.cdr.markForCheck();
+    this.http.post<DsfUniqueMatchApplyResult>('/api/v1/greenshed/dsf-counts/admin-mappings/unique-matches',
+      { matches: matches.map(match => ({ machine_id: match.machine_id, mapping_id: match.mapping_id })) })
+      .pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: result => {
+          this.saving = false; this.uniqueMatches = null;
+          const mapped = result?.mapped?.length || 0, skipped = result?.skipped || [];
+          this.success = `${mapped} machine${mapped === 1 ? '' : 's'} mapped. A fresh DSF read was requested.`;
+          if (skipped.length) this.error = 'Not mapped: ' + skipped.map(s => (s.machine_number ? 'machine ' + s.machine_number : 'a machine') + ' (' + s.reason + ')').join('; ');
+          this.refreshAfterSave();
+        },
+        error: (e: HttpErrorResponse) => { this.saving = false; this.error = this.errorText(e, 'Mapping the matches failed.'); this.cdr.markForCheck(); },
+      });
+  }
+  skipText(reason: string): string {
+    const text: Record<string, string> = {
+      NO_SOURCE: 'No DSF source ends in this machine number',
+      SEVERAL_SOURCES: 'More than one DSF source ends in this machine number',
+      SEVERAL_MACHINES: 'More than one machine has this number in the department',
+      SOURCE_IN_USE: 'The matching DSF source is already used by another machine',
+      CREDITING_HISTORY: 'Has cutter-crediting history; map it by hand',
+    };
+    return text[reason] || reason.replace(/_/g, ' ').toLowerCase();
   }
   private refreshAfterSave(): void { setTimeout(() => this.refresh(false), 1200); this.cdr.markForCheck(); }
   private syncSelected(): void {

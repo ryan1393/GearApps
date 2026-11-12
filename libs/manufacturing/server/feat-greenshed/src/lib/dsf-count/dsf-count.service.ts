@@ -17,6 +17,7 @@ import { applyDsfCutterCounts, CutterAttributionResult } from './dsf-cutter-attr
 import { DANA_MACHINES_SQL, SOURCE_IDENTITY_SQL, ROLE_CHECK_SQL, MAPPING_SQL, SHIFTS_SQL, CYCLES_SQL, OTHER_MAPPING_ACTIVITY_SQL } from './dsf-sql';
 import { grinderStateRows, collectGrinderBatches, commitGrinderBatches, GrinderBatch, GrinderStateRow } from './dsf-grinder-balance';
 import { ensureDsfCutterSchema } from './dsf-schema';
+import { findUniqueMatches, UniqueMatchResult } from './dsf-unique-matches';
 
 type Machine = {machine_id:string;machine_number:string;department:string;machine_type:string;active:boolean};
 type SourceClient = { connect():Promise<void>;query(text:string,values?:unknown[]):Promise<{rows:any[]}>;end():Promise<void>;on(event:string,fn:(e:unknown)=>void):void; };
@@ -300,9 +301,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
   }
   async saveAdminMapping(machineId:string,mappingId:string,userId:string) {
     if(!this.uuid(machineId)||!this.uuid(mappingId)||!this.uuid(userId))throw new BadRequestException('Invalid mapping request.');
-    const refreshed=this.sourceOptionsRefreshedAt?Date.parse(this.sourceOptionsRefreshedAt):NaN;
-    if(!Number.isFinite(refreshed)||Date.now()-refreshed>Math.max(600000,(this.config.interval*2+30)*1000))
-      throw new ServiceUnavailableException('DSF source list is not fresh. Refresh status and try again.');
+    this.requireFreshSources();
     const option=this.sourceOptions.find(x=>x.mapping_id===mappingId);
     if(!option)throw new BadRequestException('Selected DSF source is not in the current source list.');
     if(!option.mapping_active||!option.whiteboard_active||!option.operation_line_matches||option.running_reasons<1)
@@ -365,6 +364,55 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
     if(!saved)throw new ConflictException('Mapping save did not complete.');
     this.mappingOverrides.set(machineId,saved);this.invalidateMachine(machineId);
     return {status:'SAVED',machine_id:machineId,mapping_id:mappingId,refresh_requested:true};
+  }
+  /** DSF sources that match exactly one machine by department and the machine number their whiteboard name ends in. */
+  async uniqueMatches():Promise<UniqueMatchResult & {source_options_refreshed_at:string|null}> {
+    this.requireFreshSources();
+    if (this.db.options.type === 'postgres') this.machines = await this.db.query(DANA_MACHINES_SQL);
+    const overrides=await this.loadOverrides(this.db);
+    const assigned=new Map<string,string>();
+    for(const machine of this.machines) {
+      const mapping=this.effectiveFor(machine,overrides.get(machine.machine_id));
+      if(mapping)assigned.set(mapping.mapping_id,machine.machine_id);
+    }
+    const history=await this.db.query(`SELECT machine_id::text FROM public.dana_dsf_cutter_machine_state_v1
+      UNION SELECT machine_id::text FROM public.dana_dsf_cutter_run_shifts_v1`) as {machine_id:string}[];
+    const result=findUniqueMatches({machines:this.machines,sources:this.sourceOptions,adminDecided:new Set(overrides.keys()),
+      assigned,withHistory:new Set(history.map(row=>row.machine_id))});
+    return {...result,source_options_refreshed_at:this.sourceOptionsRefreshedAt};
+  }
+  /**
+   * Saves the matches an administrator confirmed. Each pair is checked again against the current
+   * unique matches, then saved through the normal Admin save (its own transaction, checks and audit).
+   */
+  async applyUniqueMatches(pairs:unknown,userId:string) {
+    if(!Array.isArray(pairs)||pairs.length===0||pairs.length>1000)throw new BadRequestException('Send the matches to map.');
+    const wanted=pairs.map(pair=>({machine_id:String((pair as {machine_id?:unknown})?.machine_id||''),mapping_id:String((pair as {mapping_id?:unknown})?.mapping_id||'')}));
+    if(wanted.some(pair=>!this.uuid(pair.machine_id)||!this.uuid(pair.mapping_id)))throw new BadRequestException('Invalid match.');
+    if(new Set(wanted.map(pair=>pair.machine_id)).size!==wanted.length)throw new BadRequestException('A machine is listed twice.');
+    const current=await this.uniqueMatches();
+    const mapped:{machine_id:string;machine_number:string;whiteboard_name:string}[]=[];
+    const skipped:{machine_id:string;machine_number:string|null;reason:string}[]=[];
+    for(const pair of wanted) {
+      const match=current.matches.find(m=>m.machine_id===pair.machine_id);
+      if(!match||match.mapping_id!==pair.mapping_id) {
+        skipped.push({machine_id:pair.machine_id,machine_number:match?.machine_number??null,reason:'No longer the only match. Refresh and try again.'});continue;
+      }
+      try {
+        await this.saveAdminMapping(match.machine_id,match.mapping_id,userId);
+        mapped.push({machine_id:match.machine_id,machine_number:match.machine_number,whiteboard_name:match.whiteboard_name});
+      } catch(e) {
+        const message=(e as {message?:unknown})?.message;
+        skipped.push({machine_id:match.machine_id,machine_number:match.machine_number,
+          reason:typeof message==='string'&&message.length<300?message:'Mapping save failed.'});
+      }
+    }
+    return {status:'DONE',mapped,skipped};
+  }
+  private requireFreshSources():void {
+    const refreshed=this.sourceOptionsRefreshedAt?Date.parse(this.sourceOptionsRefreshedAt):NaN;
+    if(!Number.isFinite(refreshed)||Date.now()-refreshed>Math.max(600000,(this.config.interval*2+30)*1000))
+      throw new ServiceUnavailableException('DSF source list is not fresh. Refresh status and try again.');
   }
   async unmapAdminMachine(machineId:string,userId:string) {
     if(!this.uuid(machineId)||!this.uuid(userId))throw new BadRequestException('Invalid unmap request.');
