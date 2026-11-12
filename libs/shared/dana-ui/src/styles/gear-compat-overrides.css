@@ -5,7 +5,7 @@
    The Dana core (dana-core/*.css) stays identical to its Truck Log visual source. These rules repeat
    its selectors with only the colour declarations changed, so MeshForge gets the MeshForge palette.
    Informational blue, success and danger colours are intentionally not overridden. */
-:root { --dana-text:#303743; --dana-muted:#707886; --dana-border:#e3e5e8; --dana-page:#f6f7f8; --dana-warning:#8d6a07; --dana-primary:#b4581a; --dana-primary-dark:#232830; --dana-sidebar:#14171c; --dana-sidebar-raised:#232830; --dana-shadow-panel:0 1px 2px rgba(21, 24, 29, .035), 0 5px 18px rgba(21, 24, 29, .045); --dana-shadow-raised:0 12px 30px rgba(21, 24, 29, .10); --dana-neutral-soft:#f3f4f5; --dana-control-border:#d6d8dc; --dana-placeholder:#818996; --dana-focus-border:#ed9959; --dana-focus-ring:0 0 0 3px rgba(170,84,19,.12); }
+:root { --dana-text:#303743; --dana-border:#e3e5e8; --dana-page:#f6f7f8; --dana-warning:#8d6a07; --dana-primary:#b4581a; --dana-primary-dark:#232830; --dana-sidebar:#14171c; --dana-sidebar-raised:#232830; --dana-shadow-panel:0 1px 2px rgba(21, 24, 29, .035), 0 5px 18px rgba(21, 24, 29, .045); --dana-shadow-raised:0 12px 30px rgba(21, 24, 29, .10); --dana-neutral-soft:#f3f4f5; --dana-control-border:#7e8693; --dana-placeholder:#656d7a; --dana-focus-border:#b4581a; --dana-focus-ring:0 0 0 3px rgba(170,84,19,.12); }
 .dana-sidebar { background: radial-gradient(circle at 12% 8%,rgba(202,100,22,.28),transparent 34%), linear-gradient(180deg,var(--dana-sidebar-raised),var(--dana-sidebar)); }
 .dana-brand-copy span, .dana-brand-copy small { color: #c2c6cc; }
 .dana-nav-heading { color: #8e95a0; }
@@ -17,8 +17,8 @@
 .dana-btn:hover:not(:disabled) { background: #f9fafa; }
 .dana-btn-ghost { background: #f9fafa; }
 .dana-operation-card:hover { border-color: #cfd2d7; }
-.dana-field input, .dana-field select, .dana-field textarea, .dana-input, .dana-select, .dana-textarea { border: 1px solid #d6d8dc; }
-.dana-field input:focus, .dana-field select:focus, .dana-field textarea:focus, .dana-input:focus, .dana-select:focus, .dana-textarea:focus { border-color: #ed9959; box-shadow: 0 0 0 3px rgba(170,84,19,.10); }
+.dana-field input, .dana-field select, .dana-field textarea, .dana-input, .dana-select, .dana-textarea { border: 1px solid var(--dana-control-border); }
+.dana-field input:focus, .dana-field select:focus, .dana-field textarea:focus, .dana-input:focus, .dana-select:focus, .dana-textarea:focus { border-color: var(--dana-focus-border); box-shadow: 0 0 0 3px rgba(170,84,19,.10); }
 .dana-section-title { color: #3b4352; }
 table[danaTable] th, table.dana-table th { background: #fcfcfc; }
 table[danaTable] td, table.dana-table td { border-bottom: 1px solid #f0f1f2; }
@@ -35,7 +35,7 @@ table[danaTable] tbody tr:hover td, table.dana-table tbody tr:hover td { backgro
 .dana-combobox-option.is-selected { background: #f6f7f8; }
 .dana-combobox-option.is-active.is-selected { background: #ecedf0; }
 .dana-action-row { border-bottom: 1px solid #f0f1f2; }
-.dana-card[data-tone="warning"] { border-left-color: #cca025; }
+.dana-card[data-tone="warning"] { border-left-color: #9e770a; }
 .dana-card-section { background: #f9fafa; }
 .dana-progress { background: #e7e8eb; }
 .dana-chip { color: #545a64; }
@@ -56,13 +56,13 @@ table[danaTable] tbody tr:hover td, table.dana-table tbody tr:hover td { backgro
 .local-test-card span { color:#6b7381; }
 .local-test-card button { color:#aa5413; }
 .field-label { color:#38404d; }
-.password-help { color:#9ca2ac; }
-.field-input { border:1px solid #d2d5da; color:#1c2027; }
-.field-input::placeholder { color:#a0a6b0; }
+.password-help { color:var(--gear-muted-soft); }
+.field-input { border:1px solid var(--dana-control-border); color:#1c2027; }
+.field-input::placeholder { color:var(--dana-placeholder); }
 .field-input:focus { border-color:#c76316; box-shadow:0 0 0 3px rgba(199,99,22,.14); }
 .login-submit { background:linear-gradient(180deg,#b4581a,#964511); box-shadow:0 9px 20px rgba(57,65,79,.18); }
 .login-submit:hover { background:linear-gradient(180deg,#aa5413,#aa5413); }
-.login-footer { border-top:1px solid #eff0f2; color:#89909d; }
+.login-footer { border-top:1px solid #eff0f2; color:var(--gear-muted-soft); }
 .login-notice { color:#4f545e; }
 .login-operator-link a { color:#aa5413; }
 .login-submit:focus-visible,.login-operator-link a:focus-visible { outline:3px solid #c76316; }
@@ -273,7 +273,7 @@ html body .gear-textarea,
 html body input.gear-input,
 html body select.gear-input,
 html body textarea.gear-input {
-  border-color: #d6d8dc !important;
+  border-color: var(--dana-control-border) !important;
   border-radius: 9px !important;
   background: var(--dana-surface) !important;
 }
@@ -1391,7 +1391,7 @@ html body .gear-sidebar .sidebar-footer .online-row { display: none !important; 
 
 /* --- Top bar: quieter search, legible account block --- */
 html body header.gear-topbar.gear-topbar .global-search.global-search {
-  border-color: var(--gear-border-strong) !important;
+  border-color: var(--gear-control-border) !important;
   background: var(--gear-surface) !important;
   transition: border-color .15s ease, box-shadow .15s ease;
 }
@@ -1455,7 +1455,7 @@ html body .gear-page .gear-btn-primary[disabled] {
   cursor: not-allowed;
 }
 html body :is(.gear-btn, .date-chip, .signout-button, .side-link, .operation-card, .menu-button, .dana-table-filter-trigger):focus-visible {
-  outline: 2px solid var(--dana-focus-border, #ed9959) !important;
+  outline: 2px solid var(--dana-focus-color, var(--dana-primary)) !important;
   outline-offset: 2px !important;
 }
 /* Row actions never dictate the row height. */
@@ -1571,9 +1571,7 @@ html body .login-brand-copy h1 { letter-spacing: -.025em !important; }
 :root {
   /* Quiet text still has to pass contrast on white and on the page grey. */
   --gear-muted: #5a6270;
-  --gear-muted-soft: #687080;
   --dana-muted: #5a6270;
-  --dana-placeholder: #7a8290;
   --gear-table-header-text: #4f5663;
   /* The floor for each role of text. Large shop-floor monitors scale these up below. */
   --gear-read-body: 15px;

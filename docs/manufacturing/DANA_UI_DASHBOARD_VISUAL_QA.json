@@ -3,7 +3,7 @@
   "requiredSourceBaseline": "V70.0.3R1",
   "sharedUiVersion": "0.2.0",
   "visualReference": "Truck Log",
-  "previousCssSha256": "AE74A031CA20E25E59FFB9013D586CEF1052E1BB17DA2F677FE112A6469CA41A",
+  "previousCssSha256": "812B7206F858B08B189D8E1223740BEF7E47614E8577B044B154E0F3B51DFA34",
   "managedCssSha256": "D6F06609EF9F926BAE977F85EF8754FC434FB49FF540E27C00DD0D8F86544D45",
   "scope": "Reviewed shared Dana/Gear adapter: screen presentation, spacing tokens, density variables and theme-safe surfaces; current Angular templates are covered by the linked spacing review.",
   "spacingReview": {

@@ -78,12 +78,12 @@ dana-theme-toggle { display: flow-root; }
 html:root[data-dana-theme='dark'] {
   --dana-text: #e5eaf1;
   --dana-muted: #b0bbca;
-  --dana-border: #485465;
+  --dana-border: #6e7c90;
   --dana-page: #131a23;
   --dana-surface: #202a37;
   --dana-primary: #ffb27c;
   --dana-primary-dark: #653113;
-  --dana-control-border: #627186;
+  --dana-control-border: #8391a6;
   --dana-placeholder: #a7b3c3;
   --dana-neutral-soft: #2b3747;
   --dana-info: #a5ceff;
@@ -303,4 +303,7 @@ html:root[data-dana-theme='dark'] body :is(.gear-btn-primary, .dana-btn-primary,
   background: var(--dana-primary) !important;
   border-color: var(--dana-primary) !important;
   color: var(--dana-page) !important;
+}
+html:root[data-dana-theme='dark'] body .dana-card[data-tone='warning'] {
+  border-left-color: var(--dana-warning) !important;
 }
