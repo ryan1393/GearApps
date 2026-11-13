@@ -48,10 +48,10 @@ selftest.cjs, setup.cjs labels, test PDF labels):
 BEFORE INSTALLING:
  - Run the root CHECK-BOTH-READ-ONLY.cmd to inspect the live service.
  - If TruckLogPrintAgent is already installed, the installer refuses to
-   replace it (fresh-install only). Either remove the old service first
-   (sc stop / sc delete; the installer backs up the old folder to
-   _patch_backups) or update the three agent files in place - see
-   "UPDATING AN EXISTING V4R6 SERVICE" below.
+   replace it (fresh-install only). Either remove the old service first with
+   REMOVE-OLD-PRINT-AGENT.cmd (see "REMOVE AN OLD INSTALLATION" below) or
+   update the three agent files in place - see "UPDATING AN EXISTING V4R6
+   SERVICE" below.
  - To install on a NEW Windows print PC, use Administrator and run the
    CMD on the print PC itself (not the Windows Docker development PC).
  - Requires matching Truck Log server print-agent API, credentials, network,
@@ -78,6 +78,23 @@ UPDATING AN EXISTING V4R6 SERVICE IN PLACE (keeps credential/activation):
  The existing config.json (agentVersion 4.0.6-service) is accepted by V4R7.
  A V4R6 REVIEW hold is archived into the review journal and polling resumes;
  a V4R6 pending result is moved, unchanged, into the outbox and re-sent.
+
+REMOVE AN OLD INSTALLATION (clean reinstall):
+ Run REMOVE-OLD-PRINT-AGENT.cmd as administrator on the print PC. It shows the
+ installed service, folder and agent identity, then asks you to type REMOVE.
+ It stops and deletes the TruckLogPrintAgent service and moves the old folder
+ (program, settings, credential, unsent results) into the locked folder
+ %ProgramData%\Dana\_patch_backups. It also clears a leftover installer lock.
+ Guard-gate printing on this PC stays off until the agent is installed again;
+ jobs queued in Truck Log stay queued and guards can print in the browser.
+ Then, on the Truck Log Docker host, create a new token for the same agent id:
+   SETUP-PRINT-AGENT-CREDENTIAL --agent-id <agent id> --name "<name>" --rotate
+ and run Truck-Log-Dual-Gate-Print-Agent-Service-V4R7.cmd on the print PC.
+ Once the new agent prints on both gates, delete the old files for good:
+   REMOVE-OLD-PRINT-AGENT.cmd -DeleteFiles
+ -DeleteFiles deletes the installed folder (if any) and every backup in
+ _patch_backups. Use it only when no undelivered print results matter.
+ Not run on Windows in this package; check the first run on the print PC.
 
 KNOWN ORIGINAL QUEUES:
  EAST: \\USFTWPLVPS03\USFTWP_E_Gate_Pass

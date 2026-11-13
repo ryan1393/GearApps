@@ -8,6 +8,32 @@
 - Every screen fits the window on desktop and landscape tablets. Long lists scroll inside their card, and RXO summary tiles and Dock Board counts jump to the section they describe.
 - Database migration `0006_station_roles.sql` adds the two new station types. Existing stations keep their type.
 
+## 1.0.9 — Longer confirmation before an empty Expedite list is published
+
+- Require the second empty scan to come at least 45 minutes after the first (was ten). RXO was observed showing a settled "0 of 0" list for ten to twenty minutes while shipments existed. With the default 30-minute schedule, an empty list is published by the scan one hour after it is first seen.
+- Everything else in 1.0.8 is unchanged.
+
+## 1.0.8 — Expedite: slow Freight on the Move page and genuinely empty lists
+
+- Wait up to 90 seconds (was 30) for RXO's loading overlay before switching Freight on the Move to List. A slow page no longer fails every scan with `FREIGHT_LIST_CONTROL_TIMEOUT`.
+- Accept a genuinely empty Freight on the Move list. The scheduler publishes it only when the list shows "0 of 0" with RXO's loading overlay gone and the count steady for 20 seconds, and a second scan at least ten minutes later (within six hours, with no shipments seen between) finds the same. The first sighting reports `EMPTY_LIST_AWAITING_SECOND_SCAN` and keeps the previous batch.
+- Once an empty list is published it stays published on later empty scans; the older shipments are no longer restored. The next scan that finds shipments publishes them and resets the rule.
+- A "0 of 0" list that is still loading, or a partially shown list, is refused as before. Database migrations remain unchanged through 0005.
+
+## 1.0.7 — One scan saves the number and attaches the packing slip
+
+- **Scan Document** on the Dock Board now does both steps: it saves the Delivery Number, then attaches the uploaded PDF when exactly one validated Print Agent capture carries that number, the capture belongs to no visit, and the visit has no packing slip yet. The attachment is recorded in the visit timeline and the document history as made without preview.
+- When no capture or more than one matches, or the visit already has a packing slip, the scan only saves the number as before. **Find PDF** still lists the candidates to open, review and confirm.
+- Companion SAP watcher: verified slips are stored under their Delivery Number (`13246286.pdf`).
+- Database migrations remain unchanged through 0005 and DANA UI at 0.3.1.
+
+## 1.0.6 — Password changes and print agent setup fixes
+
+- Add `CHANGE-TRUCK-LOG-PASSWORDS` (Windows and Linux) to change the administrator password, database password, Print Agent signing secret and RXO logins after setup. The database option updates PostgreSQL and `.env` together and keeps the HTTPS overlay on restart.
+- Run `SETUP-PRINT-AGENT-CREDENTIAL.cmd` and `SETUP-TRUCK-LOG-ADMIN.cmd` with `docker exec`, so they work on a Windows PC whose Docker CLI has no Compose plugin.
+- Companion print agents: add `REMOVE-OLD-PRINT-AGENT` to uninstall the old guard service before a fresh V4R7 install, and accept an incomplete token paste in the SAP watcher credential setup. The guard service remains V4R7 and the watcher W3.
+- The server, web app and RXO workers are unchanged from 1.0.5. Database migrations remain unchanged through 0005 and DANA UI at 0.3.1.
+
 ## 1.0.5 — Scan Now in both RXO control centers
 
 - Expose **Scan Now** on both standard RXO and RXO Expedite, with administrator authorization and pending/running feedback.

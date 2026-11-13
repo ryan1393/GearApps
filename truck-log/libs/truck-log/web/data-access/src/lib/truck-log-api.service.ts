@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { timeout } from 'rxjs';
 import type {
   DockScanLookup,
+  DockScanAutoAttach,
   DockDeliveryScanReceipt,
   CarrierReferenceRecord,
   CheckInConfigRecord,
@@ -446,6 +447,10 @@ export class TruckLogApi {
 
   scanPackingSlip(id: number, deliveryNumber: string) {
     return this.http.post<DockScanLookup>(`${this.base}/visits/${id}/packing-slip/scan`, { deliveryNumber });
+  }
+
+  autoAttachScannedPackingSlip(id: number, deliveryNumber: string) {
+    return this.http.post<DockScanAutoAttach<VisitDocumentRecord>>(`${this.base}/visits/${id}/packing-slip/scan/auto-attach`, { deliveryNumber });
   }
 
   previewScannedPackingSlip(id: number, token: string) {

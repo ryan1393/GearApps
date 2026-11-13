@@ -94,6 +94,13 @@ export class TruckVisitsController {
     return this.dockScan.lookup(id, body.deliveryNumber);
   }
 
+  /** Attaches the uploaded PDF only when exactly one validated capture matches; otherwise document is null. */
+  @Post(':id/packing-slip/scan/auto-attach')
+  @Header('Cache-Control', 'no-store')
+  async autoAttachScannedPackingSlip(@Param('id', ParseIntPipe) id: number, @Body() body: ScanPackingSlipDto) {
+    return { visitId: id, deliveryNumber: body.deliveryNumber, document: await this.dockScan.attachSoleMatch(id, body.deliveryNumber) };
+  }
+
   @Post(':id/packing-slip/scan/preview')
   async previewScannedPackingSlip(@Param('id', ParseIntPipe) id: number,
     @Body() body: PackingSlipScanTokenDto, @Res() response: Response) {

@@ -94,7 +94,7 @@ const RETRY_DELAY_SECONDS = Math.max(
 const RUN_ONCE = process.argv.includes('--once');
 const LOGIN_ONLY = process.argv.includes('--login-only');
 
-const PRODUCTION_VERSION = process.env.TRUCK_LOG_RELEASE || '1.0.5';
+const PRODUCTION_VERSION = process.env.TRUCK_LOG_RELEASE || '1.0.9';
 
 const PRODUCTION_PAGES =
   PAGE_CASES.map(

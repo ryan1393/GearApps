@@ -1,6 +1,6 @@
 {
   "name": "@truck-log/source",
-  "version": "1.0.5",
+  "version": "1.0.9",
   "private": true,
   "packageManager": "npm@10.9.9",
   "scripts": {
@@ -65,7 +65,7 @@
     "test:rxo-expedite-driver-documents": "node tools/truck-log/test-rxo-expedite-driver-documents-contract.mjs",
     "test:release-plumbing": "node tools/truck-log/test-release-plumbing-contract.mjs",
     "test:ux-mock-data": "node tools/truck-log/test-ux-mock-data-contract.mjs",
-    "validate:release": "node tools/truck-log/test-nx-project-boundaries.mjs && node tests/new-host/test-remote-windows-context.mjs && node tests/new-host/test-release-version.mjs && node tests/new-host/test-rxo-web-setup.mjs && node tests/new-host/test-compose.mjs && node tests/new-host/test-old-install-guard.mjs && node tests/new-host/test-build-inputs.mjs && node tests/new-host/test-core.mjs && node tools/truck-log/validate-project-layout.mjs && node tools/truck-log/validate-source.mjs && node tools/truck-log/rxo/validate-rxo-integration.mjs && npm run test:maintainability && npm run test:authoritative-docks && npm run test:migrations && npm run test:station-access && npm run test:query-result-shape",
+    "validate:release": "node tools/truck-log/test-nx-project-boundaries.mjs && node tests/new-host/test-remote-windows-context.mjs && node tests/new-host/test-release-version.mjs && node tests/new-host/test-rxo-web-setup.mjs && node tests/new-host/test-compose.mjs && node tests/new-host/test-old-install-guard.mjs && node tests/new-host/test-change-passwords.mjs && node tools/truck-log/test-dock-scan-auto-attach.mjs && node tools/truck-log/expedite/empty-list-test.mjs && node tests/new-host/test-build-inputs.mjs && node tests/new-host/test-core.mjs && node tools/truck-log/validate-project-layout.mjs && node tools/truck-log/validate-source.mjs && node tools/truck-log/rxo/validate-rxo-integration.mjs && npm run test:maintainability && npm run test:authoritative-docks && npm run test:migrations && npm run test:station-access && npm run test:query-result-shape",
     "audit:maintainability": "node tools/truck-log/maintainability-audit.mjs",
     "test:maintainability": "node tools/truck-log/maintainability-audit.mjs --strict",
     "test:nx-boundaries": "node tools/truck-log/test-nx-project-boundaries.mjs",
@@ -73,6 +73,9 @@
     "test:authoritative-docks": "node tools/truck-log/reference-csv/test-authoritative-docks.mjs",
     "test:compose": "node tests/new-host/test-compose.mjs",
     "test:old-install-guard": "node tests/new-host/test-old-install-guard.mjs",
+    "test:change-passwords": "node tests/new-host/test-change-passwords.mjs",
+    "test:dock-scan-auto-attach": "node tools/truck-log/test-dock-scan-auto-attach.mjs",
+    "test:rxo-expedite-empty-list": "node tools/truck-log/expedite/empty-list-test.mjs",
     "db:migrate": "node tools/truck-log/migrate.mjs",
     "db:status": "node tools/truck-log/migrate.mjs --status",
     "test:migrations": "node tests/new-host/test-migrations.mjs",
