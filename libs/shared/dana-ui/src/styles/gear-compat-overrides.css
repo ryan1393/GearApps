@@ -5,66 +5,66 @@
    The Dana core (dana-core/*.css) stays identical to its Truck Log visual source. These rules repeat
    its selectors with only the colour declarations changed, so MeshForge gets the MeshForge palette.
    Informational blue, success and danger colours are intentionally not overridden. */
-:root { --dana-text:#303743; --dana-muted:#707886; --dana-border:#e3e5e8; --dana-page:#f6f7f8; --dana-warning:#8d6a07; --dana-primary:#b4581a; --dana-primary-dark:#232830; --dana-sidebar:#14171c; --dana-sidebar-raised:#232830; --dana-shadow-panel:0 1px 2px rgba(21, 24, 29, .035), 0 5px 18px rgba(21, 24, 29, .045); --dana-shadow-raised:0 12px 30px rgba(21, 24, 29, .10); --dana-neutral-soft:#f3f4f5; --dana-control-border:#d6d8dc; --dana-placeholder:#818996; --dana-focus-border:#ed9959; --dana-focus-ring:0 0 0 3px rgba(170,84,19,.12); }
+:root { --dana-text:#303743; --dana-border:#e3e5e8; --dana-page:#f6f7f8; --dana-warning:#8d6a07; --dana-primary:#b4581a; --dana-primary-dark:#232830; --dana-sidebar:#14171c; --dana-sidebar-raised:#232830; --dana-shadow-panel:0 1px 2px rgba(21, 24, 29, .035), 0 5px 18px rgba(21, 24, 29, .045); --dana-shadow-raised:0 12px 30px rgba(21, 24, 29, .10); --dana-neutral-soft:#f3f4f5; --dana-control-border:#7e8693; --dana-placeholder:#656d7a; --dana-focus-border:#b4581a; --dana-focus-ring:0 0 0 3px rgba(170,84,19,.12); }
 .dana-sidebar { background: radial-gradient(circle at 12% 8%,rgba(202,100,22,.28),transparent 34%), linear-gradient(180deg,var(--dana-sidebar-raised),var(--dana-sidebar)); }
 .dana-brand-copy span, .dana-brand-copy small { color: #c2c6cc; }
 .dana-nav-heading { color: #8e95a0; }
 .dana-side-link { color: #e1e3e6; }
 .dana-nav-dot { background: #ea8a41; }
 .dana-sidebar-footer { color: #b5bac1; }
-.dana-global-search input { background: #f9fafa; }
+.dana-global-search input { background: var(--gear-surface-muted); }
 .dana-avatar { background: #e5e7ea; }
-.dana-btn:hover:not(:disabled) { background: #f9fafa; }
-.dana-btn-ghost { background: #f9fafa; }
-.dana-operation-card:hover { border-color: #cfd2d7; }
-.dana-field input, .dana-field select, .dana-field textarea, .dana-input, .dana-select, .dana-textarea { border: 1px solid #d6d8dc; }
-.dana-field input:focus, .dana-field select:focus, .dana-field textarea:focus, .dana-input:focus, .dana-select:focus, .dana-textarea:focus { border-color: #ed9959; box-shadow: 0 0 0 3px rgba(170,84,19,.10); }
-.dana-section-title { color: #3b4352; }
-table[danaTable] th, table.dana-table th { background: #fcfcfc; }
-table[danaTable] td, table.dana-table td { border-bottom: 1px solid #f0f1f2; }
-table[danaTable] tbody tr:hover td, table.dana-table tbody tr:hover td { background: #fdfdfd; }
-.dana-status-badge, [danaStatusBadge], .dana-count-badge, [danaCountBadge] { background: #f2f3f5; color: #aa5413; }
-.dana-loading-state, [danaLoadingState], .dana-empty-state, [danaEmptyState] { border: 1px dashed #cfd2d7; background: #f9fafa; }
+.dana-btn:hover:not(:disabled) { background: var(--gear-surface-muted); }
+.dana-btn-ghost { background: var(--gear-surface-muted); }
+.dana-operation-card:hover { border-color: var(--gear-border-strong); }
+.dana-field input, .dana-field select, .dana-field textarea, .dana-input, .dana-select, .dana-textarea { border: 1px solid var(--dana-control-border); }
+.dana-field input:focus, .dana-field select:focus, .dana-field textarea:focus, .dana-input:focus, .dana-select:focus, .dana-textarea:focus { border-color: var(--dana-focus-border); box-shadow: 0 0 0 3px rgba(170,84,19,.10); }
+.dana-section-title { color: var(--gear-text); }
+table[danaTable] th, table.dana-table th { background: var(--gear-surface-muted); }
+table[danaTable] td, table.dana-table td { border-bottom: 1px solid var(--gear-divider); }
+table[danaTable] tbody tr:hover td, table.dana-table tbody tr:hover td { background: var(--dana-table-state-bg, var(--gear-surface-muted)); }
+.dana-status-badge, [danaStatusBadge], .dana-count-badge, [danaCountBadge] { background: var(--gear-surface-accent); color: var(--gear-accent-strong); }
+.dana-loading-state, [danaLoadingState], .dana-empty-state, [danaEmptyState] { border: 1px dashed var(--gear-border-strong); background: var(--gear-surface-muted); }
 .dana-dialog-backdrop { background: rgba(27,31,37,.46); }
-.dana-toast-close:hover { background: #f5f6f7; }
+.dana-toast-close:hover { background: var(--gear-surface-accent); }
 :where(dialog.dana-confirm-dialog)::backdrop { background: rgba(27,31,37,.46); }
-.dana-combobox-input:disabled { background: #f5f6f7; }
-.dana-combobox-toggle:hover, .dana-combobox-clear:hover { background: #f3f4f5; }
-.dana-combobox-head { background: #fcfcfc; }
-.dana-combobox-option.is-active { background: #f2f3f5; }
-.dana-combobox-option.is-selected { background: #f6f7f8; }
+.dana-combobox-input:disabled { background: var(--gear-surface-accent); }
+.dana-combobox-toggle:hover, .dana-combobox-clear:hover { background: var(--gear-surface-accent); }
+.dana-combobox-head { background: var(--gear-surface-muted); }
+.dana-combobox-option.is-active { background: var(--gear-surface-accent); }
+.dana-combobox-option.is-selected { background: var(--gear-surface-accent); }
 .dana-combobox-option.is-active.is-selected { background: #ecedf0; }
-.dana-action-row { border-bottom: 1px solid #f0f1f2; }
-.dana-card[data-tone="warning"] { border-left-color: #cca025; }
-.dana-card-section { background: #f9fafa; }
+.dana-action-row { border-bottom: 1px solid var(--gear-divider); }
+.dana-card[data-tone="warning"] { border-left-color: #9e770a; }
+.dana-card-section { background: var(--gear-surface-muted); }
 .dana-progress { background: #e7e8eb; }
-.dana-chip { color: #545a64; }
+.dana-chip { color: var(--gear-muted); }
 .dana-chip[data-tone="warning"] { color: #745605; }
-.dana-pill-button { color: #545a64; }
-.login-page { background:#f1f2f4; color:#1c2027; }
+.dana-pill-button { color: var(--gear-muted); }
+.login-page { background:var(--gear-surface-accent); color:var(--gear-heading); }
 .login-brand-panel { background:radial-gradient(circle at 18% 12%,rgba(214,101,14,.28),transparent 28rem),linear-gradient(145deg,#1a1e24 0%,#262b34 55%,#303742 100%); }
 .login-suite { color:#c5c9cf; }
 .login-eyebrow { color:#f59d5b; }
 .login-brand-copy p { color:#cbcfd4; }
 .login-status { color:#c3c7cd; }
-.login-card { border:1px solid #e1e3e7; box-shadow:0 22px 60px rgba(38,43,53,.12); }
+.login-card { border:1px solid var(--gear-border); box-shadow:0 22px 60px rgba(38,43,53,.12); }
 .login-mobile-brand { color:#262b34; }
 .login-kicker { color:#b75b14; }
-.login-card-heading h2 { color:#1c2027; }
-.login-card-heading p { color:#6e7684; }
-.local-test-card { border:1px solid #e4e6e9; background:#f8f9f9; color:#3d4554; }
-.local-test-card span { color:#6b7381; }
-.local-test-card button { color:#aa5413; }
-.field-label { color:#38404d; }
-.password-help { color:#9ca2ac; }
-.field-input { border:1px solid #d2d5da; color:#1c2027; }
-.field-input::placeholder { color:#a0a6b0; }
+.login-card-heading h2 { color:var(--gear-heading); }
+.login-card-heading p { color:var(--gear-muted); }
+.local-test-card { border:1px solid var(--gear-border); background:var(--gear-surface-muted); color:#3d4554; }
+.local-test-card span { color:var(--gear-muted); }
+.local-test-card button { color:var(--gear-accent-strong); }
+.field-label { color:var(--gear-text); }
+.password-help { color:var(--gear-muted-soft); }
+.field-input { border:1px solid var(--dana-control-border); color:var(--gear-heading); }
+.field-input::placeholder { color:var(--dana-placeholder); }
 .field-input:focus { border-color:#c76316; box-shadow:0 0 0 3px rgba(199,99,22,.14); }
 .login-submit { background:linear-gradient(180deg,#b4581a,#964511); box-shadow:0 9px 20px rgba(57,65,79,.18); }
 .login-submit:hover { background:linear-gradient(180deg,#aa5413,#aa5413); }
-.login-footer { border-top:1px solid #eff0f2; color:#89909d; }
-.login-notice { color:#4f545e; }
-.login-operator-link a { color:#aa5413; }
+.login-footer { border-top:1px solid var(--gear-divider); color:var(--gear-muted-soft); }
+.login-notice { color:var(--gear-muted); }
+.login-operator-link a { color:var(--gear-accent-strong); }
 .login-submit:focus-visible,.login-operator-link a:focus-visible { outline:3px solid #c76316; }
 .login-footer a:focus-visible { outline:3px solid #c76316; }
 @media screen {
@@ -119,141 +119,141 @@ table[danaTable] tbody tr:hover td, table.dana-table tbody tr:hover td { backgro
 }
 
 .gear-sidebar {
-  width: var(--dana-sidebar-width, 258px) !important;
+  width: var(--dana-sidebar-width, 258px);
   background:
     radial-gradient(circle at 12% 8%, rgba(202,100,22,.28), transparent 34%),
     linear-gradient(180deg, var(--dana-sidebar-raised,#252a33), var(--dana-sidebar,#191d23)) !important;
   color: #fff;
 }
 
-.brand-row { gap: 11px !important; padding-top: 10px !important; padding-bottom: 20px !important; }
+.brand-row { gap: 11px !important; padding-top: 10px; padding-bottom: 20px; }
 .brand-mark { border-radius: 11px !important; }
-.brand-copy strong { color: #fff !important; font-size: 16px !important; font-weight: 800 !important; }
+.brand-copy strong { color: #fff; font-size: 16px; font-weight: 800; }
 .brand-copy small,
-.brand-copy span { color: #c2c6cc !important; font-size: 12px !important; }
+.brand-copy span { color: #c2c6cc; font-size: 12px; }
 
 .nav-heading {
-  color: #8e95a0 !important;
-  font-size: 11px !important;
-  letter-spacing: .1em !important;
+  color: #8e95a0;
+  font-size: 11px;
+  letter-spacing: .1em;
 }
 
 .side-link {
-  margin: 3px 0 !important;
-  padding: 11px 12px !important;
+  margin: 3px 0;
+  padding: 11px 12px;
   border-radius: 10px !important;
   color: #e1e3e6 !important;
-  font-size: 14px !important;
-  font-weight: 600 !important;
+  font-size: 14px;
+  font-weight: 600;
 }
 .side-link:hover { background: rgba(255,255,255,.07) !important; }
 .side-link.primary,
 .side-link.active,
 .side-link.active-sub { color: #fff !important; }
 
-.sidebar-footer { color: #b5bac1 !important; font-size: 12px !important; }
+.sidebar-footer { color: #b5bac1; font-size: 12px; }
 
 .gear-topbar {
-  height: var(--dana-topbar-height, 70px) !important;
+  height: var(--dana-topbar-height, 70px);
   padding-inline: 26px !important;
-  border-bottom-color: var(--dana-border,#e1e3e7) !important;
-  background: #fff !important;
-  box-shadow: none !important;
+  border-bottom-color: var(--dana-border,var(--gear-border));
+  background: var(--dana-surface) !important;
+  box-shadow: none;
 }
 
 .global-search input {
-  border-color: var(--dana-border,#e1e3e7) !important;
+  border-color: var(--dana-border,var(--gear-border)) !important;
   border-radius: 10px !important;
-  background: #f9fafa !important;
+  background: var(--gear-surface-muted) !important;
 }
 
 .avatar {
-  width: 34px !important;
-  height: 34px !important;
-  background: #e5e7ea !important;
-  color: var(--dana-primary-dark,#353d49) !important;
+  width: 34px;
+  height: 34px;
+  background: #e5e7ea;
+  color: var(--dana-primary-dark,#353d49);
 }
 
 @media (min-width: 1024px) {
   .app-content-shell:not(.login-shell) {
-    padding-left: var(--dana-sidebar-width,258px) !important;
-    padding-top: var(--dana-topbar-height,70px) !important;
+    padding-left: var(--dana-sidebar-width,258px);
+    padding-top: var(--dana-topbar-height,70px);
   }
 }
 
 html body .gear-page {
   max-width: var(--dana-content-max,1580px) !important;
   margin-inline: auto !important;
-  padding: var(--dana-content-pad,26px) !important;
+  padding: var(--dana-page-padding) !important;
 }
 
 html body .gear-page-header {
-  align-items: flex-end !important;
-  gap: 20px !important;
-  margin-bottom: 22px !important;
+  align-items: flex-end;
+  gap: var(--dana-section-gap) !important;
+  margin-bottom: var(--dana-page-header-gap, var(--dana-section-gap)) !important;
   padding: 0 !important;
-  overflow: visible !important;
+  overflow: visible;
   border: 0 !important;
   border-radius: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
+  background: transparent;
+  box-shadow: none;
 }
 html body .gear-page-header::before { display: none !important; }
 
-html body .gear-eyebrow { color: var(--dana-muted,#737b8a) !important; }
+html body .gear-eyebrow { color: var(--dana-muted,var(--gear-muted)); }
 
 html body .gear-page-title {
-  margin: 0 !important;
-  color: var(--dana-text,#1b1f25) !important;
-  font-size: 28px !important;
-  line-height: 1.2 !important;
-  font-weight: 800 !important;
-  letter-spacing: -.02em !important;
+  margin: 0;
+  color: var(--dana-text,var(--gear-heading));
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 800;
+  letter-spacing: -.02em;
 }
 
 html body .gear-page-description {
-  margin-top: 5px !important;
-  color: var(--dana-muted,#737b8a) !important;
-  font-size: 14px !important;
+  margin-top: 0;
+  color: var(--dana-muted,var(--gear-muted));
+  font-size: 14px;
 }
 
 html body .gear-panel,
 html body .data-panel,
 html body .inventory-panel {
-  border: 1px solid var(--dana-border,#e1e3e7) !important;
+  border: 1px solid var(--dana-border,var(--gear-border)) !important;
   border-radius: var(--dana-radius-lg,12px) !important;
-  background: var(--dana-surface,#fff) !important;
+  background: var(--dana-surface,var(--gear-surface)) !important;
   box-shadow: var(--dana-shadow-panel,0 1px 2px rgba(27,31,37,.05),0 6px 18px rgba(27,31,37,.04)) !important;
 }
 
 html body .gear-panel-header,
 html body .data-panel .panel-heading {
-  padding: 16px 18px !important;
-  border-bottom: 1px solid var(--dana-border,#e1e3e7) !important;
-  background: #fff !important;
+  padding: var(--dana-space-4) var(--dana-panel-padding) !important;
+  border-bottom: 1px solid var(--dana-border,var(--gear-border)) !important;
+  background: var(--dana-surface) !important;
 }
 
 html body .gear-panel-header h2,
 html body .gear-panel-header h3,
 html body .data-panel .panel-heading h2,
 html body .data-panel .panel-heading h3 {
-  font-size: 16px !important;
-  font-weight: 800 !important;
+  font-size: 16px;
+  font-weight: 800;
 }
 
 html body .gear-btn {
   min-height: 40px !important;
   border-radius: 10px !important;
-  padding: 10px 14px !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  box-shadow: none !important;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: none;
 }
 
 html body .gear-btn-primary {
-  border-color: var(--dana-primary,#aa5413) !important;
+  border-color: var(--dana-primary,var(--gear-accent-strong)) !important;
   background: var(--dana-primary,#aa5413) !important;
-  color: #fff !important;
+  color: #fff;
 }
 
 html body .gear-btn-primary:hover:not(:disabled) {
@@ -273,31 +273,31 @@ html body .gear-textarea,
 html body input.gear-input,
 html body select.gear-input,
 html body textarea.gear-input {
-  border-color: #d6d8dc !important;
+  border-color: var(--dana-control-border) !important;
   border-radius: 9px !important;
-  background: #fff !important;
+  background: var(--dana-surface) !important;
 }
 
 html body table.gear-table,
-html body .gear-table { font-size: 13px !important; }
+html body .gear-table { font-size: var(--dana-table-font-size, 13px); }
 
 html body table.gear-table thead th,
 html body .gear-table thead th,
 html body .dashboard-table thead th {
-  padding: 11px 12px !important;
-  border-bottom: 1px solid var(--dana-border,#e1e3e7) !important;
-  background: #fcfcfc !important;
-  color: var(--dana-muted,#737b8a) !important;
-  font-size: 11px !important;
-  font-weight: 800 !important;
-  letter-spacing: .05em !important;
+  padding: var(--dana-table-header-pad-y, 11px) var(--dana-table-header-pad-x, 12px) !important;
+  border-bottom: 1px solid var(--dana-border,var(--gear-border)) !important;
+  background: var(--gear-surface-muted) !important;
+  color: var(--dana-muted,var(--gear-muted)) !important;
+  font-size: var(--dana-table-header-font-size, 11px);
+  font-weight: 800;
+  letter-spacing: .05em;
 }
 
 html body table.gear-table tbody td,
 html body .gear-table tbody td,
 html body .dashboard-table tbody td {
-  padding: 13px 12px !important;
-  border-bottom-color: #f0f1f2 !important;
+  padding: var(--dana-table-cell-pad-y, 13px) var(--dana-table-cell-pad-x, 12px) !important;
+  border-bottom-color: var(--gear-divider) !important;
 }
 
 html body .gear-badge,
@@ -305,8 +305,8 @@ html body .gear-status-badge,
 html body .status-pill,
 html body .gear-count-badge {
   border-radius: 999px !important;
-  font-size: 11px !important;
-  font-weight: 800 !important;
+  font-size: 11px;
+  font-weight: 800;
 }
 
 html body .kpi-card,
@@ -314,21 +314,21 @@ html body .dashboard-kpi-card,
 html body .inventory-overview-kpi,
 html body .blade-location-summary-card,
 html body .gear-summary-card {
-  border: 1px solid var(--dana-border,#e1e3e7) !important;
+  border: 1px solid var(--dana-border,var(--gear-border)) !important;
   border-radius: var(--dana-radius-lg,12px) !important;
-  background: #fff !important;
+  background: var(--dana-surface) !important;
   box-shadow: var(--dana-shadow-panel,0 1px 2px rgba(27,31,37,.05),0 6px 18px rgba(27,31,37,.04)) !important;
 }
 
 .app-content-shell.login-shell {
-  width: 100% !important;
-  margin: 0 !important;
-  padding: 0 !important;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 @media (max-width: 760px) {
-  html body .gear-page { padding: 16px !important; }
-  html body .gear-page-header { align-items: flex-start !important; flex-direction: column !important; }
+  html body .gear-page { padding: var(--dana-page-padding) !important; }
+  html body .gear-page-header { align-items: flex-start !important; flex-direction: column; }
 }
 
 @media print {
@@ -352,7 +352,7 @@ html body .gear-summary-card {
    Screen-only rules deliberately leave the existing print layout intact. */
 @media screen {
   html body .app-content-shell:not(.login-shell) {
-    background: var(--dana-page, #f6f7f8) !important;
+    background: var(--dana-page, var(--gear-surface-accent)) !important;
   }
 
   html body .gear-sidebar .brand-copy {
@@ -370,54 +370,54 @@ html body .gear-summary-card {
   }
 
   html body .gear-topbar {
-    color: var(--dana-text, #1b1f25);
+    color: var(--dana-text, var(--gear-heading));
   }
 
   html body .gear-topbar .global-search {
     min-width: 0;
-    border-color: var(--dana-border, #e1e3e7);
-    background: #f9fafa;
+    border-color: var(--dana-border, var(--gear-border));
+    background: var(--gear-surface-muted);
     box-shadow: none;
   }
 
   html body .gear-topbar .global-search input {
-    color: var(--dana-text, #1b1f25);
-    caret-color: var(--dana-primary, #aa5413);
+    color: var(--dana-text, var(--gear-heading));
+    caret-color: var(--dana-primary, var(--gear-accent-strong));
   }
 
   html body .gear-topbar .global-search input::placeholder {
-    color: #4f545e;
+    color: var(--gear-muted);
     opacity: 1;
   }
 
   html body .gear-topbar .user-copy strong {
-    color: var(--dana-text, #1b1f25);
+    color: var(--dana-text, var(--gear-heading));
     font-size: 13px;
     line-height: 1.4;
   }
 
   html body .gear-topbar .user-copy span,
   html body .gear-topbar .search-icon {
-    color: #4f545e;
+    color: var(--gear-muted);
   }
 
   html body .gear-topbar .global-search button,
   html body .gear-topbar .menu-button,
   html body .gear-topbar .signout-button {
-    color: var(--dana-text, #1b1f25);
-    border-color: var(--dana-border, #e1e3e7);
-    background: var(--dana-surface, #ffffff);
+    color: var(--dana-text, var(--gear-heading));
+    border-color: var(--dana-border, var(--gear-border));
+    background: var(--dana-surface, var(--gear-surface));
   }
 
   html body .gear-topbar .global-search button:hover,
   html body .gear-topbar .menu-button:hover,
   html body .gear-topbar .signout-button:hover {
     color: var(--dana-primary-dark, #353d49);
-    background: #f1f2f4;
+    background: var(--gear-surface-accent);
   }
 
   html body .gear-topbar :is(button, input):focus-visible {
-    outline: 2px solid var(--dana-primary, #aa5413);
+    outline: 2px solid var(--dana-primary, var(--gear-accent-strong));
     outline-offset: 2px;
   }
 
@@ -446,55 +446,55 @@ html body .gear-summary-card {
   html body .dashboard-page :is(.dashboard-heading p, .panel-heading p,
     .operation-copy small, .kpi-card p, .dashboard-table td small,
     .dashboard-activity-row span, .dashboard-activity-row time) {
-    font-size: var(--dana-gear-dashboard-note-size, 12px) !important;
+    font-size: var(--dana-gear-dashboard-note-size, 12px);
     line-height: 1.5;
-    color: #4f545e;
+    color: var(--gear-muted);
   }
 
   html body .dashboard-page :is(.operation-copy strong, .kpi-card h3,
     .panel-heading h2) {
-    font-size: var(--dana-gear-dashboard-title-size, 16px) !important;
+    font-size: var(--dana-gear-dashboard-title-size, 16px);
     line-height: 1.35;
-    color: var(--dana-text, #1b1f25);
+    color: var(--dana-text, var(--gear-heading));
   }
 
   html body .dashboard-page .kpi-card strong {
-    font-size: var(--dana-gear-dashboard-value-size, 28px) !important;
+    font-size: var(--dana-gear-dashboard-value-size, 28px);
     line-height: 1.15;
     font-variant-numeric: tabular-nums;
   }
 
   html body .dashboard-page :is(.gear-table, .dashboard-table, table[danaTable]),
   html body .dashboard-page :is(.panel-link, .refresh-chip, .dashboard-activity-row strong) {
-    font-size: var(--dana-gear-dashboard-body-size, 14px) !important;
+    font-size: var(--dana-table-font-size, var(--dana-gear-dashboard-body-size, 14px));
   }
 
   html body .dashboard-page :is(.gear-table, .dashboard-table, table[danaTable]) thead th {
-    font-size: var(--dana-gear-dashboard-note-size, 12px) !important;
-    color: #4f545e !important;
-    letter-spacing: .025em !important;
+    font-size: var(--dana-table-header-font-size, var(--dana-gear-dashboard-note-size, 12px));
+    color: var(--gear-muted) !important;
+    letter-spacing: .025em;
   }
 
   html body .dashboard-page :is(.gear-table, .dashboard-table, table[danaTable]) tbody td {
-    font-size: var(--dana-gear-dashboard-body-size, 14px) !important;
+    font-size: var(--dana-table-font-size, var(--dana-gear-dashboard-body-size, 14px));
     line-height: 1.5;
   }
 
   html body .dashboard-page :is(.status-pill, .gear-badge, .gear-count-badge) {
-    font-size: var(--dana-gear-dashboard-note-size, 12px) !important;
+    font-size: var(--dana-gear-dashboard-note-size, 12px);
   }
 
   /* BEGIN DANA-APPS TOPBAR CONTRAST V70.0.4R7 */
-  html body header.gear-topbar.gear-topbar { color:var(--dana-text,#1b1f25)!important; background:#fff!important; border-bottom:1px solid #ced1d6!important; box-shadow:0 2px 6px rgba(27,31,37,.06)!important; }
-  html body header.gear-topbar.gear-topbar .global-search.global-search { min-width:0!important; border:1px solid #89909c!important; border-radius:10px!important; background:#f5f6f7!important; box-shadow:none!important; }
-  html body header.gear-topbar.gear-topbar .global-search.global-search input { color:var(--dana-text,#1b1f25)!important; -webkit-text-fill-color:var(--dana-text,#1b1f25)!important; caret-color:var(--dana-primary,#aa5413)!important; background:transparent!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .global-search.global-search input::placeholder { color:#4f545e!important; -webkit-text-fill-color:#4f545e!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .global-search.global-search .search-icon { color:#4f545e!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .global-search.global-search button { border:1px solid var(--dana-primary,#aa5413)!important; background:var(--dana-primary,#aa5413)!important; color:#fff!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .topbar-user.topbar-user, html body header.gear-topbar.gear-topbar .user-copy.user-copy strong { color:var(--dana-text,#1b1f25)!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .user-copy.user-copy span { color:#4f545e!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .menu-button.menu-button, html body header.gear-topbar.gear-topbar .signout-button.signout-button { border:1px solid #89909c!important; background:#f5f6f7!important; color:var(--dana-text,#1b1f25)!important; opacity:1!important; }
-  html body header.gear-topbar.gear-topbar .global-search.global-search:focus-within, html body header.gear-topbar.gear-topbar :is(button,input):focus-visible { outline:2px solid var(--dana-primary,#aa5413)!important; outline-offset:2px!important; }
+  html body header.gear-topbar.gear-topbar { color:var(--dana-text,var(--gear-heading)); background:var(--dana-surface)!important; border-bottom:1px solid var(--gear-border-strong)!important; box-shadow:0 2px 6px rgba(27,31,37,.06); }
+  html body header.gear-topbar.gear-topbar .global-search.global-search { min-width:0; border:1px solid #89909c!important; border-radius:10px!important; background:var(--gear-surface-accent)!important; box-shadow:none!important; }
+  html body header.gear-topbar.gear-topbar .global-search.global-search input { color:var(--dana-text,var(--gear-heading)); -webkit-text-fill-color:var(--dana-text,var(--gear-heading)); caret-color:var(--dana-primary,var(--gear-accent-strong)); background:transparent!important; opacity:1; }
+  html body header.gear-topbar.gear-topbar .global-search.global-search input::placeholder { color:var(--gear-muted)!important; -webkit-text-fill-color:var(--gear-muted)!important; opacity:1!important; }
+  html body header.gear-topbar.gear-topbar .global-search.global-search .search-icon { color:var(--gear-muted); opacity:1; }
+  html body header.gear-topbar.gear-topbar .global-search.global-search button { border:1px solid var(--dana-primary,var(--gear-accent-strong))!important; background:var(--dana-primary,#aa5413)!important; color:#fff!important; opacity:1; }
+  html body header.gear-topbar.gear-topbar .topbar-user.topbar-user, html body header.gear-topbar.gear-topbar .user-copy.user-copy strong { color:var(--dana-text,var(--gear-heading)); opacity:1; }
+  html body header.gear-topbar.gear-topbar .user-copy.user-copy span { color:var(--gear-muted)!important; opacity:1; }
+  html body header.gear-topbar.gear-topbar .menu-button.menu-button, html body header.gear-topbar.gear-topbar .signout-button.signout-button { border:1px solid #89909c!important; background:var(--gear-surface-accent)!important; color:var(--dana-text,var(--gear-heading))!important; opacity:1; }
+  html body header.gear-topbar.gear-topbar .global-search.global-search:focus-within, html body header.gear-topbar.gear-topbar :is(button,input):focus-visible { outline:2px solid var(--dana-primary,var(--gear-accent-strong))!important; outline-offset:2px!important; }
   /* END DANA-APPS TOPBAR CONTRAST V70.0.4R7 */
 
 }
@@ -512,43 +512,43 @@ html body .gear-summary-card {
 @media screen {
   html body .gear-sidebar,
   html body .gear-page {
-    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
     font-synthesis: none;
   }
-  html body .gear-sidebar .brand-copy strong { font-size: 15px !important; font-weight: 700 !important; letter-spacing: 0 !important; line-height: 1.25 !important; }
-  html body .gear-sidebar .nav-heading { font-size: 10px !important; font-weight: 600 !important; letter-spacing: .08em !important; line-height: 1.35 !important; }
-  html body .gear-sidebar .side-link { font-size: 14px !important; font-weight: 500 !important; letter-spacing: 0 !important; line-height: 1.4 !important; }
-  html body .gear-sidebar .sidebar-footer { font-size: 11px !important; font-weight: 400 !important; line-height: 1.45 !important; }
-  html body .gear-page { font-size: 14px !important; line-height: 1.5 !important; }
-  html body .gear-page-title { font-weight: 700 !important; }
-  html body .gear-page-description { font-size: 15px !important; font-weight: 400 !important; line-height: 1.55 !important; }
+  html body .gear-sidebar .brand-copy strong { font-size: 15px; font-weight: 700; letter-spacing: 0; line-height: 1.25; }
+  html body .gear-sidebar .nav-heading { font-size: 10px; font-weight: 600; letter-spacing: .08em; line-height: 1.35; }
+  html body .gear-sidebar .side-link { font-size: 14px; font-weight: 500; letter-spacing: 0; line-height: 1.4; }
+  html body .gear-sidebar .sidebar-footer { font-size: 11px; font-weight: 400; line-height: 1.45; }
+  html body .gear-page { font-size: 14px !important; line-height: 1.5; }
+  html body .gear-page-title { font-weight: 700; }
+  html body .gear-page-description { font-size: 15px; font-weight: 400; line-height: 1.55; }
   html body .gear-panel-header :is(h2,h3),
   html body .data-panel .panel-heading :is(h2,h3),
-  html body .dashboard-page :is(.panel-heading h2,.operation-copy strong,.kpi-card h3) { font-weight: 650 !important; letter-spacing: -.01em !important; }
-  html body .gear-page :is(label,.gear-field-label,.field-label) { font-size: 14px !important; font-weight: 600 !important; line-height: 1.35 !important; }
-  html body .gear-page :is(.gear-input,.gear-select,.gear-textarea,input,select,textarea) { font-size: 14px !important; line-height: 1.4 !important; }
-  html body .gear-page :is(.gear-btn,button[role="tab"],[role="tab"],.tab-button,.tab-link) { font-size: 14px !important; font-weight: 600 !important; }
-  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) { font-size: 14px !important; }
-  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) thead th { font-size: 12px !important; font-weight: 700 !important; letter-spacing: .035em !important; line-height: 1.35 !important; }
-  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) tbody td { font-size: 14px !important; line-height: 1.5 !important; }
-  html body .gear-page :is(.gear-badge,.gear-status-badge,.status-pill,.gear-count-badge) { font-size: 12px !important; font-weight: 700 !important; }
+  html body .dashboard-page :is(.panel-heading h2,.operation-copy strong,.kpi-card h3) { font-weight: 650; letter-spacing: -.01em; }
+  html body .gear-page :is(label,.gear-field-label,.field-label) { font-size: 14px; font-weight: 600; line-height: 1.35; }
+  html body .gear-page :is(.gear-input,.gear-select,.gear-textarea,input,select,textarea) { font-size: 14px; line-height: 1.4; }
+  html body .gear-page :is(.gear-btn,button[role="tab"],[role="tab"],.tab-button,.tab-link) { font-size: 14px; font-weight: 600; }
+  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) { font-size: var(--dana-table-font-size, 14px) !important; }
+  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) thead th { font-size: var(--dana-table-header-font-size, 12px) !important; font-weight: 700; letter-spacing: .035em; line-height: 1.35 !important; }
+  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) tbody td { font-size: var(--dana-table-font-size, 14px); line-height: 1.5 !important; }
+  html body .gear-page :is(.gear-badge,.gear-status-badge,.status-pill,.gear-count-badge) { font-size: 12px; font-weight: 700; }
 }
 @media screen and (min-width: 1500px) {
-  html body .gear-sidebar .brand-copy strong { font-size: 16px !important; }
-  html body .gear-sidebar .nav-heading { font-size: 11px !important; }
-  html body .gear-sidebar .side-link { font-size: 15px !important; min-height: 44px !important; }
-  html body .gear-sidebar .sidebar-footer { font-size: 12px !important; }
+  html body .gear-sidebar .brand-copy strong { font-size: 16px; }
+  html body .gear-sidebar .nav-heading { font-size: 11px; }
+  html body .gear-sidebar .side-link { font-size: 15px; min-height: 44px; }
+  html body .gear-sidebar .sidebar-footer { font-size: 12px; }
   html body .gear-page { font-size: 15px !important; }
-  html body .gear-page-title { font-size: 30px !important; }
-  html body .gear-page-description { font-size: 16px !important; }
+  html body .gear-page-title { font-size: 30px; }
+  html body .gear-page-description { font-size: 16px; }
   html body .gear-panel-header :is(h2,h3),
-  html body .data-panel .panel-heading :is(h2,h3) { font-size: 18px !important; }
-  html body .gear-page :is(label,.gear-field-label,.field-label) { font-size: 15px !important; }
-  html body .gear-page :is(.gear-input,.gear-select,.gear-textarea,input,select,textarea) { font-size: 15px !important; }
-  html body .gear-page :is(.gear-btn,button[role="tab"],[role="tab"],.tab-button,.tab-link) { font-size: 15px !important; }
-  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) tbody td { font-size: 15px !important; }
-  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) thead th { font-size: 13px !important; }
-  html body .gear-page :is(.gear-badge,.gear-status-badge,.status-pill,.gear-count-badge) { font-size: 13px !important; }
+  html body .data-panel .panel-heading :is(h2,h3) { font-size: 18px; }
+  html body .gear-page :is(label,.gear-field-label,.field-label) { font-size: 15px; }
+  html body .gear-page :is(.gear-input,.gear-select,.gear-textarea,input,select,textarea) { font-size: 15px; }
+  html body .gear-page :is(.gear-btn,button[role="tab"],[role="tab"],.tab-button,.tab-link) { font-size: 15px; }
+  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) tbody td { font-size: var(--dana-table-font-size, 15px); }
+  html body .gear-page :is(.gear-table,.dashboard-table,table[danaTable]) thead th { font-size: var(--dana-table-header-font-size, 13px) !important; }
+  html body .gear-page :is(.gear-badge,.gear-status-badge,.status-pill,.gear-count-badge) { font-size: 13px; }
 }
 /* END DANA-APPS TYPOGRAPHY READABILITY V70.0.5 */
 
@@ -556,22 +556,22 @@ html body .gear-summary-card {
 /* BEGIN DANA-APPS ADMIN CARD POLISH V70.0.6R1 */
 @media screen {
   html body .gear-admin-layout {
-    align-items: start !important;
-    gap: 18px !important;
+    align-items: start;
+    gap: var(--dana-section-gap) !important;
   }
 
   html body .gear-admin-list.gear-admin-record-grid,
   html body .gear-admin-record-grid-professional {
-    gap: 12px !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-admin-record-card {
-    min-width: 0 !important;
+    min-width: 0;
     border: 1px solid #d5d7dc !important;
     border-radius: 10px !important;
-    background: #ffffff !important;
+    background: var(--dana-surface) !important;
     box-shadow: 0 1px 2px rgba(27, 31, 37, .04) !important;
-    overflow: hidden !important;
+    overflow: hidden;
   }
 
   html body .gear-admin-record-card:hover {
@@ -581,42 +581,42 @@ html body .gear-summary-card {
 
   html body .gear-admin-record-card-body {
     display: grid !important;
-    align-content: start !important;
-    gap: 12px !important;
-    min-height: 142px !important;
-    padding: 14px 15px !important;
+    align-content: start;
+    gap: var(--dana-form-gap) !important;
+    min-height: 142px;
+    padding: 14px 15px;
   }
 
   html body .gear-admin-record-heading {
-    display: flex !important;
+    display: flex;
     align-items: flex-start !important;
-    justify-content: space-between !important;
-    gap: 10px !important;
-    min-width: 0 !important;
-    margin: 0 !important;
+    justify-content: space-between;
+    gap: var(--dana-field-gap) !important;
+    min-width: 0;
+    margin: 0;
   }
 
   html body .gear-admin-record-title {
-    min-width: 0 !important;
-    color: var(--dana-text, #1b1f25) !important;
-    font-size: 14px !important;
+    min-width: 0;
+    color: var(--dana-text, var(--gear-heading));
+    font-size: 14px;
     font-weight: 700 !important;
-    line-height: 1.3 !important;
-    letter-spacing: -.01em !important;
-    overflow-wrap: anywhere !important;
+    line-height: 1.3;
+    letter-spacing: -.01em;
+    overflow-wrap: anywhere;
   }
 
   html body .gear-admin-record-meta {
-    display: grid !important;
-    gap: 8px !important;
-    margin: 0 !important;
+    display: grid;
+    gap: var(--dana-space-3) var(--dana-form-gap) !important;
+    margin: 0;
   }
 
   html body .gear-admin-record-field {
-    display: grid !important;
+    display: grid;
     gap: 2px !important;
-    min-width: 0 !important;
-    margin: 0 !important;
+    min-width: 0;
+    margin: 0;
   }
 
   html body .gear-admin-record-field-wide {
@@ -624,92 +624,92 @@ html body .gear-summary-card {
   }
 
   html body .gear-admin-record-label {
-    color: #6b7381 !important;
-    font-size: 10px !important;
+    color: var(--gear-muted) !important;
+    font-size: 10px;
     font-weight: 600 !important;
-    line-height: 1.2 !important;
-    letter-spacing: .055em !important;
+    line-height: 1.2;
+    letter-spacing: .055em;
   }
 
   html body .gear-admin-record-value {
-    min-width: 0 !important;
-    color: #2e343f !important;
-    font-size: 13px !important;
+    min-width: 0;
+    color: var(--gear-text) !important;
+    font-size: 13px;
     font-weight: 500 !important;
-    line-height: 1.35 !important;
-    overflow-wrap: anywhere !important;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
   }
 
   html body .gear-admin-record-value-strong {
-    color: var(--dana-text, #1b1f25) !important;
+    color: var(--dana-text, var(--gear-heading));
     font-weight: 650 !important;
   }
 
   html body .gear-admin-record-heading :is(.gear-badge,.status-pill,.gear-count-badge) {
-    flex: 0 0 auto !important;
-    margin-top: 0 !important;
-    font-size: 11px !important;
-    line-height: 1.2 !important;
+    flex: 0 0 auto;
+    margin-top: 0;
+    font-size: 11px;
+    line-height: 1.2;
   }
 
   html body .gear-admin-list-header.gear-admin-search-header {
     gap: 12px !important;
-    margin-bottom: 12px !important;
+    margin-bottom: 12px;
   }
 
   html body .gear-admin-search-input {
-    min-height: 40px !important;
+    min-height: 40px;
   }
 
   html body .gear-admin-form {
-    padding: 18px !important;
+    padding: var(--dana-panel-padding) !important;
   }
 
   html body .gear-admin-form .gear-field {
-    margin-bottom: 12px !important;
+    margin-bottom: 0;
   }
 
   html body .gear-admin-form .gear-field-help {
-    margin-top: 5px !important;
-    color: #6b7381 !important;
-    line-height: 1.45 !important;
+    margin-top: 5px;
+    color: var(--gear-muted);
+    line-height: 1.45;
   }
 }
 
 @media screen and (min-width: 1500px) {
   html body .gear-admin-layout {
-    gap: 22px !important;
+    gap: var(--dana-section-gap) !important;
   }
 
   html body .gear-admin-list.gear-admin-record-grid,
   html body .gear-admin-record-grid-professional {
-    gap: 14px !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-admin-record-card-body {
-    min-height: 156px !important;
-    padding: 16px 17px !important;
-    gap: 13px !important;
+    min-height: 156px;
+    padding: 16px 17px;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-admin-record-title {
-    font-size: 15px !important;
+    font-size: 15px;
   }
 
   html body .gear-admin-record-label {
-    font-size: 11px !important;
+    font-size: 11px;
   }
 
   html body .gear-admin-record-value {
-    font-size: 14px !important;
+    font-size: 14px;
   }
 
   html body .gear-admin-record-heading :is(.gear-badge,.status-pill,.gear-count-badge) {
-    font-size: 12px !important;
+    font-size: 12px;
   }
 
   html body .gear-admin-form {
-    padding: 20px !important;
+    padding: var(--dana-panel-padding) !important;
   }
 }
 
@@ -725,19 +725,19 @@ html body .gear-summary-card {
 /* BEGIN DANA-APPS ROLL MASTER FULL WIDTH V70.0.8R61R20 */
 @media screen {
   html body .gear-page .gear-admin-layout.gear-admin-roll-master-layout {
-    grid-template-columns: minmax(0, 1fr) !important;
-    width: 100% !important;
-    max-width: none !important;
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+    max-width: none;
   }
 
   html body .gear-page .gear-admin-roll-master-layout > .gear-admin-list.gear-admin-record-grid-professional {
-    width: 100% !important;
-    max-width: none !important;
-    min-width: 0 !important;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-list-header {
-    min-width: 0 !important;
+    min-width: 0;
   }
 }
 /* END DANA-APPS ROLL MASTER FULL WIDTH V70.0.8R61R20 */
@@ -745,67 +745,67 @@ html body .gear-summary-card {
 /* BEGIN DANA-APPS ROLL MASTER VISUAL POLISH V70.0.8R61R21 */
 @media screen {
   html body .gear-page.gear-roll-master-page {
-    max-width: 2200px !important;
+    max-width: 2200px;
   }
 
   html body .gear-page .gear-admin-roll-master-layout > .gear-admin-list.gear-admin-record-grid-professional {
-    max-height: none !important;
-    overflow: visible !important;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-    gap: 1rem !important;
+    max-height: none;
+    overflow: visible;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-list-header {
-    position: static !important;
-    top: auto !important;
-    padding: .9rem 1rem !important;
-    border: 1px solid #e4e6e9 !important;
+    position: static;
+    top: auto;
+    padding: var(--dana-space-4) var(--dana-panel-padding) !important;
+    border: 1px solid var(--gear-border) !important;
     border-radius: 10px !important;
-    background: #fff !important;
-    overflow: visible !important;
+    background: var(--dana-surface) !important;
+    overflow: visible;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-search-input {
-    max-width: 460px !important;
-    min-height: 46px !important;
+    max-width: 460px;
+    min-height: 46px;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-card {
-    min-height: 286px !important;
-    padding: 1.08rem 1.12rem !important;
-    overflow: visible !important;
+    min-height: 286px;
+    padding: 1.08rem 1.12rem;
+    overflow: visible;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-card-body {
-    gap: .78rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-title {
-    font-size: 1.05rem !important;
+    font-size: 1.05rem;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-label {
-    font-size: .76rem !important;
+    font-size: .76rem;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-value {
-    font-size: .94rem !important;
+    font-size: .94rem;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-form-grid {
-    gap: .9rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-field {
     gap: .38rem !important;
-    font-size: .84rem !important;
-    font-weight: 750 !important;
+    font-size: .84rem;
+    font-weight: 750;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-field .gear-input {
-    min-height: 46px !important;
-    padding: .68rem .78rem !important;
-    font-size: 1rem !important;
+    min-height: 46px;
+    padding: .68rem .78rem;
+    font-size: 1rem;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-alert {
@@ -818,27 +818,27 @@ html body .gear-summary-card {
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-actions {
-    display: flex !important;
-    align-items: center !important;
+    display: flex;
+    align-items: center;
     gap: .6rem !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-actions .gear-btn {
-    min-height: 42px !important;
+    min-height: 42px;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-actions .gear-btn-primary {
-    flex: 1 1 auto !important;
+    flex: 1 1 auto;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-actions .gear-btn-secondary {
-    flex: 0 0 auto !important;
+    flex: 0 0 auto;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-card:has(.gear-alert-danger) .gear-badge {
-    border-color: #fecaca !important;
+    border-color: var(--gear-danger-border) !important;
     background: #fff1f2 !important;
-    color: #b42318 !important;
+    color: var(--gear-danger) !important;
   }
 }
 
@@ -854,30 +854,30 @@ html body .gear-summary-card {
 
 @media screen and (max-width: 1400px) {
   html body .gear-page .gear-admin-roll-master-layout > .gear-admin-list.gear-admin-record-grid-professional {
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media screen and (max-width: 760px) {
   html body .gear-page .gear-admin-roll-master-layout > .gear-admin-list.gear-admin-record-grid-professional {
-    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-list-header {
-    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-form-grid {
-    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-actions {
-    align-items: stretch !important;
-    flex-direction: column !important;
+    align-items: stretch;
+    flex-direction: column;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-actions .gear-btn {
-    width: 100% !important;
+    width: 100%;
   }
 }
 /* END DANA-APPS ROLL MASTER VISUAL POLISH V70.0.8R61R21 */
@@ -887,81 +887,81 @@ html body .gear-summary-card {
   /* Keep R21 full-width / natural page scrolling, but return the cards and controls
      to the tighter Admin scale requested after the large-card R21 pass. */
   html body .gear-page .gear-admin-roll-master-layout > .gear-admin-list.gear-admin-record-grid-professional {
-    gap: .72rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-list-header {
-    padding: .62rem .72rem !important;
+    padding: var(--dana-space-4) var(--dana-panel-padding) !important;
     border-radius: 8px !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-search-input {
-    max-width: 420px !important;
-    min-height: 38px !important;
-    padding: .46rem .62rem !important;
-    font-size: .82rem !important;
+    max-width: 420px;
+    min-height: 38px;
+    padding: .46rem .62rem;
+    font-size: .82rem;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-card {
-    min-height: 0 !important;
-    padding: 0 !important;
+    min-height: 0;
+    padding: 0;
     border-radius: 8px !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-card-body {
-    min-height: 0 !important;
-    padding: .72rem .78rem !important;
-    gap: .48rem !important;
+    min-height: 0;
+    padding: .72rem .78rem;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-heading {
-    gap: .5rem !important;
+    gap: var(--dana-field-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-title {
-    font-size: .90rem !important;
-    line-height: 1.2 !important;
+    font-size: .90rem;
+    line-height: 1.2;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-heading :is(.gear-badge,.status-pill,.gear-count-badge) {
-    padding: .16rem .38rem !important;
-    font-size: .64rem !important;
-    line-height: 1.1 !important;
+    padding: .16rem .38rem;
+    font-size: .64rem;
+    line-height: 1.1;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-meta {
-    gap: .4rem !important;
+    gap: var(--dana-space-3) var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-label {
-    font-size: .64rem !important;
-    line-height: 1.1 !important;
-    letter-spacing: .04em !important;
+    font-size: .64rem;
+    line-height: 1.1;
+    letter-spacing: .04em;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-value {
-    font-size: .80rem !important;
-    line-height: 1.2 !important;
+    font-size: .80rem;
+    line-height: 1.2;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-form-grid {
-    gap: .52rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-form-grid.mt-3 {
-    margin-top: .30rem !important;
+    margin-top: .30rem;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-field {
     gap: .18rem !important;
-    font-size: .70rem !important;
-    line-height: 1.15 !important;
+    font-size: .70rem;
+    line-height: 1.15;
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-field .gear-input {
     min-height: 35px !important;
     padding: .38rem .50rem !important;
-    font-size: .84rem !important;
+    font-size: .84rem;
     line-height: 1.15 !important;
   }
 
@@ -995,10 +995,10 @@ html body .gear-summary-card {
   }
 
   html body .gear-page .gear-admin-roll-master-layout .gear-admin-record-actions .gear-btn {
-    min-height: 34px !important;
+    min-height: 34px;
     padding: .38rem .58rem !important;
-    font-size: .74rem !important;
-    line-height: 1.1 !important;
+    font-size: .74rem;
+    line-height: 1.1;
   }
 }
 /* END DANA-APPS ROLL MASTER COMPACT V70.0.8R61R22 */
@@ -1013,169 +1013,169 @@ html body .gear-summary-card {
 
   html body .gear-page.gear-admin-page .gear-admin-tabs {
     gap: .34rem !important;
-    margin-bottom: .62rem !important;
-    padding-bottom: .42rem !important;
+    margin-bottom: .62rem;
+    padding-bottom: .42rem;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-tabs button {
-    min-height: 34px !important;
-    padding: .36rem .62rem !important;
-    font-size: .88rem !important;
-    line-height: 1.15 !important;
+    min-height: 34px;
+    padding: .36rem .62rem;
+    font-size: .88rem;
+    line-height: 1.15;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-layout {
-    grid-template-columns: minmax(275px, 340px) minmax(0, 1fr) !important;
-    gap: .72rem !important;
-    align-items: start !important;
+    grid-template-columns: minmax(275px, 340px) minmax(0, 1fr);
+    gap: var(--dana-section-gap) !important;
+    align-items: start;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-layout.gear-admin-layout-full,
   html body .gear-page.gear-admin-page .gear-admin-roll-master-layout {
-    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   /* All record tabs use page scrolling like Roll Master instead of a nested
      scroll box, and all share the same tight card spacing. */
   html body .gear-page.gear-admin-page .gear-admin-list,
   html body .gear-page.gear-admin-page .gear-admin-location-list {
-    max-height: none !important;
-    overflow: visible !important;
+    max-height: none;
+    overflow: visible;
   }
 
   html body .gear-page.gear-admin-page :where(.gear-admin-record-grid-professional,.gear-admin-record-grid-wide,.gear-admin-record-grid-compact) {
-    gap: .72rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-list-header {
-    position: static !important;
-    top: auto !important;
-    min-width: 0 !important;
-    padding: .58rem .70rem !important;
-    border: 1px solid #e4e6e9 !important;
+    position: static;
+    top: auto;
+    min-width: 0;
+    padding: var(--dana-space-4) var(--dana-panel-padding) !important;
+    border: 1px solid var(--gear-border) !important;
     border-radius: 8px !important;
-    background: #fff !important;
-    overflow: visible !important;
+    background: var(--dana-surface) !important;
+    overflow: visible;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-list-header h2 {
-    font-size: 1rem !important;
-    line-height: 1.15 !important;
+    font-size: 1rem;
+    line-height: 1.15;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-list-header small {
-    font-size: .78rem !important;
-    line-height: 1.2 !important;
+    font-size: .78rem;
+    line-height: 1.2;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-search-input,
   html body .gear-page.gear-admin-page .gear-admin-location-header .gear-input[type='search'] {
     max-width: 420px !important;
-    min-height: 36px !important;
-    padding: .38rem .54rem !important;
-    font-size: .88rem !important;
-    line-height: 1.15 !important;
+    min-height: 36px;
+    padding: .38rem .54rem;
+    font-size: .88rem;
+    line-height: 1.15;
   }
 
   /* Compact create/edit forms so the form side of every tab matches the
      compact record-card scale instead of towering over the list. */
   html body .gear-page.gear-admin-page .gear-admin-form {
-    gap: .56rem !important;
-    padding: .72rem .78rem !important;
+    gap: var(--dana-form-gap) !important;
+    padding: var(--dana-panel-padding) !important;
     border-radius: 8px !important;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-form .gear-field {
-    gap: .18rem !important;
-    margin-bottom: 0 !important;
-    font-size: .84rem !important;
-    font-weight: 700 !important;
-    line-height: 1.18 !important;
+    gap: var(--dana-field-gap) !important;
+    margin-bottom: 0;
+    font-size: .84rem;
+    font-weight: 700;
+    line-height: 1.18;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-form .gear-field-help {
-    margin-top: .18rem !important;
-    font-size: .74rem !important;
-    line-height: 1.28 !important;
+    margin-top: .18rem;
+    font-size: .74rem;
+    line-height: 1.28;
   }
 
   html body .gear-page.gear-admin-page .gear-form-grid {
-    gap: .52rem !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page.gear-admin-page :where(.gear-admin-form,.gear-admin-record-card) :where(.gear-input,.gear-select,.gear-textarea) {
-    min-height: 36px !important;
-    padding: .40rem .52rem !important;
-    font-size: .90rem !important;
-    line-height: 1.18 !important;
+    min-height: 36px;
+    padding: var(--dana-space-2) var(--dana-space-3) !important;
+    font-size: .90rem;
+    line-height: 1.18;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-form .gear-textarea {
-    min-height: 68px !important;
+    min-height: 68px;
   }
 
   html body .gear-page.gear-admin-page .gear-step-title {
-    margin-bottom: .08rem !important;
-    font-size: .94rem !important;
-    line-height: 1.18 !important;
+    margin-bottom: .08rem;
+    font-size: .94rem;
+    line-height: 1.18;
   }
 
   /* Every Admin record card now uses the same compact body dimensions as R22,
      but with larger text for easier reading. */
   html body .gear-page.gear-admin-page .gear-admin-record-card {
-    min-height: 0 !important;
+    min-height: 0;
     padding: 0 !important;
     border-radius: 8px !important;
-    overflow: visible !important;
+    overflow: visible;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-card-body {
-    min-height: 0 !important;
-    padding: .70rem .76rem !important;
-    gap: .46rem !important;
+    min-height: 0;
+    padding: var(--dana-panel-padding) !important;
+    gap: var(--dana-form-gap) !important;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-heading {
-    gap: .48rem !important;
+    gap: var(--dana-field-gap) !important;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-title {
-    font-size: 1rem !important;
-    line-height: 1.18 !important;
+    font-size: 1rem;
+    line-height: 1.18;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-heading :is(.gear-badge,.status-pill,.gear-count-badge) {
-    padding: .16rem .38rem !important;
-    font-size: .70rem !important;
-    line-height: 1.08 !important;
+    padding: .16rem .38rem;
+    font-size: .70rem;
+    line-height: 1.08;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-meta {
-    gap: .36rem .52rem !important;
+    gap: var(--dana-space-3) var(--dana-form-gap) !important;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-label {
-    font-size: .74rem !important;
-    line-height: 1.12 !important;
-    letter-spacing: .035em !important;
+    font-size: .74rem;
+    line-height: 1.12;
+    letter-spacing: .035em;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-value {
-    font-size: .90rem !important;
-    line-height: 1.2 !important;
+    font-size: .90rem;
+    line-height: 1.2;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-actions,
   html body .gear-page.gear-admin-page .gear-admin-record-actions,
   html body .gear-page.gear-admin-page .gear-admin-form-actions {
-    gap: .34rem !important;
+    gap: var(--dana-action-gap) !important;
   }
 
   html body .gear-page.gear-admin-page :where(.gear-admin-record-actions,.gear-admin-form-actions) .gear-btn {
     min-height: 34px !important;
-    padding: .36rem .54rem !important;
-    font-size: .84rem !important;
-    line-height: 1.1 !important;
+    padding: var(--dana-space-2) var(--dana-space-4) !important;
+    font-size: .84rem;
+    line-height: 1.1;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-inline-edit {
@@ -1191,16 +1191,16 @@ html body .gear-summary-card {
      Override those here so Roll Master also gets the larger R23 Admin text,
      while its warning remains intentionally small below. */
   html body .gear-page.gear-admin-page .gear-admin-roll-master-layout .gear-field {
-    font-size: .82rem !important;
-    line-height: 1.16 !important;
+    font-size: .82rem;
+    line-height: 1.16;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-roll-master-layout .gear-field .gear-input {
-    font-size: .90rem !important;
+    font-size: .90rem;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-roll-master-layout .gear-admin-record-actions .gear-btn {
-    font-size: .84rem !important;
+    font-size: .84rem;
   }
 
   /* Roll Master keeps its deliberately tiny LOW warning even though all other
@@ -1228,22 +1228,22 @@ html body .gear-summary-card {
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-title {
-    font-size: 1.04rem !important;
+    font-size: 1.04rem;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-value,
   html body .gear-page.gear-admin-page :where(.gear-admin-form,.gear-admin-record-card) :where(.gear-input,.gear-select,.gear-textarea) {
-    font-size: .94rem !important;
+    font-size: .94rem;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-record-label,
   html body .gear-page.gear-admin-page .gear-admin-form .gear-field {
-    font-size: .78rem !important;
+    font-size: .78rem;
   }
 
   html body .gear-page.gear-admin-page :where(.gear-admin-record-actions,.gear-admin-form-actions) .gear-btn,
   html body .gear-page.gear-admin-page .gear-admin-tabs button {
-    font-size: .88rem !important;
+    font-size: .88rem;
   }
 }
 
@@ -1255,18 +1255,18 @@ html body .gear-summary-card {
 
 @media screen and (max-width: 1100px) {
   html body .gear-page.gear-admin-page .gear-admin-layout {
-    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 @media screen and (max-width: 760px) {
   html body .gear-page.gear-admin-page .gear-admin-tabs button {
-    min-height: 36px !important;
-    font-size: .86rem !important;
+    min-height: 36px;
+    font-size: .86rem;
   }
 
   html body .gear-page.gear-admin-page .gear-admin-list-header {
-    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 /* END DANA-APPS ADMIN COMPACT READABLE V70.0.8R61R23 */
@@ -1277,31 +1277,31 @@ html body .gear-summary-card {
    host, DANA-R35R5). Kept here, not in the shared component, so Truck Log's toasts are unchanged. */
 /* DANA-R35R5-COMPACT-TOAST */
 :is(dana-toast-host, gear-toast-host) {
-  display: contents !important;
+  display: contents;
 }
 :is(dana-toast-host, gear-toast-host) .dana-toast-stack.gear-toast-stack {
-  position: fixed !important;
-  top: calc(var(--gear-topbar-height, 4rem) + 0.75rem) !important;
-  right: 1rem !important;
-  bottom: auto !important;
-  left: auto !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: flex-start !important;
-  align-items: stretch !important;
-  align-content: start !important;
-  gap: 0.625rem !important;
-  box-sizing: border-box !important;
-  width: min(24rem, calc(100vw - 2rem)) !important;
-  max-width: calc(100vw - 2rem) !important;
-  height: auto !important;
-  min-height: 0 !important;
-  max-height: calc(100vh - 6rem) !important;
-  grid-auto-rows: max-content !important;
-  overflow-x: hidden !important;
-  overflow-y: auto !important;
-  pointer-events: none !important;
-  z-index: 10000 !important;
+  position: fixed;
+  top: calc(var(--gear-topbar-height, 4rem) + 0.75rem);
+  right: 1rem;
+  bottom: auto;
+  left: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  align-content: start;
+  gap: 0 !important;
+  box-sizing: border-box;
+  width: min(24rem, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
+  height: auto;
+  min-height: 0;
+  max-height: calc(100vh - 6rem);
+  grid-auto-rows: max-content;
+  overflow-x: hidden;
+  overflow-y: auto;
+  pointer-events: none;
+  z-index: 10000;
 }
 :is(dana-toast-host, gear-toast-host) .dana-toast.gear-toast {
   position: relative !important;
@@ -1323,6 +1323,15 @@ html body .gear-summary-card {
 :is(dana-toast-host, gear-toast-host) .dana-toast.gear-toast > * {
   align-self: start;
   min-width: 0;
+}
+/* Polite (info/success/warning) and assertive (error) live regions share the stack. */
+:is(dana-toast-host, gear-toast-host) .dana-toast-region {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+:is(dana-toast-host, gear-toast-host) .dana-toast-region:not(:empty) ~ .dana-toast-region:not(:empty) {
+  margin-top: 0.625rem;
 }
 /* END DANA-R35R5-COMPACT-TOAST */
 
@@ -1370,28 +1379,28 @@ html body .gear-page :is(table, .kpi-card strong, .gear-count-badge, .count-chip
 }
 
 /* --- Sidebar: every destination has the same shape; the current one is simply highlighted --- */
-html body .gear-sidebar .side-link .nav-current { display: none !important; }
+html body .gear-sidebar .side-link .nav-current { display: none; }
 html body .gear-sidebar .side-link,
 html body .gear-sidebar .side-link.primary {
-  min-height: 40px !important;
-  margin: 2px 0 !important;
-  padding: 8px 12px !important;
+  min-height: 40px;
+  margin: 2px 0;
+  padding: 8px 12px;
   border-radius: 9px !important;
 }
-html body .gear-sidebar .nav-heading { margin: 18px 10px 6px !important; }
+html body .gear-sidebar .nav-heading { margin: 18px 10px 6px; }
 html body .gear-sidebar .sidebar-footer {
-  display: flex !important;
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 12px 19px !important;
+  padding: 12px 19px;
 }
-html body .gear-sidebar .sidebar-footer .version { flex: 1 1 auto; margin: 0 !important; padding: 0 !important; border: 0 !important; }
-html body .gear-sidebar .sidebar-footer .online-row { display: none !important; }
+html body .gear-sidebar .sidebar-footer .version { flex: 1 1 auto; margin: 0; padding: 0; border: 0; }
+html body .gear-sidebar .sidebar-footer .online-row { display: none; }
 
 /* --- Top bar: quieter search, legible account block --- */
 html body header.gear-topbar.gear-topbar .global-search.global-search {
-  border-color: var(--gear-border-strong) !important;
+  border-color: var(--gear-control-border) !important;
   background: var(--gear-surface) !important;
   transition: border-color .15s ease, box-shadow .15s ease;
 }
@@ -1399,70 +1408,72 @@ html body header.gear-topbar.gear-topbar .global-search.global-search:focus-with
   border-color: var(--dana-focus-border, #ed9959) !important;
   box-shadow: var(--dana-focus-ring, 0 0 0 3px rgba(170, 84, 19, .12)) !important;
 }
-html body .gear-topbar .user-copy strong { font-size: 13px !important; font-weight: 600 !important; }
-html body .gear-topbar .user-copy span { font-size: 11.5px !important; color: var(--gear-muted) !important; }
+html body .gear-topbar .user-copy strong { font-size: 13px; font-weight: 600; }
+html body .gear-topbar .user-copy span { font-size: 11.5px; color: var(--gear-muted); }
 html body header.gear-topbar.gear-topbar .signout-button.signout-button {
   min-height: 34px;
-  padding: 6px 12px !important;
+  padding: 6px 12px;
   border-color: var(--gear-border-strong) !important;
   border-radius: 8px !important;
   background: var(--gear-surface) !important;
   color: var(--gear-text) !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
+  font-size: 13px;
+  font-weight: 600;
   transition: background-color .15s ease, border-color .15s ease;
 }
 html body header.gear-topbar.gear-topbar .signout-button.signout-button:hover { background: var(--gear-surface-accent) !important; border-color: #b9bdc4 !important; }
 
 /* --- Page identity: small eyebrow, confident title, calm description --- */
 html body .gear-page .gear-eyebrow {
-  margin: 0 0 4px !important;
-  font-size: 11.5px !important;
-  font-weight: 700 !important;
-  letter-spacing: .09em !important;
+  margin: 0 0 4px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: .09em;
   line-height: 1.3 !important;
 }
 html body .gear-page .gear-page-title,
 html body .dashboard-page .dashboard-heading h1 {
-  font-family: var(--gear-font-sans) !important;
-  font-size: 26px !important;
-  font-weight: 700 !important;
-  letter-spacing: -.02em !important;
-  line-height: 1.2 !important;
-  color: var(--gear-heading) !important;
+  font-family: var(--gear-font-sans);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  line-height: 1.2;
+  color: var(--gear-heading);
 }
 html body .gear-page .gear-page-description,
 html body .dashboard-page .dashboard-heading h1 + p {
-  margin-top: 6px !important;
-  max-width: 72ch !important;
-  font-size: 14.5px !important;
-  line-height: 1.5 !important;
-  color: var(--gear-muted) !important;
+  margin-top: 6px;
+  max-width: 72ch;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--gear-muted);
 }
 
 /* --- Buttons: one height, one weight, visible keyboard focus --- */
 html body .gear-page :is(.gear-btn, .date-chip) {
   min-height: 40px;
-  font-weight: 600 !important;
+  font-weight: 600;
   transition: background-color .15s ease, border-color .15s ease, box-shadow .15s ease, color .15s ease;
 }
-html body .gear-page .gear-btn-primary:disabled,
-html body .gear-page .gear-btn-primary[disabled] {
-  background: #e7c9b4 !important;
-  border-color: transparent !important;
-  color: #fff !important;
-  opacity: 1 !important;
+/* Disabled primary and secondary buttons share one neutral look in both themes (tokens in themes.css). */
+html:root body :is(.gear-btn, .dana-btn):is(.gear-btn-primary, .dana-btn-primary, .gear-btn-secondary, .dana-btn-secondary):is(:disabled, [aria-disabled='true']) {
+  background: var(--dana-disabled-bg) !important;
+  border-color: var(--dana-disabled-border) !important;
+  color: var(--dana-disabled-text) !important;
+  opacity: 1;
+  box-shadow: none;
+  transform: none;
   cursor: not-allowed;
 }
 html body :is(.gear-btn, .date-chip, .signout-button, .side-link, .operation-card, .menu-button, .dana-table-filter-trigger):focus-visible {
-  outline: 2px solid var(--dana-focus-border, #ed9959) !important;
+  outline: 2px solid var(--dana-focus-color, var(--dana-primary)) !important;
   outline-offset: 2px !important;
 }
 /* Row actions never dictate the row height. */
 html body .gear-page table :is(td, th) .gear-btn {
   min-height: 32px !important;
-  padding: 5px 11px !important;
-  font-size: 13px !important;
+  padding: 5px 11px;
+  font-size: 13px;
   border-radius: 8px !important;
 }
 
@@ -1506,20 +1517,20 @@ html body .gear-page table.gear-table th .dana-table-header-tools:has(.dana-tabl
 
 /* --- Badges: neutral by default so the accent colour keeps its meaning --- */
 html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge) {
-  color: #4b5361 !important;
-  font-weight: 600 !important;
+  color: #4b5361;
+  font-weight: 600;
   letter-spacing: .01em;
 }
 html body .gear-page :is(.gear-count-badge, .count-chip) {
-  color: #4b5361 !important;
-  font-weight: 700 !important;
+  color: #4b5361;
+  font-weight: 700;
 }
 
 /* Status tones, wherever a badge declares one. */
-html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge, .dana-status-badge)[data-tone='success'] { border-color: #b7e4d2 !important; background: var(--gear-success-bg) !important; color: var(--gear-success) !important; }
-html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge, .dana-status-badge)[data-tone='warning'] { border-color: #f1dfa3 !important; background: var(--gear-warning-bg) !important; color: var(--gear-warning) !important; }
-html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge, .dana-status-badge)[data-tone='danger'] { border-color: #f5c6c2 !important; background: var(--gear-danger-bg) !important; color: var(--gear-danger) !important; }
-html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge, .dana-status-badge)[data-tone='neutral'] { color: var(--gear-muted) !important; }
+html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge, .dana-status-badge)[data-tone='success'] { border-color: #b7e4d2 !important; background: var(--gear-success-bg) !important; color: var(--gear-success); }
+html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge, .dana-status-badge)[data-tone='warning'] { border-color: #f1dfa3 !important; background: var(--gear-warning-bg) !important; color: var(--gear-warning); }
+html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge, .dana-status-badge)[data-tone='danger'] { border-color: #f5c6c2 !important; background: var(--gear-danger-bg) !important; color: var(--gear-danger); }
+html body .gear-page :is(.status-pill, .gear-status-badge, .gear-badge, .dana-status-badge)[data-tone='neutral'] { color: var(--gear-muted); }
 
 /* --- Panel headers: the title flexes, the actions stay on one line --- */
 html body .gear-page .panel-row > div:first-child { flex: 1 1 0; min-width: 0; }
@@ -1532,22 +1543,22 @@ html body .gear-page .panel-row > .dana-toolbar { flex: 0 0 auto; flex-wrap: now
 html body .gear-page .gear-printer-picker { margin-bottom: 14px; }
 html body .gear-page a.text-blue-700 { color: var(--gear-accent) !important; }
 html body .gear-page a.text-blue-700:hover { text-decoration: underline; }
-html body .gear-page .gear-panel :is(h2, h3).font-black { font-weight: 700 !important; }
+html body .gear-page .gear-panel :is(h2, h3).font-black { font-weight: 700; }
 
 /* --- Workflow step markers: one style in every app --- */
 html body .gear-page .gear-workflow-step-number {
-  width: 2rem !important;
-  height: 2rem !important;
+  width: 2rem;
+  height: 2rem;
   border: 1px solid color-mix(in srgb, var(--gear-accent) 28%, var(--gear-border));
   background: var(--gear-accent-soft) !important;
-  color: var(--gear-accent) !important;
+  color: var(--gear-accent);
   font-size: var(--gear-font-sm);
   font-weight: var(--gear-weight-heavy);
   box-shadow: none !important;
 }
 
 /* --- Sign-in headline: letters no longer collide --- */
-html body .login-brand-copy h1 { letter-spacing: -.025em !important; }
+html body .login-brand-copy h1 { letter-spacing: -.025em; }
 
 /* --- Readability: ship the typeface, raise the small sizes, darken the quiet text ---
    Inter was named in the font stack but never bundled, so each PC showed whatever it had
@@ -1571,9 +1582,7 @@ html body .login-brand-copy h1 { letter-spacing: -.025em !important; }
 :root {
   /* Quiet text still has to pass contrast on white and on the page grey. */
   --gear-muted: #5a6270;
-  --gear-muted-soft: #687080;
   --dana-muted: #5a6270;
-  --dana-placeholder: #7a8290;
   --gear-table-header-text: #4f5663;
   /* The floor for each role of text. Large shop-floor monitors scale these up below. */
   --gear-read-body: 15px;
@@ -1595,28 +1604,28 @@ html body .gear-page { line-height: 1.5; }
 /* :not(#_) lifts these above the older per-feature size rules without touching them.
    The Running Machines wall board keeps its own scale. */
 html body .gear-page:not(.running-machines-page):not(#_) :is(td, .gear-input, .gear-select, .gear-textarea, select, input, textarea, .gear-field, .gear-btn:not([data-icon]), .date-chip:not([data-icon])) {
-  font-size: var(--gear-read-body) !important;
+  font-size: var(--dana-table-font-size, var(--gear-read-body)) !important;
 }
-html body .gear-page:not(.running-machines-page):not(#_) table :is(td, th) .gear-btn:not([data-icon]) { font-size: var(--gear-read-secondary) !important; }
+html body .gear-page:not(.running-machines-page):not(#_) table :is(td, th) .gear-btn:not([data-icon]) { font-size: var(--dana-table-header-font-size, var(--gear-read-secondary)) !important; }
 /* Supporting sentences: descriptions, hints, sub-lines. */
 html body .gear-page:not(.running-machines-page):not(#_) :is(
   small, .gear-field-help, .operation-copy small, .inventory-browser-status, .inventory-pagination span,
   :is(.panel-heading, .gear-panel-heading, .gear-panel-header, .gear-workflow-section-header, .gear-workflow-table-heading, .kpi-card, .inventory-browser-copy, .activity-empty) p
 ) {
-  font-size: var(--gear-read-secondary) !important;
-  line-height: 1.45 !important;
-  color: var(--gear-muted) !important;
+  font-size: var(--gear-read-secondary);
+  line-height: 1.45;
+  color: var(--gear-muted);
 }
 /* Small capitals labels and chips. */
 html body .gear-page:not(.running-machines-page):not(#_) :is(th, .gear-admin-record-label, .dana-summary-card > span, .scrap-summary-card > span, .gear-badge, .gear-status-badge, .status-pill, .dana-status-badge, .gear-count-badge, .count-chip, .subheading-row :is(strong, a)) {
-  font-size: var(--gear-read-micro) !important;
+  font-size: var(--dana-table-header-font-size, var(--gear-read-micro)) !important;
 }
-html body .gear-page .gear-eyebrow { font-size: var(--gear-read-micro) !important; }
-html body .gear-page th { color: var(--gear-table-header-text) !important; }
-html body .gear-sidebar .nav-heading { font-size: 11px !important; color: #a3a9b3 !important; }
-html body .gear-sidebar .sidebar-footer :is(.version, .version span) { font-size: 12px !important; }
-html body .gear-topbar .avatar { font-size: 12px !important; }
-html body .gear-topbar .user-copy span { font-size: 12px !important; }
+html body .gear-page .gear-eyebrow { font-size: var(--gear-read-micro); }
+html body .gear-page th { color: var(--gear-table-header-text); }
+html body .gear-sidebar .nav-heading { font-size: 11px; color: #a3a9b3; }
+html body .gear-sidebar .sidebar-footer :is(.version, .version span) { font-size: 12px; }
+html body .gear-topbar .avatar { font-size: 12px; }
+html body .gear-topbar .user-copy span { font-size: 12px; }
 
 /* --- Icon buttons: actions everyone recognises show an icon, with the label as a tooltip.
    Add data-icon="…" and a title to the button; its text stays in the markup, so screen
@@ -1624,21 +1633,21 @@ html body .gear-topbar .user-copy span { font-size: 12px !important; }
 html body :is(.gear-page, .gear-topbar) [data-icon][data-icon],
 html body header.gear-topbar.gear-topbar .signout-button.signout-button[data-icon] {
   position: relative;
-  display: inline-block !important;
+  display: inline-block;
   vertical-align: middle;
   flex: 0 0 auto;
-  width: 40px !important;
-  min-width: 40px !important;
-  height: 40px !important;
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
   min-height: 40px !important;
   padding: 0 !important;
   gap: 0 !important;
   overflow: hidden;
   font-size: 0 !important;
-  line-height: 0 !important;
+  line-height: 0;
   white-space: nowrap;
 }
-html body :is(.gear-page, .gear-topbar) [data-icon][data-icon] * { font-size: 0 !important; }
+html body :is(.gear-page, .gear-topbar) [data-icon][data-icon] * { font-size: 0; }
 html body :is(.gear-page, .gear-topbar) [data-icon]::before {
   content: '';
   position: absolute;
@@ -1651,21 +1660,21 @@ html body :is(.gear-page, .gear-topbar) [data-icon]::before {
   mask: var(--gear-button-icon) center / contain no-repeat;
 }
 html body header.gear-topbar.gear-topbar .signout-button.signout-button[data-icon] {
-  width: 36px !important;
-  min-width: 36px !important;
-  height: 36px !important;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
   min-height: 36px !important;
   color: var(--gear-muted) !important;
 }
 html body header.gear-topbar.gear-topbar .signout-button.signout-button[data-icon]:hover { color: var(--gear-text) !important; }
 html body .gear-page table :is(td, th) [data-icon][data-icon] {
-  width: 32px !important;
+  width: 32px;
   min-width: 32px !important;
-  height: 32px !important;
+  height: 32px;
   min-height: 32px !important;
 }
 html body .gear-page table :is(td, th) [data-icon]::before { width: 16px; height: 16px; }
-html body .gear-page [data-icon='delete']:not(:disabled) { color: var(--gear-danger) !important; }
+html body .gear-page [data-icon='delete']:not(:disabled) { color: var(--gear-danger); }
 [data-icon='signout'] { --gear-button-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4'/%3E%3Cpath d='m16 17 5-5-5-5'/%3E%3Cpath d='M21 12H9'/%3E%3C/svg%3E"); }
 [data-icon='refresh'] { --gear-button-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 1 1-2.64-6.36L21 8'/%3E%3Cpath d='M21 3v5h-5'/%3E%3C/svg%3E"); }
 [data-icon='edit'] { --gear-button-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z'/%3E%3Cpath d='m15 5 4 4'/%3E%3C/svg%3E"); }
@@ -1684,32 +1693,32 @@ html body .gear-page [data-icon='delete']:not(:disabled) { color: var(--gear-dan
 html body, html body .login-page { font-family: var(--dana-font-sans); }
 html body :is(input, select, textarea, button) { font-family: inherit; }
 html body :is(.gear-badge, .status-pill, .dana-status-badge)[data-tone='info'] {
-  color: var(--dana-info) !important; background: var(--dana-info-soft) !important;
+  color: var(--dana-info); background: var(--dana-info-soft) !important;
 }
 html body :is(.gear-badge, .status-pill, .dana-status-badge)[data-tone='neutral'] {
-  color: var(--dana-muted) !important; background: var(--dana-neutral-soft) !important;
+  color: var(--dana-muted); background: var(--dana-neutral-soft) !important;
 }
 /* Keep wide data readable without horizontal scrolling. Tables become labelled records. */
 html body .gear-page :is(.table-wrap, .gear-table-wrap, .dana-table-shell, [danaTableShell]) { min-width: 0; max-width: 100%; }
-html body .gear-page table[danaTable] { width: 100%; min-width: 0 !important; table-layout: fixed; }
+html body .gear-page table[danaTable]:not(.running-machine-table) { width: 100%; min-width: var(--dana-table-min-width, 0); table-layout: var(--dana-table-layout, fixed); }
 html body .gear-page table[danaTable] :is(th, td) { white-space: normal !important; overflow-wrap: anywhere; min-width: 0; }
 html body .gear-page table[danaTable] :is(.gear-actions, .gear-admin-actions) { flex-wrap: wrap; }
 /* A button or field in a cell shrinks with its column instead of pushing the table sideways. */
 html body .gear-page table[danaTable] td :is(button, .gear-btn, input, select) { min-width: 0; max-width: 100%; white-space: normal; }
 @media screen and (max-width: 900px) {
-  html body .gear-page table[danaTable] { display: block; }
-  html body .gear-page table[danaTable] thead { display: block; }
-  html body .gear-page table[danaTable] thead tr { display: flex; flex-wrap: wrap; }
-  html body .gear-page table[danaTable] thead th { flex: 1 1 8rem; }
-  html body .gear-page table[danaTable] tbody { display: grid; gap: var(--dana-record-gap, 1rem); }
-  html body .gear-page table[danaTable] tbody tr { display: grid; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-md); padding: .5rem; }
-  html body .gear-page table[danaTable] tbody tr[hidden] { display: none; }
-  html body .gear-page table[danaTable] tbody td { display: flex; flex-wrap: wrap; gap: .5rem; width: auto !important; max-width: 100%; }
-  html body .gear-page table[danaTable] tbody td::before { content: attr(data-dana-label); flex: 0 0 40%; font-weight: 700; color: var(--dana-muted); }
-  html body .gear-page table[danaTable] tbody td[colspan]::before { display: none; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) { display: block; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) thead { display: block; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) thead tr { display: flex; flex-wrap: wrap; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) thead th { flex: 1 1 8rem; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) tbody { display: grid; gap: var(--dana-record-gap, 1rem); }
+  html body .gear-page table[danaTable]:not(.running-machine-table) tbody tr { display: grid; border: 1px solid var(--dana-border); border-radius: var(--dana-radius-md); padding: .5rem; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) tbody tr[hidden] { display: none; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) tbody td { display: flex; flex-wrap: wrap; gap: .5rem; width: auto; max-width: 100%; }
+  html body .gear-page table[danaTable]:not(.running-machine-table) tbody td::before { content: attr(data-dana-label); flex: 0 0 40%; font-weight: 700; color: var(--dana-muted); }
+  html body .gear-page table[danaTable]:not(.running-machine-table) tbody td[colspan]::before { display: none; }
 }
 
-html body :is(.gear-sidebar, .gear-topbar, .gear-page, .app-content-shell, .login-page), html body .gear-page .gear-page-title, html body .dashboard-page .dashboard-heading h1 { font-family: var(--dana-font-sans) !important; }
+html body :is(.gear-sidebar, .gear-topbar, .gear-page, .app-content-shell, .login-page), html body .gear-page .gear-page-title, html body .dashboard-page .dashboard-heading h1 { font-family: var(--dana-font-sans); }
 
 .gear-admin-sections { display: grid; margin-bottom: 1rem; padding: .25rem 1rem; border: 1px solid var(--dana-border); background: var(--dana-surface); border-radius: var(--dana-radius-md); }
 .gear-admin-section { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); align-items: center; gap: .75rem; padding: .4rem 0; border-bottom: 1px solid var(--dana-border); min-width: 0; }
@@ -1719,4 +1728,6 @@ html body :is(.gear-sidebar, .gear-topbar, .gear-page, .app-content-shell, .logi
   .gear-admin-section { grid-template-columns: minmax(0, 1fr); gap: .25rem; }
 }
 /* Inside a section row the tabs are a plain wrapped list: no strip border or background. */
-html body .gear-page.gear-admin-page .gear-admin-section .gear-admin-tabs { display: flex; flex-wrap: wrap; gap: .25rem; overflow: visible; margin: 0 !important; padding: 0 !important; border: 0; background: none; box-shadow: none; }
+html body .gear-page.gear-admin-page .gear-admin-section .gear-admin-tabs { display: flex; flex-wrap: wrap; gap: .25rem; overflow: visible; margin: 0 !important; padding: 0; border: 0; background: none; box-shadow: none; }
+/* Embedded Admin tools inherit their enclosing page's container and gutters. */
+html body .gear-page .gear-page { max-width: none !important; margin: 0; padding: 0 !important; }

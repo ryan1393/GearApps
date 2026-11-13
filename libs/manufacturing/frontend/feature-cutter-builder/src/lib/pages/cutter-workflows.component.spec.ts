@@ -48,6 +48,33 @@ describe('Cutter workflow selection safety', () => {
     second.next({ ...build, build_number: 'SECOND' }); first.next({ ...build, build_number: 'FIRST' });
     expect(component.card?.build_number).toBe('SECOND');
   });
+  it('offers only free, enabled, empty trays and enabled dull shelves for teardown', () => {
+    const free = { ...tray, id: 'free', serial_number: 'FREE', enabled: true, current_container: null, current_cutter_build: null };
+    api['getSelectionTrays'].mockReturnValue(of([
+      free,
+      { ...free, id: 'disabled', serial_number: 'DISABLED', enabled: false },
+      { ...free, id: 'full', serial_number: 'FULL', blade_count: 4 },
+      { ...free, id: 'coater', serial_number: 'COATER', current_container: { id: 'c', serial_number: 'C1' } },
+      { ...free, id: 'built', serial_number: 'BUILT', current_cutter_build: { id: 'b' } },
+    ]));
+    const shelf = { id: 's1', serial_number: 'CGDR-A1A', location_type: 'SHELF', department: 'CUTTERGRIND', enabled: true };
+    api['getSelectionLocations'].mockReturnValue(of([shelf, { ...shelf, id: 's2', serial_number: 'CGDR-A1B', enabled: false }]));
+    const component = teardown(); component.build = build; component.scrappedBladeCount = 0;
+    expect(component.availableEmptyTrays.map((row) => row.serial_number)).toEqual(['FREE']);
+    expect(component.eligibleDullShelves.map((row) => row.serial_number)).toEqual(['CGDR-A1A']);
+  });
+  it('sets the teardown scrap count with the − / + count stepper, within the build blade count', () => {
+    const fixture = TestBed.createComponent(CutterTeardownComponent);
+    fixture.componentInstance.build = build;
+    fixture.detectChanges();
+    const stepper = fixture.nativeElement.querySelector('gear-count-stepper') as HTMLElement;
+    expect(stepper.textContent).toContain('Number of Scrapped Blades');
+    const [minus, plus] = Array.from(stepper.querySelectorAll('button')) as HTMLButtonElement[];
+    plus.click(); plus.click(); minus.click();
+    expect(fixture.componentInstance.scrappedBladeCount).toBe(1);
+    expect(fixture.componentInstance.returnedBladeCount).toBe(10);
+    fixture.destroy();
+  });
   it('rejects fractional scrap quantities', () => {
     const component = teardown(); component.build = build; component.scrappedBladeCount = 0.5;
     expect(component.scrapCountValid).toBe(false);
@@ -81,7 +108,37 @@ describe('Cutter workflow selection safety', () => {
   });
   it('does not print a card when the build fails', () => {
     const component = readyToBuild(); api['createBuild'].mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409 })));
-    component.build(); expect(api['printCard']).not.toHaveBeenCalled();
+    component.build(); expect(api['printCard']).not.toHaveBeenCalled(); expect(component.error).toBe('Could not create Cutter Build.');
+    expect(component.cutterBody).toBe(body); expect(component.tray).toBe(tray); expect(component.busy).toBe(false);
+  });
+  it('keeps the selected card visible while printing instead of clearing it through Back to Results', () => {
+    const pending = new Subject<never>(); api['printCard'].mockReturnValue(pending);
+    const component = TestBed.runInInjectionContext(() => new CutterLookupComponent());
+    component.card = build; component.print(); component.backToResults();
+    expect(component.card).toBe(build); expect(component.busy).toBe(true);
+    expect(api['searchBuilds']).not.toHaveBeenCalled(); component.ngOnDestroy();
+  });
+  function readyToTeardown() {
+    const component = teardown(); component.build = build; component.buildNumber = build.build_number;
+    component.tray = tray; component.traySerial = tray.serial_number; component.scrappedBladeCount = build.blade_count;
+    return component;
+  }
+  it('requires a confirmed teardown and revalidates the exact selected tray before submitting', () => {
+    const component = readyToTeardown(); component.teardown();
+    expect(api['teardownBuild']).not.toHaveBeenCalled();
+    component.askTeardown(); expect(component.teardownConfirmation).toBe(true);
+    expect(component.teardownConfirmationMessage).toContain('11 scrapped');
+    component.trayChanged('OTHER'); component.teardown();
+    expect(component.teardownConfirmation).toBe(false); expect(api['teardownBuild']).not.toHaveBeenCalled();
+  });
+  it('preserves teardown failure details and selections for retry, without a duplicate pending transaction', () => {
+    const pending = new Subject<never>(); api['teardownBuild'].mockReturnValue(pending);
+    const component = readyToTeardown(); component.askTeardown(); component.teardown(); component.teardown();
+    expect(api['teardownBuild']).toHaveBeenCalledTimes(1);
+    pending.error(new HttpErrorResponse({ status: 409, error: { message: 'The tray is already assigned.' } }));
+    expect(component.error).toBe('The tray is already assigned.'); expect(component.busy).toBe(false);
+    expect(component.build).toBe(build); expect(component.tray).toBe(tray); expect(component.scrappedBladeCount).toBe(11);
+    component.askTeardown(); expect(component.teardownConfirmation).toBe(true);
   });
   it('falls back to browser print after the card renders when no card printer is set up', () => {
     jest.useFakeTimers();

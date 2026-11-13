@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { DanaKpiCardDirective, DanaKpiGridDirective, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
+import { DanaAlertDirective, DanaButtonDirective, DanaEmptyStateDirective, DanaKpiCardDirective, DanaKpiGridDirective, DanaLoadingStateDirective, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective, DanaThemeToggleComponent } from '@dana/ui';
 import { PlantHistoryDataService } from '@meshforge/manufacturing/frontend/data-access-plant-dashboard';
 import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
 import { defaultHistoryFilters, historyCountLabel, historyCsv, historyFilterError, plantDate, type PlantHistoryFilters } from '@meshforge/manufacturing/frontend/util-plant-dashboard';
@@ -11,12 +11,17 @@ import type { DsfHistoryRecord, DsfHistorySource } from '@meshforge/shared/domai
 @Component({
   selector: 'gear-plant-history',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DanaKpiCardDirective, DanaKpiGridDirective, DanaTableDirective, DanaTableShellDirective],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [CommonModule, FormsModule, RouterLink, DanaAlertDirective, DanaButtonDirective, DanaEmptyStateDirective, DanaKpiCardDirective, DanaKpiGridDirective, DanaLoadingStateDirective, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective, DanaThemeToggleComponent],
   providers: [PlantHistoryDataService],
   templateUrl: './history.component.html',
   styleUrls: ['./plant-layout.css', './history-layout.css'],
 })
 export class HistoryComponent {
+  private readonly timeFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Indiana/Indianapolis', month: 'short', day: 'numeric',
+    hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
+  });
   private readonly data = inject(PlantHistoryDataService);
   private readonly session = inject(AuthSessionService);
   private readonly router = inject(Router);
@@ -47,8 +52,8 @@ export class HistoryComponent {
   });
   readonly knownSubtotal = computed(() => {
     const report = this.report();
-    return report?.available && report.rows.some(row => !row.duplicate_operation && row.count !== null &&
-      (row.completeness === 'COMPLETE' || row.completeness === 'PARTIAL')) ? report.totals.known_subtotal : null;
+    return report?.available && report.rows.some(row => !row.duplicate_operation &&
+      row.completeness !== 'REVIEW' && row.covered_seconds > 0) ? report.totals.known_subtotal : null;
   });
 
   constructor() { this.data.applyFilters(this.draft()); }
@@ -65,8 +70,7 @@ export class HistoryComponent {
 
   formatTime(value: string | null): string {
     if (!value || !Number.isFinite(Date.parse(value))) return '—';
-    return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Indiana/Indianapolis', month: 'short', day: 'numeric',
-      hour: 'numeric', minute: '2-digit', timeZoneName: 'short' }).format(new Date(value));
+    return this.timeFormatter.format(new Date(value));
   }
 
   sourceLabel(source: DsfHistorySource): string {

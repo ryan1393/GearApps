@@ -186,8 +186,8 @@ import { groupByCell } from './cells';
               @if (settingChanges.error()) {
                 Setting changes are unavailable. Refresh to retry.
               } @else {
-                Cycles where a value other than the consec counter changed since the previous cycle of
-                that machine and gearset.
+                Cycles where a value sent to Argonaut changed since the previous cycle of that machine
+                and gearset.
                 @if ((settingChanges.value()?.total ?? 0) > (settingChanges.value()?.items?.length ?? 0)) {
                   Showing the newest {{ settingChanges.value()?.items?.length }} of {{ settingChanges.value()?.total }}.
                 }
@@ -247,11 +247,11 @@ import { groupByCell } from './cells';
                 </tr>
                 @if (isExpanded(cycle)) {
                   <tr class="setting-change-detail-row" data-dana-table-detail [attr.data-dana-table-group]="cycle.machine_cycle_id">
-                    <td colspan="7" [id]="'setting-change-' + cycle.machine_cycle_id">
+                    <td colspan="7" class="dana-table-detail-cell" [id]="'setting-change-' + cycle.machine_cycle_id">
                       <ul class="setting-change-grid" [attr.aria-label]="changeCount(cycle) + ' on ' + (cycle.machine_number || 'this machine')">
                         @for (change of cycle.changes; track change.number) {
                           <li>
-                            <span class="setting-change-macro mono">#{{ change.number }}</span>
+                            <span class="setting-change-macro gear-muted mono">#{{ change.number }}</span>
                             <span class="setting-change-name">{{ change.name }}</span>
                             <span class="setting-change-values mono"
                               >{{ change.previous_value | number: '1.0-5' }} → <strong>{{ change.value | number: '1.0-5' }}</strong
@@ -270,7 +270,7 @@ import { groupByCell } from './cells';
                     {{
                       settingChanges.loading()
                         ? 'Loading setting changes…'
-                        : 'No settings changed in the last ' + settingHours + ' hours: only the consec counter moved.'
+                        : 'No settings changed in the last ' + settingHours + ' hours: no value sent to Argonaut changed.'
                     }}
                   </td>
                 </tr>
@@ -448,18 +448,14 @@ import { groupByCell } from './cells';
     .setting-change-summary {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: var(--dana-field-gap);
       min-width: 0;
     }
     .setting-change-summary > * { flex: none; }
-    .setting-change-detail-row > td {
-      background: var(--dana-neutral-soft);
-      padding: 10px 14px !important;
-    }
     .setting-change-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 6px 18px;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+      gap: var(--dana-field-gap) var(--dana-form-gap);
       margin: 0;
       padding: 0;
       list-style: none;
@@ -468,12 +464,9 @@ import { groupByCell } from './cells';
       display: grid;
       grid-template-columns: auto minmax(0, 1fr) auto auto;
       align-items: baseline;
-      gap: 8px;
-      font-size: 13px;
+      gap: var(--dana-field-gap);
     }
-    .setting-change-macro { color: var(--dana-muted); font-size: 12px; }
     .setting-change-name {
-      font-weight: 600;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -481,7 +474,7 @@ import { groupByCell } from './cells';
     .setting-change-values, .setting-change-delta { white-space: nowrap; }
     /* On a phone the values go under the name, so names are never cut short. */
     @media (max-width: 600px) {
-      .setting-change-grid li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+      .setting-change-grid li { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--dana-space-1) var(--dana-field-gap); }
       /* The name fills the rest of the first line, so values and difference share the second. */
       .setting-change-name { flex: 1 1 60%; min-width: 0; white-space: normal; overflow-wrap: anywhere; }
     }

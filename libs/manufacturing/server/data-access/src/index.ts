@@ -1,5 +1,6 @@
 export * from './lib/server-data-access.module';
 export * from './lib/workflow-reversal';
+export * from './lib/cutter-request-allocation';
 export * from './lib/database/entities/user.orm-entity';
 export * from './lib/database/entities/blade-tracking/location.orm-entity';
 export * from './lib/database/entities/blade-tracking/tray.orm-entity';
@@ -62,3 +63,4 @@ export * from './lib/coater-container-set';
 export * from './lib/database/subscribers/user.entity-subscriber';
 export * from './lib/cutter-summary-body-rule.schema';
 export * from './lib/summary-part-type-blades.schema';
+export * from './lib/summary-requirement-lock';

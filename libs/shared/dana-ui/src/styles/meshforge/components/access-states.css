@@ -33,7 +33,7 @@
 }
 
 .gear-field-help {
-  color: #777f8e;
+  color: var(--gear-muted);
   font-size: var(--gear-font-sm);
   font-weight: 500;
   line-height: 1.45;

@@ -63,9 +63,12 @@ container_of() {
 }
 
 # One-off container from the API image; does not publish ports or start other services.
-# It gets no input, so it cannot swallow the confirmation typed afterwards.
+# It gets no input, so it cannot swallow the confirmation typed afterwards. It runs as this
+# host account, so the row-count manifest it writes into the mounted folder stays owned by
+# this account: a root-owned file there would stop a later deploy removing old releases.
 run_clear() {
   compose run --rm --no-deps -T \
+    --user "$(id -u):$(id -g)" \
     -e MESHFORGE_CLEAR_FROM_LAUNCHER=1 \
     -v "$ROOT/$SCRIPT_DIR:/app/$SCRIPT_DIR" \
     "$API_SERVICE" node "$SCRIPT" "--locations=$LOCATIONS" "$@" </dev/null

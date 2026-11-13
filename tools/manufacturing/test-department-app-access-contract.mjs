@@ -1,4 +1,5 @@
 import { contractPath } from './lib/contract-paths.mjs';
+import { readAdminScreenHtml, readAdminScreenTs } from './lib/admin-screen-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { workspaceRoot } from './lib/contract-paths.mjs';
@@ -15,7 +16,7 @@ const jwtPayload=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing
 const frontendGuard=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/data-access-common/src/lib/guards/department-editor.guard.ts'),'utf8');
 const adminUserDto=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/server/feat-user/src/lib/admin-create-user.dto.ts'),'utf8');
 const adminUserService=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/server/feat-user/src/lib/server-feat-user.service.ts'),'utf8');
-const adminHtml=fs.readFileSync(contractPath(process.cwd(), 'libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.html'),'utf8');
+const adminHtml=readAdminScreenHtml();
 const mutationSuite=fs.readFileSync(contractPath(process.cwd(), 'tools/manufacturing/test-authenticated-backend-mutations.ps1'),'utf8');
 const backendFixture=fs.readFileSync(contractPath(process.cwd(), 'tools/manufacturing/test-data/ensure-backend-mutation-test-fixtures.mjs'),'utf8');
 const runner=fs.readFileSync(contractPath(process.cwd(), 'tools/manufacturing/run-all-tests.ps1'),'utf8');
@@ -70,9 +71,28 @@ const controllerRules=[
 ];
 for(const [file,app] of controllerRules){
   const text=fs.readFileSync(contractPath(process.cwd(), file),'utf8');
+  // Request planning is shared by Team Leaders and Cutter Grind. These recovered
+  // endpoints retain JWT/base-role and custom-action grants without acquiring the
+  // physical Cutter Builder department restriction.
+  const requestHandlers=new Map([
+    ["@Get('requests')",'listCutterRequests'],
+    ["@Post('requests')",'createCutterRequest'],
+    ["@Patch('requests/:id/status')",'updateCutterRequestStatus'],
+  ]);
+  if(app==='CUTTER_BUILDER'){
+    for(const [route,handler] of requestHandlers){
+      const start=text.indexOf(route);
+      const block=start<0 ? '' : text.slice(start).split(/\n\s*@(Get|Post|Patch|Delete|Put)\(/)[0];
+      if(!block.includes('@Auth([RoleType.ADMIN, RoleType.USER])') ||
+         !block.includes(`${handler}(`) || block.includes('@DepartmentAppEdit')){
+        throw new Error(`${file} ${route} must preserve authenticated, action-authorized cross-department request access.`);
+      }
+    }
+  }
   const mutations=[...text.matchAll(/@(Post|Patch|Delete|Put)\([^)]*\)/g)];
   if(!mutations.length) throw new Error(`${file} has no mutating routes to inspect.`);
   for(const match of mutations){
+    if(app==='CUTTER_BUILDER' && requestHandlers.has(match[0])) continue;
     const after=text.slice(match.index, match.index+180);
     if(!after.includes(`@DepartmentAppEdit('${app}')`)){
       throw new Error(`${file} mutation ${match[0]} is missing DepartmentAppEdit('${app}').`);
@@ -118,7 +138,7 @@ for(const file of [
   if(!text.includes('*ngIf="canEdit(user)"') ||
      !text.includes('*ngIf="!canEdit(user)"') ||
      !text.includes('VIEW ONLY') ||
-     !text.includes('can view this dashboard')){
+     !(text.includes('can view this dashboard') || text.includes('Physical cutter operations follow department permissions. Cutter Requests follow your assigned access.'))){
     throw new Error(`${file} does not expose dashboard-only/view-only UI state.`);
   }
 }

@@ -1,5 +1,6 @@
 import { BaseEntity } from '../common/entity';
 import { Gearset } from './gearset';
+import { ARGONAUT_MACROS } from './argonaut';
 import { Machine } from './machine';
 
 /** One lapping cycle run on a machine for a gearset. */
@@ -94,6 +95,12 @@ export interface LapperProduction {
  * #10032 is the consecutive cycle counter (consec).
  */
 export const PER_CYCLE_MACROS: readonly number[] = [10032];
+/**
+ * The only macros a setting change is flagged for: the 68 sent to Argonaut, never a per-cycle
+ * counter. Admin > Macros > Flag changes can switch one of these off but cannot add any other.
+ */
+export const FLAGGABLE_MACROS: readonly number[] = ARGONAUT_MACROS.filter((n) => !PER_CYCLE_MACROS.includes(n));
+export const macroCanFlagChanges = (number: unknown): boolean => FLAGGABLE_MACROS.includes(Number(number));
 /** The Lapper Dashboard flags setting changes over this many hours. */
 export const SETTING_CHANGE_HOURS = 8;
 

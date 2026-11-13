@@ -1,3 +1,8 @@
+/* Dense DSF value captions use the shared theme while retaining the board layout. */
+.running-machines-page .dsf-count-value { font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.2; }
+.running-machines-page .dsf-count-state { font-size: .65rem; line-height: 1.2; color: var(--dana-muted); }
+.running-machines-page .dsf-count-warning { color: var(--dana-warning); font-weight: 700; }
+
 /* DANA-R61R14-RUNNING-MACHINES-PART-SHIFT-COUNTS-BEGIN */
 .running-machines-page .running-machines-header { min-height: 82px !important; flex: 0 0 auto !important; }
 .running-machines-page .running-machine-table th:nth-child(1),
@@ -28,7 +33,7 @@
   font-weight: 700 !important;
   line-height: 1.2 !important;
   font-variant-numeric: tabular-nums !important;
-  color: #39414e !important;
+  color: var(--gear-text) !important;
   text-align: center !important;
   white-space: nowrap !important;
   overflow-wrap: normal !important;
@@ -38,7 +43,7 @@
   text-align: center !important;
   font-size: .8125rem !important;
   line-height: 1.25 !important;
-  color: #39414e !important;
+  color: var(--gear-text) !important;
   font-weight: 600 !important;
 }
 .running-machines-page .shift-count-note { text-align: center !important; }

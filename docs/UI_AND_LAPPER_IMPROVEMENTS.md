@@ -39,7 +39,7 @@ Lapping Summaries is laid out to fit one screen: a paged cycle table with a seri
 - All-machine DSF tests: Department 45 grinders, Department 181 lappers, non-cutting operations and initial source discovery passed using a fake read-only source.
 - Integrated Coater RPA: all 11 container-tray/RPA tests passed, including matched-set quantity regressions for 11, 13, 17 and 19. A synthetic saved workbook was prepared and downloaded through both the API and shipment UI with matching inner/outer quantities; SMTP remained disabled. The shared shipment screen passed desktop, tablet and phone checks.
 - Real local PostgreSQL/API checks: login, machine/gear/macro setup, cycle ingestion, historical macro values, saved pass/fail simulations, unchanged production totals and non-admin denial.
-- Chromium: all four login fonts match app fonts; Admin renders at 1440, 768 and 390 pixels without horizontal page overflow. Cycle simulation and historical selection work through the UI. Lapper dashboard, settings, blade grinding, shipments and inventory also passed responsive checks. Machine DSF Counts passed at all three widths in all four apps; grinder selection survives refresh and its saved pass history renders without overflow.
+- Chromium: all four login fonts match app fonts; Admin renders at 1440, 768 and 390 pixels without horizontal page overflow. Cycle simulation and historical selection work through the UI. Lapper dashboard, settings, blade grinding, shipments and inventory also passed responsive checks. Machine DSF Counts passed at all three widths in Blade Tracking, Cutter Builder and Greenshed (it has since been removed from Lapper); grinder selection survives refresh and its saved pass history renders without overflow.
 
 ## Remaining external validation
 

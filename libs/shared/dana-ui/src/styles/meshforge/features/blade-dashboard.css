@@ -26,7 +26,7 @@
   align-items: center;
   gap: 10px;
   min-height: 55px;
-  border-bottom: 1px solid #f0f1f2;
+  border-bottom: 1px solid var(--gear-divider);
 }
 
 .dashboard-activity-row:last-child {
@@ -40,8 +40,8 @@
   place-items: center;
   border: 1px solid #dee0e4;
   border-radius: 8px;
-  background: #f4f5f6;
-  color: #ad5613;
+  background: var(--gear-surface-accent);
+  color: var(--gear-accent-strong);
   font-size: 12px;
   font-weight: 800;
 }

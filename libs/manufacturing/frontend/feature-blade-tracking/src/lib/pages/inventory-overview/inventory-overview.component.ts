@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@meshforge/manufacturing/frontend/util-common';
 
 import {
@@ -31,6 +31,7 @@ interface InventoryPageState<T> {
   rows: T[];
   meta: IPaginationMeta | null;
   loading: boolean;
+  error: string;
 }
 
 @Component({
@@ -49,12 +50,16 @@ interface InventoryPageState<T> {
   ],
   templateUrl: './inventory-overview.component.html',
 })
-export class InventoryOverviewComponent implements OnInit {
+export class InventoryOverviewComponent implements OnInit, OnDestroy {
   private readonly api = inject(BladeTrackingApiService);
   private readonly toast = inject(GearToastService);
+  private readonly destroyed$ = new Subject<void>();
+  private readonly versions: Record<InventoryTab, number> = { trays: 0, containers: 0, locations: 0, blades: 0 };
+  private operationError = '';
 
   activeTab: InventoryTab = 'trays';
-  error = '';
+  get error(): string { return this.operationError || this.stateFor(this.activeTab).error; }
+  set error(value: string) { this.operationError = value; }
   printMessage = '';
   printTone: 'success' | 'warning' | 'info' = 'success';
   printingTagSerial: string | null = null;
@@ -73,11 +78,11 @@ export class InventoryOverviewComponent implements OnInit {
     blades: '',
   };
 
-  readonly inventoryTotals: Record<InventoryTab, number> = {
-    trays: 0,
-    containers: 0,
-    locations: 0,
-    blades: 0,
+  readonly inventoryTotals: Record<InventoryTab, number | null> = {
+    trays: null,
+    containers: null,
+    locations: null,
+    blades: null,
   };
 
   expandedTrayId: string | null = null;
@@ -90,44 +95,53 @@ export class InventoryOverviewComponent implements OnInit {
     rows: [],
     meta: null,
     loading: true,
+    error: '',
   };
 
   containers: InventoryPageState<InventoryContainerRow> = {
     rows: [],
     meta: null,
     loading: true,
+    error: '',
   };
 
   locations: InventoryPageState<InventoryLocationRow> = {
     rows: [],
     meta: null,
     loading: true,
+    error: '',
   };
 
   blades: InventoryPageState<InventoryBladeRow> = {
     rows: [],
     meta: null,
     loading: true,
+    error: '',
   };
 
   ngOnInit(): void {
     this.loadInitial();
   }
 
-  get totalTrays(): number {
-    return this.inventoryTotals.trays;
+  ngOnDestroy(): void {
+    this.destroyed$.next();
+    this.destroyed$.complete();
   }
 
-  get totalContainers(): number {
-    return this.inventoryTotals.containers;
+  get totalTrays(): number | string {
+    return this.inventoryTotals.trays ?? (this.trays.loading ? '…' : '—');
   }
 
-  get totalLocations(): number {
-    return this.inventoryTotals.locations;
+  get totalContainers(): number | string {
+    return this.inventoryTotals.containers ?? (this.containers.loading ? '…' : '—');
   }
 
-  get totalBlades(): number {
-    return this.inventoryTotals.blades;
+  get totalLocations(): number | string {
+    return this.inventoryTotals.locations ?? (this.locations.loading ? '…' : '—');
+  }
+
+  get totalBlades(): number | string {
+    return this.inventoryTotals.blades ?? (this.blades.loading ? '…' : '—');
   }
 
   get anyLoading(): boolean {
@@ -138,6 +152,9 @@ export class InventoryOverviewComponent implements OnInit {
       this.blades.loading
     );
   }
+
+  get activeLoading(): boolean { return this.stateFor(this.activeTab).loading; }
+  get activeLoadError(): string { return this.stateFor(this.activeTab).error; }
 
   get activeSearch(): string {
     return this.searchTerms[this.activeTab];
@@ -224,7 +241,7 @@ export class InventoryOverviewComponent implements OnInit {
     this.printMessage = '';
     this.printingTagSerial = serialNumber;
 
-    this.api.printAssetTag(kind, recordId).subscribe({
+    this.api.printAssetTag(kind, recordId).pipe(takeUntil(this.destroyed$)).subscribe({
       next: (result) => {
         this.printingTagSerial = null;
         if (!result.printed) {
@@ -248,93 +265,113 @@ export class InventoryOverviewComponent implements OnInit {
 
   loadTrays(page: number): void {
     if (page < 1) return;
+    const version = ++this.versions.trays;
     this.error = '';
+    this.trays.error = '';
     this.expandedTrayId = null;
     this.trays.loading = true;
 
     const search = this.appliedSearchTerms.trays;
-    this.api.getTrays(page, 50, search).subscribe({
+    this.api.getTrays(page, 50, search).pipe(takeUntil(this.destroyed$)).subscribe({
       next: (response) => {
+        if (version !== this.versions.trays) return;
         this.trays = {
           rows: response.data,
           meta: response.meta,
           loading: false,
+          error: '',
         };
         if (!search) this.inventoryTotals.trays = response.meta.totalItems;
       },
       error: (error: HttpErrorResponse) => {
+        if (version !== this.versions.trays) return;
         this.trays.loading = false;
-        this.error = apiErrorText(error, 'Could not load trays.');
+        this.trays.error = apiErrorText(error, 'Could not load trays.');
       },
     });
   }
 
   loadContainers(page: number): void {
     if (page < 1) return;
+    const version = ++this.versions.containers;
     this.error = '';
+    this.containers.error = '';
     this.expandedContainerId = null;
     this.expandedContainerTrayId = null;
     this.containers.loading = true;
 
     const search = this.appliedSearchTerms.containers;
-    this.api.getContainers(page, 50, search).subscribe({
+    this.api.getContainers(page, 50, search).pipe(takeUntil(this.destroyed$)).subscribe({
       next: (response) => {
+        if (version !== this.versions.containers) return;
         this.containers = {
           rows: response.data,
           meta: response.meta,
           loading: false,
+          error: '',
         };
         if (!search) this.inventoryTotals.containers = response.meta.totalItems;
       },
       error: (error: HttpErrorResponse) => {
+        if (version !== this.versions.containers) return;
         this.containers.loading = false;
-        this.error = apiErrorText(error, 'Could not load containers.');
+        this.containers.error = apiErrorText(error, 'Could not load containers.');
       },
     });
   }
 
   loadLocations(page: number): void {
     if (page < 1) return;
+    const version = ++this.versions.locations;
     this.error = '';
+    this.locations.error = '';
     this.expandedLocationId = null;
     this.expandedLocationTrayId = null;
     this.locations.loading = true;
 
     const search = this.appliedSearchTerms.locations;
-    this.api.getLocations(page, 50, search).subscribe({
+    this.api.getLocations(page, 50, search).pipe(takeUntil(this.destroyed$)).subscribe({
       next: (response) => {
+        if (version !== this.versions.locations) return;
         this.locations = {
           rows: response.data,
           meta: response.meta,
           loading: false,
+          error: '',
         };
         if (!search) this.inventoryTotals.locations = response.meta.totalItems;
       },
       error: (error: HttpErrorResponse) => {
+        if (version !== this.versions.locations) return;
         this.locations.loading = false;
-        this.error = apiErrorText(error, 'Could not load locations.');
+        this.locations.error = apiErrorText(error, 'Could not load locations.');
       },
     });
   }
 
   loadBlades(page: number): void {
     if (page < 1) return;
+    const version = ++this.versions.blades;
     this.error = '';
+    this.blades.error = '';
     this.blades.loading = true;
 
     const search = this.appliedSearchTerms.blades;
-    this.api.getBlades(page, 50, search).subscribe({
+    this.api.getBlades(page, 50, search).pipe(takeUntil(this.destroyed$)).subscribe({
       next: (response) => {
+        if (version !== this.versions.blades) return;
         this.blades = {
           rows: response.data,
           meta: response.meta,
           loading: false,
+          error: '',
         };
         if (!search) this.inventoryTotals.blades = response.meta.totalItems;
       },
       error: (error: HttpErrorResponse) => {
+        if (version !== this.versions.blades) return;
         this.blades.loading = false;
-        this.error = apiErrorText(error, 'Could not load blades.');
+        this.blades.error = apiErrorText(error, 'Could not load blades.');
       },
     });
   }
@@ -359,43 +396,11 @@ export class InventoryOverviewComponent implements OnInit {
   }
 
   private loadInitial(): void {
-    this.error = '';
-
-    forkJoin({
-      trays: this.api.getTrays(1, 50),
-      containers: this.api.getContainers(1, 50),
-      locations: this.api.getLocations(1, 50),
-      blades: this.api.getBlades(1, 50),
-    }).subscribe({
-      next: ({ trays, containers, locations, blades }) => {
-        this.trays = { rows: trays.data, meta: trays.meta, loading: false };
-        this.containers = {
-          rows: containers.data,
-          meta: containers.meta,
-          loading: false,
-        };
-        this.locations = {
-          rows: locations.data,
-          meta: locations.meta,
-          loading: false,
-        };
-        this.blades = { rows: blades.data, meta: blades.meta, loading: false };
-
-        this.inventoryTotals.trays = trays.meta.totalItems;
-        this.inventoryTotals.containers = containers.meta.totalItems;
-        this.inventoryTotals.locations = locations.meta.totalItems;
-        this.inventoryTotals.blades = blades.meta.totalItems;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.trays.loading = false;
-        this.containers.loading = false;
-        this.locations.loading = false;
-        this.blades.loading = false;
-        this.error = apiErrorText(
-          error,
-          'Could not load Blade Tracking inventory.',
-        );
-      },
-    });
+    // Each inventory type loads independently: one failed or restricted lookup must
+    // not discard the other successful tabs or leave their operators waiting.
+    this.loadTrays(1);
+    this.loadContainers(1);
+    this.loadLocations(1);
+    this.loadBlades(1);
   }
 }

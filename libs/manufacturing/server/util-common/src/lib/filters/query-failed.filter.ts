@@ -5,6 +5,8 @@ import { QueryFailedError } from 'typeorm';
 import { ArgumentsHost, Catch, HttpStatus, Logger } from '@nestjs/common';
 import { BaseExceptionFilter, Reflector } from '@nestjs/core';
 
+import { reportServerError } from './report-server-errors.filter';
+
 export function isQueryFailedError(
   thrownValue: unknown,
 ): thrownValue is QueryFailedError {
@@ -57,6 +59,7 @@ export class QueryFailedFilter extends BaseExceptionFilter {
       ? code
       : 'unknown';
     Logger.error(`Database query failed (code=${safeCode})`);
+    if (status >= HttpStatus.INTERNAL_SERVER_ERROR) reportServerError(exception);
     host.switchToHttp().getResponse<Response>().status(status).json({
       statusCode: status,
       error: STATUS_CODES[status],

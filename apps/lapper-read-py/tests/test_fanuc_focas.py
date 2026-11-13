@@ -2,6 +2,7 @@ import ctypes
 import unittest
 from decimal import Decimal
 
+from lapper_read.api import ApiError
 from lapper_read.fanuc import Fanuc
 from lapper_read.focas import FOCAS_LONG, IODBPMC, ODBPM, pmc_bit, scale
 from tests.fakes import FakeApi, FakeTransport
@@ -66,6 +67,27 @@ class FanucTests(unittest.TestCase):
             self.fanuc.persist_macros(CYCLE, {"m-rpm": Decimal(1900)}, "req")
         self.fanuc.persist_macros(CYCLE, {"m-rpm": Decimal(1900)}, "req")
         self.assertIn("req:m-rpm", self.api.macro_logs)
+
+    def test_a_value_the_api_refuses_is_skipped_and_the_rest_are_recorded(self):
+        self.api.reject_macro = {"m-rpm": 422}
+        with self.assertLogs("lapper_read.fanuc", "WARNING") as logs:
+            written = self.fanuc.persist_macros(CYCLE, {"m-rpm": Decimal("123456789"), "m-consec": Decimal(2)}, "req")
+        self.assertEqual(written, 1)
+        self.assertEqual(list(self.api.macro_logs), ["req:m-consec"])
+        message = logs.output[0]
+        for detail in ("machine-1", "cycle-1", "#11006", "m-rpm", "123456789"):
+            self.assertIn(detail, message)
+        # Its baseline did not advance: the next cycle sends a changed value again.
+        self.api.reject_macro = {}
+        self.fanuc.persist_macros({**CYCLE, "id": "cycle-2"}, {"m-rpm": Decimal("123456789"), "m-consec": Decimal(2)}, "next")
+        self.assertEqual(list(self.api.macro_logs), ["req:m-consec", "next:m-rpm"])
+
+    def test_sign_in_throttling_and_outages_still_retry_the_cycle(self):
+        for status in (401, 403, 408, 429, 500, 503):
+            self.api.reject_macro = {"m-rpm": status}
+            with self.assertRaises(ApiError):
+                self.fanuc.persist_macros(CYCLE, {"m-rpm": Decimal(1900)}, f"req-{status}")
+        self.assertEqual(self.api.macro_logs, {})
 
     def test_gearsets_have_independent_baselines(self):
         self.fanuc.persist_macros(CYCLE, {"m-rpm": Decimal(1900)}, "a")

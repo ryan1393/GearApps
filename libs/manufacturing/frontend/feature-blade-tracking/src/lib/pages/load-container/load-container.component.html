@@ -5,7 +5,7 @@
 
     <div class="gear-panel op-step">
       <gear-scan-panel #containerScanner [step]="1" label="Scan Container" buttonText="Select" changeText="Change container"
-        [doneValue]="container?.serial_number ?? null" [disabled]="busy" (scanned)="scanContainer($event)" (reopen)="changeContainer()">
+        [doneValue]="container?.serial_number ?? null" [busy]="busy" (scanned)="scanContainer($event)" (reopen)="changeContainer()">
         <gear-option-picker placeholder="Choose container…" [headers]="['Container', 'Blades', 'Trays']" [options]="containerOptions"
           emptyText="No empty containers are available to load." [disabled]="busy" (picked)="chooseContainer($event)" />
       </gear-scan-panel>
@@ -13,7 +13,7 @@
 
     @if (container) {
       <div class="gear-panel op-step">
-        <gear-scan-panel #trayScanner [step]="2" label="Scan Tray To Empty Into Container" [disabled]="busy" (scanned)="scanTray($event)">
+        <gear-scan-panel #trayScanner [step]="2" label="Scan Tray To Empty Into Container" [busy]="busy" (scanned)="scanTray($event)">
           <gear-option-picker placeholder="Choose tray…" [headers]="['Tray', 'Location', 'Blades']" [options]="trayOptions"
             emptyText="No full, ground trays are waiting at COATER-STAGING or on a rough shelf bin." [disabled]="busy" (picked)="chooseTray($event)" />
         </gear-scan-panel>
@@ -41,13 +41,13 @@
           @for (tray of trays; track tray.id) {
             <li><strong>{{ tray.serial_number }}</strong><span>{{ tray.blade_count }} blades</span></li>
           } @empty {
-            <li class="text-slate-500">No trays loaded yet.</li>
+            <li class="gear-muted">No trays loaded yet.</li>
           }
         </ul>
       </div>
     } @else if (lastCompleted; as done) {
       <div class="gear-panel op-card" role="status">
-        <span class="op-card-eyebrow text-emerald-700">Loading complete</span>
+        <span class="op-card-eyebrow dana-text-success">Loading complete</span>
         <span class="op-card-title">{{ done.serial }}</span>
         <span>One set · {{ done.bladeCount }} blades. Packed, not yet sent.</span>
         <a routerLink="/blades/operations" [queryParams]="{ op: 'coater-shipments' }" class="gear-btn gear-btn-secondary mt-2">Send it from Coater Shipments</a>
@@ -56,9 +56,9 @@
 
     <div class="gear-panel op-card">
       <span class="op-card-eyebrow">Good to know</span>
-      <p>Loading does not send anything. Packed containers are printed and sent on <a routerLink="/blades/operations" [queryParams]="{ op: 'coater-shipments' }" class="font-bold text-blue-700">Coater Shipments</a>.</p>
+      <p>Loading does not send anything. Packed containers are printed and sent on <a routerLink="/blades/operations" [queryParams]="{ op: 'coater-shipments' }" class="dana-action-link">Coater Shipments</a>.</p>
       <p>A container holds one complete set. The container stays where the tray was (COATER-STAGING or its rough shelf bin).</p>
-      <p>Loaded the wrong tray? <a routerLink="/blades/cancel-last" class="font-bold text-blue-700">Undo the last transaction</a> for it before the container is sent.</p>
+      <p>Loaded the wrong tray? <a routerLink="/blades/cancel-last" class="dana-action-link">Undo the last transaction</a> for it before the container is sent.</p>
     </div>
   </div>
 </section>

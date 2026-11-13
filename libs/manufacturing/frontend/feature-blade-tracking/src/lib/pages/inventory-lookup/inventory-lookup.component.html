@@ -1,4 +1,4 @@
-<section class="gear-page space-y-5">
+<section class="gear-page dana-page-stack">
   <header class="gear-page-header" danaPageHeader eyebrow="INVENTORY SEARCH" heading="Find Inventory" description="Scan a tray, container, or location serial."></header>
 
   <gear-label-printer-picker labelType="ASSET_TAG" label="Print tags to" />
@@ -12,12 +12,14 @@
     [step]="1"
     label="Scan Serial Number"
     buttonText="Find"
-    [disabled]="busy"
+    [disabled]="printingTagSerial !== null" [busy]="busy"
     (scanned)="lookup($event)"
   />
 
+  <p *ngIf="busy" class="gear-loading-state" role="status">Finding inventory…</p>
+
   <section *ngIf="tray as t" class="gear-panel inventory-result-card">
-    <div class="inventory-result-header">
+    <div danaPanelHeader class="inventory-result-header">
       <div>
         <span class="gear-badge" data-tone="info">TRAY</span>
         <h3>{{ t.serial_number }}</h3>
@@ -65,12 +67,20 @@
         <strong>{{ t.enabled ? 'Enabled' : 'Disabled' }}</strong>
       </div>
     </div>
-    <div class="mt-4 grid gap-3 sm:grid-cols-2"><div class="gear-detail"><span>Current Placement</span><strong *ngIf="t.current_location" class="font-mono">{{ t.current_location.serial_number }}</strong><small *ngIf="t.current_location?.description">{{ t.current_location?.description }}</small><strong *ngIf="t.current_container">Container {{ t.current_container.serial_number }}</strong><strong *ngIf="!t.current_location && !t.current_container">{{ t.blade_count===0 ? 'Available / Ready to Use' : 'Unassigned' }}</strong></div><div class="gear-detail"><span>Active Blade Records</span><strong>{{ t.blades.length }}</strong></div></div>
+    <div danaDetailGrid class="dana-panel-body">
+      <dana-detail-item label="Current Placement">
+        <span *ngIf="t.current_location" class="mono">{{ t.current_location.serial_number }}</span>
+        <small *ngIf="t.current_location?.description" class="block">{{ t.current_location?.description }}</small>
+        <span *ngIf="t.current_container" class="block">Container {{ t.current_container.serial_number }}</span>
+        <span *ngIf="!t.current_location && !t.current_container">{{ t.blade_count===0 ? 'Available / Ready to Use' : 'Unassigned' }}</span>
+      </dana-detail-item>
+      <dana-detail-item label="Active Blade Records" [value]="'' + t.blades.length" />
+    </div>
     <div *ngIf="t.blades.length" danaTableShell class="table-wrap inventory-child-table"><table danaTable class="gear-table"><thead><tr><th>Blade</th><th>Status</th><th>Cycle</th></tr></thead><tbody><tr *ngFor="let b of t.blades"><td class="font-mono font-bold">{{b.serial_number}}</td><td>{{b.status}}</td><td>{{b.service_cycle}}</td></tr></tbody></table></div>
   </section>
 
   <section *ngIf="container as c" class="gear-panel inventory-result-card">
-    <div class="inventory-result-header">
+    <div danaPanelHeader class="inventory-result-header">
       <div>
         <span class="gear-badge" data-tone="info">CONTAINER</span>
         <h3>{{ c.serial_number }}</h3>
@@ -123,7 +133,7 @@
   </section>
 
   <section *ngIf="location as l" class="gear-panel inventory-result-card">
-    <div class="inventory-result-header">
+    <div danaPanelHeader class="inventory-result-header">
       <div>
         <span class="gear-badge" data-tone="info">LOCATION</span>
         <h3>{{ l.serial_number }}</h3>

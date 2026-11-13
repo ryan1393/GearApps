@@ -5,10 +5,10 @@ import { RouterLink } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { BladeTrackingApiService, EmptyBodyShelfView, apiErrorText } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
 import { GearScannerFocusDirective, GearToastService } from '@meshforge/manufacturing/frontend/util-common';
-import { DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
+import { DanaConfirmDialogComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
 
 @Component({ selector:'gear-body-shelves', standalone:true,
-  imports:[CommonModule, FormsModule, RouterLink, GearScannerFocusDirective, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
+  imports:[CommonModule, FormsModule, RouterLink, GearScannerFocusDirective, DanaConfirmDialogComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
   templateUrl:'./body-shelves.component.html' })
 export class BodyShelvesComponent implements OnInit, OnDestroy {
   private readonly api=inject(BladeTrackingApiService);
@@ -25,15 +25,36 @@ export class BodyShelvesComponent implements OnInit, OnDestroy {
     event.preventDefault();
     if(this.bodyIdentifier.trim())shelfInput.focus();
   }
+  /** The placement or removal waiting for the operator to confirm it in the dialog. */
+  confirmation: { kind:'place'; body:string; shelf:string } | { kind:'remove'; row:EmptyBodyShelfView } | null = null;
+  get confirmationTitle():string { return this.confirmation?.kind==='remove' ? 'Remove shelf observation?' : 'Confirm empty body on shelf?'; }
+  get confirmationMessage():string {
+    const pending=this.confirmation;
+    if(!pending) return '';
+    return pending.kind==='place'
+      ? `Confirm EMPTY cutter body ${pending.body} is physically on shelf ${pending.shelf}?`
+      : `Remove the empty-body shelf observation for ${pending.row.body_serial}? This does not move or cancel a cutter build.`;
+  }
   place():void {
     if(this.busy||this.loading||!this.bodyIdentifier.trim()||!this.shelfSerial.trim())return;
-    const body=this.bodyIdentifier.trim().toUpperCase(); const shelf=this.shelfSerial.trim().toUpperCase();
-    if(!globalThis.confirm(`Confirm EMPTY cutter body ${body} is physically on shelf ${shelf}?`))return;
+    this.confirmation={ kind:'place', body:this.bodyIdentifier.trim().toUpperCase(), shelf:this.shelfSerial.trim().toUpperCase() };
+  }
+  remove(row:EmptyBodyShelfView):void {
+    if(this.busy||this.loading)return;
+    this.confirmation={ kind:'remove', row };
+  }
+  confirm():void {
+    const pending=this.confirmation;
+    this.confirmation=null;
+    if(!pending||this.busy||this.loading)return;
+    if(pending.kind==='place') this.recordPlacement(pending.body,pending.shelf);
+    else this.removeObservation(pending.row);
+  }
+  private recordPlacement(body:string, shelf:string):void {
     this.busy=true; this.error='';
     this.api.placeEmptyBodyShelf(body,shelf).pipe(takeUntil(this.destroyed$)).subscribe({next:()=>{this.busy=false;this.bodyIdentifier='';this.shelfSerial='';this.toast.success(`${body} recorded on ${shelf}.`,'Shelf recorded');this.refresh();},error:e=>{this.busy=false;this.error=apiErrorText(e,'Shelf placement was not recorded.');}});
   }
-  remove(row:EmptyBodyShelfView):void {
-    if(this.busy||this.loading||!globalThis.confirm(`Remove the empty-body shelf observation for ${row.body_serial}? This does not move or cancel a cutter build.`))return;
+  private removeObservation(row:EmptyBodyShelfView):void {
     this.busy=true; this.error='';
     this.api.removeEmptyBodyShelf(row.body_serial,row.placement_id).pipe(takeUntil(this.destroyed$)).subscribe({next:()=>{this.busy=false;this.toast.success('Shelf observation removed; history retained.','Shelf removed');this.refresh();},error:e=>{this.busy=false;this.error=apiErrorText(e,'Could not remove this shelf observation.');}});
   }

@@ -4,22 +4,22 @@
     <gear-station-status [message]="message" [prompt]="prompt" (dismiss)="message = null" />
 
     <div class="gear-panel op-step">
-      <gear-scan-panel #trayScanner [step]="1" label="Scan Intake Tray" [disabled]="busy" (scanned)="scanTray($event)">
+      <gear-scan-panel #trayScanner [step]="1" label="Scan Intake Tray" [busy]="busy" (scanned)="scanTray($event)">
         <gear-option-picker placeholder="Choose intake tray…" [headers]="['Tray', 'Stage', 'Blades']" [options]="trayOptions"
           [loading]="pickerLoading" [error]="pickerError" emptyText="No trays currently need intake." [disabled]="busy" (picked)="chooseTray($event)" />
       </gear-scan-panel>
     </div>
 
     @if (tray) {
-      <form id="intake-batch" (ngSubmit)="create()" class="gear-panel op-step p-5">
+      <form id="intake-batch" (ngSubmit)="create()" class="gear-panel op-step">
         <h2 class="mb-4 text-lg font-bold">2 · Blades for tray {{ tray.serial_number }}</h2>
-        <div class="grid gap-4 sm:grid-cols-2">
+        <div class="intake-form-fields">
           <label>Part Summary<select #summarySelect [(ngModel)]="summaryId" (ngModelChange)="refreshRequiredBlades()" name="summary" class="gear-input mt-1 w-full" [disabled]="busy || tray.blade_count > 0"><option value="">Select…</option><option *ngFor="let x of summaries" [value]="x.id">{{ x.number }}</option></select></label>
           <label>Part Type<select #partTypeSelect [(ngModel)]="partTypeId" (ngModelChange)="refreshRequiredBlades()" name="partType" class="gear-input mt-1 w-full" [disabled]="busy || tray.blade_count > 0"><option value="">Select…</option><option *ngFor="let x of partTypes" [value]="x.id">{{ x.code }}</option></select></label>
           <gear-count-stepper label="Quantity" [(value)]="quantity" [min]="1" [max]="remainingCapacity || 500" [disabled]="busy" />
-          <label>Starting Status<select [(ngModel)]="status" name="status" class="gear-input mt-1 w-full"><option *ngFor="let x of statuses" [value]="x.value" [disabled]="tray.blade_count > 0 && x.value === 'waiting_for_grinding'">{{ x.label }}</option></select></label>
+          <label>Starting Status<select [(ngModel)]="status" name="status" class="gear-input mt-1 w-full" [disabled]="busy"><option *ngFor="let x of statuses" [value]="x.value" [disabled]="tray.blade_count > 0 && x.value === 'waiting_for_grinding'">{{ x.label }}</option></select></label>
         </div>
-        <p *ngIf="lookupsError" role="alert" class="mt-3 text-sm font-bold text-red-700">{{ lookupsError }}</p>
+        <p *ngIf="lookupsError" role="alert" class="gear-alert gear-alert-danger mt-3">{{ lookupsError }}</p>
       </form>
       <div class="op-primary">
         <button type="submit" form="intake-batch" class="gear-btn gear-btn-primary" [disabled]="!canAddBladeBatch">{{ busy ? 'Adding…' : 'Add Blade Batch' }}</button>
@@ -47,7 +47,7 @@
         @if (remainingCapacity) { <span>Needs {{ remainingCapacity }} more</span> }
         @if (requirementLoading) { <span role="status">Loading blade requirement…</span> }
         @if (trayFull) {
-          <p class="mt-2 font-bold">Full. Next: <a routerLink="/blades/operations" [queryParams]="{ op: 'grinding' }" class="text-blue-700">record grinding</a>.</p>
+          <p class="mt-2 font-bold">Full. Next: <a routerLink="/blades/operations" [queryParams]="{ op: 'grinding' }" class="dana-action-link">record grinding</a>.</p>
         }
       </div>
     } @else if (!refreshRequired) {

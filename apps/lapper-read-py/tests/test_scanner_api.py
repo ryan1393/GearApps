@@ -26,7 +26,8 @@ class ScriptedScanner(threading.Thread):
         self.port = self.server.getsockname()[1]
 
     def run(self):
-        conn, _ = self.server.accept()
+        with self.server:
+            conn, _ = self.server.accept()
         with conn:
             buffer = b""
             for reply in self.replies:
@@ -56,12 +57,65 @@ class ScannerTests(unittest.TestCase):
         self.assertEqual(state, ScannerState("D123456789", None))
         self.assertEqual(fake.commands, ["INCHK,1", "AMON", "LON01"])
 
-    def test_empty_input_moves_the_scanned_serial_to_the_queue(self):
-        fake = ScriptedScanner([[b"OK,INCHK,OFF\r"]])
+    def test_input_1_triggers_once_and_queues_the_serial_on_release(self):
+        serial = "D123456789"
+        fake = ScriptedScanner([
+            [b"OK,INCHK,OFF\r"], [b"OK,AMON\r"],
+            [b"OK,INCHK,ON\r"], [b"OK,AMON\r"], [b"OK,LON01\r", f"{serial}\r".encode("ascii")],
+            [b"OK,INCHK,ON\r"], [b"OK,AMOFF\r"],
+            [b"OK,INCHK,OFF\r"],
+        ])
         fake.start()
         scanner = Scanner("127.0.0.1", fake.port, 2)
-        self.assertEqual(scanner.read(ScannerState("D123456789", None)), ScannerState(None, "D123456789"))
-        scanner.close()
+        self.addCleanup(scanner.close)
+
+        self.assertIsNone(scanner.photoeye)
+        idle = scanner.read(ScannerState(None, None))
+        self.assertIs(scanner.photoeye, False)
+        scanned = scanner.read(idle)
+        self.assertIs(scanner.photoeye, True)
+        held = scanner.read(scanned)
+        released = scanner.read(held)
+        self.assertIs(scanner.photoeye, False)
+
+        self.assertEqual(idle, ScannerState(None, None))
+        self.assertEqual(scanned, ScannerState(serial, None))
+        self.assertEqual(held, scanned)
+        self.assertEqual(released, ScannerState(None, serial))
+        self.assertEqual(fake.commands, [
+            "INCHK,1", "AMON",
+            "INCHK,1", "AMON", "LON01",
+            "INCHK,1", "AMOFF",
+            "INCHK,1",
+        ])
+
+    def test_dashboard_commands_share_the_polling_connection_and_replies_stay_in_step(self):
+        serial = "DM1A48B0B7"
+        fake = ScriptedScanner([
+            [b"OK,TUNE\r"],
+            # The trigger's acknowledgement comes before the read result (Keyence SR-1000 format).
+            [b"OK,LON\r", f"{serial}:78:F/A/A:scanner-current.JPG\r".encode("ascii")],
+            # A late acknowledgement from an earlier command is skipped, not taken as the input state.
+            [b"OK,OUTON\r", b"OK,INCHK,OFF\r"],
+            [b"OK,AMON\r"],
+        ])
+        fake.start()
+        scanner = Scanner("127.0.0.1", fake.port, 2)
+        self.addCleanup(scanner.close)
+
+        self.assertEqual(scanner.command("TUNE01"), "OK,TUNE")
+        self.assertEqual(scanner.command("LON01"), f"{serial}:78:F/A/A:scanner-current.JPG")
+        self.assertEqual(scanner.read(ScannerState(None, None)), ScannerState(None, None))
+        self.assertEqual(fake.commands, ["TUNE01", "LON01", "INCHK,1", "AMON"])
+
+    def test_dashboard_command_rejections_and_bad_op_codes(self):
+        fake = ScriptedScanner([[b"ER,FTUNE,02\r"]])
+        fake.start()
+        scanner = Scanner("127.0.0.1", fake.port, 2)
+        self.addCleanup(scanner.close)
+        with self.assertRaises(ValueError):
+            scanner.command("LON\rRESET")
+        self.assertEqual(scanner.command("FTUNE"), "ER,FTUNE,02")
 
     def test_timeout_drops_the_connection_so_the_next_poll_reconnects(self):
         fake = ScriptedScanner([[]])  # never answers

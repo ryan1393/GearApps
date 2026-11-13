@@ -19,8 +19,9 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
   Lapping Summaries with the recent average; a live timer counts up on the Lapper Dashboard machine
   cards and in Lapping Summaries while a lapper is in cycle.
 - **Setting changes.** The Lapper Dashboard lists the cycles of the last 8 hours that changed a
-  controller value since the previous cycle of that machine and gearset. Admin > Macros > Flag
-  changes chooses which values count; the consec counter never does.
+  controller value since the previous cycle of that machine and gearset. Only the 68 macros sent to
+  Argonaut count, and all 68 start with Admin > Macros > Flag changes on (any can be switched off).
+  The consec counter (#10032) and every other macro are stored with it off and never count.
 - **Cutter-body compatibility** is one check on screen and in the API, and unetched bodies build
   again. See [CUTTER_BODY_BLADE_RULES.md](CUTTER_BODY_BLADE_RULES.md).
 - **Summary blades.** Each Summary has RING and PINION HOS, Inner blade and Outer blade, saved with

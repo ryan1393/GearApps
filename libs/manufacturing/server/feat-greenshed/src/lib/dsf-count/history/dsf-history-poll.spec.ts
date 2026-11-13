@@ -1,7 +1,7 @@
 import { DataSource } from 'typeorm';
 import { DsfCountService } from '../dsf-count.service';
 import { DsfRefusal } from '../dsf-core';
-import { CYCLES_SQL, DANA_MACHINES_SQL, MAPPING_SQL, ROLE_CHECK_SQL, SHIFTS_SQL, SOURCE_IDENTITY_SQL } from '../dsf-sql';
+import { CYCLES_SQL, DANA_MACHINES_SQL, LAPPER_MACHINES_TABLE_SQL, MAPPING_SQL, ROLE_CHECK_SQL, SHIFTS_SQL, SOURCE_IDENTITY_SQL } from '../dsf-sql';
 import { DsfHistoryService } from './dsf-history.service';
 import * as source from './dsf-history-source';
 import type { HistoryCapture, HistoryPlan } from './dsf-history-model';
@@ -23,6 +23,7 @@ describe('plant history shares the guarded DSF poll', () => {
       department_id: uuid(50), department: '45', source_department: '45', line_name: 'G01', whiteboard_name: 'G01', enabled: true, revision: 1 };
     const sequence: string[] = [];
     const lease = { connect: jest.fn(), release: jest.fn(), query: jest.fn(async (sql: string) => {
+      if (sql === LAPPER_MACHINES_TABLE_SQL) return [{ present: true }];
       if (sql === DANA_MACHINES_SQL) return [machine];
       if (sql.includes('pg_try_advisory_lock')) return [{ held: true }];
       if (sql.includes('FROM public.dana_dsf_machine_mapping_v1')) return [mapping];

@@ -2,6 +2,30 @@
 
 ## Unreleased
 
+- **Plant count history (70.8.0).** The plant dashboard now retains hourly RUN counts and exact
+  dated-shift records for every discovered DSF source, including CutGrind and named areas without
+  a registered machine link. Counts survive restarts; bounded backfill and whole-window
+  replacement handle missed reads and corrections. Source identity changes preserve earlier
+  history, and missing or ambiguous evidence stays visible for review. Enable
+  `DSF_HISTORY_ENABLED=true` alongside the existing DSF reader, then restart the updated API.
+  The Count history screen adds date/source filters and CSV exports. Source reads remain
+  read-only; the archive lives in MeshForge. Existing Lapper machine exclusions remain in place.
+
+- **Setting changes flag only Argonaut macros.** The Lapper Dashboard's Setting changes now flag a
+  change only in the 68 macros Lapper Read sends to Argonaut; the consec counter #10032 and every
+  other macro are never flagged. On the next API start a one-time update ticks Flag changes on for
+  all 68 and off for every other macro, #10032 included; from then on a macro outside the 68 is
+  always saved with it off. Admin > Macros > Flag changes can still switch an Argonaut macro off,
+  and shows Never (with its tick off and disabled) for every other macro.
+
+- **DSF: removed from Lapper machines.** Lapper machines (machines with a Lapper profile) no longer
+  get DSF counts. They are left out of the DSF reader, Machine DSF Counts, the plant dashboard and
+  Admin > DSF Mappings, a mapping for one is refused, and the DSF badge is gone from the Lapper
+  live machine cards and Lapping Summary. The Lapper app no longer has the Machine DSF Counts
+  menu link or page; an old /machine-counts bookmark there opens the Dashboard. Mappings saved earlier for Lapper machines are deleted
+  when the API starts (each recorded as an `UNMAP` in the mapping audit), and their DSF sources can
+  be mapped to other machines.
+
 - **Setting changes are one line each.** The Lapper Dashboard's Setting changes panel showed every
   changed value of a cycle in its row, so a cycle with a dozen changes filled the screen. Each
   cycle now shows how many values changed (12 changes, every name on hover) with a Show details

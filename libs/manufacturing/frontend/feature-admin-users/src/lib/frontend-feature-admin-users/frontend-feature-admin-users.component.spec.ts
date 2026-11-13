@@ -1,154 +1,82 @@
-import { HttpClientModule } from '@angular/common/http';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
-import { HttpErrorResponse } from '@angular/common/http';
-import { IPartSummarySettings, ISummaryBodyRuleRow } from '@meshforge/manufacturing/shared/util-types';
-
-import { AdminApiService, AdminLocationRow, PartSummaryRow } from '../admin-api.service';
+import { Component } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 
 import { FrontendFeatureAdminUsersComponent } from './frontend-feature-admin-users.component';
+import { adminTabRedirect } from '../lib.routes';
+import { ADMIN_TABS } from '../shared/admin-tabs';
 
-describe('FrontendFeatureAdminUsersComponent', () => {
-  let component: FrontendFeatureAdminUsersComponent;
-  let fixture: ComponentFixture<FrontendFeatureAdminUsersComponent>;
+@Component({ standalone: true, template: 'tab' })
+class StubTabComponent {}
 
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [FrontendFeatureAdminUsersComponent, HttpClientModule],
-    }).compileComponents();
-
-    fixture = TestBed.createComponent(FrontendFeatureAdminUsersComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
-  describe('location Summary and part type', () => {
-    const fill = (serial: string) => {
-      component.locationForm = { serial_number: serial, number: 'A-03', description: '', department: '', location_type: 'SHELF', enabled: true, summary_id: 'summary-1', part_type_id: 'ring' };
-    };
-
-    it('saves the chosen Summary and part type with the location', () => {
-      const create = jest.spyOn(TestBed.inject(AdminApiService), 'createLocation').mockReturnValue(of({} as AdminLocationRow));
-      fill('RACK-A-03');
-      component.saveLocation();
-
-      expect(create).toHaveBeenCalledWith(expect.objectContaining({ serial_number: 'RACK-A-03', summary_id: 'summary-1', part_type_id: 'ring' }));
-    });
-
-    it('sends none for a Green Shed summary shelf, whose barcode sets them', () => {
-      const create = jest.spyOn(TestBed.inject(AdminApiService), 'createLocation').mockReturnValue(of({} as AdminLocationRow));
-      fill('GSR-1.955FC');
-      expect(component.locationContentsFromBarcode).toBe(true);
-      component.saveLocation();
-
-      const payload = create.mock.calls[0][0];
-      expect(payload).not.toHaveProperty('summary_id');
-      expect(payload).not.toHaveProperty('part_type_id');
-    });
-
-    it('takes the part type from the R or P in a shelf barcode and sends only the Summary', () => {
-      const create = jest.spyOn(TestBed.inject(AdminApiService), 'createLocation').mockReturnValue(of({} as AdminLocationRow));
-      fill('cgdp-a1a');
-      expect(component.locationContentsFromBarcode).toBe(false);
-      expect(component.locationBarcodePartType).toBe('PINION');
-      component.saveLocation();
-
-      const payload = create.mock.calls[0][0];
-      expect(payload).toMatchObject({ serial_number: 'CGDP-A1A', summary_id: 'summary-1' });
-      expect(payload).not.toHaveProperty('part_type_id');
-
-      fill('CGFR-B2C');
-      expect(component.locationBarcodePartType).toBe('RING');
-      fill('RACK-A-03');
-      expect(component.locationBarcodePartType).toBeNull();
-    });
-
-    it('lists each Summary number once, without revisions', () => {
-      const row = (id: string, number: string, revision: string, active = true, enabled = true) =>
-        ({ id, number, revision, active, enabled, model_id: null, hos: null });
-      component.partSummaries = [
-        row('a-1', '1.955FC', '1'),
-        row('a-2', '1.955FC', '2'),
-        row('a-3', '1.955FC', '3', false),
-        row('b-1', '1.500FC', 'A'),
-        row('c-1', '2.000FC', 'A', true, false),
-      ];
-      component.locationForm = { ...component.locationForm, summary_id: '' };
-      expect(component.locationSummaryChoices.map((s) => s.id)).toEqual(['b-1', 'a-2']);
-
-      component.locationForm = { ...component.locationForm, summary_id: 'a-1' };
-      expect(component.locationSummaryChoices.map((s) => s.id)).toEqual(['b-1', 'a-1']);
-    });
-
-    it('reads the summary tag as Summary-PART TYPE, and only once both are set', () => {
-      const location = { summary: { id: 's', number: '1.955fc' }, part_type: { id: 'r', code: 'RING' } } as AdminLocationRow;
-      expect(component.locationSummaryTag(location)).toBe('1.955FC-RING');
-      expect(component.locationSummaryTag({ ...location, part_type: null })).toBeNull();
-    });
-  });
-
-  describe('Edit Part Summary: one save for every field', () => {
-    const summary = { id: 's30538', number: '30538', revision: 'D', model_id: null, hos: 'LH', active: true, enabled: true } as PartSummaryRow;
-    const settings: IPartSummarySettings = {
-      summary_id: 's30538', summary_number: '30538', summary_revision: 'D', model_id: null, hos: 'LH',
-      part_types: [
-        { part_type_id: 'r', part_type_code: 'RING', hos: 'RH', inner_blade: 'RH IB', outer_blade: 'RH OB' },
-        { part_type_id: 'p', part_type_code: 'PINION', hos: 'LH', inner_blade: 'LH IB', outer_blade: 'RH IB' },
+/** The Admin page with every tab route stubbed, mounted at /admin as in the apps. */
+function configure() {
+  TestBed.configureTestingModule({
+    providers: [provideRouter([{
+      path: 'admin',
+      component: FrontendFeatureAdminUsersComponent,
+      children: [
+        { path: '', pathMatch: 'full', canActivate: [adminTabRedirect], children: [] },
+        ...ADMIN_TABS.map((tab) => ({ path: tab, component: StubTabComponent })),
+        { path: '**', redirectTo: 'users' },
       ],
-      body_rule: { summary_id: 's30538', required_blade_sets: 19, required_total_blades: 38, configured_body_rule: null } as ISummaryBodyRuleRow,
-    };
-    beforeEach(() => {
-      component.summarySettings = new Map([[summary.id, settings]]);
-      component.summaryBodyRules = new Map([[summary.id, settings.body_rule]]);
-      component.beginEditPartSummary(summary);
-    });
+    }])],
+  });
+}
 
-    it('loads each Part Type group separately, keeping PINION Outer blade RH IB', () => {
-      expect(component.summaryTypeForm.RING).toEqual({ hos: 'RH', inner_blade: 'RH IB', outer_blade: 'RH OB' });
-      expect(component.summaryTypeForm.PINION).toEqual({ hos: 'LH', inner_blade: 'LH IB', outer_blade: 'RH IB' });
-      expect(component.summaryBodyRuleChoice).toBe('KEEP');
-      expect(component.summaryRequiredBladesPreview).toContain('38 blades (19 sets)');
-    });
+describe('Admin page shell', () => {
+  beforeEach(configure);
 
-    it('sends Revision, both groups and no body rule in ONE request when the rule is kept', () => {
-      const save = jest.spyOn(TestBed.inject(AdminApiService), 'savePartSummary').mockReturnValue(of(settings));
-      component.summaryForm.revision = 'E';
-      component.summaryTypeForm.RING.inner_blade = '';
-      component.createPartSummary();
-      expect(save).toHaveBeenCalledTimes(1);
-      const [, body] = save.mock.calls[0];
-      expect(body).toEqual({
-        number: '30538', revision: 'E', model_id: null, hos: 'LH',
-        part_types: {
-          RING: { hos: 'RH', inner_blade: null, outer_blade: 'RH OB' },
-          PINION: { hos: 'LH', inner_blade: 'LH IB', outer_blade: 'RH IB' },
-        },
-      });
-      expect('body_rule' in body).toBe(false);
-    });
+  it('opens Users at /admin', async () => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/admin');
+    expect(TestBed.inject(Router).url).toBe('/admin/users');
+  });
 
-    it('includes an explicit Body Size change and previews its Required Blades', () => {
-      const save = jest.spyOn(TestBed.inject(AdminApiService), 'savePartSummary').mockReturnValue(of(settings));
-      jest.spyOn(globalThis, 'confirm').mockReturnValue(true);
-      component.summaryBodyRuleChoice = '105';
-      expect(component.summaryRequiredBladesPreview).toContain('38 blades');
-      component.createPartSummary();
-      expect(save.mock.calls[0][1].body_rule).toBe('105');
-    });
+  it.each(['gearsets', 'lapping-machines', 'scanners', 'access', 'cutter-bodies'])('turns the old /admin?tab=%s link into /admin/%s', async (tab) => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl(`/admin?tab=${tab}`);
+    expect(TestBed.inject(Router).url).toBe(`/admin/${tab}`);
+  });
 
-    it('keeps the draft when the save fails', () => {
-      jest.spyOn(TestBed.inject(AdminApiService), 'savePartSummary').mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409, error: { message: 'already exists' } })));
-      component.summaryForm.revision = 'C';
-      component.summaryTypeForm.PINION.outer_blade = 'RH IB';
-      component.createPartSummary();
-      expect(component.editingPartSummaryId).toBe('s30538');
-      expect(component.summaryForm.revision).toBe('C');
-      expect(component.summaryTypeForm.PINION.outer_blade).toBe('RH IB');
-      expect(component.busy).toBe(false);
-    });
+  it('keeps other query parameters and ignores an unknown tab', async () => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/admin?tab=nonsense&focus=1');
+    expect(TestBed.inject(Router).url).toBe('/admin/users?focus=1');
+    await harness.navigateByUrl('/admin/not-a-tab');
+    expect(TestBed.inject(Router).url).toBe('/admin/users');
+  });
+
+  it('marks the open tab and navigates from the section buttons and the mobile list', async () => {
+    const harness = await RouterTestingHarness.create();
+    const shell = await harness.navigateByUrl('/admin/trays', FrontendFeatureAdminUsersComponent);
+    expect(shell.activeTab).toBe('trays');
+    const current = harness.routeNativeElement?.querySelector('[aria-current="page"]');
+    expect(current?.textContent).toBe('Trays');
+
+    const locations = Array.from(harness.routeNativeElement?.querySelectorAll('.gear-admin-tabs button') ?? [])
+      .find((button) => button.textContent === 'Locations') as HTMLButtonElement;
+    locations.click();
+    await harness.fixture.whenStable();
+    expect(TestBed.inject(Router).url).toBe('/admin/locations');
+    expect(shell.activeTab).toBe('locations');
+
+    shell.openTabByName('coater-rpa');
+    await harness.fixture.whenStable();
+    expect(TestBed.inject(Router).url).toBe('/admin/coater-rpa');
+    shell.openTabByName('not-a-tab');
+    await harness.fixture.whenStable();
+    expect(TestBed.inject(Router).url).toBe('/admin/coater-rpa');
+  });
+
+  it('applies the Roll Master page layout only on that tab', async () => {
+    const harness = await RouterTestingHarness.create();
+    await harness.navigateByUrl('/admin/roll-masters');
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.querySelector('section.gear-admin-page')?.classList.contains('gear-roll-master-page')).toBe(true);
+    await harness.navigateByUrl('/admin/parts');
+    harness.detectChanges();
+    expect(harness.routeNativeElement?.querySelector('section.gear-admin-page')?.classList.contains('gear-roll-master-page')).toBe(false);
   });
 });

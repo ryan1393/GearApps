@@ -1,9 +1,29 @@
 {
-    "version":  "V70.0.4",
-    "requiredSourceBaseline":  "V70.0.3R1",
-    "sharedUiVersion":  "0.2.0",
-    "visualReference":  "Truck Log",
-    "previousCssSha256":  "5D736F5C27E17A92F5F11B634B8CC2B79E9EAA495D143EA3ADD634D558A4C9D2",
-    "managedCssSha256":  "00B37D5B91A9246A03D24F69EDF4E103C8BF78D61035348A30452CF1AAA30E1A",
-    "scope":  "Gear-only screen styles; no Angular template, route, backend, Compose, package or PowerShell changes"
+  "version": "V70.0.4",
+  "requiredSourceBaseline": "V70.0.3R1",
+  "sharedUiVersion": "0.2.0",
+  "visualReference": "Truck Log",
+  "previousCssSha256": "852874CCC80554643CDC5116A744675E07E965C21B7789335EA95556D8562C76",
+  "managedCssSha256": "C60A4AE04B98CE137D81A8CAF257E3382DC029937F632FE5F816B50C5AB957BE",
+  "scope": "Reviewed shared Dana/Gear adapter: screen presentation, spacing tokens, density variables and theme-safe surfaces; current Angular templates are covered by the linked spacing review.",
+  "spacingReview": {
+    "date": "2026-11-12",
+    "report": "docs/manufacturing/DANA_SPACING_REVIEW.md",
+    "routeViewportChecks": 184,
+    "widths": [
+      1920,
+      1024,
+      390,
+      320
+    ],
+    "originalRelease": {
+      "scope": "Gear-only screen styles; no Angular template, route, backend, Compose, package or PowerShell changes",
+      "previousCssSha256": "5D736F5C27E17A92F5F11B634B8CC2B79E9EAA495D143EA3ADD634D558A4C9D2",
+      "managedCssSha256": "00B37D5B91A9246A03D24F69EDF4E103C8BF78D61035348A30452CF1AAA30E1A"
+    }
+  },
+  "tokenReview": {
+    "date": "2026-11-12",
+    "change": "Hard-coded light colours replaced by MeshForge role tokens (--gear-*); 150 page/theme/size screenshots compared before and after."
+  }
 }

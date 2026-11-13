@@ -1,4 +1,4 @@
-import { OAuth2Client } from 'google-auth-library';
+import { OAuth2Client, TokenPayload } from 'google-auth-library';
 
 import { ISocialPayload } from '@meshforge/manufacturing/shared/util-types';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
@@ -20,14 +20,18 @@ export class GoogleAuthService {
   async getProfileByToken(
     loginDto: GoogleAuthLoginDto,
   ): Promise<ISocialPayload> {
-    const ticket = await this.google.verifyIdToken({
-      idToken: loginDto.idToken,
-      audience: [
-        this.configService.getOrThrow<string>('google.clientId'),
-      ],
-    });
-
-    const data = ticket.getPayload();
+    const audience = this.configService.getOrThrow<string>('google.clientId');
+    let data: TokenPayload | undefined;
+    try {
+      const ticket = await this.google.verifyIdToken({
+        idToken: loginDto.idToken,
+        audience: [audience],
+      });
+      data = ticket.getPayload();
+    } catch {
+      // A malformed, expired or foreign token is a failed sign-in, not a server error.
+      throw new UnauthorizedException('Google sign-in token is invalid or expired');
+    }
 
     if (!data?.email || data.email_verified !== true) {
       throw new UnauthorizedException(

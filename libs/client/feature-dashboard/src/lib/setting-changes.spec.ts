@@ -76,8 +76,8 @@ describe('Lapper Dashboard setting changes', () => {
     expect(text(panel.querySelector('tbody gear-status-badge'))).toBe('1 change');
   });
 
-  it('says so when only the consec counter moved', () => {
+  it('says so when no value sent to Argonaut changed', () => {
     const { rows } = render({ hours: 8, total: 0, items: [] });
-    expect(rows()).toEqual(['No settings changed in the last 8 hours: only the consec counter moved.']);
+    expect(rows()).toEqual(['No settings changed in the last 8 hours: no value sent to Argonaut changed.']);
   });
 });

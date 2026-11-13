@@ -328,13 +328,15 @@ export class DsfHistoryStore {
   }
 
   private async sourceJoin(): Promise<{join:string;fields:string}> {
-    const installed = await this.db.query(`SELECT to_regclass('public.dana_dsf_machine_mapping_v1') IS NOT NULL AS installed`);
+    const installed = await this.db.query(`SELECT to_regclass('public.dana_dsf_machine_mapping_v1') IS NOT NULL AS installed,
+      to_regclass('lapper.machines') IS NOT NULL AS lapper_installed`);
     return installed[0]?.installed===true ? {
       join:`LEFT JOIN public.dana_dsf_machine_mapping_v1 approved ON approved.enabled AND s.current
         AND approved.mapping_id=s.mapping_id AND approved.whiteboard_id=s.whiteboard_id AND approved.op_id=s.op_id
         AND approved.line_id=s.line_id AND approved.department_id=s.department_id
         AND approved.line_name=s.line_name AND approved.whiteboard_name=s.source_name
         LEFT JOIN public.machines machine ON machine.id=approved.machine_id AND machine."deletedAt" IS NULL
+          ${installed[0]?.lapper_installed===true?'AND NOT EXISTS (SELECT 1 FROM lapper.machines profile WHERE profile.public_machine_id=machine.id)':''}
           AND EXISTS (SELECT 1 FROM public.departments department WHERE department.id=machine.department_id
             AND department.code=approved.source_department AND department."deletedAt" IS NULL)`,
       fields:`machine.id::text AS machine_id,btrim(machine.machine_number) AS machine_number`,

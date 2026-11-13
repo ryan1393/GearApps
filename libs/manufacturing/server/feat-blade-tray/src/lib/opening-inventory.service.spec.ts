@@ -59,6 +59,19 @@ const dto = (changes: Partial<OpeningInventoryDto> = {}): OpeningInventoryDto =>
 });
 
 describe('Opening inventory', () => {
+  it('previews quantities and stage without changing inventory or writing history', async () => {
+    const { service, saved } = setup();
+    expect(await service.record(dto(), USER, true)).toMatchObject({ blade_count: 17, stage_code: 'READY_FOR_COATING' });
+    for (const values of Object.values(saved)) expect(values).toHaveLength(0);
+  });
+
+  it('rejects invalid configured quantities before creating stock', async () => {
+    for (const required of [0, -1, 1.5, NaN]) {
+      const { service, saved } = setup({ required });
+      await expect(service.record(dto(), USER)).rejects.toThrow('positive whole number');
+      expect(saved.blades).toHaveLength(0);
+    }
+  });
   it('records a ground tray exactly as completing grinding leaves it', async () => {
     const { service, saved } = setup();
     const result = await service.record(dto({ service_cycle: 2 }), USER);

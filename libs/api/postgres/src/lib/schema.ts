@@ -8,6 +8,18 @@ import { LAPPER_HISTORY_INTEGRITY_SQL } from './history-integrity';
 import { LAPPER_ARCHIVE_GUARD_SQL } from './archive-guard';
 import { COLLECTOR_TOKEN_PURPOSE_SQL, COLLECTOR_TOKENS_SQL } from './collector-tokens';
 
+export const LAPPER_ARGONAUT_FLAGS_MIGRATION = '20261112-lapper-macro-flag-argonaut-only-v1';
+/** The macros sent to Argonaut, as FLAGGABLE_MACROS lists them when this migration was written. */
+export const LAPPER_ARGONAUT_FLAGS_SQL = `
+      UPDATE lapper.macros SET flag_changes = (number = ANY(ARRAY[
+        10039,10040,10042,10043,10045,10046,10047,10049,10050,10051,10053,10054,10055,10063,
+        10209,10401,10402,10403,10404,10405,10406,10407,10408,10409,10410,10412,10413,10414,
+        10415,10416,10418,10419,10421,10426,10428,10430,10433,10435,10437,10481,10482,10483,
+        10484,10485,10486,10487,10488,10489,10490,10492,10493,10494,10495,10496,10498,10499,
+        10501,10506,10508,10510,10513,10515,10517,10020,10021,10023,10400,10480
+      ]::int[]));
+    `;
+
 // Compatible with the tested legacy import. Public manufacturing tables are
 // referenced, never synchronized or rebuilt by the Lapper API.
 export const LAPPER_POSTGRES_DDL = `
@@ -160,6 +172,26 @@ export async function migrateLapperPostgres(dataSource: DataSource): Promise<voi
     // Every macro starts flagged; the consec counter is never flagged whatever this says.
     await runDatabaseMigration(manager, '20261112-lapper-macro-flag-changes-v1', `
       ALTER TABLE lapper.macros ADD COLUMN IF NOT EXISTS flag_changes boolean NOT NULL DEFAULT true;
+    `);
+    // Setting changes are flagged only for the 68 macros sent to Argonaut (FLAGGABLE_MACROS): tick
+    // those on and every other macro, the consec counter #10032 among them, off. Runs once; the
+    // list is written out so this migration never changes (a test keeps it equal to the code).
+    await runDatabaseMigration(manager, LAPPER_ARGONAUT_FLAGS_MIGRATION, LAPPER_ARGONAUT_FLAGS_SQL);
+    // Collector Idempotency-Keys are kept for INGEST_REQUEST_RETENTION_DAYS; the daily prune
+    // finds expired ones by age.
+    // Where each scanner's capture is on the FTP drop (Admin > Scanners). Null keeps the default,
+    // <SCANNER_FTP_ROOT>/<scanner IP>/<SCANNER_FTP_IMAGE_FILE>. No '..' segments; JPEG or BMP files.
+    await runDatabaseMigration(manager, '20261112-lapper-scanner-image-location-v1', `
+      ALTER TABLE lapper.scanners ADD COLUMN IF NOT EXISTS image_folder text;
+      ALTER TABLE lapper.scanners ADD COLUMN IF NOT EXISTS image_file text;
+      ALTER TABLE lapper.scanners DROP CONSTRAINT IF EXISTS ck_lapper_scanner_image_location;
+      ALTER TABLE lapper.scanners ADD CONSTRAINT ck_lapper_scanner_image_location CHECK (
+        (image_folder IS NULL OR (length(image_folder) <= 255 AND image_folder !~ '(^|/)\\.\\.(/|$)' AND image_folder !~ '[\\\\[:cntrl:]]'))
+        AND (image_file IS NULL OR (length(image_file) <= 128 AND image_file ~* '^[^/\\\\[:cntrl:]]+\\.(jpe?g|bmp)$'))
+      );
+    `);
+    await runDatabaseMigration(manager, '20261112-lapper-ingest-requests-created-v1', `
+      CREATE INDEX IF NOT EXISTS ix_lapper_ingest_requests_created ON lapper.ingest_requests(created_at);
     `);
   });
 }

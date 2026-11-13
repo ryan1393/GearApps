@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
 import {
@@ -9,6 +9,7 @@ import {
   cutterApiErrorText,
 } from '@meshforge/manufacturing/frontend/data-access-cutter-builder';
 import { canEditMeshForgeApp } from '@meshforge/manufacturing/shared/util-constants';
+import { getDanaAppUrl } from '@meshforge/manufacturing/shared/dana-app-config';
 import {
   DanaCountBadgeDirective,
   DanaDashboardGridComponent,
@@ -32,14 +33,44 @@ import {
   standalone: true,
   imports: [DanaToneDirective, CommonModule, RouterLink, DanaDashboardGridComponent, DanaDashboardPanelComponent, DanaKpiGridDirective, DanaKpiCardDirective, DanaPanelHeaderDirective, DanaPanelActionDirective, DanaTableShellDirective, DanaTableDirective, DanaCountBadgeDirective, DanaStatusBadgeDirective, DanaTableEmptyDirective, DanaPageHeaderComponent, DanaOperationCardComponent, DanaOperationGridDirective],
   templateUrl: './cutter-builder-dashboard.component.html',
+  styleUrl: './cutter-builder-dashboard.component.css',
 })
-export class CutterBuilderDashboardComponent implements OnInit {
+export class CutterBuilderDashboardComponent implements OnInit, OnDestroy {
   private readonly session = inject(AuthSessionService);
   private readonly api = inject(CutterBuilderApiService);
 
   data: CutterDashboardData | null = null;
   loading = true;
   error = '';
+  /** The ID just copied, shown as ✓ on its button for a moment. */
+  copiedValue = '';
+  private copiedTimer: ReturnType<typeof setTimeout> | null = null;
+
+  ngOnDestroy(): void {
+    if (this.copiedTimer) clearTimeout(this.copiedTimer);
+  }
+
+  /**
+   * Copies a tray, build or body ID that may be cut off in its column. Works without the async
+   * Clipboard API too, which browsers withhold from plain-HTTP intranet pages.
+   */
+  async copy(value: string): Promise<void> {
+    if (!value) return;
+    let copied = false;
+    try {
+      if (globalThis.navigator?.clipboard?.writeText) {
+        await globalThis.navigator.clipboard.writeText(value);
+        copied = true;
+      }
+    } catch {
+      copied = false;
+    }
+    if (!copied) copied = copyWithSelection(value);
+    if (!copied) return;
+    this.copiedValue = value;
+    if (this.copiedTimer) clearTimeout(this.copiedTimer);
+    this.copiedTimer = setTimeout(() => (this.copiedValue = ''), 1500);
+  }
 
   get canEdit(): boolean {
     const user = this.session.currentUser;
@@ -47,6 +78,7 @@ export class CutterBuilderDashboardComponent implements OnInit {
       'CUTTER_BUILDER',
       user?.role,
       user?.departmentCode,
+      user?.permissions,
     );
   }
 
@@ -54,20 +86,24 @@ export class CutterBuilderDashboardComponent implements OnInit {
     this.refresh();
   }
 
-  startGrinding(trayId: string, traySerial: string): void {
-    this.loading = true;
-    this.error = '';
+  /** Starting grinding is a Blade Tracking transaction: it needs that app's edit rights and a grinder. */
+  get canEditBladeTracking(): boolean {
+    const user = this.session.currentUser;
+    return canEditMeshForgeApp(
+      'BLADE_TRACKING',
+      user?.role,
+      user?.departmentCode,
+      user?.permissions,
+    );
+  }
 
-    this.api.startGrinding(trayId).subscribe({
-      next: () => this.refresh(),
-      error: (err: HttpErrorResponse) => {
-        this.loading = false;
-        this.error = cutterApiErrorText(
-          err,
-          `Could not start grinding for ${traySerial}.`,
-        );
-      },
-    });
+  /**
+   * Opens Blade Tracking's Operations Station on Grinding with the tray already chosen, through the
+   * same app URL the sidebar's Shared Apps link uses. The operator confirms the grinder there.
+   */
+  grindingStationUrl(traySerial: string): string {
+    const query = new URLSearchParams({ op: 'grinding', tray: traySerial });
+    return `${getDanaAppUrl('bladeTracking')}/blades/operations?${query.toString()}`;
   }
 
   refresh(): void {
@@ -87,5 +123,24 @@ export class CutterBuilderDashboardComponent implements OnInit {
         );
       },
     });
+  }
+}
+
+/** Fallback copy through a temporary selection, for pages without the Clipboard API. */
+function copyWithSelection(value: string): boolean {
+  if (typeof document === 'undefined' || typeof document.execCommand !== 'function') return false;
+  const field = document.createElement('textarea');
+  field.value = value;
+  field.setAttribute('readonly', '');
+  field.style.position = 'fixed';
+  field.style.opacity = '0';
+  document.body.appendChild(field);
+  field.select();
+  try {
+    return document.execCommand('copy');
+  } catch {
+    return false;
+  } finally {
+    field.remove();
   }
 }

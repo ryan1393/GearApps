@@ -10,7 +10,8 @@ const norm = text => text.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
 const digest = text => crypto.createHash('sha256').update(text).digest('hex').toUpperCase();
 const receipt = JSON.parse(read('docs/manufacturing/DANA_UI_DASHBOARD_VISUAL_QA.json'));
 // Since Dana UI 0.3.0 this CSS ships as gear-compat-overrides.css, with a packaging header and the
-// compact toast block appended after the dashboard polish; the reviewed content is unchanged.
+// compact toast block appended after the dashboard polish. The receipt tracks the current
+// reviewed adapter; later Dana reviews retain original release hashes in its provenance.
 const css = norm(read('libs/shared/dana-ui/src/styles/gear-compat-overrides.css'))
   .replace(/^\/\* @dana\/ui Gear compatibility: overrides[\s\S]*?\*\/\n/, '')
   .replace(/\n*\/\* Compact toast stack for MeshForge[\s\S]*$/, '\n');
@@ -21,8 +22,8 @@ must(at >= 0 && css.indexOf(begin, at + begin.length) < 0, 'Dashboard polish mus
 const endAt = css.indexOf(end, at);
 must(endAt > at, 'Dashboard polish block must be complete.');
 const block = css.slice(at, endAt + end.length) + '\n';
-must(digest(block) === receipt.managedCssSha256, 'Dashboard visual QA managed CSS differs from its reviewed release.');
-must(digest(css.slice(0, at).trimEnd()) === receipt.previousCssSha256, 'Pre-existing Dana/Gear migration CSS was changed.');
+must(digest(block) === receipt.managedCssSha256, 'Dashboard managed CSS differs from its reviewed Dana adapter receipt.');
+must(digest(css.slice(0, at).trimEnd()) === receipt.previousCssSha256, 'Dana/Gear adapter prefix differs from its reviewed receipt.');
 must(receipt.version === 'V70.0.4' && receipt.sharedUiVersion === '0.2.0', 'Dashboard visual QA receipt version mismatch.');
 const pkg = JSON.parse(read('libs/shared/dana-ui/package.json'));
 must(pkg.name === '@dana/ui' && /^0\.(2|3)\.\d+$/.test(pkg.version), 'Dashboard polish requires @dana/ui 0.2.x/0.3.x (reviewed against 0.2.0).');
@@ -39,7 +40,8 @@ const hook = "await import('./test-dashboard-visual-qa-contract.mjs');";
 must(external.includes(hook), 'Existing external-Dana-UI regression must invoke dashboard visual QA.');
 const runner = read('tools/manufacturing/run-all-tests.ps1');
 must(runner.includes('test-external-dana-ui-package-contract.mjs'), 'Authoritative Gear runner must retain the external UI regression gate.');
-// The exact CSS hash guards this reviewed screen-only scope; no HTML or routes are rewritten.
+// The managed dashboard block retains its screen-only layout scope. The separate spacing
+// review also covers current application templates and records that broader scope in the receipt.
 must(block.includes('@media screen {') && block.includes('@media screen and (min-width: 1500px)'),
   'Polish must remain screen-only with its explicit large-display layer.');
 must(!/\bdisplay\s*:\s*none\b/.test(block), 'Polish must not hide application controls or data.');

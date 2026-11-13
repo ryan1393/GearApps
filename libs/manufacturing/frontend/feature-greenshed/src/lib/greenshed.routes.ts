@@ -11,7 +11,10 @@ import { GreenshedMachinesComponent } from './pages/machines/greenshed-machines.
 export const frontendFeatureGreenshedRoutes: Route[] = [
   { path: 'cancel-last', canActivate: [departmentEditorGuard('GREENSHED')], component: WorkflowCancellationComponent, data: { cancellationApp: 'greenshed' } },
   { path:'', pathMatch:'full', component:GreenshedDashboardComponent },
+  { path: 'cutter-requests', loadComponent: () => import('@meshforge/manufacturing/frontend/feature-cutter-builder').then(module => module.CutterRequestsComponent) },
   { path:'machines', canActivate:[departmentEditorGuard('GREENSHED')], component:GreenshedMachinesComponent },
+  // The same machines as large touch cards; the table above stays as it is.
+  { path:'machines-board', canActivate:[departmentEditorGuard('GREENSHED')], loadComponent: () => import('./pages/machines-board/greenshed-machines-board.component').then(module => module.GreenshedMachinesBoardComponent) },
   { path:'setup', canActivate:[departmentEditorGuard('GREENSHED')], component:GreenshedSetupComponent },
   { path:'check', canActivate:[departmentEditorGuard('GREENSHED')], component:GreenshedCheckComponent },
   { path:'pull', canActivate:[departmentEditorGuard('GREENSHED')], component:GreenshedPullComponent },

@@ -54,7 +54,7 @@
         <span>{{ loginError }}</span>
       </div>
 
-      <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form">
+      <form [formGroup]="loginForm" (ngSubmit)="login()" class="login-form" [attr.aria-busy]="submitting && signInMethod === 'password'">
         <label class="field-label" for="email">Email address</label>
         <input
           formControlName="email"
@@ -64,10 +64,13 @@
           autocomplete="email"
           required
           class="field-input"
+          [readOnly]="submitting"
+          [attr.aria-invalid]="fEmail.invalid && fEmail.touched"
+          [attr.aria-describedby]="fEmail.invalid && fEmail.touched ? 'email-error' : null"
           [class.field-error]="fEmail.invalid && (fEmail.touched || fEmail.dirty)"
           placeholder="name@company.com"
         />
-        <small *ngIf="fEmail.invalid && (fEmail.touched || fEmail.dirty)" class="field-message">
+        <small id="email-error" *ngIf="fEmail.invalid && (fEmail.touched || fEmail.dirty)" class="field-message">
           Enter a valid email address.
         </small>
 
@@ -83,14 +86,25 @@
           autocomplete="current-password"
           required
           class="field-input"
+          [readOnly]="submitting"
+          [attr.aria-invalid]="fPassword.invalid && fPassword.touched"
+          [attr.aria-describedby]="fPassword.invalid && fPassword.touched ? 'password-error' : null"
           [class.field-error]="fPassword.invalid && (fPassword.touched || fPassword.dirty)"
           placeholder="Enter your password"
         />
-        <small *ngIf="fPassword.invalid && (fPassword.touched || fPassword.dirty)" class="field-message">
+        <small id="password-error" *ngIf="fPassword.invalid && (fPassword.touched || fPassword.dirty)" class="field-message">
           Password is required.
         </small>
 
-        <button type="submit" class="login-submit" [disabled]="submitting" [attr.aria-busy]="submitting">{{ submitting ? 'Signing in…' : 'Sign in' }}</button>
+        <button type="submit" class="login-submit" [disabled]="submitting" [attr.aria-busy]="submitting && signInMethod === 'password'">{{ submitting && signInMethod === 'password' ? 'Signing in…' : 'Sign in' }}</button>
+      </form>
+
+      <form class="login-form" (ngSubmit)="loginBadge()" aria-label="Badge sign in" [attr.aria-busy]="submitting && signInMethod === 'badge'">
+        <label class="field-label" for="badge-uid">Or scan your badge</label>
+        <input id="badge-uid" name="badgeUid" class="field-input" type="password" [(ngModel)]="badgeUid" maxlength="128" autocomplete="off" [readOnly]="submitting" [attr.aria-busy]="submitting" (keydown)="badgeKeydown($event)" placeholder="Focus here and scan your card" aria-describedby="badge-help badge-notice" />
+        <small id="badge-help">The reader sends the card UID followed by Enter.</small>
+        <small id="badge-notice" class="field-message" role="status" aria-live="polite">{{ badgeNotice }}</small>
+        <button type="submit" class="gear-btn gear-btn-secondary" [disabled]="submitting || !badgeUid">{{ submitting && signInMethod === 'badge' ? 'Signing in with badge…' : 'Sign in with badge' }}</button>
       </form>
 
       <div class="login-footer">

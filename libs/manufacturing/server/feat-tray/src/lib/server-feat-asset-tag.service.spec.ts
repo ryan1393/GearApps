@@ -259,3 +259,55 @@ describe('CreateTrayDto', () => {
     });
   });
 });
+
+describe('ServerFeatAssetTagService 4 x 6.5 location label', () => {
+  const location = {
+    id: RECORD_ID,
+    serial_number: 'gsr-1.955fc-ring',
+    number: '14',
+    description: 'Green Shed rough shelf',
+    department: 'GREENSHED',
+    enabled: true,
+    summary: { number: '1.955FC' },
+    part_type: { code: 'RING' },
+  };
+  async function labelService(saved: Partial<LabelPrinterRow>[], found: unknown = location) {
+    const none = { findOne: jest.fn() };
+    const locations = { findOne: jest.fn().mockResolvedValue(found) };
+    return { service: new ServerFeatAssetTagService(none as never, none as never, locations as never, await printerRegistry(saved)), locations };
+  }
+
+  it('sends the landscape label to the default card printer, never to the tag printer', async () => {
+    const card = await listen();
+    const tag = await listen();
+    try {
+      const { service, locations } = await labelService([
+        { id: '22222222-2222-4222-8222-222222222222', name: 'Card Zebra', host: '127.0.0.1', port: card.port, label_type: 'CUTTER_CARD', language: 'ZPL', is_default: true },
+        { id: '33333333-3333-4333-8333-333333333333', name: 'Tag printer', host: '127.0.0.1', port: tag.port, label_type: 'ASSET_TAG', is_default: true },
+      ]);
+      const result = await service.printLocationLabel({ record_id: RECORD_ID });
+      expect(locations.findOne).toHaveBeenCalledWith(expect.objectContaining({ where: { id: RECORD_ID, enabled: true } }));
+      expect(result).toEqual(expect.objectContaining({ printed: true, printer_configured: true, printer_name: 'Card Zebra', language: 'ZPL', serial_number: 'GSR-1.955FC-RING', file_name: 'LOCATION-GSR-1.955FC-RING.zpl' }));
+      const job = (await card.received).toString('utf8');
+      expect(job).toMatch(/\^A0R,\d+,\d+\^FD1\.955FC\^FS/);
+      expect(job).toContain('^FDRING^FS');
+      expect(job).toContain('^FD14^FS');
+    } finally {
+      card.server.close();
+      tag.server.close();
+    }
+  });
+
+  it('returns the label to print from the browser when no card printer is set up', async () => {
+    const { service } = await labelService([]);
+    const result = await service.printLocationLabel({ record_id: RECORD_ID });
+    expect(result).toEqual(expect.objectContaining({ printed: false, printer_configured: false, printer_name: null, language: 'IPL' }));
+    expect(result.label).toEqual({ serial: 'GSR-1.955FC-RING', number: '14', summary: '1.955FC', partType: 'RING', description: 'Green Shed rough shelf', department: 'GREENSHED' });
+    expect(Buffer.from(result.file_base64, 'base64').toString('latin1')).toContain('d3,1.955FC;');
+  });
+
+  it('refuses a location that does not exist or is disabled', async () => {
+    const { service } = await labelService([], null);
+    await expect(service.printLocationLabel({ record_id: RECORD_ID })).rejects.toThrow('Location record could not be found');
+  });
+});

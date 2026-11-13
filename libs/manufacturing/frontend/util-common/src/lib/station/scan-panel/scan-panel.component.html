@@ -1,0 +1,25 @@
+<div class="gear-scan-step flex">
+  <div class="gear-workflow-step-number flex h-10 w-10 shrink-0 items-center justify-center" aria-hidden="true">{{ doneValue ? '✓' : step }}</div>
+  <div class="min-w-0 flex-1">
+    @if (doneValue) {
+      <div class="gear-eyebrow">{{ label }}</div>
+      <div class="gear-scan-done mt-1 flex flex-wrap items-center justify-between gap-3">
+        <strong class="gear-scan-done-value font-mono text-2xl font-black">{{ doneValue }}</strong>
+        <button type="button" class="gear-btn gear-btn-secondary" [disabled]="disabled || busy" (click)="reopen.emit()">{{ changeText }}</button>
+      </div>
+    } @else {
+      <label [for]="inputId" class="dana-label">{{ label }}</label>
+      <p *ngIf="help" [id]="inputId + '-help'" class="gear-muted mt-1">{{ help }}</p>
+      <div class="mt-4 flex gap-2">
+        <!-- While the station is busy the box keeps the cursor (read-only), so a fast next scan is held, not lost. -->
+        <input #input [id]="inputId" [attr.aria-describedby]="describedBy" [attr.data-gear-scan-step]="step" [(ngModel)]="value" (keydown)="onKeydown($event)" (focus)="selectOnFocus()" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="go"
+          class="gear-input min-w-0 flex-1"
+          [placeholder]="placeholder" [disabled]="disabled" [readonly]="busy" [attr.aria-busy]="busy ? 'true' : null" />
+        <button type="button" (click)="submit()" [disabled]="disabled || busy || !value.trim()"
+          class="gear-btn gear-btn-primary">{{ buttonText }}</button>
+      </div>
+      @if (note) { <p [id]="inputId + '-note'" class="gear-muted mt-2" role="status">{{ note }}</p> }
+      <ng-content />
+    }
+  </div>
+</div>

@@ -4,7 +4,7 @@ import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DanaPageHeaderComponent } from '@dana/ui';
+import { DanaConfirmDialogComponent, DanaPageHeaderComponent } from '@dana/ui';
 import { GearScannerFocusDirective } from './directives/scanner-focus.directive';
 
 interface Operation {
@@ -16,12 +16,12 @@ interface CancellationView { latest: Operation | null; history: Operation[]; mes
 
 @Component({
   selector: 'gear-workflow-cancellation', standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, DanaPageHeaderComponent, GearScannerFocusDirective],
+  imports: [CommonModule, FormsModule, RouterLink, DanaPageHeaderComponent, DanaConfirmDialogComponent, GearScannerFocusDirective],
   styles: [`
     :host{display:block}.cancel-content{max-width:64rem;margin:auto}
     .cancel-actions{display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-top:1rem}
-    .cancel-entry{padding:1rem 0;border-bottom:1px solid var(--dana-control-border);overflow-wrap:anywhere}
-    .cancel-entry p{margin:.35rem 0}.cancel-entry:last-child{border:0}
+    .cancel-entry{padding:var(--dana-form-gap) 0;overflow-wrap:anywhere}
+    .cancel-entry p{margin:var(--dana-space-2) 0}
   `],
   template: `
     <section class="gear-page gear-workflow-page cancel-content">
@@ -51,7 +51,7 @@ interface CancellationView { latest: Operation | null; history: Operation[]; mes
       <section *ngIf="view?.history?.length" class="gear-workflow-section">
         <div class="gear-workflow-section-header"><div><h2>Transaction History</h2><p>Original entries and cancellation details are retained.</p></div></div>
         <div class="gear-workflow-section-body">
-          <article *ngFor="let row of view?.history" class="cancel-entry">
+          <article *ngFor="let row of view?.history" class="cancel-entry dana-divider-section">
             <strong>{{ row.action }} · {{ row.canceled_at ? 'Canceled' : 'Recorded' }}</strong>
             <p>{{ row.recorded_by }} · {{ row.occurred_at | date:'MMM d, y, h:mm:ss a' }}</p>
             <p *ngIf="row.canceled_at">Canceled by {{ row.canceled_by }} · {{ row.canceled_at | date:'MMM d, y, h:mm:ss a' }}</p>
@@ -59,6 +59,9 @@ interface CancellationView { latest: Operation | null; history: Operation[]; mes
           </article>
         </div>
       </section>
+      <dana-confirm-dialog [open]="!!pendingCancellation" [title]="title + '?'"
+        [message]="confirmationMessage" confirmLabel="Cancel transaction" cancelLabel="Keep transaction"
+        [danger]="true" (confirm)="confirmCancellation()" (cancel)="pendingCancellation = null" />
     </section>
   `,
 })
@@ -70,6 +73,12 @@ export class WorkflowCancellationComponent implements OnInit {
   appName = ''; title = ''; backRoute = ''; identifierLabel = ''; effect = '';
   identifier = ''; reason = ''; error = ''; message = ''; busy = false;
   view: CancellationView | null = null;
+  pendingCancellation: { operation: Operation; reason: string } | null = null;
+
+  get confirmationMessage(): string {
+    const pending = this.pendingCancellation;
+    return pending ? `${pending.operation.identifier}: ${pending.operation.action}. ${this.effect} Reason: ${pending.reason}` : '';
+  }
 
   ngOnInit(): void {
     const app = this.route.snapshot.data['cancellationApp'] as string;
@@ -88,7 +97,7 @@ export class WorkflowCancellationComponent implements OnInit {
 
   load(): void {
     if (this.busy || !this.identifier.trim()) return;
-    this.busy = true; this.error = ''; this.message = ''; this.view = null; this.reason = '';
+    this.busy = true; this.error = ''; this.message = ''; this.view = null; this.reason = ''; this.pendingCancellation = null;
     this.http.get<CancellationView>(this.endpoint, { params: { identifier: this.identifier.trim() } }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: view => { this.view = view; this.message = view.message || ''; this.busy = false; },
       error: (error: HttpErrorResponse) => { this.busy = false; this.error = this.errorText(error); },
@@ -98,9 +107,17 @@ export class WorkflowCancellationComponent implements OnInit {
   cancel(): void {
     const last = this.view?.latest;
     if (this.busy || !last?.can_cancel || !this.reason.trim()) return;
-    if (!globalThis.confirm(this.title + ': ' + last.identifier + '?\n\n' + last.action + '\n\n' + this.effect)) return;
+    if (this.reason.length > 1000) { this.error = 'The cancellation reason must be 1,000 characters or fewer.'; return; }
+    this.pendingCancellation = { operation: { ...last }, reason: this.reason.trim() };
+  }
+
+  confirmCancellation(): void {
+    const pending = this.pendingCancellation;
+    this.pendingCancellation = null;
+    if (this.busy || !pending || !this.view?.latest?.can_cancel || pending.operation.id !== this.view.latest.id) return;
+    const last = pending.operation;
     this.busy = true; this.error = ''; this.message = '';
-    this.http.post<Operation>(this.endpoint, { identifier: last.identifier, operation_id: last.id, reason: this.reason.trim() }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+    this.http.post<Operation>(this.endpoint, { identifier: last.identifier, operation_id: last.id, reason: pending.reason }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: result => {
         this.busy = false; this.reason = ''; this.message = 'Canceled. The original entry and cancellation details are retained.';
         if (this.view) { this.view.latest = result; this.view.history = this.view.history.map(row => row.id === result.id ? result : row); }

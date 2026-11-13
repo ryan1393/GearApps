@@ -40,3 +40,5 @@
 .dana-glyph-summary { --dana-glyph-url: url("../../assets/icons/summary.svg"); }
 .dana-glyph-teardown { --dana-glyph-url: url("../../assets/icons/teardown.svg"); }
 .dana-glyph-tray { --dana-glyph-url: url("../../assets/icons/tray.svg"); }
+
+.dana-glyph-ship { --dana-glyph-url: url("../../assets/icons/ship.svg"); }

@@ -41,7 +41,7 @@ This is a separate frontend application **inside the existing MeshForge/GearApps
 
 Cross-project imports use the public `@meshforge/...` aliases in `tsconfig.base.json`. Library lint rules enforce the layers: utilities depend on domain types; data access depends on domain types and existing data-access libraries; feature UI depends on those layers and Dana UI. Frontend libraries cannot import server libraries or apps. Local files within a library use relative imports.
 
-`nx test plant-dashboard` orchestrates the utility and data-access test targets through Nx dependencies; tests live with their owning libraries. Nx tracks and caches these projects with the workspace defaults. The app has no duplicated business logic or nested dependency installation. The data-access service is provided by the dashboard component, so leaving/signing out destroys polling and source metadata; a later regular-user session cannot inherit an administrator's cached source list.
+`nx test plant-dashboard` orchestrates utility, data-access and feature test targets through Nx dependencies; tests live with their owning libraries. Nx tracks and caches these projects with the workspace defaults. The app has no duplicated business logic or nested dependency installation. Data services are scoped to their screen, so leaving/signing out destroys polling and source metadata; a later regular-user session cannot inherit an administrator's cached source list.
 
 To inspect the dependency graph or test layers independently:
 

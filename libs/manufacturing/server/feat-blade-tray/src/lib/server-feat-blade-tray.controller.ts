@@ -49,6 +49,13 @@ export class ServerFeatBladeTrayController {
     return this.openingInventory.record(dto, userId);
   }
 
+  @Post('opening-inventory/preview')
+  @DepartmentAppEdit('BLADE_TRACKING')
+  @Auth([RoleType.ADMIN])
+  previewOpeningInventory(@Body() dto: OpeningInventoryDto, @ReqUserId() userId: Uuid) {
+    return this.openingInventory.record(dto, userId, true);
+  }
+
   @Post('')
   @DepartmentAppEdit('BLADE_TRACKING')
   @ApiCreatedResponse({
@@ -122,7 +129,8 @@ export class ServerFeatBladeTrayController {
   @ApiOkResponse({
     type: BladeTrayDto,
   })
-  @Auth([RoleType.ADMIN, RoleType.USER])
+  // Administrator correction only; operators use the intake, transfer and grinding workflows.
+  @Auth([RoleType.ADMIN])
   async deleteBladeTray(
     @Param('id', new ParseUUIDPipe()) id: Uuid,
     @ReqUserId() userId: Uuid,

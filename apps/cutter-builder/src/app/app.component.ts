@@ -1,12 +1,13 @@
 import { Component, inject } from '@angular/core';
+import { DanaThemeToggleComponent } from '@dana/ui';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
+import { GearSkipLinkDirective, GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { CutterBuilderNavComponent } from './layout/cutter-builder-nav/cutter-builder-nav.component';
 
 @Component({
   standalone: true,
-  imports: [RouterOutlet, CutterBuilderNavComponent, GearToastHostComponent],
+  imports: [GearSkipLinkDirective, DanaThemeToggleComponent, RouterOutlet, CutterBuilderNavComponent, GearToastHostComponent],
   selector: 'gear-cutter-builder-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
@@ -23,6 +24,8 @@ export class AppComponent {
       ['/cutter-builder/teardown', 'Tear Down Cutter'],
       ['/cutter-builder/lookup', 'Build Lookup'],
       ['/cutter-builder/build', 'Build Cutter'],
+      ['/cutter-builder/requests', 'Cutter Requests'],
+      ['/machine-counts', 'Machine DSF Counts'],
       ['/admin', 'Admin'],
       ['/login', 'Sign In'],
       ['/forgot-password', 'Forgot Password'],

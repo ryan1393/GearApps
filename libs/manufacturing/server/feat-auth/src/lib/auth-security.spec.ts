@@ -198,6 +198,13 @@ describe('authentication security regressions', () => {
     await expect(
       auth.validateUser({ email: user.email!, password }),
     ).rejects.toBeInstanceOf(ForbiddenException);
+    // A wrong password must not reveal that the account exists but is inactive.
+    await expect(
+      auth.validateUser({ email: String(user.email), password: 'Wrong-Password1!' }),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+    await expect(
+      auth.validateUser({ email: 'nobody@example.test', password }),
+    ).rejects.toThrow('Invalid email or password');
     await expect(
       new JwtAccessStrategy(config, users).validate(decode(tokens.accessToken)),
     ).rejects.toBeInstanceOf(UnauthorizedException);
@@ -425,6 +432,20 @@ describe('authentication security regressions', () => {
     });
     await expect(
       google.getProfileByToken({ idToken: 'opaque-token' }),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+  it('answers a malformed Google token with 401, not a server error', async () => {
+    const google = new GoogleAuthService(config);
+    Object.defineProperty(google, 'google', {
+      value: {
+        // What google-auth-library throws for a token that is not a JWT.
+        verifyIdToken: async () => {
+          throw new Error('Wrong number of segments in token: not-a-jwt');
+        },
+      },
+    });
+    await expect(
+      google.getProfileByToken({ idToken: 'not-a-jwt' }),
     ).rejects.toBeInstanceOf(UnauthorizedException);
   });
   it('enforces bcrypt maximum UTF-8 password bytes on direct updates', async () => {

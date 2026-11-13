@@ -383,6 +383,62 @@ test('PostgreSQL history retains ambiguous source counts but excludes them from 
   });
 });
 
+test('PostgreSQL history machine aliases require matching approval and exclude Lapper profiles without changing source counts', integration, async () => {
+  await withDatabase(async ({ database, client }) => {
+    await seedMeshForge(client);
+    const store = new (modules().DsfHistoryStore)(database);
+    await store.ensure();
+    const source = historySource(1);
+    await store.commit(capture([source], { [source.source_key]: 7 }));
+    const departmentId = uuid(7001), machineId = uuid(7002), unrelatedMachineId = uuid(7003);
+    await client.query('INSERT INTO public.departments (id,code,"deletedAt") VALUES ($1,$2,NULL)', [departmentId, '45']);
+    await client.query('INSERT INTO public.machines (id,machine_number,department_id,"deletedAt") VALUES ($1,$2,$3,NULL),($4,$5,$3,NULL)',
+      [machineId, 'CG-FIXTURE-1', departmentId, unrelatedMachineId, 'OTHER-FIXTURE']);
+    await client.query(`INSERT INTO public.dana_dsf_machine_mapping_v1
+      (machine_id,mapping_id,whiteboard_id,op_id,line_id,department_id,source_department,line_name,whiteboard_name,enabled)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,true)`,
+      [machineId, source.mapping_id, source.whiteboard_id, source.op_id, source.line_id, source.department_id,
+        '45', source.line_name, source.source_name]);
+    const linked = (await store.sources(true)).find(row => row.source_key === source.source_key);
+    assert.equal(linked.machine_id, machineId);
+    assert.equal(linked.machine_number, 'CG-FIXTURE-1');
+    assert.equal(sourceRow(await store.report(reportQuery()), source).machine_number, 'CG-FIXTURE-1');
+    const physicalBefore = (await client.query('SELECT * FROM public.machines ORDER BY id')).rows;
+
+    for (const [lineName, whiteboardName] of [['Changed line identity', source.source_name], [source.line_name, 'Changed whiteboard identity']]) {
+      await client.query('UPDATE public.dana_dsf_machine_mapping_v1 SET line_name=$1,whiteboard_name=$2 WHERE machine_id=$3',
+        [lineName, whiteboardName, machineId]);
+      const unlinked = (await store.sources(true)).find(row => row.source_key === source.source_key);
+      assert.equal(unlinked.machine_id, null);
+      assert.equal(unlinked.machine_number, null);
+      const report = sourceRow(await store.report(reportQuery()), source);
+      assert.equal(report.machine_number, null);
+      assert.equal(report.count, 7);
+      assert.equal(report.completeness, 'COMPLETE');
+    }
+
+    await client.query('UPDATE public.dana_dsf_machine_mapping_v1 SET line_name=$1,whiteboard_name=$2 WHERE machine_id=$3',
+      [source.line_name, source.source_name, machineId]);
+    await client.query('CREATE SCHEMA lapper; CREATE TABLE lapper.machines (id uuid PRIMARY KEY,public_machine_id uuid NOT NULL)');
+    await client.query('INSERT INTO lapper.machines VALUES ($1,$2)', [uuid(8001), unrelatedMachineId]);
+    assert.equal((await store.sources(true)).find(row => row.source_key === source.source_key).machine_id, machineId,
+      'An unrelated Lapper profile must not suppress this physical alias.');
+    await client.query('INSERT INTO lapper.machines VALUES ($1,$2)', [uuid(8002), machineId]);
+    const profiled = (await store.sources(true)).find(row => row.source_key === source.source_key);
+    assert.equal(profiled.machine_id, null);
+    assert.equal(profiled.machine_number, null);
+    const report = await store.report(reportQuery());
+    const row = sourceRow(report, source);
+    assert.equal(row.machine_number, null);
+    assert.equal(row.count, 7);
+    assert.equal(row.completeness, 'COMPLETE');
+    assert.equal(report.totals.known_subtotal, 7);
+    assert.deepEqual((await client.query('SELECT count::text AS count FROM public.dana_dsf_history_hour_v1')).rows, [{ count: '7' }]);
+    assert.deepEqual((await client.query('SELECT * FROM public.machines ORDER BY id')).rows, physicalBefore);
+    assert.equal((await client.query('SELECT count(*)::int AS n FROM public.cutter_machine_runs')).rows[0].n, 0);
+  });
+});
+
 test('PostgreSQL history retains the prior known count while scoped issues remain reviewable and retryable', integration, async () => {
   await withDatabase(async ({ database, client }) => {
     await seedMeshForge(client);

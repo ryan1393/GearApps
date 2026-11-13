@@ -1,5 +1,5 @@
 import type { MachineCount, ProductionSnapshot } from '@meshforge/shared/domain';
-import { csvCell, filterMachines, formatPlantTime, freshCount, machineCsv, rowLabel, shiftReports } from './production';
+import { csvCell, filterMachines, formatAge, formatPlantClock, formatPlantTime, freshCount, machineCsv, rowLabel, shiftReports } from './production';
 
 const now = Date.parse('2026-11-11T16:00:00Z');
 const machine = (overrides: Partial<MachineCount> = {}): MachineCount => ({
@@ -65,5 +65,19 @@ describe('plant production evidence', () => {
     expect(csv).toContain('"\'=1+1"');
     expect(csvCell(' \t@SUM(A1)')).toBe('"\' \t@SUM(A1)"');
     expect(csvCell('Machine "A",\nB')).toBe('"Machine ""A"",\nB"');
+  });
+});
+
+describe('glanceable update time', () => {
+  it('says how long ago data arrived', () => {
+    const at = Date.parse('2026-11-12T15:00:00Z');
+    expect(formatAge(at, at + 12_400)).toBe('12 s ago');
+    expect(formatAge(at, at + 185_000)).toBe('3 min ago');
+    expect(formatAge(at, at + 2 * 3600_000 + 5)).toBe('2 h ago');
+    expect(formatAge(at, at - 5000)).toBe('0 s ago');
+  });
+
+  it('shows the clock time in the plant time zone with seconds', () => {
+    expect(formatPlantClock(Date.parse('2026-11-12T15:04:05Z'))).toBe('10:04:05 AM');
   });
 });

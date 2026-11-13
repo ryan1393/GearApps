@@ -2,18 +2,18 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { DanaKpiCardDirective, DanaKpiGridDirective, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { DanaAlertDirective, DanaButtonDirective, DanaEmptyStateDirective, DanaKpiCardDirective, DanaKpiGridDirective, DanaLoadingStateDirective, DanaPageHeaderComponent, DanaPanelHeaderDirective, DanaTabDirective, DanaTableDirective, DanaTableShellDirective, DanaTabsDirective } from '@dana/ui';
 import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
 import { timer } from 'rxjs';
-import { csvCell, filterMachines, formatPlantTime, freshCount, machineCsv, rowLabel, shiftReports, cuttergrindCoverage, departmentLabel, plantDepartmentCoverage, REFERENCE_DEPARTMENTS } from '@meshforge/manufacturing/frontend/util-plant-dashboard';
+import { csvCell, filterMachines, formatAge, formatPlantClock, formatPlantTime, freshCount, machineCsv, rowLabel, shiftReports, cuttergrindCoverage, departmentLabel, plantDepartmentCoverage, REFERENCE_DEPARTMENTS, referenceDepartmentsText } from '@meshforge/manufacturing/frontend/util-plant-dashboard';
 import type { MachineCount } from '@meshforge/shared/domain';
 import { PlantDashboardDataService } from '@meshforge/manufacturing/frontend/data-access-plant-dashboard';
 
 @Component({
   selector: 'gear-plant-dashboard', standalone: true,
   styleUrls: ['./plant-layout.css'],
-  imports: [CommonModule, FormsModule, RouterLink, DanaKpiCardDirective, DanaKpiGridDirective, DanaTableDirective, DanaTableShellDirective],
+  imports: [CommonModule, FormsModule, RouterLink, DanaAlertDirective, DanaButtonDirective, DanaEmptyStateDirective, DanaKpiCardDirective, DanaKpiGridDirective, DanaLoadingStateDirective, DanaPageHeaderComponent, DanaPanelHeaderDirective, DanaTabDirective, DanaTableDirective, DanaTableShellDirective, DanaTabsDirective],
   templateUrl: './dashboard.component.html',
   providers: [PlantDashboardDataService],
 })
@@ -21,15 +21,31 @@ export class DashboardComponent {
   private readonly data = inject(PlantDashboardDataService);
   private readonly session = inject(AuthSessionService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute, { optional: true });
   private readonly destroy = inject(DestroyRef);
   readonly board = this.data.board;
   readonly error = this.data.error;
   readonly loading = this.data.loading;
+  readonly stale = this.data.stale;
+  readonly updatedAt = this.data.updatedAt;
+  /** Data rules (freshness, stale counts) are evaluated on this 15-second tick. */
   readonly now = signal(Date.now());
+  /** A one-second tick used only for the "Updated N s ago" display. */
+  readonly clock = signal(Date.now());
+  readonly updatedAgo = computed(() => {
+    const at = this.updatedAt();
+    return at === null ? '' : formatAge(at, this.clock());
+  });
+  readonly updatedClock = computed(() => {
+    const at = this.updatedAt();
+    return at === null ? '' : formatPlantClock(at);
+  });
+  /** Wall display: large numbers and no page chrome (toggle, or open with ?kiosk=1). */
+  readonly kiosk = signal(false);
   readonly department = signal('');
   readonly search = signal('');
   readonly attention = signal(false);
-  readonly view = signal<'overview' | 'reports'>('overview');
+  readonly view = signal<'overview' | 'reports' | 'quality'>('overview');
   readonly formatTime = formatPlantTime;
   readonly departmentLabel = departmentLabel;
   readonly isAdmin = this.data.isAdmin;
@@ -37,6 +53,7 @@ export class DashboardComponent {
   readonly mappingError = this.data.mappingError;
   readonly cuttergrind = computed(() => cuttergrindCoverage(this.board()?.rows ?? [], this.mappingBoard(), this.now()));
   readonly referenceDepartmentCount = REFERENCE_DEPARTMENTS.length;
+  readonly referenceDepartmentsText = referenceDepartmentsText();
   readonly plantCoverage = computed(() => plantDepartmentCoverage(this.board()?.rows ?? [], this.mappingBoard(), this.now()));
   readonly departments = computed(() => this.plantCoverage().map(row => row.code));
   readonly rows = computed(() => {
@@ -50,8 +67,20 @@ export class DashboardComponent {
     return board ? shiftReports(this.rows(), board, this.now()) : [];
   });
 
+  /** Columns for the wall display grid, so every machine fits on one screen. */
+  readonly kioskColumns = computed(() => Math.min(8, Math.max(3, Math.ceil(Math.sqrt(this.rows().length * 1.8)))));
+
   constructor() {
     timer(0, 15000).pipe(takeUntilDestroyed(this.destroy)).subscribe(() => this.now.set(Date.now()));
+    timer(0, 1000).pipe(takeUntilDestroyed(this.destroy)).subscribe(() => this.clock.set(Date.now()));
+    this.route?.queryParamMap.pipe(takeUntilDestroyed(this.destroy))
+      .subscribe(params => this.kiosk.set(['1', 'true'].includes(params.get('kiosk') ?? '')));
+  }
+
+  setKiosk(on: boolean): void {
+    this.kiosk.set(on);
+    if (on) this.view.set('overview');
+    void this.router.navigate([], { relativeTo: this.route ?? undefined, queryParams: { kiosk: on ? 1 : null }, queryParamsHandling: 'merge', replaceUrl: true });
   }
 
   count(row: MachineCount): number | null {
@@ -65,7 +94,9 @@ export class DashboardComponent {
   }
 
   refresh(): void { this.data.refresh(); }
+  clearFilters(): void { this.department.set(''); this.search.set(''); this.attention.set(false); }
   showCuttergrind(): void { this.department.set('45'); this.search.set(''); this.attention.set(false); this.view.set('overview'); }
+  tabId(view: 'overview' | 'reports' | 'quality'): string { return `plant-${view}-tab`; }
   logout(): void { this.session.logout(); void this.router.navigateByUrl('/login'); }
   print(): void { window.print(); }
 

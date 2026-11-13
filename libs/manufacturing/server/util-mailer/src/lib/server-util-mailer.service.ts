@@ -10,6 +10,29 @@ import { ConfigType } from '@nestjs/config';
 import { IBaseEmailContext } from '../templates/contexts';
 
 import SMTPTransport = require('nodemailer/lib/smtp-transport');
+
+/**
+ * SMTP transport options. The mail conversation is logged only when EMAIL_DEBUG is true, and
+ * even then nodemailer logs commands and byte counts, never message bodies (reset links).
+ */
+export function mailTransportOptions(
+  cfg: Pick<ConfigType<typeof mailerConfig>, 'host' | 'port' | 'ignoreTls' | 'secure' | 'requireTls' | 'user' | 'password' | 'debug'>,
+): SMTPTransport.Options {
+  return {
+    host: cfg.host,
+    port: cfg.port,
+    ignoreTLS: cfg.ignoreTls,
+    secure: cfg.secure,
+    requireTLS: cfg.requireTls,
+    auth: {
+      user: cfg.user,
+      pass: cfg.password,
+    },
+    debug: cfg.debug === true,
+    logger: cfg.debug === true,
+  };
+}
+
 @Injectable()
 export class ServerUtilMailerService {
   private readonly transporter!: Transporter;
@@ -21,20 +44,7 @@ export class ServerUtilMailerService {
   ) {
     if (cfgService.enabled) {
       this.logger.debug(`Configuring nodemailer`);
-      const options: SMTPTransport.Options = {
-        host: cfgService.host,
-        port: cfgService.port,
-        ignoreTLS: cfgService.ignoreTls,
-        secure: cfgService.secure,
-        requireTLS: cfgService.requireTls,
-        auth: {
-          user: cfgService.user,
-          pass: cfgService.password,
-        },
-        debug: cfgService.debug,
-        logger: true,
-      };
-      this.transporter = createTransport(options);
+      this.transporter = createTransport(mailTransportOptions(cfgService));
       this.registerPartials(cfgService.partialsDir);
     } else {
       this.logger.debug(`nodemailer is disabled, skipping configuration`);

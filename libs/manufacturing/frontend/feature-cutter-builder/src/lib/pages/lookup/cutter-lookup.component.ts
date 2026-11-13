@@ -124,6 +124,11 @@ export class CutterLookupComponent implements OnInit, OnDestroy {
     this.search();
   }
 
+  backToResults(): void {
+    if (this.busy) return;
+    this.search();
+  }
+
   /** Sends the card to the card printer. If no printer takes it, the card files are saved instead. */
   print(): void {
     const buildNumber = this.card?.build_number;

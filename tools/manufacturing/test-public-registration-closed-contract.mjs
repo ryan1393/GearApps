@@ -7,15 +7,28 @@ const authController = read('libs/manufacturing/server/feat-auth/src/lib/server-
 const authService = read('libs/manufacturing/server/feat-auth/src/lib/server-feat-auth.service.ts');
 const userController = read('libs/manufacturing/server/feat-user/src/lib/server-feat-user.controller.ts');
 const adminApi = read('libs/manufacturing/frontend/feature-admin-users/src/lib/admin-api.service.ts');
-const userApi = read('libs/manufacturing/frontend/data-access-user/src/lib/user-api.service.ts');
-const userFacade = read('libs/manufacturing/frontend/data-access-user/src/lib/user.service.ts');
+// Every frontend source file: no browser code may call public registration.
+const frontendRoots = ['libs/manufacturing/frontend', 'libs/client', 'apps/blade-tracking', 'apps/cutter-builder', 'apps/greenshed', 'apps/lapper-client', 'apps/plant-dashboard'];
+const frontendSources = [];
+const collect = (dir) => {
+  const absolute = contractPath(process.cwd(), dir);
+  if (!fs.existsSync(absolute)) return;
+  for (const entry of fs.readdirSync(absolute, { withFileTypes: true })) {
+    const child = `${dir}/${entry.name}`;
+    if (entry.isDirectory()) { if (entry.name !== 'node_modules') collect(child); }
+    else if (/\.(ts|html)$/.test(entry.name) && !/\.spec\.ts$/.test(entry.name)) frontendSources.push([child, read(child)]);
+  }
+};
+frontendRoots.forEach(collect);
+if (!frontendSources.some(([file]) => file.includes('data-access-user/src/lib/auth-session.service.ts'))) {
+  throw new Error('Frontend source scan did not find the shared AuthSessionService');
+}
 
 const forbidden = [
   [authController, "@Post('email/register')", 'Auth controller still exposes public email registration'],
   [authController, 'async register(', 'Auth controller still has the registration action'],
   [authService, 'async registerUser(', 'Auth service still exposes direct email self-registration'],
-  [userApi, '/api/v1/auth/email/register', 'Frontend UserApiService still calls public registration'],
-  [userFacade, 'addUser(', 'Compatibility UserService still exposes public addUser registration'],
+  ...frontendSources.map(([file, source]) => [source, '/api/v1/auth/email/register', `Frontend ${file} still calls public registration`]),
 ];
 
 for (const [source, marker, message] of forbidden) {

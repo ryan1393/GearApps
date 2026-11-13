@@ -52,6 +52,8 @@ operation, line and department identities. A changed identity starts a separate
 stream and preserves the previous stream's history. A display-name change alone
 does not create a new stream. Approved full-identity MeshForge mappings can supply
 a physical machine label; the collector never creates or guesses those mappings.
+The existing Lapper client exclusion remains in place: this archive records DSF
+source operations and does not restore Lapper machine badges, mappings or links.
 
 For a mapping whose identity changes, including a return to an earlier identity,
 the archive records when that identity was observed active. It does not backfill

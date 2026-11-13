@@ -1,8 +1,8 @@
 <section class="launch" aria-labelledby="launch-title">
-  <div class="gear-panel launch-panel launch-lead">
+  <div class="gear-panel dana-panel-padded launch-panel launch-lead">
     <div>
-      <h2 id="launch-title">Launch Setup</h2>
-      <p class="gear-muted">Getting the floor into the system for the first day: what still has to be set up, barcode tags in bulk, and the trays that are already ground or coated.</p>
+      <h2 id="launch-title" class="dana-panel-title">Launch Setup</h2>
+      <p class="gear-muted">Set up floor records, print barcode tags, and record existing inventory.</p>
     </div>
     <button type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="loading" data-icon="refresh" title="Refresh">{{ loading ? 'Refreshing…' : '↻ Refresh' }}</button>
   </div>
@@ -10,7 +10,7 @@
   <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert"><strong>Unable to continue.</strong><span>{{ error }}</span></div>
 
   <!-- 1. Checklist -->
-  <div class="gear-panel launch-panel" *ngIf="status as current">
+  <div class="gear-panel dana-panel-padded launch-panel" *ngIf="status as current">
     <div class="gear-step-title"><span class="gear-step-number">1</span><span>Set up</span></div>
     <div danaTableShell class="table-wrap">
       <table danaTable class="gear-table">
@@ -28,7 +28,7 @@
   </div>
 
   <!-- 2. Tags -->
-  <form class="gear-panel launch-panel" (ngSubmit)="makeTags()" aria-label="Barcode tags">
+  <form class="gear-panel dana-panel-padded launch-panel" (ngSubmit)="makeTags()" aria-label="Barcode tags">
     <div class="gear-step-title"><span class="gear-step-number">2</span><span>Barcode tags in bulk</span></div>
     <p class="gear-muted">Makes a run of numbered records and prints a tag for each. A number that already exists is not created again; its tag is printed again.</p>
     <div class="gear-form-grid">
@@ -70,7 +70,7 @@
       <span class="mono">{{ tagSerials[0] }}</span>
       <ng-container *ngIf="tagSerials.length > 1"> to <span class="mono">{{ tagSerials[tagSerials.length - 1] }}</span></ng-container>
     </p>
-    <div class="gear-admin-form-actions">
+    <div class="dana-actions">
       <button type="submit" class="gear-btn gear-btn-primary" [disabled]="tagBusy || !!tagProblem">{{ tagBusy ? 'Working… ' + tagProgress : 'Create and Print Tags' }}</button>
     </div>
     <div *ngIf="tagResults.length" danaTableShell class="table-wrap">
@@ -89,7 +89,7 @@
   </form>
 
   <!-- 3. Opening inventory -->
-  <form class="gear-panel launch-panel" (ngSubmit)="recordOpening()" aria-label="Opening inventory">
+  <form class="gear-panel dana-panel-padded launch-panel" (ngSubmit)="recordOpening()" aria-label="Opening inventory">
     <div class="gear-step-title"><span class="gear-step-number">3</span><span>Trays already on the floor</span></div>
     <p class="gear-muted">Record a full tray that is already ground or already coated, on the shelf where it sits. Each entry can be undone with Cancel Last in Blade Tracking.</p>
     <div class="gear-form-grid">
@@ -124,7 +124,7 @@
       </label>
     </div>
     <p *ngIf="openingError" class="gear-alert gear-alert-danger" role="alert">{{ openingError }}</p>
-    <div class="gear-admin-form-actions">
+    <div class="dana-actions">
       <button type="submit" class="gear-btn gear-btn-primary" [disabled]="openingBusy">{{ openingBusy ? 'Recording…' : 'Record Tray' }}</button>
     </div>
     <p class="gear-field-help">The tray is recorded with the full blade count its Summary requires. Use the normal screens for everything else: dull or new blades in Blade Intake, a built cutter in Cutter Builder > Build, and a cutter on a machine in Greenshed > Setup.</p>
@@ -142,8 +142,10 @@
     </div>
   </form>
 
+  <gear-bulk-opening [summaries]="summaries" [partTypes]="partTypes" (recorded)="refresh()" />
+
   <!-- 4. What is recorded -->
-  <div class="gear-panel launch-panel" *ngIf="status as current">
+  <div class="gear-panel dana-panel-padded launch-panel" *ngIf="status as current">
     <div class="gear-step-title"><span class="gear-step-number">4</span><span>What the system holds now</span></div>
     <div danaTableShell class="table-wrap">
       <table danaTable class="gear-table">

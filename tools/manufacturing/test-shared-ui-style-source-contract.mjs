@@ -16,7 +16,7 @@ const must=(ok,msg)=>{if(!ok) throw new Error(msg)};
 const sharedStyle=MESHFORGE_STYLE_ENTRY;
 const domainStyle=MESHFORGE_DOMAIN_STYLE_ENTRY;
 const factory='../../tools/manufacturing/tailwind/create-app-tailwind-config';
-const moved=['blade-dashboard.css','cutter-builder.css','greenshed-running-machines.css','greenshed-running-machines-typography.css','greenshed-running-machines-colors.css','greenshed-running-machines-counts.css','inventory-core.css','inventory-relations.css','scrap-blades.css'];
+const moved=['blade-dashboard.css','cutter-builder.css','greenshed-running-machines.css','greenshed-running-machines-typography.css','greenshed-running-machines-colors.css','greenshed-running-machines-counts.css','inventory-core.css','inventory-relations.css','scrap-blades.css','blade-workstation.css'];
 const criticalOrder=[
   'foundation/tokens.css','foundation/base.css','layout/app-shell.css',
   'components/primitives.css','components/data-display.css','components/icons.css',

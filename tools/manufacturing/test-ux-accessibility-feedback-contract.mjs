@@ -1,8 +1,8 @@
 import { contractPath } from './lib/contract-paths.mjs';
 import fs from 'node:fs';
 const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8');
-const scanTs=read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/shared/scan-panel/scan-panel.component.ts');
-const scanHtml=read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/shared/scan-panel/scan-panel.component.html');
+const scanTs=read('libs/manufacturing/frontend/util-common/src/lib/station/scan-panel/scan-panel.component.ts');
+const scanHtml=read('libs/manufacturing/frontend/util-common/src/lib/station/scan-panel/scan-panel.component.html');
 for(const m of ['implements AfterViewInit','@Input() autoFocus = true','readonly inputId','ngAfterViewInit()']) if(!scanTs.includes(m)) throw new Error(`Shared scan autofocus missing ${m}`);
 for(const m of ['[for]="inputId"','[id]="inputId"']) if(!scanHtml.includes(m)) throw new Error(`Shared scan label association missing ${m}`);
 const css=read('libs/shared/dana-ui/src/styles/meshforge/components/primitives.css');

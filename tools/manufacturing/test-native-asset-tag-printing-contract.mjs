@@ -1,4 +1,5 @@
 import { contractPath } from './lib/contract-paths.mjs';
+import { readAdminScreenHtml, readAdminScreenTs } from './lib/admin-screen-source.mjs';
 import fs from 'node:fs';
 
 const read=(p)=>fs.readFileSync(contractPath(process.cwd(), p),'utf8').replace(/^\uFEFF/,'');
@@ -24,8 +25,8 @@ const locationsHtml=read('libs/manufacturing/frontend/feature-blade-tracking/src
 const trayTs=read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/tray-contents/tray-contents.component.ts');
 const trayHtml=read('libs/manufacturing/frontend/feature-blade-tracking/src/lib/pages/tray-contents/tray-contents.component.html');
 const adminApi=read('libs/manufacturing/frontend/feature-admin-users/src/lib/admin-api.service.ts');
-const adminTs=read('libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.ts');
-const adminHtml=read('libs/manufacturing/frontend/feature-admin-users/src/lib/frontend-feature-admin-users/frontend-feature-admin-users.component.html');
+const adminTs=readAdminScreenTs();
+const adminHtml=readAdminScreenHtml();
 const envExample=read('.env.example');
 const configurePrinter=read('tools/manufacturing/configure-label-printer.ps1');
 const printDoc=read('docs/manufacturing/printing/ASSET-TAG-IPL.md');

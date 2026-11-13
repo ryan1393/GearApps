@@ -933,6 +933,46 @@
         "cwd": "."
       },
       "cache": false
+    },
+    "test-cutter-requests": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --env-file=.env tools/manufacturing/test-cutter-requests.mjs --browser",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-access-workflows": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --env-file=.env tools/manufacturing/test-access-workflows.mjs --browser",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-cutter-request-migration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --env-file=.env tools/manufacturing/test-cutter-request-migration.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-ui-ux-review": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --env-file=.env tools/manufacturing/test-ui-ux-review.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-dana-spacing": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --env-file=.env tools/manufacturing/test-ui-ux-review.mjs --spacing",
+        "cwd": "."
+      },
+      "cache": false
     }
   }
 }

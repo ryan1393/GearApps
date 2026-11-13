@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
+import { DanaThemeToggleComponent } from '@dana/ui';
 import { Title } from '@angular/platform-browser';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
+import { GearSkipLinkDirective, GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { LapperNavComponent } from './layout/lapper-nav/lapper-nav.component';
 
 @Component({
-  imports: [RouterOutlet, LapperNavComponent, GearToastHostComponent],
+  imports: [GearSkipLinkDirective, DanaThemeToggleComponent, RouterOutlet, LapperNavComponent, GearToastHostComponent],
   selector: 'gear-lapper-root',
   templateUrl: './app.component.html',
 })

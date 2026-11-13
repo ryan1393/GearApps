@@ -54,12 +54,11 @@ interface FanucRow {
   changeDetection: ChangeDetectionStrategy.OnPush,
   styles: `
     .lapper-collector-detail {
-      margin-top: 4px;
-      font-size: 12px;
+      margin-top: var(--dana-space-1);
     }
   `,
   template: `
-    <div class="gear-page gear-workflow-page">
+    <div class="gear-page dana-page-stack gear-workflow-page">
       <section
         danaPageHeader
         eyebrow="LAPPER / CONFIGURATION"

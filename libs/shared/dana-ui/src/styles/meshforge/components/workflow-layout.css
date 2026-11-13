@@ -1,13 +1,14 @@
 /* Canonical workflow/forms/results layout for Cutter Builder and Greenshed */
 .gear-workflow-page {
   display: grid;
-  gap: var(--gear-space-5);
+  gap: var(--dana-section-gap);
+  --dana-page-header-gap: 0px;
 }
 
 .gear-workflow-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--gear-space-5);
+  gap: var(--dana-section-gap);
 }
 
 .gear-workflow-grid-wide {
@@ -31,7 +32,7 @@
   display: flex;
   align-items: center;
   gap: var(--gear-space-3);
-  padding: var(--gear-space-4) var(--gear-space-5);
+  padding: var(--dana-space-4) var(--dana-panel-padding);
   border-bottom: 1px solid var(--gear-border);
   background: var(--gear-surface-subtle);
 }
@@ -66,8 +67,8 @@
 
 .gear-workflow-section-body {
   display: grid;
-  gap: var(--gear-space-4);
-  padding: var(--gear-space-5);
+  gap: var(--dana-form-gap);
+  padding: var(--dana-panel-padding);
 }
 
 .gear-workflow-scan-row {
@@ -80,7 +81,7 @@
 .gear-workflow-form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--gear-space-4);
+  gap: var(--dana-form-gap);
 }
 
 .gear-workflow-form-grid-four {
@@ -90,7 +91,7 @@
 .gear-workflow-filter-grid {
   display: grid;
   grid-template-columns: minmax(15rem, 2fr) repeat(3, minmax(8rem, 1fr)) auto auto;
-  gap: var(--gear-space-3);
+  gap: var(--dana-form-gap);
   align-items: end;
 }
 
@@ -110,21 +111,21 @@
 }
 
 .gear-workflow-state-success {
-  border-color: #a7f3d0;
+  border-color: var(--gear-success-border);
   border-left-color: var(--gear-success);
   background: var(--gear-success-bg);
   color: var(--gear-success);
 }
 
 .gear-workflow-state-warning {
-  border-color: #fde68a;
+  border-color: var(--gear-warning-border);
   border-left-color: var(--gear-warning);
   background: var(--gear-warning-bg);
   color: var(--gear-warning);
 }
 
 .gear-workflow-state-danger {
-  border-color: #fecaca;
+  border-color: var(--gear-danger-border);
   border-left-color: var(--gear-danger);
   background: var(--gear-danger-bg);
   color: var(--gear-danger);
@@ -220,7 +221,7 @@
 .gear-workflow-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--gear-space-3);
+  gap: var(--dana-action-gap);
   align-items: center;
 }
 
@@ -268,22 +269,26 @@
 }
 
 .gear-workflow-result-body {
-  padding: var(--gear-space-5);
+  padding: var(--dana-panel-padding);
 }
 
 .gear-workflow-result-footer {
-  padding: var(--gear-space-4) var(--gear-space-5);
+  padding: var(--dana-panel-padding);
   border-top: 1px solid var(--gear-border);
+  display: grid;
+  gap: var(--dana-form-gap);
 }
 
 .gear-workflow-card {
   width: min(100%, 64rem);
   margin-inline: auto;
-  padding: var(--gear-space-6);
+  padding: var(--dana-panel-padding);
   border: 2px solid var(--gear-heading);
   border-radius: var(--gear-radius-lg);
   background: var(--gear-surface);
   box-shadow: none;
+  display: grid;
+  gap: var(--dana-form-gap);
 }
 
 .gear-workflow-card-header {
@@ -310,7 +315,7 @@
 }
 
 .gear-workflow-card-body {
-  padding-block: var(--gear-space-5);
+  padding-block: 0;
 }
 
 .gear-workflow-comments {
@@ -327,7 +332,7 @@
 }
 
 .gear-workflow-table-heading {
-  padding: var(--gear-space-4) var(--gear-space-5);
+  padding: var(--dana-space-4) var(--dana-panel-padding);
   border-bottom: 1px solid var(--gear-border);
   background: var(--gear-surface-subtle);
 }
@@ -362,13 +367,13 @@
 }
 
 .gear-workflow-page .gear-feedback[role='alert'] {
-  border: 1px solid #fecaca;
+  border: 1px solid var(--gear-danger-border);
   background: var(--gear-danger-bg);
   color: var(--gear-danger);
 }
 
 .gear-workflow-page .gear-feedback[role='status'] {
-  border: 1px solid #a7f3d0;
+  border: 1px solid var(--gear-success-border);
   background: var(--gear-success-bg);
   color: var(--gear-success);
 }
@@ -402,7 +407,7 @@
   .gear-workflow-result-body,
   .gear-workflow-result-footer,
   .gear-workflow-card {
-    padding: var(--gear-space-4);
+    padding: var(--dana-panel-padding);
   }
 
   .gear-workflow-result-header,
@@ -423,5 +428,13 @@
   .gear-workflow-card {
     max-width: none;
     border-radius: 0;
+    display: grid;
+    gap: var(--dana-form-gap);
   }
 }
+
+.gear-workflow-page > * { margin-block: 0; }
+
+.gear-workflow-section-body > :is(p,dl),
+.gear-workflow-card > :is(.gear-workflow-comments,.gear-actions),
+.gear-workflow-result-footer > :is(p,.gear-actions) { margin-block: 0; }

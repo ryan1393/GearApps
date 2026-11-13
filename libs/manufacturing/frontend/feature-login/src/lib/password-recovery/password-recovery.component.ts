@@ -5,6 +5,7 @@ import {
   ChangeDetectorRef,
   Component,
   DestroyRef,
+  ElementRef,
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -19,31 +20,13 @@ import {
 import { ActivatedRoute } from '@angular/router';
 import { combineLatest } from 'rxjs';
 import {
+  isStrongPassword,
   PASSWORD_MAX_LENGTH,
   PASSWORD_MIN_LENGTH,
-  PASSWORD_MIN_NUMBER,
-  PASSWORD_MIN_SYMBOL,
-  PASSWORD_MIN_UPPERCASE,
 } from '@meshforge/manufacturing/shared/util-constants';
 
 function strongPassword(control: AbstractControl): ValidationErrors | null {
-  const value = String(control.value ?? '');
-  const bytes = Array.from(value).reduce((count, char) => {
-    const point = char.codePointAt(0) ?? 0;
-    return (
-      count + (point > 0xffff ? 4 : point > 0x7ff ? 3 : point > 0x7f ? 2 : 1)
-    );
-  }, 0);
-  const count = (pattern: RegExp) => value.match(pattern)?.length ?? 0;
-  const valid =
-    value.length >= PASSWORD_MIN_LENGTH &&
-    value.length <= PASSWORD_MAX_LENGTH &&
-    bytes <= 72 &&
-    count(/[a-z]/g) >= 1 &&
-    count(/[A-Z]/g) >= PASSWORD_MIN_UPPERCASE &&
-    count(/[0-9]/g) >= PASSWORD_MIN_NUMBER &&
-    count(/[-#!$@£%^&*()_+|~=\x60{}[\]:";'<>?,./\\ ]/g) >= PASSWORD_MIN_SYMBOL;
-  return valid ? null : { passwordPolicy: true };
+  return isStrongPassword(control.value) ? null : { passwordPolicy: true };
 }
 
 @Component({
@@ -58,6 +41,7 @@ export class PasswordRecoveryComponent {
   private readonly route = inject(ActivatedRoute);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly element = inject<ElementRef<HTMLElement>>(ElementRef);
   private generation = 0;
   private code = '';
   mode: 'forgot' | 'reset' = 'forgot';
@@ -136,6 +120,9 @@ export class PasswordRecoveryComponent {
           (this.mode === 'reset'
             ? ' and matching passwords that meet the requirements.'
             : '.');
+      const field = this.form.controls.email.invalid ? '#recovery-email'
+        : this.form.controls.password.invalid ? '#new-password' : '#confirm-password';
+      this.element.nativeElement.querySelector<HTMLInputElement>(field)?.focus();
       return;
     }
     const generation = this.generation,
@@ -162,8 +149,11 @@ export class PasswordRecoveryComponent {
       error: (error: HttpErrorResponse) => {
         if (generation !== this.generation) return;
         this.submitting = false;
-        this.error =
-          mode === 'forgot'
+        const serverMessage = typeof error.error?.message === 'string' ? error.error.message : '';
+        this.error = error.status === 429 && serverMessage
+          // Too many attempts: the server says how long to wait.
+          ? serverMessage
+          : mode === 'forgot'
             ? 'Could not send the request right now. Please try again.'
             : error.status === 400 || error.status === 422
               ? 'The reset link is invalid or expired, or the account details do not match. Request a new link and try again.'

@@ -9,7 +9,7 @@
 .gear-table .gear-actions {
   flex-wrap: nowrap;
   justify-content: flex-end;
-  gap: 6px;
+  gap: var(--dana-action-gap);
 }
 
 .gear-table td.right {

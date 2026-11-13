@@ -6,11 +6,30 @@ MeshForge prints two kinds of label straight to network label printers:
 | --- | --- | --- |
 | Tray, container and location tags | 2.125 x 0.625 in | every **Print Tag** button |
 | Location summary tags | 2.125 x 0.625 in (tag stock) | **Print Summary Tag** on Admin > Locations and Blade Tracking > Locations |
+| Location label | 4 x 6.5 in landscape (card stock) | **Print 4×6.5 Label** on Admin > Locations and Blade Tracking > Locations |
 | Cutter Build card | 4 x 6.5 in | **Print Cutter Card** on Build Cutter and Build Lookup |
 
 A location summary tag has the same layout as the other tags, but its barcode and text are the Summary and part type set on the location, for example `1.955FC-RING`. Set them in the location's Summary and Part Type fields in Admin > Locations; Green Shed summary shelves (`GSR-`/`GSP-`) take them from their barcode. The location's own tag is unchanged.
 
-Coater packing slips (Letter) and coater container labels (4 x 6) are ordinary browser prints and use whatever printer the browser offers.
+Coater packing slips (Letter) and coater container labels (4 x 6) are ordinary browser prints and use whatever printer the browser offers. Location labels print on a card printer, with the browser print as a fallback.
+
+## Location label (4 x 6.5)
+
+**Print 4×6.5 Label** on Admin > Locations and Blade Tracking > Locations prints a landscape 4 x 6.5 in label (6.5 in across, 4 in tall) for that location on the same card stock as the Cutter Build card. The label shows:
+
+- Top row: the **Summary** kept at the location, as large as fits.
+- Second row: the **Part Type** and **Location #** (the location number) side by side.
+- Across the bottom: the location's barcode, Code 128 of its serial — the same value its small tag carries, so scanning it finds the location — with the serial under it and the description and department below that.
+
+Each value shrinks only as far as it must to fit on one line. A Summary or part type that is not set prints *NOT SET*; set them in the location's Summary and Part Type fields in Admin > Locations. The values come from the database when the label is printed.
+
+**Choosing the printer.** Both pages have a **Print 4×6.5 labels to** choice beside the tag printer choice. It lists the enabled **Cutter Build card** printers; the choice is kept on that computer, and *Default* uses the default card printer. The label is sent in the printer's language (IPL or ZPL) with the printer's *right* and *down* adjustments, the same as the Cutter Build card.
+
+**Browser fallback.** With no card printer set up, the button opens the label in the browser's print dialog straight away. When a card printer is set up but does not take the label (it is off, unreachable or refuses the job), a notice says why and offers **Print in browser**, which opens the same label for the browser's print dialog. In the dialog, choose a 4 x 6.5 printer and print landscape, at actual size (100%), with no margins.
+
+Check the first label on each card printer: the fields are turned to read across the 6.5 in length of the card. If a label prints off the card, adjust the printer's *right* and *down* in Admin > Label Printers.
+
+The printer layout is `libs/manufacturing/server/feat-tray/src/lib/label-printers/location-card-label.ts`; the browser fallback is `libs/manufacturing/frontend/util-common/src/lib/location-label/location-label.ts`. The API is `POST /api/v1/asset-tags/location-label` with `record_id` and an optional `printer_id`.
 
 ## Set up a printer
 
@@ -19,7 +38,7 @@ Admin > **Label Printers** > *Add a printer*:
 - **Name** — what operators will see, for example `Cutter Grind Zebra`.
 - **IP address** and **Port** — raw printing is port 9100 on most printers.
 - **Printer language** — `IPL` for Intermec / Honeywell, `ZPL` for Zebra. A printer sent the wrong language accepts the job and prints nothing.
-- **Loaded with** — tags or cutter cards. Tags are never sent to a card printer, or cards to a tag printer.
+- **Loaded with** — tags or 4 x 6.5 cards (cutter cards and location labels). Tags are never sent to a card printer, or cards to a tag printer.
 - **Default** — the printer every Print button uses for that label. The first printer added for a label becomes its default; *Make Default* changes it.
 
 The printer must be on the network and reachable **from the MeshForge server** (the API container), not just from the operator's PC. A printer attached to one PC by USB cannot be used.
@@ -31,7 +50,7 @@ The printer must be on the network and reachable **from the MeshForge server** (
 
 ## If the label is off-centre or cut off
 
-Each printer has **Move right (dots)** and **Move down (dots)** in its *Edit* form. They move everything that printer prints: tags and cutter cards, IPL and ZPL. 8 dots are about 1 mm (203 dots per inch); a negative number moves left or up. Save, then **Print Test Tag** and repeat until the tag sits squarely.
+Each printer has **Move right (dots)** and **Move down (dots)** in its *Edit* form. They move everything that printer prints: tags, cutter cards and location labels, IPL and ZPL. 8 dots are about 1 mm (203 dots per inch); a negative number moves left or up. Save, then **Print Test Tag** and repeat until the tag sits squarely.
 
 Before adjusting a Zebra that prints far off the label, run its media calibration first; the adjustment is for the last millimetre or two, not for a printer that has lost track of the gap.
 

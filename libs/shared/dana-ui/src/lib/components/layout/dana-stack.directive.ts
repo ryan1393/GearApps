@@ -6,7 +6,7 @@ import { Directive, HostBinding, Input } from '@angular/core';
 })
 export class DanaStackDirective {
   @HostBinding('class.dana-stack') readonly hostClass = true;
-  @Input() danaStackGap = 'var(--gear-space-4, 16px)';
+  @Input() danaStackGap = 'var(--dana-action-gap, 12px)';
   @Input() danaStackAlign = 'stretch';
   @Input() danaStackJustify = 'flex-start';
   @Input() danaStackMobile = false;

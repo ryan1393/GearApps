@@ -12,7 +12,7 @@ this reader's validated read-only connection and stores hourly/shift records in
 MeshForge after DSF closes. `DSF_HISTORY_ENABLED=true` enables retention;
 `DSF_HISTORY_LOOKBACK_DAYS` controls recent reconciliation, not record deletion.
 
-MeshForge reads current-shift DSF piece counts for machines across all departments, including individual grinders, lappers and cutter builders. Machine DSF Counts is available in all four apps, with counts beside selected machines and in Admin. Optional cutter crediting applies only to production cutting machines in Departments 132/152. The integration is off by default.
+MeshForge reads current-shift DSF piece counts for machines across all departments, including individual grinders and cutter builders. Lapper machines (every machine with a Lapper profile in `lapper.machines`) are left out: they get no DSF count, cannot be mapped to a DSF source, and the Lapper app has no DSF badge or Machine DSF Counts page. Machine DSF Counts is available in Blade Tracking, Cutter Builder and Greenshed, with counts beside selected machines and in Admin. Optional cutter crediting applies only to production cutting machines in Departments 132/152. The integration is off by default.
 
 The API **pulls** from DSF on a timer. Nothing pushes to MeshForge, and MeshForge never writes
 to DSF: the DSF session is a read-only transaction running fixed `SELECT`s, and it is closed
@@ -78,7 +78,7 @@ DSF migrations, so a database that already has them keeps its mappings and ledge
 
 ## Machine mapping
 
-Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operation + line). Admin mappings allow every numeric DSF department and its approved operation, including grinding and lapping. Source discovery works before the first mapping is configured. The machine and source departments must match.
+Each MeshForge machine is tied to one DSF source (whiteboard + mapping + operation + line). Admin mappings allow every numeric DSF department and its approved operation, including grinding. Lapper machines are not listed and a mapping for one is refused; any mapping saved for one is deleted when the API starts, recorded as an `UNMAP` (reason `LAPPER_MACHINE`) in `dana_dsf_machine_mapping_audit_v1`, and its DSF source is free to map to another machine. Until that start-up runs, such a mapping is ignored. Source discovery works before the first mapping is configured. The machine and source departments must match.
 
 DSF departments are named like `Dept. 132`. Some have a plain name instead: the CutGrind
 grinders (`CutGrind 3 1-24-79`) are in the DSF department `CUTTER GRIND`, which is MeshForge
@@ -140,11 +140,13 @@ is a new run.
   and last-check count of its previous run. Pieces made while no cutter was recorded on the
   machine are not credited to anyone.
 - **Quality checks.** With crediting on, a check records the count it was taken at (at or after
-  the previous check) and no longer sets the running count. Cancelling a check puts back the
-  previous check point and leaves the running count alone.
+  the previous check) and never changes the running count, even when entered above it; the next
+  check is due from the check's count. Cancelling a check puts back the previous check point and
+  leaves the running count alone. A typed running-count update (`POST greenshed/machines/:machine/piece-count`)
+  is refused while crediting is on.
 - **Review instead of guessing.** Crediting for a machine stops, and Admin > DSF Mappings shows
-  why, if the DSF total goes down or if the cutter's count was changed by hand (a count update,
-  or a check entered above the running count). A hand-changed cutter resumes at the next shift.
+  why, if the DSF total goes down or if the cutter's count was changed outside DSF crediting.
+  A hand-changed cutter resumes at the next shift.
 - Reads are bounded: more than 10,000 events for one machine in a read is refused rather than
   published truncated.
 

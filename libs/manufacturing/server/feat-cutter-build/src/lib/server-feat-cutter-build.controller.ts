@@ -7,6 +7,7 @@ import {
   Get,
   HttpCode,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Query,
@@ -22,6 +23,8 @@ import {
 } from './cutter-build.dto';
 import { CutterCardPrintService } from './cutter-card-print.service';
 import { ServerFeatCutterBuildService } from './server-feat-cutter-build.service';
+import { CutterRequestsService } from './cutter-requests.service';
+import { CreateCutterRequestDto, UpdateCutterRequestStatusDto } from './cutter-requests.dto';
 
 @Controller({ path: 'cutter-builder', version: '1' })
 @ApiTags('Cutter Builder')
@@ -29,7 +32,26 @@ export class ServerFeatCutterBuildController {
   constructor(
     private readonly service: ServerFeatCutterBuildService,
     private readonly cardPrinter: CutterCardPrintService,
+    private readonly requests: CutterRequestsService,
   ) {}
+
+  @Get('requests')
+  @Auth([RoleType.ADMIN, RoleType.USER])
+  listCutterRequests(@Query('includeCompleted') includeCompleted?: string) {
+    return this.requests.list(includeCompleted === 'true');
+  }
+
+  @Post('requests')
+  @Auth([RoleType.ADMIN, RoleType.USER])
+  createCutterRequest(@Body() dto: CreateCutterRequestDto, @ReqUserId() userId: Uuid) {
+    return this.requests.create(dto, userId);
+  }
+
+  @Patch('requests/:id/status')
+  @Auth([RoleType.ADMIN, RoleType.USER])
+  updateCutterRequestStatus(@Param('id', ParseUUIDPipe) id: string, @Body() dto: UpdateCutterRequestStatusDto, @ReqUserId() userId: Uuid) {
+    return this.requests.updateStatus(id, dto.status, userId);
+  }
 
   @Post('cutter-bodies')
   @DepartmentAppEdit('CUTTER_BUILDER')

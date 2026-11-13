@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { randPassword } from '@ngneat/falso';
 
+import { AuthAttemptLimits } from '../auth-attempt-limits';
 import { ServerFeatAuthService } from '../server-feat-auth.service';
 import { GoogleAuthController } from './google-auth.controller';
 import { GoogleAuthService } from './google-auth.service';
@@ -24,6 +25,7 @@ describe('GoogleAuthController', () => {
       controllers: [GoogleAuthController],
       providers: [
         ServerFeatAuthService,
+        AuthAttemptLimits,
         GoogleAuthService,
         {
           provide: ServerFeatUserService,

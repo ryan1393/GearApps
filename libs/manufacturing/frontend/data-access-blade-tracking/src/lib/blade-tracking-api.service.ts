@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { catchError, defer, EMPTY, expand, forkJoin, map, Observable, of, reduce, throwError } from 'rxjs';
-import { LabelPrinterChoiceService } from '@meshforge/manufacturing/frontend/util-common';
+import { LabelPrinterChoiceService, LocationLabelPrintResult } from '@meshforge/manufacturing/frontend/util-common';
 import { ContainerWorkflowEligibility, TrayWorkflowEligibility } from '@meshforge/manufacturing/shared/util-constants';
 import {
   BladeHistoryEvent,
@@ -267,6 +267,14 @@ export class BladeTrackingApiService {
   private readonly http = inject(HttpClient);
   private readonly printerChoice = inject(LabelPrinterChoiceService);
 
+
+  /** Prints a location's 4 x 6.5 label on the card printer chosen on this computer (or the default card printer). */
+  printLocationLabel(recordId: string) {
+    return this.http.post<LocationLabelPrintResult>('/api/v1/asset-tags/location-label', {
+      record_id: recordId,
+      printer_id: this.printerChoice.selectedId('CUTTER_CARD') ?? undefined,
+    });
+  }
 
   printAssetTag(kind: AssetTagKind, recordId: string) {
     return this.http.post<AssetTagPrintResult>('/api/v1/asset-tags/print', {

@@ -21,12 +21,12 @@
     "package.json": "148A7E892597F02CE950C8736CE8F9125DF06EC6FFEFEE0ACDF071F051E4342F",
     "package-lock.json": "985FE860A87CFB1D0F89CC2D568D9C15DCF404096F305648DA4986D9613F499C",
     "nx.json": "73A2F6BD253030EAD5B14930871A240C60AFD9B5378940CC224689ABC36E5ACD",
-    "tsconfig.base.json": "AADAF6162D209B5BBEAB81399F1B391DEE4A83D70854CE0B8BB7EF7B2D64359F"
+    "tsconfig.base.json": "6A9E5E1D5D20CA726D0653BADAEE41D8C9357B18164EE089DF020DE1F34EF9A2"
   },
   "composeFiles": [
     {
       "path": "compose.yml",
-      "sha256": "2C72EFAA9DB712D94CADD46A0E0AF86064C7BB4E825E5B7A95E60AD6CB9F9D86"
+      "sha256": "31D26E81B7A6330221CB77FB1991896C0C75911069B44F0FD3FC20D88303CF1B"
     }
   ],
   "runtimeProjects": [
@@ -168,16 +168,6 @@
     {
       "name": "api-data-access",
       "root": "libs/api/data-access",
-      "projectType": "library",
-      "tags": [],
-      "targets": [],
-      "hasBuildTarget": false,
-      "hasServeTarget": false,
-      "hasTestTarget": false
-    },
-    {
-      "name": "api-feature-cutter-tracking",
-      "root": "libs/api/feature-cutter-tracking",
       "projectType": "library",
       "tags": [],
       "targets": [],
@@ -542,11 +532,12 @@
         "type:feature"
       ],
       "targets": [
-        "lint"
+        "lint",
+        "test"
       ],
       "hasBuildTarget": false,
       "hasServeTarget": false,
-      "hasTestTarget": false
+      "hasTestTarget": true
     },
     {
       "name": "frontend-util-common",

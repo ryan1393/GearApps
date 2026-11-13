@@ -88,6 +88,8 @@ export const ScannerDetailEntity = new EntitySchema<ScannerDetail>({
     sn_scanner: str(true),
     status: str(),
     machine_id: fk(true),
+    image_folder: str(true),
+    image_file: str(true),
   },
   relations: {
     machine: {

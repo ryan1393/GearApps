@@ -1,3 +1,6 @@
+import { InjectDataSource } from '@nestjs/typeorm';
+import { Optional } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { createHash, randomUUID } from 'node:crypto';
 
@@ -33,6 +36,9 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 
+/** A bcrypt hash (cost 10, as saved passwords) of a discarded random value; nothing matches it. */
+const UNUSABLE_PASSWORD_HASH = '$2b$10$T0QknPt2OaC6GeKe0pJrwOk4tilH/V1rtC9FgiQX3oEKhO/q2VbPm';
+
 @Injectable()
 export class ServerFeatAuthService {
   private logger = new Logger(ServerFeatAuthService.name);
@@ -40,6 +46,7 @@ export class ServerFeatAuthService {
     private jwtService: JwtService,
     private userService: ServerFeatUserService,
     private configService: ConfigService,
+    @Optional() @InjectDataSource() private readonly source?: DataSource,
   ) {}
 
   /** Emailed password reset needs outgoing mail; without it the forgot-password form can only fail silently. */
@@ -48,7 +55,11 @@ export class ServerFeatAuthService {
   }
 
   async generateAccessToken(data: UserOrmEntity): Promise<string> {
+    const assigned = this.source ? await this.source.query(
+      `SELECT r.permissions,r.enabled FROM meshforge_user_roles u JOIN meshforge_roles r ON r.id=u.role_id WHERE u.user_id=$1`, [data.id],
+    ) : [];
     const payload = {
+      permissions: assigned.length ? (assigned[0].enabled ? assigned[0].permissions : []) : null,
       email: data.email,
       role: data.role,
       departmentId: data.departmentId,
@@ -115,21 +126,20 @@ export class ServerFeatAuthService {
     }
     const user = await this.userService.findByEmail(userLoginDto.email);
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid email or password');
-    }
-
-    if (!user.active) {
-      throw new ForbiddenException('User account is inactive');
-    }
-
+    // Compare against a stand-in hash when there is no account or no password, so the
+    // answer takes the same time and says the same thing whether or not the email exists.
     const isPasswordValid = await bcrypt.compare(
       userLoginDto.password,
-      user.password ?? '',
+      user?.password || UNUSABLE_PASSWORD_HASH,
     );
 
-    if (!isPasswordValid) {
+    if (!user?.password || !isPasswordValid) {
       throw new UnauthorizedException('Invalid email or password');
+    }
+
+    // Only someone who knows the password learns that the account is inactive.
+    if (!user.active) {
+      throw new ForbiddenException('User account is inactive');
     }
 
     return user;

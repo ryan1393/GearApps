@@ -1,10 +1,10 @@
-<section class="gear-page">
+<section class="gear-page dana-page-stack">
   <header class="gear-page-header gear-section-heading inventory-overview-heading" danaPageHeader eyebrow="BLADE TRACKING / INVENTORY" heading="Inventory Control Center" description="See every tray, container, location, and blade — including the live relationships between them.">
   <button danaPageHeaderAction
       type="button"
       class="gear-btn gear-btn-secondary"
       (click)="refresh()"
-      [disabled]="anyLoading"
+      [disabled]="activeLoading"
      data-icon="refresh" title="Refresh Current View">
       ↻ Refresh Current View
     </button>
@@ -12,7 +12,7 @@
 
   <gear-label-printer-picker labelType="ASSET_TAG" label="Print tags to" />
 
-  <div *ngIf="error" class="gear-alert">{{ error }}</div>
+  <div *ngIf="error" class="gear-alert gear-alert-danger" role="alert">{{ error }} <button *ngIf="activeLoadError" type="button" class="gear-btn gear-btn-secondary" (click)="refresh()" [disabled]="activeLoading">Retry current view</button></div>
   <div *ngIf="printMessage" class="gear-alert" role="status" [class.gear-alert-success]="printTone === 'success'" [class.gear-alert-warning]="printTone === 'warning'">{{ printMessage }}</div>
 
   <section danaSummaryGrid class="inventory-overview-kpis inventory-overview-kpis-four">
@@ -20,6 +20,7 @@
       type="button"
       class="gear-metric-card inventory-overview-kpi"
       [class.active]="activeTab === 'trays'"
+      [attr.aria-pressed]="activeTab === 'trays'"
       (click)="setTab('trays')"
     >
       <span>TRAYS</span>
@@ -31,6 +32,7 @@
       type="button"
       class="gear-metric-card inventory-overview-kpi"
       [class.active]="activeTab === 'containers'"
+      [attr.aria-pressed]="activeTab === 'containers'"
       (click)="setTab('containers')"
     >
       <span>CONTAINERS</span>
@@ -42,6 +44,7 @@
       type="button"
       class="gear-metric-card inventory-overview-kpi"
       [class.active]="activeTab === 'locations'"
+      [attr.aria-pressed]="activeTab === 'locations'"
       (click)="setTab('locations')"
     >
       <span>LOCATIONS</span>
@@ -53,6 +56,7 @@
       type="button"
       class="gear-metric-card inventory-overview-kpi"
       [class.active]="activeTab === 'blades'"
+      [attr.aria-pressed]="activeTab === 'blades'"
       (click)="setTab('blades')"
     >
       <span>BLADES</span>
@@ -81,11 +85,11 @@
     </div>
 
     <div class="gear-actions inventory-browser-actions">
-      <button type="submit" class="gear-btn gear-btn-primary" [disabled]="anyLoading">Search</button>
+      <button type="submit" class="gear-btn gear-btn-primary" [disabled]="activeLoading">Search</button>
       <button
         type="button"
         class="gear-btn gear-btn-secondary"
-        [disabled]="anyLoading || (!activeSearch && !activeAppliedSearch)"
+        [disabled]="activeLoading || (!activeSearch && !activeAppliedSearch)"
         (click)="clearCurrentSearch()"
       >
         Clear
@@ -111,8 +115,8 @@
 
     <div *ngIf="trays.loading" class="gear-loading-state inventory-loading">Loading trays and blade assignments…</div>
 
-    <div *ngIf="!trays.loading" danaTableShell class="table-wrap">
-      <table danaTable class="gear-table dashboard-table inventory-master-table inventory-relation-table">
+    <div *ngIf="!trays.loading && !trays.error" danaTableShell class="table-wrap">
+      <table danaTable class="gear-table dashboard-table inventory-master-table inventory-relation-table" aria-label="Tray inventory">
         <thead>
           <tr>
             <th>Tray</th>
@@ -210,7 +214,7 @@
       </table>
     </div>
 
-    <div *ngIf="trays.meta as meta" class="inventory-pagination">
+    <div *ngIf="!trays.error && trays.meta as meta" class="inventory-pagination">
       <span>Page {{ meta.page }} of {{ meta.totalPages }} · {{ meta.totalItems }} trays</span>
       <div>
         <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!meta.hasPreviousPage || trays.loading" (click)="loadTrays(meta.page - 1)" data-icon="prev" title="Previous page">← Previous</button>
@@ -230,8 +234,8 @@
 
     <div *ngIf="containers.loading" class="gear-loading-state inventory-loading">Loading containers and tray assignments…</div>
 
-    <div *ngIf="!containers.loading" danaTableShell class="table-wrap">
-      <table danaTable class="gear-table dashboard-table inventory-master-table inventory-relation-table">
+    <div *ngIf="!containers.loading && !containers.error" danaTableShell class="table-wrap">
+      <table danaTable class="gear-table dashboard-table inventory-master-table inventory-relation-table" aria-label="Container inventory">
         <thead>
           <tr>
             <th>Container</th>
@@ -328,7 +332,7 @@
       </table>
     </div>
 
-    <div *ngIf="containers.meta as meta" class="inventory-pagination">
+    <div *ngIf="!containers.error && containers.meta as meta" class="inventory-pagination">
       <span>Page {{ meta.page }} of {{ meta.totalPages }} · {{ meta.totalItems }} containers</span>
       <div>
         <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!meta.hasPreviousPage || containers.loading" (click)="loadContainers(meta.page - 1)" data-icon="prev" title="Previous page">← Previous</button>
@@ -348,8 +352,8 @@
 
     <div *ngIf="locations.loading" class="gear-loading-state inventory-loading">Loading locations and tray assignments…</div>
 
-    <div *ngIf="!locations.loading" danaTableShell class="table-wrap">
-      <table danaTable class="gear-table dashboard-table inventory-master-table inventory-relation-table">
+    <div *ngIf="!locations.loading && !locations.error" danaTableShell class="table-wrap">
+      <table danaTable class="gear-table dashboard-table inventory-master-table inventory-relation-table" aria-label="Location inventory">
         <thead>
           <tr>
             <th>Location</th>
@@ -453,7 +457,7 @@
       </table>
     </div>
 
-    <div *ngIf="locations.meta as meta" class="inventory-pagination">
+    <div *ngIf="!locations.error && locations.meta as meta" class="inventory-pagination">
       <span>Page {{ meta.page }} of {{ meta.totalPages }} · {{ meta.totalItems }} locations</span>
       <div>
         <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!meta.hasPreviousPage || locations.loading" (click)="loadLocations(meta.page - 1)" data-icon="prev" title="Previous page">← Previous</button>
@@ -473,8 +477,8 @@
 
     <div *ngIf="blades.loading" class="gear-loading-state inventory-loading">Loading blades and tray assignments…</div>
 
-    <div *ngIf="!blades.loading" danaTableShell class="table-wrap">
-      <table danaTable class="gear-table dashboard-table inventory-master-table">
+    <div *ngIf="!blades.loading && !blades.error" danaTableShell class="table-wrap">
+      <table danaTable class="gear-table dashboard-table inventory-master-table" aria-label="Blade inventory">
         <thead>
           <tr>
             <th>Blade</th>
@@ -506,7 +510,7 @@
       </table>
     </div>
 
-    <div *ngIf="blades.meta as meta" class="inventory-pagination">
+    <div *ngIf="!blades.error && blades.meta as meta" class="inventory-pagination">
       <span>Page {{ meta.page }} of {{ meta.totalPages }} · {{ meta.totalItems }} blades</span>
       <div>
         <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!meta.hasPreviousPage || blades.loading" (click)="loadBlades(meta.page - 1)" data-icon="prev" title="Previous page">← Previous</button>

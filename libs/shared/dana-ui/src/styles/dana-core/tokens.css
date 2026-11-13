@@ -21,6 +21,21 @@
   --dana-shadow-raised:0 12px 30px rgba(15, 23, 42, .10);
   --dana-sidebar-width:258px;
   --dana-topbar-height:70px;
+  --dana-space-1:4px;
+  --dana-space-2:8px;
+  --dana-space-3:12px;
+  --dana-space-4:16px;
+  --dana-space-5:20px;
+  --dana-space-6:24px;
+  --dana-space-7:32px;
+  --dana-space-8:40px;
+  --dana-page-padding:var(--dana-content-pad);
+  --dana-panel-padding:var(--dana-space-5);
+  --dana-section-gap:var(--dana-space-6);
+  --dana-form-gap:var(--dana-space-4);
+  --dana-field-gap:var(--dana-space-2);
+  --dana-action-gap:var(--dana-space-3);
+  --dana-workstation-gap:var(--dana-space-3);
   --dana-content-pad:26px;
   --dana-content-max:1580px;
   --dana-info:#28558d;
@@ -33,6 +48,8 @@
   --dana-control-height:42px;
   --dana-control-border:#cfd9e5;
   --dana-placeholder:#7a8a9d;
+  --dana-on-dark:#ffffff;
+  --dana-on-dark-warning:#ffcf7b;
   --dana-focus-border:#92afd4;
   --dana-focus-ring:0 0 0 3px rgba(36,87,166,.12);
 }

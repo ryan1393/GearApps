@@ -42,8 +42,9 @@ const plantHistoryHtml=read('libs/manufacturing/frontend/feature-plant-dashboard
 must(count(plantDashboardHtml,'danaKpiCard')===4,'Plant dashboard must retain its four Dana KPI cards.');
 must(count(plantHistoryHtml,'danaKpiCard')===4,'Plant history must retain its four Dana KPI cards.');
 must(count(allHtml,'danaKpiCard')-count(plantDashboardHtml,'danaKpiCard')-count(plantHistoryHtml,'danaKpiCard')===15,'Existing Dana KPI-card coverage changed unexpectedly.');
-// 4 Inventory Control Center + 4 Blade Locations + 4 Admin DSF Mappings.
-must(count(allHtml,'danaSummaryCard')===12,'Dana summary-card coverage changed unexpectedly.');
+// 4 Inventory Control Center + 4 Blade Locations + 4 Admin DSF Mappings,
+// plus 2 Blade availability templates (one repeats by stage) + 3 Shipment totals.
+must(count(allHtml,'danaSummaryCard')===17,'Dana summary-card coverage changed unexpectedly.');
 must(summary.includes('Dana summary card contract'),'Summary-card regression contract missing.');
 must(!/\sstyle="/.test(allHtml),'Inline style attribute introduced into MeshForge feature templates.');
 console.log('[PASS] Dana UI release-hardening contract: stabilized shared components, KPI/icon geometry, summary cards, page headers, loading semantics, and dangerous historical regressions are protected.');

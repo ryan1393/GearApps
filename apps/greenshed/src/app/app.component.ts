@@ -1,12 +1,13 @@
 import { Component, inject } from '@angular/core';
+import { DanaThemeToggleComponent } from '@dana/ui';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { Title } from '@angular/platform-browser';
-import { GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
+import { GearSkipLinkDirective, GearToastHostComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { GreenshedNavComponent } from './layout/greenshed-nav/greenshed-nav.component';
 
 @Component({
   standalone: true,
-  imports: [RouterOutlet, GreenshedNavComponent, GearToastHostComponent],
+  imports: [GearSkipLinkDirective, DanaThemeToggleComponent, RouterOutlet, GreenshedNavComponent, GearToastHostComponent],
   selector: 'gear-greenshed-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css'],
@@ -25,6 +26,8 @@ export class AppComponent {
       ['/greenshed/check', 'Quality Check'],
       ['/greenshed/pull', 'Pull Cutter'],
       ['/greenshed/lookup', 'Build Lookup'],
+      ['/greenshed/cutter-requests', 'Cutter Requests'],
+      ['/machine-counts', 'Machine DSF Counts'],
       ['/admin', 'Admin'],
       ['/login', 'Sign In'],
       ['/forgot-password', 'Forgot Password'],

@@ -55,6 +55,15 @@ describe('PasswordRecoveryComponent', () => {
     expect(component.success).toBe(true);
     expect(component.form.controls.email.value).toBe('');
   });
+  it('shows the wait the server asks for when too many requests were made', () => {
+    create('forgot');
+    component.form.controls.email.setValue('operator@example.com');
+    component.submit();
+    http.expectOne('/api/v1/auth/email/forgot-password')
+      .flush({ message: 'Too many attempts. Wait 15 minutes, then try again.' }, { status: 429, statusText: 'Too Many Requests', headers: { 'Retry-After': '900' } });
+    expect(component.error).toBe('Too many attempts. Wait 15 minutes, then try again.');
+    expect(component.submitting).toBe(false);
+  });
   it('replaces the forgot form with guidance when the server cannot send reset email', () => {
     create('forgot', code, false);
     expect(component.resetByEmailAvailable).toBe(false);
@@ -72,6 +81,24 @@ describe('PasswordRecoveryComponent', () => {
     component.submit();
     http.expectNone('/api/v1/auth/email/forgot-password');
     expect(component.error).toContain('valid email');
+    fixture.detectChanges();
+    const email = fixture.nativeElement.querySelector('#recovery-email') as HTMLInputElement;
+    expect(document.activeElement).toBe(email);
+    expect(email.getAttribute('aria-describedby')).toBe('recovery-email-error');
+  });
+
+  it('focuses and describes an unmatched confirmation without sending a reset', () => {
+    create();
+    valid();
+    component.form.controls.confirmPassword.setValue('Different-Password1!');
+    component.submit();
+    fixture.detectChanges();
+    const confirmation = fixture.nativeElement.querySelector('#confirm-password') as HTMLInputElement;
+    expect(document.activeElement).toBe(confirmation);
+    expect(confirmation.getAttribute('aria-invalid')).toBe('true');
+    expect(confirmation.getAttribute('aria-describedby')).toBe('recovery-confirm-error');
+    expect(fixture.nativeElement.querySelector('#recovery-confirm-error').textContent).toContain('passwords must match');
+    http.expectNone(request => request.method === 'POST');
   });
   it.each(['', 'abc', '../secret', 'z'.repeat(64)])(
     'does not submit an invalid reset link %s',

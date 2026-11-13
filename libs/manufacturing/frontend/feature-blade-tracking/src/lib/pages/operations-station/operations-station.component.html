@@ -35,23 +35,24 @@
     </fieldset>
   }
 
+  @if (!shownOperations().length) { <p role="status">Your role has no blade operation actions. Ask an administrator to review your permissions.</p> }
   <div id="ops-station-panel" class="ops-station-work" role="tabpanel" [attr.data-operation]="active()">
-    @if (visited().has('intake')) {
+    @if (allowed('intake') && visited().has('intake')) {
       <div class="ops-station-op" data-operation-panel="intake" [hidden]="active() !== 'intake'"><gear-blade-intake /></div>
     }
-    @if (visited().has('grinding')) {
-      <div class="ops-station-op" data-operation-panel="grinding" [hidden]="active() !== 'grinding'"><gear-blade-grinding /></div>
+    @if (allowed('grinding') && visited().has('grinding')) {
+      <div class="ops-station-op" data-operation-panel="grinding" [hidden]="active() !== 'grinding'"><gear-blade-grinding [requestedTray]="active() === 'grinding' ? requestedTray() : null" /></div>
     }
-    @if (visited().has('load-container')) {
+    @if (allowed('load-container') && visited().has('load-container')) {
       <div class="ops-station-op" data-operation-panel="load-container" [hidden]="active() !== 'load-container'"><gear-load-container /></div>
     }
-    @if (visited().has('coater-shipments')) {
+    @if (allowed('coater-shipments') && visited().has('coater-shipments')) {
       <div class="ops-station-op" data-operation-panel="coater-shipments" [hidden]="active() !== 'coater-shipments'"><gear-coater-shipments /></div>
     }
-    @if (visited().has('receive-container')) {
+    @if (allowed('receive-container') && visited().has('receive-container')) {
       <div class="ops-station-op" data-operation-panel="receive-container" [hidden]="active() !== 'receive-container'"><gear-receive-container /></div>
     }
-    @if (visited().has('internal-movement')) {
+    @if (allowed('internal-movement') && visited().has('internal-movement')) {
       <div class="ops-station-op" data-operation-panel="internal-movement" [hidden]="active() !== 'internal-movement'"><gear-internal-movement /></div>
     }
   </div>

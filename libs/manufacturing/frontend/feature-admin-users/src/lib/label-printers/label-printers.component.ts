@@ -96,7 +96,7 @@ export class LabelPrintersComponent implements OnInit {
     return parts.length ? `Moved ${parts.join(', ')} (dots)` : '';
   }
 
-  typeName(labelType: LabelType): string { return labelType === 'CUTTER_CARD' ? 'Cutter cards' : 'Tray / container / location tags'; }
+  typeName(labelType: LabelType): string { return labelType === 'CUTTER_CARD' ? 'Cutter cards and location labels' : 'Tray / container / location tags'; }
   languageName(language: LabelLanguage): string { return language === 'ZPL' ? 'ZPL (Zebra)' : 'IPL (Intermec)'; }
 
   refresh(): void {

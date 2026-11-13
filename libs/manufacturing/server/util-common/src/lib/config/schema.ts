@@ -42,13 +42,20 @@ import {
   ENV_SWAGGER_JSON_FILE,
 } from '@meshforge/manufacturing/shared/util-constants';
 
+import { DEFAULT_TRUST_PROXY, parseTrustProxy } from './http.config';
+
 export const validationSchema = Joi.object({
   // api config
   [ENV_API_VERSION]: Joi.string().default('v1'),
   [ENV_API_PREFIX]: Joi.string().default('api'),
 
   // swagger config
-  [ENV_ENABLE_SWAGGER]: Joi.boolean().default(true),
+  // Off by default in production: the page lists every route. ENABLE_SWAGGER=true turns it on.
+  [ENV_ENABLE_SWAGGER]: Joi.boolean().when('NODE_ENV', {
+    is: 'production',
+    then: Joi.boolean().default(false),
+    otherwise: Joi.boolean().default(true),
+  }),
   [ENV_GENERATE_SWAGGER_JSON]: Joi.boolean().default(false),
   [ENV_SWAGGER_JSON_FILE]: Joi.when(ENV_GENERATE_SWAGGER_JSON, {
     is: true,
@@ -60,7 +67,13 @@ export const validationSchema = Joi.object({
   [ENV_ENVIRONMENT]: Joi.string()
     .allow('development', 'production', 'local', 'test', 'docker')
     .default('development'),
-  [ENV_CORS_ORIGINS]: Joi.string().default('*'),
+  [ENV_CORS_ORIGINS]: Joi.string().allow('').default('').custom((value: string, helpers) =>
+    value.split(',').map((origin) => origin.trim()).filter(Boolean)
+      .every((origin) => origin === '*' || /^https?:\/\/[^/\s?#@]+\/?$/i.test(origin))
+      ? value : helpers.error('any.invalid')),
+  // Proxies trusted for the client address (X-Forwarded-For). See parseTrustProxy.
+  TRUST_PROXY: Joi.string().default(DEFAULT_TRUST_PROXY).custom((value: string, helpers) =>
+    parseTrustProxy(value) === null ? helpers.error('any.invalid') : value),
   [ENV_SERVER_HOST]: Joi.string().default('localhost'),
   [ENV_SERVER_PORT]: Joi.number().default(3333),
   PUBLIC_API_BASE_URL: Joi.string().uri().default('http://localhost:3333'),
@@ -194,6 +207,7 @@ export const validationSchema = Joi.object({
   SCANNER_DEFAULT_HOST: Joi.string().allow('').optional(),
   SCANNER_ALLOW_INSECURE_TLS: Joi.boolean().default(true),
   SCANNER_TIMEOUT_MS: Joi.number().integer().min(1).default(4000),
+  LAPPER_READ_SCANNER_PORT: Joi.number().port().min(1).empty('').default(9004),
   SCANNER_FTP_HOST: Joi.string().allow('').optional(),
   SCANNER_FTP_USER: Joi.string().allow('').optional(),
   SCANNER_FTP_PASSWORD: Joi.string().allow('').optional(),

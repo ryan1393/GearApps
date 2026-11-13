@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, OnDestroy, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint } from '@meshforge/manufacturing/frontend/util-common';
+import { GearLabelPrinterPickerComponent, GearToastService, announceAssetTagPrint, ScanMessage, ScanPanelComponent } from '@meshforge/manufacturing/frontend/util-common';
 import {
   AssetTagKind,
   BladeTrackingApiService,
@@ -13,10 +13,11 @@ import {
   InventoryTrayRow,
   apiErrorText,
 } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
-import { ScanMessage } from '../../models/scan-message';
-import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import {
   DanaPageHeaderComponent,
+  DanaDetailGridDirective,
+  DanaDetailItemComponent,
+  DanaPanelHeaderDirective,
   DanaTableDirective,
   DanaTableShellDirective,
   DanaToneDirective,
@@ -25,7 +26,7 @@ import {
 @Component({
   selector: 'gear-inventory-lookup',
   standalone: true,
-  imports: [DanaToneDirective, GearLabelPrinterPickerComponent, CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaTableDirective, DanaTableShellDirective],
+  imports: [DanaToneDirective, GearLabelPrinterPickerComponent, CommonModule, ScanPanelComponent, DanaPageHeaderComponent, DanaDetailGridDirective, DanaDetailItemComponent, DanaPanelHeaderDirective, DanaTableDirective, DanaTableShellDirective],
   templateUrl: './inventory-lookup.component.html',
 })
 export class InventoryLookupComponent implements OnInit, OnDestroy {

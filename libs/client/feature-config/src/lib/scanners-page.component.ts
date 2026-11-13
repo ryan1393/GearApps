@@ -6,6 +6,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import {
   DanaConfirmDialogComponent,
@@ -19,11 +20,13 @@ import {
   LapperAccess,
   loadable,
   MachinesApi,
+  ScannerApi,
   ScannerDetailsApi,
   ToastService,
 } from '@meshforge/client/core';
 import { StatusBadgeComponent } from '@meshforge/client/ui';
-import { Machine, ScannerDetail } from '@meshforge/shared/domain';
+import { Machine, resolveScannerImagePath, ScannerDetail, ScannerImagePath } from '@meshforge/shared/domain';
+import { catchError, of } from 'rxjs';
 import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
 
 @Component({
@@ -41,7 +44,7 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="gear-page gear-workflow-page">
+    <div class="gear-page dana-page-stack gear-workflow-page">
       <section
         danaPageHeader
         eyebrow="LAPPER / CONFIGURATION"
@@ -83,6 +86,7 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
                 <th>Model</th>
                 <th>Machine</th>
                 <th>Scanner · queue · process</th>
+                <th>Image location</th>
                 <th>Status</th>
                 <th data-dana-table-static aria-label="Actions"></th>
               </tr>
@@ -105,6 +109,22 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
                   </td>
                   <td class="mono nowrap" title="In scanner · in queue · in process">
                     {{ s.sn_scanner || '—' }} · {{ s.sn_queue || '—' }} · {{ s.sn_procces || '—' }}
+                  </td>
+                  <td class="image-path">
+                    @if (imagePath(s); as p) {
+                      @if (p.folder) {
+                        <code>{{ p.folder }}/{{ p.file }}</code>
+                        @if (p.defaultFolder) {
+                          <small class="gear-muted">Default: no folder set on this scanner</small>
+                        }
+                      } @else {
+                        <span class="gear-muted">Set an IP address or image folder</span>
+                      }
+                    } @else if (s.image_folder) {
+                      <code>{{ s.image_folder }}</code>
+                    } @else {
+                      <span class="gear-muted">Default folder for {{ s.ip || 'its IP' }}</span>
+                    }
                   </td>
                   <td><gear-status-badge [status]="s.status" /></td>
                   <td class="right">
@@ -132,7 +152,7 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
                 </tr>
               } @empty {
                 <tr>
-                  <td danaTableEmpty colspan="6" class="empty-row">
+                  <td danaTableEmpty colspan="7" class="empty-row">
                     {{ scanners.loading() ? 'Loading scanners…' : 'No scanners yet.' }}
                   </td>
                 </tr>
@@ -164,6 +184,15 @@ import { ScannerFormDialogComponent } from './scanner-form-dialog.component';
       (cancel)="pendingDelete.set(null)"
     />
   `,
+  styles: `
+    .image-path {
+      min-width: 14rem;
+      overflow-wrap: anywhere;
+    }
+    .image-path small {
+      display: block;
+    }
+  `,
 })
 export class ScannersPageComponent implements OnInit {
   private readonly api = inject(ScannerDetailsApi);
@@ -171,6 +200,11 @@ export class ScannersPageComponent implements OnInit {
   private readonly toast = inject(ToastService);
   protected readonly access = inject(LapperAccess);
 
+  /** The server's default capture location; null until loaded (or if it cannot be read). */
+  private readonly imageDefaults = toSignal(
+    inject(ScannerApi).imageDefaults().pipe(catchError(() => of(null))),
+    { initialValue: null },
+  );
   protected readonly scanners = loadable<ScannerDetail[]>([]);
   protected readonly machines = loadable<Machine[]>([]);
   protected readonly assignedCount = computed(
@@ -191,6 +225,12 @@ export class ScannersPageComponent implements OnInit {
   protected reload() {
     this.scanners.load(this.api.list());
     this.machines.load(this.machinesApi.list());
+  }
+
+  /** Where MeshForge reads this scanner's capture on the FTP drop (null until the defaults load). */
+  protected imagePath(s: ScannerDetail): ScannerImagePath | null {
+    const defaults = this.imageDefaults();
+    return defaults ? resolveScannerImagePath(s, defaults) : null;
   }
 
   protected modelLabel(s: ScannerDetail): string {

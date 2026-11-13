@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { EntityManager } from 'typeorm';
-import { CoaterManifest, CoaterShipmentTray } from '@meshforge/manufacturing/shared/util-types';
+import { CoaterAvailableContainer, CoaterManifest, CoaterShipmentTray } from '@meshforge/manufacturing/shared/util-types';
 import { parseCuttergrindRoughShelfTag, DEPARTMENT_CUTTERGRIND, isCoaterStagingLocation } from '@meshforge/manufacturing/shared/util-constants';
 
 export function coaterContentHash(destination: string, notes: string, manifest: CoaterManifest): string {
@@ -111,5 +111,40 @@ export async function readCoaterManifest(manager: EntityManager, ids: string[]):
   if (containers.length !== ids.length) result.issues.push('A selected container no longer exists.');
   result.totals.containers = result.containers.length;
   result.summary = [...summary.values()].sort((a,b) => a.summary.localeCompare(b.summary) || a.part_type.localeCompare(b.part_type));
+  return result;
+}
+
+/**
+ * The containers of one batched manifest that could each be added to a shipment on their own:
+ * no issues, with the same totals and Summary lines a manifest of that container alone has.
+ * Keeps the order of `candidates`.
+ */
+export function availableCoaterContainers(
+  manifest: CoaterManifest,
+  candidates: ReadonlyArray<{ id: string; serial_number: string }>,
+): CoaterAvailableContainer[] {
+  const byId = new Map(manifest.containers.map((item) => [item.id, item]));
+  const result: CoaterAvailableContainer[] = [];
+  for (const candidate of candidates) {
+    const item = byId.get(String(candidate.id));
+    if (!item || item.issues.length) continue;
+    const lines = new Map<string, { summary: string; part_type: string; trays: number; blades: number }>();
+    let blades = 0;
+    for (const row of item.trays) {
+      blades += row.blades.length;
+      const key = JSON.stringify([row.summary, row.part_type]);
+      const line = lines.get(key) ?? { summary: row.summary, part_type: row.part_type, trays: 0, blades: 0 };
+      line.trays++;
+      line.blades += row.blades.length;
+      lines.set(key, line);
+    }
+    result.push({
+      id: item.id,
+      serial: candidate.serial_number,
+      trays: item.trays.length,
+      blades,
+      summary: [...lines.values()].sort((a, b) => a.summary.localeCompare(b.summary) || a.part_type.localeCompare(b.part_type)),
+    });
+  }
   return result;
 }

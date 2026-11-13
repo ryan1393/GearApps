@@ -3,15 +3,15 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
-import { canEditMeshForgeApp, MESHFORGE_VERSION } from '@meshforge/manufacturing/shared/util-constants';
+import { canEditMeshForgeApp, canUseMeshForgeAction, MESHFORGE_VERSION } from '@meshforge/manufacturing/shared/util-constants';
 import { getDanaAppUrl } from '@meshforge/manufacturing/shared/dana-app-config';
 import { IJwtPayload } from '@meshforge/manufacturing/shared/util-types';
-import { DanaMobileNavDirective } from '@dana/ui';
+import { DanaMobileNavDirective, DanaThemeToggleComponent } from '@dana/ui';
 
 @Component({
   selector: 'gear-cutter-builder-nav',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, DanaMobileNavDirective],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, DanaMobileNavDirective, DanaThemeToggleComponent],
   templateUrl: './cutter-builder-nav.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -47,7 +47,12 @@ export class CutterBuilderNavComponent {
       'CUTTER_BUILDER',
       user.role,
       user.departmentCode,
+      user.permissions,
     );
+  }
+
+  canReadRequests(user: IJwtPayload): boolean {
+    return canUseMeshForgeAction(user, 'cutter-builder:listCutterRequests');
   }
 
   logout(): void {

@@ -8,12 +8,12 @@ import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-acces
 import { canEditMeshForgeApp, MESHFORGE_VERSION } from '@meshforge/manufacturing/shared/util-constants';
 import { getDanaAppUrl } from '@meshforge/manufacturing/shared/dana-app-config';
 import { IJwtPayload } from '@meshforge/manufacturing/shared/util-types';
-import { DanaMobileNavDirective } from '@dana/ui';
+import { DanaMobileNavDirective, DanaThemeToggleComponent } from '@dana/ui';
 
 @Component({
   selector: 'gear-nav',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, DanaMobileNavDirective],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive, DanaMobileNavDirective, DanaThemeToggleComponent],
   templateUrl: './app-nav.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -59,6 +59,7 @@ export class AppNavComponent {
       'BLADE_TRACKING',
       user.role,
       user.departmentCode,
+      user.permissions,
     );
   }
 

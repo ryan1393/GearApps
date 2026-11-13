@@ -1,3 +1,4 @@
+import { dockerCollectorTokenFile } from '@meshforge/api/core';
 import { CollectorTokensService } from '@meshforge/api/feature-gear';
 import {
   COLLECTOR_TOKEN_PREFIX,
@@ -7,7 +8,12 @@ import {
   CreatedCollectorToken,
   DockerCollectorConnection,
 } from '@meshforge/shared/domain';
-import { Injectable, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { chmod, mkdir, rename, rm, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
@@ -36,12 +42,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS collector_tokens_one_active_purpose
 
 const DOCKER_TOKEN_NAME = 'Docker collector';
 
-/**
- * Where the API hands the Docker collector its token: a file on a volume only the API and the
- * lapper-read container mount (compose sets LAPPER_READ_TOKEN_FILE). Empty outside Docker.
- */
-export const dockerCollectorTokenFile = (env: NodeJS.ProcessEnv = process.env): string =>
-  (env['LAPPER_READ_TOKEN_FILE'] ?? '').trim();
+// The token file's path now lives in @meshforge/api/core (the scanner client reads it too).
+export { dockerCollectorTokenFile };
 
 /** Usage is recorded at most this often per token, so busy collectors don't write on every call. */
 const LAST_USED_RESOLUTION_MS = 60_000;
@@ -67,6 +69,8 @@ export class PostgresCollectorTokens
   implements CollectorTokenResolver
 {
   private readonly lastTouched = new Map<string, number>();
+  /** The Docker connection in progress, if any: connections run one at a time. */
+  private connecting: Promise<unknown> = Promise.resolve();
 
   /** Read once at start-up from LAPPER_READ_TOKEN_FILE (set by compose). */
   private readonly tokenFile = dockerCollectorTokenFile();
@@ -110,16 +114,45 @@ export class PostgresCollectorTokens
   }
 
   /**
-   * Issues a new Docker collector token, writes it where the collector reads it and revokes the
-   * previous one, in one transaction: the old token keeps working until the new file is in place.
+   * Issues a new Docker collector token, writes it where the collector reads it and only then
+   * revokes the previous one: the old token keeps working until the new file is in place.
+   *
+   * 1. The new token is committed (not yet marked as the Docker one).
+   * 2. Only after that commit is it written to the file. If the write fails, the new token is
+   *    revoked and the collector keeps its current token.
+   * 3. One transaction makes it the Docker token and revokes the previous one.
+   *
    * The collector picks the new token up on its next rejected call, without a restart.
    */
-  async connectDocker(createdBy: string): Promise<DockerCollectorConnection> {
+  connectDocker(createdBy: string): Promise<DockerCollectorConnection> {
     const file = this.tokenFile;
     if (!file) {
-      throw new ServiceUnavailableException(
-        'This API is not running in the Docker stack, so it cannot hand a token to the Docker collector. ' +
-          'Create a token instead and set MESHFORGE_API_TOKEN for the collector.',
+      return Promise.reject(
+        new ServiceUnavailableException(
+          'This API is not running in the Docker stack, so it cannot hand a token to the Docker collector. ' +
+            'Create a token instead and set MESHFORGE_API_TOKEN for the collector.',
+        ),
+      );
+    }
+    // One connection at a time, so the file always holds the token marked as the Docker one.
+    const run = this.connecting.then(() => this.rotateDockerToken(file, createdBy));
+    this.connecting = run.catch(() => undefined);
+    return run;
+  }
+
+  private async rotateDockerToken(file: string, createdBy: string): Promise<DockerCollectorConnection> {
+    const { id, token } = await this.insert(DOCKER_TOKEN_NAME, createdBy, null);
+    try {
+      await writeTokenFile(file, token);
+    } catch (error) {
+      await this.query(
+        `UPDATE lapper.collector_tokens SET revoked_at=clock_timestamp() WHERE id=$1`,
+        [id],
+      ).catch(() => undefined);
+      const reason = error instanceof Error ? error.message : String(error);
+      throw new InternalServerErrorException(
+        `Could not write the Docker collector token to ${file} (${reason}). ` +
+          'Nothing changed: the collector keeps its current token. Check the shared volume and try again.',
       );
     }
     await this.catalog.db.transaction(async (manager) => {
@@ -128,8 +161,7 @@ export class PostgresCollectorTokens
         [],
         manager,
       );
-      const { token } = await this.insert(DOCKER_TOKEN_NAME, createdBy, 'docker', manager);
-      await writeTokenFile(file, token);
+      await this.query(`UPDATE lapper.collector_tokens SET purpose='docker' WHERE id=$1`, [id], manager);
     });
     return this.dockerConnection();
   }

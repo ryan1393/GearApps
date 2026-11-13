@@ -1,9 +1,0 @@
-{
-  "name": "api-feature-cutter-tracking",
-  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/api/feature-cutter-tracking/src",
-  "projectType": "library",
-  "tags": [],
-  "// targets": "to see all targets run: nx show project api-feature-cutter-tracking --web",
-  "targets": {}
-}

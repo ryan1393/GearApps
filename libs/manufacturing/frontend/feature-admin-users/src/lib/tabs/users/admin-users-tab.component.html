@@ -1,0 +1,78 @@
+<gear-admin-feedback [tab]="this" />
+<div class="gear-admin-layout">
+  <form class="gear-panel gear-admin-form" data-admin-editor #userEditor="ngForm" (ngSubmit)="createUser()" [attr.aria-busy]="busy">
+    <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingUserId ? 'Edit User' : 'Create User' }}</span></div>
+    <label class="gear-field">Email{{ editingUserId ? '' : ' (required)' }}<input id="admin-user-email" class="gear-input" type="email" email [(ngModel)]="userForm.email" #userEmail="ngModel" name="userEmail" autocomplete="off" [required]="!editingUserId" [disabled]="busy" [attr.aria-invalid]="userEmail.invalid && (userEmail.touched || userEditor.submitted)" aria-describedby="admin-user-email-error" /><small id="admin-user-email-error" *ngIf="userEmail.invalid && (userEmail.touched || userEditor.submitted)" class="gear-field-help">Enter a valid email address.</small></label>
+    <label *ngIf="!editingUserId" class="gear-field">Temporary Password (required)<input id="admin-user-password" class="gear-input" type="password" [(ngModel)]="userForm.password" #userPassword="ngModel" name="userPassword" autocomplete="new-password" required [minlength]="minPasswordLength" maxlength="128" [disabled]="busy" [attr.aria-invalid]="userPassword.invalid && (userPassword.touched || userEditor.submitted)" aria-describedby="admin-user-password-help" /><small id="admin-user-password-help" class="gear-field-help">Use at least {{ minPasswordLength }} characters with uppercase and lowercase letters, a number, and a symbol.</small></label>
+    <div class="gear-form-grid">
+      <label class="gear-field">First Name<input class="gear-input" [(ngModel)]="userForm.firstName" name="userFirstName" [disabled]="busy" /></label>
+      <label class="gear-field">Last Name<input class="gear-input" [(ngModel)]="userForm.lastName" name="userLastName" [disabled]="busy" /></label>
+    </div>
+    <label class="gear-field">Department (required)
+      <select id="admin-user-department" class="gear-select" [(ngModel)]="userForm.departmentId" #userDepartment="ngModel" name="userDepartment" required [disabled]="busy" [attr.aria-invalid]="userDepartment.invalid && (userDepartment.touched || userEditor.submitted)" aria-describedby="admin-user-department-help">
+        <option value="">Select department...</option>
+        <option *ngFor="let department of departments" [value]="department.id">
+          {{ department.code }} — {{ department.description }}
+        </option>
+      </select>
+      <small id="admin-user-department-help" class="gear-field-help">
+        Department controls physical operations: Cutter Grind uses Blade Tracking and Cutter Builder; Gear Quality uses Greenshed.
+        Cutter Requests is shared across departments. Assigned custom roles can further limit screen actions; administrators retain administrator access.
+      </small>
+    </label>
+    <label class="gear-field">Role
+      <select class="gear-select" [(ngModel)]="userForm.role" name="userRole" [disabled]="busy">
+        <option value="user">User</option>
+        <option value="admin">Admin</option>
+      </select>
+    </label>
+    <div class="gear-admin-form-actions">
+      <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">{{ editingUserId ? 'Save User' : 'Create User' }}</button>
+      <button *ngIf="editingUserId" class="gear-btn gear-btn-secondary" type="button" [disabled]="busy" (click)="cancelUserEdit()">Cancel Edit</button>
+    </div>
+  </form>
+
+  <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+          <div class="gear-admin-list-header gear-admin-search-header">
+      <div>
+        <h2>Existing Users</h2>
+        <small>{{ filteredUsers.length }} shown · {{ users.length }} total</small>
+      </div>
+      <input
+        class="gear-input gear-admin-search-input"
+        type="search"
+        [(ngModel)]="userSearch"
+        name="adminUserSearch"
+        aria-label="Search users by name, email, department or role"
+        placeholder="Search name, email, department, role..."
+        autocomplete="off"
+      />
+    </div>
+    <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="user-v20" *ngFor="let user of filteredUsers">
+      <div class="gear-admin-record-card-body">
+        <div class="gear-admin-record-heading">
+          <strong class="gear-admin-record-title">{{ user.fullName || user.email }}</strong>
+          <span class="gear-badge" [attr.data-tone]="user.active ? 'success' : 'danger'">{{ user.active ? 'Active' : 'Inactive' }} · {{ user.role }}</span>
+        </div>
+        <div class="gear-admin-record-meta">
+          <div class="gear-admin-record-field gear-admin-record-field-wide">
+            <span class="gear-admin-record-label">Email</span>
+            <span class="gear-admin-record-value">{{ user.email || '—' }}</span>
+          </div>
+          <div class="gear-admin-record-field gear-admin-record-field-wide">
+            <span class="gear-admin-record-label">Department</span>
+            <span class="gear-admin-record-value">{{ departmentName(user.departmentId) }}</span>
+          </div>
+        </div>
+        <div class="gear-admin-actions gear-admin-record-actions">
+          <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditUser(user)" data-icon="edit" [attr.aria-label]="'Edit ' + (user.fullName || user.email || 'user')" title="Edit">Edit</button>
+          <button *ngIf="!isSelf(user.id)" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="requestUserEnabled(user)" [attr.aria-label]="(user.active ? 'Disable ' : 'Enable ') + (user.fullName || user.email || 'user')">{{ user.active ? 'Disable' : 'Enable' }}</button>
+          <span *ngIf="isSelf(user.id)" class="gear-badge" data-tone="info">You</span>
+        </div>
+      </div>
+    </div>
+    <gear-admin-list-state [list]="usersList" noun="users" [shown]="filteredUsers.length" [total]="users.length" (retry)="loadUsers()" />
+  </div>
+</div>
+
+<dana-confirm-dialog [open]="!!userToDisable" title="Disable this account?" [message]="'Disable ' + (userToDisable?.email || userToDisable?.fullName || 'this account') + '? The user will be signed out and cannot sign in until the account is enabled again.'" confirmLabel="Disable account" [danger]="true" (confirm)="confirmDisableUser()" (cancel)="userToDisable = null" />

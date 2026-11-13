@@ -1,7 +1,13 @@
 @if (!isLoginRoute) {
+  <a gearSkipLink class="dana-skip-link" href="#main-content">Skip to main content</a>
   <gear-lapper-nav />
 }
-<div class="app-content-shell" [class.login-shell]="isLoginRoute">
+<div class="app-content-shell" id="main-content" tabindex="-1" [attr.role]="isLoginRoute ? null : 'main'" [class.login-shell]="isLoginRoute">
   <router-outlet />
 </div>
 <gear-toast-host />
+
+@if (isLoginRoute) {
+  <!-- Signed-in screens show the theme picker in the top bar; sign-in screens keep it below the form. -->
+  <dana-theme-toggle />
+}

@@ -1,3 +1,4 @@
+import { BulkOpeningComponent } from './bulk-opening.component';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, EventEmitter, OnInit, Output, inject } from '@angular/core';
@@ -66,7 +67,7 @@ const MAX_LAYERS = 9;
 @Component({
   selector: 'gear-admin-launch-setup',
   standalone: true,
-  imports: [CommonModule, FormsModule, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective, DanaToneDirective],
+  imports: [BulkOpeningComponent, CommonModule, FormsModule, DanaTableDirective, DanaTableEmptyDirective, DanaTableShellDirective, DanaToneDirective],
   templateUrl: './launch-setup.component.html',
   styleUrls: ['./launch-setup.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,

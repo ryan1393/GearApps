@@ -41,6 +41,8 @@ export const EMPTY = [
   'cutter_builds', 'cutter_build_blades', 'cutter_build_trays', 'cutter_build_locations',
   'cutter_events', 'cutter_cmm_checks', 'cutter_frequency_checks',
   'cutter_teardowns', 'cutter_machine_runs',
+  // Request fulfillment evidence points at those builds; clear it only in this explicit backup-first floor reset.
+  'cutter_requests', 'cutter_request_history', 'cutter_request_build_allocations',
   // Coater shipments and RPA requests (the RPA settings, template and part map stay)
   'dana_coater_shipments_v1', 'dana_coater_shipment_containers_v1',
   'dana_coater_shipment_events_v1', 'dana_rpa_requests_v1',
@@ -54,6 +56,7 @@ export const EMPTY = [
 /** Tables that must keep every row. Checked before and after, inside the transaction. */
 export const KEEP = [
   'users', 'departments',
+  'meshforge_roles', 'meshforge_user_roles', 'meshforge_badges', 'meshforge_access_audit',
   'models', 'parts', 'part_summaries', 'part_types', 'cutter_blade_requirements', 'cutter_summary_body_rules',
   'part_summary_part_type_blades',
   'cutter_body_definitions', 'cutter_bodies', 'roll_masters', 'gearsets', 'machines',

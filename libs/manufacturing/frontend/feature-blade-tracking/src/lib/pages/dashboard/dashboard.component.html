@@ -1,4 +1,4 @@
-<div class="gear-page dashboard-page" [class.view-only-dashboard]="!canEdit">
+<div class="gear-page dana-page-stack dashboard-page blade-dashboard" [class.view-only-dashboard]="!canEdit">
   <section class="gear-page-header dashboard-heading" danaPageHeader eyebrow="BLADE TRACKING" heading="Dashboard" description="Live inventory, movement, and workflow status from the MeshForge database." [dashboard]="true">
   <button danaPageHeaderAction
       type="button"
@@ -74,12 +74,13 @@
   </section>
 
 
-  <section class="gear-panel p-5">
-    <div class="gear-panel-heading panel-heading panel-row">
+  <section class="gear-panel availability-panel">
+    <div danaPanelHeader class="gear-panel-header gear-panel-heading panel-heading panel-row">
       <div><h2>Availability By Part Summary</h2><p>Distinct trays in their current workflow stage plus cutter bodies physically recorded on shelves.</p></div>
       <span *ngIf="availability" class="gear-count-badge count-chip">{{ availability.total_trays }} trays</span>
     </div>
-    <div class="grid gap-3 md:grid-cols-2">
+    <div class="dana-panel-body">
+    <div class="grid gap-4 md:grid-cols-2">
       <label class="text-sm font-bold">Part Summary
         <select class="gear-input mt-1 w-full" [(ngModel)]="selectedSummaryId" (ngModelChange)="refreshAvailability()"><option value="">Select Summary…</option><option *ngFor="let summary of summaries" [value]="summary.id">{{summary.number}}</option></select>
       </label>
@@ -89,14 +90,14 @@
     </div>
     <div class="mt-3 flex flex-wrap gap-3 items-center">
       <button type="button" class="gear-btn gear-btn-secondary" [disabled]="!selectedSummaryId || availabilityLoading" (click)="refreshAvailability()" data-icon="refresh" title="Refresh Availability">Refresh Availability</button>
-      <a *ngIf="canEdit" routerLink="body-shelves" class="text-sm font-bold text-blue-700">Record Empty Body Shelf</a>
-      <span class="text-sm text-slate-500">Refreshes every 30 seconds while this page is visible.</span>
+      <a *ngIf="canEdit" routerLink="body-shelves" class="text-sm dana-action-link">Record Empty Body Shelf</a>
+      <span class="gear-muted">Refreshes every 30 seconds while this page is visible.</span>
     </div>
-    <p *ngIf="lookupsError" role="alert" class="mt-3 text-sm text-red-700">{{lookupsError}}</p>
+    <p *ngIf="lookupsError" role="alert" class="gear-alert gear-alert-danger mt-3">{{lookupsError}}</p>
     <p *ngIf="availabilityLoading" class="mt-4 text-sm">Loading current availability…</p>
-    <p *ngIf="availabilityError" class="mt-4 text-sm font-bold text-red-700">{{availabilityError}}</p>
+    <p *ngIf="availabilityError" class="gear-alert gear-alert-danger mt-4">{{availabilityError}}</p>
     <div *ngIf="availability" class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6">
-      <button *ngFor="let stage of availability.stages; trackBy: trackStage" type="button"
+      <button danaSummaryCard *ngFor="let stage of availability.stages; trackBy: trackStage" type="button"
         class="availability-stage-card" [class.is-selected]="selectedTrayStageCode === stage.code"
         [disabled]="availabilityLoading" (click)="showStageTrays(stage.code)"
         [attr.aria-label]="stage.name + ': ' + stage.tray_count + ' trays. Show matching trays.'"
@@ -106,7 +107,7 @@
         <small class="availability-stage-code">{{stage.code}}</small>
         <span class="availability-stage-hint">View trays</span>
       </button>
-      <article class="rounded-xl border border-blue-200 bg-blue-50 p-4"><strong class="text-2xl text-blue-800">{{availability.shelved_cutter_bodies.total}}</strong><h3 class="mt-1 text-sm font-black">Shelved Cutter Bodies</h3><small>{{availability.shelved_cutter_bodies.with_blades}} with blades · {{availability.shelved_cutter_bodies.empty}} empty</small></article>
+      <article danaSummaryCard><strong>{{availability.shelved_cutter_bodies.total}}</strong><span>Shelved Cutter Bodies</span><small>{{availability.shelved_cutter_bodies.with_blades}} with blades · {{availability.shelved_cutter_bodies.empty}} empty</small></article>
     </div>
     <section *ngIf="selectedTrayStageCode" id="availability-tray-list" class="availability-tray-list"
       aria-labelledby="availability-tray-list-title" [attr.aria-busy]="availabilityLoading">
@@ -157,11 +158,12 @@
         </div>
       </ng-container>
     </section>
-    <div *ngIf="availability" class="mt-3 text-sm text-slate-600">
+    <div *ngIf="availability" class="mt-3 gear-muted">
       <p *ngIf="availability.blade_requirements.length"><strong>Blade requirement:</strong> <span *ngFor="let req of availability.blade_requirements">{{req.part_type_code}}: {{req.required_blade_count}} blades. </span></p>
       <p *ngFor="let note of availability.notes" class="mt-1">{{note}}</p>
     </div>
-    <p *ngIf="!selectedSummaryId" class="mt-4 text-sm text-slate-500">Select a Summary to see every current tray stage, including zero counts.</p>
+    <p *ngIf="!selectedSummaryId" class="mt-4 gear-muted">Select a Summary to see every current tray stage, including zero counts.</p>
+    </div>
   </section>
 
   <section danaDashboardGrid class="blade-dashboard-aligned-grid">
@@ -328,13 +330,14 @@
 
     <form class="quick-search" (ngSubmit)="quickScan()">
       <input
+        class="gear-input"
         name="quickScan"
         [(ngModel)]="scanValue"
         placeholder="Scan barcode or type ID..."
         aria-label="Scan a tray, container, or location"
         autocomplete="off"
       />
-      <button type="submit" aria-label="Find"><span aria-hidden="true">▥</span></button>
+      <button type="submit" class="gear-btn gear-btn-primary" aria-label="Find"><span aria-hidden="true">▥</span></button>
     </form>
 
     <div class="subheading-row">

@@ -3,14 +3,10 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, ViewChild, inject, OnDestroy } from '@angular/core';
-import { GearToastService } from '@meshforge/manufacturing/frontend/util-common';
+import { GearToastService, ScanMessage, OptionPickerComponent, PickerOption, ScanPanelComponent, StationStatusComponent } from '@meshforge/manufacturing/frontend/util-common';
 import { ILocation, ILocationTray, ITray } from '@meshforge/manufacturing/shared/util-types';
 import { BladeTrackingApiService, InventoryLocationRow, InventoryTrayRow, apiErrorText } from '@meshforge/manufacturing/frontend/data-access-blade-tracking';
-import { ScanMessage } from '../../models/scan-message';
-import { OptionPickerComponent, PickerOption } from '../../shared/option-picker/option-picker.component';
-import { ScanPanelComponent } from '../../shared/scan-panel/scan-panel.component';
 import { autoShelfFor, trayMayMoveTo } from '../../shared/auto-shelf/auto-shelf';
-import { StationStatusComponent } from '../../shared/station-status/station-status.component';
 import { StationOperation } from '../operations-station/operations-station.operations';
 import { DanaDetailGridDirective, DanaDetailItemComponent, DanaPageHeaderComponent } from '@dana/ui';
 
@@ -27,8 +23,7 @@ export class InternalMovementComponent implements OnDestroy, StationOperation {
   destination: ILocation | null = null;
   availableTrays:InventoryTrayRow[]=[]; availableLocations:InventoryLocationRow[]=[]; selectedTraySerial=''; traySearch=''; locationSearch=''; trayLocationLabels:Record<string,string>={}; pickerOpen=false;
   get filteredTrays(){const q=this.traySearch.trim().toLowerCase();return q?this.availableTrays.filter(x=>(x.serial_number+' '+(this.trayLocationLabels[x.id]||'Unassigned')).toLowerCase().includes(q)):this.availableTrays;}
-  get eligibleLocations(){const currentId=this.current?.location?.id;const q=this.locationSearch.trim().toLowerCase();return this.availableLocations.filter(x=>x.id!==currentId && this.locationEnabled(x) && (!q || (x.serial_number+' '+(x.description??'')+' '+(x.department??'')+' '+(x.location_type??'')).toLowerCase().includes(q)));}
-  private locationEnabled(x:InventoryLocationRow):boolean{return (x as any).active!==false && (x as any).enabled!==false;}
+  get eligibleLocations(){const currentId=this.current?.location?.id;const q=this.locationSearch.trim().toLowerCase();return this.availableLocations.filter(x=>x.id!==currentId && x.enabled && (!q || (x.serial_number+' '+(x.description??'')+' '+(x.department??'')+' '+(x.location_type??'')).toLowerCase().includes(q)));}
   trayOptionLabel(tray:ITray){return tray.serial_number+' - Current: '+(this.trayLocationLabels[tray.id]||'Unassigned');}
   pickerError = '';
   private pickerVersion = 0;

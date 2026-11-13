@@ -1,4 +1,7 @@
 import { readFile } from 'node:fs/promises';
+import { Agent as HttpAgent } from 'node:http';
+import { Agent as HttpsAgent } from 'node:https';
+import { isIP } from 'node:net';
 import {
   BadGatewayException,
   BadRequestException,
@@ -9,8 +12,11 @@ import {
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { DataSource } from 'typeorm';
-import { dockerCollectorTokenFile } from '@meshforge/api/postgres';
+import { dockerCollectorTokenFile, isPrivateAddress, privateNetworkLookup } from '@meshforge/api/core';
 import { ARGONAUT_MACROS, ControllerMacroValues } from '@meshforge/shared/domain';
+
+// Kept here too for existing imports.
+export { isPrivateAddress, privateNetworkLookup };
 
 const TIMEOUT_MS = 25_000;
 
@@ -53,12 +59,25 @@ export class ControllerValuesService {
     const numbers = await this.macroNumbers();
     const base = String(this.config.get('LAPPER_READ_STATUS_URL') || 'http://lapper-read:8080').replace(/\/+$/, '');
     const url = `${base}/machines/${encodeURIComponent(machineId)}/macros?numbers=${numbers.join(',')}`;
+    // The request carries the Docker collector's token, so it only goes to the collector on this
+    // host or the plant's private network (an IP there, or a name such as the compose service
+    // that resolves there), never to an outside host the setting might name.
+    const host = new URL(base).hostname.replace(/^\[|\]$/g, '');
+    if (isIP(host) && !isPrivateAddress(host)) {
+      throw new ServiceUnavailableException(
+        `LAPPER_READ_STATUS_URL (${base}) must be on this server or the private network; the collector token is not sent to ${host}.`,
+      );
+    }
     const token = await this.collectorToken();
+    const lookup = privateNetworkLookup();
     let reply;
     try {
       reply = await axios.get(url, {
         timeout: TIMEOUT_MS,
         proxy: false,
+        httpAgent: new HttpAgent({ lookup } as never),
+        httpsAgent: new HttpsAgent({ lookup } as never),
+        maxRedirects: 0,
         headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' },
         validateStatus: () => true,
       });

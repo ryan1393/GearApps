@@ -1,0 +1,479 @@
+/* Blade workstation visual recipes. Layout remains with the feature components.
+ * All selectors are scoped to Blade component hosts or the operations station. */
+
+/* shared/option-picker/option-picker.component.ts */
+
+gear-scan-panel .dana-label {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+gear-scan-panel .gear-workflow-step-number {
+  border-radius: var(--dana-radius-pill);
+}
+
+gear-coater-shipments .shipment-alert ul {
+  list-style: disc;
+}
+
+gear-coater-shipments .audit li {
+  border-bottom: 1px solid var(--dana-border);
+}
+
+gear-option-picker {
+  border-top: 1px solid var(--dana-border);
+}
+gear-option-picker.picker-plain {
+  border-top: 0;
+}
+gear-option-picker .picker-divider {
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: var(--dana-muted);
+}
+gear-option-picker .picker-toggle {
+  cursor: pointer;
+  text-align: left;
+  font-size: 1.05rem;
+}
+gear-option-picker .picker-count {
+  border-radius: var(--dana-radius-pill);
+  background: var(--dana-neutral-soft);
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+gear-option-picker .picker-list {
+  border: 1px solid var(--dana-border);
+  border-radius: var(--dana-radius-panel);
+  background: var(--dana-surface);
+}
+gear-option-picker .picker-row {
+  border: 0;
+  border-bottom: 1px solid var(--dana-border);
+  background: none;
+  color: var(--dana-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+gear-option-picker .picker-row > span:first-child {
+  font-weight: 800;
+}
+gear-option-picker .picker-row > span:last-child:not(:first-child) {
+  text-align: right;
+}
+gear-option-picker button.picker-row:hover,
+gear-option-picker button.picker-row:focus-visible {
+  background: var(--dana-neutral-soft);
+}
+gear-option-picker button.picker-row:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+gear-option-picker .picker-head {
+  background: var(--dana-neutral-soft);
+  cursor: default;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--dana-muted);
+}
+gear-option-picker .picker-head > span:first-child {
+  font-weight: 900;
+}
+gear-option-picker .picker-note {
+  font-size: 0.95rem;
+}
+gear-option-picker .picker-error {
+  color: var(--dana-danger);
+}
+
+/* shared/count-stepper/count-stepper.component.ts */
+
+gear-count-stepper .stepper-label {
+  font-weight: 700;
+}
+gear-count-stepper .stepper-btn {
+  font-size: 1.6rem;
+  font-weight: 900;
+  line-height: 1;
+}
+gear-count-stepper .stepper-input {
+  text-align: center;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+/* shared/station-status/station-status.component.ts */
+
+gear-station-status .station-status {
+  border: 2px solid var(--dana-border);
+  border-radius: var(--dana-radius-panel);
+  background: var(--dana-neutral-soft);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+gear-station-status .station-status-icon {
+  border-radius: 50%;
+  background: var(--dana-surface);
+  font-weight: 900;
+}
+gear-station-status [data-tone='prompt'] {
+  border-style: dashed;
+  color: var(--dana-text);
+}
+gear-station-status [data-tone='prompt'] .station-status-icon {
+  color: var(--dana-primary);
+}
+gear-station-status [data-tone='success'] {
+  border-color: var(--dana-success);
+  background: var(--dana-success-soft);
+  color: var(--dana-success);
+}
+gear-station-status [data-tone='info'] {
+  border-color: var(--dana-info);
+  background: var(--dana-info-soft);
+  color: var(--dana-info);
+}
+gear-station-status [data-tone='error'] {
+  border-color: var(--dana-danger);
+  background: var(--dana-danger-soft);
+  color: var(--dana-danger);
+}
+gear-station-status .flash {
+  animation: station-status-flash 0.8s ease-out 3;
+}
+@keyframes station-status-flash {
+  0% {
+    box-shadow: 0 0 0 8px var(--dana-danger);
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  gear-station-status .flash {
+    animation: none;
+  }
+}
+
+/* pages/operations-station/operations-station.component.css */
+
+.ops-station .ops-station-tabs {
+  border: 0;
+}
+
+.ops-station .ops-station-tab {
+  border: 2px solid var(--dana-control-border);
+  border-radius: var(--dana-radius-panel);
+  background: var(--dana-surface);
+  color: var(--dana-text);
+  font-size: 1.05rem;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ops-station .ops-station-tab.is-side {
+  border-style: dashed;
+}
+
+.ops-station .ops-station-tab.is-side::before {
+  border-left: 2px solid var(--dana-border);
+}
+
+.ops-station .ops-station-tab-step {
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+.ops-station .ops-station-tab-busy {
+  border: 2px solid var(--dana-surface);
+  border-radius: 50%;
+  background: var(--dana-warning);
+}
+
+.ops-station .ops-station-tab.is-active {
+  border-color: var(--dana-primary);
+  background: var(--dana-primary);
+  color: var(--dana-surface);
+}
+
+.ops-station .ops-station-tab:active {
+  transform: scale(0.98);
+}
+
+.ops-station .ops-station-tab:focus-visible {
+  outline: 3px solid var(--dana-focus-border);
+  outline-offset: 2px;
+}
+
+.ops-station .ops-station-instruction {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--dana-muted);
+}
+
+.ops-station .ops-station-bar .gear-btn {
+  font-size: 1rem;
+}
+
+.ops-station .ops-station-settings legend {
+  font-weight: 800;
+}
+
+.ops-station .ops-station-settings label {
+  font-weight: 700;
+}
+
+.ops-station .ops-station-settings p {
+  color: var(--dana-muted);
+}
+
+.ops-station .op-summary > div {
+  border-radius: var(--dana-radius-card);
+  background: var(--dana-neutral-soft);
+}
+
+.ops-station .op-summary dt {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--dana-muted);
+}
+
+.ops-station .op-summary dd {
+  font-size: 1.2rem;
+  font-weight: 900;
+}
+
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .ops-station .ops-station-tab {
+    font-size: 0.92rem;
+  }
+
+  .ops-station .ops-station-tab-step {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 599px) {
+  .ops-station .ops-station-tab {
+    font-size: 0.85rem;
+  }
+}
+
+/* pages/operations-station/operations-station-pages.css */
+
+.ops-station .op-page > header {
+  border: 0;
+}
+.ops-station .op-step:focus-within {
+  border-color: var(--dana-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dana-primary) 22%, transparent);
+}
+
+.ops-station gear-scan-panel[data-state='ready']:focus-within .gear-workflow-step-number {
+  transform: scale(1.15);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--dana-primary) 25%, transparent);
+}
+
+.ops-station gear-scan-panel[data-state='done'] .gear-workflow-step-number {
+  background: var(--dana-success) !important;
+}
+
+.ops-station gear-scan-panel[data-state='disabled'] {
+  opacity: 0.55;
+}
+
+.ops-station .ops-station-work .op-primary > button {
+  font-size: 1.15rem !important;
+  font-weight: 800;
+}
+
+.ops-station .op-blocked {
+  font-weight: 700;
+  color: var(--dana-muted);
+}
+
+.ops-station .op-card-eyebrow {
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--dana-muted);
+}
+
+.ops-station .op-card-title {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+
+.ops-station .op-list > li {
+  border-top: 1px solid var(--dana-border);
+}
+
+.ops-station .op-list > li > button {
+  border: 0;
+  border-radius: var(--dana-radius-control);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ops-station .op-list > li > button:hover {
+  background: var(--dana-neutral-soft);
+}
+
+.ops-station .op-progress {
+  border-radius: var(--dana-radius-pill);
+  background: var(--dana-neutral-soft);
+}
+
+.ops-station .op-progress > span {
+  background: var(--dana-success);
+}
+.ops-station
+  .ops-station-work
+  :is(
+    .gear-input,
+    .gear-select,
+    select,
+    input:not([type='checkbox']):not([type='radio']),
+    textarea
+  ) {
+  font-size: 1.05rem;
+}
+
+.ops-station .ops-station-work .gear-btn {
+  font-size: 1rem;
+}
+@media (min-width: 1024px) {
+  .ops-station .op-steps > gear-station-status {
+    background: var(--dana-page);
+  }
+
+  .ops-station .op-primary {
+    background: var(--dana-page);
+  }
+}
+
+/* Blade Dashboard availability drilldown recipe. */
+
+.blade-dashboard .availability-stage-card {
+  appearance: none;
+  border: 1px solid var(--dana-control-border);
+  border-radius: var(--dana-radius-card);
+  background: var(--dana-surface);
+  color: var(--dana-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.blade-dashboard .availability-stage-card:hover {
+  border-color: var(--dana-primary);
+  background: var(--dana-page);
+}
+.blade-dashboard .availability-stage-card.is-selected {
+  border-color: var(--dana-primary);
+  background: var(--dana-neutral-soft);
+  box-shadow: inset 0 0 0 1px var(--dana-primary);
+}
+.blade-dashboard .availability-stage-card:focus-visible,
+.blade-dashboard .availability-tray-list a:focus-visible,
+.blade-dashboard .availability-tray-list button:focus-visible {
+  outline: 3px solid var(--dana-primary);
+  outline-offset: 3px;
+}
+.blade-dashboard .availability-stage-card:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+.blade-dashboard .availability-stage-count {
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+.blade-dashboard .availability-stage-name {
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+.blade-dashboard .availability-stage-code {
+  font-size: 0.7rem;
+  color: var(--dana-muted);
+}
+.blade-dashboard .availability-stage-hint {
+  font-size: 0.75rem;
+  color: var(--dana-primary);
+  font-weight: 700;
+}
+.blade-dashboard .availability-tray-list {
+  border: 1px solid var(--dana-control-border);
+  border-radius: var(--dana-radius-card);
+  background: var(--dana-surface);
+}
+.blade-dashboard .availability-tray-toolbar h3 {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+.blade-dashboard .availability-tray-toolbar p {
+  font-size: 0.875rem;
+  color: var(--dana-muted);
+}
+.blade-dashboard .availability-tray-search label {
+  font-weight: 700;
+  font-size: 0.875rem;
+}
+.blade-dashboard .availability-tray-table {
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+}
+.blade-dashboard .availability-tray-table th,
+.blade-dashboard .availability-tray-table td {
+  border-bottom: 1px solid var(--dana-border);
+  text-align: center;
+}
+.blade-dashboard .availability-tray-table th {
+  background: var(--dana-page);
+  color: var(--dana-text);
+  font-weight: 700;
+}
+.blade-dashboard .availability-tray-table a {
+  color: var(--dana-primary);
+  font-weight: 700;
+}
+.blade-dashboard .availability-tray-table .availability-empty-trays {
+  color: var(--dana-muted);
+}
+.blade-dashboard .availability-tray-footer small {
+  color: var(--dana-muted);
+}
+.blade-dashboard .availability-tray-pagination {
+  font-size: 0.875rem;
+}
+.blade-dashboard .availability-visually-hidden {
+  border: 0;
+}
+@media (max-width: 700px) {
+  .blade-dashboard .availability-tray-table tr {
+    border: 1px solid var(--dana-border);
+    border-radius: var(--dana-radius-control);
+  }
+  .blade-dashboard .availability-tray-table td {
+    border: 0;
+    text-align: left;
+  }
+  .blade-dashboard .availability-tray-table td[data-label]::before {
+    font-weight: 700;
+  }
+}

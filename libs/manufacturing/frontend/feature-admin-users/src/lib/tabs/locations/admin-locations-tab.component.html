@@ -1,0 +1,247 @@
+<gear-admin-feedback [tab]="this" />
+<gear-label-printer-picker labelType="ASSET_TAG" label="Print tags to" />
+<gear-label-printer-picker
+  labelType="CUTTER_CARD"
+  label="Print 4×6.5 labels to"
+  nounOverride="4×6.5 card"
+  noPrinterNote="No 4×6.5 card printer is set up, so location labels open in the browser to print. An administrator can add one in Admin › Label Printers."
+  (choicesLoaded)="cardPrintersLoaded($event)" />
+<div *ngIf="labelFallback as fallback" class="gear-alert gear-alert-warning" role="status">
+  <span>Location label for {{ fallback.serial }} was not printed. {{ fallback.reason }}</span>
+  <span class="gear-actions">
+    <button type="button" class="gear-btn gear-btn-primary" (click)="printFallbackInBrowser()" data-icon="print">Print in browser</button>
+    <button type="button" class="gear-btn gear-btn-secondary" (click)="dismissLabelFallback()">Dismiss</button>
+  </span>
+</div>
+<gear-location-editor [locations]="locations" (saved)="reloadLocations()" />
+<gear-admin-bulk-locations (created)="reloadLocations()" />
+<div class="gear-admin-layout">
+  <form class="gear-panel gear-admin-form" data-admin-editor (ngSubmit)="saveLocation()">
+    <div class="gear-step-title">
+      <span class="gear-step-number">1</span>
+      <span>{{ editingLocationId ? 'Edit Location' : 'Create Location' }}</span>
+    </div>
+
+    <label class="gear-field">
+      Location Barcode / Serial
+      <input
+        class="gear-input"
+        [(ngModel)]="locationForm.serial_number"
+        name="locationSerial"
+        placeholder="Example: CGRR-A1A, CGDR-A1A, CGFP-A1A, or GSR-31706"
+        autocomplete="off"
+      />
+      <small class="gear-field-help">This is the value scanned on the physical location tag.</small>
+    </label>
+
+    <div *ngIf="locationShelfPreview as shelf" class="gear-admin-location-rule">
+      <strong>Shelf routing detected</strong>
+      <span>{{ shelf.kind }}<ng-container *ngIf="shelf.partTypeCode"> · {{ shelf.partTypeCode }}</ng-container> · {{ locationShelfDisplay(shelf) }}</span>
+      <small>Department, location number, and SHELF type are derived automatically. Numbered Cuttergrind shelves use shelf type + physical number; Green Shed Summary shelves keep Summary validation.</small>
+    </div>
+
+    <div class="gear-form-grid">
+      <label class="gear-field">
+        Location Number
+        <input
+          class="gear-input"
+          [(ngModel)]="locationForm.number"
+          name="locationNumber"
+          [disabled]="!!locationShelfPreview"
+          placeholder="A1"
+        />
+      </label>
+
+      <label class="gear-field">
+        Location Type
+        <input
+          class="gear-input"
+          [(ngModel)]="locationForm.location_type"
+          name="locationType"
+          [disabled]="!!locationShelfPreview"
+          placeholder="INTERNAL / SHELF / WORKCENTER"
+        />
+      </label>
+    </div>
+
+    <label class="gear-field">
+      Department / Area
+      <input
+        class="gear-input"
+        [(ngModel)]="locationForm.department"
+        name="locationDepartment"
+        [disabled]="!!locationShelfPreview"
+        placeholder="CUTTERGRIND"
+      />
+    </label>
+
+    <label class="gear-field">
+      Description
+      <input
+        class="gear-input"
+        [(ngModel)]="locationForm.description"
+        name="locationDescription"
+        placeholder="Physical location description"
+      />
+    </label>
+
+    <div class="gear-form-grid">
+      <label class="gear-field">
+        Summary
+        <select class="gear-select" [(ngModel)]="locationForm.summary_id" name="locationSummary" [disabled]="locationContentsFromBarcode">
+          <option value="">None</option>
+          <option *ngFor="let summary of locationSummaryChoices" [value]="summary.id">
+            {{ summary.number }}
+          </option>
+        </select>
+      </label>
+
+      @if (locationBarcodePartType; as barcodePartType) {
+        <label class="gear-field">
+          Part Type
+          <input
+            class="gear-input"
+            [value]="barcodePartType"
+            name="locationPartTypeFromBarcode"
+            readonly
+            data-testid="location-part-type-from-barcode"
+          />
+        </label>
+      } @else {
+        <label class="gear-field">
+          Part Type
+          <select class="gear-select" [(ngModel)]="locationForm.part_type_id" name="locationPartType">
+            <option value="">None</option>
+            <option *ngFor="let type of locationPartTypeChoices" [value]="type.id">{{ type.code }}</option>
+          </select>
+        </label>
+      }
+    </div>
+    <small class="gear-field-help">
+      {{ locationContentsFromBarcode
+        ? 'Set from the Green Shed shelf barcode.'
+        : locationBarcodePartType
+          ? 'Part Type is set by the barcode: R is RING, P is PINION. Choose the Summary kept here; both are printed on the summary tag.'
+          : 'Optional. Printed on the location\'s summary tag, for example 1.955FC-RING.' }}
+    </small>
+
+    <label class="gear-field gear-admin-check-field">
+      <input type="checkbox" [(ngModel)]="locationForm.enabled" name="locationEnabled" />
+      <span>Location is active</span>
+    </label>
+
+    <div class="gear-admin-form-actions">
+      <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">
+        {{ editingLocationId ? 'Save Location' : 'Create Location' }}
+      </button>
+      <button
+        *ngIf="editingLocationId"
+        class="gear-btn gear-btn-secondary"
+        type="button"
+        [disabled]="busy"
+        (click)="cancelLocationEdit()"
+      >
+        Cancel Edit
+      </button>
+    </div>
+
+    <small class="gear-field-help">
+      Location identity/routing fields cannot be changed, and a location cannot be disabled, while trays or cutters are actively assigned there.
+    </small>
+  </form>
+
+  <div class="gear-panel gear-admin-list gear-admin-location-list gear-admin-record-grid gear-admin-record-grid-professional">
+    <div class="gear-admin-list-header gear-admin-search-header gear-admin-location-header">
+      <div>
+        <h2>Existing Locations</h2>
+        <small>{{ filteredLocations.length }} shown · {{ locations.length }} total</small>
+      </div>
+      <input
+        class="gear-input gear-admin-search-input"
+        type="search"
+        [(ngModel)]="locationSearch"
+        name="adminLocationSearch"
+        aria-label="Search locations"
+        placeholder="Search locations..."
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="gear-admin-row gear-admin-record-card gear-admin-location-row" data-gear-admin-record-card="location-v20" *ngFor="let location of filteredLocations">
+      <div class="gear-admin-record-card-body">
+        <div class="gear-admin-record-heading">
+          <strong class="gear-admin-record-title mono">{{ location.serial_number }}</strong>
+          <span class="gear-badge" [danaTone]="location.enabled ? 'Active' : 'Inactive'">{{ location.enabled ? 'Active' : 'Inactive' }}</span>
+        </div>
+        <div class="gear-admin-record-meta">
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Location #</span>
+            <span class="gear-admin-record-value">{{ location.number || '—' }}</span>
+          </div>
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Type</span>
+            <span class="gear-admin-record-value">{{ location.location_type || '—' }}</span>
+          </div>
+          <div class="gear-admin-record-field gear-admin-record-field-wide">
+            <span class="gear-admin-record-label">Department / Area</span>
+            <span class="gear-admin-record-value">{{ location.department || 'Shared / Internal' }}</span>
+          </div>
+          <div class="gear-admin-record-field gear-admin-record-field-wide">
+            <span class="gear-admin-record-label">Description</span>
+            <span class="gear-admin-record-value">{{ location.description || 'No description' }}</span>
+          </div>
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Summary</span>
+            <span class="gear-admin-record-value mono">{{ location.summary?.number || '—' }}</span>
+          </div>
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Part Type</span>
+            <span class="gear-admin-record-value">{{ location.part_type?.code || '—' }}</span>
+          </div>
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Trays</span>
+            <span class="gear-admin-record-value gear-admin-record-value-strong">{{ location.tray_count }}</span>
+          </div>
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Blades</span>
+            <span class="gear-admin-record-value gear-admin-record-value-strong">{{ location.blade_count }}</span>
+          </div>
+        </div>
+        <div class="gear-admin-actions gear-admin-record-actions">
+          <button
+            type="button"
+            class="gear-btn gear-btn-secondary"
+            [disabled]="busy || !location.enabled || printingTagId === location.id"
+            (click)="printTag('LOCATION', location.id, location.serial_number)"
+           data-icon="print" title="Print tag">
+            {{ printingTagId === location.id ? 'Printing…' : 'Print Tag' }}
+          </button>
+          <button
+            type="button"
+            class="gear-btn gear-btn-secondary"
+            [disabled]="busy || !location.enabled || !locationSummaryTag(location) || printingTagId === location.id + ':summary'"
+            (click)="printTag('LOCATION_SUMMARY', location.id, locationSummaryTag(location) || location.serial_number)"
+            data-icon="print"
+            [title]="locationSummaryTag(location) ? 'Print a tag reading ' + locationSummaryTag(location) : 'Set a Summary and Part Type to print a summary tag'">
+            {{ printingTagId === location.id + ':summary' ? 'Printing…' : 'Print Summary Tag' }}
+          </button>
+          <button
+            type="button"
+            class="gear-btn gear-btn-secondary"
+            [disabled]="busy || !location.enabled || printingTagId === location.id + ':label'"
+            (click)="printLocationLabel(location)"
+            data-icon="print"
+            title="Print a 4 × 6.5 label with the Summary, part type, location number and location barcode">
+            {{ printingTagId === location.id + ':label' ? 'Printing…' : 'Print 4×6.5 Label' }}
+          </button>
+          <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditLocation(location)" data-icon="edit" title="Edit">Edit</button>
+          <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="toggleLocationEnabled(location)">
+            {{ location.enabled ? 'Disable' : 'Enable' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <gear-admin-list-state [list]="locationsList" noun="locations" [shown]="filteredLocations.length" [total]="locations.length" (retry)="loadLocations()" />
+  </div>
+</div>

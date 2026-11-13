@@ -125,14 +125,33 @@ docker exec "$PG" sh -c 'pg_dump -U "$POSTGRES_USER" -d "$POSTGRES_DB" --no-owne
 ls -1t ${rq(BACKUP_DIR)}/meshforge-*.sql.gz | tail -n +21 | xargs -r rm -f   # keep the newest 20
 echo "[PASS] Database backed up to $OUT ($(du -h "$OUT" | cut -f1))"`;
 
+// Removes a release folder. A one-off container run as root (CLEAR-OPERATIONAL-DATA before
+// it ran as the host account) can leave root-owned files in a release, which this account
+// cannot delete; those are removed from a throwaway root container using an image this
+// project already runs, so nothing is pulled. Anything else stops with the exact command.
+const REMOVE_TREE_FN = `remove_tree() {
+  [ -e "$1" ] || [ -L "$1" ] || return 0
+  rm -rf "$1" 2>/dev/null && return 0
+  local parent name img
+  parent="$(cd "$(dirname "$1")" && pwd)"; name="$(basename "$1")"
+  img="$(docker ps --filter "label=com.docker.compose.project=${PROJECT}" --format '{{.Image}}' 2>/dev/null | head -1)"
+  if [ -n "$img" ] && docker run --rm --user 0:0 --network none --entrypoint rm -v "$parent:/parent" "$img" -rf "/parent/$name" >/dev/null 2>&1 && [ ! -e "$1" ]; then
+    echo "[PASS] Removed $1 (it held files owned by another account)."
+    return 0
+  fi
+  echo "[FAIL] Could not remove $1: it holds files owned by another account. Run: sudo rm -rf '$1'" >&2
+  return 1
+}`;
+
 // Release folders: BASE (current), BASE.prev (last good), BASE.pending-prev (the release that
 // was current when an unfinished deploy started). A deploy that fails leaves pending-prev in
 // place, so a retry discards the failed release instead of making it the rollback target.
 const stageScript = (root, legacy, archive, uploadedEnv) => `set -euo pipefail
 umask 077
 BASE=${rq(root)}; NEXT="$BASE.next"; PEND="$BASE.pending-prev"; LEGACY=${rq(legacy)}
+${REMOVE_TREE_FN}
 mkdir -p "$(dirname "$BASE")"
-rm -rf "$NEXT"; mkdir -p "$NEXT"
+remove_tree "$NEXT"; mkdir -p "$NEXT"
 tar -xzf ${rq(archive)} -C "$NEXT"
 # The release is packed on Windows, whose tar keeps no Unix execute bits: make the shipped
 # shell scripts (commands/*.sh and the tools) runnable as ./script.sh again.
@@ -151,7 +170,7 @@ test -f "$NEXT/compose.yml"
 test -f "$NEXT/package-lock.json"
 if [ -d "$PEND" ]; then
   echo "[RETRY] Discarding the failed release while preserving $PEND as the last good release."
-  rm -rf "$BASE"
+  remove_tree "$BASE"
 elif [ -d "$BASE" ]; then mv "$BASE" "$PEND"; fi
 mv "$NEXT" "$BASE"
 rm -f ${rq(archive)}
@@ -160,12 +179,14 @@ echo "[PASS] Consolidated release ${VERSION} staged at $BASE."`;
 // Called only after every service is healthy: the pending release becomes the rollback target.
 const finalizeScript = (root) => `set -euo pipefail
 BASE=${rq(root)}; PEND="$BASE.pending-prev"; PREV="$BASE.prev"
-if [ -d "$PEND" ]; then rm -rf "$PREV"; mv "$PEND" "$PREV"; fi
+${REMOVE_TREE_FN}
+if [ -d "$PEND" ]; then remove_tree "$PREV"; mv "$PEND" "$PREV"; fi
 echo "[PASS] Previous release kept at $PREV for --rollback."`;
 
 const rollbackSwapScript = (root, legacy) => `set -euo pipefail
 umask 077
 BASE=${rq(root)}; PREV="$BASE.prev"; PEND="$BASE.pending-prev"; TMP="$BASE.rollback-tmp"; LEGACY=${rq(legacy)}
+${REMOVE_TREE_FN}
 if [ -d "$PEND" ]; then TARGET="$PEND"
 elif [ -d "$PREV" ]; then TARGET="$PREV"
 elif [ -f "$LEGACY/compose.yml" ] || [ -f "$LEGACY/manufacturing/compose.yml" ]; then TARGET="$LEGACY"
@@ -175,7 +196,7 @@ if [ -f "$BASE/compose.yml" ]; then CURRENT_ENV="$BASE/.env"
 elif [ -f "$BASE/manufacturing/compose.yml" ]; then CURRENT_ENV="$BASE/manufacturing/.env"
 else CURRENT_ENV="$BASE/.env"; fi
 [ ! -f "$CURRENT_ENV" ] || cp -p "$CURRENT_ENV" "$KEEP/active.env"
-rm -rf "$TMP"; mv "$BASE" "$TMP"; mv "$TARGET" "$BASE"; rm -rf "$PREV"; mv "$TMP" "$PREV"
+remove_tree "$TMP"; mv "$BASE" "$TMP"; mv "$TARGET" "$BASE"; remove_tree "$PREV"; mv "$TMP" "$PREV"
 if [ -f "$BASE/compose.yml" ]; then TARGET_ENV="$BASE/.env"
 elif [ -f "$BASE/manufacturing/compose.yml" ]; then TARGET_ENV="$BASE/manufacturing/.env"
 else TARGET_ENV="$BASE/.env"; fi
@@ -383,7 +404,7 @@ async function main() {
   console.log(`Blade Tracking: http://${ctx.host}:4200   Cutter Builder: http://${ctx.host}:4201   Greenshed: http://${ctx.host}:4202`);
 }
 
-export { envCheckScript, stageScript, finalizeScript, rollbackSwapScript, upScript, containerState, verifyVersion };
+export { envCheckScript, stageScript, finalizeScript, rollbackSwapScript, upScript, containerState, verifyVersion, REMOVE_TREE_FN };
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   main().catch((e) => {

@@ -1,0 +1,112 @@
+<gear-admin-feedback [tab]="this" />
+<div class="gear-admin-layout">
+  <form class="gear-panel gear-admin-form" data-admin-editor (ngSubmit)="createPart()">
+    <div class="gear-step-title"><span class="gear-step-number">1</span><span>{{ editingPartId ? 'Edit Part' : 'Create Part' }}</span></div>
+
+    <label class="gear-field">
+      Part Number
+      <input
+        class="gear-input"
+        [(ngModel)]="partForm.part_number"
+        name="partNumber"
+        placeholder="Enter production part number"
+      />
+    </label>
+
+    <label class="gear-field">
+      Part Summary
+      <select class="gear-select" [(ngModel)]="partForm.summary_id" name="partSummary">
+        <option value="">Select Part Summary...</option>
+        <option *ngFor="let summary of partSummaries" [value]="summary.id">
+          {{ summary.number }}{{ summary.revision ? ' / ' + summary.revision : '' }}
+        </option>
+      </select>
+    </label>
+
+    <label class="gear-field">
+      Part Type
+      <select class="gear-select" [(ngModel)]="partForm.part_type_id" name="partType">
+        <option value="">Select Part Type...</option>
+        <option *ngFor="let partType of partTypeChoices" [value]="partType.id">
+          {{ partType.code }} — {{ partType.name }}
+        </option>
+      </select>
+    </label>
+
+    <label class="gear-field">
+      Teeth
+      <input
+        class="gear-input"
+        type="number"
+        min="0"
+        [(ngModel)]="partForm.teeth"
+        name="partTeeth"
+        placeholder="Optional"
+      />
+    </label>
+
+    <small class="gear-field-help">Gearset parts are created with their assembly in the Gearsets tab. A part used in a gearset keeps its number, type, Summary and teeth.</small>
+
+    <div class="gear-admin-actions">
+      <button class="gear-btn gear-btn-primary" type="submit" [disabled]="busy">{{ editingPartId ? 'Save Part' : 'Create Part' }}</button>
+      <button *ngIf="editingPartId" class="gear-btn gear-btn-secondary" type="button" [disabled]="busy" (click)="cancelPartEdit()">Cancel Edit</button>
+    </div>
+  </form>
+
+  <div class="gear-panel gear-admin-list gear-admin-record-grid gear-admin-record-grid-professional">
+    <div class="gear-admin-list-header gear-admin-search-header">
+      <div>
+        <h2>Existing Parts</h2>
+        <small>{{ filteredParts.length }} shown · {{ parts.length }} total</small>
+      </div>
+      <input
+        class="gear-input gear-admin-search-input"
+        type="search"
+        [(ngModel)]="partSearch"
+        name="adminPartSearch"
+        aria-label="Search parts"
+        placeholder="Search part number, Summary, type, teeth..."
+        autocomplete="off"
+      />
+    </div>
+
+    <div class="gear-admin-row gear-admin-record-card" data-gear-admin-record-card="part-v20" *ngFor="let part of filteredParts">
+      <div class="gear-admin-record-card-body">
+        <div class="gear-admin-record-heading">
+          <strong class="gear-admin-record-title mono">{{ part.part_number }}</strong>
+          <span class="gear-badge" [danaTone]="part.enabled && part.active ? 'Active' : 'Inactive'">{{ part.enabled && part.active ? 'Active' : 'Inactive' }}</span>
+        </div>
+        <div class="gear-admin-record-meta">
+          <div class="gear-admin-record-field gear-admin-record-field-wide">
+            <span class="gear-admin-record-label">Summary</span>
+            <span class="gear-admin-record-value">
+              {{ part.summary?.number || 'No summary' }}{{ part.summary?.revision ? ' / ' + part.summary?.revision : '' }}
+            </span>
+          </div>
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Part Type</span>
+            <span class="gear-admin-record-value">{{ part.part_type?.code || 'No type' }}</span>
+          </div>
+          <div class="gear-admin-record-field">
+            <span class="gear-admin-record-label">Teeth</span>
+            <span class="gear-admin-record-value">{{ part.teeth ?? '—' }}</span>
+          </div>
+          <div class="gear-admin-record-field" data-gear-part-inner-blade>
+            <span class="gear-admin-record-label">Inner blade</span>
+            <span class="gear-admin-record-value">{{ part.inner_blade || '—' }}</span>
+          </div>
+          <div class="gear-admin-record-field" data-gear-part-outer-blade>
+            <span class="gear-admin-record-label">Outer blade</span>
+            <span class="gear-admin-record-value">{{ part.outer_blade || '—' }}</span>
+          </div>
+        </div>
+        <div class="gear-admin-actions gear-admin-record-actions">
+          <button *ngIf="!isGearsetPart(part)" type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="beginEditPart(part)" data-icon="edit" title="Edit">Edit</button>
+          <button *ngIf="isGearsetPart(part)" type="button" class="gear-btn gear-btn-secondary" (click)="openTab('gearsets')">Open in Gearsets</button>
+          <button type="button" class="gear-btn gear-btn-secondary" [disabled]="busy" (click)="togglePartEnabled(part)">{{ part.enabled ? 'Disable' : 'Enable' }}</button>
+        </div>
+      </div>
+    </div>
+    <gear-admin-list-state [list]="partsList" noun="parts" [shown]="filteredParts.length" [total]="parts.length" (retry)="loadParts()" />
+  </div>
+</div>

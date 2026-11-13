@@ -22,6 +22,7 @@ import { FANUC_SIGNALS, ON_OFF_OPTIONS } from './options';
   template: `
     <gear-dialog
       [open]="open()"
+      [dismissible]="!busy()"
       (openChange)="open.set($event)"
       [title]="
         (snapshot() ? 'Fanuc I/O · ' : 'Set up Fanuc I/O · ') +
@@ -44,7 +45,7 @@ import { FANUC_SIGNALS, ON_OFF_OPTIONS } from './options';
         }
       </form>
       <ng-container dialogActions>
-        <button type="button" class="gear-btn gear-btn-secondary" (click)="open.set(false)">
+        <button type="button" class="gear-btn gear-btn-secondary" (click)="open.set(false)" [disabled]="busy()">
           Cancel
         </button>
         <button
@@ -61,7 +62,7 @@ import { FANUC_SIGNALS, ON_OFF_OPTIONS } from './options';
   styles: `
     .lapper-fanuc-form {
       display: grid;
-      gap: 14px;
+      gap: var(--dana-form-gap);
     }
   `,
 })
