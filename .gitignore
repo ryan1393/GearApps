@@ -1,7 +1,0 @@
-# Local deployment configuration and generated artifacts.
-.env
-.env.*
-!.env.example
-*.zip
-**/__pycache__/
-*.py[cod]
