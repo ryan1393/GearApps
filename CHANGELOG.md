@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Full report or hourly section (70.10.0).** The plant dashboard adds a
+  Full report / Hour by hour only selector in normal and wall views. Keep the
+  date and selected machines while switching between the comparison charts and
+  one source's horizontal hourly report. Saved RUN counts and coverage populate
+  the full layout; unsupported DSF metrics are marked unavailable.
+
 - **Hour-by-hour machine comparison (70.9.0).** The plant dashboard can show hourly
   RUN production for up to six selected sources on one screen, including Cutter
   Grind and named areas. Each source has its own chart, with shared date controls

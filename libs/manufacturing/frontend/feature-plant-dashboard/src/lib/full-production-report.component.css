@@ -1,0 +1,16 @@
+:host { display: flex; flex: 1; min-width: 0; min-height: 0; }
+.full-production-report { display: flex; flex-direction: column; width: 100%; min-width: 0; min-height: 0; gap: var(--dana-space-3); }
+.full-report-heading { display: flex; align-items: start; justify-content: space-between; gap: var(--dana-space-3); }
+.full-report-summary { display: grid; justify-items: end; gap: var(--dana-space-1); }
+.full-report-facts { display: flex; flex-wrap: wrap; gap: var(--dana-space-3) var(--dana-space-6); margin: 0; }
+.full-report-facts dd { margin: 0; }
+.full-report-table { min-height: 0; overflow: auto; max-height: 65dvh; }
+.full-report-table table { min-width: 1420px; }
+.full-report-table th, .full-report-table td { vertical-align: middle; }
+.full-report-table thead th { position: sticky; top: 0; z-index: 1; }
+.full-report-table tbody th { min-width: 180px; }
+.full-report-track { width: 100%; min-width: 140px; }
+.full-report-count { white-space: nowrap; }
+.full-report-secondary { display: block; }
+:host-context(.hourly-wall) .full-report-table { flex: 1; max-height: none; }
+@media (max-width: 650px) { .full-report-heading { flex-direction: column; } .full-report-summary { justify-items: start; } }

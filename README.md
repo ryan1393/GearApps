@@ -1,4 +1,4 @@
-# MeshForge 70.9.0
+# MeshForge 70.10.0
 
 One Nx monorepo contains Lapper, Lapper Read, Blade Tracking, Cutter Builder and
 Greenshed. All four web applications and the collector use **one NestJS API on

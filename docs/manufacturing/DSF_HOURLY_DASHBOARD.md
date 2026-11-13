@@ -12,7 +12,10 @@ without an approved physical-machine link.
    plant-calendar date after midnight; choosing a historical date keeps it fixed.
 3. Add or remove sources, up to six at once. Department filtering narrows the
    available choices; the Cutter Grind action selects its active sources.
-4. Use **Wall display** for a compact view on a plant-floor monitor.
+4. Choose **Hour by hour only** to compare the charts, or **Full report** to
+   inspect one selected source across the full width.
+5. Use **Wall display** for a compact view on a plant-floor monitor. Its report
+   selector remains available.
 
 Four active sources are selected initially, with Cutter Grind first. Clear this
 selection or add and remove individual sources to choose a different comparison.
@@ -23,6 +26,32 @@ The layout adapts to the available width. Normal desktop views use two columns;
 wider views and the wall display can show three columns. Phones use one column.
 The wall display is intended for several charts on one monitor, rather than a
 playlist of separate dashboard pages or different TV configurations.
+
+## Full report or hourly section
+
+The report selector changes presentation while preserving the date and selected
+sources. Switching views does not start another history request. **Hour by hour
+only** retains the multi-machine chart grid. **Full report** focuses one selected
+source at a time; choose another selected source to inspect its report.
+
+Full report follows the supplied shopfloor example's horizontal hourly rows. It
+shows accepted RUN actuals, a production bar, coverage, source identity and
+capture evidence. A recorded zero remains zero; missing or review-only evidence
+does not become an accepted actual. Partial counts stay labeled as known counts.
+The subtotal is separate from a fully captured calendar-day total.
+
+The full view also makes the remaining report fields visible as **Unavailable**:
+target, maximum capacity, OEE, downtime percentage, cycle variance, FTT loss,
+reason minutes and comments. These fields are not exposed by the count archive.
+They require the verified source data and rules described in the
+[database reference](DSF_DATABASE_REFERENCE.md). No values are copied from a
+screenshot into live report cells, and no zero or loss segment is invented.
+
+This screen still uses an Indianapolis **calendar day**, with 23, 24 or 25 hourly
+rows. It does not guess an eight-hour shift or prorate whole-hour counts into
+sub-hour shift boundaries. Exact dated-shift totals remain available in Count
+history. Full-report tables can scroll internally in wall mode, so the wide
+report remains readable without shrinking six complete reports onto one screen.
 
 ## What the charts mean
 

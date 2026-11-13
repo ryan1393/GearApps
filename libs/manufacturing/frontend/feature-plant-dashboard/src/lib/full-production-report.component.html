@@ -1,0 +1,32 @@
+<article class="dana-panel dana-panel-padded full-production-report" [attr.aria-label]="source().source_name + ' full production report'">
+  <header class="full-report-heading"><div><p class="gear-eyebrow">{{ source().department_name || 'Unassigned department' }} / FULL REPORT</p><h2 class="gear-panel-title">{{ source().source_name }}</h2><p class="gear-muted">{{ date() }} · Calendar day · Indianapolis time</p></div><div class="full-report-summary"><strong>{{ model().knownSubtotal === null ? '—' : (model().knownSubtotal | number) }}</strong><span class="gear-field-help">{{ model().totalCount === null ? 'Known subtotal · incomplete day' : 'Complete day total' }} · RUN pieces</span></div></header>
+  <dl class="full-report-facts">
+    <div><dt class="gear-field-help">Asset</dt><dd>{{ source().asset_number || 'Not supplied' }}</dd></div>
+    <div><dt class="gear-field-help">Approved machine link</dt><dd>{{ source().machine_number || 'Not confirmed' }}</dd></div>
+    <div><dt class="gear-field-help">Plant collector last capture</dt><dd>{{ formatTime(collector()?.last_success_at ?? null) }}</dd></div>
+    <div><dt class="gear-field-help">Latest observed record</dt><dd>{{ formatTime(lastObserved()) }}</dd></div>
+    <div><dt class="gear-field-help">Report served</dt><dd>{{ formatTime(report()?.served_at ?? null) }}</dd></div>
+    <div><dt class="gear-field-help">Active part</dt><dd>Unavailable</dd></div>
+  </dl>
+  @if (!source().active || !source().current || source().duplicate_operation || source().review_reason) { <p class="gear-field-help">{{ !source().current ? 'Earlier source identity. ' : !source().active ? 'Inactive source. ' : '' }}{{ source().duplicate_operation ? 'Shared operation counts are excluded pending review.' : source().review_reason ? 'Source identity or count evidence needs review.' : '' }}</p> }
+  <p class="gear-field-help full-report-limit">Saved history supplies RUN counts and capture coverage. Target, maximum capacity, OEE, downtime, cycle variance, FTT, reason minutes, comments and active part are unavailable. Bars compare recorded pieces with the highest known hour in this day; their length does not indicate capacity or downtime.</p>
+  @if (firstRecordedHour()) { <div class="dana-toolbar"><button type="button" danaButton="secondary" (click)="jumpToFirstRecordedHour()">First recorded hour</button><span class="gear-field-help">All calendar hours remain in the report.</span></div> }
+  @if (model().buckets.length) {
+    <div danaTableShell class="full-report-table" tabindex="0" role="region" [attr.aria-label]="source().source_name + ': scroll hourly report'">
+      <table danaTable>
+        <caption>{{ source().source_name }} · {{ date() }} · {{ model().buckets.length }} calendar hours. Partial actuals are known subtotals; unknown and excluded counts stay blank.</caption>
+        <thead><tr><th scope="col">Hour · Indianapolis</th><th scope="col">Actual RUN pieces</th><th scope="col">Hourly production</th><th scope="col">Capture coverage</th><th scope="col">Target / maximum capacity / OEE</th><th scope="col">Downtime %</th><th scope="col">Cycle variance · sec</th><th scope="col">FTT loss · parts</th><th scope="col">Reason codes · minutes</th><th scope="col">Comments</th></tr></thead>
+        <tbody>@for (bucket of model().buckets; track bucket.key) {
+          <tr [attr.data-hour-start]="bucket.start">
+            <th scope="row" [title]="bucket.detailLabel" [attr.aria-label]="bucket.detailLabel">{{ bucket.label }}</th>
+            <td class="full-report-count" [attr.aria-label]="countDescription(bucket)">{{ bucket.knownCount === null ? '—' : (bucket.knownCount | number) }}@if (bucket.knownCount !== null && bucket.completeness !== 'COMPLETE') { <span class="gear-field-help full-report-secondary">Known count</span> }</td>
+            <td>@if (bucket.knownCount !== null) { <div class="dana-progress full-report-track" role="meter" aria-valuemin="0" [attr.aria-valuemax]="model().maxKnownCount || 1" [attr.aria-valuenow]="bucket.knownCount" [attr.aria-label]="bucket.detailLabel + ': hourly RUN pieces'" [attr.aria-valuetext]="countDescription(bucket) + '. Scale is the highest known hour, not capacity.'"><span [style.width.%]="barWidth(bucket)"></span></div> } @else { <span class="gear-muted" aria-label="Production bar unavailable">—</span> }</td>
+            <td><span class="dana-status-badge" [attr.data-tone]="bucket.completeness === 'COMPLETE' ? 'success' : bucket.completeness === 'REVIEW' ? 'warning' : null">{{ coverage(bucket) }}</span></td>
+            <td class="gear-muted">Unavailable</td><td class="gear-muted">Unavailable</td><td class="gear-muted">Unavailable</td><td class="gear-muted">Unavailable</td><td class="gear-muted">Unavailable</td><td class="gear-muted">Unavailable</td>
+          </tr>
+        }</tbody>
+        <tfoot><tr><th scope="row">{{ model().totalCount === null ? 'Known subtotal' : 'Day total' }}</th><td class="full-report-count">{{ model().knownSubtotal === null ? '—' : (model().knownSubtotal | number) }}</td><td></td><td>{{ model().totalCount === null ? 'Incomplete day' : 'Complete day' }}</td><td class="gear-muted">Unavailable</td><td class="gear-muted">Unavailable</td><td class="gear-muted">Unavailable</td><td class="gear-muted">Unavailable</td><td class="gear-muted">Unavailable</td><td class="gear-muted">Unavailable</td></tr></tfoot>
+      </table>
+    </div>
+  } @else { <p class="gear-muted">{{ model().note }} Missing counts remain unknown.</p> }
+</article>

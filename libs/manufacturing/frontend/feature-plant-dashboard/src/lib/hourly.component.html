@@ -32,10 +32,21 @@
   } @else {
     <header class="dana-toolbar hourly-wall-header"><div><p class="gear-eyebrow">MESHFORGE / HOURLY PRODUCTION</p><h1 class="gear-panel-title">{{ shownDate() }} · {{ cards().length }} source charts <span class="gear-muted">· Indianapolis</span></h1></div><div class="dana-toolbar"><span class="gear-field-help">{{ followToday() ? 'Following today · ' : '' }}{{ loading() ? 'Refreshing…' : 'Refreshes every 30 seconds' }}</span><dana-theme-toggle /><button type="button" danaButton="secondary" (click)="wallMode.set(false)">Exit wall display</button></div></header>
   }
+  <section class="dana-toolbar hourly-mode-controls" aria-label="Report view">
+    <div class="dana-toolbar" role="group" aria-label="Report mode"><button type="button" [danaButton]="viewMode() === 'full' ? 'primary' : 'secondary'" [attr.aria-pressed]="viewMode() === 'full'" (click)="setViewMode('full')">Full report</button><button type="button" [danaButton]="viewMode() === 'hourly' ? 'primary' : 'secondary'" [attr.aria-pressed]="viewMode() === 'hourly'" (click)="setViewMode('hourly')">Hour by hour only</button></div>
+    @if (viewMode() === 'full') { @if (focusedCard(); as focused) { <label class="gear-field hourly-report-source">Full report source<select class="gear-select" [ngModel]="focused.source.source_key" (ngModelChange)="focusSource($event)">@for (card of cards(); track card.source.source_key) { <option [value]="card.source.source_key">{{ sourceLabel(card.source) }}</option> }</select></label> } }
+  </section>
   @if (dateError() || selectionError()) { <p danaAlert="warning" role="alert">{{ dateError() || selectionError() }}</p> }
   @if (sourcesError()) { <p danaAlert="warning" role="status">{{ sourcesError() }}</p> }
   @if (statusError() && !wallMode()) { <p danaAlert="warning" role="status">{{ statusError() }}</p> }
   @if (status(); as collector) { @if ((!collector.enabled || !collector.source_reader_enabled || collector.last_failure_code) && !wallMode()) { <p danaAlert="warning">{{ collector.last_failure_code ? 'Collection needs attention.' : 'Collection is not enabled.' }} Stored history remains available. <a routerLink="/history">View collection status</a></p> } }
+  @if (viewMode() === 'full') {
+    @if (focusedCard(); as focused) {
+      @if (focused.error) { <p danaAlert="warning" role="status">{{ focused.error }} Choose another selected source to view its saved report.</p> }
+      @if (loading() && !focused.report) { <p class="gear-muted" role="status">Loading saved hourly counts…</p> }
+      <gear-full-production-report [source]="focused.source" [report]="focused.report" [collector]="status()" [date]="shownDate()" />
+    } @else { <div danaEmptyState>Choose a machine or DSF source to view its full report.</div> }
+  } @else {
   @if (!wallMode()) { <div class="dana-toolbar hourly-chart-heading"><div><h2 class="gear-panel-title">{{ shownDate() }} · Hourly RUN pieces</h2><p class="gear-muted">Same vertical scale on every chart · Counts saved in MeshForge · Refreshes every 30 seconds</p></div><span class="dana-status-badge">○ Recorded zero · ? Unknown · Dashed bars: partial</span></div> }
   <section class="hourly-grid" [attr.data-card-count]="cards().length" aria-label="Hourly production charts" [attr.aria-busy]="loading()">
     @for (card of cards(); track card.source.source_key) {
@@ -49,6 +60,7 @@
       </article>
     } @empty { <div danaEmptyState class="hourly-empty">{{ loading() ? 'Loading saved sources…' : 'Choose machines or DSF sources to compare their hourly counts.' }}</div> }
   </section>
-  <footer class="gear-field-help hourly-footer"><span>{{ captureHealth() }} · Last successful capture: {{ formatTime(status()?.last_success_at ?? null) }}</span><span>○ Recorded zero · ? Unknown · Dashed bars: known counts with partial coverage. RUN pieces do not establish downtime or finished-goods output.</span></footer>
+  }
+  <footer class="gear-field-help hourly-footer"><span>{{ captureHealth() }} · Last successful capture: {{ formatTime(status()?.last_success_at ?? null) }}</span><span>{{ viewMode() === 'full' ? 'Partial rows show known counts; unknown counts stay blank.' : '○ Recorded zero · ? Unknown · Dashed bars: known counts with partial coverage.' }} RUN pieces do not establish downtime or finished-goods output.</span></footer>
 </main>
 </div>

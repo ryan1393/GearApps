@@ -96,4 +96,38 @@ describe('Multi-machine hourly selection', () => {
     component.setDate('2026-11-02');
     expect(component.selectionError()).toContain('Choose each machine once');
   });
+
+  it('switches report mode without refetching or changing the date, source selection, following state or errors', () => {
+    snapshot([source(1), source(2), source(3), source(4)]);
+    const { component } = create();
+    component.setDate('2026-11-01');
+    component.selectionError.set('Saved source needs attention');
+    const savedQuery = query();
+    const selected = component.selectedSources();
+    const calls = data.applyQuery.mock.calls.length;
+    expect(component.viewMode()).toBe('hourly');
+    component.setViewMode('full'); component.wallMode.set(true); component.setViewMode('hourly'); component.setViewMode('full');
+    expect(data.applyQuery.mock.calls).toHaveLength(calls);
+    expect(query()).toBe(savedQuery);
+    expect(component.date()).toBe('2026-11-01');
+    expect(component.selectedSources()).toBe(selected);
+    expect(component.followToday()).toBe(false);
+    expect(component.selectionError()).toBe('Saved source needs attention');
+    component.useToday(); component.setViewMode('hourly');
+    expect(component.followToday()).toBe(true);
+  });
+
+  it('focuses only a selected source and falls back to the first selected source after removal', () => {
+    snapshot([source(1), source(2), source(3)]);
+    const { component } = create();
+    expect(component.focusedCard()?.source.source_key).toBe(source(1).source_key);
+    component.focusSource(source(3).source_key);
+    expect(component.focusedCard()?.source.source_key).toBe(source(3).source_key);
+    component.focusSource(source(9).source_key);
+    expect(component.focusedCard()?.source.source_key).toBe(source(3).source_key);
+    component.removeSource(source(3).source_key);
+    expect(component.focusedCard()?.source.source_key).toBe(source(1).source_key);
+    component.clearSelection();
+    expect(component.focusedCard()).toBeNull();
+  });
 });

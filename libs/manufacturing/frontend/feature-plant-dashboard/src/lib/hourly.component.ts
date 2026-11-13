@@ -10,11 +10,12 @@ import { buildHourlyProductionChart, historyFilterError, plantDate } from '@mesh
 import type { DsfHistorySource } from '@meshforge/shared/domain';
 import { timer } from 'rxjs';
 import { HourlyChartComponent } from './hourly-chart.component';
+import { FullProductionReportComponent } from './full-production-report.component';
 
 @Component({
   selector: 'gear-plant-hourly', standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, FormsModule, RouterLink, DanaAlertDirective, DanaButtonDirective, DanaEmptyStateDirective, DanaPageHeaderComponent, DanaThemeToggleComponent, HourlyChartComponent],
+  imports: [CommonModule, FormsModule, RouterLink, DanaAlertDirective, DanaButtonDirective, DanaEmptyStateDirective, DanaPageHeaderComponent, DanaThemeToggleComponent, HourlyChartComponent, FullProductionReportComponent],
   providers: [PlantHourlyDataService],
   templateUrl: './hourly.component.html',
   styleUrls: ['./plant-layout.css', './hourly-layout.css'],
@@ -38,6 +39,8 @@ export class HourlyComponent {
   readonly candidateKey = signal('');
   readonly includeInactive = signal(false);
   readonly wallMode = signal(false);
+  readonly viewMode = signal<'hourly' | 'full'>('hourly');
+  readonly focusedSourceKey = signal('');
   readonly selectedSources = signal<DsfHistorySource[]>([]);
   readonly selectionError = signal('');
   readonly shownDate = computed(() => this.data.query()?.date ?? this.date());
@@ -63,6 +66,7 @@ export class HourlyComponent {
     const result = this.data.results().find(item => item.source_key === source.source_key);
     return { source, report: result?.report ?? null, error: result?.error ?? '', chart: buildHourlyProductionChart(result?.report ?? null, source.source_key) };
   }));
+  readonly focusedCard = computed(() => this.cards().find(card => card.source.source_key === this.focusedSourceKey()) ?? this.cards()[0] ?? null);
   readonly scaleMax = computed(() => {
     const largest = Math.max(0, ...this.cards().map(card => card.chart.maxKnownCount));
     const step = largest <= 10 ? 1 : largest <= 50 ? 5 : largest <= 100 ? 10 : Math.pow(10, Math.floor(Math.log10(largest)) - 1) * 5;
@@ -116,6 +120,8 @@ export class HourlyComponent {
     this.candidateKey.set(''); this.applySelection();
   }
   sourceLabel(source: DsfHistorySource): string { return `${source.source_name}${!source.current ? ' · Earlier identity' : !source.active ? ' · Inactive' : ''}`; }
+  setViewMode(mode: 'hourly' | 'full'): void { this.viewMode.set(mode); }
+  focusSource(key: string): void { if (this.cards().some(card => card.source.source_key === key)) this.focusedSourceKey.set(key); }
   formatTime(value: string | null): string { return value && Number.isFinite(Date.parse(value)) ? this.timeFormatter.format(Date.parse(value)) : 'Not captured'; }
   refresh(): void { this.data.refresh(); }
   logout(): void { this.session.logout(); void this.router.navigateByUrl('/login'); }

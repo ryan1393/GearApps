@@ -20,6 +20,15 @@ or a complete shift history.
 
 ## Current implementation versus reference
 
+The later November 12, 2026 screenshot establishes the requested display choice:
+show the complete shopfloor layout or only its hour-by-hour production section.
+The `/hourly` screen now offers **Full report / Hour by hour only**. Full report
+focuses one selected source with horizontal calendar-hour rows; hourly-only
+retains the multi-source comparison. This changes presentation, not the set of
+available metrics. Unconnected fields remain unavailable. The November 12 image
+is a separate date from the November 11 capture window; it is a layout reference,
+not additional query evidence or a completed numerical reconciliation.
+
 | Requirement | Current support | Evidence still needed |
 | --- | --- | --- |
 | Cuttergrind and every reference department remain visible | Coverage matrix includes all 15 reference departments, registered departments and additional discovered DSF departments | Live source catalog and physical-machine inventory reconciliation |
