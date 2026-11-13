@@ -33,40 +33,44 @@ export class RxoRecoveryRuntime {
       return remaining > 0 ? this.native(args, Math.min(timeout, remaining)) : Promise.resolve({ok:false,stdout:''});
     });
   }
-  private project() { const value = this.config.get<string>('TRUCK_LOG_DOCKER_PROJECT', 'truck-log'); if (!/^[a-z0-9][a-z0-9_-]{0,62}$/.test(value)) throw new Error('WORKER_UNAVAILABLE'); return value; }
-  private release() { const value = this.config.get<string>('TRUCK_LOG_RELEASE', ''); if (!/^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$/.test(value)) throw new Error('WORKER_UNAVAILABLE'); return value; }
+  private project() { const value = this.config.get<string>('TRUCK_LOG_DOCKER_PROJECT', 'truck-log'); if (!/^[a-z0-9][a-z0-9_-]{0,62}$/.test(value)) throw new Error('WORKER_RELEASE_MISMATCH'); return value; }
+  private release() { const value = this.config.get<string>('TRUCK_LOG_RELEASE', ''); if (!/^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$/.test(value)) throw new Error('WORKER_RELEASE_MISMATCH'); return value; }
   private volume(role: RecoveryRole) { return role === 'standard' ? this.config.get<string>('TRUCK_LOG_RXO_DOCKER_DATA_VOLUME','truck-log-rxo-data') : 'truck-log-rxo-expedite-data'; }
   private credentials() { return this.config.get<string>('TRUCK_LOG_RXO_DOCKER_CREDENTIAL_VOLUME','truck-log-rxo-credentials'); }
-  private async json(args: string[]): Promise<any> {
+  private async json(args: string[], failure = 'WORKER_DOCKER_UNAVAILABLE'): Promise<any> {
     const result = await this.native(args);
-    if (!result.ok) throw new Error('WORKER_UNAVAILABLE');
-    try { return JSON.parse(result.stdout); } catch { throw new Error('WORKER_UNAVAILABLE'); }
+    if (!result.ok) throw new Error(failure);
+    try { return JSON.parse(result.stdout); } catch { throw new Error('WORKER_DOCKER_UNAVAILABLE'); }
   }
   async target(role: RecoveryRole): Promise<RecoveryTarget> {
     const project = this.project(), release = this.release(), service = services[role];
     const found = await this.native(['ps','-a','--no-trunc','--filter',`label=com.docker.compose.project=${project}`,'--filter',`label=com.docker.compose.service=${service}`,'--format','{{.ID}}']);
     const ids = found.stdout.trim().split(/\s+/).filter(Boolean);
-    if (!found.ok || ids.length !== 1 || !/^[a-f0-9]{64}$/.test(ids[0])) throw new Error('WORKER_UNAVAILABLE');
+    // Each failure names its cause (see WORKER_PROBLEMS in recovery-policy.ts) so the page can say what to do.
+    if (!found.ok) throw new Error('WORKER_DOCKER_UNAVAILABLE');
+    if (!ids.length) throw new Error('WORKER_NOT_FOUND');
+    if (ids.length !== 1 || !/^[a-f0-9]{64}$/.test(ids[0])) throw new Error('WORKER_DUPLICATE');
     const v = await this.json(['inspect','--type','container','--format','{{json .}}',ids[0]]);
     const labels = v?.Config?.Labels;
     const image = `${images[role]}:${release}`, dataVolume = this.volume(role), credentialVolume = this.credentials();
     if (!labels || labels['com.docker.compose.project'] !== project || labels['com.docker.compose.service'] !== service ||
-      !['False','false'].includes(labels['com.docker.compose.oneoff']) || labels['com.dana.truck-log.release'] !== release ||
-      v.Id !== ids[0] || v.Config.Image !== image || v.State?.Paused || ['dead','removing'].includes(v.State?.Status)) throw new Error('WORKER_UNAVAILABLE');
-    for (const name of [dataVolume,credentialVolume]) if (!/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/.test(name)) throw new Error('WORKER_UNAVAILABLE');
+      !['False','false'].includes(labels['com.docker.compose.oneoff']) || v.Id !== ids[0]) throw new Error('WORKER_NOT_FOUND');
+    if (labels['com.dana.truck-log.release'] !== release || v.Config.Image !== image) throw new Error('WORKER_RELEASE_MISMATCH');
+    if (v.State?.Paused || ['dead','removing'].includes(v.State?.Status)) throw new Error('WORKER_NOT_FOUND');
+    for (const name of [dataVolume,credentialVolume]) if (!/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/.test(name)) throw new Error('WORKER_STORAGE_MISMATCH');
     const mounts = v.Mounts;
     if (!Array.isArray(mounts) || !mounts.some(m => m.Type === 'volume' && m.Name === dataVolume && m.Destination === '/app/data' && m.RW === true) ||
-      !mounts.some(m => m.Type === 'volume' && m.Name === credentialVolume && m.Destination === '/run/secrets' && m.RW === false)) throw new Error('WORKER_UNAVAILABLE');
-    const imageInfo = await this.json(['image','inspect','--format','{{json .}}',image]);
+      !mounts.some(m => m.Type === 'volume' && m.Name === credentialVolume && m.Destination === '/run/secrets' && m.RW === false)) throw new Error('WORKER_STORAGE_MISMATCH');
+    const imageInfo = await this.json(['image','inspect','--format','{{json .}}',image], 'WORKER_RELEASE_MISMATCH');
     if (!/^sha256:[a-f0-9]{64}$/.test(imageInfo?.Id || '') || imageInfo?.Id !== v.Image || imageInfo?.Config?.Labels?.['com.dana.truck-log.release'] !== release ||
-      imageInfo?.Config?.Labels?.['com.dana.truck-log.component'] !== components[role]) throw new Error('WORKER_UNAVAILABLE');
+      imageInfo?.Config?.Labels?.['com.dana.truck-log.component'] !== components[role]) throw new Error('WORKER_RELEASE_MISMATCH');
     for (const name of [dataVolume,credentialVolume]) {
-      const volume = await this.json(['volume','inspect','--format','{{json .}}',name]);
-      if (volume?.Name !== name) throw new Error('WORKER_UNAVAILABLE');
+      const volume = await this.json(['volume','inspect','--format','{{json .}}',name], 'WORKER_STORAGE_MISMATCH');
+      if (volume?.Name !== name) throw new Error('WORKER_STORAGE_MISMATCH');
     }
     return {id: ids[0], role, image, imageId: imageInfo.Id, dataVolume, credentialVolume, running: v.State?.Running === true, restarting: v.State?.Restarting === true};
   }
-  async observe(target: RecoveryTarget, operation: 'status' | 'request'): Promise<RecoveryObservation> {
+  async observe(target: RecoveryTarget, operation: 'status' | 'request' | 'acknowledge'): Promise<RecoveryObservation> {
     const name = `truck-log-rxo-recovery-${randomUUID()}`;
     const args = ['run','--rm','--pull=never','--name',name,'--network=none','--read-only','--cap-drop=ALL','--security-opt=no-new-privileges',
       '--pids-limit=32','--memory=128m','--cpus=0.5','--tmpfs','/tmp:rw,noexec,nosuid,size=8m',
@@ -74,8 +78,9 @@ export class RxoRecoveryRuntime {
       '--mount',`type=volume,source=${target.credentialVolume},target=/run/secrets,readonly`,
       '--entrypoint','node',target.imageId,'--input-type=module','-e',RECOVERY_HELPER,target.role,operation];
     try {
-      const result = await this.native(args);
-      if (!result.ok) throw new Error('RECOVERY_UNAVAILABLE');
+      // Starting a helper from the full worker image takes several seconds on a real host.
+      const result = await this.native(args, 30000);
+      if (!result.ok) throw new Error('WORKER_CHECK_FAILED');
       return recoveryObservation(JSON.parse(result.stdout),target.role);
     } finally { await this.native(['rm','-f',name],5000).catch(() => undefined); }
   }

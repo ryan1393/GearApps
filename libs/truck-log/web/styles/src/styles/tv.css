@@ -1,7 +1,12 @@
 /* Dock TV boards — layout only; the wall-display look comes from Dana UI (.dana-wall). */
 @media screen {
+  /* Exactly one screen tall when the shell is zoomed on a large TV (see fit.css). */
+  .tl-tv.dana-wall { height: calc(100dvh / var(--tl-zoom, 1)); }
   .tl-tv-dock-layout { display: grid; flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr) max-content; gap: 12px; }
-  .tl-tv-management-layout { display: grid; flex: 1; min-height: 0; grid-template-columns: minmax(0, 1fr) 255px; gap: 18px; }
+  .tl-tv-management-layout { display: grid; flex: 1; min-height: 0; grid-template-columns: minmax(0, 1fr) 320px; gap: 18px; }
+  /* "Occupied docks" and its page count stay on one line beside the visit table. */
+  .tl-tv-summary-panel .dana-wall-panel-title { flex-wrap: nowrap; }
+  .tl-tv-summary-panel .dana-wall-panel-title h2 { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .tl-tv-timing-grid { display: grid; grid-template-columns: minmax(0, .85fr) repeat(2, minmax(0, 1fr)); align-items: start; }
   .tl-tv-wait-status { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 5px 12px; }
   .tl-tv-dock-summary { display: grid; gap: 9px; }
@@ -22,4 +27,18 @@
   .tl-tv-management-layout { grid-template-rows: minmax(0, 1fr) 108px; }
   .tl-tv-dock-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tl-tv-timing-grid { gap: 6px; }
+}
+
+/* Dock codes are short identifiers: never split them between letters (only after a hyphen). */
+@media screen { .tl-tv-table td[data-label="Dock"] strong { overflow-wrap: normal; word-break: normal; } }
+@media screen and (max-width: 1149px) {
+  .tl-tv-table th:nth-child(2), .tl-tv-table th:nth-child(4) { width: 20%; }
+  .tl-tv-table th:nth-child(3) { width: 15%; }
+}
+/* A TV board opened on a phone or very short window: stack and scroll instead of squeezing a
+   one-screen wall until panels overlap. Real TVs (wider and taller) keep the fixed wall. */
+@media screen and (max-width: 699px), screen and (max-height: 599px) {
+  .tl-tv.dana-wall { height: auto; min-height: 100dvh; }
+  .tl-tv-dock-layout, .tl-tv-management-layout { flex: 0 0 auto; grid-template-rows: none; }
+  .tl-tv .dana-wall-panel { min-height: 0; overflow: visible; }
 }

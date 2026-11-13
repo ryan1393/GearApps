@@ -6,3 +6,4 @@ export { RxoConnectionRecoveryService } from './lib/rxo-connection-recovery.serv
 export { RxoRecoveryRuntime, runRecoveryDocker } from './lib/recovery-runtime';
 export type { RecoveryDockerRun, RecoveryTarget } from './lib/recovery-runtime';
 export type { RecoveryRole } from './lib/recovery-policy';
+export type { RecoverOptions } from './lib/rxo-connection-recovery.service';

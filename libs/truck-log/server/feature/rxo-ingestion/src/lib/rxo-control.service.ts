@@ -1,5 +1,5 @@
-import { RxoConnectionRecoveryService } from '@truck-log/server/infrastructure/rxo-recovery';
-import type { RxoConnectionRecoveryResult } from '@truck-log/shared/contracts';
+import { RxoConnectionRecoveryService, type RecoverOptions } from '@truck-log/server/infrastructure/rxo-recovery';
+import type { RxoConnectionRecoveryResult, RxoWorkerRestartResult } from '@truck-log/shared/contracts';
 import { BadRequestException, Injectable, OnModuleDestroy, OnModuleInit, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { spawn } from 'node:child_process';
@@ -232,12 +232,18 @@ export class RxoControlService implements OnModuleInit, OnModuleDestroy {
     return { username, usernameConfigured: true, passwordConfigured: true, passwordUpdated: Boolean(password) };
   }
 
-  recoverConnection(): Promise<RxoConnectionRecoveryResult> {
+  recoverConnection(options: RecoverOptions = {}): Promise<RxoConnectionRecoveryResult> {
     this.invalidateStatus();
     if (this.autoCheckBusy || !['IDLE', 'COMPLETE', 'PARTIAL', 'FAILED'].includes(this.manualRun.status)) {
       return Promise.resolve({status: 'ALREADY_RUNNING', message: 'An RXO scan or import is already running. It has been left to finish.'});
     }
-    return this.connectionRecovery.recover('standard');
+    return this.connectionRecovery.recover('standard', options);
+  }
+
+  /** Administrator Restart worker for the standard RXO exporter container. */
+  restartWorker(): Promise<RxoWorkerRestartResult> {
+    this.invalidateStatus();
+    return this.connectionRecovery.restartWorker('standard');
   }
 
   async requestRescan() {

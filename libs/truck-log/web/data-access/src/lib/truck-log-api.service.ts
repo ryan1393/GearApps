@@ -19,6 +19,7 @@ import type {
   PackingSlipRouteUpdateRequest,
   RxoControlStatusData,
   RxoConnectionRecoveryResult,
+  RxoWorkerRestartResult,
   RxoDataPage,
   RxoExporterSettings,
   RxoFreightRecord,
@@ -201,12 +202,22 @@ export class TruckLogApi {
     );
   }
 
-  recoverRxoConnection() {
-    return this.http.post<RxoConnectionRecoveryResult>(`${this.base}/rxo/control/recover`, {}).pipe(timeout(45000));
+  /** acknowledgeHold: the administrator confirmed RXO was checked; clears a review-type sign-in hold once. */
+  recoverRxoConnection(acknowledgeHold = false) {
+    return this.http.post<RxoConnectionRecoveryResult>(`${this.base}/rxo/control/recover`, acknowledgeHold ? { acknowledgeHold: true } : {}).pipe(timeout(75000));
   }
 
-  recoverRxoExpediteConnection() {
-    return this.http.post<RxoConnectionRecoveryResult>(`${this.base}/rxo/expedite/recover`, {}).pipe(timeout(45000));
+  restartRxoWorker() {
+    return this.http.post<RxoWorkerRestartResult>(`${this.base}/rxo/control/restart-worker`, {}).pipe(timeout(60000));
+  }
+
+  /** acknowledgeHold: the administrator confirmed RXO was checked; clears a review-type sign-in hold once. */
+  recoverRxoExpediteConnection(acknowledgeHold = false) {
+    return this.http.post<RxoConnectionRecoveryResult>(`${this.base}/rxo/expedite/recover`, acknowledgeHold ? { acknowledgeHold: true } : {}).pipe(timeout(75000));
+  }
+
+  restartRxoExpediteWorker() {
+    return this.http.post<RxoWorkerRestartResult>(`${this.base}/rxo/expedite/restart-worker`, {}).pipe(timeout(60000));
   }
 
   runRxoScanNow() {

@@ -54,12 +54,15 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
       <div class="tl-rxo-recovery-row">
         <p><b id="expedite-recovery-title">{{recoveryBusy || recoveryMessage ? 'RXO Expedite connection recovery.' : 'RXO Expedite connection needs recovery.'}}</b> {{connectionRecoveryDetail}}</p>
         <div class="dana-actions" *ngIf="adminAuth.canWrite(); else recoveryAdminSignIn">
-          <button class="dana-btn dana-btn-sm dana-btn-primary" type="button" [disabled]="recoveryBusy || scanRunning || scan.active || scan.requesting || !recoveryAvailable" [attr.aria-busy]="recoveryBusy" (click)="recoverConnection()">{{recoveryBusy ? 'Requesting recovery…' : 'Recover connection'}}</button>
+          <button class="dana-btn dana-btn-sm dana-btn-primary" type="button" *ngIf="canAcknowledgeHold" [disabled]="recoveryBusy || workerRestarting" (click)="recoverConnection(true)">{{recoveryBusy ? 'Retrying…' : 'Retry sign-in'}}</button>
+          <button class="dana-btn dana-btn-sm dana-btn-primary" type="button" *ngIf="!canAcknowledgeHold" [disabled]="recoveryBusy || scanRunning || scan.active || scan.requesting || !recoveryAvailable || workerRestarting" [attr.aria-busy]="recoveryBusy" (click)="recoverConnection()">{{recoveryBusy ? 'Requesting recovery…' : 'Recover connection'}}</button>
+          <button class="dana-btn dana-btn-sm" type="button" [disabled]="recoveryBusy || workerRestarting" [attr.aria-busy]="workerRestarting" (click)="restartWorker()">{{workerRestarting ? 'Restarting…' : 'Restart worker'}}</button>
           <button class="dana-btn dana-btn-sm" type="button" [disabled]="recoveryBusy" (click)="openRecoverySettings()">Settings &amp; Login</button>
         </div>
         <ng-template #recoveryAdminSignIn><a class="dana-btn dana-btn-sm dana-btn-primary" routerLink="/admin/login" [queryParams]="{ returnTo: '/rxo-expedite' }">Sign in to recover</a></ng-template>
       </div>
-      <p class="tl-rxo-recovery-note" *ngIf="recoveryLoginRequired">Open Settings &amp; Login to check the saved Expedite login. If RXO requests MFA, approval or an interactive sign-in, complete it with your administrator before recovering again.</p>
+      <p class="tl-rxo-recovery-note" *ngIf="recoveryLoginRequired && !canAcknowledgeHold">The saved Expedite login was rejected or locked. Update it in Settings &amp; Login; the new login is tried on the next scan.</p>
+    <p class="tl-rxo-recovery-note" *ngIf="canAcknowledgeHold">RXO asked for MFA, approval or an interactive sign-in, or showed an unexpected sign-in page, so automatic sign-in paused. Check RXO in a browser and finish any verification, then use <b>Retry sign-in</b>. If it was a temporary RXO error page, you can retry right away.</p>
       <p class="tl-rxo-recovery-note" *ngIf="recoveryWait as wait"><b>{{wait.title}}</b> {{wait.detail}} <time [attr.datetime]="wait.until">{{wait.resumeLabel}}</time> <span aria-live="off">({{wait.remaining}} remaining)</span>.</p>
       <p class="tl-rxo-recovery-note dana-field-error" role="alert" *ngIf="recoveryError">{{recoveryError}}</p>
       <p class="tl-rxo-recovery-note" role="status" *ngIf="recoveryMessage">{{recoveryMessage}}</p>
@@ -157,6 +160,13 @@ type ExpediteMainTab = 'data' | 'health' | 'settings';
 
     <div *ngIf="activeTab === 'health'" id="rxo-expedite-panel-health" role="tabpanel"
          aria-labelledby="rxo-expedite-tab-health" tabindex="0" class="tl-fill tl-scroll">
+      <!-- Always reachable: restart the worker even when the recovery strip is hidden. -->
+      <div class="dana-alert tl-rxo-recovery" *ngIf="adminAuth.canWrite()">
+        <div class="tl-rxo-recovery-row">
+          <p><b>RXO Expedite worker container.</b> Restarting stops a scan in progress (the scheduler retries it); verified data, the saved login and sign-in pauses are unchanged.</p>
+          <div class="dana-actions"><button class="dana-btn dana-btn-sm" type="button" [disabled]="recoveryBusy || workerRestarting" [attr.aria-busy]="workerRestarting" (click)="restartWorker()">{{workerRestarting ? 'Restarting…' : 'Restart worker'}}</button></div>
+        </div>
+      </div>
       <tl-rxo-expedite mode="health"></tl-rxo-expedite>
     </div>
 
@@ -183,6 +193,7 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
   summaryOpen = this.summaryPreference.get();
   recoveryBusy = false;
   recoveryMessage = '';
+  workerRestarting = false;
   recoveryError = '';
   private recoveryLoginBlocked = false;
   private recoveryBlockedStatus: ExpediteStatus | null = null;
@@ -226,7 +237,7 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
 
   get connectionRecoveryNeeded() {
     const reason = this.status?.recovery?.reason;
-    return !!this.status && ((!!reason && reason !== 'READY') || this.recoveryLoginRequired || this.recoveryCooldownActive || this.authenticationNeedsReview
+    return !!this.status && ((!!reason && reason !== 'READY' && reason !== 'CHECKING') || this.recoveryLoginRequired || this.recoveryCooldownActive || this.authenticationNeedsReview
       || /STOPPED|STOPPING/.test(this.schedulerState));
   }
   /**
@@ -237,8 +248,36 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
    */
   get showRecoveryPanel(): boolean {
     if (this.recoveryBusy || this.recoveryError || this.recoveryLoginRequired) return true;
+    // No status at all: the worker may be stuck, so keep Restart worker within reach.
+    if (!this.status && !!this.pageError) return true;
     if (this.integrationState === 'healthy') return false;
     return this.connectionRecoveryNeeded || !!this.recoveryMessage;
+  }
+  /** A review-type sign-in hold an administrator may clear with Retry sign-in (not a rejected password). */
+  get canAcknowledgeHold(): boolean {
+    return this.status?.recovery?.reason === 'INTERACTIVE_LOGIN_REQUIRED' && !this.recoveryCooldownActive;
+  }
+  /** Restart the worker container (stops a running scan; the scheduler retries it). */
+  restartWorker() {
+    if (!this.adminAuth.canWrite()) { this.toast.error('Sign in as administrator to restart the RXO Expedite worker.'); return; }
+    if (this.workerRestarting || this.recoveryBusy || this.destroyed) return;
+    if (!window.confirm('Restart the RXO Expedite worker container?\n\nA scan in progress is stopped and retried by the scheduler. The last verified data stays available, and the saved login and sign-in pauses are unchanged.')) return;
+    this.workerRestarting = true;
+    this.recoveryError = '';
+    this.api.restartRxoExpediteWorker().subscribe({
+      next: result => {
+        if (this.destroyed) return;
+        this.workerRestarting = false;
+        this.toast.success(result.message, result.status === 'STARTED' ? 'Worker started' : 'Worker restarted');
+        this.store.refresh();
+      },
+      error: error => {
+        if (this.destroyed) return;
+        this.workerRestarting = false;
+        this.recoveryError = error?.error?.message || 'The worker restart was not confirmed. Check the worker on the server.';
+        this.store.refresh();
+      },
+    });
   }
   get recoveryLoginRequired() {
     const info = this.status?.recovery;
@@ -252,6 +291,9 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
       && !this.recoveryCooldownActive && !this.recoveryLoginRequired;
   }
   get connectionRecoveryDetail() {
+    // The note under the strip explains what to check and offers Retry sign-in.
+    if (this.canAcknowledgeHold) return 'Automatic sign-in is paused.';
+    if (!this.status && this.pageError) return 'Expedite status could not be read. If the worker is stuck, Restart worker can help.';
     if (this.needsReview && !this.authenticationNeedsReview && this.waitingForNextScan) {
       return 'The latest acquisition attempt failed. Open Exporter Health for its recorded stage and cause. The scheduler is still waiting for the next scan; a connection reset is not a general export retry.';
     }
@@ -271,14 +313,21 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
     this.activeTab = 'settings';
     document.getElementById('rxo-expedite-tab-settings')?.focus();
   }
-  recoverConnection() {
+  /**
+   * acknowledgeHold: the administrator confirmed they checked RXO, so a verification, access-review
+   * or unexpected-sign-in-page hold is cleared once and one recovery is queued (server-enforced limits apply).
+   */
+  recoverConnection(acknowledgeHold = false) {
     if (!this.adminAuth.canWrite()) { this.toast.error('Sign in as administrator to recover the Expedite connection.'); return; }
-    if (this.recoveryLoginRequired) { this.openRecoverySettings(); return; }
-    if (this.recoveryBusy || this.scanRunning || this.scan.active || this.scan.requesting || !this.recoveryAvailable || this.destroyed) return;
+    if (acknowledgeHold) {
+      if (!this.canAcknowledgeHold || this.recoveryBusy || this.destroyed) return;
+      if (!window.confirm('Retry the RXO sign-in now?\n\nUse this after you have checked RXO yourself: any verification or access step is done, or the sign-in page error was temporary. Truck Log tries once; if RXO still shows the same page, sign-in pauses again.')) return;
+    } else if (this.recoveryLoginRequired) { this.openRecoverySettings(); return; }
+    if (!acknowledgeHold && (this.recoveryBusy || this.scanRunning || this.scan.active || this.scan.requesting || !this.recoveryAvailable || this.destroyed)) return;
     this.recoveryBusy = true;
     this.recoveryError = '';
     this.recoveryMessage = '';
-    this.recoveryRequest = this.api.recoverRxoExpediteConnection().subscribe({
+    this.recoveryRequest = this.api.recoverRxoExpediteConnection(acknowledgeHold).subscribe({
       next: result => {
         if (this.destroyed) return;
         this.recoveryBusy = false;
@@ -287,7 +336,8 @@ export class RxoExpediteControlCenterComponent implements OnInit, OnDestroy {
         } else {
           this.recoveryMessage = result.status === 'ALREADY_RUNNING'
             ? 'A recovery scan is already queued or running. Wait for a verified export; the connection is not yet confirmed.'
-            : 'Recovery requested. Wait for a successful verified export before treating the connection as restored. Previous verified data stays available.';
+            : (acknowledgeHold ? 'Sign-in hold cleared and one retry requested. ' : 'Recovery requested. ')
+              + 'Wait for a successful verified export before treating the connection as restored. Previous verified data stays available.';
         }
         this.store.refresh();
       },
