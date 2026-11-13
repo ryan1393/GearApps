@@ -16,3 +16,9 @@ export interface DockScanLookup {
   candidates: DockScanCandidate[];
   message: string;
 }
+/** One-scan result: `document` is the newly attached packing slip, or null when a person must choose. */
+export interface DockScanAutoAttach<TDocument = unknown> {
+  visitId: number;
+  deliveryNumber: string;
+  document: TDocument | null;
+}

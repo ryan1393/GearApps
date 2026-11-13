@@ -1603,9 +1603,17 @@ class Watcher:
             if proc.returncode != 0:
                 raise WatcherError(f"SumatraPDF submission exit={proc.returncode}")
 
-    def _place(self, src: Path, folder: Path) -> Path:
+    def _place(self, src: Path, folder: Path, delivery_number: str = "") -> Path:
+        """Move a PDF into a route folder. A verified slip is named after its Delivery Number
+        (13246286.pdf, then 13246286-2.pdf ...) so it can be found by the number on the paper."""
         folder.mkdir(parents=True, exist_ok=True)
         dest = folder / src.name
+        if re.fullmatch(r"\d{8}", delivery_number or ""):
+            dest = folder / f"{delivery_number}.pdf"
+            copy = 2
+            while dest.exists() and copy <= 9999:
+                dest = folder / f"{delivery_number}-{copy}.pdf"
+                copy += 1
         if dest.exists():
             raise WatcherError(f"Destination already exists, refused overwrite: {dest}")
         src.rename(dest)
@@ -1736,7 +1744,7 @@ class Watcher:
                         raise
                     print_status = "PRINTED"  # spooler submission accepted; paper not verified
                     record["status"] = "PRINT_SUBMITTED_PAPER_UNVERIFIED"
-            dest = self._place(incoming, target)
+            dest = self._place(incoming, target, detail)
             record["stored_file"] = str(dest)
             record["completed_at"] = iso_utc()
             self._queue_upload(r, record, verification, print_status, output_printer, print_error, review_reason)
@@ -1744,7 +1752,7 @@ class Watcher:
             to_review = recovered or bool(record.get("stale_reason"))
             self.log("PASS" if not recovered else "RECOVERED",
                      f"route{r.number}: delivery {detail} ({verification.method}) -> "
-                     f"{'NeedsReview' if to_review else 'Ready'}; {record['status']}"
+                     f"{'NeedsReview' if to_review else 'Ready'} as {dest.name}; {record['status']}"
                      f"{'; upload queued' if record.get('upload') == 'QUEUED' else ''}")
         except Exception as e:
             if record["status"] == "PRINT_SUBMISSION_PENDING_DO_NOT_RETRY_AUTOMATICALLY":
@@ -2258,7 +2266,44 @@ def check_command(c: Settings, online: bool = True, http: Optional[Callable[...,
     return 1 if issues else 0
 
 
-def setup_upload_command(c: Settings, token: Optional[str] = None) -> int:
+_TOKEN_IN_TEXT = re.compile(r"tlpa_[0-9a-f]{16}_[0-9a-f]{64}(?![0-9a-f])")
+
+
+def extract_token(text: str) -> Optional[str]:
+    """The one token inside pasted text: tolerates the 'Bearer token (shown once):' label,
+    stray control characters from a console paste, and a token wrapped over several lines."""
+    for candidate in (text, "".join(ch for ch in text if ch.isprintable() and not ch.isspace())):
+        found = set(_TOKEN_IN_TEXT.findall(candidate))
+        if len(found) == 1:
+            return found.pop()
+    return None
+
+
+def read_windows_clipboard() -> str:
+    """Clipboard text on Windows, or '' when unavailable. Never logged or printed."""
+    if os.name != "nt":
+        return ""
+    try:
+        exe = Path(os.environ.get("SystemRoot", r"C:\Windows")) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
+        done = subprocess.run([str(exe), "-NoLogo", "-NoProfile", "-NonInteractive", "-Command", "Get-Clipboard -Raw"],
+                              capture_output=True, text=True, timeout=20)
+        return done.stdout if done.returncode == 0 else ""
+    except (OSError, subprocess.SubprocessError):
+        return ""
+
+
+def describe_bad_token_input(text: str) -> str:
+    """What was wrong with a rejected paste, without revealing any of it."""
+    visible = "".join(ch for ch in text if ch.isprintable() and not ch.isspace())
+    if not visible:
+        return "nothing was received (the paste did not reach this window)"
+    if "tlpa_" not in visible:
+        return f"{len(visible)} characters were received but they do not contain tlpa_"
+    return f"{len(visible)} characters were received; a complete token is 86 (tlpa_, 16, _, 64)"
+
+
+def setup_upload_command(c: Settings, token: Optional[str] = None,
+                         clipboard: Callable[[], str] = read_windows_clipboard) -> int:
     import getpass
     tl = c.truck_log
     if not tl.api_base:
@@ -2270,7 +2315,18 @@ def setup_upload_command(c: Settings, token: Optional[str] = None) -> int:
     else:
         print("The file is sealed for this PC (DPAPI LocalMachine) and readable only by SYSTEM and Administrators.")
     if token is None:
-        token = getpass.getpass("Paste token (tlpa_..., input hidden): ").strip()
+        pasted = getpass.getpass("Paste token (tlpa_..., input hidden; right-click to paste), then Enter: ")
+        token = extract_token(pasted)
+        if token is None:
+            # A hidden console prompt can lose a paste (Ctrl+V, or a token copied over two lines).
+            token = extract_token(clipboard())
+            if token is None:
+                raise WatcherError("No complete token was pasted: " + describe_bad_token_input(pasted)
+                                   + ". Copy the whole tlpa_... token again and run this once more; "
+                                   "it is also read straight from the clipboard if the paste fails.")
+            print("The paste was incomplete; the token was read from the Windows clipboard instead.")
+    else:
+        token = extract_token(token) or token
     store_token(tl, token)
     if load_token(tl) != token.strip():
         raise WatcherError("Stored credential did not read back correctly")

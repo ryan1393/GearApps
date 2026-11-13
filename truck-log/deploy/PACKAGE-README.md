@@ -2,7 +2,7 @@
 
 | Folder | What it is | Version |
 | --- | --- | --- |
-| `truck-log/` | Truck Log server and web app (Docker). Start with `truck-log/README.md`. | 1.0.5 |
+| `truck-log/` | Truck Log server and web app (Docker). Start with `truck-log/README.md`. | 1.0.9 |
 | `print-agents/` | Windows print PC programs: guard shack print agent and SAP packing-slip watcher. Start with `print-agents/README-FIRST.txt`. | V4R7 / W3 |
 
 DANA UI (the shared styling package) lives in its own repo. Truck Log builds from the pinned copy in `truck-log/vendor/dana-ui/`.
@@ -31,11 +31,30 @@ For a new installation, use `truck-log\SETUP-TRUCK-LOG.cmd` instead. Detailed in
 
 After deployment, sign in as an administrator and use **Scan Now** in **RXO Control Center** or **RXO Expedite**. Each button queues that integration's own scheduler; watch its last successful export and latest import to confirm completion.
 
+## First-time `.env` and changing passwords
+
+A first-time ZIP can include a ready-made `truck-log/.env` holding a unique generated database password and signing secret, so `DEPLOY-TRUCKLOG-LINUX.cmd` and `SETUP-TRUCK-LOG` run without choosing a file. It is for a **new** server only. A server that already has Truck Log data must keep using its existing `.env`: replace the included file with it before deploying. `.env` is never committed to Git.
+
+After the first start, create the administrator and replace the included values, from the `truck-log` folder:
+
+```powershell
+.\SETUP-TRUCK-LOG-ADMIN.cmd --bootstrap
+.\CHANGE-TRUCK-LOG-PASSWORDS.cmd --all-generated
+```
+
+Run `CHANGE-TRUCK-LOG-PASSWORDS.cmd` without options to list every password it can change (administrator, database, signing secret, RXO logins). Linux uses the matching `.sh` files. Details: `truck-log/README.md`.
+
 ## Print agent reports HTTP 401
 
 A running Windows service can be offline in Truck Log when its saved credential is rejected. On the print PC, run `print-agents\01-Guard-Shack-Agent\REPAIR-PRINT-AGENT-CREDENTIAL.cmd` as administrator. It checks the configured server, agent identity and existing credential first. If a replacement is needed, it displays the command to create a credential on that Truck Log Docker host and accepts the new token in a hidden local prompt.
 
-The repair validates the replacement before changing the installed credential. It preserves the configured printers and print journals and restarts a previously running service. The server application remains version 1.0.5; this repair tool runs on the Windows print PC.
+The repair validates the replacement before changing the installed credential. It preserves the configured printers and print journals and restarts a previously running service. The server application is unchanged by it; this repair tool runs on the Windows print PC.
+
+## Remove an old print agent before reinstalling
+
+The guard agent installer refuses to replace an installed service. On the print PC, run `print-agents\01-Guard-Shack-Agent\REMOVE-OLD-PRINT-AGENT.cmd` as administrator and type `REMOVE` when asked. It uninstalls the `TruckLogPrintAgent` service and moves the old folder into a locked backup. Guard-gate printing on that PC stays off until the agent is installed again.
+
+Then create a new token on the Truck Log host (`SETUP-PRINT-AGENT-CREDENTIAL --agent-id <agent id> --name "<name>" --rotate`) and run the V4R7 installer on the print PC. When the new agent prints on both gates, `REMOVE-OLD-PRINT-AGENT.cmd -DeleteFiles` deletes the old files. The SAP watcher has its own `REMOVE-WATCHER-SERVICE.cmd`. Details: `print-agents/README-FIRST.txt`.
 
 ## Connect an extracted ZIP to local Git
 

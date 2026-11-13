@@ -47,7 +47,7 @@ def verify():
         if data != (guard / 'original-source' / file['name']).read_bytes():
             raise ValueError(f"Nested source mismatch: {file['name']}")
     watcher = ROOT / '02-SAP-Queue-Watcher'
-    for script in list(watcher.glob('*.cmd')) + list(watcher.glob('*.ps1')):
+    for script in list(watcher.glob('*.cmd')) + list(watcher.glob('*.ps1')) + list(guard.glob('REMOVE-OLD-PRINT-AGENT.*')):
         data = script.read_bytes()
         data.decode('ascii')
         if data.count(b'\n') != data.count(b'\r\n'):

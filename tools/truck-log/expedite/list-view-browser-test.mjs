@@ -3,7 +3,7 @@
 // PLAYWRIGHT_CHROMIUM_EXECUTABLE may select a system Chromium instead.
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
-import { openFreightList, assertFreightSession } from '../../../apps/rxo-expedite/src/lib/list-view.mjs';
+import { openFreightList, assertFreightSession, freightViewCovered } from '../../../apps/rxo-expedite/src/lib/list-view.mjs';
 const { chromium } = createRequire(new URL('../../../apps/rxo-expedite/package.json', import.meta.url))('playwright');
 const browser = await chromium.launch({headless:true,
  ...(process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE ? {executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE} : {})});
@@ -37,4 +37,14 @@ try{
  await fixture(`<button>List</button><div role="dialog"><label>Verification code<input autocomplete="one-time-code"></label></div>`);
  await assert.rejects(assertFreightSession(page),e=>e.code==='RXO_AUTH_VERIFICATION_REQUIRED');
  console.log('[PASS] real Chromium: verification overlay returns verification-required');
+ const toggle='<div style="position:absolute;top:10px;right:10px"><button>List</button><button>Map</button></div><p>0 of 0 Shipments</p>';
+ await fixture(toggle);
+ assert.equal(await freightViewCovered(page),false);
+ await fixture(toggle+'<div style="position:fixed;inset:0;background:rgba(0,0,0,.4)"><span>Loading</span></div>');
+ assert.equal(await freightViewCovered(page),true);
+ await fixture('<p>0 of 0 Shipments</p>');
+ assert.equal(await freightViewCovered(page),true);
+ await fixture('<div style="position:absolute;top:10px;right:10px"><label><span>List</span></label><a class="btn"><b>Map</b></a></div>');
+ assert.equal(await freightViewCovered(page),false);
+ console.log('[PASS] real Chromium: an empty list is believable only when nothing covers the List/Map switch');
 }finally{await browser.close();}

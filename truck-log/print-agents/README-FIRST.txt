@@ -7,6 +7,15 @@ RUNNING GUARD SERVICE WITH HTTP 401 / OFFLINE:
  guides an in-place credential replacement when authentication is rejected.
  Its token prompt is hidden and local; the existing V4R7 service stays installed.
 
+REMOVE OLD INSTALLATIONS BEFORE A CLEAN INSTALL:
+ Guard agent:  01-Guard-Shack-Agent\REMOVE-OLD-PRINT-AGENT.cmd (administrator).
+   Uninstalls the TruckLogPrintAgent service and moves its old folder to a
+   locked backup; add -DeleteFiles later to delete the old files for good.
+   The fresh V4R7 install then needs a new token from the Truck Log host.
+ SAP watcher:  02-SAP-Queue-Watcher\REMOVE-WATCHER-SERVICE.cmd (administrator),
+   -DeleteProgramFiles to delete its program folder too. INSTALL-WATCHER-
+   SERVICE.cmd already removes the old sign-in task when it upgrades.
+
 THIS ZIP HAS TWO SEPARATE COMPONENTS:
 
 1. 01-Guard-Shack-Agent

@@ -17,6 +17,7 @@ const EVENT_LABELS: Record<string, string> = {
   SAP_DELIVERY_NUMBER_SCANNED: 'Scanned SAP Delivery Number saved to visit',
   SAP_DELIVERY_NUMBER_ENTERED: 'Manually entered SAP Delivery Number saved to visit',
   PACKING_SLIP_CONFIRMED: 'Packing-slip PDF reviewed, confirmed and attached',
+  PACKING_SLIP_AUTO_ATTACHED: 'Packing-slip PDF matched the scanned number and was attached',
   PACKING_SLIP_SCANNED: 'Scanned packing-slip PDF confirmed and attached',
   PACKING_SLIP_REPLACED: 'Packing slip replaced',
   RXO_DOCUMENT_UPLOADED: 'RXO driver document uploaded',
