@@ -19,7 +19,22 @@
 .dana-app-shell {
   --dana-topbar-height: 58px;
   --dana-content-pad: 20px;
-  --dana-content-max: 1720px;
+  /* Wide enough that a zoomed 4K screen is filled; smaller screens never reach it. */
+  --dana-content-max: 2240px;
+}
+
+/*
+ * Large monitors and TVs (1440p, 4K) at 100% display scaling: the whole shell, TV boards included,
+ * is scaled up so text and controls stay a comfortable size instead of a small column in the middle
+ * of the screen (TV text sizes stop growing at about 2400px wide). --tl-zoom lets full-height rules
+ * divide by the zoom, because zoom also scales viewport units (100dvh would be 1.5 screens tall).
+ * Code that reads window sizes or screen coordinates must divide by element.currentCSSZoom.
+ */
+@media screen and (min-width: 2400px) and (min-height: 1200px) {
+  .dana-app-shell { --tl-zoom: 1.25; zoom: 1.25; }
+}
+@media screen and (min-width: 3200px) and (min-height: 1700px) {
+  .dana-app-shell { --tl-zoom: 1.5; zoom: 1.5; }
 }
 .dana-topbar { padding: 0 22px; }
 .dana-sidebar { padding: 14px 12px; }
@@ -42,9 +57,9 @@ table.dana-table td { padding: 9px 12px; }
 .dana-tabs { flex: 0 0 auto; }
 
 @media screen and (min-width: 900px) and (min-height: 600px) {
-  .dana-app-shell { height: 100dvh; min-height: 0; overflow: hidden; }
+  .dana-app-shell { height: calc(100dvh / var(--tl-zoom, 1)); min-height: 0; overflow: hidden; }
   .dana-sidebar { min-height: 0; }
-  .dana-main { display: flex; height: 100dvh; flex-direction: column; }
+  .dana-main { display: flex; height: calc(100dvh / var(--tl-zoom, 1)); flex-direction: column; }
   .dana-topbar { position: static; flex: 0 0 auto; }
   .dana-page { display: flex; flex: 1 1 auto; min-height: 0; flex-direction: column; overflow: hidden; }
 
@@ -88,10 +103,12 @@ table.dana-table td { padding: 9px 12px; }
 
   /* Check In Truck: the form card and the action rail each scroll on their own. */
   .tl-checkin-fields { display: flex; flex: 1 1 0; min-height: 300px; flex-direction: column; }
-  .tl-checkin-layout { flex: 1 1 auto; min-height: 0; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); grid-template-rows: minmax(0, 1fr); align-items: stretch; }
-  .tl-checkin-layout > .dana-panel { display: flex; min-height: 0; flex-direction: column; margin: 0; }
+  /* Each column is as tall as its content (no empty card below Dock Assignment on tall screens),
+     capped at the space available, where its body scrolls instead. */
+  .tl-checkin-layout { flex: 1 1 auto; min-height: 0; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); grid-template-rows: minmax(0, 1fr); align-items: start; }
+  .tl-checkin-layout > .dana-panel { display: flex; min-height: 0; max-height: 100%; flex-direction: column; margin: 0; }
   .tl-checkin-layout > .dana-panel > .dana-panel-body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
-  .tl-checkin-rail { position: static; display: flex; min-height: 0; flex-direction: column; gap: 12px; overflow: auto; overscroll-behavior: contain; }
+  .tl-checkin-rail { position: static; display: flex; min-height: 0; max-height: 100%; flex-direction: column; gap: 12px; overflow: auto; overscroll-behavior: contain; }
   .tl-checkin-rail > .dana-panel { flex: 0 0 auto; margin: 0; }
   .tl-checkin-print { max-height: 40%; overflow: auto; }
 
@@ -116,7 +133,7 @@ table.dana-table td { padding: 9px 12px; }
   /* RXO pages: the data tables never shrink below a usable height (several rows). When the
      notices and summary above leave less room than that, the page scrolls instead of squeezing
      the table down to one row. */
-  :is(#rxo-panel-data, #rxo-expedite-panel-data).tl-fill { min-height: min(460px, 70dvh); }
+  :is(#rxo-panel-data, #rxo-expedite-panel-data).tl-fill { min-height: min(460px, calc(70dvh / var(--tl-zoom, 1))); }
   /* RXO pages: summaries stay short so the active tab gets the height. */
   /* Data tab status counts: a slim strip of "label  count" tiles above the table. */
   .dana-page .tl-rxo-status-summary { grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 8px; }

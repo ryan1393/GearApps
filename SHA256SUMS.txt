@@ -82,7 +82,7 @@ f181b4905180740be5dfb96c8ca9aa8bb638d23995f766ae47e54efbda1812d9  truck-log/LOGS
 e92c53b46f2d722537b0de15b81a5fe663f8c4f353b1cd610a866888da516964  truck-log/LOGS-RXO-EXPORT.sh
 f0185be66d45d703d4f8590d5319b755b8f0a1412179761b1e4ce7f6ea6ad715  truck-log/LOGS-TRUCK-LOG.cmd
 f1d269e9c2da3fba70ac4e94b1b9890779783c6e5572629ea2a6721a41af54ed  truck-log/LOGS-TRUCK-LOG.sh
-5aa790de392d803c689593c08ccf10c77bfb3682b4f6eb0cca66446852a5d991  truck-log/MANIFEST-SHA256.txt
+2b34e4a4a891cfb5139d65c4d99ae3c91a672d0d804574d6ec876a0a0969053b  truck-log/MANIFEST-SHA256.txt
 1f5001b1a6bf9eea574854cf25ce1a0dd22abdd2a5c0f5565f6c43d8e6d50af6  truck-log/MOCK-DATA-STATUS.cmd
 b17cd0dafe13ac5e674b828cb87bbeb4f461f78cd203e8fd748ecbbb61e101d0  truck-log/MOCK-DATA-STATUS.sh
 856e0df777cd2c3e27cbcc282bdc3eb8caad7387c537af568e9ae158e54f3162  truck-log/README.md
@@ -571,7 +571,7 @@ dc2a8e1ca0a1fbc0c2ba69297a26c0b97f982ed381249a86e764d4332a6f146a  truck-log/libs
 9d4241ef05e502542e7274dcb3ed00b62a67c1f2e056df1eb07601eb4d9ebd64  truck-log/libs/truck-log/web/feature/check-in/project.json
 d75838bf886a77a4050d79f6e788e2bca28d861f19aa0ddb934f2a254d42f5e1  truck-log/libs/truck-log/web/feature/check-in/src/index.ts
 832ae8fe75cf4b9d7b020c2c214f13ae7905cbc73f169b76edadc474774d3f16  truck-log/libs/truck-log/web/feature/check-in/src/lib/check-in.component.html
-59b0ba2fecdad92c20a8b44dd13160d43df339b22436d108459198f188969a79  truck-log/libs/truck-log/web/feature/check-in/src/lib/check-in.component.ts
+4ca8de19768e2ba36605436c2da990e3e69b033c9b36de43721ffabe4c328daa  truck-log/libs/truck-log/web/feature/check-in/src/lib/check-in.component.ts
 da580f0a6a4fca1c838b78cdfc0cba20fceb2c82720bfc287cfc018b2786355c  truck-log/libs/truck-log/web/feature/check-in/src/lib/dock-status-widget.component.ts
 847c6d719f747a2554f05bc7140176405814110bd8c6a9cbd7b3a074fa2f5a49  truck-log/libs/truck-log/web/feature/check-in/src/lib/driver-print-tracker.service.ts
 07a9e3e855b78d3c7368cead13703d9dfeb2b39c1b36d8d61903d71d9d7cad79  truck-log/libs/truck-log/web/feature/check-in/src/lib/freight-load-picker.service.ts
@@ -612,7 +612,7 @@ dc2a8e1ca0a1fbc0c2ba69297a26c0b97f982ed381249a86e764d4332a6f146a  truck-log/libs
 389782c7c1a01b444994d049cf02f0b269aa3b562d8d2b66cdb73445ef11277b  truck-log/libs/truck-log/web/feature/tv-display/project.json
 b778157b3924850d02180416d50873d7c220f72f10a7b2ab0a5fd9bcc80b4cfd  truck-log/libs/truck-log/web/feature/tv-display/src/index.ts
 61301f5c772bb131d89a7677964d80943f6d5b77a3b2aa619bc542fb44308ae5  truck-log/libs/truck-log/web/feature/tv-display/src/lib/tv-display.component.html
-e222c86de07a2c8c98baed0a7b3286885e2c70c7ac0ac882766d9b2fee6fa5f7  truck-log/libs/truck-log/web/feature/tv-display/src/lib/tv-display.component.ts
+b853b5b222bc2f2bb63f7759a164929130bca6b74aa146306c2311075c6055b7  truck-log/libs/truck-log/web/feature/tv-display/src/lib/tv-display.component.ts
 952103604f0e0f2efdbc8fbb2c6953204f932e3cbe5131f1c19f8c84a3a9ec0b  truck-log/libs/truck-log/web/feature/tv-display/src/lib/tv-display.model.ts
 d44ef3bf8f12f9f97c44dca5a7a8b835fed631a66b36046436eecbdd224414bd  truck-log/libs/truck-log/web/feature/tv-display/src/lib/tv-display.preferences.ts
 dc2a8e1ca0a1fbc0c2ba69297a26c0b97f982ed381249a86e764d4332a6f146a  truck-log/libs/truck-log/web/feature/tv-display/tsconfig.json
@@ -621,13 +621,13 @@ dc2a8e1ca0a1fbc0c2ba69297a26c0b97f982ed381249a86e764d4332a6f146a  truck-log/libs
 d43842ebf63e6484e8a5b0f6ff5e03adbd5c2e10aae96cd2b0e200e7815e2dd6  truck-log/libs/truck-log/web/styles/src/styles/auth.css
 dcac5f8d704f6b445210842a0e5861f0b025d8abfc636578db1f6f35386b9d7e  truck-log/libs/truck-log/web/styles/src/styles/check-in.css
 b461b0cf8dad75924d8e700c087d2ec794e7653963cd7ff070d0c8fe55776a33  truck-log/libs/truck-log/web/styles/src/styles/dock-board.css
-cfb5698961643dafe6c2df862538255fa021eb8d9954b544a6ac33b731926098  truck-log/libs/truck-log/web/styles/src/styles/fit.css
+ffbf7d5b381188d9f435ccd29dabb96a76439806c646b83055ce7825e26d4d2d  truck-log/libs/truck-log/web/styles/src/styles/fit.css
 3f6c3dc8b19bedb991112e8b6f238254b1d8cd3181c28ad3625fb9b23def9ceb  truck-log/libs/truck-log/web/styles/src/styles/operations.css
 96c89cf101202b548d1d401ec30d33d5a4587a72659ae7a1b9e404c344883be1  truck-log/libs/truck-log/web/styles/src/styles/records.css
 db35c1e0a24829f3d68e20fdd8fcde3e47fc7d24f30860b25b8b1054c4560859  truck-log/libs/truck-log/web/styles/src/styles/rxo.css
 c91eb7436b6ed60aafa6b24307eca5ef3c06ec4ea3f2f582194ab1cec44ecba1  truck-log/libs/truck-log/web/styles/src/styles/shell.css
 15e31b28e2258cbaeb38e33f9180427f68464c9fe33729dc4ddecc67c29707ef  truck-log/libs/truck-log/web/styles/src/styles/truck-log.css
-4351cbe1315223ef10089b21143234c647174b1aef8f924dcab933053395ded4  truck-log/libs/truck-log/web/styles/src/styles/tv.css
+f87dceb57e3294fbb6fddabe9caddedb57116c5f8bd020bf8502d466b13f8cb0  truck-log/libs/truck-log/web/styles/src/styles/tv.css
 d435110688be3a75d159ec6c7a6649acfc5c8b247f3350908823af9d2ee1df01  truck-log/libs/truck-log/web/styles/src/styles/ui.css
 377fda6d64eed3ea6398eff67cd425d1f7c794f239594c374a18ed884e0dc53d  truck-log/libs/truck-log/web/ui/project.json
 062224073f4f309875991a035951e3dea96060564e426fb66ac832c1588ff9e1  truck-log/libs/truck-log/web/ui/src/index.ts
@@ -722,7 +722,7 @@ f5a54faa9cda5571150aba79ee5e94196bf38ae82e304a0bbdf1d7f2dff6f622  truck-log/tool
 df382bf4e246d74ecaf222366a0246b23e683e5d85a2325cb54242406f7c8d96  truck-log/tools/truck-log/test-angular-declaration-layouts.mjs
 5f25da4f734c7c807d26cfae359f9a73cd7f73eb53db75d8b09dedb1798a99a6  truck-log/tools/truck-log/test-check-in-form-transform-integrity-contract.mjs
 2a00b0f78d4a20f9edca66ef1fed26614bef9bd79cee3e1c1538f8f8ff869c9e  truck-log/tools/truck-log/test-check-in-load-entry-style-contract.mjs
-93d35ee314d49f7558b16a9aeba5f571ab8352263825c12acfb8d3ee85f69667  truck-log/tools/truck-log/test-check-in-reliability.mjs
+2c234c1730056c12f839a9419b1ec1ad15a2072da306121ef62fed46c6eea3c5  truck-log/tools/truck-log/test-check-in-reliability.mjs
 1e16250a251ff71dc72a0bf24a79b1359aaced32e25cdd849273f967206f141c  truck-log/tools/truck-log/test-check-in-rxo-freight-load-selector-contract.mjs
 72fd99f48087762632aa6d1ab5ce8c6e69a77026fee167e45f8878f8b6b1c3d4  truck-log/tools/truck-log/test-dana-favicon-contract.mjs
 755385dc8539d9750a375063e5e5abd1dda8ac29661039f0a9b9f2c4b28a9b52  truck-log/tools/truck-log/test-driver-phone-validation-contract.mjs
@@ -798,3 +798,4 @@ bd6a808efce905ad3f1427a6b1dd4af92feceb9fea48d43187e2349bad8c0a5c  truck-log/libs
 d63d57716cbfdff8013fca00847cd533172a84a1cf48490b43a9214a8521967d  truck-log/tools/truck-log/test-plant-time.mjs
 667cbdaa6b2c2a8aabcbfe3b31b78637f931e0f52f33966225486852d5a7ee6b  truck-log/database/truck-log/migrations/0007_station_rename.sql
 5915ee82a538a6b7bebd0deaf0b52092a9901c0e22198a4277be09fecd24d3f3  truck-log/database/truck-log/migrations/0008_station_kind_change.sql
+a7ce9646d8c82fb64d372d612a5f929801601ce5745607984a6cb66618b59f81  truck-log/libs/truck-log/web/feature/check-in/src/lib/combobox-zoom.directive.ts

@@ -7,6 +7,7 @@ import { CheckInForm, CheckInRxoSelection, UppercaseCheckInField, emptyCheckInFo
 import { ToastService, PlantDatePipe } from '@truck-log/web/ui';
 import { DanaComboboxComponent, type DanaComboboxColumn } from '@dana/ui';
 import { ComboboxExactEnterDirective } from './combobox-exact-enter.directive';
+import { ComboboxZoomPlacementDirective } from './combobox-zoom.directive';
 import { DockStatusWidgetComponent } from './dock-status-widget.component';
 
 /** The control each "missing required item" chip jumps to (labels match missingRequiredItems). */
@@ -28,7 +29,7 @@ import { FreightLoadPicker } from './freight-load-picker.service';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule, DockStatusWidgetComponent, DanaComboboxComponent, ComboboxExactEnterDirective, PlantDatePipe],
+  imports: [CommonModule, FormsModule, DockStatusWidgetComponent, DanaComboboxComponent, ComboboxExactEnterDirective, ComboboxZoomPlacementDirective, PlantDatePipe],
   // Load picker and print-package tracking are scoped to this page.
   providers: [FreightLoadPicker, DriverPrintTracker],
   templateUrl: './check-in.component.html'
