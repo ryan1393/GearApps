@@ -155,6 +155,19 @@ test('Expedite WAITING after failed attempt shows a real countdown and Health gu
   assert.equal(f.c.connectionRecoveryNeeded,false); assert.match(f.c.integrationDetail,/Exporter Health/); assert.doesNotMatch(f.c.integrationDetail,/Use Recover connection/);
   assert.equal(f.c.latestFailureAt,f.read().acquisition.completedAt); assert.match(f.c.latestFailureDetail,/Excel download — Timed out/);
 });
+test('Expedite recovery strip shows while recovery can help and disappears once data is current', () => {
+  const auth=fixture('expedite'); assert.equal(auth.c.showRecoveryPanel,true, 'auth hold needs the recovery strip');
+  const f=waitingFailure(); const st=f.read();
+  // Healthy: verified batch imported, scheduler waiting normally, but the server cannot verify the
+  // recovery helper (as seen on a live install). The strip must not take the table's space.
+  st.scheduler.lastErrorCode=null; st.scheduler.lastFailureAt=null;
+  st.acquisition={...st.acquisition,state:'COMPLETE',lastError:null,diagnostic:null};
+  st.databaseIngestionEnabled=true; st.database={state:'COMPLETE',rowCount:6};
+  st.recovery={...metadata(),reason:'WORKER_UNAVAILABLE',available:false,message:'The installed worker or its storage could not be verified. Review the deployment.'};
+  assert.equal(f.c.integrationState,'healthy');
+  assert.equal(f.c.showRecoveryPanel,false);
+  f.c.recoveryError='Recovery could not be confirmed.'; assert.equal(f.c.showRecoveryPanel,true, 'a failed recovery stays visible');
+});
 test('An hourly cap from past resets does not turn a generic scheduled export error into login advice', () => {
   const f=waitingFailure(); f.read().recovery={...metadata(),reason:'RETRY_LIMIT',available:false,cooldownUntil:new Date(f.c.clockNow+35*60000).toISOString()};
   assert.equal(f.c.timerLabel,'20:00'); assert.equal(f.c.connectionRecoveryNeeded,true);

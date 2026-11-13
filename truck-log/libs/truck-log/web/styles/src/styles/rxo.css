@@ -63,3 +63,9 @@
   .tl-rxo-data-filters > label { flex: 1 1 100%; }
   .tl-rxo-data-filters > .tl-filter-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
 }
+/* Connection recovery: a compact strip (text and buttons on one row), not a full card. */
+.tl-rxo-recovery { display: grid; gap: 4px; padding: 8px 12px; }
+.tl-rxo-recovery p { margin: 0; }
+.tl-rxo-recovery-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; }
+.tl-rxo-recovery-row > p { flex: 1 1 320px; min-width: 0; }
+.tl-rxo-recovery-note { font-size: 13px; }

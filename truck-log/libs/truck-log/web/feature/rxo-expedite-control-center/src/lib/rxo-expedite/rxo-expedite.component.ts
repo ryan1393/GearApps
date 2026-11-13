@@ -121,11 +121,14 @@ const EXPEDITE_DOCUMENT_SITE_KEY = 'fort-wayne-expedite';
                 <ng-container *ngFor="let row of filteredShipments; trackBy: trackShipment">
                   <tr [attr.data-tone]="row.critical ? 'warning' : null">
                     <td>
-                      <b>{{row.shipmentId}}</b>
-                      <button class="dana-btn dana-btn-ghost dana-btn-sm tl-rxo-details" type="button"
-                        [attr.aria-expanded]="expediteDetailsOpen(row)"
-                        [attr.aria-label]="(expediteDetailsOpen(row) ? 'Hide' : 'Show') + ' details for Expedite shipment ' + row.shipmentId"
-                        (click)="toggleExpediteDetails(row)">{{expediteDetailsOpen(row) ? 'Hide details' : 'Details'}}</button>
+                      <!-- Same identity cell as the standard RXO tables: number and Details button spaced apart. -->
+                      <div class="tl-rxo-identity">
+                        <b>{{row.shipmentId}}</b>
+                        <button class="dana-btn dana-btn-ghost dana-btn-sm tl-rxo-details" type="button"
+                          [attr.aria-expanded]="expediteDetailsOpen(row)"
+                          [attr.aria-label]="(expediteDetailsOpen(row) ? 'Hide' : 'Show') + ' details for Expedite shipment ' + row.shipmentId"
+                          (click)="toggleExpediteDetails(row)">{{expediteDetailsOpen(row) ? 'Hide details' : 'Details'}}</button>
+                      </div>
                     </td>
                     <td>
                       <span class="dana-status-badge" [attr.data-tone]="expediteStatusTone(row.etaStatus, row.critical)">{{row.etaStatus || (row.critical ? 'Critical' : 'Current')}}</span>

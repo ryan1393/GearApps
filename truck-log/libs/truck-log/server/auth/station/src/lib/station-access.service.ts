@@ -110,6 +110,36 @@ export class StationAccessService {
     }
   }
 
+  /**
+   * Edit a station's name and/or kind. Its pairing and sign-in are unchanged, so a paired browser
+   * keeps working; a new kind takes effect on the API at once (the identity cache is cleared) and in
+   * that browser's screens the next time it loads Truck Log.
+   */
+  async update(id: string, input: unknown, actor: string): Promise<StationRecord> {
+    const body = (typeof input === 'object' && input ? input : {}) as { name?: unknown; kind?: unknown };
+    const name = body.name === undefined ? null : stationName(body.name);
+    const kind = body.kind === undefined ? null : stationKind(body.kind);
+    if (name === null && kind === null) stationFail(400, 'STATION_EDIT', 'Send a new name, a new kind, or both.');
+    try {
+      return await this.db.transaction(async (q) => {
+        const before = returnedRows<StationRow>(await q.query(
+          `SELECT ${COLUMNS} FROM public.truck_log_stations WHERE id = $1 AND revoked_at IS NULL FOR UPDATE`, [stationId(id)]));
+        if (before.length !== 1) stationFail(404, 'STATION_NOT_FOUND', 'That station does not exist or was revoked.');
+        const rows = returnedRows<StationRow>(await q.query(
+          `UPDATE public.truck_log_stations SET name = COALESCE($2, name), kind = COALESCE($3, kind)
+            WHERE id = $1 RETURNING ${COLUMNS}`, [before[0].id, name, kind]));
+        if (name !== null && rows[0].name !== before[0].name) await this.event(q, rows[0].id, 'RENAMED', actor, null);
+        if (kind !== null && rows[0].kind !== before[0].kind) await this.event(q, rows[0].id, 'KIND_CHANGED', actor, null);
+        // Paired browsers are identified (name and kind) through this cache: drop it so the change applies now.
+        this.cache.clear();
+        return record(rows[0]);
+      });
+    } catch (error) {
+      if ((error as { code?: string })?.code === '23505') stationFail(409, 'STATION_NAME_TAKEN', 'A station with that name already exists.');
+      throw error;
+    }
+  }
+
   /** New pairing code; the station is signed out until it pairs again. */
   async reissue(id: string, actor: string): Promise<StationPairingResult> {
     const code = newPairingCode();

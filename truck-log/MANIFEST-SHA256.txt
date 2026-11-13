@@ -120,6 +120,8 @@ eeec1462a753ec8f3d248f55137367e3baa98fc82ede0c618e392934c88f8209  database/truck
 4f8abba7e84c392e1d5095d0d7c33f45147b2e8c8ffcf50efa316d7e27723996  database/truck-log/migrations/0004_packing_slip_watcher_routes.sql
 a07951d322ad0c2b26debd38253cc5dce3444feb65a56cf654a169b8fd7d5c59  database/truck-log/migrations/0005_print_workflow_recovery.sql
 f03c2b6eb79658faf7e91cd1c6b10a836054054f7c59a6cd4d1b5a004ad9b811  database/truck-log/migrations/0006_station_roles.sql
+667cbdaa6b2c2a8aabcbfe3b31b78637f931e0f52f33966225486852d5a7ee6b  database/truck-log/migrations/0007_station_rename.sql
+5915ee82a538a6b7bebd0deaf0b52092a9901c0e22198a4277be09fecd24d3f3  database/truck-log/migrations/0008_station_kind_change.sql
 a00a0ac9dc4deb3244aa0bf30aa32ef3b5f08461ad237d84f200bdc4a6d894ab  docker/truck-log/nginx.conf
 32b5b9376b6a54aa6f1f9bd29e5b11d3a76ad6dedeb6f7e1da631f852e32cfc6  docker/truck-log/nginx.https.conf.template
 54db7b95d9f289d5168e79174f0737954f571ffc516f42fbe4ebfb5fe9741945  docker/truck-log/server-entrypoint.sh
@@ -130,7 +132,7 @@ be6e30d96f05070b6091decab477f1b337a3ae26b9fba24f9ac1050b2324dfb5  docker-compose
 a6b05bdc9015f7c2912a2858f47244d2b89a06141569fb461adb1daad4db2260  docker-compose.yml
 6362f27e2026ff74782cb3aa3e823e5239253120cb175fe053ee4caddf0fbd54  docs/truck-log/ARCHITECTURE.md
 093a17dc55728909e59cb3be488318d27a13048c86b3aa7896554ea6781dac1c  docs/truck-log/CHECK-IN-RXO-FREIGHT-LOAD-SELECTION.md
-3223a16a268f61ab08e30ccb8c3ebd060e403eeddfc345e474a01f31868c6823  docs/truck-log/DATABASE-MIGRATIONS.md
+0cae3448d6136dfafa8496c835488cd5ccf65c77537b07ab31d16d87f0ffeffb  docs/truck-log/DATABASE-MIGRATIONS.md
 8e2b445d91b5e5e6c82df7e019ac307bbc50d432ef0a9573b3ae1b378101bf47  docs/truck-log/DEPENDENCY-SECURITY.md
 1c279a38dde7b4cb387b0c06f47256e4da1de87d86b441cd811c09207e9a997e  docs/truck-log/DEPLOYMENT.md
 056964b413b0c08dd5cb1dd847590144bc8cb278716d0747024895720330564a  docs/truck-log/DOCK-AGING-ALERTS.md
@@ -154,7 +156,7 @@ a3cce057cbf45fc538222c05a536a0cd28c88cdcd7f139e4a8cadfec36f3092d  docs/truck-log
 789fc4d856004e8961b68b0e1d3747b00f6bf2b0c5e83de247c323329cb94fae  docs/truck-log/SAP-DOCUMENT-FOUNDATION.md
 da2587d400fb44ecf4b77d3899d5d63b8f6423f5d18ac84e1281f9609dae9987  docs/truck-log/SCHEDULED-LOAD-EXCEL-IMPORT.md
 ea0813865f0c4eba8394d4afb3c890e400933e69d63df25ab32d3306133e009b  docs/truck-log/SCHEDULED-LOADS.md
-4205049b9d841bcae5c11353a90e3a9484e82a0f9ddecd46690157d3a28d8fd3  docs/truck-log/STATIONS.md
+d60ac284e2fc0a5f11c819fff122277bc255b85f1bac773b4b7c426f82f917b2  docs/truck-log/STATIONS.md
 2a1cda71c08a1fe37a1b5cf14c0716e818fb3968996d325e548b23820ffec1b3  docs/truck-log/TOAST-NOTIFICATIONS.md
 d6f76dc857a6f1e13f388eaa28092a53301ee437ee970f6846006d4549e9a620  docs/truck-log/VERSIONING.md
 fb182050e3651792d8352591efa0a1871a01d14ca31af235117acac661c96472  docs/truck-log/WINDOWS-REMOTE-DOCKER-INSTALL.md
@@ -186,10 +188,10 @@ b3e2149f4551af5736cc2c1e51226a864a02642eea069c1f66bab96957b1403e  libs/truck-log
 ef31290bf04f06c150b1ff7049690a7e039628447f30125b9f1149b4895c2935  libs/truck-log/server/auth/print-agent/tsconfig.json
 2b7d083c3b4c80b5eeadb64adfa31cffc9de8efe0cf6e37369338af60fb94e52  libs/truck-log/server/auth/station/project.json
 c4e07630bc40cd00cddc999155eca355236628f4089e7bc08feaf57c25047b10  libs/truck-log/server/auth/station/src/index.ts
-b5e9037d258eb0a7f0e8180275dfd37dfdec410c50278c8932b71d61814957ea  libs/truck-log/server/auth/station/src/lib/station-access.controller.ts
+3d88b71bdec66f85d407e9fc1490ce32b6f704070c34a0a9b4173b1e0ce696a5  libs/truck-log/server/auth/station/src/lib/station-access.controller.ts
 455a01f8bf07c3c4e7626847161d59bdc5409bfd5139f4a840ec9f9c2b4f8688  libs/truck-log/server/auth/station/src/lib/station-access.guard.ts
 15ce630458b7ba49a8ac55346adcb0ad3e3eb9bd86915d5020899f942f7ae918  libs/truck-log/server/auth/station/src/lib/station-access.module.ts
-3e250fdda8da99657bd6a9fc2729b634b271e8f26e98da9932f581248b355515  libs/truck-log/server/auth/station/src/lib/station-access.service.ts
+470f3a07fbbfbaff704a4d57f60897b1c3c40613c2c9511e2f49de633049cf36  libs/truck-log/server/auth/station/src/lib/station-access.service.ts
 f372716223df82af73a936f13425016c45d182c06e60d9ef5b93218f1fb9d655  libs/truck-log/server/auth/station/src/lib/station-policy.ts
 bacf367dbc8ee74af96f13d3e7caef8645bf5dad4a3f7f51a82d3420ca8aeb27  libs/truck-log/server/auth/station/src/lib/station-roles.ts
 763053cd77e963457b91f4b9e5fab07c0a2617048377a15d1e03c5d00e795961  libs/truck-log/server/auth/station/src/lib/station-security.ts
@@ -426,10 +428,10 @@ e8fe00db8480e6affc397752128e58fa6573bb40ab9d852f3192ca54f4f3c02d  libs/truck-log
 dc2a8e1ca0a1fbc0c2ba69297a26c0b97f982ed381249a86e764d4332a6f146a  libs/truck-log/web/auth/admin/tsconfig.json
 b3415ba719daa51026c234dbc52dea2a81a9146ed0d91618704b5301d420359d  libs/truck-log/web/auth/station/project.json
 c80f5552dc828b2d5915d5338a040d722bde64037364c10c73f045cb3da2f212  libs/truck-log/web/auth/station/src/index.ts
-06ebda5db3ecc9c9ef30caab5f34623410c0967b52beda0a5c0348acab2cddd9  libs/truck-log/web/auth/station/src/lib/station-access.service.ts
+1be94efc3eb539b552617c9f2149126b6b2d972f595652d6d766074ccbee6e32  libs/truck-log/web/auth/station/src/lib/station-access.service.ts
 941bba2c01d748c4647086aab1da2fb25a10fb6737cd2d22f7c49acd2f0aa35b  libs/truck-log/web/auth/station/src/lib/station-roles.ts
 61fb70345f4abc9a7a701f7c79c16c619a8b9cd1f577085dc6a4c59cc95bcd83  libs/truck-log/web/auth/station/src/lib/station-setup.component.ts
-e9e9b2da9cd302bcb747f7aaea8c067f5ff76ef2e51fa8b0a0f3ad8f0e4feca2  libs/truck-log/web/auth/station/src/lib/stations-admin.component.ts
+d5e424f97262ee7e99007370220123cf06e4072bb035fcc3052e7f7bd824e4ff  libs/truck-log/web/auth/station/src/lib/stations-admin.component.ts
 dc2a8e1ca0a1fbc0c2ba69297a26c0b97f982ed381249a86e764d4332a6f146a  libs/truck-log/web/auth/station/tsconfig.json
 c4107e4db95d25683e0cc30e6195097b4695d07a86a15dbe46122be10251696c  libs/truck-log/web/data-access/project.json
 e2436539bbad70c8151dca11746889ae4d4c82250de7f2d3a3e6bf0f0378c5f9  libs/truck-log/web/data-access/src/index.ts
@@ -490,8 +492,8 @@ a4bb003be34a9a6a5da3c478fde99e6e841f0ce78a634cc82b855a0d386a16ff  libs/truck-log
 dc2a8e1ca0a1fbc0c2ba69297a26c0b97f982ed381249a86e764d4332a6f146a  libs/truck-log/web/feature/history/tsconfig.json
 8a64cd0ef13472001a8d519865ee0865cad52c550cd889d9a647e6b55cabda57  libs/truck-log/web/feature/rxo-control-center/project.json
 2eede1c41f11fd2881470178a960600f705a48e0608552413719e73de492b277  libs/truck-log/web/feature/rxo-control-center/src/index.ts
-e75d7e18b08494a832104fc3dd5fae3bcf55beef8afac0b33a1805689202a9af  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-control-center.component.html
-711308964f4cb48ef96b39c75c9b4a7bdf5f1323f6eb75f52835bf72eb867b5b  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-control-center.component.ts
+8523c10485e679779e9dddad3cbe0b226b108f0ef2502a6f9dd7a63d1e7e3ff6  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-control-center.component.html
+0b29924afca9ba9489b88d32cc9d25b01d8d1bfbe81f8dcc2ca54b890bd5e02a  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-control-center.component.ts
 9a458a304261515b757a5f2d7ee2c39342fa482f0ff042a5d8d96c9243f7b082  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-control-center.presenter.ts
 3b7b72986a55cdf16ad73e4dea8771f90bc3f70faa06f7c7d753ef82539f4972  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-data-table.component.html
 71833546dac4a3cc9e3a0944aca652269c3dfce137dd873714349b64b48bfc91  libs/truck-log/web/feature/rxo-control-center/src/lib/rxo-data-table.component.ts
@@ -504,9 +506,9 @@ cca8c77a7a0c6cbc6376143a671af54bc60a114dbbbc54426d66bf25d394cb62  libs/truck-log
 fce80a1a682e5779e28cc812ed320c36c408ee97e6d3ead5a6a04f53d6cbdf2f  libs/truck-log/web/feature/rxo-expedite-control-center/src/lib/rxo-expedite/expedite-failure-display.ts
 0082c636492cb08b060b082e418561b6c01c7b8f5fb83dc2cea06efcee69e492  libs/truck-log/web/feature/rxo-expedite-control-center/src/lib/rxo-expedite/expedite-scan-action.ts
 a3ed1a80c84ffff7141382c0e9a7331925ca100ddfaa7b23ddc464ca3c9d1464  libs/truck-log/web/feature/rxo-expedite-control-center/src/lib/rxo-expedite/rxo-expedite-eta-format.ts
-8ffb5e753a62df6dd4721a8ea57c46c6954936e8e9c657d90c533fc36c9df27d  libs/truck-log/web/feature/rxo-expedite-control-center/src/lib/rxo-expedite/rxo-expedite.component.ts
+32f3480db453e498371cfc0657beb5b50282768065ea85f17c7c572d767769cd  libs/truck-log/web/feature/rxo-expedite-control-center/src/lib/rxo-expedite/rxo-expedite.component.ts
 f6d59d772fd5113db19394524b5e3c8477144c56dc8e20213647e3153e5e2134  libs/truck-log/web/feature/rxo-expedite-control-center/src/lib/rxo-expedite/rxo-expedite.store.ts
-05ec9d27e23808f6cd9d8475032665c18fb67beb8c84747977e7c10dc8a1bde2  libs/truck-log/web/feature/rxo-expedite-control-center/src/lib/rxo-expedite-control-center.component.ts
+4450e08c275968e8e3e5c598e8a86617b121f2409b9604b8bc8b7f4d21986d47  libs/truck-log/web/feature/rxo-expedite-control-center/src/lib/rxo-expedite-control-center.component.ts
 dc2a8e1ca0a1fbc0c2ba69297a26c0b97f982ed381249a86e764d4332a6f146a  libs/truck-log/web/feature/rxo-expedite-control-center/tsconfig.json
 389782c7c1a01b444994d049cf02f0b269aa3b562d8d2b66cdb73445ef11277b  libs/truck-log/web/feature/tv-display/project.json
 b778157b3924850d02180416d50873d7c220f72f10a7b2ab0a5fd9bcc80b4cfd  libs/truck-log/web/feature/tv-display/src/index.ts
@@ -520,10 +522,10 @@ dc2a8e1ca0a1fbc0c2ba69297a26c0b97f982ed381249a86e764d4332a6f146a  libs/truck-log
 d43842ebf63e6484e8a5b0f6ff5e03adbd5c2e10aae96cd2b0e200e7815e2dd6  libs/truck-log/web/styles/src/styles/auth.css
 dcac5f8d704f6b445210842a0e5861f0b025d8abfc636578db1f6f35386b9d7e  libs/truck-log/web/styles/src/styles/check-in.css
 b461b0cf8dad75924d8e700c087d2ec794e7653963cd7ff070d0c8fe55776a33  libs/truck-log/web/styles/src/styles/dock-board.css
-f337d8579865bb03041bed313247aa3edf81528334431fe02050ce48fb5bb978  libs/truck-log/web/styles/src/styles/fit.css
+cfb5698961643dafe6c2df862538255fa021eb8d9954b544a6ac33b731926098  libs/truck-log/web/styles/src/styles/fit.css
 3f6c3dc8b19bedb991112e8b6f238254b1d8cd3181c28ad3625fb9b23def9ceb  libs/truck-log/web/styles/src/styles/operations.css
 96c89cf101202b548d1d401ec30d33d5a4587a72659ae7a1b9e404c344883be1  libs/truck-log/web/styles/src/styles/records.css
-63852f86397010a0721103cebb2a7c388844d8c84b07fa82177bb7f15dcd29fb  libs/truck-log/web/styles/src/styles/rxo.css
+db35c1e0a24829f3d68e20fdd8fcde3e47fc7d24f30860b25b8b1054c4560859  libs/truck-log/web/styles/src/styles/rxo.css
 c91eb7436b6ed60aafa6b24307eca5ef3c06ec4ea3f2f582194ab1cec44ecba1  libs/truck-log/web/styles/src/styles/shell.css
 15e31b28e2258cbaeb38e33f9180427f68464c9fe33729dc4ddecc67c29707ef  libs/truck-log/web/styles/src/styles/truck-log.css
 4351cbe1315223ef10089b21143234c647174b1aef8f924dcab933053395ded4  libs/truck-log/web/styles/src/styles/tv.css
@@ -554,7 +556,7 @@ e3c6eae3b0040f49cb2141665bccb266d39a1e6171b5a75d7d43a9bfa53ca142  package.json
 112da22eb2897c57617d557e6dd2ab837e0de25492099b9c2a098e3a8763b71a  reference-data-import/REFERENCE-DATA-CSV-GUIDE.md
 f130cd211f24c4d8751884d0413d344c566e0b226c5d62c7f78016438910d941  reference-data-import/reference-data-template.csv
 a1f93fe4b9102737647d0016d1a42cc0fcc010ae2b09fb23edb4284b01e0f346  reference-data-import/truck-log-dock-master.csv
-f2ea30d167142734a452823b197a03975c0718610c8691de011566c8e193ad9e  RELEASE-MANIFEST.json
+8901945204afaa2fc43cb50894aecffa27f53a8da5851a46f01074e7b06a1982  RELEASE-MANIFEST.json
 d1ba541629ea1809032eff7a4733ab688f24ebbca696d1f1c5f81f52c4972b91  REMOVE-OLD-TRUCK-LOG-INSTALL.cmd
 a70d9c995f2f4065066f07e536c5c17ce9a567f8f825fd0ec5647b0ffea9e8c3  REMOVE-OLD-TRUCK-LOG-INSTALL.sh
 1d371474bf7c10f3a3f0dc20c8d0fa05283adb3bcdff47ca7858c508d381191b  RESET-MOCK-DATA.cmd
@@ -688,7 +690,7 @@ f9d177a6f50525d962ccf197a953d13ec387f0d21e9a65d4d6f0ef18b34d2a5c  tools/truck-lo
 399ff5f30ee60e2954637cd118c2f80a97f8d0aa542f5858cc34243239b572a2  tools/truck-log/test-release-validation.mjs
 5544ba92d612b5c19b6d6fcc9e1caf35ff41d36d181f71706c36b3f6215d392f  tools/truck-log/test-rxo-auth-recovery.mjs
 a55a6e5f3dc027eb0d9fc22d9486c26480210edca69bd471b8b906aa0bdaca35  tools/truck-log/test-rxo-connection-recovery-api.mjs
-91d7591f62c465d080fdb110913816a1af4a04db82386885fbf78dddb6bddba7  tools/truck-log/test-rxo-connection-recovery-ui.mjs
+c69bd1e50ac3e69df340b5ace0e47399851ac0f4dcc3fc8d01f0692e9ec36842  tools/truck-log/test-rxo-connection-recovery-ui.mjs
 0ae4d80b31f493c9db17090a33a2f849206ebc5d69b46d75d9f1e01a0db8c776  tools/truck-log/test-rxo-control-center-contract.mjs
 cafed8baa6dbf55c967fcb788cd327811e5ea88584a99fceb488dc1ec683a2d9  tools/truck-log/test-rxo-data-route-contract.mjs
 4486036c2b5f9d7463cf9fbe04b0456cfebe9e566fbf31eb16b935cddc1d400e  tools/truck-log/test-rxo-driver-document-workflow-contract.mjs

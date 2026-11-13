@@ -34,6 +34,7 @@ The station name is recorded in visit history for check-ins, dock-complete, uplo
 
 ## Replace or remove a station
 
+- **Edit** changes the station's name or kind (for example a CK65 added as a guard station by mistake becomes a dock handheld). It stays paired and signed in, so no new pairing code is needed. The server applies a new kind at once; that browser shows its new screens and name the next time it loads Truck Log. Names must stay unique.
 - **New pairing code** signs that station out immediately and issues a fresh code. Use it when a PC is rebuilt, its browser data is cleared, or the station moves.
 - **Revoke** signs the station out for good. The name can then be reused.
 

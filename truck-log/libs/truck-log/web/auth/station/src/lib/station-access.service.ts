@@ -171,6 +171,14 @@ export class TruckLogStationAccess {
     return this.http.post<StationPairingResult>(STATIONS, { name: trimmed, kind }).pipe(timeout(20000));
   }
 
+  /** Change a station's name and/or kind; it stays paired. */
+  updateStation(id: string, changes: { name?: string; kind?: StationKind }): Observable<StationRecord> {
+    const body: { name?: string; kind?: StationKind } = {};
+    if (changes.name !== undefined) body.name = changes.name.trim().slice(0, STATION_NAME_MAX);
+    if (changes.kind !== undefined) body.kind = changes.kind;
+    return this.http.patch<StationRecord>(`${STATIONS}/${encodeURIComponent(id)}`, body).pipe(timeout(20000));
+  }
+
   newPairingCode(id: string): Observable<StationPairingResult> {
     return this.http.post<StationPairingResult>(`${STATIONS}/${encodeURIComponent(id)}/pairing-code`, {}).pipe(timeout(20000));
   }

@@ -98,6 +98,7 @@ export function clockTime(iso: string | null | undefined): string {
             <td><span class="dana-status-badge" [attr.data-tone]="station.status === 'ACTIVE' ? 'success' : (station.status === 'REVOKED' ? 'danger' : 'warning')">{{statusLabel(station)}}</span></td>
             <td>
               <div class="dana-table-actions">
+                <button type="button" class="dana-btn dana-btn-sm" [disabled]="busy || !auth.canWrite() || station.status === 'REVOKED'" (click)="beginEdit(station)">Edit</button>
                 <button type="button" class="dana-btn dana-btn-sm" [disabled]="busy || !auth.canWrite()" (click)="newCode(station)">New pairing code</button>
                 <button type="button" class="dana-btn dana-btn-sm dana-btn-warning" [disabled]="busy || !auth.canWrite() || station.status === 'REVOKED'" (click)="revokeTarget = station">Revoke</button>
               </div>
@@ -108,6 +109,32 @@ export function clockTime(iso: string | null | undefined): string {
     </div>
     <div class="dana-empty-state" *ngIf="!stations.length && !loading && loaded">No stations yet. Add the first guard PC, dock handheld or TV above.</div>
   </section>
+  </div>
+
+  <div class="dana-dialog-backdrop" *ngIf="editTarget as target" (click)="cancelEdit()">
+    <form class="dana-dialog" tlDialog="tl-edit-station-title" [tlDialogEscape]="!busy" (tlDialogClose)="cancelEdit()" (click)="$event.stopPropagation()" (ngSubmit)="saveEdit(target)" autocomplete="off">
+      <div class="dana-dialog-header"><h2 id="tl-edit-station-title">Edit {{target.name}}</h2>
+      <p>The station stays paired and signed in; you don't need a new pairing code.</p></div>
+      <div class="dana-dialog-body tl-stack">
+        <label class="dana-field">Name
+          <input class="dana-input" name="editStationName" [(ngModel)]="editName" [attr.maxlength]="nameMax" required autofocus>
+        </label>
+        <label class="dana-field">Kind
+          <select class="dana-input" name="editStationKind" [(ngModel)]="editKind">
+            <option [ngValue]="kinds.GUARD">Guard station (guard shack PC)</option>
+            <option [ngValue]="kinds.DOCK">Dock handheld (CK65: Dock Board and Records)</option>
+            <option [ngValue]="kinds.MANAGEMENT">Management (view only)</option>
+            <option [ngValue]="kinds.DISPLAY">TV display</option>
+          </select>
+        </label>
+        <p class="dana-field-hint" *ngIf="editKind !== target.kind">What this station may do changes right away. Its screens change the next time it loads Truck Log (reload the page on that device).</p>
+        <p class="dana-field-error" role="alert" *ngIf="editError">{{editError}}</p>
+      </div>
+      <div class="dana-dialog-actions">
+        <button type="button" class="dana-btn" [disabled]="busy" (click)="cancelEdit()">Cancel</button>
+        <button type="submit" class="dana-btn dana-btn-primary" [disabled]="busy || !editName.trim() || !editChanged(target)">{{busy ? 'Saving…' : 'Save'}}</button>
+      </div>
+    </form>
   </div>
 
   <div class="dana-dialog-backdrop" *ngIf="revokeTarget as target" (click)="revokeTarget = null">
@@ -133,6 +160,10 @@ export class StationsAdminComponent implements OnInit, OnDestroy {
   newKind: StationKind = StationKinds.GUARD;
   pairing: StationPairingResult | null = null;
   revokeTarget: StationRecord | null = null;
+  editTarget: StationRecord | null = null;
+  editName = '';
+  editKind: StationKind = StationKinds.GUARD;
+  editError = '';
   busy = false;
   creating = false;
   loading = false;
@@ -200,6 +231,46 @@ export class StationsAdminComponent implements OnInit, OnDestroy {
     this.access.newPairingCode(station.id).subscribe({
       next: (result) => { this.busy = false; this.showPairing(result); },
       error: (e) => { this.busy = false; this.error = stationErrorMessage(e, 'A new pairing code was not issued.'); },
+    });
+  }
+
+  beginEdit(station: StationRecord) {
+    if (this.busy || !this.auth.canWrite() || station.status === 'REVOKED') return;
+    this.editTarget = station;
+    this.editName = station.name;
+    this.editKind = station.kind;
+    this.editError = '';
+  }
+
+  cancelEdit() {
+    if (this.busy) return;
+    this.editTarget = null;
+    this.editError = '';
+  }
+
+  editChanged(station: StationRecord): boolean {
+    return this.editName.trim() !== station.name || this.editKind !== station.kind;
+  }
+
+  saveEdit(station: StationRecord) {
+    const name = this.editName.trim();
+    if (this.busy || !this.auth.canWrite() || !name || !this.editChanged(station)) return;
+    const changes: { name?: string; kind?: StationKind } = {};
+    if (name !== station.name) changes.name = name;
+    if (this.editKind !== station.kind) changes.kind = this.editKind;
+    this.busy = true; this.editError = '';
+    this.access.updateStation(station.id, changes).subscribe({
+      next: (updated) => {
+        this.busy = false; this.editTarget = null;
+        this.upsert(updated);
+        if (this.pairing?.station.id === updated.id) this.pairing = { ...this.pairing, station: updated };
+        const parts = [
+          changes.name ? `renamed to ${updated.name}` : '',
+          changes.kind ? `now a ${this.kindLabel(updated.kind).toLowerCase()}` : '',
+        ].filter(Boolean).join(' and ');
+        this.toast.success(`${station.name} ${parts}.`, 'Station updated');
+      },
+      error: (e) => { this.busy = false; this.editError = stationErrorMessage(e, 'The station was not changed.'); },
     });
   }
 

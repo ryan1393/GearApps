@@ -271,6 +271,17 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
       || /AUTH|STOPPED|NEEDS_REVIEW/.test([control.scheduler?.status, control.scheduler?.currentPhase].join(' ').toUpperCase())
       || /RXO_AUTH_/.test(String(control.exporterHealth?.lastError || control.scheduler?.lastError || '')));
   }
+  /**
+   * The recovery strip appears only while it can help: a recovery is running or failed, the login
+   * needs attention, or the integration is not healthy and a recovery is needed. Once RXO data is
+   * current again it disappears, including when the server still reports a recovery reason (for
+   * example a helper that cannot verify the worker) while everything else works.
+   */
+  get showRecoveryPanel(): boolean {
+    if (this.recoveryBusy || this.recoveryError || this.recoveryLoginRequired) return true;
+    if (this.view.integrationState === 'healthy') return false;
+    return this.connectionRecoveryNeeded || !!this.recoveryMessage;
+  }
   get recoveryLoginRequired() {
     const info = this.control?.recovery;
     return !!(info?.requiresCredentials || info?.requiresInteractiveLogin)
