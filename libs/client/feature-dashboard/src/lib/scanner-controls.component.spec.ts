@@ -47,4 +47,24 @@ describe('Scanner command feedback', () => {
     fixture.detectChanges();
     expect(root.classList).toContain('gear-ctl-compact');
   });
+
+  it('splits into the outputs (with their state) and the other actions', () => {
+    TestBed.configureTestingModule({imports:[ScannerControlsComponent],providers:[{provide:ScannerApi,useValue:{command:jest.fn()}},{provide:ToastService,useValue:{info:jest.fn(),error:jest.fn()}}]});
+    const fixture=TestBed.createComponent(ScannerControlsComponent);
+    fixture.componentRef.setInput('scannerId','scanner-a');
+    fixture.componentRef.setInput('io',{machine_id:'m1',worker:true,phase:'collecting',scanner_outputs:{'1':true}});
+    const root=fixture.nativeElement as HTMLElement;
+    const groups=()=>[...root.querySelectorAll('[role="group"]')].map(g=>g.getAttribute('aria-label'));
+
+    fixture.componentRef.setInput('part','outputs'); fixture.detectChanges();
+    expect(groups()).toEqual(['Output 1','Output 2']);
+    const rows=[...root.querySelectorAll('.gear-ctl-row')].map(r=>r.textContent?.replace(/\s+/g,' ').trim());
+    expect(rows).toEqual(['Output 1*ON On Off','Output 2*— On Off']);
+    expect(root.textContent).not.toContain('Highlighted:');
+
+    fixture.componentRef.setInput('part','actions'); fixture.detectChanges();
+    expect(groups()).toEqual(['Tuning','Test','Trigger']);
+    expect(root.classList).toContain('gear-ctl-actions');
+    expect(root.textContent).not.toContain('Highlighted:');
+  });
 });

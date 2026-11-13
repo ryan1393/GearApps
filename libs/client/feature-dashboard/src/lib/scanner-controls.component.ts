@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CollectorMachine, ScannerApi, ToastService } from '@meshforge/client/core';
@@ -53,41 +53,60 @@ const GROUPS: { label: string; output?: number; cmds: Cmd[] }[] = [
 
 @Component({
   selector: 'gear-scanner-controls',
-  host: { '[class.gear-ctl-compact]': 'compact()' },
+  host: {
+    '[class.gear-ctl-compact]': 'compact()',
+    '[class.gear-ctl-actions]': "part() === 'actions'",
+  },
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe],
+  imports: [DatePipe, NgTemplateOutlet],
   template: `
-    <div class="gear-ctl">
-      @for (g of groups; track g.label) {
-        <div
-          class="gear-ctl-group"
-          role="group"
-          [attr.aria-label]="g.label"
-          [attr.title]="g.output ? 'Highlighted: the state last set here. The scanner cannot report its outputs and may switch them itself.' : null"
-        >
-          <span class="dana-detail-label">{{ g.label }}</span>
-          <div class="gear-actions">
-            @for (c of g.cmds; track c.op) {
-              <button
-                type="button"
-                class="gear-btn gear-btn-sm {{ buttonClass(g.output, c) }}"
-                [disabled]="pending() !== null"
-                [attr.aria-pressed]="g.output ? isCurrent(g.output, c) : null"
-                [attr.aria-label]="g.label + ' ' + c.label"
-                [attr.aria-busy]="pending() === c.op"
-                (click)="send(c.op)"
-              >
-                {{ pending() === c.op ? 'Sending…' : c.label }}
-              </button>
-            }
+    <ng-template #buttons let-g>
+      <div class="gear-actions">
+        @for (c of g.cmds; track c.op) {
+          <button
+            type="button"
+            class="gear-btn gear-btn-sm {{ buttonClass(g.output, c) }}"
+            [disabled]="pending() !== null"
+            [attr.aria-pressed]="g.output ? isCurrent(g.output, c) : null"
+            [attr.aria-label]="g.label + ' ' + c.label"
+            [attr.aria-busy]="pending() === c.op"
+            (click)="send(c.op)"
+          >
+            {{ pending() === c.op ? 'Sending…' : c.label }}
+          </button>
+        }
+      </div>
+    </ng-template>
+
+    @if (part() === 'outputs') {
+      <!-- One line per output: its state as last set here, then On / Off. -->
+      <div class="gear-ctl-rows">
+        @for (g of shownGroups(); track g.label) {
+          <div class="gear-ctl-row" role="group" [attr.aria-label]="g.label" [attr.title]="outputTitle()">
+            <span class="dana-detail-label">{{ g.label }}*</span>
+            <span class="dana-status-badge" [attr.data-tone]="outputState(g.output!) ? 'success' : 'neutral'">{{
+              onOff(outputState(g.output!))
+            }}</span>
+            <ng-container *ngTemplateOutlet="buttons; context: { $implicit: g }" />
           </div>
-        </div>
+        }
+      </div>
+    } @else {
+      <div class="gear-ctl">
+        @for (g of shownGroups(); track g.label) {
+          <div class="gear-ctl-group" role="group" [attr.aria-label]="g.label" [attr.title]="g.output ? outputTitle() : null">
+            <span class="dana-detail-label">{{ g.label }}</span>
+            <ng-container *ngTemplateOutlet="buttons; context: { $implicit: g }" />
+          </div>
+        }
+      </div>
+      @if (part() === 'all') {
+        <small class="gear-ctl-note gear-muted"
+          >Highlighted: the output state last set here{{ outputsSetAt() ? ' (' + (outputsSetAt() | date: 'shortTime') + ')' : '' }}.
+          The scanner cannot report its outputs and may switch them itself.</small
+        >
       }
-    </div>
-    <small class="gear-ctl-note gear-muted"
-      >Highlighted: the output state last set here{{ outputsSetAt() ? ' (' + (outputsSetAt() | date: 'shortTime') + ')' : '' }}.
-      The scanner cannot report its outputs and may switch them itself.</small
-    >
+    }
   `,
   styles: `
     .gear-ctl-note {
@@ -118,6 +137,36 @@ const GROUPS: { label: string; output?: number; cmds: Cmd[] }[] = [
     :host(.gear-ctl-compact) .gear-ctl-note {
       display: none;
     }
+    /* Outputs: label, state, then On / Off, one output a line. */
+    .gear-ctl-rows {
+      display: grid;
+      gap: 2px;
+    }
+    .gear-ctl-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: var(--dana-space-2);
+    }
+    .gear-ctl-row .gear-actions {
+      flex-wrap: nowrap;
+    }
+    /* Actions: every group on one wrapping line, label beside its buttons. */
+    :host(.gear-ctl-actions) .gear-ctl {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: var(--dana-space-1) var(--dana-space-4);
+    }
+    :host(.gear-ctl-actions) .gear-ctl-group {
+      display: flex;
+      align-items: center;
+      gap: var(--dana-space-1);
+    }
+    :host(.gear-ctl-compact) .gear-ctl-row .gear-btn,
+    :host(.gear-ctl-compact.gear-ctl-actions) .gear-btn {
+      min-height: 1.75rem;
+    }
   `,
 })
 export class ScannerControlsComponent {
@@ -129,8 +178,22 @@ export class ScannerControlsComponent {
   readonly io = input<CollectorMachine | null>(null);
   /** Shorter buttons and no footnote, to fit a card sized to the screen. */
   readonly compact = input(false);
-  protected readonly groups = GROUPS;
+  /** 'outputs': the two outputs with their state; 'actions': tuning, test and trigger; 'all': everything. */
+  readonly part = input<'all' | 'outputs' | 'actions'>('all');
+  protected readonly shownGroups = computed(() => {
+    const part = this.part();
+    return part === 'all' ? GROUPS : GROUPS.filter((g) => (part === 'outputs') === !!g.output);
+  });
   protected readonly outputsSetAt = computed(() => this.io()?.scanner_outputs_set_at ?? null);
+  protected readonly outputTitle = computed(() => {
+    const at = this.outputsSetAt();
+    const when = at ? ` (${new Date(at).toLocaleTimeString()})` : '';
+    return `* The state last set here${when}. The scanner cannot report its outputs and may switch them itself.`;
+  });
+
+  protected onOff(state: boolean | null): string {
+    return state === null ? '—' : state ? 'ON' : 'OFF';
+  }
 
   /** As last switched from MeshForge; null when it has not been set since the collector started. */
   protected outputState(terminal: number): boolean | null {

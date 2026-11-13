@@ -31,6 +31,10 @@ export const PHOTOEYE_POLL_MS = 1_000;
 export const FIT_MIN_WIDTH_PX = 1024;
 export const FIT_MAX_MACHINES = 4;
 export const FIT_MIN_ROW_PX = 540;
+/** The fewest recent cycles a fitted card shows before the page scrolls instead. */
+const MIN_FIT_CYCLES = 2;
+/** How long the layout must be still before a fitted card's room is checked. */
+const FIT_SETTLE_MS = 250;
 /** Space kept under the cards at the bottom of the screen. */
 const FIT_BOTTOM_GAP_PX = 16;
 
@@ -188,13 +192,16 @@ export class CellLivePageComponent implements OnInit {
   protected readonly recentCount = computed(() => {
     const height = this.fitHeight();
     const rowHeight = height === null ? null : height / this.layout().rows;
-    if (this.focused()) return rowHeight !== null && rowHeight < 700 ? 5 : 8;
-    return rowHeight !== null && rowHeight < 640 ? 3 : 5;
+    const wanted = this.focused() ? (rowHeight !== null && rowHeight < 700 ? 5 : 8) : rowHeight !== null && rowHeight < 640 ? 3 : 5;
+    return Math.min(wanted, this.cycleCap());
   });
+  /** Lowered while fitting when the cards' data would not fit beside the cycles. */
+  private readonly cycleCap = signal(Number.POSITIVE_INFINITY);
   /** The grid's height in px when it fills the rest of the screen; null scrolls as usual. */
   protected readonly fitHeight = signal<number | null>(null);
   private readonly grid = viewChild<ElementRef<HTMLElement>>('grid');
   private readonly view = this.doc.defaultView;
+  private settleTimer?: ReturnType<typeof setTimeout>;
   protected readonly pollMs = signal(2000);
   protected readonly rates = [
     { label: '1 s', ms: 1000 },
@@ -216,6 +223,7 @@ export class CellLivePageComponent implements OnInit {
       this.grid();
       this.view?.requestAnimationFrame(() => this.fit());
     });
+    this.destroy.onDestroy(() => clearTimeout(this.settleTimer));
     if (this.view) {
       fromEvent(this.view, 'resize')
         .pipe(takeUntilDestroyed(this.destroy))
@@ -228,6 +236,7 @@ export class CellLivePageComponent implements OnInit {
     const el = this.grid()?.nativeElement;
     const view = this.view;
     const n = this.shown().length;
+    this.cycleCap.set(Number.POSITIVE_INFINITY);
     if (!el || !view || !n || n > FIT_MAX_MACHINES || view.innerWidth < FIT_MIN_WIDTH_PX) {
       this.fitHeight.set(null);
       return;
@@ -244,7 +253,29 @@ export class CellLivePageComponent implements OnInit {
       const over = this.doc.documentElement.scrollHeight - view.innerHeight;
       const now = this.fitHeight();
       if (over > 0 && now !== null) this.fitHeight.set(now - over);
+      this.checkRoom();
     });
+  }
+
+  /** Checks the fitted cards once the layout has been still for FIT_SETTLE_MS (see makeRoom). */
+  private checkRoom(): void {
+    clearTimeout(this.settleTimer);
+    this.settleTimer = setTimeout(() => this.makeRoom(), FIT_SETTLE_MS);
+  }
+
+  /**
+   * Nothing may be cut off: when a card's data does not fit, show as many fewer recent cycles as
+   * the overflow needs (down to MIN_FIT_CYCLES); if that is still not enough, let the page scroll.
+   */
+  private makeRoom(): void {
+    const grid = this.grid()?.nativeElement;
+    if (!grid || this.fitHeight() === null) return;
+    const over = Math.max(0, ...Array.from(grid.querySelectorAll<HTMLElement>('.gear-live-data')).map((d) => d.scrollHeight - d.clientHeight));
+    if (over <= 1) return;
+    const rowPx = grid.querySelector('.gear-live-cycles tbody tr')?.getBoundingClientRect().height || 28;
+    const next = this.recentCount() - Math.ceil(over / rowPx);
+    if (next >= MIN_FIT_CYCLES) this.cycleCap.set(next);
+    else this.fitHeight.set(null);
   }
 
   ngOnInit() {
@@ -257,6 +288,8 @@ export class CellLivePageComponent implements OnInit {
         takeUntilDestroyed(this.destroy),
       )
       .subscribe((status) => {
+        // Cards change size as data arrives: check again that nothing is cut off.
+        this.checkRoom();
         this.collectorRows.set(new Map((status?.machines ?? []).map((m) => [m.machine_id, m])));
         const on = new Set((status?.machines ?? []).filter((m) => m.photoeye === true).map((m) => m.machine_id));
         const now = this.photoeyes();

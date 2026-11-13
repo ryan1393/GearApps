@@ -181,43 +181,50 @@ describe('Live machine card polling', () => {
     fixture.destroy();
   });
 
-  it('shows scanner inputs and outputs, and swaps recent cycles for the controls in the same panel', async () => {
+  it('groups inputs and outputs separately, with controls always shown to those who may use them', () => {
     const scanner = { id: 's1', ip: '10.16.82.253', image_folder: null, image_file: null, sn_scanner: 'DM1A48B0B7' } as unknown as ScannerDetail;
-    TestBed.configureTestingModule({
-      imports: [MachineLiveCardComponent],
-      providers: [
-        { provide: LapperAccess, useValue: { canEditSetup: () => true } },
-        { provide: MachineCyclesApi, useValue: { recent: () => of([]) } },
-        { provide: ScannerApi, useValue: { image: jest.fn(() => NEVER), imageDefaults: () => NEVER } },
-        { provide: ScannerDetailsApi, useValue: { get: jest.fn(() => NEVER) } },
-        { provide: FanucVariablesApi, useValue: { byMachine: jest.fn(() => NEVER) } },
-      ],
-    });
-    TestBed.overrideComponent(MachineLiveCardComponent, { set: { imports: [DatePipe], schemas: [NO_ERRORS_SCHEMA] } });
-    const fixture = TestBed.createComponent(MachineLiveCardComponent);
-    fixture.componentRef.setInput('machine', { ...machine, scanner_id: 's1', scanner } as unknown as Machine);
-    fixture.componentRef.setInput('fit', true);
-    fixture.componentRef.setInput('collector', {
-      machine_id: 'm1', worker: true, phase: 'collecting',
-      scanner_inputs: { '1': true, '2': false }, scanner_outputs: { '1': true },
-    });
-    fixture.detectChanges();
-    const root = fixture.nativeElement as HTMLElement;
-    const io = [...root.querySelectorAll('[aria-label="Scanner I/O"] .gear-io > div')].map((d) => [
-      d.querySelector('.gear-long')?.textContent?.trim(),
-      d.querySelector('dd')?.textContent?.trim(),
-    ]);
-    expect(io).toEqual([['Photoeye', 'ON'], ['Input 2', 'OFF'], ['Output 1*', 'ON'], ['Output 2*', '—']]);
+    const render = (canEdit: boolean) => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [MachineLiveCardComponent],
+        providers: [
+          { provide: LapperAccess, useValue: { canEditSetup: () => canEdit } },
+          { provide: MachineCyclesApi, useValue: { recent: () => of([]) } },
+          { provide: ScannerApi, useValue: { image: jest.fn(() => NEVER), imageDefaults: () => NEVER } },
+          { provide: ScannerDetailsApi, useValue: { get: jest.fn(() => NEVER) } },
+          { provide: FanucVariablesApi, useValue: { byMachine: jest.fn(() => NEVER) } },
+        ],
+      });
+      TestBed.overrideComponent(MachineLiveCardComponent, { set: { imports: [DatePipe], schemas: [NO_ERRORS_SCHEMA] } });
+      const fixture = TestBed.createComponent(MachineLiveCardComponent);
+      fixture.componentRef.setInput('machine', { ...machine, scanner_id: 's1', scanner } as unknown as Machine);
+      fixture.componentRef.setInput('fit', true);
+      fixture.componentRef.setInput('collector', {
+        machine_id: 'm1', worker: true, phase: 'collecting',
+        scanner_inputs: { '1': true, '2': false }, scanner_outputs: { '1': true },
+      });
+      fixture.detectChanges();
+      return fixture.nativeElement as HTMLElement;
+    };
+    const pairs = (root: HTMLElement, group: string) =>
+      [...root.querySelectorAll(`[aria-label="${group}"] .gear-io > div`)].map((d) => [
+        (d.querySelector('.gear-long') ?? d.querySelector('dt'))?.textContent?.trim(),
+        d.querySelector('dd')?.textContent?.trim(),
+      ]);
+
+    // Operators: inputs, then outputs as last set here, read-only; no buttons.
+    let root = render(false);
+    expect(pairs(root, 'Scanner inputs')).toEqual([['Photoeye', 'ON'], ['Input 2', 'OFF']]);
+    expect(pairs(root, 'Scanner outputs')).toEqual([['Output 1*', 'ON'], ['Output 2*', '—']]);
+    expect(root.querySelector('gear-scanner-controls')).toBeNull();
     expect(root.querySelector('article')?.classList).toContain('gear-live-fit');
 
-    const tabs = [...root.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
-    expect(tabs.map((t) => t.textContent?.trim())).toEqual(['Recent cycles', 'Scanner controls']);
-    expect(root.querySelector('gear-scanner-controls')).toBeNull();
-    tabs[1].click();
-    fixture.detectChanges();
-    expect(root.querySelector('gear-scanner-controls')).not.toBeNull();
-    expect(root.querySelector('.gear-live-cycles')).toBeNull();
-    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
-    fixture.destroy();
+    // Setup users: each output's buttons sit in the Outputs group, the other actions above Recent cycles.
+    root = render(true);
+    expect(pairs(root, 'Scanner inputs')).toEqual([['Photoeye', 'ON'], ['Input 2', 'OFF']]);
+    expect(root.querySelector('[aria-label="Scanner outputs"] gear-scanner-controls')?.getAttribute('part')).toBe('outputs');
+    expect(root.querySelector('[aria-label="Scanner actions"] gear-scanner-controls')?.getAttribute('part')).toBe('actions');
+    expect(root.querySelector('[role="tab"]')).toBeNull();
+    expect(root.querySelector('[aria-label="Recent cycles"]')).not.toBeNull();
   });
 });

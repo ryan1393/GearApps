@@ -127,6 +127,7 @@ export const RECENT_CYCLES_MS = 10_000;
         </div>
 
         <div class="gear-live-data">
+          <div class="gear-live-groups">
           <section class="gear-live-group" aria-label="Serial numbers">
             <div class="dana-section-title">Serials</div>
             <dl class="gear-kv">
@@ -167,48 +168,52 @@ export const RECENT_CYCLES_MS = 10_000;
           </section>
 
           @if (scanner()) {
-            <section class="gear-live-group" aria-label="Scanner I/O">
-              <div class="dana-section-title" title="Outputs marked * show the state last set from MeshForge: the scanner cannot report its outputs">
-                Scanner I/O <small class="gear-muted">· * last set here</small>
-              </div>
+            <section class="gear-live-group" aria-label="Scanner inputs">
+              <div class="dana-section-title">Inputs</div>
               <dl class="gear-io">
                 <div>
-                  <dt class="dana-detail-label" title="Input 1: the photoeye"><span class="gear-long">Photoeye</span><span class="gear-short" aria-hidden="true">Eye</span></dt>
+                  <dt class="dana-detail-label" title="Input 1: the photoeye">Photoeye</dt>
                   <dd><span class="dana-status-badge" [attr.data-tone]="tone(scannerInput(1))">{{ onOff(scannerInput(1)) }}</span></dd>
                 </div>
                 <div>
-                  <dt class="dana-detail-label" title="Input 2"><span class="gear-long">Input 2</span><span class="gear-short" aria-hidden="true">In 2</span></dt>
+                  <dt class="dana-detail-label">Input 2</dt>
                   <dd><span class="dana-status-badge" [attr.data-tone]="tone(scannerInput(2))">{{ onOff(scannerInput(2)) }}</span></dd>
                 </div>
-                @for (o of [1, 2]; track o) {
-                  <div title="Output {{ o }} as last set from MeshForge; the scanner cannot report its outputs">
-                    <dt class="dana-detail-label"><span class="gear-long">Output {{ o }}*</span><span class="gear-short" aria-hidden="true">Out {{ o }}*</span></dt>
-                    <dd><span class="dana-status-badge" [attr.data-tone]="tone(scannerOutput(o))">{{ onOff(scannerOutput(o)) }}</span></dd>
-                  </div>
-                }
               </dl>
             </section>
+
+            <section class="gear-live-group" aria-label="Scanner outputs">
+              <div class="dana-section-title" title="The state last set here: the scanner cannot report its outputs">
+                Outputs <small class="gear-muted">· * last set here</small>
+              </div>
+              @if (canControl()) {
+                <gear-scanner-controls part="outputs" [scannerId]="scanner()!.id" [io]="collector()" [compact]="true" />
+              } @else {
+                <dl class="gear-io">
+                  @for (o of [1, 2]; track o) {
+                    <div title="Output {{ o }} as last set from MeshForge; the scanner cannot report its outputs">
+                      <dt class="dana-detail-label">Output {{ o }}*</dt>
+                      <dd><span class="dana-status-badge" [attr.data-tone]="tone(scannerOutput(o))">{{ onOff(scannerOutput(o)) }}</span></dd>
+                    </div>
+                  }
+                </dl>
+              }
+            </section>
           }
+          </div>
         </div>
       </div>
 
-      <section class="gear-live-panel" [style.--gear-live-rows]="recentCount()" [attr.aria-label]="panel() === 'controls' ? 'Scanner controls' : 'Recent cycles'">
-        @if (canControl()) {
-          <div class="dana-tabs" role="tablist" aria-label="Card panel">
-            <button type="button" class="dana-tab" role="tab" [class.is-active]="panel() === 'cycles'" [attr.aria-selected]="panel() === 'cycles'" (click)="panel.set('cycles')">
-              Recent cycles
-            </button>
-            <button type="button" class="dana-tab" role="tab" [class.is-active]="panel() === 'controls'" [attr.aria-selected]="panel() === 'controls'" (click)="panel.set('controls')">
-              Scanner controls
-            </button>
-          </div>
-        } @else {
-          <div class="dana-section-title">Recent cycles</div>
-        }
-        <div class="gear-live-panel-body" role="tabpanel">
-          @if (panel() === 'controls' && canControl()) {
-            <gear-scanner-controls [scannerId]="scanner()!.id" [io]="collector()" [compact]="fit()" />
-          } @else if (recentCycles(); as cycles) {
+      @if (canControl()) {
+        <section class="gear-live-actions" aria-label="Scanner actions">
+          <gear-scanner-controls part="actions" [scannerId]="scanner()!.id" [io]="collector()" [compact]="true" />
+        </section>
+      }
+
+      <section class="gear-live-panel" [style.--gear-live-rows]="recentCount()" aria-label="Recent cycles">
+        <div class="dana-section-title">Recent cycles</div>
+        <div class="gear-live-panel-body">
+          @if (recentCycles(); as cycles) {
             @if (cycles.length) {
               <table class="dana-table dana-table-compact gear-live-cycles">
                 <thead>
@@ -256,7 +261,7 @@ export const RECENT_CYCLES_MS = 10_000;
     .gear-live-card {
       container-type: inline-size;
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr) auto;
+      grid-template-rows: auto minmax(0, 1fr) auto auto;
       gap: var(--dana-space-2);
     }
     /* Sized by the page to fill the screen: every row shares the card's fixed height. */
@@ -354,14 +359,25 @@ export const RECENT_CYCLES_MS = 10_000;
       text-overflow: ellipsis;
     }
     .gear-live-data {
-      display: grid;
-      align-content: start;
-      gap: var(--dana-space-3);
+      container-type: inline-size;
       min-height: 0;
       overflow-y: auto;
     }
+    .gear-live-groups {
+      display: grid;
+      align-content: start;
+      gap: var(--dana-space-3);
+    }
+    /* A wide data column puts serials and machine I/O beside inputs and outputs. */
+    @container (min-width: 30rem) {
+      .gear-live-groups {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: var(--dana-space-4);
+      }
+    }
     .gear-live-group {
       display: grid;
+      align-content: start;
       gap: var(--dana-space-1);
     }
     .gear-live-group .dana-section-title {
@@ -411,12 +427,11 @@ export const RECENT_CYCLES_MS = 10_000;
     }
     /* One height for both panels (the header row plus one row per cycle), so switching never moves the card. */
     .gear-live-fit .gear-live-panel-body {
-      height: max(calc((var(--gear-live-rows, 5) + 1) * 1.75rem + 2px), 7.75rem);
+      height: calc((var(--gear-live-rows, 5) + 1) * 1.75rem + 2px);
       overflow: hidden;
     }
-    .gear-live-panel .dana-tab {
-      min-height: 2rem;
-      padding-block: var(--dana-space-1);
+    .gear-live-actions {
+      min-width: 0;
     }
     .gear-live-cycles {
       width: 100%;
@@ -449,7 +464,7 @@ export const RECENT_CYCLES_MS = 10_000;
       .gear-live-updated {
         display: none;
       }
-      .gear-live-data {
+      .gear-live-groups {
         gap: var(--dana-space-1);
       }
       .gear-io {
@@ -510,8 +525,7 @@ export class MachineLiveCardComponent implements OnDestroy {
   /** The last machine I/O request failed or timed out; the values shown are the previous ones. */
   protected readonly fanucStale = signal(false);
   protected readonly lastUpdate = signal<string | null>(null);
-  /** The bottom panel: recent cycles, or the scanner controls for those who may use them. */
-  protected readonly panel = signal<'cycles' | 'controls'>('cycles');
+  /** Scanner buttons (outputs and actions) are for those who may change machine setup. */
   protected readonly canControl = computed(() => this.access.canEditSetup() && !!this.scanner());
   /** The machine's newest cycles; null until the first read. */
   protected readonly recentCycles = signal<MachineCycle[] | null>(null);
