@@ -83,9 +83,9 @@ export class StationsAdminController {
 
   @Patch(':id')
   @Header('Cache-Control', 'no-store')
-  async rename(@Req() req: Request, @Param('id') id: string, @Body() body: unknown): Promise<StationRecord> {
-    const actor = await this.actor(req, 'rename');
-    return this.stations.safe(() => this.stations.rename(id, body, actor));
+  async update(@Req() req: Request, @Param('id') id: string, @Body() body: unknown): Promise<StationRecord> {
+    const actor = await this.actor(req, 'update');
+    return this.stations.safe(() => this.stations.update(id, body, actor));
   }
 
   @Post(':id/pairing-code')

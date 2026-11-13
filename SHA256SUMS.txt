@@ -82,11 +82,11 @@ f181b4905180740be5dfb96c8ca9aa8bb638d23995f766ae47e54efbda1812d9  truck-log/LOGS
 e92c53b46f2d722537b0de15b81a5fe663f8c4f353b1cd610a866888da516964  truck-log/LOGS-RXO-EXPORT.sh
 f0185be66d45d703d4f8590d5319b755b8f0a1412179761b1e4ce7f6ea6ad715  truck-log/LOGS-TRUCK-LOG.cmd
 f1d269e9c2da3fba70ac4e94b1b9890779783c6e5572629ea2a6721a41af54ed  truck-log/LOGS-TRUCK-LOG.sh
-6ebf61ac0f0c81fda5830265faae415d2f0cbc9c8ee961dcff945048c9da3b2c  truck-log/MANIFEST-SHA256.txt
+05dd4fae5900878f6923629bbc49961a1c2c38e772ff4ee11662c116447da161  truck-log/MANIFEST-SHA256.txt
 1f5001b1a6bf9eea574854cf25ce1a0dd22abdd2a5c0f5565f6c43d8e6d50af6  truck-log/MOCK-DATA-STATUS.cmd
 b17cd0dafe13ac5e674b828cb87bbeb4f461f78cd203e8fd748ecbbb61e101d0  truck-log/MOCK-DATA-STATUS.sh
 856e0df777cd2c3e27cbcc282bdc3eb8caad7387c537af568e9ae158e54f3162  truck-log/README.md
-af770b409cbbaeef521ad0696ffe31c3cb4c816869ff3c9022970784427d0691  truck-log/RELEASE-MANIFEST.json
+8901945204afaa2fc43cb50894aecffa27f53a8da5851a46f01074e7b06a1982  truck-log/RELEASE-MANIFEST.json
 d1ba541629ea1809032eff7a4733ab688f24ebbca696d1f1c5f81f52c4972b91  truck-log/REMOVE-OLD-TRUCK-LOG-INSTALL.cmd
 a70d9c995f2f4065066f07e536c5c17ce9a567f8f825fd0ec5647b0ffea9e8c3  truck-log/REMOVE-OLD-TRUCK-LOG-INSTALL.sh
 1d371474bf7c10f3a3f0dc20c8d0fa05283adb3bcdff47ca7858c508d381191b  truck-log/RESET-MOCK-DATA.cmd
@@ -238,7 +238,7 @@ be6e30d96f05070b6091decab477f1b337a3ae26b9fba24f9ac1050b2324dfb5  truck-log/dock
 a6b05bdc9015f7c2912a2858f47244d2b89a06141569fb461adb1daad4db2260  truck-log/docker-compose.yml
 6362f27e2026ff74782cb3aa3e823e5239253120cb175fe053ee4caddf0fbd54  truck-log/docs/truck-log/ARCHITECTURE.md
 093a17dc55728909e59cb3be488318d27a13048c86b3aa7896554ea6781dac1c  truck-log/docs/truck-log/CHECK-IN-RXO-FREIGHT-LOAD-SELECTION.md
-cd3bc4dd3cbd7adebccf8cfa1d36eb6c0fb3606e3607ef00c7e8bbe89b4b82c0  truck-log/docs/truck-log/DATABASE-MIGRATIONS.md
+0cae3448d6136dfafa8496c835488cd5ccf65c77537b07ab31d16d87f0ffeffb  truck-log/docs/truck-log/DATABASE-MIGRATIONS.md
 8e2b445d91b5e5e6c82df7e019ac307bbc50d432ef0a9573b3ae1b378101bf47  truck-log/docs/truck-log/DEPENDENCY-SECURITY.md
 1c279a38dde7b4cb387b0c06f47256e4da1de87d86b441cd811c09207e9a997e  truck-log/docs/truck-log/DEPLOYMENT.md
 056964b413b0c08dd5cb1dd847590144bc8cb278716d0747024895720330564a  truck-log/docs/truck-log/DOCK-AGING-ALERTS.md
@@ -262,7 +262,7 @@ a3cce057cbf45fc538222c05a536a0cd28c88cdcd7f139e4a8cadfec36f3092d  truck-log/docs
 789fc4d856004e8961b68b0e1d3747b00f6bf2b0c5e83de247c323329cb94fae  truck-log/docs/truck-log/SAP-DOCUMENT-FOUNDATION.md
 da2587d400fb44ecf4b77d3899d5d63b8f6423f5d18ac84e1281f9609dae9987  truck-log/docs/truck-log/SCHEDULED-LOAD-EXCEL-IMPORT.md
 ea0813865f0c4eba8394d4afb3c890e400933e69d63df25ab32d3306133e009b  truck-log/docs/truck-log/SCHEDULED-LOADS.md
-4528e031a7faa5f85dc755995d05e8fcfdd138cd1583c481bd31610025bc5b12  truck-log/docs/truck-log/STATIONS.md
+d60ac284e2fc0a5f11c819fff122277bc255b85f1bac773b4b7c426f82f917b2  truck-log/docs/truck-log/STATIONS.md
 2a1cda71c08a1fe37a1b5cf14c0716e818fb3968996d325e548b23820ffec1b3  truck-log/docs/truck-log/TOAST-NOTIFICATIONS.md
 d6f76dc857a6f1e13f388eaa28092a53301ee437ee970f6846006d4549e9a620  truck-log/docs/truck-log/VERSIONING.md
 fb182050e3651792d8352591efa0a1871a01d14ca31af235117acac661c96472  truck-log/docs/truck-log/WINDOWS-REMOTE-DOCKER-INSTALL.md
@@ -291,10 +291,10 @@ b3e2149f4551af5736cc2c1e51226a864a02642eea069c1f66bab96957b1403e  truck-log/libs
 ef31290bf04f06c150b1ff7049690a7e039628447f30125b9f1149b4895c2935  truck-log/libs/truck-log/server/auth/print-agent/tsconfig.json
 2b7d083c3b4c80b5eeadb64adfa31cffc9de8efe0cf6e37369338af60fb94e52  truck-log/libs/truck-log/server/auth/station/project.json
 c4e07630bc40cd00cddc999155eca355236628f4089e7bc08feaf57c25047b10  truck-log/libs/truck-log/server/auth/station/src/index.ts
-9d585de36ecac7ea3df9be91d52c6f30f1e3019a1173e0b5f2c35b221915fda7  truck-log/libs/truck-log/server/auth/station/src/lib/station-access.controller.ts
+3d88b71bdec66f85d407e9fc1490ce32b6f704070c34a0a9b4173b1e0ce696a5  truck-log/libs/truck-log/server/auth/station/src/lib/station-access.controller.ts
 455a01f8bf07c3c4e7626847161d59bdc5409bfd5139f4a840ec9f9c2b4f8688  truck-log/libs/truck-log/server/auth/station/src/lib/station-access.guard.ts
 15ce630458b7ba49a8ac55346adcb0ad3e3eb9bd86915d5020899f942f7ae918  truck-log/libs/truck-log/server/auth/station/src/lib/station-access.module.ts
-8b729a1cec77a6d00bf48c2915ddd6a71e088626040538e4a619ee7c642ffdf3  truck-log/libs/truck-log/server/auth/station/src/lib/station-access.service.ts
+470f3a07fbbfbaff704a4d57f60897b1c3c40613c2c9511e2f49de633049cf36  truck-log/libs/truck-log/server/auth/station/src/lib/station-access.service.ts
 f372716223df82af73a936f13425016c45d182c06e60d9ef5b93218f1fb9d655  truck-log/libs/truck-log/server/auth/station/src/lib/station-policy.ts
 bacf367dbc8ee74af96f13d3e7caef8645bf5dad4a3f7f51a82d3420ca8aeb27  truck-log/libs/truck-log/server/auth/station/src/lib/station-roles.ts
 763053cd77e963457b91f4b9e5fab07c0a2617048377a15d1e03c5d00e795961  truck-log/libs/truck-log/server/auth/station/src/lib/station-security.ts
@@ -530,10 +530,10 @@ e8fe00db8480e6affc397752128e58fa6573bb40ab9d852f3192ca54f4f3c02d  truck-log/libs
 dc2a8e1ca0a1fbc0c2ba69297a26c0b97f982ed381249a86e764d4332a6f146a  truck-log/libs/truck-log/web/auth/admin/tsconfig.json
 b3415ba719daa51026c234dbc52dea2a81a9146ed0d91618704b5301d420359d  truck-log/libs/truck-log/web/auth/station/project.json
 c80f5552dc828b2d5915d5338a040d722bde64037364c10c73f045cb3da2f212  truck-log/libs/truck-log/web/auth/station/src/index.ts
-611e7021ab052439dbb5e19c70a20dc33b85dd1753104a01af08fa0d843c9244  truck-log/libs/truck-log/web/auth/station/src/lib/station-access.service.ts
+1be94efc3eb539b552617c9f2149126b6b2d972f595652d6d766074ccbee6e32  truck-log/libs/truck-log/web/auth/station/src/lib/station-access.service.ts
 941bba2c01d748c4647086aab1da2fb25a10fb6737cd2d22f7c49acd2f0aa35b  truck-log/libs/truck-log/web/auth/station/src/lib/station-roles.ts
 61fb70345f4abc9a7a701f7c79c16c619a8b9cd1f577085dc6a4c59cc95bcd83  truck-log/libs/truck-log/web/auth/station/src/lib/station-setup.component.ts
-5c8a2474895c92b37ede149a3a8c4ab7bd9d2279abe90ae7a7fa2193d0297c1f  truck-log/libs/truck-log/web/auth/station/src/lib/stations-admin.component.ts
+d5e424f97262ee7e99007370220123cf06e4072bb035fcc3052e7f7bd824e4ff  truck-log/libs/truck-log/web/auth/station/src/lib/stations-admin.component.ts
 dc2a8e1ca0a1fbc0c2ba69297a26c0b97f982ed381249a86e764d4332a6f146a  truck-log/libs/truck-log/web/auth/station/tsconfig.json
 c4107e4db95d25683e0cc30e6195097b4695d07a86a15dbe46122be10251696c  truck-log/libs/truck-log/web/data-access/project.json
 e2436539bbad70c8151dca11746889ae4d4c82250de7f2d3a3e6bf0f0378c5f9  truck-log/libs/truck-log/web/data-access/src/index.ts
@@ -797,3 +797,4 @@ efeb3e623c25ecc8db3df760c3645f7d53ce23719a8f826375408609be5e523a  truck-log/libs
 bd6a808efce905ad3f1427a6b1dd4af92feceb9fea48d43187e2349bad8c0a5c  truck-log/libs/truck-log/web/ui/src/lib/plant-date.pipe.ts
 d63d57716cbfdff8013fca00847cd533172a84a1cf48490b43a9214a8521967d  truck-log/tools/truck-log/test-plant-time.mjs
 667cbdaa6b2c2a8aabcbfe3b31b78637f931e0f52f33966225486852d5a7ee6b  truck-log/database/truck-log/migrations/0007_station_rename.sql
+5915ee82a538a6b7bebd0deaf0b52092a9901c0e22198a4277be09fecd24d3f3  truck-log/database/truck-log/migrations/0008_station_kind_change.sql

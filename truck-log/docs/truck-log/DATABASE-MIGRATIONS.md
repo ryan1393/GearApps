@@ -9,6 +9,7 @@ database/truck-log/migrations/
   0005_print_workflow_recovery.sql   driver print workflow recovery
   0006_station_roles.sql   station types become roles: adds DOCK (CK65 dock handheld) and MANAGEMENT (view only)
   0007_station_rename.sql   stations can be renamed; the station audit log records RENAMED
+  0008_station_kind_change.sql   a station's kind can be changed; the station audit log records KIND_CHANGED
 ```
 
 `tools/truck-log/migrate.mjs` runs at every server start (from `docker/truck-log/server-entrypoint.sh`), before the API:
