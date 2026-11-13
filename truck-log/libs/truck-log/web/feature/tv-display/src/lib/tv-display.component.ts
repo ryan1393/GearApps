@@ -71,13 +71,18 @@ export class TvDisplayComponent implements OnInit, OnDestroy, AfterViewChecked {
   }
   @HostListener('window:resize') measure(): void {
     this.capacityMeasuredAt = performance.now();
-    const w = window.innerWidth, h = window.innerHeight;
+    const { w, h } = this.viewport();
     this.tileCapacity = w < 700 ? 1 : w < 1400 ? (h < 900 ? 2 : 4) : (h < 820 ? 3 : 6);
     this.rowCapacity = w < 700 ? 1 : Math.max(2, Math.min(12, Math.floor((h - (w < 1150 ? 470 : 385)) / 88)));
     this.waitingCapacity = w < 700 ? 1 : w < 1200 ? 2 : 3;
     this.summaryCapacity = w < 1150 ? (w < 700 ? 2 : 4) : Math.max(2, Math.min(10, Math.floor((h - 395) / 82)));
   }
-  get dockColumns(): number { return Math.min(this.tileCapacity, window.innerWidth < 700 ? 1 : window.innerWidth < 1400 ? 2 : 3); }
+  get dockColumns(): number { const { w } = this.viewport(); return Math.min(this.tileCapacity, w < 700 ? 1 : w < 1400 ? 2 : 3); }
+  /** The board's size in its own CSS pixels: on a large TV the shell is zoomed (fit.css), the window is not. */
+  private viewport(): { w: number; h: number } {
+    const zoom = Number((this.element.nativeElement as unknown as { currentCSSZoom?: number }).currentCSSZoom) || 1;
+    return { w: window.innerWidth / zoom, h: window.innerHeight / zoom };
+  }
   ngAfterViewChecked(): void {
     if (this.destroyed || !this.snapshot) return;
     const key = [this.management, this.cycle, this.snapshot.generatedAt, window.innerWidth, window.innerHeight,

@@ -35,9 +35,18 @@ export class RxoControlController {
   @Post('recover')
   @HttpCode(200)
   @Header('Cache-Control', 'no-store')
-  recover(@Req() request: Request) {
+  recover(@Req() request: Request, @Body() body: unknown) {
     if (!request.is('application/json')) throw new BadRequestException('JSON content is required.');
-    return this.control.recoverConnection();
+    return this.control.recoverConnection({ acknowledgeHold: acknowledgeHold(body) });
+  }
+
+  /** Administrator only (unsafe method on this admin-write controller). */
+  @Post('restart-worker')
+  @HttpCode(200)
+  @Header('Cache-Control', 'no-store')
+  restartWorker(@Req() request: Request) {
+    if (!request.is('application/json')) throw new BadRequestException('JSON content is required.');
+    return this.control.restartWorker();
   }
 
   @Post('rescan')
@@ -45,4 +54,9 @@ export class RxoControlController {
 
   @Post('sync-latest')
   syncLatest() { return this.control.syncLatestNow(); }
+}
+
+/** Only an explicit `{ "acknowledgeHold": true }` clears a sign-in review hold. */
+export function acknowledgeHold(body: unknown): boolean {
+  return typeof body === 'object' && body !== null && (body as { acknowledgeHold?: unknown }).acknowledgeHold === true;
 }

@@ -43,6 +43,7 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
   activeTab: MainTab = 'data';
   recoveryBusy = false;
   recoveryMessage = '';
+  workerRestarting = false;
   recoveryError = '';
   private recoveryLoginBlocked = false;
   private recoveryBlockedStatus: RxoControlStatusData | null = null;
@@ -267,7 +268,7 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
   get connectionRecoveryNeeded() {
     const control = this.control;
     const reason = control?.recovery?.reason;
-    return !!control && ((!!reason && reason !== 'READY') || this.recoveryLoginRequired || this.recoveryCooldownActive || this.view.scanNeedsReview
+    return !!control && ((!!reason && reason !== 'READY' && reason !== 'CHECKING') || this.recoveryLoginRequired || this.recoveryCooldownActive || this.view.scanNeedsReview
       || /AUTH|STOPPED|NEEDS_REVIEW/.test([control.scheduler?.status, control.scheduler?.currentPhase].join(' ').toUpperCase())
       || /RXO_AUTH_/.test(String(control.exporterHealth?.lastError || control.scheduler?.lastError || '')));
   }
@@ -279,8 +280,36 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
    */
   get showRecoveryPanel(): boolean {
     if (this.recoveryBusy || this.recoveryError || this.recoveryLoginRequired) return true;
+    // No status at all: the worker may be stuck, so keep Restart worker within reach.
+    if (!this.control && this.statusRefreshFailed) return true;
     if (this.view.integrationState === 'healthy') return false;
     return this.connectionRecoveryNeeded || !!this.recoveryMessage;
+  }
+  /** A review-type sign-in hold an administrator may clear with Retry sign-in (not a rejected password). */
+  get canAcknowledgeHold(): boolean {
+    return this.control?.recovery?.reason === 'INTERACTIVE_LOGIN_REQUIRED' && !this.recoveryCooldownActive;
+  }
+  /** Restart the worker container (stops a running scan; the scheduler retries it). */
+  restartWorker() {
+    if (!this.adminAuth.canWrite()) { this.toast.error('Sign in as administrator to restart the RXO worker.'); return; }
+    if (this.workerRestarting || this.recoveryBusy || this.destroyed) return;
+    if (!window.confirm('Restart the RXO worker container?\n\nA scan in progress is stopped and retried by the scheduler. The last verified data stays available, and the saved login and sign-in pauses are unchanged.')) return;
+    this.workerRestarting = true;
+    this.recoveryError = '';
+    this.api.restartRxoWorker().subscribe({
+      next: result => {
+        if (this.destroyed) return;
+        this.workerRestarting = false;
+        this.toast.success(result.message, result.status === 'STARTED' ? 'Worker started' : 'Worker restarted');
+        this.refreshControl(false);
+      },
+      error: error => {
+        if (this.destroyed) return;
+        this.workerRestarting = false;
+        this.recoveryError = error?.error?.message || 'The worker restart was not confirmed. Check the worker on the server.';
+        this.refreshControl(false);
+      },
+    });
   }
   get recoveryLoginRequired() {
     const info = this.control?.recovery;
@@ -294,6 +323,9 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
       && !this.recoveryCooldownActive && !this.recoveryLoginRequired;
   }
   get connectionRecoveryDetail() {
+    // The note under the strip explains what to check and offers Retry sign-in.
+    if (this.canAcknowledgeHold) return 'Automatic sign-in is paused.';
+    if (!this.control && this.statusRefreshFailed) return 'RXO status could not be read. If the worker is stuck, Restart worker can help.';
     return this.control?.recovery?.message || 'A controlled recovery reopens RXO with the saved login and requests a fresh scan. The previous verified data stays available.';
   }
   toggleSummary() { this.setSummaryOpen(!this.summaryOpen); }
@@ -315,15 +347,22 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
     this.activeTab = 'settings';
     document.getElementById('rxo-tab-settings')?.focus();
   }
-  recoverConnection() {
+  /**
+   * acknowledgeHold: the administrator confirmed they checked RXO, so a verification, access-review
+   * or unexpected-sign-in-page hold is cleared once and one recovery is queued (server-enforced limits apply).
+   */
+  recoverConnection(acknowledgeHold = false) {
     if (!this.adminAuth.canWrite()) { this.toast.error('Sign in as administrator to recover the RXO connection.'); return; }
-    if (this.recoveryLoginRequired) { this.openRecoverySettings(); return; }
-    if (this.recoveryBusy || this.busy || this.view.scanRunning || !this.recoveryAvailable || this.destroyed) return;
+    if (acknowledgeHold) {
+      if (!this.canAcknowledgeHold || this.recoveryBusy || this.destroyed) return;
+      if (!window.confirm('Retry the RXO sign-in now?\n\nUse this after you have checked RXO yourself: any verification or access step is done, or the sign-in page error was temporary. Truck Log tries once; if RXO still shows the same page, sign-in pauses again.')) return;
+    } else if (this.recoveryLoginRequired) { this.openRecoverySettings(); return; }
+    if (!acknowledgeHold && (this.recoveryBusy || this.busy || this.view.scanRunning || !this.recoveryAvailable || this.destroyed)) return;
     this.recoveryBusy = true;
     this.busy = true;
     this.recoveryError = '';
     this.recoveryMessage = '';
-    this.recoveryRequest = this.api.recoverRxoConnection().subscribe({
+    this.recoveryRequest = this.api.recoverRxoConnection(acknowledgeHold).subscribe({
       next: result => {
         if (this.destroyed) return;
         this.recoveryBusy = false;
@@ -333,7 +372,8 @@ export class RxoControlCenterComponent implements OnInit, OnDestroy {
         } else {
           this.recoveryMessage = result.status === 'ALREADY_RUNNING'
             ? 'A recovery scan is already queued or running. Wait for a verified export; the connection is not yet confirmed.'
-            : 'Recovery requested. Wait for a successful verified export before treating the connection as restored. Previous verified data stays available.';
+            : (acknowledgeHold ? 'Sign-in hold cleared and one retry requested. ' : 'Recovery requested. ')
+              + 'Wait for a successful verified export before treating the connection as restored. Previous verified data stays available.';
         }
         this.refreshControl(false);
       },

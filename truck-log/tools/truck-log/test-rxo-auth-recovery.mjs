@@ -444,6 +444,38 @@ try {
         assert.deepEqual(snapshot(f.root), before);
       }));
     }
+    for (const code of ['RXO_AUTH_VERIFICATION_REQUIRED', 'RXO_AUTH_ACCESS_REVIEW', 'RXO_AUTH_ORIGIN_REVIEW']) {
+      await test(`${role}: administrator acknowledgement clears a ${code} hold once and queues one recovery`, () => using(role, f => {
+        f.hold(code);
+        const result = auth.acknowledgeAuthHold(f.root, role);
+        assert.equal(result.requested, true);
+        assert.equal(result.holdCleared, true);
+        assert.equal(fs.existsSync(path.join(f.root, HOLD)), false, 'the review hold is released');
+        assert.equal(json(f.root, RECOVERY).phase, 'QUEUED');
+        assert.equal(json(f.root, RETRY).kind, 'connection');
+        assertSafeMetadata(result, f);
+      }));
+    }
+    await test(`${role}: acknowledgement never clears rejected or locked credentials`, () => using(role, f => {
+      for (const code of ['RXO_AUTH_REJECTED', 'RXO_AUTH_ACCOUNT_REVIEW']) {
+        f.hold(code);
+        const before = snapshot(f.root);
+        const result = auth.acknowledgeAuthHold(f.root, role);
+        assert.equal(result.requested, false);
+        assert.equal(result.requiresCredentials, true);
+        assert.deepEqual(snapshot(f.root), before, 'nothing changes: new credentials are required');
+      }
+    }));
+    await test(`${role}: acknowledgement cannot bypass the cooldown; the hold is put back`, () => using(role, f => clock(advance => {
+      f.hold('RXO_AUTH_ORIGIN_REVIEW');
+      assert.equal(auth.acknowledgeAuthHold(f.root, role).requested, true);
+      advance(5_000);
+      f.hold('RXO_AUTH_ORIGIN_REVIEW'); // the retried sign-in hit the same page again
+      const result = auth.acknowledgeAuthHold(f.root, role);
+      assert.equal(result.requested, false);
+      assert.equal(result.reason, 'COOLDOWN');
+      assert.equal(json(f.root, HOLD).code, 'RXO_AUTH_ORIGIN_REVIEW', 'the hold stays in place');
+    })));
     await test(`${role}: malformed control state fails closed without replacing evidence`, () => using(role, f => {
       fs.writeFileSync(path.join(f.root, RECOVERY), '{malformed');
       const before = snapshot(f.root);

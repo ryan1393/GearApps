@@ -29,12 +29,15 @@
     <div class="tl-rxo-recovery-row">
       <p><b id="rxo-recovery-title">{{recoveryBusy || recoveryMessage ? 'RXO connection recovery.' : 'RXO connection needs recovery.'}}</b> {{connectionRecoveryDetail}}</p>
       <div class="dana-actions" *ngIf="adminAuth.canWrite(); else recoveryAdminSignIn">
-        <button class="dana-btn dana-btn-sm dana-btn-primary" type="button" [disabled]="recoveryBusy || busy || view.scanRunning || !recoveryAvailable" [attr.aria-busy]="recoveryBusy" (click)="recoverConnection()">{{recoveryBusy ? 'Requesting recovery…' : 'Recover connection'}}</button>
+        <button class="dana-btn dana-btn-sm dana-btn-primary" type="button" *ngIf="canAcknowledgeHold" [disabled]="recoveryBusy || workerRestarting" (click)="recoverConnection(true)">{{recoveryBusy ? 'Retrying…' : 'Retry sign-in'}}</button>
+        <button class="dana-btn dana-btn-sm dana-btn-primary" type="button" *ngIf="!canAcknowledgeHold" [disabled]="recoveryBusy || busy || view.scanRunning || !recoveryAvailable || workerRestarting" [attr.aria-busy]="recoveryBusy" (click)="recoverConnection()">{{recoveryBusy ? 'Requesting recovery…' : 'Recover connection'}}</button>
+        <button class="dana-btn dana-btn-sm" type="button" [disabled]="recoveryBusy || workerRestarting" [attr.aria-busy]="workerRestarting" (click)="restartWorker()">{{workerRestarting ? 'Restarting…' : 'Restart worker'}}</button>
         <button class="dana-btn dana-btn-sm" type="button" [disabled]="recoveryBusy" (click)="openRecoverySettings()">Settings &amp; Login</button>
       </div>
       <ng-template #recoveryAdminSignIn><a class="dana-btn dana-btn-sm dana-btn-primary" routerLink="/admin/login" [queryParams]="{ returnTo: '/rxo' }">Sign in to recover</a></ng-template>
     </div>
-    <p class="tl-rxo-recovery-note" *ngIf="recoveryLoginRequired">Open Settings &amp; Login to check the saved RXO login. If RXO requests MFA, approval or an interactive sign-in, complete it with your administrator before recovering again.</p>
+    <p class="tl-rxo-recovery-note" *ngIf="recoveryLoginRequired && !canAcknowledgeHold">The saved RXO login was rejected or locked. Update it in Settings &amp; Login; the new login is tried on the next scan.</p>
+    <p class="tl-rxo-recovery-note" *ngIf="canAcknowledgeHold">RXO asked for MFA, approval or an interactive sign-in, or showed an unexpected sign-in page, so automatic sign-in paused. Check RXO in a browser and finish any verification, then use <b>Retry sign-in</b>. If it was a temporary RXO error page, you can retry right away.</p>
     <p class="tl-rxo-recovery-note" *ngIf="recoveryWait as wait"><b>{{wait.title}}</b> {{wait.detail}} <time [attr.datetime]="wait.until">{{wait.resumeLabel}}</time> <span aria-live="off">({{wait.remaining}} remaining)</span>.</p>
     <p class="tl-rxo-recovery-note dana-field-error" role="alert" *ngIf="recoveryError">{{recoveryError}}</p>
     <p class="tl-rxo-recovery-note" role="status" *ngIf="recoveryMessage">{{recoveryMessage}}</p>
@@ -146,6 +149,13 @@
   </section>
 
   <div *ngIf="activeTab === 'health'" id="rxo-panel-health" role="tabpanel" aria-labelledby="rxo-tab-health" tabindex="0" class="tl-stack tl-fill tl-scroll">
+    <!-- Always reachable: restart the worker even when the recovery strip is hidden. -->
+    <div class="dana-alert tl-rxo-recovery" *ngIf="adminAuth.canWrite()">
+      <div class="tl-rxo-recovery-row">
+        <p><b>RXO worker container.</b> Restarting stops a scan in progress (the scheduler retries it); verified data, the saved login and sign-in pauses are unchanged.</p>
+        <div class="dana-actions"><button class="dana-btn dana-btn-sm" type="button" [disabled]="recoveryBusy || workerRestarting" [attr.aria-busy]="workerRestarting" (click)="restartWorker()">{{workerRestarting ? 'Restarting…' : 'Restart worker'}}</button></div>
+      </div>
+    </div>
     <section class="dana-panel" aria-label="RXO timer diagnostics">
       <div class="dana-panel-header">
         <div>
