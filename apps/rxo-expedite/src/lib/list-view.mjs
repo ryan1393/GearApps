@@ -27,12 +27,35 @@ export async function assertFreightSession(page) {
   }
 }
 
+/** RXO's Freight on the Move view can sit behind its loading overlay for well over half a
+ * minute after sign-in. The click below waits for that overlay; give it the same 90 seconds
+ * the list-data and export steps allow. */
+export const LIST_CONTROL_TIMEOUT_MS = 90000;
+
+/** True while something (RXO's loading overlay) covers the List/Map switch, or when that
+ * cannot be determined. Selector-free: asks the browser which element is on top at the
+ * centre of each switch control. RXO shows "0 of 0 Shipments" while it is still loading,
+ * so an empty list is only believable once this returns false. */
+export async function freightViewCovered(page) {
+  return page.evaluate(() => {
+    const exact = /^\s*(list|map)\s*$/i;
+    const controls = [...document.querySelectorAll('button, a, label, [role="button"], [role="tab"], [role="radio"], .btn, .k-button')]
+      .filter((node) => exact.test(node.textContent || '') && node.getClientRects().length > 0);
+    if (!controls.length) return true;
+    return controls.some((node) => {
+      const box = node.getBoundingClientRect();
+      const top = document.elementFromPoint(box.left + box.width / 2, box.top + box.height / 2);
+      return !top || !(top === node || node.contains(top) || (top.contains(node) && exact.test(top.textContent || '')));
+    });
+  });
+}
+
 export function excelControls(page) { return page.locator(INTERACTIVE).filter({ hasText: EXCEL }); }
 
 async function hasListExport(page) { return await excelControls(page).count() === 1; }
 
 /** Select List once; native export/data checks, rather than a navigation load event, prove readiness. */
-export async function openFreightList(page, { timeoutMs = 30000 } = {}) {
+export async function openFreightList(page, { timeoutMs = LIST_CONTROL_TIMEOUT_MS } = {}) {
   await assertFreightSession(page);
   // RXO restores the previous view in a persistent profile. Re-clicking its active List
   // link can start another legacy navigation while that view is still fetching data.

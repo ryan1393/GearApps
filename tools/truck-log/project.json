@@ -496,7 +496,7 @@
     "validate-release": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "node tools/truck-log/test-nx-project-boundaries.mjs && node tools/truck-log/tests/new-host/test-remote-windows-context.mjs && node tools/truck-log/tests/new-host/test-release-version.mjs && node tools/truck-log/tests/new-host/test-rxo-web-setup.mjs && node tools/truck-log/tests/new-host/test-compose.mjs && node tools/truck-log/tests/new-host/test-old-install-guard.mjs && node tools/truck-log/tests/new-host/test-build-inputs.mjs && node tools/truck-log/tests/new-host/test-core.mjs && node tools/truck-log/validate-project-layout.mjs && node tools/truck-log/validate-source.mjs && node tools/truck-log/rxo/validate-rxo-integration.mjs && node tools/truck-log/maintainability-audit.mjs --strict && node tools/truck-log/reference-csv/test-authoritative-docks.mjs && node tools/truck-log/tests/new-host/test-migrations.mjs && node tools/truck-log/test-station-access-contract.mjs && node tools/truck-log/test-query-result-shape.mjs",
+        "command": "node tools/truck-log/test-nx-project-boundaries.mjs && node tools/truck-log/tests/new-host/test-remote-windows-context.mjs && node tools/truck-log/tests/new-host/test-release-version.mjs && node tools/truck-log/tests/new-host/test-rxo-web-setup.mjs && node tools/truck-log/tests/new-host/test-compose.mjs && node tools/truck-log/tests/new-host/test-old-install-guard.mjs && node tools/truck-log/tests/new-host/test-change-passwords.mjs && node tools/truck-log/test-dock-scan-auto-attach.mjs && node tools/truck-log/expedite/empty-list-test.mjs && node tools/truck-log/tests/new-host/test-build-inputs.mjs && node tools/truck-log/tests/new-host/test-core.mjs && node tools/truck-log/validate-project-layout.mjs && node tools/truck-log/validate-source.mjs && node tools/truck-log/rxo/validate-rxo-integration.mjs && node tools/truck-log/maintainability-audit.mjs --strict && node tools/truck-log/reference-csv/test-authoritative-docks.mjs && node tools/truck-log/tests/new-host/test-migrations.mjs && node tools/truck-log/test-station-access-contract.mjs && node tools/truck-log/test-query-result-shape.mjs",
         "cwd": "."
       },
       "cache": false
@@ -777,6 +777,30 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "node tools/truck-log/test-plant-time.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-change-passwords": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/tests/new-host/test-change-passwords.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-dock-scan-auto-attach": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-dock-scan-auto-attach.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-expedite-empty-list": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/expedite/empty-list-test.mjs",
         "cwd": "."
       },
       "cache": false

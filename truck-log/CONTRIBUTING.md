@@ -38,7 +38,7 @@ For deployment changes, also run a real Docker build/start and health check on a
 
 ## Release identity
 
-The release is the SemVer string in `VERSION` (currently `1.0.5`), used unchanged by npm, Docker image tags, labels and the UI. `tests/new-host/test-release-version.mjs` lists every copy and fails if one drifts; after changing `VERSION` run `node tools/truck-log/refresh-manifests.mjs`.
+The release is the SemVer string in `VERSION` (currently `1.0.9`), used unchanged by npm, Docker image tags, labels and the UI. `tests/new-host/test-release-version.mjs` lists every copy and fails if one drifts; after changing `VERSION` run `node tools/truck-log/refresh-manifests.mjs`.
 
 ## Local development (`nx serve`)
 

@@ -233,4 +233,54 @@ export class DockPackingScanService {
       return doc;
     });
   }
+  /** One-scan path for the Dock Board: after the Delivery Number is saved, attach the uploaded
+   * PDF without a preview ONLY when the match is unambiguous. Exactly one stored, hash-verified,
+   * VALIDATED Print Agent capture may carry that number, it must not belong to any visit, and the
+   * visit must not already have a packing slip. Anything else returns null and changes nothing;
+   * the operator then uses Find PDF to review and confirm.
+   */
+  async attachSoleMatch(visitId: number, deliveryNumber: string): Promise<VisitDocument | null> {
+    if (typeof deliveryNumber !== 'string' || !/^[0-9]{8}$/.test(deliveryNumber)) {
+      throw new BadRequestException('Scan exactly the eight-digit SAP Delivery Number.');
+    }
+    return this.dataSource.transaction(async (manager) => {
+      const visit = await this.activeVisit(manager, visitId, true);
+      if (await this.current(manager, visitId, true)) return null; // Never replace a current slip automatically.
+      const documents = manager.getRepository(VisitDocument);
+      const matches = await documents.find({ where: {
+        documentType: 'PACKING_SLIP', extractedDocumentId: deliveryNumber, storageStatus: 'STORED',
+        truckVisitId: IsNull(), associationStatus: 'UNMATCHED', sourceKind: 'PRINT_AGENT', validationStatus: 'VALIDATED',
+      }, order: { capturedAt: 'DESC', id: 'DESC' }, take: 3 });
+      const eligible = matches.filter((doc) => this.eligible(doc, visitId, deliveryNumber));
+      if (eligible.length !== 1) return null; // None, or more than one capture shares the number: a person must choose.
+      const doc = await documents.findOne({ where: { id: eligible[0].id }, lock: { mode: 'pessimistic_write' } });
+      if (!doc || doc.truckVisitId !== null || !this.eligible(doc, visitId, deliveryNumber)) return null;
+      try { await this.pdf(doc); } catch { return null; }
+      const now = new Date();
+      doc.truckVisitId = visitId;
+      doc.associationStatus = 'ASSOCIATED';
+      doc.associationMethod = 'DOCK_SCAN_AUTO';
+      doc.associatedAt = now;
+      doc.associatedBy = null;
+      doc.associationReason = 'The scanned Delivery Number matched exactly one validated Print Agent capture; attached without preview.';
+      doc.isAuthoritative = true;
+      doc.supersedesDocumentId = null;
+      doc.reviewStatus = 'RESOLVED';
+      doc.reviewReason = null;
+      doc.updatedAt = now;
+      await documents.save(doc);
+      const sapEvents = manager.getRepository(SapDocumentEvent);
+      await sapEvents.save(sapEvents.create({ visitDocumentId: doc.id, eventType: 'DOCK_DOCUMENT_ATTACHED',
+        occurredAt: now, actorType: 'SYSTEM', actorId: null, fromVisitId: null, toVisitId: visitId,
+        reason: doc.associationReason, details: { workflow: 'DOCK_DELIVERY_SOLE_MATCH', deliveryNumber,
+          sha256: doc.sha256, replacedDocumentId: null, previewConfirmed: false }, createdAt: now }));
+      const events = manager.getRepository(VisitEvent);
+      await events.save(events.create({ truckVisitId: visitId, eventType: 'PACKING_SLIP_AUTO_ATTACHED', occurredAt: now,
+        actor: null, notes: `Delivery Number ${deliveryNumber}; PDF ${doc.id} was the only validated capture and was attached without preview.`, createdAt: now }));
+      visit.updatedAt = now;
+      await manager.getRepository(TruckVisit).save(visit);
+      doc.fileAvailable = true;
+      return doc;
+    });
+  }
 }
