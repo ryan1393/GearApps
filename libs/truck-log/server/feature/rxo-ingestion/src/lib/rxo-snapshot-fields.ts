@@ -39,7 +39,7 @@ export class RxoSnapshotFields {
     return path.join(this.latestRootPath, RXO_BOUNDARY_FILE);
   }
 
-  private cellText(value: unknown) {
+  private cellText(value: unknown): string {
     if (value instanceof Date && !Number.isNaN(value.getTime())) return value.toISOString();
     if (value && typeof value === 'object') {
       const v = value as any;

@@ -1,7 +1,7 @@
 /** tests: injected in-memory command runners ONLY. No Docker/SSH/network. */
 import assert from 'node:assert/strict';
-import { parseComposeVersion, resolveCompose } from '../../tools/truck-log/new-host/compose-client.mjs';
-import { withBrowserSession } from '../../tools/truck-log/new-host/browser-bootstrap.mjs';
+import { parseComposeVersion, resolveCompose } from '../../../../tools/truck-log/new-host/compose-client.mjs';
+import { withBrowserSession } from '../../../../tools/truck-log/new-host/browser-bootstrap.mjs';
 
 let passed=0;
 async function test(name, fn) { await fn(); passed++; console.log('[PASS] '+name); }

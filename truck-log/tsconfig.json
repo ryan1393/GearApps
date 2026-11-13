@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.base.json",
-  "compileOnSave": false,
-  "compilerOptions": {
-    "noEmit": true
-  },
-  "files": [],
-  "include": []
-}

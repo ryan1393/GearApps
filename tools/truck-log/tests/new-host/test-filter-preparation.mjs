@@ -1,7 +1,7 @@
 /** route/error/source-order checks; built-ins only, no Docker or network. */
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { prepareExportFilters, isFreightListUrl } from '../../apps/rxo-integration/src/lib/rxo-filter-readiness.mjs';
+import { prepareExportFilters, isFreightListUrl } from '../../../../apps/rxo-integration/src/lib/rxo-filter-readiness.mjs';
 let passed=0;
 async function test(name,body){await body();passed++;console.log('[PASS] '+name);}
 const base='https://customer.rxoconnect.rxo.com',origin=base+'/orders/list',empty={count:async()=>0};

@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../..');
 const source = (s) => fs.readFileSync(path.join(ROOT,s),'utf8');
 const exists = (s) => fs.existsSync(path.join(ROOT,s));
 const must = (s) => assert.ok(exists(s), `Missing supported workflow source: ${s}`);

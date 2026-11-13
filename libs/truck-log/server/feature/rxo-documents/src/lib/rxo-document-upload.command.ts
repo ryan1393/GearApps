@@ -218,11 +218,12 @@ export class RxoDocumentUploadCommand {
       : null;
     const associationStatus = linkedVisitId === null ? 'UNMATCHED' : 'ASSOCIATED';
     const associationMethod = linkedVisitId === null ? null : 'RXO_EXACT_TUPLE';
+    const exactMatchReason = 'Exactly one Truck Log visit matched the complete RXO site, shipment, and direction tuple.';
     const associationReason = linkedVisitId === null
       ? ambiguousVisitAssociation
         ? reviewReason
         : 'No Truck Log visit is linked to this RXO shipment yet.'
-      : 'Exactly one Truck Log visit matched the complete RXO site, shipment, and direction tuple.';
+      : exactMatchReason;
     const inserted = await manager.query(
       `INSERT INTO visit_documents(
          truck_visit_id,
@@ -354,7 +355,7 @@ export class RxoDocumentUploadCommand {
         now,
         null,
         linkedVisitId,
-        associationReason,
+        exactMatchReason,
         commonAuditDetails,
       );
 

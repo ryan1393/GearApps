@@ -33,6 +33,21 @@ export class TruckVisitQueries {
         for (const visit of visits) visit.scannedDeliveryNumbers = scannedDeliveryNumbers(visit.id, byVisit.get(visit.id) || []);
         return visits;
     }
+    /** One grouped count for the returned visits (TypeORM 1.x removed loadRelationCountAndMap). */
+    async withDocumentCounts(visits: TruckVisit[]): Promise<TruckVisit[]> {
+        if (!visits.length) return visits;
+        const rows: { visitId: number | string; documentCount: number | string }[] = await this.visits.manager
+            .createQueryBuilder()
+            .select('document.truck_visit_id', 'visitId')
+            .addSelect('COUNT(*)', 'documentCount')
+            .from('visit_documents', 'document')
+            .where('document.truck_visit_id IN (:...visitIds)', { visitIds: [...new Set(visits.map((visit) => visit.id))] })
+            .groupBy('document.truck_visit_id')
+            .getRawMany();
+        const counts = new Map(rows.map((row) => [Number(row.visitId), Number(row.documentCount)]));
+        for (const visit of visits) visit.documentCount = counts.get(visit.id) ?? 0;
+        return visits;
+    }
     applySearch(query: SelectQueryBuilder<TruckVisit>, q?: string) {
         if (!q?.trim())
             return;
@@ -54,18 +69,16 @@ export class TruckVisitQueries {
     }
     async listOpen(q?: string) {
         const query = this.visits.createQueryBuilder('visit')
-            .loadRelationCountAndMap('visit.documentCount', 'visit.documents')
             .where('visit.status <> :closed', { closed: VisitStatuses.GUARD_CHECKED_OUT })
             .orderBy('visit.guard_check_in_at', 'DESC');
         this.applySearch(query, q);
-        return this.withScannedDeliveryNumbers(await query.getMany());
+        return this.withScannedDeliveryNumbers(await this.withDocumentCounts(await query.getMany()));
     }
     async history(q?: string, status = 'ALL', date?: string, limit = 100) {
         const safeLimit = Number.isFinite(limit)
             ? Math.min(Math.max(Math.trunc(limit), 1), 500)
             : 100;
         const query = this.visits.createQueryBuilder('visit')
-            .loadRelationCountAndMap('visit.documentCount', 'visit.documents')
             .orderBy('visit.guard_check_in_at', 'DESC')
             .take(safeLimit);
         if (status === 'ACTIVE') {
@@ -82,16 +95,16 @@ export class TruckVisitQueries {
             query.andWhere('(visit.guard_check_in_at AT TIME ZONE :timeZone)::date = :visitDate', { timeZone: this.timeZone(), visitDate });
         }
         this.applySearch(query, q);
-        return this.withScannedDeliveryNumbers(await query.getMany());
+        return this.withScannedDeliveryNumbers(await this.withDocumentCounts(await query.getMany()));
     }
     async dashboard() {
         const timeZone = this.timeZone();
         const activePreview = this.visits.createQueryBuilder('visit')
-            .loadRelationCountAndMap('visit.documentCount', 'visit.documents')
             .where('visit.status <> :closed', { closed: VisitStatuses.GUARD_CHECKED_OUT })
             .orderBy('visit.guard_check_in_at', 'DESC')
             .take(30)
-            .getMany();
+            .getMany()
+            .then((visits) => this.withDocumentCounts(visits));
         const awaitingGuard = this.visits.find({
             where: { status: VisitStatuses.DOCK_COMPLETE },
             order: { dockCompletedAt: 'ASC', guardCheckInAt: 'ASC' },

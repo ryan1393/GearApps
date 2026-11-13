@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../..');
 const clone = value => structuredClone(value);
 const read = name => JSON.parse(fs.readFileSync(path.join(root, name), 'utf8'));
 const manifest = read('package.json'), lock = read('package-lock.json');

@@ -3,9 +3,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { parseEnv, prepareEnv, VOLUMES } from '../../tools/truck-log/new-host/setup-config.mjs';
-import { tunnelArguments, viewerPort } from '../../tools/truck-log/new-host/browser-bootstrap.mjs';
-import { DockerClient } from '../../tools/truck-log/new-host/docker-client.mjs';
+import { parseEnv, prepareEnv, VOLUMES } from '../../../../tools/truck-log/new-host/setup-config.mjs';
+import { tunnelArguments, viewerPort } from '../../../../tools/truck-log/new-host/browser-bootstrap.mjs';
+import { DockerClient } from '../../../../tools/truck-log/new-host/docker-client.mjs';
 
 let count=0, skipped=0;
 async function test(name, f, {posixOnly=false}={}){

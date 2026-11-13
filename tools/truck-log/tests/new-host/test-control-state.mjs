@@ -2,7 +2,7 @@
  * The worker's image-build suite separately tests the same function in Chromium.
  */
 import assert from 'node:assert/strict';
-import { readDirectionControlState } from '../../apps/rxo-integration/src/lib/rxo-filter-readiness.mjs';
+import { readDirectionControlState } from '../../../../apps/rxo-integration/src/lib/rxo-filter-readiness.mjs';
 const oldStyle=globalThis.getComputedStyle;
 globalThis.getComputedStyle=node=>({display:'inline-block',visibility:'visible',...node.style});
 let passed=0;

@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { checksum, loadMigrations, migrate, assertSchemaCurrent, MIGRATIONS_DIR } from '../../tools/truck-log/migrate.mjs';
+import { checksum, loadMigrations, migrate, assertSchemaCurrent, MIGRATIONS_DIR } from '../../../../tools/truck-log/migrate.mjs';
 
 let count = 0;
 async function test(name, fn) { await fn(); count++; console.log(`[PASS] ${name}`); }

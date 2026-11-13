@@ -85,4 +85,6 @@ export class TruckVisit {
     events!: VisitEvent[];
     /** Response projection from visit_events; deliberately not a database column. */
     scannedDeliveryNumbers?: string[];
+    /** Response projection counted from visit_documents; deliberately not a database column. */
+    documentCount?: number;
 }

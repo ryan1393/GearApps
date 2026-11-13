@@ -1,0 +1,785 @@
+{
+  "name": "truck-log-tools",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "tools/truck-log",
+  "tags": ["scope:truck-log", "type:tooling"],
+  "targets": {
+    "test-rxo-manual-scan-ui": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-manual-scan-ui.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-expedite-manual-scan": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/expedite/manual-scan-test.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "rxo-expedite-check": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/expedite/test.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "rxo-expedite-once": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose -p truck-log --profile rxo-expedite-manual run --rm --no-deps rxo-expedite --once --confirm-live-export",
+        "cwd": "truck-log"
+      },
+      "cache": false
+    },
+    "rxo-expedite-verify": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose -p truck-log --profile rxo-expedite-manual run --rm --no-deps rxo-expedite --verify-latest",
+        "cwd": "truck-log"
+      },
+      "cache": false
+    },
+    "setup-development": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/truck-log/setup-truck-log.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "start-development": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/truck-log/start-truck-log.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "build-all": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run-many -t build -p truck-log-server truck-log rxo-integration rxo-expedite",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "build-web": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx build truck-log",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "serve-web": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx serve truck-log --port=4300",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "docker-up": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose -p truck-log up -d --build",
+        "cwd": "truck-log"
+      },
+      "cache": false
+    },
+    "docker-down": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose -p truck-log down",
+        "cwd": "truck-log"
+      },
+      "cache": false
+    },
+    "docker-logs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "docker compose -p truck-log logs -f",
+        "cwd": "truck-log"
+      },
+      "cache": false
+    },
+    "validate-source": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/validate-source.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-operator": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-operator-flow.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-workflow": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-workflow-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "validate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-nx-project-boundaries.mjs && node tools/truck-log/validate-project-layout.mjs && node tools/truck-log/test-workspace-boundaries.mjs && node tools/truck-log/test-server-boundaries.mjs && node tools/truck-log/validate-source.mjs && node tools/truck-log/tests/new-host/test-remote-windows-context.mjs && node tools/truck-log/tests/new-host/test-release-version.mjs && node tools/truck-log/tests/new-host/test-rxo-web-setup.mjs && node tools/truck-log/tests/new-host/test-compose.mjs && node tools/truck-log/test-workflow-contract.mjs && node tools/truck-log/test-operator-flow.mjs && node tools/truck-log/test-ui-polish-contract.mjs && node tools/truck-log/test-reference-data-contract.mjs && node tools/truck-log/test-rxo-integration-contract.mjs && node tools/truck-log/test-rxo-ingestion-contract.mjs && node tools/truck-log/test-rxo-scan-timer-contract.mjs && node tools/truck-log/test-rxo-data-route-contract.mjs && node tools/truck-log/test-rxo-control-center-contract.mjs && node tools/truck-log/test-rxo-timer-diagnostics-contract.mjs && node tools/truck-log/test-system-status-badge-contract.mjs && node tools/truck-log/test-rxo-stall-recovery-contract.mjs && node tools/truck-log/test-packing-slip-upload-contract.mjs && node tools/truck-log/test-sap-document-foundation-contract.mjs && node tools/truck-log/test-print-agent-api-contract.mjs && node tools/truck-log/test-packing-slip-watcher-routes-contract.mjs && node tools/truck-log/test-packing-slip-ingestion-contract.mjs && node tools/truck-log/test-access-credentials-contract.mjs && node tools/truck-log/test-rxo-driver-document-workflow-contract.mjs && node tools/truck-log/test-rxo-storage-hardening-contract.mjs && node tools/truck-log/test-release-plumbing-contract.mjs && node tools/truck-log/test-check-in-rxo-freight-load-selector-contract.mjs && node tools/truck-log/test-check-in-load-entry-style-contract.mjs && node tools/truck-log/test-typescript-workspace-contract.mjs && node tools/truck-log/test-shared-ui-entry-contract.mjs && node tools/truck-log/test-human-readable-visit-id-contract.mjs && node tools/truck-log/test-ux-mock-data-contract.mjs && node tools/truck-log/test-rxo-expedite-ingestion-contract.mjs && node tools/truck-log/maintainability-audit.mjs --strict && node tools/truck-log/reference-csv/test-authoritative-docks.mjs && node tools/truck-log/tests/new-host/test-migrations.mjs && node tools/truck-log/build-admin-auth-core.mjs --check && node tools/truck-log/test-station-access-contract.mjs && node tools/truck-log/test-rxo-worker-safety.mjs && node tools/truck-log/check-angular-templates.mjs && node tools/truck-log/test-station-web-contract.mjs && node tools/truck-log/audit-web-css.mjs --check && node tools/truck-log/test-admin-gear-style-contract.mjs && node tools/truck-log/test-admin-tabs-contract.mjs && node tools/truck-log/test-rxo-pdf-upload-contract.mjs && node tools/truck-log/test-driver-phone-validation-contract.mjs && node tools/truck-log/test-location-domain-distinction-contract.mjs && node tools/truck-log/test-visit-location-removal-contract.mjs && node tools/truck-log/test-rxo-expedite-driver-documents-contract.mjs && node tools/truck-log/test-rxo-snapshot-behavior.mjs && node tools/truck-log/test-workflow-reliability.mjs && node tools/truck-log/test-security-behavior.mjs && node tools/truck-log/test-check-in-reliability.mjs && node tools/truck-log/test-https-deployment.mjs && node tools/truck-log/test-release-validation.mjs && node tools/truck-log/test-angular-declaration-layouts.mjs && node tools/truck-log/test-rxo-worker-dependencies.mjs && node tools/truck-log/test-rxo-auth-recovery.mjs && node tools/truck-log/test-rxo-connection-recovery-ui.mjs && node tools/truck-log/test-rxo-connection-recovery-api.mjs && node tools/truck-log/test-rxo-recovery-scheduler-behavior.mjs && node tools/truck-log/expedite/acquisition-diagnostics-test.mjs && node tools/truck-log/test-rxo-manual-scan-ui.mjs && node tools/truck-log/expedite/manual-scan-test.mjs && node tools/truck-log/test-plant-time.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "build-truck-log-server": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx build truck-log-server",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "serve-truck-log-server": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx serve truck-log-server",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-ui": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-ui-polish-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-reference-data": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-reference-data-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "build-rxo-integration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx build rxo-integration",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "validate-rxo-integration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run rxo-integration:validate",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-integration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run rxo-integration:test-production",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "start-rxo-integration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run rxo-integration:start",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "status-rxo-integration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run rxo-integration:status",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "verify-rxo-integration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run rxo-integration:verify-latest",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "sync-rxo-integration": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run rxo-integration:sync-latest",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-boundaries": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-workspace-boundaries.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-server-boundaries": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-server-boundaries.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "import-rxo-latest": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./tools/truck-log/rxo/import-latest.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-ingestion": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-ingestion-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-control-center": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-control-center-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-data-route": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-data-route-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-scan-timer": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-scan-timer-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-timer-diagnostics": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-timer-diagnostics-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-system-status-badge": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-system-status-badge-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-stall-recovery": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-stall-recovery-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-packing-slip-upload": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-packing-slip-upload-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-sap-document-foundation": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-sap-document-foundation-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "print-agent-provision": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/provision-print-agent.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-print-agent-api": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-print-agent-api-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-packing-slip-watcher-routes": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-packing-slip-watcher-routes-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-packing-slip-ingestion": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-packing-slip-ingestion-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-check-in-rxo-freight-load-selector": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-check-in-rxo-freight-load-selector-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-check-in-load-entry-style": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-check-in-load-entry-style-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-typescript-workspace": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-typescript-workspace-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-shared-ui-entry": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-shared-ui-entry-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "typecheck-contracts": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run truck-log-shared-contracts:typecheck",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "typecheck-web": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run-many -t typecheck --projects=truck-log-web-*",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "typecheck-server": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run-many -t typecheck --projects=truck-log-server-*",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "typecheck-workspace": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx run-many -t typecheck --all",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-human-readable-visit-id": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-human-readable-visit-id-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "access-provision": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/provision-access-credential.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-access-credentials": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-access-credentials-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-driver-document-workflow": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-driver-document-workflow-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-storage-hardening": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-storage-hardening-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-expedite-ingestion": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-expedite-ingestion-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-expedite-driver-documents": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-expedite-driver-documents-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-release-plumbing": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-release-plumbing-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-ux-mock-data": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-ux-mock-data-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "validate-release": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-nx-project-boundaries.mjs && node tools/truck-log/tests/new-host/test-remote-windows-context.mjs && node tools/truck-log/tests/new-host/test-release-version.mjs && node tools/truck-log/tests/new-host/test-rxo-web-setup.mjs && node tools/truck-log/tests/new-host/test-compose.mjs && node tools/truck-log/tests/new-host/test-old-install-guard.mjs && node tools/truck-log/tests/new-host/test-build-inputs.mjs && node tools/truck-log/tests/new-host/test-core.mjs && node tools/truck-log/validate-project-layout.mjs && node tools/truck-log/validate-source.mjs && node tools/truck-log/rxo/validate-rxo-integration.mjs && node tools/truck-log/maintainability-audit.mjs --strict && node tools/truck-log/reference-csv/test-authoritative-docks.mjs && node tools/truck-log/tests/new-host/test-migrations.mjs && node tools/truck-log/test-station-access-contract.mjs && node tools/truck-log/test-query-result-shape.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "audit-maintainability": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/maintainability-audit.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-maintainability": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/maintainability-audit.mjs --strict",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-nx-boundaries": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-nx-project-boundaries.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "build-rxo-expedite": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "nx build rxo-expedite",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-authoritative-docks": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/reference-csv/test-authoritative-docks.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-compose": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/tests/new-host/test-compose.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-old-install-guard": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/tests/new-host/test-old-install-guard.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "db-migrate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/migrate.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "db-status": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/migrate.mjs --status",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-migrations": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/tests/new-host/test-migrations.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "build-admin-auth-core": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/build-admin-auth-core.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-station-access": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-station-access-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-worker-safety": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-worker-safety.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-angular-templates": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/check-angular-templates.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-station-web": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-station-web-contract.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-web-css": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/audit-web-css.mjs --check",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-query-result-shape": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-query-result-shape.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "validate-archive": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/tests/new-host/test-release-package.mjs && node tools/truck-log/refresh-manifests.mjs --check",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-snapshot-behavior": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-snapshot-behavior.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-workflow-reliability": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-workflow-reliability.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-security-behavior": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-security-behavior.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-check-in-reliability": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-check-in-reliability.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-https-deployment": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-https-deployment.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "audit-production": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm audit --omit=dev",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "audit-build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm audit --audit-level=moderate",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-release-validation": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-release-validation.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-angular-declaration-layouts": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-angular-declaration-layouts.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-worker-dependencies": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-worker-dependencies.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-auth-recovery": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-auth-recovery.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-connection-recovery-ui": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-connection-recovery-ui.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-recovery-api": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-connection-recovery-api.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-recovery-scheduler-behavior": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-recovery-scheduler-behavior.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-recovery-docker": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-rxo-recovery-docker.mjs --run",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-rxo-expedite-acquisition": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/expedite/acquisition-diagnostics-test.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-plant-time": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/test-plant-time.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    }
+  }
+}

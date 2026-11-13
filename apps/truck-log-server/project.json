@@ -5,13 +5,14 @@
   "projectType": "application",
   "targets": {
     "build": {
-      "executor": "@nx/webpack:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/apps/truck-log-server"],
       "options": {
-        "webpackConfig": "apps/truck-log-server/webpack.config.js",
-        "outputPath": "dist/apps/truck-log-server"
+        "command": "webpack-cli build --config webpack.config.js",
+        "cwd": "apps/truck-log-server",
+        "env": {
+          "NODE_ENV": "production"
+        }
       }
     },
     "serve": {
@@ -27,9 +28,5 @@
       }
     }
   },
-  "tags": [
-    "scope:truck-log",
-    "platform:server",
-    "type:app"
-  ]
+  "tags": ["scope:truck-log", "platform:server", "type:app"]
 }

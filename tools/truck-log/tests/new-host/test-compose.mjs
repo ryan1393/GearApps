@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-const RELEASE = (await import('node:fs')).readFileSync(new URL('../../VERSION', import.meta.url), 'utf8').trim();
+const RELEASE = (await import('node:fs')).readFileSync(new URL('../../../../truck-log/VERSION', import.meta.url), 'utf8').trim();
 // This test intentionally uses only Node core libraries, no Docker Engine required.
 const root = process.cwd();
 const read=(n)=>fs.readFileSync(n,'utf8');

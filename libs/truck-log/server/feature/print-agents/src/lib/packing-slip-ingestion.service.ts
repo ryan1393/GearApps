@@ -131,7 +131,8 @@ export class PackingSlipIngestionService {
       .digest('hex');
     const capturedAt = new Date(metadata.capturedAt);
     const now = new Date();
-    let stored: StoredSapDocumentPdf | null = null;
+    // Assigned inside the transaction callback, so the catch block must not narrow it to null.
+    let stored = null as StoredSapDocumentPdf | null;
 
     try {
       const response = await this.dataSource.transaction(async (manager) => {
