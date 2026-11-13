@@ -41,9 +41,19 @@ export class RxoExpediteController {
   @Post('recover')
   @HttpCode(200)
   @Header('Cache-Control', 'no-store')
-  recover(@Req() request: Request) {
+  recover(@Req() request: Request, @Body() body: unknown) {
     this.requireJson(request);
-    return this.expedite.recoverConnection();
+    const acknowledgeHold = typeof body === 'object' && body !== null && (body as { acknowledgeHold?: unknown }).acknowledgeHold === true;
+    return this.expedite.recoverConnection({ acknowledgeHold });
+  }
+
+  /** Administrator only (unsafe method on this admin-write controller). */
+  @Post('restart-worker')
+  @HttpCode(200)
+  @Header('Cache-Control', 'no-store')
+  restartWorker(@Req() request: Request) {
+    this.requireJson(request);
+    return this.expedite.restartWorker();
   }
 
   @Post('rescan')

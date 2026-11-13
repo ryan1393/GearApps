@@ -1,4 +1,4 @@
-import { RxoConnectionRecoveryService } from '@truck-log/server/infrastructure/rxo-recovery';
+import { RxoConnectionRecoveryService, type RecoverOptions } from '@truck-log/server/infrastructure/rxo-recovery';
 import {
   BadRequestException,
   ForbiddenException,
@@ -246,9 +246,15 @@ export class RxoExpediteService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  recoverConnection() {
+  recoverConnection(options: RecoverOptions = {}) {
     this.invalidateShared();
-    return this.connectionRecovery.recover('expedite');
+    return this.connectionRecovery.recover('expedite', options);
+  }
+
+  /** Administrator Restart worker for the Expedite scheduler container. */
+  restartWorker() {
+    this.invalidateShared();
+    return this.connectionRecovery.restartWorker('expedite');
   }
 
   requestRescan(): Promise<RxoExpediteManualRunState> {

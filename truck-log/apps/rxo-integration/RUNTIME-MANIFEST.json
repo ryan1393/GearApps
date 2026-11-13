@@ -138,8 +138,8 @@
       "bytes": 8468
     },
     "libs/truck-log/rxo-shared/rxo-auth.mjs": {
-      "sha256": "e2af9459676e0ae664b9e47e03ba145ee4de8de414e1a57361ef1fa22b9e135e",
-      "bytes": 47834
+      "sha256": "9157f0bdb63210a19e42a0a11afb74533f5b7b395f7c748cc8462d3ac1ee8602",
+      "bytes": 49594
     },
     "apps/rxo-integration/Dockerfile": {
       "sha256": "bef32984e30a5ca8455c01b61503f55f24f303b495626287ad8c144bfb38d41d",
@@ -154,5 +154,5 @@
       "bytes": 644
     }
   },
-  "imageSourceDigest": "991976be51fe6472ffac0e85c633f6d5e1b969115682feea19a659993b620630"
+  "imageSourceDigest": "11a28168a68bb0e74ad3e1c3ce014ef29dfa15c302034d5ac38eedb024a3053e"
 }

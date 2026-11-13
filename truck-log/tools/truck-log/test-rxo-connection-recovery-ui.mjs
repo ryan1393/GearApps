@@ -6,6 +6,7 @@ const require = createRequire(import.meta.url);
 const ts = require('typescript');
 const rxjs = require('rxjs');
 const focused = [];
+let confirmAnswer = true;
 const decorator = () => value => value;
 const mocks = {
   '@angular/core': { Component: decorator, Injectable: decorator, inject: () => ({}) },
@@ -22,7 +23,7 @@ function load(file) {
   vm.runInNewContext(compiled.outputText, {
     module, exports:module.exports, require(name) { assert(name in mocks,`Unexpected dependency ${name}`); return mocks[name]; },
     document:{getElementById:id=>({focus:()=>focused.push(id)})},
-    window:{dispatchEvent(){},clearInterval(){}}, CustomEvent:class {},
+    window:{dispatchEvent(){},clearInterval(){},confirm:()=>confirmAnswer}, CustomEvent:class {},
   }, {filename:file});
   return module.exports;
 }
@@ -42,8 +43,10 @@ function fixture(kind) {
   const action=new rxjs.Subject();
   let requests=0,refreshes=0,admin=true;
   const errors=[];
-  const api={recoverRxoConnection:()=>{requests++;return action;},recoverRxoExpediteConnection:()=>{requests++;return action;}};
-  const toast={error:message=>errors.push(message)};
+  const acknowledged=[],restarts=[];
+  const api={recoverRxoConnection:ack=>{requests++;acknowledged.push(ack===true);return action;},recoverRxoExpediteConnection:ack=>{requests++;acknowledged.push(ack===true);return action;},
+    restartRxoWorker:()=>{restarts.push('standard');return action;},restartRxoExpediteWorker:()=>{restarts.push('expedite');return action;}};
+  const toast={error:message=>errors.push(message),success(){}};
   const auth={canWrite:()=>admin};
   const status={recovery:metadata(),scheduler:{state:'AUTH_HELD',lastErrorCode:'RXO_AUTH_NAVIGATION_REVIEW'},acquisition:{lastError:'RXO_AUTH_NAVIGATION_REVIEW'}};
   let c,read,setStatus;
@@ -59,7 +62,7 @@ function fixture(kind) {
     read=()=>store.status;
     setStatus=value=>{store.status=value;};
   }
-  return {c,action,errors,read,setStatus,get requests(){return requests;},get refreshes(){return refreshes;},setAdmin:value=>{admin=value;}};
+  return {c,action,errors,read,setStatus,acknowledged,restarts,get requests(){return requests;},get refreshes(){return refreshes;},setAdmin:value=>{admin=value;}};
 }
 let passed=0;
 function test(name,fn){fn();passed++;console.log(`[PASS] ${name}`);}
@@ -155,6 +158,27 @@ test('Expedite WAITING after failed attempt shows a real countdown and Health gu
   assert.equal(f.c.connectionRecoveryNeeded,false); assert.match(f.c.integrationDetail,/Exporter Health/); assert.doesNotMatch(f.c.integrationDetail,/Use Recover connection/);
   assert.equal(f.c.latestFailureAt,f.read().acquisition.completedAt); assert.match(f.c.latestFailureDetail,/Excel download — Timed out/);
 });
+for (const kind of ['standard','expedite']) {
+  test(kind+': Retry sign-in clears an interactive hold only after the administrator confirms', () => {
+    const f=fixture(kind); f.read().recovery={...metadata(),reason:'INTERACTIVE_LOGIN_REQUIRED',available:false,requiresInteractiveLogin:true};
+    assert.equal(f.c.canAcknowledgeHold,true); assert.equal(f.c.connectionRecoveryDetail,'Automatic sign-in is paused.');
+    confirmAnswer=false; f.c.recoverConnection(true); assert.equal(f.requests,0,'cancelled confirmation sends nothing');
+    confirmAnswer=true; f.c.recoverConnection(true); assert.equal(f.requests,1); assert.deepEqual(f.acknowledged,[true]);
+    f.action.next({status:'QUEUED',message:'queued'}); assert.match(f.c.recoveryMessage,/Sign-in hold cleared/);
+  });
+  test(kind+': Retry sign-in is not offered for rejected credentials', () => {
+    const f=fixture(kind); f.read().recovery={...metadata(),reason:'CREDENTIALS_UNCHANGED',available:false,requiresCredentials:true};
+    assert.equal(f.c.canAcknowledgeHold,false); f.c.recoverConnection(true); assert.equal(f.requests,0);
+  });
+  test(kind+': Restart worker asks first, then restarts only its own worker', () => {
+    const f=fixture(kind);
+    confirmAnswer=false; f.c.restartWorker(); assert.deepEqual(f.restarts,[]);
+    confirmAnswer=true; f.c.restartWorker(); assert.deepEqual(f.restarts,[kind]); assert.equal(f.c.workerRestarting,true);
+    f.c.restartWorker(); assert.deepEqual(f.restarts,[kind],'a second click while restarting sends nothing');
+    f.action.next({status:'RESTARTED',message:'restarted'}); assert.equal(f.c.workerRestarting,false);
+    f.setAdmin(false); f.c.restartWorker(); assert.deepEqual(f.restarts,[kind],'operators cannot restart');
+  });
+}
 test('Expedite recovery strip shows while recovery can help and disappears once data is current', () => {
   const auth=fixture('expedite'); assert.equal(auth.c.showRecoveryPanel,true, 'auth hold needs the recovery strip');
   const f=waitingFailure(); const st=f.read();

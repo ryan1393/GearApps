@@ -11,6 +11,18 @@ Release 1.0.3 adds **Recover connection** to both the standard RXO Control Cente
 
 The standard and Expedite connections are independent. Recovering one does not restart the other.
 
+### Retry sign-in (paused sign-in)
+
+When RXO asks for MFA, approval or an interactive sign-in, or shows a sign-in page on an unexpected host (an RXO error page, a blank tab), automatic sign-in pauses and the page shows **Retry sign-in** instead of Recover connection. Check RXO in a browser and finish any verification, then select **Retry sign-in** and confirm. Truck Log clears that pause once and queues one recovery. If RXO shows the same page again, sign-in pauses again; credentials are never entered on an unapproved host. The cooldown and the three-per-hour limit still apply. A rejected or locked login is not retried: update it in **Settings & Login**.
+
+### Restart worker
+
+**Restart worker** (in the recovery strip and at the top of **Exporter Health**) restarts that RXO worker container, or starts it if it is stopped. It confirms first. A scan in progress is stopped and retried by the scheduler; the last verified data, the saved login and any sign-in pause are unchanged. Only the installed Truck Log worker can be restarted: the same project, release, image and volume checks as recovery run first.
+
+### When the worker cannot be verified
+
+The recovery check runs in the background (up to 30 seconds, because it starts a helper from the full worker image), so status pages never wait on it; until the first check finishes the page shows "Checking". If a check fails, the page says which one: worker not found, more than one container, a different Truck Log build than the API, unexpected volumes, or Docker not answering. Running setup on the server fixes the build and volume cases.
+
 ## Recovery policy
 
 - A durable request authorizes one connection attempt. Repeated concurrent clicks share a request.
@@ -23,7 +35,7 @@ The standard and Expedite connections are independent. Recovering one does not r
 
 ## API and worker lifecycle
 
-The administrator-only endpoints are `POST /api/v1/rxo/control/recover` and `POST /api/v1/rxo/expedite/recover`. They use the application's existing session, origin, intent-header, and CSRF protection. Responses report `QUEUED` or `ALREADY_RUNNING`; policy rejections provide bounded flags for credentials, interactive login, and cooldown status.
+The administrator-only endpoints are `POST /api/v1/rxo/control/recover` and `POST /api/v1/rxo/expedite/recover` (body `{ "acknowledgeHold": true }` for Retry sign-in), and `POST /api/v1/rxo/control/restart-worker` and `POST /api/v1/rxo/expedite/restart-worker`. They use the application's existing session, origin, intent-header, and CSRF protection. Responses report `QUEUED` or `ALREADY_RUNNING`; policy rejections provide bounded flags for credentials, interactive login, and cooldown status.
 
 The API verifies the exact Compose project, service, release image, and named volumes before using a helper container. The helper has no network, uses the matching installed worker image without pulling a replacement, mounts credentials read-only, and mounts data read-only for status or writable for a recovery request. Process output and execution time are bounded, and temporary helpers are removed.
 
