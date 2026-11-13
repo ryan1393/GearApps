@@ -23,6 +23,9 @@ WHAT IT DOES:
   Tesseract OCR. OCR is also tried when a text layer exists but has no
   labelled Delivery Number. A text layer with two different numbers is
   rejected and OCR cannot override that.
+- A verified PDF is named after its Delivery Number (13246286.pdf; a second
+  capture of the same number becomes 13246286-2.pdf). Unverified PDFs keep
+  their capture name (route8-<time>-<id>.pdf).
 - Verified PDFs go to Ready; unverified, malformed and uncertain outputs go to
   NeedsReview and are never printed or uploaded. Do not delete them blindly.
 - Runs as the Windows service TruckLogPackingSlipWatcher (LocalSystem), so it
@@ -138,7 +141,7 @@ one would break the other.
  a) On the Truck Log host (folder with docker-compose / the Truck Log code):
       SETUP-PRINT-AGENT-CREDENTIAL.cmd --agent-id trucklog-sap-watcher-01 --name "SAP packing slip watcher (USFTWLDAPP)"
     (Linux: ./SETUP-PRINT-AGENT-CREDENTIAL.sh with the same arguments, or
-     docker compose exec truck-log-server node tools/truck-log/provision-print-agent.mjs --agent-id trucklog-sap-watcher-01 --name "SAP packing slip watcher (USFTWLDAPP)")
+     docker exec truck-log-server node tools/truck-log/provision-print-agent.mjs --agent-id trucklog-sap-watcher-01 --name "SAP packing slip watcher (USFTWLDAPP)")
     It prints "Bearer token (shown once): tlpa_...". The watcher uses
     documents:upload (route settings and uploads) and the read-only
     setup-check. Use --rotate only to replace a lost/leaked token for this
@@ -147,6 +150,10 @@ one would break the other.
     and keep agent_id = trucklog-sap-watcher-01 (must match step a).
  c) On USFTWLDAPP run SETUP-TRUCK-LOG-UPLOAD.cmd as Administrator and paste
     the token (hidden). It confirms the token and agent id with Truck Log.
+    If the hidden paste is incomplete (Ctrl+V, a token copied over two lines,
+    or the "Bearer token" label included), the tool finds the token inside the
+    pasted text or reads it straight from the Windows clipboard; otherwise it
+    reports how many characters arrived. Right-click pastes most reliably.
 The token never goes into watcher.ini (the watcher refuses a token= key) and
 is redacted from logs and stored errors. http:// is refused unless
 allow_http = yes. HTTP redirects are refused (fix api_base instead).

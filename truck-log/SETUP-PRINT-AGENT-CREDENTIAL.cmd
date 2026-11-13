@@ -14,7 +14,7 @@ echo Creates (or with --rotate, replaces) the credential a Print Agent PC uses.
 echo Docker context:
 docker context show
 echo.
-docker compose exec truck-log-server node tools/truck-log/provision-print-agent.mjs %*
+docker exec truck-log-server node tools/truck-log/provision-print-agent.mjs %*
 set "RC=%ERRORLEVEL%"
 echo.
 if "%RC%"=="0" echo Copy the token above into the Print Agent configuration now. It is not shown again.

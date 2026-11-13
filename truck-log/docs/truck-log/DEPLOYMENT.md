@@ -53,7 +53,7 @@ Before an upgrade of a production host, take deliberate backups of the PostgreSQ
 
 ## Credentials
 
-Secrets are not shipped in this ZIP. Fresh setup generates only internal database/claim-token secrets. RXO credentials must be entered separately through the credential setup helpers. An optional web workflow also exists, but first requires explicit administrator schema/account setup and a matching Expedite origin policy. See `RXO-WEB-CREDENTIAL-SETUP.md` and run `SETUP-TRUCK-LOG-ADMIN.sh --bootstrap` from the Docker host to create the first administrator. Then pair each guard PC and TV as a station (`docs/truck-log/STATIONS.md`).
+Secrets are not kept in source control. A first-time ZIP may carry a ready-made `truck-log/.env` with unique generated values; replace them after the first start with `CHANGE-TRUCK-LOG-PASSWORDS --all-generated`. Fresh setup generates only internal database/claim-token secrets. RXO credentials must be entered separately through the credential setup helpers. An optional web workflow also exists, but first requires explicit administrator schema/account setup and a matching Expedite origin policy. See `RXO-WEB-CREDENTIAL-SETUP.md` and run `SETUP-TRUCK-LOG-ADMIN.sh --bootstrap` from the Docker host to create the first administrator. Then pair each guard PC and TV as a station (`docs/truck-log/STATIONS.md`).
 
 The `.env` file and named credential volume are runtime assets and should not be committed into source control or copied into support bundles without explicit secret handling.
 

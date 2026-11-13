@@ -121,6 +121,30 @@ class WatcherUnitTests(Base):
         self.assertEqual(len(list((self.base / 'state' / 'journal').glob('*.json'))), 1)
         self.assertEqual(list((self.base / 'state' / 'snapshots').glob('*')), [])  # snapshot cleaned up
 
+    def test_verified_slip_is_named_after_its_delivery_number(self):
+        w, _ = self.make_watcher()
+        w.prepare_dirs()
+        for expected in ('12345678.pdf', '12345678-2.pdf'):
+            self.make_capture()
+            capture_and_process(w)
+            time.sleep(.55)
+            self.assertEqual(capture_and_process(w), 1)
+            self.assertTrue((self.route.ready / expected).is_file(), expected)
+        self.assertEqual(sorted(p.name for p in self.route.ready.glob('*.pdf')), ['12345678-2.pdf', '12345678.pdf'])
+        stored = sorted(json.loads(p.read_text())['stored_file'] for p in (self.base / 'state' / 'journal').glob('*.json'))
+        self.assertEqual([Path(x).name for x in stored], ['12345678-2.pdf', '12345678.pdf'])
+
+    def test_unverified_slip_keeps_its_capture_name(self):
+        self.make_capture()
+        w, _ = self.make_watcher(text='Invoice Delivery Number: 12345678')
+        w.prepare_dirs()
+        capture_and_process(w)
+        time.sleep(.55)
+        capture_and_process(w)
+        names = [p.name for p in self.route.needs_review.glob('*.pdf')]
+        self.assertEqual(len(names), 1)
+        self.assertTrue(names[0].startswith('route8-'), names)
+
     def test_nonpacking_goes_to_review_no_print(self):
         self.make_capture()
         w, calls = self.make_watcher(text='Purchase order only')
@@ -1028,6 +1052,43 @@ class ModeTests(Base):
         self.make_capture(sample_pdf(b'fresh'))          # a new print after the switch does print
         self.assertEqual(self.settle(w), 1)
         self.assertEqual(len(calls), 1)
+
+
+class TokenPasteTests(unittest.TestCase):
+    TOKEN = "tlpa_" + "0a" * 8 + "_" + "1b" * 32
+
+    def test_token_found_in_label_control_characters_and_wrapped_lines(self):
+        t = self.TOKEN
+        for text in (t, "  " + t + "\r\n", "Bearer token (shown once): " + t, "\x16" + t,
+                     t[:40] + "\r\n" + t[40:], "Key ID: 0a0a0a0a0a0a0a0a\nBearer token (shown once): " + t + "\n"):
+            self.assertEqual(W.extract_token(text), t)
+        for text in ("", "\x16", t[:-1], t + "0", "tlpa_short", t + " tlpa_" + "ff" * 8 + "_" + "ee" * 32):
+            self.assertIsNone(W.extract_token(text))
+
+    def test_rejected_paste_is_described_without_revealing_it(self):
+        self.assertIn("nothing was received", W.describe_bad_token_input("\x16"))
+        self.assertIn("do not contain tlpa_", W.describe_bad_token_input("hello"))
+        text = W.describe_bad_token_input(self.TOKEN[:50])
+        self.assertIn("50 characters", text)
+        self.assertNotIn(self.TOKEN[:20], text)
+
+    def test_setup_uses_clipboard_when_hidden_paste_fails(self):
+        import getpass
+        from unittest import mock
+        settings = mock.Mock()
+        settings.truck_log = mock.Mock(api_base="http://x/api/v1", credential_file="f", credential_format="dpapi", dpapi_scope="LocalMachine")
+        stored = []
+        with mock.patch.object(getpass, "getpass", return_value="\x16"), \
+                mock.patch.object(W, "store_token", side_effect=lambda tl, token: stored.append(token)), \
+                mock.patch.object(W, "load_token", side_effect=lambda tl: stored[-1]), \
+                mock.patch.object(W, "setup_check", return_value=(True, "ok")), \
+                mock.patch("builtins.print"):
+            self.assertEqual(W.setup_upload_command(settings, clipboard=lambda: "Bearer token (shown once): " + self.TOKEN), 0)
+            self.assertEqual(stored, [self.TOKEN])
+            with self.assertRaises(W.WatcherError) as raised:
+                W.setup_upload_command(settings, clipboard=lambda: "")
+            self.assertIn("nothing was received", str(raised.exception))
+            self.assertEqual(stored, [self.TOKEN])
 
 
 class CredentialTests(Base):
