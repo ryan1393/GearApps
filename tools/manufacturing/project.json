@@ -8,6 +8,38 @@
     "type:tooling"
   ],
   "targets": {
+    "generate-dsf-capture": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/manufacturing/dsf/generate-capture.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-dsf-capture": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --test tools/manufacturing/dsf/capture.test.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "test-dsf-history": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node --test tools/manufacturing/dsf/history-integration.test.mjs",
+        "cwd": "."
+      },
+      "cache": false
+    },
+    "export-dsf-capture": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell -NoProfile -File ./tools/manufacturing/dsf/DSF-capture.ps1",
+        "cwd": "."
+      },
+      "cache": false
+    },
     "start-meshforge": {
       "executor": "nx:run-commands",
       "options": {

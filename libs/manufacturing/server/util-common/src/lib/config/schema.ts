@@ -216,6 +216,8 @@ export const validationSchema = Joi.object({
   // shape is checked here; the DSF reader validates the combination and stays off, with a
   // startup warning, if it is unsafe or incomplete. No defaults are set here on purpose.
   DSF_COUNT_ENABLED: Joi.string().valid('true', 'false', '').optional(),
+  DSF_HISTORY_ENABLED: Joi.string().valid('true', 'false', '').optional(),
+  DSF_HISTORY_LOOKBACK_DAYS: Joi.number().integer().min(1).max(31).empty('').optional(),
   DSF_CUTTER_WRITE_ENABLED: Joi.string().valid('true', 'false', '').optional(),
   DSF_COUNT_INTERVAL_SECONDS: Joi.number().integer().min(30).max(3600).empty('').optional(),
   DSF_COUNT_MACHINES: Joi.string().allow('').pattern(/^[A-Za-z0-9-]{1,20}(\s*,\s*[A-Za-z0-9-]{1,20})*$/).optional(),

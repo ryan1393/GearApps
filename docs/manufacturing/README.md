@@ -1,4 +1,4 @@
-# MeshForge 70.7.0
+# MeshForge 70.8.0
 
 MeshForge is the Dana manufacturing workspace for four workflows sharing one API and database:
 **Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root MeshForge Nx workspace. All frontends use

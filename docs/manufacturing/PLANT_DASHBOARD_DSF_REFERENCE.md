@@ -1,6 +1,14 @@
 # Review against the running DSF screens
 
-The user supplied the running Dana Connected shopfloor report and department overview as the reference for this separate dashboard. The current application is a development starter, **not a validated replacement for those reports**. No live plant DSF query, physical inventory reconciliation, or numerical report comparison has been completed.
+The user supplied the running Dana Connected shopfloor report and department overview as the reference for this separate dashboard. The application now includes current counts and a persistent RUN-count archive, **not a validated replacement for the full DSF reports**. Offline six-source comparisons are documented; live plant collection and physical inventory reconciliation have not been validated from the cloud.
+
+The two November 11, 2026 offline exports have now been reviewed. The durable
+[database reference](DSF_DATABASE_REFERENCE.md) records their schema, logical joins,
+source coverage, sample-supported units and unresolved formulas. The
+[capture audit](DSF_CAPTURE_PLAN.md) distinguishes what the next bounded export
+collects from the evidence still needed for full-plant report acceptance. These
+exports are evidence of DSF's setup; they do not establish a live cloud connection
+or a complete shift history.
 
 ## Confirmed scope and meanings
 
@@ -24,7 +32,7 @@ The user supplied the running Dana Connected shopfloor report and department ove
 | Downtime and reason-code minutes | Not implemented | Authoritative state intervals/durations and reasons; distinguish planned downtime, unplanned downtime, micro stops, slow running, job change and early stop/late start |
 | Cycle variance | Not implemented | Actual/reference cycle measurements, sign convention, units, weighting and part/rate changes |
 | FTT losses in parts | Not implemented | FTT meaning, rejected/reworked/good counts, counting and correction rules |
-| Historical date/shift selection | Not implemented; current snapshot only | Historical data source, retention, corrections and timezone/shift rules |
+| Historical date/shift selection | Implemented for retained RUN counts: hourly/daily and exact dated-shift reports, source filters and CSV in `/history` | Deploy/enable the archive at the plant and verify live collection/performance; other metric formulas remain unresolved |
 | OEE | No OEE is displayed or calculated | Separate availability, performance and quality definitions plus approved aggregation |
 
 ## Data rules required for parity
@@ -41,4 +49,4 @@ The user supplied the running Dana Connected shopfloor report and department ove
 
 ## Acceptance before calling the new dashboard equivalent
 
-Obtain a read-only DSF reporting connection or source/schema export and one authoritative report for a known line/shift, including Cuttergrind. Confirm the additional percentage above the doughnuts and the loss-category definitions. Compare actual, capacity, target, hourly buckets, downtime minutes/percent, cycle variance, FTT and shift totals to DSF at a matching cutoff. Include planned breaks, a part change, a stale/missing source, zero output, and a shift crossing a date/time boundary. Reconcile all listed departments and physical grinders, including DSF-only machines. Until these pass, the application remains a current-count/coverage starter with the remaining metrics unavailable.
+Use the successful bounded capture in [DSF_CAPTURE_PLAN.md](DSF_CAPTURE_PLAN.md) and an authoritative report for a matching line/shift/cutoff, including Cuttergrind. The uploaded schema and comparisons are recorded in the database reference. Confirm the additional percentage above the doughnuts and the loss-category definitions. Compare actual, capacity, target, hourly buckets, downtime minutes/percent, cycle variance, FTT and shift totals to DSF at that cutoff. Include planned breaks, a part change, a stale/missing source, zero output, and a shift crossing a date/time boundary. Reconcile all listed departments and physical grinders, including DSF-only machines. Persistent RUN-count history is now implemented; unverified report metrics remain unavailable until these checks pass.

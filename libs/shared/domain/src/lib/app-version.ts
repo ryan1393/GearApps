@@ -1,2 +1,2 @@
 /** Release shared by all MeshForge applications. Use npm run version:set. */
-export const MESHFORGE_VERSION = '70.7.0';
+export const MESHFORGE_VERSION = '70.8.0';

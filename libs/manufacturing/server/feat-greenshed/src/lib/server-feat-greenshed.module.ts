@@ -5,11 +5,13 @@ import { ServerFeatGreenshedController } from './server-feat-greenshed.controlle
 import { ServerFeatGreenshedService } from './server-feat-greenshed.service';
 import { DsfCountController } from './dsf-count/dsf-count.controller';
 import { DsfCountService } from './dsf-count/dsf-count.service';
+import { DsfHistoryService } from './dsf-count/history/dsf-history.service';
+import { DsfHistoryController } from './dsf-count/history/dsf-history.controller';
 
 @Module({
   imports: [ServerDataAccessModule],
-  controllers: [ServerFeatGreenshedController, DsfCountController],
-  providers: [ServerFeatGreenshedService, DsfCountService],
+  controllers: [ServerFeatGreenshedController, DsfCountController, DsfHistoryController],
+  providers: [ServerFeatGreenshedService, DsfHistoryService, DsfCountService],
   exports: [ServerFeatGreenshedService],
 })
 export class ServerFeatGreenshedModule {}

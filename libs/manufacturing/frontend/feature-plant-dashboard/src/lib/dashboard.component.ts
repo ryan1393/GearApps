@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { DanaKpiCardDirective, DanaKpiGridDirective, DanaTableDirective, DanaTableShellDirective } from '@dana/ui';
 import { AuthSessionService } from '@meshforge/manufacturing/frontend/data-access-user';
 import { timer } from 'rxjs';
@@ -13,7 +13,7 @@ import { PlantDashboardDataService } from '@meshforge/manufacturing/frontend/dat
 @Component({
   selector: 'gear-plant-dashboard', standalone: true,
   styleUrls: ['./plant-layout.css'],
-  imports: [CommonModule, FormsModule, DanaKpiCardDirective, DanaKpiGridDirective, DanaTableDirective, DanaTableShellDirective],
+  imports: [CommonModule, FormsModule, RouterLink, DanaKpiCardDirective, DanaKpiGridDirective, DanaTableDirective, DanaTableShellDirective],
   templateUrl: './dashboard.component.html',
   providers: [PlantDashboardDataService],
 })

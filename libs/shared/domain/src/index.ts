@@ -27,3 +27,4 @@ export * from './lib/gear/argonaut';
 export * from './lib/gear/cycle-test';
 
 export * from './lib/plant-dashboard';
+export * from './lib/dsf-history';

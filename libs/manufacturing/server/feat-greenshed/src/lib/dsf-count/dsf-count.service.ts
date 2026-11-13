@@ -6,7 +6,7 @@
  * DSF_COUNT_ENABLED=true, and counts only reach cutter runs when DSF_CUTTER_WRITE_ENABLED=true.
  * Restored from the earlier integration; see docs/manufacturing/DSF_COUNTS.md.
  */
-import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException, OnModuleInit, OnModuleDestroy, ServiceUnavailableException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger, NotFoundException, OnModuleInit, OnModuleDestroy, Optional, ServiceUnavailableException } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { readFileSync } from 'node:fs';
@@ -19,6 +19,9 @@ import { grinderStateRows, collectGrinderBatches, commitGrinderBatches, GrinderB
 import { ensureDsfCutterSchema } from './dsf-schema';
 import { findUniqueMatches, UniqueMatchResult } from './dsf-unique-matches';
 import { findRoughMatches, RoughMatchResult } from './dsf-rough-matches';
+import { DsfHistoryService } from './history/dsf-history.service';
+import { collectDsfHistory, dsfHistorySystemKey } from './history/dsf-history-source';
+import type { HistoryCapture } from './history/dsf-history-model';
 
 type Machine = {machine_id:string;machine_number:string;department:string;machine_type:string;active:boolean};
 type SourceClient = { connect():Promise<void>;query(text:string,values?:unknown[]):Promise<{rows:any[]}>;end():Promise<void>;on(event:string,fn:(e:unknown)=>void):void; };
@@ -202,7 +205,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
   private mappingKeys=new Map<string,string>();
   private pendingImmediate=false;
   private nextImmediateAllowedAt=0;
-  constructor(@InjectDataSource() private readonly db:DataSource) {}
+  constructor(@InjectDataSource() private readonly db:DataSource, @Optional() private readonly history?:DsfHistoryService) {}
   private readonly logger=new Logger('DsfCount');
   private lastFailure:{reason:string;code:string|null;at:string}|null=null;
   async onModuleInit():Promise<void> {
@@ -522,6 +525,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
     this.busy=true;
     let lease:ReturnType<DataSource['createQueryRunner']>|null=null,held=false;
     let client:SourceClient|null=null,watchdog:ReturnType<typeof setTimeout>|null=null;
+    let historyCapture:HistoryCapture|null=null,historyFailure:string|null=null;
     try {
       // Shared local lease: a second API process cannot open a parallel source connection.
       lease=this.db.createQueryRunner();await lease.connect();
@@ -574,6 +578,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       await client.query("SET LOCAL idle_in_transaction_session_timeout='15s'");
       await client.query("SET LOCAL TIME ZONE 'UTC'");
       await client.query('SET LOCAL max_parallel_workers_per_gather=0');
+      await client.query('SET LOCAL jit=off');
       await client.query('SET LOCAL search_path=pg_catalog,public');
       const identity=(await client.query(SOURCE_IDENTITY_SQL)).rows[0];
       if(!identity?.is_source||!identity.not_meshforge||!identity.read_only)throw new DsfRefusal('WRONG_SOURCE_OR_NOT_READ_ONLY');
@@ -583,6 +588,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       const account=(await client.query(DSF_ACCOUNT_SQL)).rows[0];
       const rights=(await client.query(ROLE_CHECK_SQL)).rows[0];
       this.accountPolicy=dsfAccountPolicy(this.config,account,rights);
+      await client.query('SAVEPOINT dsf_source_catalog');
       try {
         const names=this.config.departmentNames??new Map<string,string>();
         const options=((await client.query(SOURCE_OPTIONS_SQL,[[...names.keys()]])).rows as SourceOption[])
@@ -593,18 +599,25 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
         this.sourceOptions=valid;this.sourceOptionsRefreshedAt=at;
         this.sourceOptionsProblem=valid.length?null:{reason:options.length?'NO_VALID_SOURCES':'NO_SOURCES',code:null};
       } catch(e) {
+        await client.query('ROLLBACK TO SAVEPOINT dsf_source_catalog');
         this.sourceOptions=[];this.sourceOptionsRefreshedAt=null;
         const reason=e instanceof DsfRefusal?e.reason:'SOURCE_LIST_QUERY_FAILED',code=dsfFailureCode(e);
         if(this.sourceOptionsProblem?.reason!==reason||this.sourceOptionsProblem?.code!==code)
           this.logger.warn('DSF source list could not be read: '+reason+(code?' ('+code+')':''));
         this.sourceOptionsProblem={reason,code};
       }
+      await client.query('RELEASE SAVEPOINT dsf_source_catalog');
       // The five grinders share this *same* validated, read-only DSF connection.
       // Errors in their stream cannot block the existing cutter-count writer.
       let grinderBatches:GrinderBatch[]=[];
       if(hasActiveGrinders) {
+        await client.query('SAVEPOINT dsf_grinder_counts');
         try { grinderBatches=await collectGrinderBatches(client,grinderStates,at); }
-        catch { grinderBatches=[]; /* Report stale status from last_success_at, never invented credits. */ }
+        catch {
+          await client.query('ROLLBACK TO SAVEPOINT dsf_grinder_counts');
+          grinderBatches=[]; /* Report stale status from last_success_at, never invented credits. */
+        }
+        await client.query('RELEASE SAVEPOINT dsf_grinder_counts');
       }
       for(const item of candidates) {
         const m=item.machine,mapping=item.mapping;
@@ -643,10 +656,41 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
           nextStates.set(m.machine_id,{status:'DATA_REVIEW',note:'Source count evidence requires review'});nextCaches.delete(m.machine_id);
         }
       }
+      // Archive every DSF source, including unregistered/named departments, on this
+      // same validated read-only session. A savepoint contains optional history
+      // failures so they cannot abort the existing machine/cutter count reads.
+      if(this.history?.enabled) {
+        if(Date.now()>deadline-40000)historyFailure='HISTORY_READ_DEADLINE';
+        else {
+          await client.query('SAVEPOINT dsf_history_capture');
+          try {
+            const plan=await this.history.preparePlan(at,dsfHistorySystemKey(this.config.client));
+            if(plan)historyCapture=await collectDsfHistory(client,at,plan);
+          } catch(e) {
+            historyFailure=e instanceof DsfRefusal?e.reason:dsfFailureCode(e)||'HISTORY_SOURCE_READ_FAILED';
+            await client.query('ROLLBACK TO SAVEPOINT dsf_history_capture');
+          }
+          await client.query('RELEASE SAVEPOINT dsf_history_capture');
+        }
+      }
       await client.query('ROLLBACK');
       // Release source connection before any local count mutations. The source
       // connection is strictly read-only. A write failure NEVER invalidates DSF.
       await client.end();client=null;this.source=null;
+      // History writes occur only after the DSF connection has closed. The local
+      // store replaces complete windows atomically; a failed commit retains its
+      // old counts and checkpoint rather than advancing or inventing zero.
+      if(historyCapture && this.history) {
+        try {
+          await this.history.commitCapture(historyCapture);
+          historyFailure=historyCapture.issues.find(issue=>issue.source_key===null)?.code||historyFailure;
+        }
+        catch {historyFailure='HISTORY_LOCAL_COMMIT_FAILED';}
+      }
+      if(historyFailure && this.history) {
+        try {await this.history.noteFailure(historyFailure);}
+        catch {/* Source and current machine counts remain independent of archival status. */}
+      }
       // No Dana manufacturing writes are made until the DSF read-only session is closed.
       // Local grinder ledger accounting and cutter attribution remain independent.
       if(grinderBatches.length) {
@@ -675,6 +719,7 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       if(this.lastFailure?.reason!==reason||this.lastFailure?.code!==code)
         this.logger.warn('DSF refresh failed: '+reason+(code?' ('+code+')':''));
       this.lastFailure={reason,code,at:new Date().toISOString()};
+      historyFailure=historyFailure||code||reason;
       const safeNote=reason==='READ_ONLY_ROLE_REQUIRED'?'Dedicated read-only source user required':
         reason==='SOURCE_ACCOUNT_MISMATCH'?'Source account/database does not match approved configuration':
         reason==='CLOCK_DIFFERENCE'?'Source and MeshForge clocks need review':
@@ -689,6 +734,10 @@ export class DsfCountService implements OnModuleInit,OnModuleDestroy {
       if(watchdog)clearTimeout(watchdog);
       if(client) {try{await client.end();}catch{/* no unsafe diagnostic logging */}}
       this.source=null;
+      if(historyFailure && this.history?.enabled && client) {
+        try {await this.history.noteFailure(historyFailure);}
+        catch {/* A failed source read never replaces persistent count windows. */}
+      }
       if(lease) {
         if(held)try{await lease.query('SELECT pg_advisory_unlock(1437329,77311)');}catch{/* released by connection close */}
         try{await lease.release();}catch{/* no raw error output */}

@@ -1,0 +1,82 @@
+<header class="app-header">
+  <div class="brand"><span class="brand-mark" aria-hidden="true">M</span><div><strong>MESHFORGE</strong><span>Plant intelligence</span></div></div>
+  <nav aria-label="Main navigation">
+    <button type="button" routerLink="/">Plant overview</button>
+    <button type="button" class="selected" aria-current="page">Count history</button>
+  </nav>
+  <button type="button" class="sign-out" (click)="logout()">Sign out</button>
+</header>
+<main class="plant-page">
+  <section class="page-heading">
+    <div><p class="eyebrow">OPERATIONS / COUNT HISTORY</p><h1>Production counts you can look back on.</h1>
+      <p class="muted">Hourly, shift and daily records · Indianapolis time · Saved in MeshForge</p></div>
+    <button type="button" (click)="refresh()" [disabled]="loading()">{{ loading() ? 'Refreshing…' : 'Refresh saved records' }}</button>
+  </section>
+
+  @if (statusError()) { <div class="notice warning" role="status">{{ statusError() }}</div> }
+  @if (status(); as collector) {
+    <section class="report-limit collector-status" aria-labelledby="collector-heading">
+      <div class="section-heading"><div><p class="eyebrow">AUTOMATIC COLLECTION</p><h2 id="collector-heading">{{ collector.enabled && collector.source_reader_enabled ? 'Count history collection' : 'Collection is not enabled' }}</h2></div>
+        <span class="data-status" [class.good]="collector.enabled && collector.source_reader_enabled && !!collector.last_success_at && !collector.last_failure_code">{{ collector.last_failure_code ? 'Collection needs attention' : collector.enabled && collector.source_reader_enabled ? collector.last_success_at ? 'Collecting records' : 'Waiting for the first read' : 'Stored records remain available' }}</span>
+      </div>
+      <p>{{ collector.note }}</p>
+      @if (!collector.enabled || !collector.source_reader_enabled) { <p>An administrator can enable count history with the MeshForge DSF settings. Existing saved history is retained.</p> }
+      <dl class="collector-facts">
+        <div><dt>Last successful capture</dt><dd>{{ formatTime(collector.last_success_at) }}</dd></div>
+        <div><dt>Records available from</dt><dd>{{ formatTime(collector.earliest_hour) }}</dd></div>
+        <div><dt>Latest recorded coverage</dt><dd>{{ formatTime(collector.latest_covered_to) }}</dd></div>
+        <div><dt>Earlier records being checked</dt><dd>{{ formatTime(collector.next_backfill_hour) }}</dd></div>
+      </dl>
+      <p class="small muted">Counts are retained until deliberately removed. Recent {{ collector.lookback_days }} days are rechecked for source corrections. {{ collector.active_source_count }} active DSF sources are known; sources and physical machines still need matching.</p>
+    </section>
+  }
+
+  <form class="filters history-filters" aria-label="Count history filters" (ngSubmit)="applyFilters()">
+    <label>From date<input name="from" type="date" [max]="today" [ngModel]="draft().from" (ngModelChange)="updateFilters({ from: $event })" required /></label>
+    <label>Through date<input name="to" type="date" [max]="today" [ngModel]="draft().to" (ngModelChange)="updateFilters({ to: $event })" required /></label>
+    <label>Group by<select name="group" [ngModel]="draft().group" (ngModelChange)="updateFilters({ group: $event })"><option value="day">Day</option><option value="shift">DSF shift</option><option value="hour">Hour</option></select></label>
+    <label>Department<select name="department" [ngModel]="draft().department_id" (ngModelChange)="updateFilters({ department_id: $event })"><option value="">All departments</option>@for (department of departments(); track department.id) { <option [value]="department.id">{{ department.name }}</option> }</select></label>
+    <label class="history-source-filter">Machine / DSF source<select name="source" [ngModel]="draft().source_key" (ngModelChange)="updateFilters({ source_key: $event })"><option value="">All sources</option>@for (source of sources(); track source.source_key) { <option [value]="source.source_key">{{ sourceLabel(source) }}</option> }</select></label>
+    <label class="checkbox"><input name="inactive" type="checkbox" [ngModel]="draft().include_inactive" (ngModelChange)="updateFilters({ include_inactive: $event })" /> Include inactive and earlier sources</label>
+    <button type="submit" [disabled]="!!filterError()">Apply filters</button>
+  </form>
+  @if (draft().group === 'shift') { <p class="muted small">Shift dates select each DSF shift’s start date, including its continuation after midnight. Hourly and daily reports use calendar dates in Indianapolis.</p> }
+  @if (filterError()) { <p class="notice warning" role="status">{{ filterError() }}</p> }
+  @if (sourcesError()) { <p class="notice warning" role="status">{{ sourcesError() }}</p> }
+  @if (error()) { <div class="notice warning" role="alert">{{ error() }}</div> }
+
+  @if (report(); as saved) {
+    @if (!saved.available) {
+      <div class="notice warning" role="status">Saved count history is not available yet. Once collection is enabled, verified records will appear here. Missing records are not zero production.</div>
+    }
+    @if (saved.truncated) { <div class="notice warning" role="status"><strong>Only part of this report is shown.</strong> Choose one day or a single machine/source to see and export a complete result.</div> }
+    @if (saved.totals.excluded_duplicate_sources) { <div class="notice warning" role="status">{{ saved.totals.excluded_duplicate_sources }} sources share an operation with another source. They remain visible and are excluded from report totals until reviewed.</div> }
+
+    <section danaKpiGrid class="plant-kpis" aria-label="Saved report summary">
+      <article danaKpiCard><p>Recorded RUN pieces</p><strong>{{ knownSubtotal() === null ? '—' : (knownSubtotal() | number) }}</strong><span>{{ saved.totals.count === null ? 'Known subtotal · coverage is incomplete' : 'Complete selected report' }}</span></article>
+      <article danaKpiCard><p>Complete records</p><strong>{{ saved.totals.complete_records | number }}</strong><span>Fully captured periods</span></article>
+      <article danaKpiCard><p>Records needing review</p><strong>{{ reviewRecords() | number }}</strong><span>Partial, unknown, or flagged records</span></article>
+      <article danaKpiCard><p>Active DSF sources</p><strong>{{ status()?.active_source_count ?? '—' }}</strong><span>Includes sources without a machine link</span></article>
+    </section>
+    <p class="muted small summary-note">{{ saved.note }} Output can include several operations on the same part, so this is not a finished-goods total. A recorded zero differs from an uncaptured period.</p>
+
+    <section class="section-heading"><div><h2>Saved production records</h2><p class="muted">{{ saved.from }} through {{ saved.to }} · {{ saved.group === 'hour' ? 'Hourly' : saved.group === 'shift' ? 'DSF shifts' : 'Daily' }} · Times shown in Indianapolis</p></div><button type="button" (click)="exportReport()" [disabled]="!saved.rows.length">Export history CSV</button></section>
+    <div danaTableShell class="report-table"><table danaTable>
+      <caption>Recorded counts for DSF equipment and operations, including sources without a registered machine link. Unknown counts remain blank in CSV exports.</caption>
+      <thead><tr><th scope="col">Department</th><th scope="col">Machine / source</th><th scope="col">Period</th><th scope="col">RUN pieces</th><th scope="col">Coverage</th><th scope="col">Observed</th></tr></thead>
+      <tbody>
+        @for (row of saved.rows; track recordKey(row)) {
+          <tr>
+            <td>{{ row.department_name || 'Unassigned department' }}</td>
+            <td><strong>{{ row.source_name }}</strong><span class="history-secondary">{{ row.machine_number ? 'Machine ' + row.machine_number : 'Machine link not confirmed' }}{{ row.asset_number ? ' · ' + row.asset_number : '' }}</span>@if (row.review_reason && !row.duplicate_operation) { <span class="history-secondary">Source identity or count evidence needs review.</span> }</td>
+            <td [title]="row.period_start + ' — ' + row.period_end"><span>{{ formatTime(row.period_start) }}</span><span class="history-secondary">to {{ formatTime(row.period_end) }}</span>@if (saved.group === 'shift') { <span class="history-secondary">{{ row.shift_number === null ? 'Shift not established' : 'Shift ' + row.shift_number }}{{ row.shift_date ? ' · ' + row.shift_date : '' }}</span> }</td>
+            <td class="history-number">{{ displayCount(row) === null ? '—' : (displayCount(row) | number) }}</td>
+            <td><span class="data-status" [class.good]="row.completeness === 'COMPLETE' && !row.duplicate_operation">{{ countLabel(row.completeness) }}</span>@if (row.completeness === 'PARTIAL') { <span class="history-secondary">{{ (row.covered_seconds / 60) | number:'1.0-1' }} of {{ (row.expected_seconds / 60) | number:'1.0-1' }} minutes captured</span> }@if (row.duplicate_operation) { <span class="history-secondary">Duplicate operation · excluded from totals</span> }</td>
+            <td>{{ formatTime(row.observed_at) }}</td>
+          </tr>
+        } @empty { <tr><td colspan="6" class="empty-state">No saved sources match these filters. Uncaptured history is not a zero count.</td></tr> }
+      </tbody>
+    </table></div>
+    <footer class="page-footer"><span>Archive served {{ formatTime(saved.served_at) }} · Automatic refresh every 30 seconds</span><span>DSF is read-only · Records are saved by MeshForge</span></footer>
+  } @else if (loading()) { <p class="empty-state" role="status">Loading saved count history…</p> }
+</main>

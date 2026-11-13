@@ -1,0 +1,10 @@
+.collector-status .section-heading { margin-top: 0; margin-bottom: .75rem; }
+.collector-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; margin: 1rem 0; }
+.collector-facts dt { font-size: .75rem; margin-bottom: .35rem; }
+.collector-facts dd { margin: 0; font-size: .85rem; }
+.history-filters { gap: .9rem; }
+.history-source-filter { flex: 1; min-width: 230px; max-width: 400px; }
+.history-filters input, .history-filters select { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.history-secondary { display: block; margin-top: .3rem; font-size: .75rem; }
+.history-number { font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 600px) { .history-filters > label { width: 100%; max-width: none; } .collector-facts { grid-template-columns: 1fr; } }

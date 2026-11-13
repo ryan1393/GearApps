@@ -852,5 +852,26 @@
     "controller": "ServerFeatUserController",
     "source": "libs/manufacturing/server/feat-user/src/lib/server-feat-user.controller.ts",
     "has_parameters": true
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/dsf-counts/history",
+    "controller": "DsfHistoryController",
+    "source": "libs/manufacturing/server/feat-greenshed/src/lib/dsf-count/history/dsf-history.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/dsf-counts/history/status",
+    "controller": "DsfHistoryController",
+    "source": "libs/manufacturing/server/feat-greenshed/src/lib/dsf-count/history/dsf-history.controller.ts",
+    "has_parameters": false
+  },
+  {
+    "method": "GET",
+    "path": "/api/v1/dsf-counts/history/sources",
+    "controller": "DsfHistoryController",
+    "source": "libs/manufacturing/server/feat-greenshed/src/lib/dsf-count/history/dsf-history.controller.ts",
+    "has_parameters": false
   }
 ]
