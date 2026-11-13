@@ -55,7 +55,8 @@ class FakeWorker:
         self.stopped.set()
 
     def status(self):
-        return {"phase": self.phase, "photoeye": True}
+        return {"phase": self.phase, "photoeye": True, "scanner_inputs": {"1": True, "2": False},
+                "scanner_outputs": {"1": True}, "scanner_outputs_set_at": "2026-11-12T23:00:00.000Z"}
 
     def scanner_command(self, op, timeout_s=20.0):
         from lapper_read.worker import ScannerCommandError
@@ -151,6 +152,9 @@ class SupervisorTests(unittest.TestCase):
         self.api.machines = [machine("m1")]
         self.supervisor.discover_once()
         self._wait(lambda: self.supervisor.summary()["machines"][0].get("photoeye") is True)
+        row = self.supervisor.summary()["machines"][0]
+        self.assertEqual(row["scanner_inputs"], {"1": True, "2": False})
+        self.assertEqual(row["scanner_outputs"], {"1": True})
 
     def test_a_failing_worker_is_rebuilt_without_affecting_others(self):
         self.fail_next = True

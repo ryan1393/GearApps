@@ -10,7 +10,7 @@ import time
 from dataclasses import dataclass, field
 
 from . import argonaut as argo
-from .api import MeshForgeApi, utc_now
+from .api import MeshForgeApi, utc_iso, utc_now
 from .fanuc import Fanuc, NoGearsetLoaded
 from .scanner import Scanner
 from .scanner_monitor import ScannerMonitor
@@ -18,6 +18,10 @@ from .state import ArgonautPost, CycleState, CycleStateStore, MachineState, Scan
 from .tracker import DEFAULT_MAX_SAMPLE_GAP_S, CycleTracker
 
 log = logging.getLogger("lapper_read")
+
+#: Input 2 is checked on every this many scanner polls (about once a second at 250 ms); input 1,
+#: the photoeye, is read on every poll.
+INPUT2_EVERY = 4
 
 #: Oldest unsent Argonaut posts are dropped beyond this, so a long outage cannot grow the checkpoint forever.
 ARGONAUT_QUEUE_LIMIT = 1000
@@ -94,6 +98,7 @@ class Worker:
         self.stop_event = threading.Event()
         self._reads: queue.Queue[MacroRead] = queue.Queue()
         self._commands: queue.Queue[ScannerCommand] = queue.Queue()
+        self._scanner_polls = 0
         self._lock = threading.Lock()
         self._tracker = self._new_tracker(CycleState())
         self._dirty = False
@@ -127,6 +132,7 @@ class Worker:
             "serials": "scanned" if self.scanner else "none (no scanner)",
             **(self.scanner_monitor.status() if self.scanner_monitor else {"scanner": "none"}),
             "photoeye": self._photoeye(),
+            **self._scanner_io(),
             **argonaut,
         }
 
@@ -135,6 +141,18 @@ class Worker:
         if not self.scanner or (self.scanner_monitor and not self.scanner_monitor.should_read()):
             return None
         return getattr(self.scanner, "photoeye", None)
+
+    def _scanner_io(self) -> dict:
+        """Scanner inputs (live, None while offline) and outputs as last set through MeshForge."""
+        if not self.scanner:
+            return {}
+        online = not self.scanner_monitor or self.scanner_monitor.should_read()
+        set_at = getattr(self.scanner, "outputs_set_at", None)
+        return {
+            "scanner_inputs": {"1": self._photoeye(), "2": getattr(self.scanner, "input2", None) if online else None},
+            "scanner_outputs": {str(k): v for k, v in sorted(getattr(self.scanner, "outputs", {}).items())},
+            "scanner_outputs_set_at": utc_iso(set_at) if set_at else None,
+        }
 
     def _new_tracker(self, state: CycleState) -> CycleTracker:
         # A cycle's start or end is timed only when the previous sample was a few polls before it.
@@ -293,6 +311,9 @@ class Worker:
                 if self.scanner and monitor and monitor.should_read():
                     try:
                         scanner = self.scanner.read(previous)
+                        self._scanner_polls += 1
+                        if self._scanner_polls % INPUT2_EVERY == 0:
+                            self.scanner.check_input(2)
                         if monitor.read_succeeded():
                             log.info("[%s] Scanner %s is online again; cycles get scanned serials", label, s.scanner_ip)
                     except (OSError, TimeoutError) as error:

@@ -99,6 +99,10 @@ export class MachineCyclesApi extends CrudApi<MachineCycle, CreateMachineCycle> 
   production(): Observable<LapperProduction> {
     return this.http.get<LapperProduction>(`${this.url}/production`);
   }
+  /** The machine's newest cycles, newest first. */
+  recent(machineId: string, limit: number): Observable<MachineCycle[]> {
+    return this.http.get<MachineCycle[]>(`${this.url}/machine/${machineId}`, { params: { limit } });
+  }
   history(machineId: string, gearsetId: string): Observable<MachineCycle[]> {
     return this.http.get<MachineCycle[]>(`${this.url}/history/${machineId}/${gearsetId}`);
   }

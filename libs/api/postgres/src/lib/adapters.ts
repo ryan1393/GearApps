@@ -92,8 +92,8 @@ export class PostgresCycles extends PostgresCrudAdapter<MachineCycle> {
   findPage(page: number, pageSize: number): Promise<MachineCycle[]> {
     return project(this.store.catalog.cyclePage(page, pageSize));
   }
-  findByMachine(id: string): Promise<MachineCycle[]> {
-    return project(this.store.catalog.cycles({ machineId: id }));
+  findByMachine(id: string, limit?: number): Promise<MachineCycle[]> {
+    return project(this.store.catalog.cycles({ machineId: id, ...(limit ? { limit } : {}) }));
   }
   findByGearset(id: string): Promise<MachineCycle[]> {
     return project(this.store.catalog.cycles({ gearsetId: id }));

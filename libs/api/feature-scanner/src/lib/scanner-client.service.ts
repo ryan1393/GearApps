@@ -40,13 +40,16 @@ export class ScannerClientService {
   private readonly logger = new Logger(ScannerClientService.name);
   private readonly http: AxiosInstance;
   /**
-   * Short-lived image cache plus one shared fetch per scanner, so live cards polling every
-   * second (the fastest Live View setting) cost one FTP login per scanner, not one per viewer.
+   * Short-lived image cache plus one shared fetch per scanner, so viewers asking at about the same
+   * time (and every viewer while a fetch is under way) cost one FTP login per scanner, not one each.
    */
   private readonly imageCache = new Map<string, { at: number; image: ScannerImage }>();
   private readonly imageFetches = new Map<string, Promise<ScannerImage>>();
-  /** At least the fastest UI poll period (1 s), with room for the requests to drift. */
-  static readonly IMAGE_TTL_MS = 1_500;
+  /**
+   * Below the live view's 0.5 s refresh while a photoeye is on (LIVE_FEED_MS), so each of those
+   * refreshes reads the newest upload instead of the previous one from this cache.
+   */
+  static readonly IMAGE_TTL_MS = 400;
   private static readonly MAX_IMAGE_BYTES = 16 * 1024 * 1024;
   private static readonly MAX_LISTING = 2000;
   /** Above the collector's own 20 s wait, so its answer (or its timeout message) arrives first. */

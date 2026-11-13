@@ -1,9 +1,10 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FanucVariablesApi, LapperAccess, ScannerApi, ScannerDetailsApi } from '@meshforge/client/core';
-import { Machine, MachineFanucVariable, ScannerDetail } from '@meshforge/shared/domain';
+import { FanucVariablesApi, LapperAccess, MachineCyclesApi, ScannerApi, ScannerDetailsApi } from '@meshforge/client/core';
+import { Machine, MachineCycle, MachineFanucVariable, ScannerDetail } from '@meshforge/shared/domain';
 import { NEVER, Observable, of } from 'rxjs';
-import { LIVE_FEED_MS, LIVE_REQUEST_TIMEOUT_MS, MachineLiveCardComponent } from './machine-live-card.component';
+import { DatePipe } from '@angular/common';
+import { LIVE_FEED_MS, LIVE_REQUEST_TIMEOUT_MS, MachineLiveCardComponent, RECENT_CYCLES } from './machine-live-card.component';
 
 describe('Live machine card polling', () => {
   const machine = { id: 'm1', number: '01-094-101', ip: '10.0.0.1', status: 'active', scanner_id: null, scanner: null } as unknown as Machine;
@@ -20,6 +21,7 @@ describe('Live machine card polling', () => {
       imports: [MachineLiveCardComponent],
       providers: [
         { provide: LapperAccess, useValue: { canEditSetup: () => false } },
+        { provide: MachineCyclesApi, useValue: { recent: () => of([]) } },
         { provide: ScannerApi, useValue: { image: jest.fn(), imageDefaults: () => of({ root: '181-lapper-scanners', imageFile: 'scanner-current.jpg' }) } },
         { provide: ScannerDetailsApi, useValue: { get: jest.fn() } },
         { provide: FanucVariablesApi, useValue: { byMachine } },
@@ -42,7 +44,7 @@ describe('Live machine card polling', () => {
     fixture.detectChanges();
     expect(card.fanucStale()).toBe(true);
     expect(card.fanuc()?.y03_2_stack_inCycle).toBe(true);
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Machine I/O did not refresh');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Did not refresh; showing the last values.');
 
     // The tick during the hung request was skipped; the next one polls again.
     await jest.advanceTimersByTimeAsync(10_000 - LIVE_REQUEST_TIMEOUT_MS);
@@ -63,6 +65,7 @@ describe('Live machine card polling', () => {
       imports: [MachineLiveCardComponent],
       providers: [
         { provide: LapperAccess, useValue: { canEditSetup: () => false } },
+        { provide: MachineCyclesApi, useValue: { recent: () => of([]) } },
         { provide: ScannerApi, useValue: { image, imageDefaults: () => of({ root: '181-lapper-scanners', imageFile: 'scanner-current.jpg' }) } },
         { provide: ScannerDetailsApi, useValue: { get: jest.fn(() => of(null)) } },
         { provide: FanucVariablesApi, useValue: { byMachine: jest.fn(() => of(snapshot(false))) } },
@@ -76,7 +79,7 @@ describe('Live machine card polling', () => {
     await jest.advanceTimersByTimeAsync(0);
     expect(image).toHaveBeenCalledTimes(1);
     const text = () => (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(text()).not.toContain('Live · photoeye on');
+    expect(text()).not.toContain('Live · ');
 
     // The photoeye trips: refresh now, then every second instead of every 5 s.
     fixture.componentRef.setInput('photoeye', true);
@@ -86,7 +89,7 @@ describe('Live machine card polling', () => {
     await jest.advanceTimersByTimeAsync(3 * LIVE_FEED_MS);
     expect(image).toHaveBeenCalledTimes(5);
     fixture.detectChanges();
-    expect(text()).toContain('Live · photoeye on');
+    expect(text()).toContain('Live · 0.5 s');
     expect((fixture.nativeElement as HTMLElement).querySelector('img')?.getAttribute('src')).toBe('blob:capture');
 
     // It clears: back to the chosen 5 s refresh.
@@ -95,7 +98,7 @@ describe('Live machine card polling', () => {
     await jest.advanceTimersByTimeAsync(4000);
     expect(image).toHaveBeenCalledTimes(6);
     fixture.detectChanges();
-    expect(text()).not.toContain('Live · photoeye on');
+    expect(text()).not.toContain('Live · ');
     fixture.destroy();
   });
 
@@ -105,6 +108,7 @@ describe('Live machine card polling', () => {
       imports: [MachineLiveCardComponent],
       providers: [
         { provide: LapperAccess, useValue: { canEditSetup: () => false } },
+        { provide: MachineCyclesApi, useValue: { recent: () => of([]) } },
         { provide: ScannerApi, useValue: { image: jest.fn(() => NEVER), imageDefaults: () => of({ root: '181-lapper-scanners', imageFile: 'scanner-current.jpg' }) } },
         { provide: ScannerDetailsApi, useValue: { get: jest.fn(() => NEVER) } },
         { provide: FanucVariablesApi, useValue: { byMachine: jest.fn(() => NEVER) } },
@@ -125,5 +129,102 @@ describe('Live machine card polling', () => {
     fixture.detectChanges();
     expect(path()).toBe('FTP 181-lapper-scanners/53711922/scanner-current.jpg');
     fixture.destroy();
+  });
+
+  it('lists the newest cycles, re-reads them when a cycle ends, and offers Focus until focused', async () => {
+    jest.useFakeTimers();
+    const cycle = (id: string, serial: string | null, seconds: number | null) =>
+      ({ id, serial_number: serial, timestamp: '2026-11-12T23:30:00Z', cycle_time_s: seconds, gearset: { number: 373 } }) as unknown as MachineCycle;
+    const recent = jest.fn(() => of([cycle('c2', 'DM1A48B0B7', 134), cycle('c1', null, null)]));
+    let inCycle = true;
+    TestBed.configureTestingModule({
+      imports: [MachineLiveCardComponent],
+      providers: [
+        { provide: LapperAccess, useValue: { canEditSetup: () => false } },
+        { provide: MachineCyclesApi, useValue: { recent } },
+        { provide: ScannerApi, useValue: { image: jest.fn(() => NEVER), imageDefaults: () => NEVER } },
+        { provide: ScannerDetailsApi, useValue: { get: jest.fn(() => NEVER) } },
+        { provide: FanucVariablesApi, useValue: { byMachine: jest.fn(() => of(snapshot(inCycle))) } },
+      ],
+    });
+    TestBed.overrideComponent(MachineLiveCardComponent, { set: { imports: [DatePipe], schemas: [NO_ERRORS_SCHEMA] } });
+    const fixture = TestBed.createComponent(MachineLiveCardComponent);
+    fixture.componentRef.setInput('machine', machine);
+    fixture.componentRef.setInput('pollMs', 1000);
+    fixture.detectChanges();
+    await jest.advanceTimersByTimeAsync(0);
+    fixture.detectChanges();
+    expect(recent).toHaveBeenCalledWith('m1', RECENT_CYCLES);
+    const rows = [...(fixture.nativeElement as HTMLElement).querySelectorAll('.gear-live-cycles tbody tr')].map((r) =>
+      [...r.querySelectorAll('td')].slice(1).map((td) => td.textContent?.trim()),
+    );
+    expect(rows).toEqual([
+      ['DM1A48B0B7', '373', '2:14'],
+      ['no serial', '373', '—'],
+    ]);
+
+    // The cycle ends (in cycle goes off): the list is read again without waiting for the timer.
+    inCycle = false;
+    await jest.advanceTimersByTimeAsync(1000);
+    fixture.detectChanges();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(recent).toHaveBeenCalledTimes(2);
+
+    const focus = jest.fn();
+    fixture.componentInstance.focusMachine.subscribe(focus);
+    const button = (fixture.nativeElement as HTMLElement).querySelector('button[data-icon="expand"]') as HTMLButtonElement;
+    button.click();
+    expect(focus).toHaveBeenCalledTimes(1);
+    fixture.componentRef.setInput('focused', true);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('button[data-icon="expand"]')).toBeNull();
+    fixture.destroy();
+  });
+
+  it('groups inputs and outputs separately, with controls always shown to those who may use them', () => {
+    const scanner = { id: 's1', ip: '10.16.82.253', image_folder: null, image_file: null, sn_scanner: 'DM1A48B0B7' } as unknown as ScannerDetail;
+    const render = (canEdit: boolean) => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [MachineLiveCardComponent],
+        providers: [
+          { provide: LapperAccess, useValue: { canEditSetup: () => canEdit } },
+          { provide: MachineCyclesApi, useValue: { recent: () => of([]) } },
+          { provide: ScannerApi, useValue: { image: jest.fn(() => NEVER), imageDefaults: () => NEVER } },
+          { provide: ScannerDetailsApi, useValue: { get: jest.fn(() => NEVER) } },
+          { provide: FanucVariablesApi, useValue: { byMachine: jest.fn(() => NEVER) } },
+        ],
+      });
+      TestBed.overrideComponent(MachineLiveCardComponent, { set: { imports: [DatePipe], schemas: [NO_ERRORS_SCHEMA] } });
+      const fixture = TestBed.createComponent(MachineLiveCardComponent);
+      fixture.componentRef.setInput('machine', { ...machine, scanner_id: 's1', scanner } as unknown as Machine);
+      fixture.componentRef.setInput('fit', true);
+      fixture.componentRef.setInput('collector', {
+        machine_id: 'm1', worker: true, phase: 'collecting',
+        scanner_inputs: { '1': true, '2': false }, scanner_outputs: { '1': true },
+      });
+      fixture.detectChanges();
+      return fixture.nativeElement as HTMLElement;
+    };
+    const pairs = (root: HTMLElement, group: string) =>
+      [...root.querySelectorAll(`[aria-label="${group}"] .gear-io > div`)].map((d) => [
+        (d.querySelector('.gear-long') ?? d.querySelector('dt'))?.textContent?.trim(),
+        d.querySelector('dd')?.textContent?.trim(),
+      ]);
+
+    // Operators: inputs, then outputs as last set here, read-only; no buttons.
+    let root = render(false);
+    expect(pairs(root, 'Scanner inputs')).toEqual([['Photoeye', 'ON'], ['Input 2', 'OFF']]);
+    expect(pairs(root, 'Scanner outputs')).toEqual([['Output 1*', 'ON'], ['Output 2*', '—']]);
+    expect(root.querySelector('gear-scanner-controls')).toBeNull();
+    expect(root.querySelector('article')?.classList).toContain('gear-live-fit');
+
+    // Setup users: each output's buttons sit in the Outputs group, the other actions above Recent cycles.
+    root = render(true);
+    expect(pairs(root, 'Scanner inputs')).toEqual([['Photoeye', 'ON'], ['Input 2', 'OFF']]);
+    expect(root.querySelector('[aria-label="Scanner outputs"] gear-scanner-controls')?.getAttribute('part')).toBe('outputs');
+    expect(root.querySelector('[aria-label="Scanner actions"] gear-scanner-controls')?.getAttribute('part')).toBe('actions');
+    expect(root.querySelector('[role="tab"]')).toBeNull();
+    expect(root.querySelector('[aria-label="Recent cycles"]')).not.toBeNull();
   });
 });
