@@ -172,12 +172,12 @@ describe('Live machine card polling', () => {
 
     const focus = jest.fn();
     fixture.componentInstance.focusMachine.subscribe(focus);
-    const button = (fixture.nativeElement as HTMLElement).querySelector('button[title="Show only this machine"]') as HTMLButtonElement;
+    const button = (fixture.nativeElement as HTMLElement).querySelector('button[data-icon="expand"]') as HTMLButtonElement;
     button.click();
     expect(focus).toHaveBeenCalledTimes(1);
     fixture.componentRef.setInput('focused', true);
     fixture.detectChanges();
-    expect((fixture.nativeElement as HTMLElement).querySelector('button[title="Show only this machine"]')).toBeNull();
+    expect((fixture.nativeElement as HTMLElement).querySelector('button[data-icon="expand"]')).toBeNull();
     fixture.destroy();
   });
 

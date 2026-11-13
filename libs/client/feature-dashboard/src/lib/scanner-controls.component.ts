@@ -1,4 +1,5 @@
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { DanaTooltipDirective } from '@dana/ui';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CollectorMachine, ScannerApi, ToastService } from '@meshforge/client/core';
@@ -6,6 +7,10 @@ import { CollectorMachine, ScannerApi, ToastService } from '@meshforge/client/co
 interface Cmd {
   label: string;
   op: string;
+  /** Dana button icon (data-icon). */
+  icon: string;
+  /** What the button does, shown on hover and focus. */
+  tip: string;
   /** MeshForge button tone; secondary when omitted. */
   cls?: string;
 }
@@ -16,37 +21,37 @@ const GROUPS: { label: string; output?: number; cmds: Cmd[] }[] = [
     label: 'Output 1',
     output: 1,
     cmds: [
-      { label: 'On', op: 'OUTON,1' },
-      { label: 'Off', op: 'OUTOFF,1' },
+      { label: 'On', op: 'OUTON,1', icon: 'power', tip: 'Turn output 1 on (OUTON,1)' },
+      { label: 'Off', op: 'OUTOFF,1', icon: 'power-off', tip: 'Turn output 1 off (OUTOFF,1)' },
     ],
   },
   {
     label: 'Output 2',
     output: 2,
     cmds: [
-      { label: 'On', op: 'OUTON,2' },
-      { label: 'Off', op: 'OUTOFF,2' },
+      { label: 'On', op: 'OUTON,2', icon: 'power', tip: 'Turn output 2 on (OUTON,2)' },
+      { label: 'Off', op: 'OUTOFF,2', icon: 'power-off', tip: 'Turn output 2 off (OUTOFF,2)' },
     ],
   },
   {
     label: 'Tuning',
     cmds: [
-      { label: 'Tune', op: 'TUNE01' },
-      { label: 'Focus', op: 'FTUNE' },
+      { label: 'Tune', op: 'TUNE01', icon: 'tune', tip: 'Tune: the scanner sets its reading conditions for the code in view (TUNE01)' },
+      { label: 'Focus', op: 'FTUNE', icon: 'focus', tip: 'Focus: the scanner adjusts its focus to the part in view (FTUNE)' },
     ],
   },
   {
     label: 'Test',
     cmds: [
-      { label: 'Start', op: 'TEST0' },
-      { label: 'Quit', op: 'QUIT', cls: 'gear-btn-danger' },
+      { label: 'Start', op: 'TEST0', icon: 'play', tip: 'Start the scanner test mode (TEST0)' },
+      { label: 'Quit', op: 'QUIT', icon: 'stop', tip: 'Quit the scanner test mode (QUIT)', cls: 'gear-btn-danger' },
     ],
   },
   {
     label: 'Trigger',
     cmds: [
-      { label: 'On', op: 'LON01', cls: 'gear-btn-success' },
-      { label: 'Off', op: 'LOFF' },
+      { label: 'On', op: 'LON01', icon: 'trigger-on', tip: 'Trigger a read now (LON01)', cls: 'gear-btn-success' },
+      { label: 'Off', op: 'LOFF', icon: 'trigger-off', tip: 'Stop reading (LOFF)' },
     ],
   },
 ];
@@ -58,7 +63,7 @@ const GROUPS: { label: string; output?: number; cmds: Cmd[] }[] = [
     '[class.gear-ctl-actions]': "part() === 'actions'",
   },
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, NgTemplateOutlet],
+  imports: [DatePipe, NgTemplateOutlet, DanaTooltipDirective],
   template: `
     <ng-template #buttons let-g>
       <div class="gear-actions">
@@ -66,6 +71,8 @@ const GROUPS: { label: string; output?: number; cmds: Cmd[] }[] = [
           <button
             type="button"
             class="gear-btn gear-btn-sm {{ buttonClass(g.output, c) }}"
+            [attr.data-icon]="c.icon"
+            [danaTooltip]="pending() === c.op ? 'Sending ' + c.op + '…' : c.tip"
             [disabled]="pending() !== null"
             [attr.aria-pressed]="g.output ? isCurrent(g.output, c) : null"
             [attr.aria-label]="g.label + ' ' + c.label"

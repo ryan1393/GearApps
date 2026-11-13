@@ -67,4 +67,35 @@ describe('Scanner command feedback', () => {
     expect(root.classList).toContain('gear-ctl-actions');
     expect(root.textContent).not.toContain('Highlighted:');
   });
+
+  it('gives every button an icon and a tooltip on hover and keyboard focus', () => {
+    TestBed.configureTestingModule({imports:[ScannerControlsComponent],providers:[{provide:ScannerApi,useValue:{command:jest.fn()}},{provide:ToastService,useValue:{info:jest.fn(),error:jest.fn()}}]});
+    const fixture=TestBed.createComponent(ScannerControlsComponent);
+    fixture.componentRef.setInput('scannerId','scanner-a'); fixture.detectChanges();
+    const root=fixture.nativeElement as HTMLElement;
+    const buttons=[...root.querySelectorAll('button')];
+    expect(buttons.map(b=>b.getAttribute('data-icon'))).toEqual(
+      ['power','power-off','power','power-off','tune','focus','play','stop','trigger-on','trigger-off']);
+    const tune=root.querySelector('button[aria-label="Tuning Tune"]') as HTMLButtonElement;
+    const tip=()=>document.body.querySelector('.dana-tooltip');
+
+    tune.dispatchEvent(new MouseEvent('mouseenter'));
+    expect(tip()?.textContent).toContain('TUNE01');
+    expect(tip()?.getAttribute('role')).toBe('tooltip');
+    expect(tune.getAttribute('aria-describedby')).toBe(tip()?.id);
+    tune.dispatchEvent(new MouseEvent('mouseleave'));
+    expect(tip()).toBeNull();
+    expect(tune.hasAttribute('aria-describedby')).toBe(false);
+
+    // Keyboard users get it on focus, and Escape dismisses it.
+    tune.dispatchEvent(new FocusEvent('focusin'));
+    expect(tip()?.textContent).toContain('Tune');
+    tune.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape'}));
+    expect(tip()).toBeNull();
+
+    // Removed with the button.
+    tune.dispatchEvent(new MouseEvent('mouseenter'));
+    fixture.destroy();
+    expect(tip()).toBeNull();
+  });
 });

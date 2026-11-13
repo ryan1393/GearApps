@@ -1,4 +1,5 @@
 import { DatePipe, DOCUMENT } from '@angular/common';
+import { DanaTooltipDirective } from '@dana/ui';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -60,7 +61,7 @@ export const RECENT_CYCLES_MS = 10_000;
  */
 @Component({
   selector: 'gear-machine-live-card',
-  imports: [DatePipe, StatusBadgeComponent, ScannerControlsComponent, LiveCycleTimerComponent],
+  imports: [DatePipe, DanaTooltipDirective, StatusBadgeComponent, ScannerControlsComponent, LiveCycleTimerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <article
@@ -91,11 +92,12 @@ export const RECENT_CYCLES_MS = 10_000;
             <button
               type="button"
               class="gear-btn gear-btn-secondary gear-btn-sm"
+              data-icon="expand"
+              danaTooltip="Show only this machine, larger"
               (click)="focusMachine.emit()"
               [attr.aria-label]="'Show only ' + (machine().number || machine().ip)"
-              title="Show only this machine"
             >
-              ⤢
+              Focus
             </button>
           }
         </div>
