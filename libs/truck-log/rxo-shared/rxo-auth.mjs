@@ -217,7 +217,39 @@ export function connectionRecoveryStatus(root,role) {
 }
 export function requestConnectionRecovery(root,role) {
   if(!roles.has(role))fail('RXO_AUTH_STATE_REVIEW');
+  try {return recoveryUpdateLock(root,()=>queueConnectionRecoveryLocked(root,role));}catch(error){
+    if(error instanceof LockBusyError)return {role,requested:false,reason:'COOLDOWN',message:'Another recovery request is being processed. Refresh status shortly.'};
+    throw error;
+  }
+}
+/**
+ * Holds an administrator may clear after checking RXO themselves: a verification or access step
+ * that was completed outside Truck Log, or a sign-in page that briefly showed an unexpected host
+ * (an RXO error page, a blank tab). Credentials are never entered on an unapproved host, so one
+ * more attempt is safe; if the cause remains, the attempt stops at the same check and holds again.
+ * Rejected or locked credentials are NOT clearable here: retrying them unchanged can lock the account.
+ */
+const ACKNOWLEDGEABLE_HOLD_CODES=new Set(['RXO_AUTH_VERIFICATION_REQUIRED','RXO_AUTH_ACCESS_REVIEW','RXO_AUTH_ORIGIN_REVIEW']);
+export function acknowledgeAuthHold(root,role) {
+  if(!roles.has(role))fail('RXO_AUTH_STATE_REVIEW');
   try {return recoveryUpdateLock(root,()=>{
+    const hold=readAuthHold(root,role);
+    if(hold&&!ACKNOWLEDGEABLE_HOLD_CODES.has(hold.code)){
+      const blocked=blockedHold(hold,false)||recoveryInfo(false,'STATE_REVIEW','RXO sign-in state requires operator review before recovery.');
+      return {role,requested:false,...blocked};
+    }
+    if(hold)releaseAuthHold(root,role);
+    // The usual cooldown and hourly limit still apply: if no recovery can be queued now, the hold
+    // goes back unchanged, so acknowledging can never bypass those limits.
+    const queued=queueConnectionRecoveryLocked(root,role);
+    if(!queued.requested&&hold)write(root,HOLD,hold);
+    return {...queued,holdCleared:!!hold&&queued.requested};
+  });}catch(error){
+    if(error instanceof LockBusyError)return {role,requested:false,reason:'COOLDOWN',message:'Another recovery request is being processed. Refresh status shortly.'};
+    throw error;
+  }
+}
+function queueConnectionRecoveryLocked(root,role) {
     const status=connectionRecoveryStatus(root,role);if(!status.available)return {role,requested:false,...status};
     const prior=recoveryRecord(root,role), retry=retryRecord(root,role), now=Date.now(), at=new Date(now).toISOString();
     if(matchingQueue(retry,prior)) {
@@ -230,10 +262,6 @@ export function requestConnectionRecovery(root,role) {
     write(root,RETRY,{version:AUTH_VERSION,role,id,requestedAt:at,kind:'connection'});
     return {role,requested:true,requestedAt:at,cooldownUntil:new Date(now+RECOVERY_COOLDOWN_MS).toISOString(),
       message:'Recovery queued. Wait for a verified RXO export before treating the connection as restored.'};
-  });}catch(error){
-    if(error instanceof LockBusyError)return {role,requested:false,reason:'COOLDOWN',message:'Another recovery request is being processed. Refresh status shortly.'};
-    throw error;
-  }
 }
 function startQueuedRecovery(root,role,retry,recovery) {
   matchingQueue(retry,recovery);

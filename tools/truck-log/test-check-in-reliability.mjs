@@ -27,7 +27,7 @@ const mocks = {
   '@angular/common': {}, '@angular/forms': {}, '@truck-log/web/data-access': {},
   '@truck-log/shared/contracts': {}, '@truck-log/web/ui': {}, '@dana/ui': {},
   './dock-status-widget.component': {}, './driver-print-tracker.service': {}, './freight-load-picker.service': {},
-  './combobox-exact-enter.directive': {},
+  './combobox-exact-enter.directive': {}, './combobox-zoom.directive': {},
   rxjs,
 };
 function load(relative) {

@@ -477,6 +477,11 @@ export interface RxoConnectionRecoveryResult {
     message: string;
     requestedAt?: string;
 }
+/** Administrator Restart worker (POST /rxo/control/restart-worker, /rxo/expedite/restart-worker). */
+export interface RxoWorkerRestartResult {
+    status: 'RESTARTED' | 'STARTED' | 'ALREADY_RESTARTING';
+    message: string;
+}
 export type ExpediteAcquisitionStage =
     'PREPARATION' | 'BROWSER_LAUNCH' | 'AUTHENTICATION' | 'LIST_CONTROL' | 'LIST_DATA' |
     'EXPORT_CONTROL' | 'EXPORT_DOWNLOAD' | 'DOWNLOAD_SAVE' | 'WORKBOOK_VALIDATION' | 'PUBLICATION';
