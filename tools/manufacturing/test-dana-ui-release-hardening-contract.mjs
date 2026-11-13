@@ -36,10 +36,12 @@ must(loading.includes("role: 'status'")&&loading.includes("'aria-live': 'polite'
 must(headers.includes("class: 'dana-page-header gear-page-header'"),'Dana page header must own Dana canonical class while preserving Gear compatibility alias.');
 must(consolidation.includes('20 page headers')&&consolidation.includes('DanaPageHeaderComponent'),'Dana page-header consolidation regression contract missing.');
 must(count(allHtml,'danaOperationCard')>=16,'Dana operation cards were removed.');
-// Existing dashboards retain 15 KPI cards; the new plant feature contributes four.
+// Existing dashboards retain 15 KPI cards; plant overview and history each contribute four.
 const plantDashboardHtml=read('libs/manufacturing/frontend/feature-plant-dashboard/src/lib/dashboard.component.html');
+const plantHistoryHtml=read('libs/manufacturing/frontend/feature-plant-dashboard/src/lib/history.component.html');
 must(count(plantDashboardHtml,'danaKpiCard')===4,'Plant dashboard must retain its four Dana KPI cards.');
-must(count(allHtml,'danaKpiCard')-count(plantDashboardHtml,'danaKpiCard')===15,'Existing Dana KPI-card coverage changed unexpectedly.');
+must(count(plantHistoryHtml,'danaKpiCard')===4,'Plant history must retain its four Dana KPI cards.');
+must(count(allHtml,'danaKpiCard')-count(plantDashboardHtml,'danaKpiCard')-count(plantHistoryHtml,'danaKpiCard')===15,'Existing Dana KPI-card coverage changed unexpectedly.');
 // 4 Inventory Control Center + 4 Blade Locations + 4 Admin DSF Mappings,
 // plus 2 Blade availability templates (one repeats by stage) + 3 Shipment totals.
 must(count(allHtml,'danaSummaryCard')===17,'Dana summary-card coverage changed unexpectedly.');

@@ -25,8 +25,8 @@ if (-not (Test-Path -LiteralPath $ManifestPath)) {
 
 $Routes = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
 
-if (@($Routes).Count -ne 122) {
-    throw "Expected 122 routes but manifest contains $(@($Routes).Count)."
+if (@($Routes).Count -ne 125) {
+    throw "Expected 125 routes but manifest contains $(@($Routes).Count)."
 }
 
 $Results = @()
@@ -152,7 +152,10 @@ function Invoke-RequestProbe {
         $headers = $script:AuthHeaders
         $expectedMode = "AUTHENTICATED-GET"
 
-        if ($Route -eq "/api/v1/cutter-config/blade-requirements/resolve") {
+        if ($Route -eq "/api/v1/dsf-counts/history") {
+            $uri = "${uri}?from=2000-01-01&to=2000-01-01&group=day"
+        }
+        elseif ($Route -eq "/api/v1/cutter-config/blade-requirements/resolve") {
             $uri = "${uri}?summaryId=00000000-0000-4000-8000-000000000001&partTypeId=00000000-0000-4000-8000-000000000001"
         }
     }
@@ -316,7 +319,7 @@ catch {
 }
 
 # ------------------------------------------------------------
-# ALL 112 ROUTES
+# ALL DECLARED ROUTES
 # ------------------------------------------------------------
 
 Write-Host ""

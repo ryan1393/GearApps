@@ -14,3 +14,5 @@
 - Manufacturing aliases use `@meshforge/manufacturing/...`. Preserve PostgreSQL workflow transactions and guards. Preserve existing manufacturing API paths, database schema, transaction locks, authentication safeguards and inventory rules.
 - Also run `npm test` and `npm run test:contracts` at the root. Live database tests need a dedicated test database and `MESHFORGE_ALLOW_TEST_ACCOUNTS=YES`.
 - All application releases share `MESHFORGE_VERSION` in `libs/shared/domain`; update with `npm run version:set`.
+
+- For DSF/plant reporting, read `docs/manufacturing/DSF_DATABASE_REFERENCE.md` before changing queries or calculations. It preserves the exported schema, distinct identifier namespaces, five active Cutter Grind sources, named-area coverage gaps, and confirmed versus unresolved report rules. Keep it current as evidence arrives; raw DSF exports and credentials stay outside Git. See `AGENTS.md` and `apps/plant-dashboard/README.md` for the reporting scope.

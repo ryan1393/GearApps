@@ -186,9 +186,11 @@ export const ENVIRONMENT_SETTING_GROUPS: readonly EnvironmentSettingGroup[] = [
   {
     id: 'dsf',
     title: 'DSF production counts',
-    description: 'Read-only counts from Digital Shop Floor for Departments 132 and 152. Nothing is written to DSF.',
+    description: 'Read-only counts from Digital Shop Floor, with optional plant-wide history stored in MeshForge. Nothing is written to DSF.',
     settings: [
       flag('DSF_COUNT_ENABLED', 'Read DSF counts', 'Shows a DSF Count column on Running Machines.'),
+      flag('DSF_HISTORY_ENABLED', 'Keep plant count history', 'Records all DSF sources, including grinders and named departments, in MeshForge. Read DSF counts must also be enabled.'),
+      number('DSF_HISTORY_LOOKBACK_DAYS', 'Recent history to reconcile (days)', '1 to 31; default 7. Initial history and recent corrections are read in bounded windows. Saved records are retained indefinitely.'),
       flag('DSF_CUTTER_WRITE_ENABLED', 'Credit DSF production to cutters', 'Only applies while DSF counts are read.'),
       number('DSF_COUNT_INTERVAL_SECONDS', 'Read every (seconds)', '30 to 3600.'),
       text('DSF_COUNT_MACHINES', 'Reference-mapped machines', 'Machine numbers, comma separated. Machines mapped in DSF Mappings need not be listed.'),

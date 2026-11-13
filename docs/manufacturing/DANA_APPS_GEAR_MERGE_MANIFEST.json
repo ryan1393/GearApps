@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "hashEncoding": "utf8-lf",
   "baseline": "Dana Apps V70.0.0",
-  "releaseVersion": "70.7.0",
+  "releaseVersion": "70.9.0",
   "workspace": "single-root",
   "authoritativeTest": "nx run-many -t test --exclude=*-e2e,lapper-read-py",
   "sourcePackager": "tools/package-release.mjs",
@@ -18,15 +18,15 @@
     "typescript": "5.9.3"
   },
   "rootHashes": {
-    "package.json": "8739576CDF093380711B8177C11B7BF805028B496A482C41B22AC19FD922D717",
-    "package-lock.json": "512B24B7C147E1F056C83F83D5E9D5740B710ACE9DD59BB603266A60FAFB80B4",
+    "package.json": "C93973BE5F345FEAC7C2F93DDB4CA8058A11220C2E6BA9D82D694BDADF8DF1D8",
+    "package-lock.json": "D7A4011C968C01EA1F51A3DABBC55E67DA09105D7D5BD8D39A1D6C6487046886",
     "nx.json": "73A2F6BD253030EAD5B14930871A240C60AFD9B5378940CC224689ABC36E5ACD",
     "tsconfig.base.json": "6A9E5E1D5D20CA726D0653BADAEE41D8C9357B18164EE089DF020DE1F34EF9A2"
   },
   "composeFiles": [
     {
       "path": "compose.yml",
-      "sha256": "E157EEA6DD9F3CF62175E0425FB03C921EE8FA3DBF2F3A2DDAAAAC1668863D2B"
+      "sha256": "9988B9708DB2230F67933CF4721DAEC317EA394B54CC06707C3636B6D6DDA74F"
     }
   ],
   "runtimeProjects": [

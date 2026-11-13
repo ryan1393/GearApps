@@ -82,7 +82,8 @@
           "target": "test",
           "projects": [
             "frontend-util-plant-dashboard",
-            "frontend-data-access-plant-dashboard"
+            "frontend-data-access-plant-dashboard",
+            "frontend-feature-plant-dashboard"
           ]
         }
       ]

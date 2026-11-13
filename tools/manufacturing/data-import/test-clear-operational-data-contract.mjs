@@ -27,6 +27,10 @@ for (const table of ['trays', 'containers', 'blades', 'cutter_builds', 'dana_wor
 }
 const overlap = EMPTY.filter((table) => KEEP.includes(table));
 if (overlap.length) fail(`Tables on both lists: ${overlap.join(', ')}`);
+for (const table of ['dana_dsf_history_source_v1', 'dana_dsf_history_hour_v1', 'dana_dsf_history_slice_v1',
+  'dana_dsf_history_state_v1', 'dana_dsf_history_issue_v1', 'dana_dsf_history_revision_v1']) {
+  if (!KEEP.includes(table) || EMPTY.includes(table)) fail(`${table} must survive operational workflow cleanup`);
+}
 for (const table of ['container_sets', 'container_set_blades']) {
   if (!EMPTY.includes(table)) fail(`${table} must be emptied with containers and blades`);
 }

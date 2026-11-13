@@ -65,6 +65,9 @@ export const KEEP = [
   'gear_environment_settings', 'gear_label_printers',
   'dana_rpa_settings_v1', 'dana_rpa_template_v1', 'dana_rpa_part_map_v1',
   'dana_dsf_machine_mapping_v1', 'dana_dsf_machine_mapping_audit_v1',
+  // The plant archive is independent of blade/cutter workflow resets.
+  'dana_dsf_history_source_v1', 'dana_dsf_history_hour_v1', 'dana_dsf_history_slice_v1',
+  'dana_dsf_history_state_v1', 'dana_dsf_history_issue_v1', 'dana_dsf_history_revision_v1',
   'dana_greenshed_shift_tracking',
 ];
 

@@ -50,6 +50,14 @@ describe('environment settings', () => {
     expect(values['SCANNER_FTP_ROOT']).toBe('181-lapper-scanners');
   });
 
+  it('validates count-history controls without enabling them by default', () => {
+    expect(environmentProblems({ ...VALID, DSF_HISTORY_ENABLED: 'true', DSF_HISTORY_LOOKBACK_DAYS: '7' })).toEqual([]);
+    expect(environmentWithDefaults(VALID)['DSF_HISTORY_ENABLED']).not.toBe('true');
+    for (const value of ['0', '32', 'forever']) {
+      expect(environmentProblems({ ...VALID, DSF_HISTORY_LOOKBACK_DAYS: value })).toHaveLength(1);
+    }
+  });
+
   it('encrypts secrets so only the same signing secret reads them', () => {
     const stored = encryptEnvironmentValue('ftp-password', VALID.JWT_ACCESS_SECRET);
     expect(stored).not.toContain('ftp-password');

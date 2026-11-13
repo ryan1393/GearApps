@@ -50,6 +50,8 @@
     <button type="button" danaTab id="plant-quality-tab" [active]="view() === 'quality'" aria-controls="plant-content" (click)="view.set('quality')">Data quality</button>
   </nav>
   <div class="dana-toolbar plant-header-actions">
+    <button type="button" danaButton="secondary" routerLink="/hourly">Hour by hour</button>
+    <button type="button" danaButton="secondary" routerLink="/history">Count history</button>
     <button type="button" danaButton="secondary" (click)="setKiosk(true)" title="Large numbers without page controls, for a wall display. Open with ?kiosk=1 to start this way.">Wall display</button>
     <button type="button" danaButton="secondary" (click)="logout()">Sign out</button>
   </div>
@@ -123,7 +125,7 @@
           <tr><td>{{ report.department }}</td><td>{{ report.date || 'Unavailable' }} / {{ report.shift ?? '—' }}</td><td>{{ formatTime(report.start) }} – {{ formatTime(report.end) }}</td><td>{{ report.reporting }} / {{ report.machines }}</td><td>{{ report.pieces === null ? '—' : (report.pieces | number) }}</td><td>{{ report.reporting === report.machines ? 'Complete for this group' : 'Partial' }}</td></tr>
         } @empty { <tr><td colspan="6">No machines match the selected filters.</td></tr> }
       </tbody></table></div>
-      <section class="dana-panel dana-panel-padded plant-section-copy"><p class="gear-eyebrow">DOWNTIME & HISTORY</p><h2 class="gear-panel-title">Machine state history is needed next.</h2><p>The current MeshForge feed supplies current-shift piece counts. Downtime, downtime reasons, utilization, and past-shift reports need a verified DSF history feed. They cannot be calculated reliably from gaps between piece counts.</p><span class="dana-status-badge" data-tone="warning">Awaiting DSF history connection</span></section>
+      <section class="dana-panel dana-panel-padded plant-section-copy"><p class="gear-eyebrow">DOWNTIME & HISTORY</p><h2 class="gear-panel-title">Machine state history is needed next.</h2><p>The current feed supplies current-shift piece counts. Saved hourly, shift and daily RUN counts are available under Count history when collection is enabled. Downtime, downtime reasons and utilization still need verified machine state history; gaps between piece counts cannot establish downtime.</p><span class="dana-status-badge" data-tone="warning">Awaiting verified machine state history</span></section>
     } @else {
       <div danaAlert="info"><span><strong>Plant coverage has not been verified.</strong> Machine production uses the {{ snapshot.rows.length }} machines registered in MeshForge. The coverage checks below also look for DSF sources without registered machine links.</span></div>
       <p class="gear-field-help">Output sums each machine’s current shift. Parts may pass through multiple machines; this is not a finished-goods total. Missing counts are not zero production. “Reporting” describes data quality, not whether a machine is running.</p>

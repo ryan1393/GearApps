@@ -1,5 +1,17 @@
 # DSF production counts (Digital Shop Floor / Ignition)
 
+For the reviewed November 2026 offline schema, source identities, counting
+semantics and unresolved historical-report rules, see
+[DSF database reference](DSF_DATABASE_REFERENCE.md). The
+[capture audit](DSF_CAPTURE_PLAN.md) records the remaining evidence and export
+checks. This document describes the existing current-shift integration.
+
+For automatic retention across all DSF sources, including unregistered equipment
+and named areas, see [plant-wide count history](DSF_COUNT_HISTORY.md). It shares
+this reader's validated read-only connection and stores hourly/shift records in
+MeshForge after DSF closes. `DSF_HISTORY_ENABLED=true` enables retention;
+`DSF_HISTORY_LOOKBACK_DAYS` controls recent reconciliation, not record deletion.
+
 MeshForge reads current-shift DSF piece counts for machines across all departments, including individual grinders and cutter builders. Lapper machines (every machine with a Lapper profile in `lapper.machines`) are left out: they get no DSF count, cannot be mapped to a DSF source, and the Lapper app has no DSF badge or Machine DSF Counts page. Machine DSF Counts is available in Blade Tracking, Cutter Builder and Greenshed, with counts beside selected machines and in Admin. Optional cutter crediting applies only to production cutting machines in Departments 132/152. The integration is off by default.
 
 The API **pulls** from DSF on a timer. Nothing pushes to MeshForge, and MeshForge never writes

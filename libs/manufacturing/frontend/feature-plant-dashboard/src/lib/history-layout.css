@@ -1,0 +1,9 @@
+/* History-specific layout; Dana UI owns colors, typography and control styling. */
+.collector-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: var(--dana-section-gap); margin: 0; }
+.collector-facts dt { margin-bottom: var(--dana-space-1); }
+.collector-facts dd { margin: 0; }
+.history-source-filter { flex: 1 1 15rem; min-width: 0; max-width: 25rem; }
+.history-filters input, .history-filters select { min-width: 0; max-width: 100%; box-sizing: border-box; }
+.history-secondary { display: block; margin-top: var(--dana-space-1); }
+.history-number { font-variant-numeric: tabular-nums; white-space: nowrap; }
+@media (max-width: 600px) { .history-filters > label { width: 100%; max-width: none; } .collector-facts { grid-template-columns: 1fr; } }
