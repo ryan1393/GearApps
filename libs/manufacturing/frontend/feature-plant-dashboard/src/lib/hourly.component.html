@@ -1,0 +1,54 @@
+<div class="hourly-screen" [class.hourly-wall]="wallMode()">
+@if (!wallMode()) {
+  <header class="dana-panel dana-panel-padded plant-app-header">
+    <div class="plant-brand"><strong class="gear-eyebrow">MESHFORGE</strong><span class="gear-muted">Plant intelligence</span></div>
+    <nav class="dana-toolbar" aria-label="Plant views"><a danaButton="secondary" routerLink="/">Plant overview</a><a danaButton="primary" routerLink="/hourly" aria-current="page">Hour by hour</a><a danaButton="secondary" routerLink="/history">Count history</a></nav>
+    <div class="dana-toolbar plant-header-actions"><dana-theme-toggle /><button type="button" danaButton="secondary" (click)="logout()">Sign out</button></div>
+  </header>
+}
+<main class="dana-page gear-page plant-page hourly-main" [class.hourly-wall-main]="wallMode()">
+  @if (!wallMode()) {
+    <section danaPageHeader eyebrow="OPERATIONS / HOURLY PRODUCTION" heading="Hour by hour" description="Compare saved production for several machines and operations on one screen.">
+      <div danaPageHeaderAction class="dana-toolbar"><button type="button" danaButton="secondary" (click)="refresh()" [disabled]="loading()">{{ loading() ? 'Refreshing…' : 'Refresh' }}</button><button type="button" danaButton="primary" (click)="wallMode.set(true)" [disabled]="!cards().length">Wall display</button></div>
+    </section>
+    <section class="dana-panel dana-panel-padded hourly-picker" aria-label="Choose hourly charts">
+      <div class="plant-filters">
+        <label class="gear-field">Date · Indianapolis<input class="gear-input" type="date" [max]="today()" [ngModel]="date()" (ngModelChange)="setDate($event)" /></label>
+        <button type="button" danaButton="secondary" (click)="useToday()">{{ followToday() ? 'Following today' : 'Today' }}</button>
+        <label class="gear-field">Find sources in department<select class="gear-select" [ngModel]="department()" (ngModelChange)="department.set($event); candidateKey.set('')"><option value="">All departments</option>@for (name of departments(); track name) { <option [value]="name">{{ name }}</option> }</select></label>
+        <label class="gear-field hourly-source-picker">Machine / DSF source<select class="gear-select" [ngModel]="candidateKey()" (ngModelChange)="candidateKey.set($event)"><option value="">Choose a source to add</option>@for (source of availableSources(); track source.source_key) { <option [value]="source.source_key">{{ sourceLabel(source) }}</option> }</select></label>
+        <button type="button" danaButton="primary" (click)="addSource()" [disabled]="!candidateKey() || cards().length >= 6">Add chart</button>
+      </div>
+      <div class="dana-toolbar hourly-selection-actions">
+        @if (cutterGrind().length && !(cutterGrind().length > 6)) { <button type="button" danaButton="secondary" (click)="selectCutterGrind()">All {{ cutterGrind().length }} Cutter Grind</button> }
+        @if (cutterGrind().length > 6) { <span class="gear-field-help">Choose up to six Cutter Grind sources from the list.</span> }
+        <button type="button" danaButton="secondary" (click)="clearSelection()" [disabled]="!cards().length">Clear selection</button>
+        <label class="gear-field plant-checkbox"><input type="checkbox" [ngModel]="includeInactive()" (ngModelChange)="setIncludeInactive($event)" /> Include inactive and earlier sources</label>
+        <span class="gear-muted">{{ cards().length }} of 6 charts</span>
+      </div>
+      @if (cards().length) { <div class="dana-toolbar hourly-selected" aria-label="Selected sources">@for (card of cards(); track card.source.source_key) { <button type="button" danaButton="secondary" (click)="removeSource(card.source.source_key)" [attr.aria-label]="'Remove ' + card.source.source_name">{{ sourceLabel(card.source) }} <span aria-hidden="true">×</span></button> }</div> }
+      <p class="gear-field-help">The department list filters choices; selected charts stay on screen. Up to six sources can be compared. Sources without a confirmed machine link remain visible.</p>
+    </section>
+  } @else {
+    <header class="dana-toolbar hourly-wall-header"><div><p class="gear-eyebrow">MESHFORGE / HOURLY PRODUCTION</p><h1 class="gear-panel-title">{{ shownDate() }} · {{ cards().length }} source charts <span class="gear-muted">· Indianapolis</span></h1></div><div class="dana-toolbar"><span class="gear-field-help">{{ followToday() ? 'Following today · ' : '' }}{{ loading() ? 'Refreshing…' : 'Refreshes every 30 seconds' }}</span><dana-theme-toggle /><button type="button" danaButton="secondary" (click)="wallMode.set(false)">Exit wall display</button></div></header>
+  }
+  @if (dateError() || selectionError()) { <p danaAlert="warning" role="alert">{{ dateError() || selectionError() }}</p> }
+  @if (sourcesError()) { <p danaAlert="warning" role="status">{{ sourcesError() }}</p> }
+  @if (statusError() && !wallMode()) { <p danaAlert="warning" role="status">{{ statusError() }}</p> }
+  @if (status(); as collector) { @if ((!collector.enabled || !collector.source_reader_enabled || collector.last_failure_code) && !wallMode()) { <p danaAlert="warning">{{ collector.last_failure_code ? 'Collection needs attention.' : 'Collection is not enabled.' }} Stored history remains available. <a routerLink="/history">View collection status</a></p> } }
+  @if (!wallMode()) { <div class="dana-toolbar hourly-chart-heading"><div><h2 class="gear-panel-title">{{ shownDate() }} · Hourly RUN pieces</h2><p class="gear-muted">Same vertical scale on every chart · Counts saved in MeshForge · Refreshes every 30 seconds</p></div><span class="dana-status-badge">○ Recorded zero · ? Unknown · Dashed bars: partial</span></div> }
+  <section class="hourly-grid" [attr.data-card-count]="cards().length" aria-label="Hourly production charts" [attr.aria-busy]="loading()">
+    @for (card of cards(); track card.source.source_key) {
+      <article class="dana-panel dana-panel-padded hourly-card" [attr.aria-label]="card.source.source_name + ' hourly production'">
+        <header class="hourly-card-header"><div class="hourly-card-name"><p class="gear-eyebrow">{{ card.source.department_name || 'Unassigned department' }}</p><h2 class="gear-panel-title">{{ card.source.source_name }}</h2><p class="gear-field-help">{{ card.source.machine_number ? 'Machine ' + card.source.machine_number : 'Machine link not confirmed' }}{{ card.source.asset_number ? ' · ' + card.source.asset_number : '' }}</p></div><div class="hourly-subtotal"><strong>{{ card.chart.knownSubtotal === null ? '—' : (card.chart.knownSubtotal | number) }}</strong><span class="gear-field-help">{{ card.chart.totalCount === null ? 'Known pieces' : 'Day total' }}</span><span class="dana-status-badge" [attr.data-tone]="card.chart.totalCount === null ? null : 'success'">{{ card.chart.totalCount === null ? 'Incomplete day' : 'Complete day' }}</span></div></header>
+        @if (!card.source.active || !card.source.current) { <p class="gear-field-help">{{ !card.source.current ? 'Earlier source identity' : 'Inactive source' }} · Historical records only{{ !includeInactive() ? '; include inactive sources to request this history.' : '.' }}</p> }
+        @if (card.source.duplicate_operation || card.source.review_reason) { <p class="gear-field-help">Source needs review{{ card.source.duplicate_operation ? ' · Shared operation counts are excluded.' : '.' }}</p> }
+        @if (card.error) { <p danaAlert="warning" role="status">{{ card.error }} Other charts remain available.</p> }
+        @else if (loading() && !card.report) { <p class="gear-muted hourly-card-loading" role="status">Loading saved hourly counts…</p> }
+        @else { <gear-hourly-chart [report]="card.report" [sourceKey]="card.source.source_key" [sourceName]="card.source.source_name" [scaleMax]="scaleMax()" [compact]="wallMode()" /> }
+      </article>
+    } @empty { <div danaEmptyState class="hourly-empty">{{ loading() ? 'Loading saved sources…' : 'Choose machines or DSF sources to compare their hourly counts.' }}</div> }
+  </section>
+  <footer class="gear-field-help hourly-footer"><span>{{ captureHealth() }} · Last successful capture: {{ formatTime(status()?.last_success_at ?? null) }}</span><span>○ Recorded zero · ? Unknown · Dashed bars: known counts with partial coverage. RUN pieces do not establish downtime or finished-goods output.</span></footer>
+</main>
+</div>

@@ -27,3 +27,8 @@ plant dashboard's `/history` route. Read
 collection or retention. Preserve whole-window replacement, identity versions,
 explicit gaps and source-close-before-local-write ordering. The scan cursor is
 work progress, not proof of complete source coverage.
+
+The `/hourly` screen compares up to six selected sources using saved hourly
+counts. Read [DSF_HOURLY_DASHBOARD.md](docs/manufacturing/DSF_HOURLY_DASHBOARD.md)
+before changing its chart allocation, selection or coverage rules. It adds no
+DSF queries or new reporting formulas.

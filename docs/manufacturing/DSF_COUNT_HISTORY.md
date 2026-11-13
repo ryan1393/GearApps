@@ -148,6 +148,12 @@ The browser refreshes the saved report/status every 30 seconds while the screen
 is open. These reads query MeshForge history only; they do not force DSF reads.
 Leaving the screen or signing out destroys its polling and cached state.
 
+For several machines on one screen, open **Hour by hour** at `/hourly`.
+It compares up to six selected sources for one Indianapolis calendar day, with
+one chart per source and a compact wall display. Each source uses a separate
+bounded read of this same local archive. See the
+[hourly comparison guide](DSF_HOURLY_DASHBOARD.md).
+
 ## Enable on the MeshForge server
 
 Deploy the rebuilt `meshforge-server` and plant dashboard frontend using the

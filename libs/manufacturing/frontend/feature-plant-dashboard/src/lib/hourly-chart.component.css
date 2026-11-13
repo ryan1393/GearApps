@@ -1,0 +1,6 @@
+:host { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.hourly-svg { display: block; width: 100%; min-height: 0; flex: 1 1 auto; max-height: 260px; }
+.hourly-readout { min-height: 2.5em; margin-block: var(--dana-space-2) 0; }
+.hourly-values { margin-block-start: var(--dana-space-2); }
+.hourly-values table { min-width: 0; }
+.hourly-no-data { margin-block: auto; padding-block: var(--dana-space-6); }

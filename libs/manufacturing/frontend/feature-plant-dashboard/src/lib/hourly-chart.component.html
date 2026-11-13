@@ -1,0 +1,33 @@
+@if (model().buckets.length) {
+  <svg class="hourly-svg" [attr.viewBox]="'0 0 ' + width() + ' 222'" role="group" [attr.aria-label]="sourceName() + ': hourly RUN pieces. Use left and right arrows to inspect hours.'" [attr.aria-describedby]="chartId + '-detail'">
+    <text x="8" y="20" fill="var(--dana-muted)">{{ maximum() | number:'1.0-0' }}</text>
+    <text x="8" y="90" fill="var(--dana-muted)">{{ maximum() / 2 | number:'1.0-1' }}</text>
+    <text x="20" y="160" fill="var(--dana-muted)">0</text>
+    <line x1="44" [attr.x2]="width() - 16" y1="16" y2="16" stroke="var(--dana-border)" stroke-dasharray="3 4" />
+    <line x1="44" [attr.x2]="width() - 16" y1="86" y2="86" stroke="var(--dana-border)" stroke-dasharray="3 4" />
+    <line x1="44" [attr.x2]="width() - 16" y1="156" y2="156" stroke="var(--dana-border)" />
+    @for (bucket of model().buckets; track bucket.key; let index = $index) {
+      <g role="button" [attr.tabindex]="isSelected(index) ? 0 : -1" [attr.data-hour-index]="index" [attr.aria-label]="bucket.detailLabel + ': ' + countText(bucket)" [attr.aria-pressed]="isSelected(index)" (focus)="select(index)" (click)="select(index)" (keydown)="onKeydown($event, index)">
+        <title>{{ bucket.detailLabel }}: {{ countText(bucket) }}</title>
+        <rect [attr.x]="x(index)" y="10" [attr.width]="step() - 3" height="152" fill="transparent" [attr.stroke]="isSelected(index) && engaged() ? 'var(--dana-primary)' : 'none'" stroke-dasharray="3 3" />
+        @if (bucket.knownCount !== null && bucket.knownCount > 0) {
+          <rect [attr.x]="x(index) + 3" [attr.y]="156 - barHeight(bucket)" [attr.width]="barWidth()" [attr.height]="barHeight(bucket)" fill="var(--dana-primary)" [attr.fill-opacity]="bucket.completeness === 'COMPLETE' ? 1 : 0.45" [attr.stroke]="bucket.completeness === 'COMPLETE' ? 'none' : 'var(--dana-primary)'" stroke-dasharray="3 2" />
+        } @else if (bucket.knownCount === 0) {
+          <circle [attr.cx]="x(index) + (step() - 3) / 2" cy="152" r="4" fill="var(--dana-surface)" stroke="var(--dana-primary)" stroke-width="2" [attr.stroke-dasharray]="bucket.completeness === 'COMPLETE' ? null : '2 2'" [attr.opacity]="bucket.completeness === 'COMPLETE' ? 1 : 0.55" />
+        } @else {
+          <text [attr.x]="x(index) + (step() - 3) / 2" y="148" text-anchor="middle" fill="var(--dana-muted)">{{ bucket.completeness === 'REVIEW' ? '!' : '?' }}</text>
+        }
+        @if (bucket.knownCount !== null && bucket.completeness === 'REVIEW') { <text [attr.x]="x(index) + (step() - 3) / 2" [attr.y]="146 - barHeight(bucket)" text-anchor="middle" fill="var(--dana-warning)">!</text> }
+        @if (labelVisible(index)) { <text [attr.transform]="'translate(' + (x(index) + 5) + ',176) rotate(25)'" fill="var(--dana-muted)">{{ axisLabel(bucket) }}</text> }
+      </g>
+    }
+  </svg>
+  <p class="gear-field-help hourly-readout" [id]="chartId + '-detail'" aria-live="polite"><strong>{{ selected()?.label }}</strong> · {{ selected() ? countText(selected()!) : '' }}</p>
+  @if (!compact()) {
+    <details class="hourly-values"><summary>Hourly values and coverage</summary><div danaTableShell><table danaTable>
+      <caption>{{ sourceName() }} · Exact saved hourly counts, Indianapolis time</caption>
+      <thead><tr><th scope="col">Hour</th><th scope="col">RUN pieces / coverage</th></tr></thead>
+      <tbody>@for (bucket of model().buckets; track bucket.key) { <tr><th scope="row">{{ bucket.detailLabel }}</th><td>{{ countText(bucket) }}</td></tr> }</tbody>
+    </table></div></details>
+  }
+} @else { <p class="gear-muted hourly-no-data">{{ model().note }} Missing counts are unknown.</p> }

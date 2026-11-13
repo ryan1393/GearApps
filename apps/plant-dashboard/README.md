@@ -60,6 +60,7 @@ npx nx run-many -t lint --projects=plant-dashboard,frontend-feature-plant-dashbo
 - A plant coverage matrix/export covering the 15 departments visible in the user's DSF reference, every registered department, and additional discovered source departments. Missing catalog departments stay visible; stale or unavailable DSF source totals are unknown rather than zero.
 - Current-shift reports grouped by department, date, shift number, and exact shift boundaries.
 - **Count history** at `/history`: MeshForge retains hourly RUN counts and exact dated-shift slices for every discovered DSF source, including all five grinders, named areas and sources without a registered machine link. Date/department/source filters, daily/hourly/shift reports, coverage states and history CSV exports use that local archive.
+- **Hour by hour** at `/hourly`: compare up to six selected machines or DSF sources on one screen, with a separate hourly production chart for each. Choose one Indianapolis calendar date, filter the source picker by department, or select Cutter Grind together. Wall display mode uses a compact chart grid for a plant monitor. See [hourly comparison](../../docs/manufacturing/DSF_HOURLY_DASHBOARD.md).
 - Machine and department CSV exports honoring the filters, and a printable report.
 - Explicit missing-data and partial-coverage states; unknown production remains blank, not zero. Counts expire at shift end or when source evidence becomes stale, even if HTTP requests keep succeeding.
 

@@ -1,4 +1,4 @@
-# MeshForge 70.8.0
+# MeshForge 70.9.0
 
 MeshForge is the Dana manufacturing workspace for four workflows sharing one API and database:
 **Blade Tracking**, **Cutter Builder**, **Green Shed** and **Lapper**. It belongs to the root MeshForge Nx workspace. All frontends use
@@ -12,6 +12,16 @@ Manufacturing retains PostgreSQL 16 and Docker Compose.
 | Green Shed | 4202 | `../apps/greenshed` |
 | Lapper | 4203 | `../apps/lapper-client` |
 | Shared API | 3333 | `../apps/server` (`/api/v1`, health at `/api/v1/health/ready`) |
+
+## What changed in 70.9.0
+
+- **Hour by hour.** Compare up to six machines or DSF sources on one screen, each
+  with its own hourly RUN-production chart. Choose a day, select Cutter Grind
+  together and open the compact wall display. See
+  [DSF_HOURLY_DASHBOARD.md](DSF_HOURLY_DASHBOARD.md).
+- **Saved count history (70.8.0).** The existing DSF reader can retain hourly,
+  shift and daily counts in MeshForge. Deploy and enable collection with the
+  [count-history instructions](DSF_COUNT_HISTORY.md).
 
 ## What changed in 70.7.0
 

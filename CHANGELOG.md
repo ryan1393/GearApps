@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Hour-by-hour machine comparison (70.9.0).** The plant dashboard can show hourly
+  RUN production for up to six selected sources on one screen, including Cutter
+  Grind and named areas. Each source has its own chart, with shared date controls
+  and a compact wall display. The screen reads the existing MeshForge archive;
+  missing hours, partial coverage and review exclusions remain explicit.
+
 - **Plant count history (70.8.0).** The plant dashboard now retains hourly RUN counts and exact
   dated-shift records for every discovered DSF source, including CutGrind and named areas without
   a registered machine link. Counts survive restarts; bounded backfill and whole-window

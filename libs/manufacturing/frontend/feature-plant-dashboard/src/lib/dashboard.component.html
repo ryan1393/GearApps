@@ -50,6 +50,7 @@
     <button type="button" danaTab id="plant-quality-tab" [active]="view() === 'quality'" aria-controls="plant-content" (click)="view.set('quality')">Data quality</button>
   </nav>
   <div class="dana-toolbar plant-header-actions">
+    <button type="button" danaButton="secondary" routerLink="/hourly">Hour by hour</button>
     <button type="button" danaButton="secondary" routerLink="/history">Count history</button>
     <button type="button" danaButton="secondary" (click)="setKiosk(true)" title="Large numbers without page controls, for a wall display. Open with ?kiosk=1 to start this way.">Wall display</button>
     <button type="button" danaButton="secondary" (click)="logout()">Sign out</button>

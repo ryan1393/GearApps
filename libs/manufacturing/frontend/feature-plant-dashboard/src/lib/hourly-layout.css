@@ -1,0 +1,31 @@
+.hourly-main { display: flex; flex-direction: column; gap: var(--dana-section-gap); }
+.hourly-picker { display: grid; gap: var(--dana-form-gap); }
+.hourly-source-picker { flex: 1 1 16rem; }
+.hourly-selection-actions, .hourly-selected { flex-wrap: wrap; }
+.hourly-chart-heading, .hourly-wall-header { justify-content: space-between; align-items: center; }
+.hourly-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--dana-section-gap); min-height: 0; }
+.hourly-card { display: flex; flex-direction: column; min-width: 0; min-height: 0; gap: var(--dana-space-3); }
+.hourly-card-header { display: flex; justify-content: space-between; gap: var(--dana-space-3); }
+.hourly-card-name { min-width: 0; overflow-wrap: anywhere; }
+.hourly-subtotal { display: grid; align-content: start; justify-items: end; gap: var(--dana-space-1); flex-shrink: 0; }
+.hourly-card gear-hourly-chart { flex: 1; }
+.hourly-card-loading { margin-block: auto; padding-block: var(--dana-space-6); }
+.hourly-empty { grid-column: 1 / -1; }
+.hourly-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--dana-space-2); }
+.hourly-wall { height: 100dvh; }
+.hourly-wall-main { height: 100%; padding: var(--dana-space-4); gap: var(--dana-space-3); }
+.hourly-wall-header { flex: 0 0 auto; flex-wrap: nowrap; }
+.hourly-wall .hourly-grid { flex: 1; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: var(--dana-space-3); }
+.hourly-wall .hourly-grid[data-card-count="1"] { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+.hourly-wall .hourly-grid[data-card-count="2"], .hourly-wall .hourly-grid[data-card-count="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.hourly-wall .hourly-grid[data-card-count="2"], .hourly-wall .hourly-grid[data-card-count="3"] { grid-template-rows: minmax(0, 1fr); }
+.hourly-wall .hourly-card { padding: var(--dana-space-3); gap: var(--dana-space-1); }
+.hourly-wall .hourly-footer { flex: 0 0 auto; }
+@media (min-width: 1800px) { .hourly-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 1000px) {
+  .hourly-grid { grid-template-columns: minmax(0, 1fr); }
+  .hourly-wall { height: auto; min-height: 100dvh; }
+  .hourly-wall .hourly-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+  .hourly-wall .hourly-card { min-height: 330px; }
+  .hourly-wall-header { flex-wrap: wrap; }
+}
