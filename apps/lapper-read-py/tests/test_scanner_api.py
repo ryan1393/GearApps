@@ -108,6 +108,28 @@ class ScannerTests(unittest.TestCase):
         self.assertEqual(scanner.read(ScannerState(None, None)), ScannerState(None, None))
         self.assertEqual(fake.commands, ["TUNE01", "LON01", "INCHK,1", "AMON"])
 
+    def test_input_2_and_the_outputs_last_switched_here(self):
+        fake = ScriptedScanner([
+            [b"OK,INCHK,ON\r"],
+            [b"OK,OUTON\r"],
+            [b"ER,OUTOFF,02\r"],
+            [b"OK,ALLOFF\r"],
+        ])
+        fake.start()
+        scanner = Scanner("127.0.0.1", fake.port, 2)
+        self.addCleanup(scanner.close)
+        self.assertEqual((scanner.input2, scanner.outputs), (None, {}))
+        self.assertIs(scanner.check_input(2), True)
+        self.assertIs(scanner.input2, True)
+        scanner.command("OUTON,1")
+        self.assertEqual(scanner.outputs, {1: True})
+        scanner.command("OUTOFF,1")  # rejected: still shown as on
+        self.assertEqual(scanner.outputs, {1: True})
+        scanner.command("ALLOFF")
+        self.assertEqual(scanner.outputs, {1: False, 2: False, 3: False})
+        self.assertIsNotNone(scanner.outputs_set_at)
+        self.assertEqual(fake.commands, ["INCHK,2", "OUTON,1", "OUTOFF,1", "ALLOFF"])
+
     def test_dashboard_command_rejections_and_bad_op_codes(self):
         fake = ScriptedScanner([[b"ER,FTUNE,02\r"]])
         fake.start()

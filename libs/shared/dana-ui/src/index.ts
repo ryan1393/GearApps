@@ -21,6 +21,7 @@ export type { DanaTone } from './lib/components/data/dana-tone.directive';
 export { DanaLoadingStateDirective } from './lib/components/feedback/dana-loading-state.directive';
 export { DanaEmptyStateDirective } from './lib/components/feedback/dana-empty-state.directive';
 export { DanaTableEmptyDirective } from './lib/components/feedback/dana-table-empty.directive';
+export { DanaTooltipDirective } from './lib/components/feedback/dana-tooltip.directive';
 
 export { DanaSummaryGridDirective } from './lib/components/data/dana-summary-grid.directive';
 export { DanaSummaryCardDirective } from './lib/components/data/dana-summary-card.directive';

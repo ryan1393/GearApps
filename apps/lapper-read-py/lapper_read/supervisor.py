@@ -337,6 +337,10 @@ class Supervisor:
                 "scanner_last_seen": status.get("scanner_last_seen"),
                 # The scanner's input 1 (photoeye): the live view refreshes the image fast while on.
                 "photoeye": status.get("photoeye"),
+                # Inputs read from the scanner; outputs as last switched through MeshForge.
+                "scanner_inputs": status.get("scanner_inputs"),
+                "scanner_outputs": status.get("scanner_outputs"),
+                "scanner_outputs_set_at": status.get("scanner_outputs_set_at"),
             }
             for slot in self._slots.values()
             for status in [slot.status()]

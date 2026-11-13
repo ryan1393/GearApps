@@ -104,10 +104,37 @@ class Scanner:
         self._input1 = Channel(host, input1_port, timeout_s)
         #: Input 1 (the photoeye) at the last poll: True on, False off, None unknown.
         self.photoeye: bool | None = None
+        #: Input 2 at its last check (polled less often than input 1).
+        self.input2: bool | None = None
+        #: Outputs as last switched through this connection (OUTON/OUTOFF/ALLON/ALLOFF). The scanner
+        #: has no command to read them back and may switch them itself, so this is "last set here".
+        self.outputs: dict[int, bool] = {}
+        self.outputs_set_at: float | None = None
 
     def close(self) -> None:
         self._input1.close()
-        self.photoeye = None
+        self.photoeye = self.input2 = None
+
+    def check_input(self, terminal: int) -> bool | None:
+        """INCHK,<terminal>: True on, False off, None for any other answer."""
+        reply = self._input1.exchange(f"INCHK,{terminal}", expect=lambda f: "INCHK" in f or _is_error(f))
+        state = True if "OK,INCHK,ON" in reply else False if "OK,INCHK,OFF" in reply else None
+        if terminal == 2:
+            self.input2 = state
+        return state
+
+    def _remember_output(self, op: str, reply: str) -> None:
+        if not reply.startswith("OK"):
+            return
+        match = re.fullmatch(r"OUT(ON|OFF),(\d)", op)
+        if match:
+            self.outputs[int(match.group(2))] = match.group(1) == "ON"
+        elif op in ("ALLON", "ALLOFF"):
+            for terminal in (1, 2, 3):
+                self.outputs[terminal] = op == "ALLON"
+        else:
+            return
+        self.outputs_set_at = time.time()
 
     def command(self, op: str) -> str:
         """Sends a dashboard op code (Tune, Focus, outputs, trigger, test) on the connection the
@@ -118,7 +145,9 @@ class Scanner:
         slow = op.startswith(SLOW_COMMANDS)
         timeout_s = max(self._input1.timeout_s, SLOW_COMMAND_TIMEOUT_S) if slow else None
         expect = _is_read_result if op.startswith("LON") else _is_reply
-        return self._input1.exchange(op, expect=expect, timeout_s=timeout_s)
+        reply = self._input1.exchange(op, expect=expect, timeout_s=timeout_s)
+        self._remember_output(op, reply)
+        return reply
 
     def read(self, previous: ScannerState) -> ScannerState:
         # A serial in place of the input state is still taken as a scan, as before.

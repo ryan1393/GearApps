@@ -24,6 +24,10 @@ class StubScanner:
             raise OSError("scanner offline")
         return self.state
 
+    def check_input(self, terminal):
+        self.inputs_checked = getattr(self, "inputs_checked", 0) + 1
+        return False
+
     def command(self, op):
         if self.fail:
             raise OSError("scanner offline")
@@ -59,10 +63,24 @@ class WorkerTests(unittest.TestCase):
             self.worker.scanner_command("FTUNE", timeout_s=5)
 
     def test_status_reports_the_photoeye_only_while_the_scanner_is_online(self):
-        self.scanner.photoeye = True
-        self.assertIs(self.worker.status()["photoeye"], True)
+        self.scanner.photoeye, self.scanner.input2 = True, False
+        self.scanner.outputs, self.scanner.outputs_set_at = {2: True}, 1_700_000_000.0
+        status = self.worker.status()
+        self.assertIs(status["photoeye"], True)
+        self.assertEqual(status["scanner_inputs"], {"1": True, "2": False})
+        self.assertEqual(status["scanner_outputs"], {"2": True})
+        self.assertEqual(status["scanner_outputs_set_at"], "2023-11-14T22:13:20.000Z")
         self.worker.scanner_monitor.read_failed(OSError("gone"))
-        self.assertIsNone(self.worker.status()["photoeye"])
+        status = self.worker.status()
+        self.assertIsNone(status["photoeye"])
+        self.assertEqual(status["scanner_inputs"], {"1": None, "2": None})
+        self.assertEqual(status["scanner_outputs"], {"2": True})  # last set here; not read from the scanner
+
+    def test_input_2_is_checked_every_few_scanner_polls(self):
+        from lapper_read.worker import INPUT2_EVERY
+        self._start(self.worker)
+        self._wait(lambda: getattr(self.scanner, "inputs_checked", 0) >= 2)
+        self.assertGreaterEqual(self.worker._scanner_polls, 2 * INPUT2_EVERY)
 
     def test_a_machine_without_a_scanner_refuses_scanner_commands(self):
         fanuc = Fanuc(self.transport, "10.0.0.1", 1000, self.api)
