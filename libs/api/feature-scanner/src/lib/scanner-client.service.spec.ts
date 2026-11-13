@@ -229,11 +229,11 @@ describe('ScannerClientService shared image fetches', () => {
     expect(images).toEqual(Array(3).fill({ data: jpeg, contentType: 'image/jpeg' }));
   });
 
-  it('serves the cached image for at least the 1 s poll period', async () => {
-    expect(ScannerClientService.IMAGE_TTL_MS).toBeGreaterThanOrEqual(1000);
+  it('shares a capture for less than the 0.5 s live refresh, then reads the newest upload', async () => {
+    expect(ScannerClientService.IMAGE_TTL_MS).toBeLessThan(500);
     const service = client();
     await finish(service.getLatestImage(host));
-    jest.spyOn(Date, 'now').mockReturnValue(1_000_000 + 1000);
+    jest.spyOn(Date, 'now').mockReturnValue(1_000_000 + ScannerClientService.IMAGE_TTL_MS - 1);
     await service.getLatestImage(host);
     expect(logins).toHaveBeenCalledTimes(1);
     jest.spyOn(Date, 'now').mockReturnValue(1_000_000 + ScannerClientService.IMAGE_TTL_MS);

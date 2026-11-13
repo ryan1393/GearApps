@@ -23,6 +23,14 @@ export interface CollectorMachine {
   scanner_last_seen?: string | null;
   /** The scanner's input 1 (photoeye) at the last poll; null without a scanner or while offline. */
   photoeye?: boolean | null;
+  /** Scanner inputs "1" (the photoeye) and "2": true on, false off, null unknown or offline. */
+  scanner_inputs?: Record<string, boolean | null> | null;
+  /**
+   * Scanner outputs as last switched through MeshForge (Scanner controls). The scanner cannot
+   * report them and may switch them itself, so these are not read from it. Missing: never set.
+   */
+  scanner_outputs?: Record<string, boolean> | null;
+  scanner_outputs_set_at?: string | null;
 }
 
 export interface CollectorStatus {

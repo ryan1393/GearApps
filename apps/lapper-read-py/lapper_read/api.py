@@ -268,3 +268,8 @@ class MeshForgeApi:
 
 def utc_now() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+
+def utc_iso(timestamp: float) -> str:
+    """A Unix time as the same UTC ISO text as utc_now()."""
+    return datetime.fromtimestamp(timestamp, timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")

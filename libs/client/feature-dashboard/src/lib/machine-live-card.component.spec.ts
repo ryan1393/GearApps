@@ -1,9 +1,10 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FanucVariablesApi, LapperAccess, ScannerApi, ScannerDetailsApi } from '@meshforge/client/core';
-import { Machine, MachineFanucVariable, ScannerDetail } from '@meshforge/shared/domain';
+import { FanucVariablesApi, LapperAccess, MachineCyclesApi, ScannerApi, ScannerDetailsApi } from '@meshforge/client/core';
+import { Machine, MachineCycle, MachineFanucVariable, ScannerDetail } from '@meshforge/shared/domain';
 import { NEVER, Observable, of } from 'rxjs';
-import { LIVE_FEED_MS, LIVE_REQUEST_TIMEOUT_MS, MachineLiveCardComponent } from './machine-live-card.component';
+import { DatePipe } from '@angular/common';
+import { LIVE_FEED_MS, LIVE_REQUEST_TIMEOUT_MS, MachineLiveCardComponent, RECENT_CYCLES } from './machine-live-card.component';
 
 describe('Live machine card polling', () => {
   const machine = { id: 'm1', number: '01-094-101', ip: '10.0.0.1', status: 'active', scanner_id: null, scanner: null } as unknown as Machine;
@@ -20,6 +21,7 @@ describe('Live machine card polling', () => {
       imports: [MachineLiveCardComponent],
       providers: [
         { provide: LapperAccess, useValue: { canEditSetup: () => false } },
+        { provide: MachineCyclesApi, useValue: { recent: () => of([]) } },
         { provide: ScannerApi, useValue: { image: jest.fn(), imageDefaults: () => of({ root: '181-lapper-scanners', imageFile: 'scanner-current.jpg' }) } },
         { provide: ScannerDetailsApi, useValue: { get: jest.fn() } },
         { provide: FanucVariablesApi, useValue: { byMachine } },
@@ -63,6 +65,7 @@ describe('Live machine card polling', () => {
       imports: [MachineLiveCardComponent],
       providers: [
         { provide: LapperAccess, useValue: { canEditSetup: () => false } },
+        { provide: MachineCyclesApi, useValue: { recent: () => of([]) } },
         { provide: ScannerApi, useValue: { image, imageDefaults: () => of({ root: '181-lapper-scanners', imageFile: 'scanner-current.jpg' }) } },
         { provide: ScannerDetailsApi, useValue: { get: jest.fn(() => of(null)) } },
         { provide: FanucVariablesApi, useValue: { byMachine: jest.fn(() => of(snapshot(false))) } },
@@ -76,7 +79,7 @@ describe('Live machine card polling', () => {
     await jest.advanceTimersByTimeAsync(0);
     expect(image).toHaveBeenCalledTimes(1);
     const text = () => (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(text()).not.toContain('Live · photoeye on');
+    expect(text()).not.toContain('Live · every');
 
     // The photoeye trips: refresh now, then every second instead of every 5 s.
     fixture.componentRef.setInput('photoeye', true);
@@ -86,7 +89,7 @@ describe('Live machine card polling', () => {
     await jest.advanceTimersByTimeAsync(3 * LIVE_FEED_MS);
     expect(image).toHaveBeenCalledTimes(5);
     fixture.detectChanges();
-    expect(text()).toContain('Live · photoeye on');
+    expect(text()).toContain('Live · every 0.5 s');
     expect((fixture.nativeElement as HTMLElement).querySelector('img')?.getAttribute('src')).toBe('blob:capture');
 
     // It clears: back to the chosen 5 s refresh.
@@ -95,7 +98,7 @@ describe('Live machine card polling', () => {
     await jest.advanceTimersByTimeAsync(4000);
     expect(image).toHaveBeenCalledTimes(6);
     fixture.detectChanges();
-    expect(text()).not.toContain('Live · photoeye on');
+    expect(text()).not.toContain('Live · every');
     fixture.destroy();
   });
 
@@ -105,6 +108,7 @@ describe('Live machine card polling', () => {
       imports: [MachineLiveCardComponent],
       providers: [
         { provide: LapperAccess, useValue: { canEditSetup: () => false } },
+        { provide: MachineCyclesApi, useValue: { recent: () => of([]) } },
         { provide: ScannerApi, useValue: { image: jest.fn(() => NEVER), imageDefaults: () => of({ root: '181-lapper-scanners', imageFile: 'scanner-current.jpg' }) } },
         { provide: ScannerDetailsApi, useValue: { get: jest.fn(() => NEVER) } },
         { provide: FanucVariablesApi, useValue: { byMachine: jest.fn(() => NEVER) } },
@@ -124,6 +128,56 @@ describe('Live machine card polling', () => {
     } as unknown as Machine);
     fixture.detectChanges();
     expect(path()).toBe('FTP 181-lapper-scanners/53711922/scanner-current.jpg');
+    fixture.destroy();
+  });
+
+  it('lists the newest cycles, re-reads them when a cycle ends, and offers Focus until focused', async () => {
+    jest.useFakeTimers();
+    const cycle = (id: string, serial: string | null, seconds: number | null) =>
+      ({ id, serial_number: serial, timestamp: '2026-11-12T23:30:00Z', cycle_time_s: seconds, gearset: { number: 373 } }) as unknown as MachineCycle;
+    const recent = jest.fn(() => of([cycle('c2', 'DM1A48B0B7', 134), cycle('c1', null, null)]));
+    let inCycle = true;
+    TestBed.configureTestingModule({
+      imports: [MachineLiveCardComponent],
+      providers: [
+        { provide: LapperAccess, useValue: { canEditSetup: () => false } },
+        { provide: MachineCyclesApi, useValue: { recent } },
+        { provide: ScannerApi, useValue: { image: jest.fn(() => NEVER), imageDefaults: () => NEVER } },
+        { provide: ScannerDetailsApi, useValue: { get: jest.fn(() => NEVER) } },
+        { provide: FanucVariablesApi, useValue: { byMachine: jest.fn(() => of(snapshot(inCycle))) } },
+      ],
+    });
+    TestBed.overrideComponent(MachineLiveCardComponent, { set: { imports: [DatePipe], schemas: [NO_ERRORS_SCHEMA] } });
+    const fixture = TestBed.createComponent(MachineLiveCardComponent);
+    fixture.componentRef.setInput('machine', machine);
+    fixture.componentRef.setInput('pollMs', 1000);
+    fixture.detectChanges();
+    await jest.advanceTimersByTimeAsync(0);
+    fixture.detectChanges();
+    expect(recent).toHaveBeenCalledWith('m1', RECENT_CYCLES);
+    const rows = [...(fixture.nativeElement as HTMLElement).querySelectorAll('.gear-live-cycles tbody tr')].map((r) =>
+      [...r.querySelectorAll('td')].slice(1).map((td) => td.textContent?.trim()),
+    );
+    expect(rows).toEqual([
+      ['DM1A48B0B7', '373', '2:14'],
+      ['no serial', '373', '—'],
+    ]);
+
+    // The cycle ends (in cycle goes off): the list is read again without waiting for the timer.
+    inCycle = false;
+    await jest.advanceTimersByTimeAsync(1000);
+    fixture.detectChanges();
+    await jest.advanceTimersByTimeAsync(0);
+    expect(recent).toHaveBeenCalledTimes(2);
+
+    const focus = jest.fn();
+    fixture.componentInstance.focusMachine.subscribe(focus);
+    const button = (fixture.nativeElement as HTMLElement).querySelector('button[title="Show only this machine"]') as HTMLButtonElement;
+    button.click();
+    expect(focus).toHaveBeenCalledTimes(1);
+    fixture.componentRef.setInput('focused', true);
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('button[title="Show only this machine"]')).toBeNull();
     fixture.destroy();
   });
 });

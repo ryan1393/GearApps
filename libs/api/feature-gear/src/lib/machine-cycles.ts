@@ -5,14 +5,17 @@ import {
   UpdateMachineCycleDto,
 } from '@meshforge/api/data-access';
 import { CycleHistoryPage, LapperProduction, MachineCycle, SETTING_CHANGE_HOURS, SettingChanges } from '@meshforge/shared/domain';
-import { UseInterceptors, Controller, Get, Injectable, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import { BadRequestException, UseInterceptors, Controller, Get, Injectable, Param, ParseUUIDPipe, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+/** The most cycles `GET machine-cycle/machine/:id?limit=` returns. */
+export const RECENT_CYCLES_MAX = 200;
 @Injectable()
 export abstract class MachineCyclesService extends CrudService<MachineCycle> {
   /** One page of every cycle, newest first. */
   abstract findPage(page: number, pageSize: number): Promise<MachineCycle[]>;
   abstract findByGearset(gearsetId: string): Promise<MachineCycle[]>;
-  abstract findByMachine(machineId: string): Promise<MachineCycle[]>;
+  /** Newest first; `limit` keeps only that many (every cycle without it). */
+  abstract findByMachine(machineId: string, limit?: number): Promise<MachineCycle[]>;
   abstract production(): Promise<LapperProduction>;
   abstract settingChanges(hours: number, limit: number): Promise<SettingChanges>;
   abstract history(machineId: string, gearsetId: string): Promise<MachineCycle[]>;
@@ -67,13 +70,18 @@ export class MachineCyclesController extends crudController<MachineCycle>({
     return this.service.findByGearset(gearsetId);
   }
   @Get('machine/:machineId')
-  @ApiOperation({ summary: 'Cycles for a machine (newest first)' })
+  @ApiOperation({ summary: 'Cycles for a machine (newest first); limit keeps only the newest few' })
+  @ApiQuery({ name: 'limit', required: false, type: Number, description: `1 to ${RECENT_CYCLES_MAX}; every cycle when omitted` })
   @ApiOkResponse({ type: MachineCycleDto, isArray: true })
   findByMachine(
     @Param('machineId', ParseUUIDPipe)
     machineId: string,
+    @Query('limit') limit?: string,
   ): Promise<MachineCycle[]> {
-    return this.service.findByMachine(machineId);
+    if (limit === undefined || limit === '') return this.service.findByMachine(machineId);
+    const parsed = Number(limit);
+    if (!Number.isInteger(parsed) || parsed < 1) throw new BadRequestException('limit must be a whole number from 1');
+    return this.service.findByMachine(machineId, Math.min(parsed, RECENT_CYCLES_MAX));
   }
   @Get('history/:machineId/:gearsetId')
   @ApiOperation({ summary: 'Most recent 200 cycles for a machine and gearset' })

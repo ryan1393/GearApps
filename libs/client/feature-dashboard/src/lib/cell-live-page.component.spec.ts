@@ -1,6 +1,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router, RouterLink } from '@angular/router';
+import { DanaPageHeaderComponent } from '@dana/ui';
+import { EmptyStateComponent } from '@meshforge/client/ui';
 import { CollectorApi, CollectorStatus, MachinesApi } from '@meshforge/client/core';
 import { Machine } from '@meshforge/shared/domain';
 import { of, Subject, throwError } from 'rxjs';
@@ -53,5 +56,36 @@ describe('Live cell loading states', () => {
     expect([...page.photoeyes()]).toEqual([]);
     fixture.destroy();
     jest.useRealTimers();
+  });
+
+  it('shows one machine on its own when focused, with a way back to the cell', () => {
+    const machines = [
+      { id: 'm1', number: '01-094-292', ip: '10.16.81.212', cell: '1', status: 'Active' },
+      { id: 'm2', number: '01-094-305', ip: '10.16.81.213', cell: '1', status: 'Active' },
+    ] as unknown as Machine[];
+    TestBed.configureTestingModule({ imports:[CellLivePageComponent], providers:[provideRouter([]),{provide:MachinesApi,useValue:{list:()=>of(machines)}},{provide:CollectorApi,useValue:{status:()=>of({last_discovery:null,machines:[]})}}] });
+    TestBed.overrideComponent(CellLivePageComponent, { set: { imports: [RouterLink, DanaPageHeaderComponent, EmptyStateComponent], schemas: [NO_ERRORS_SCHEMA] } });
+    const fixture = TestBed.createComponent(CellLivePageComponent);
+    fixture.componentRef.setInput('cell','1');
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const cards = () => root.querySelectorAll('gear-machine-live-card').length;
+    expect(cards()).toBe(2);
+    expect(root.textContent).toContain('All cells');
+
+    fixture.componentRef.setInput('machine','m2');
+    fixture.detectChanges();
+    expect(cards()).toBe(1);
+    expect(root.querySelector('h1')?.textContent).toContain('01-094-305');
+    expect(root.textContent).toContain('Back to cell 1');
+
+    // An id from another cell (an old bookmark) shows the whole cell.
+    fixture.componentRef.setInput('machine','other');
+    fixture.detectChanges();
+    expect(cards()).toBe(2);
+
+    const navigate = jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    (fixture.componentInstance as unknown as { focusOn(id: string): void }).focusOn('m1');
+    expect(navigate).toHaveBeenCalledWith([], expect.objectContaining({ queryParams: { machine: 'm1' }, queryParamsHandling: 'merge' }));
   });
 });

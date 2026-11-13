@@ -1,4 +1,4 @@
-import { DOCUMENT } from '@angular/common';
+import { DatePipe, DOCUMENT } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -8,18 +8,21 @@ import {
   inject,
   input,
   OnDestroy,
+  output,
   signal,
   untracked,
 } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import {
+  CollectorMachine,
   FanucVariablesApi,
+  MachineCyclesApi,
   LapperAccess,
   ScannerApi,
   ScannerDetailsApi,
 } from '@meshforge/client/core';
 import { LiveCycleTimerComponent, StatusBadgeComponent, ValueFieldComponent } from '@meshforge/client/ui';
-import { Machine, MachineFanucVariable, resolveScannerImagePath, ScannerDetail } from '@meshforge/shared/domain';
+import { Machine, MachineCycle, MachineFanucVariable, resolveScannerImagePath, ScannerDetail } from '@meshforge/shared/domain';
 import {
   catchError,
   combineLatest,
@@ -28,6 +31,7 @@ import {
   filter,
   forkJoin,
   fromEvent,
+  pairwise,
   interval,
   map,
   merge,
@@ -42,10 +46,13 @@ import { ScannerControlsComponent } from './scanner-controls.component';
 export const LIVE_REQUEST_TIMEOUT_MS = 6_000;
 const NOT_REFRESHED = 'not-refreshed' as const;
 /**
- * Refresh period while the scanner's photoeye is on. The API keeps each capture for its 1 s cache,
- * and the scanner uploads one image per read, so refreshing faster would show nothing new.
+ * Refresh period while the scanner's photoeye is on. The API keeps each capture for less than this
+ * (ScannerClientService.IMAGE_TTL_MS), so every live refresh reads the newest upload.
  */
-export const LIVE_FEED_MS = 1_000;
+export const LIVE_FEED_MS = 500;
+/** How many recent cycles a card lists, and how often it re-reads them (also right after a cycle ends). */
+export const RECENT_CYCLES = 5;
+export const RECENT_CYCLES_MS = 10_000;
 
 /**
  * Live tile for one machine: scanner capture, serial-number slots and Fanuc I/O.
@@ -53,10 +60,14 @@ export const LIVE_FEED_MS = 1_000;
  */
 @Component({
   selector: 'gear-machine-live-card',
-  imports: [StatusBadgeComponent, ValueFieldComponent, ScannerControlsComponent, LiveCycleTimerComponent],
+  imports: [DatePipe, StatusBadgeComponent, ValueFieldComponent, ScannerControlsComponent, LiveCycleTimerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <article class="dana-card" [attr.data-tone]="fanuc()?.y03_2_stack_inCycle ? 'success' : null">
+    <article
+      class="dana-card"
+      [class.gear-live-focused]="focused()"
+      [attr.data-tone]="fanuc()?.y03_2_stack_inCycle ? 'success' : null"
+    >
       <header class="dana-card-header">
         <div>
           <span class="dana-card-eyebrow">{{
@@ -71,9 +82,27 @@ export const LIVE_FEED_MS = 1_000;
           </span>
         </div>
         <div class="gear-live-status">
-          <gear-status-badge [status]="machine().status" />
+          @if (live()) {
+            <span class="gear-live-feed dana-status-badge" data-tone="success" role="status"
+              >Live · every {{ periodLabel() }}</span
+            >
+          }
+          <div class="gear-live-corner">
+            <gear-status-badge [status]="machine().status" />
+            @if (!focused()) {
+              <button
+                type="button"
+                class="gear-btn gear-btn-secondary gear-btn-sm"
+                (click)="focusMachine.emit()"
+                [attr.aria-label]="'Show only ' + (machine().number || machine().ip)"
+                title="Show only this machine"
+              >
+                ⤢ Focus
+              </button>
+            }
+          </div>
           @if (lastUpdate()) {
-            <small class="gear-muted" title="Last refresh">{{ lastUpdate() }}</small>
+            <small class="gear-muted" title="Last refresh">Updated {{ lastUpdate() }}</small>
           }
         </div>
       </header>
@@ -81,9 +110,6 @@ export const LIVE_FEED_MS = 1_000;
       <div class="gear-live-body">
         <div class="gear-live-media">
           <div class="dana-media-frame gear-live-image">
-          @if (live()) {
-            <span class="gear-live-feed dana-status-badge" data-tone="success" role="status">Live · photoeye on</span>
-          }
           @if (imageUrl()) {
             <img [src]="imageUrl()" alt="Latest scanner capture for {{ machine().number }}" />
             @if (imageError()) {
@@ -171,6 +197,46 @@ export const LIVE_FEED_MS = 1_000;
         </div>
       </div>
 
+        <section class="dana-card-section gear-live-cycles" aria-label="Recent cycles">
+          <div class="dana-section-title">Recent cycles</div>
+          @if (recentCycles(); as cycles) {
+            @if (cycles.length) {
+              <table class="gear-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Serial</th>
+                    <th>Gearset</th>
+                    <th class="right">Cycle</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of cycles; track c.id) {
+                    <tr>
+                      <td class="nowrap">{{ c.timestamp | date: 'shortTime' }}</td>
+                      <td class="mono nowrap">
+                        @if (c.serial_number) {
+                          {{ c.serial_number }}
+                        } @else {
+                          <span class="gear-muted">no serial</span>
+                        }
+                      </td>
+                      <td class="mono nowrap">{{ c.gearset?.number ?? '—' }}</td>
+                      <td class="mono nowrap right">{{ cycleTime(c.cycle_time_s) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            } @else {
+              <p class="gear-field-help">No cycles recorded yet.</p>
+            }
+          } @else if (cyclesError()) {
+            <p class="gear-field-help" data-tone="warning">Recent cycles could not be loaded.</p>
+          } @else {
+            <p class="gear-field-help">Loading cycles…</p>
+          }
+        </section>
+
       @if (access.canEditSetup() && scanner(); as s) {
         <footer class="dana-divider-section gear-live-foot">
           <button
@@ -181,7 +247,7 @@ export const LIVE_FEED_MS = 1_000;
             {{ controlsOpen() ? 'Hide scanner controls' : 'Scanner controls' }}
           </button>
           @if (controlsOpen()) {
-            <gear-scanner-controls [scannerId]="s.id" />
+            <gear-scanner-controls [scannerId]="s.id" [io]="collector()" />
           }
         </footer>
       }
@@ -209,10 +275,16 @@ export const LIVE_FEED_MS = 1_000;
       place-items: center;
       position: relative;
     }
-    .gear-live-feed {
-      position: absolute;
-      inset: var(--dana-space-2) auto auto var(--dana-space-2);
-      z-index: 1;
+    .gear-live-corner {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: end;
+      align-items: center;
+      gap: var(--dana-space-1);
+    }
+    /* One machine on its own: a larger image beside its data. */
+    .gear-live-focused .gear-live-body {
+      grid-template-columns: minmax(280px, 2fr) minmax(240px, 1fr);
     }
     .gear-live-feed::before {
       animation: gear-live-pulse 1s ease-in-out infinite;
@@ -243,6 +315,12 @@ export const LIVE_FEED_MS = 1_000;
       gap: var(--dana-space-1);
       align-content: start;
     }
+    .gear-live-cycles {
+      display: grid;
+      gap: var(--dana-field-gap);
+      margin-top: var(--dana-form-gap);
+      overflow-x: auto;
+    }
     .gear-live-path {
       display: block;
       overflow-wrap: anywhere;
@@ -261,7 +339,8 @@ export const LIVE_FEED_MS = 1_000;
       gap: var(--dana-form-gap);
     }
     @media (max-width: 640px) {
-      .gear-live-body {
+      .gear-live-body,
+      .gear-live-focused .gear-live-body {
         grid-template-columns: 1fr;
       }
     }
@@ -272,6 +351,7 @@ export class MachineLiveCardComponent implements OnDestroy {
   private readonly scannerApi = inject(ScannerApi);
   private readonly scannerDetails = inject(ScannerDetailsApi);
   private readonly fanucApi = inject(FanucVariablesApi);
+  private readonly cyclesApi = inject(MachineCyclesApi);
   private readonly doc = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -280,8 +360,16 @@ export class MachineLiveCardComponent implements OnDestroy {
   readonly pollMs = input(2000);
   /** The scanner's photoeye is on: the image refreshes now and every LIVE_FEED_MS until it clears. */
   readonly photoeye = input(false);
+  /** Lapper Read's row for this machine: scanner inputs and outputs for the scanner controls. */
+  readonly collector = input<CollectorMachine | null>(null);
+  /** Shown on its own, larger; hides the Focus button. */
+  readonly focused = input(false);
+  /** Focus was pressed: the page shows only this machine. */
+  readonly focusMachine = output<void>();
   protected readonly live = computed(() => this.photoeye() && !!this.scannerId());
   private readonly period = computed(() => (this.live() ? Math.min(LIVE_FEED_MS, this.pollMs()) : this.pollMs()));
+  /** The refresh period as shown on the Live badge, e.g. "0.5 s". */
+  protected readonly periodLabel = computed(() => `${this.period() / 1000} s`);
   private readonly period$ = toObservable(this.period);
 
   protected readonly scanner = signal<ScannerDetail | null>(null);
@@ -295,6 +383,10 @@ export class MachineLiveCardComponent implements OnDestroy {
   protected readonly fanucStale = signal(false);
   protected readonly lastUpdate = signal<string | null>(null);
   protected readonly controlsOpen = signal(false);
+  /** The machine's newest cycles; null until the first read. */
+  protected readonly recentCycles = signal<MachineCycle[] | null>(null);
+  protected readonly cyclesError = signal(false);
+  private readonly inCycle$ = toObservable(computed(() => this.fanuc()?.y03_2_stack_inCycle ?? null));
   private readonly imageDefaults = toSignal(
     this.scannerApi.imageDefaults().pipe(catchError(() => of(null))),
     { initialValue: null },
@@ -376,6 +468,48 @@ export class MachineLiveCardComponent implements OnDestroy {
 
       onCleanup(() => sub.unsubscribe());
     });
+
+    // Recent cycles: every RECENT_CYCLES_MS, and as soon as a cycle ends (in cycle goes off).
+    effect((onCleanup) => {
+      const machineId = this.machine().id;
+      untracked(() => {
+        this.recentCycles.set(null);
+        this.cyclesError.set(false);
+      });
+      const cycleEnded$ = this.inCycle$.pipe(
+        pairwise(),
+        filter(([before, now]) => before === true && now === false),
+      );
+      const sub = untracked(() =>
+        merge(interval(RECENT_CYCLES_MS).pipe(startWith(0)), cycleEnded$)
+          .pipe(
+            filter(() => this.doc.visibilityState === 'visible'),
+            exhaustMap(() =>
+              this.cyclesApi.recent(machineId, RECENT_CYCLES).pipe(
+                timeout(LIVE_REQUEST_TIMEOUT_MS),
+                catchError(() => of(null)),
+              ),
+            ),
+            takeUntilDestroyed(this.destroyRef),
+          )
+          .subscribe((cycles) => {
+            if (cycles) {
+              this.recentCycles.set(cycles);
+              this.cyclesError.set(false);
+            } else {
+              this.cyclesError.set(true);
+            }
+          }),
+      );
+      onCleanup(() => sub.unsubscribe());
+    });
+  }
+
+  /** Cycle time as m:ss, or a dash when Lapper Read could not time it. */
+  protected cycleTime(seconds: number | null | undefined): string {
+    if (seconds == null || !Number.isFinite(seconds)) return '—';
+    const whole = Math.round(seconds);
+    return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, '0')}`;
   }
 
   ngOnDestroy() {
