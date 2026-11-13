@@ -26,25 +26,25 @@ describe('Scanner command feedback', () => {
     expect(toast.info).toHaveBeenCalledTimes(1);
   });
 
-  it('shows the scanner inputs and the outputs as last set here, highlighting the current one', () => {
+  it('highlights each output as last set here, and goes compact inside a fitted card', () => {
     TestBed.configureTestingModule({imports:[ScannerControlsComponent],providers:[{provide:ScannerApi,useValue:{command:jest.fn()}},{provide:ToastService,useValue:{info:jest.fn(),error:jest.fn()}}]});
     const fixture=TestBed.createComponent(ScannerControlsComponent);
     fixture.componentRef.setInput('scannerId','scanner-a');
     fixture.detectChanges();
     const root=fixture.nativeElement as HTMLElement;
-    const text=()=>root.textContent?.replace(/\s+/g,' ') ?? '';
-    // No collector: every state is unknown and nothing is highlighted.
-    expect(text()).toContain('Input 1 (photoeye): unknown');
+    // No collector: nothing is highlighted.
     expect(root.querySelector('button[aria-pressed="true"]')).toBeNull();
 
     fixture.componentRef.setInput('io',{machine_id:'m1',worker:true,phase:'collecting',
       scanner_inputs:{'1':true,'2':false},scanner_outputs:{'1':true,'2':false},scanner_outputs_set_at:'2026-11-12T23:00:00.000Z'});
     fixture.detectChanges();
-    expect(text()).toContain('Input 1 (photoeye): ON');
-    expect(text()).toContain('Input 2: OFF');
     expect(root.querySelector('button[aria-label="Output 1 On"]')?.getAttribute('aria-pressed')).toBe('true');
     expect(root.querySelector('button[aria-label="Output 1 Off"]')?.getAttribute('aria-pressed')).toBe('false');
     expect(root.querySelector('button[aria-label="Output 2 Off"]')?.className).toContain('gear-btn-primary');
-    expect(text()).toContain('Outputs show what was last set here');
+    expect(root.textContent).toContain('the output state last set here');
+    expect(root.classList).not.toContain('gear-ctl-compact');
+    fixture.componentRef.setInput('compact',true);
+    fixture.detectChanges();
+    expect(root.classList).toContain('gear-ctl-compact');
   });
 });

@@ -53,31 +53,19 @@ const GROUPS: { label: string; output?: number; cmds: Cmd[] }[] = [
 
 @Component({
   selector: 'gear-scanner-controls',
+  host: { '[class.gear-ctl-compact]': 'compact()' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [DatePipe],
   template: `
-    <div class="gear-ctl-io" role="group" aria-label="Scanner inputs">
-      <span class="dana-detail-label">Inputs</span>
-      @for (i of inputs; track i.terminal) {
-        <span class="dana-status-badge" [attr.data-tone]="inputState(i.terminal) ? 'success' : 'neutral'"
-          >{{ i.label }}: {{ onOff(inputState(i.terminal)) }}</span
-        >
-      }
-    </div>
     <div class="gear-ctl">
       @for (g of groups; track g.label) {
-        <div class="gear-ctl-group" role="group" [attr.aria-label]="g.label">
-          <span class="dana-detail-label"
-            >{{ g.label }}
-            @if (g.output) {
-              <span
-                class="dana-status-badge"
-                [attr.data-tone]="outputState(g.output) ? 'success' : 'neutral'"
-                title="As last set from MeshForge; the scanner can also switch its outputs itself"
-                >{{ onOff(outputState(g.output)) }}</span
-              >
-            }
-          </span>
+        <div
+          class="gear-ctl-group"
+          role="group"
+          [attr.aria-label]="g.label"
+          [attr.title]="g.output ? 'Highlighted: the state last set here. The scanner cannot report its outputs and may switch them itself.' : null"
+        >
+          <span class="dana-detail-label">{{ g.label }}</span>
           <div class="gear-actions">
             @for (c of g.cmds; track c.op) {
               <button
@@ -97,30 +85,38 @@ const GROUPS: { label: string; output?: number; cmds: Cmd[] }[] = [
       }
     </div>
     <small class="gear-ctl-note gear-muted"
-      >Outputs show what was last set here{{ outputsSetAt() ? ' (' + (outputsSetAt() | date: 'shortTime') + ')' : '' }};
-      the scanner cannot report them and may switch them itself. Inputs are read from the scanner.</small
+      >Highlighted: the output state last set here{{ outputsSetAt() ? ' (' + (outputsSetAt() | date: 'shortTime') + ')' : '' }}.
+      The scanner cannot report its outputs and may switch them itself.</small
     >
   `,
   styles: `
-    .gear-ctl-io {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: var(--dana-space-2);
-      margin-bottom: var(--dana-form-gap);
-    }
     .gear-ctl-note {
       display: block;
       margin-top: var(--dana-field-gap);
     }
     .gear-ctl {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
-      gap: var(--dana-form-gap);
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 8.5rem), 1fr));
+      gap: var(--dana-space-2) var(--dana-space-3);
     }
     .gear-ctl-group {
       display: grid;
       gap: var(--dana-field-gap);
+    }
+    /* Inside a card fitted to the screen: three groups a row, shorter buttons, no footnote. */
+    :host(.gear-ctl-compact) .gear-ctl {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--dana-space-1) var(--dana-space-3);
+    }
+    :host(.gear-ctl-compact) .gear-ctl-group {
+      gap: 2px;
+    }
+    :host(.gear-ctl-compact) .gear-btn {
+      min-height: 2rem;
+      padding-block: 0;
+    }
+    :host(.gear-ctl-compact) .gear-ctl-note {
+      display: none;
     }
   `,
 })
@@ -131,25 +127,14 @@ export class ScannerControlsComponent {
   readonly scannerId = input.required<string>();
   /** Lapper Read's row for the machine: input states and the outputs as last set here. */
   readonly io = input<CollectorMachine | null>(null);
+  /** Shorter buttons and no footnote, to fit a card sized to the screen. */
+  readonly compact = input(false);
   protected readonly groups = GROUPS;
-  protected readonly inputs = [
-    { terminal: 1, label: 'Input 1 (photoeye)' },
-    { terminal: 2, label: 'Input 2' },
-  ];
   protected readonly outputsSetAt = computed(() => this.io()?.scanner_outputs_set_at ?? null);
-
-  /** true on, false off, null unknown (no collector, scanner offline, or not read yet). */
-  protected inputState(terminal: number): boolean | null {
-    return this.io()?.scanner_inputs?.[String(terminal)] ?? null;
-  }
 
   /** As last switched from MeshForge; null when it has not been set since the collector started. */
   protected outputState(terminal: number): boolean | null {
     return this.io()?.scanner_outputs?.[String(terminal)] ?? null;
-  }
-
-  protected onOff(state: boolean | null): string {
-    return state === null ? 'unknown' : state ? 'ON' : 'OFF';
   }
 
   protected isCurrent(terminal: number, c: Cmd): boolean {

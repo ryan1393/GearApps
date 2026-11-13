@@ -44,7 +44,7 @@ describe('Live machine card polling', () => {
     fixture.detectChanges();
     expect(card.fanucStale()).toBe(true);
     expect(card.fanuc()?.y03_2_stack_inCycle).toBe(true);
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Machine I/O did not refresh');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('Did not refresh; showing the last values.');
 
     // The tick during the hung request was skipped; the next one polls again.
     await jest.advanceTimersByTimeAsync(10_000 - LIVE_REQUEST_TIMEOUT_MS);
@@ -79,7 +79,7 @@ describe('Live machine card polling', () => {
     await jest.advanceTimersByTimeAsync(0);
     expect(image).toHaveBeenCalledTimes(1);
     const text = () => (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(text()).not.toContain('Live · every');
+    expect(text()).not.toContain('Live · ');
 
     // The photoeye trips: refresh now, then every second instead of every 5 s.
     fixture.componentRef.setInput('photoeye', true);
@@ -89,7 +89,7 @@ describe('Live machine card polling', () => {
     await jest.advanceTimersByTimeAsync(3 * LIVE_FEED_MS);
     expect(image).toHaveBeenCalledTimes(5);
     fixture.detectChanges();
-    expect(text()).toContain('Live · every 0.5 s');
+    expect(text()).toContain('Live · 0.5 s');
     expect((fixture.nativeElement as HTMLElement).querySelector('img')?.getAttribute('src')).toBe('blob:capture');
 
     // It clears: back to the chosen 5 s refresh.
@@ -98,7 +98,7 @@ describe('Live machine card polling', () => {
     await jest.advanceTimersByTimeAsync(4000);
     expect(image).toHaveBeenCalledTimes(6);
     fixture.detectChanges();
-    expect(text()).not.toContain('Live · every');
+    expect(text()).not.toContain('Live · ');
     fixture.destroy();
   });
 
@@ -178,6 +178,46 @@ describe('Live machine card polling', () => {
     fixture.componentRef.setInput('focused', true);
     fixture.detectChanges();
     expect((fixture.nativeElement as HTMLElement).querySelector('button[title="Show only this machine"]')).toBeNull();
+    fixture.destroy();
+  });
+
+  it('shows scanner inputs and outputs, and swaps recent cycles for the controls in the same panel', async () => {
+    const scanner = { id: 's1', ip: '10.16.82.253', image_folder: null, image_file: null, sn_scanner: 'DM1A48B0B7' } as unknown as ScannerDetail;
+    TestBed.configureTestingModule({
+      imports: [MachineLiveCardComponent],
+      providers: [
+        { provide: LapperAccess, useValue: { canEditSetup: () => true } },
+        { provide: MachineCyclesApi, useValue: { recent: () => of([]) } },
+        { provide: ScannerApi, useValue: { image: jest.fn(() => NEVER), imageDefaults: () => NEVER } },
+        { provide: ScannerDetailsApi, useValue: { get: jest.fn(() => NEVER) } },
+        { provide: FanucVariablesApi, useValue: { byMachine: jest.fn(() => NEVER) } },
+      ],
+    });
+    TestBed.overrideComponent(MachineLiveCardComponent, { set: { imports: [DatePipe], schemas: [NO_ERRORS_SCHEMA] } });
+    const fixture = TestBed.createComponent(MachineLiveCardComponent);
+    fixture.componentRef.setInput('machine', { ...machine, scanner_id: 's1', scanner } as unknown as Machine);
+    fixture.componentRef.setInput('fit', true);
+    fixture.componentRef.setInput('collector', {
+      machine_id: 'm1', worker: true, phase: 'collecting',
+      scanner_inputs: { '1': true, '2': false }, scanner_outputs: { '1': true },
+    });
+    fixture.detectChanges();
+    const root = fixture.nativeElement as HTMLElement;
+    const io = [...root.querySelectorAll('[aria-label="Scanner I/O"] .gear-io > div')].map((d) => [
+      d.querySelector('.gear-long')?.textContent?.trim(),
+      d.querySelector('dd')?.textContent?.trim(),
+    ]);
+    expect(io).toEqual([['Photoeye', 'ON'], ['Input 2', 'OFF'], ['Output 1*', 'ON'], ['Output 2*', '—']]);
+    expect(root.querySelector('article')?.classList).toContain('gear-live-fit');
+
+    const tabs = [...root.querySelectorAll('[role="tab"]')] as HTMLButtonElement[];
+    expect(tabs.map((t) => t.textContent?.trim())).toEqual(['Recent cycles', 'Scanner controls']);
+    expect(root.querySelector('gear-scanner-controls')).toBeNull();
+    tabs[1].click();
+    fixture.detectChanges();
+    expect(root.querySelector('gear-scanner-controls')).not.toBeNull();
+    expect(root.querySelector('.gear-live-cycles')).toBeNull();
+    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
     fixture.destroy();
   });
 });

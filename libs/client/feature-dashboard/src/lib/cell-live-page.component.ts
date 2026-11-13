@@ -1,40 +1,54 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   DestroyRef,
+  effect,
+  ElementRef,
   inject,
   input,
   OnInit,
   signal,
+  viewChild,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { DanaPageHeaderComponent } from '@dana/ui';
 import { apiErrorMessage, CollectorApi, CollectorMachine, CollectorStatus, loadable, MachinesApi } from '@meshforge/client/core';
 import { EmptyStateComponent } from '@meshforge/client/ui';
 import { Machine } from '@meshforge/shared/domain';
-import { catchError, exhaustMap, filter, interval, of, startWith } from 'rxjs';
+import { catchError, exhaustMap, filter, fromEvent, interval, of, startWith } from 'rxjs';
 import { groupByCell } from './cells';
 import { MachineLiveCardComponent } from './machine-live-card.component';
 
 /** How often the page asks Lapper Read which scanners' photoeyes are on. */
 export const PHOTOEYE_POLL_MS = 1_000;
+/**
+ * The cell fills the screen, without scrolling, from this width and with at most FIT_MAX_MACHINES
+ * machines, when each row of cards gets at least FIT_MIN_ROW_PX. Smaller screens scroll as usual.
+ */
+export const FIT_MIN_WIDTH_PX = 1024;
+export const FIT_MAX_MACHINES = 4;
+export const FIT_MIN_ROW_PX = 540;
+/** Space kept under the cards at the bottom of the screen. */
+const FIT_BOTTOM_GAP_PX = 16;
 
 @Component({
   selector: 'gear-cell-live-page',
-  imports: [RouterLink, DanaPageHeaderComponent, EmptyStateComponent, MachineLiveCardComponent],
+  imports: [RouterLink, EmptyStateComponent, MachineLiveCardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="gear-page dana-page-stack gear-workflow-page">
-      <section
-        danaPageHeader
-        [eyebrow]="focused() ? 'LAPPER · LIVE VIEW · CELL ' + cell() : 'LAPPER · LIVE VIEW'"
-        [heading]="focused() ? focused()!.number || focused()!.ip : 'Cell ' + cell()"
-        [description]="description()"
-      >
-        <div danaPageHeaderAction class="dana-toolbar">
+    <div class="gear-page dana-page-stack gear-workflow-page gear-live-page">
+      <header class="gear-live-bar">
+        <div class="gear-live-title">
+          <p class="dana-eyebrow gear-eyebrow">{{ focused() ? 'Lapper · Live view · Cell ' + cell() : 'Lapper · Live view' }}</p>
+          <h1 class="dana-page-title gear-page-title">
+            {{ focused() ? focused()!.number || focused()!.ip : 'Cell ' + cell() }}
+            <small class="gear-muted">{{ description() }}</small>
+          </h1>
+        </div>
+        <div class="dana-toolbar">
           <div class="gear-rates" role="group" aria-label="Refresh rate">
             <span class="gear-muted" aria-hidden="true">Refresh</span>
             @for (r of rates; track r.ms) {
@@ -58,7 +72,7 @@ export const PHOTOEYE_POLL_MS = 1_000;
             <a class="gear-btn gear-btn-secondary" routerLink="/dashboard">‹ All cells</a>
           }
         </div>
-      </section>
+      </header>
 
       @if (all.error()) {
         <div class="gear-alert gear-alert-danger" role="alert">
@@ -77,7 +91,14 @@ export const PHOTOEYE_POLL_MS = 1_000;
           </div>
         </section>
       } @else {
-        <div class="gear-live-grid" [class.gear-live-grid-one]="focused()">
+        <div
+          #grid
+          class="gear-live-grid"
+          [class.gear-live-grid-one]="focused()"
+          [style.height.px]="fitHeight()"
+          [style.grid-template-columns]="fitHeight() ? 'repeat(' + layout().cols + ', minmax(0, 1fr))' : null"
+          [style.grid-template-rows]="fitHeight() ? 'repeat(' + layout().rows + ', minmax(0, 1fr))' : null"
+        >
           @for (m of shown(); track m.id) {
             <gear-machine-live-card
               [machine]="m"
@@ -85,6 +106,8 @@ export const PHOTOEYE_POLL_MS = 1_000;
               [photoeye]="photoeyes().has(m.id)"
               [collector]="collectorRows().get(m.id) ?? null"
               [focused]="!!focused()"
+              [fit]="fitHeight() !== null"
+              [recentCount]="recentCount()"
               (focusMachine)="focusOn(m.id)"
             />
           }
@@ -101,6 +124,20 @@ export const PHOTOEYE_POLL_MS = 1_000;
     /* Cards may shrink below their contents' width; a wide table scrolls inside its card. */
     .gear-live-grid > * {
       min-width: 0;
+    }
+    /* A monitoring screen: use the full width of large displays, not the usual reading column. */
+    .gear-live-page {
+      --dana-content-max: none;
+    }
+    .gear-live-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      justify-content: space-between;
+      gap: var(--dana-space-2) var(--dana-space-4);
+    }
+    .gear-live-title :is(p, h1) {
+      margin: 0;
     }
     .gear-live-grid-one {
       grid-template-columns: 1fr;
@@ -139,9 +176,25 @@ export class CellLivePageComponent implements OnInit {
   });
   protected readonly description = computed(() => {
     const n = this.machines().length;
-    const what = 'scanner image, serial numbers and machine I/O';
-    return this.focused() ? `One machine of ${n} in this cell · ${what}.` : `${n} machine${n === 1 ? '' : 's'} · ${what}.`;
+    return this.focused() ? `· 1 of ${n} machines in cell ${this.cell()}` : `· ${n} machine${n === 1 ? '' : 's'}`;
   });
+  /** Cards per row and rows of cards when the cell fills the screen. */
+  protected readonly layout = computed(() => {
+    const n = this.shown().length;
+    const cols = n <= 1 ? 1 : 2;
+    return { cols, rows: Math.max(1, Math.ceil(n / cols)) };
+  });
+  /** Recent cycles per card: more when focused, fewer when rows of cards are short. */
+  protected readonly recentCount = computed(() => {
+    const height = this.fitHeight();
+    const rowHeight = height === null ? null : height / this.layout().rows;
+    if (this.focused()) return rowHeight !== null && rowHeight < 700 ? 5 : 8;
+    return rowHeight !== null && rowHeight < 640 ? 3 : 5;
+  });
+  /** The grid's height in px when it fills the rest of the screen; null scrolls as usual. */
+  protected readonly fitHeight = signal<number | null>(null);
+  private readonly grid = viewChild<ElementRef<HTMLElement>>('grid');
+  private readonly view = this.doc.defaultView;
   protected readonly pollMs = signal(2000);
   protected readonly rates = [
     { label: '1 s', ms: 1000 },
@@ -153,6 +206,46 @@ export class CellLivePageComponent implements OnInit {
   protected readonly photoeyes = signal<ReadonlySet<string>>(new Set());
   /** Lapper Read's row per machine (scanner inputs and outputs); empty without the collector. */
   protected readonly collectorRows = signal<ReadonlyMap<string, CollectorMachine>>(new Map());
+
+  constructor() {
+    afterNextRender(() => this.fit());
+    // Re-measure after the cards or the header change (machines loaded, focus on or off).
+    effect(() => {
+      this.shown();
+      this.focused();
+      this.grid();
+      this.view?.requestAnimationFrame(() => this.fit());
+    });
+    if (this.view) {
+      fromEvent(this.view, 'resize')
+        .pipe(takeUntilDestroyed(this.destroy))
+        .subscribe(() => this.fit());
+    }
+  }
+
+  /** Sizes the grid to the space left under the page header, so the whole cell shows without scrolling. */
+  protected fit(): void {
+    const el = this.grid()?.nativeElement;
+    const view = this.view;
+    const n = this.shown().length;
+    if (!el || !view || !n || n > FIT_MAX_MACHINES || view.innerWidth < FIT_MIN_WIDTH_PX) {
+      this.fitHeight.set(null);
+      return;
+    }
+    const top = el.getBoundingClientRect().top + view.scrollY;
+    const height = Math.floor(view.innerHeight - top - FIT_BOTTOM_GAP_PX);
+    if (height < this.layout().rows * FIT_MIN_ROW_PX) {
+      this.fitHeight.set(null);
+      return;
+    }
+    this.fitHeight.set(height);
+    // The app shell may add padding below the page: take off whatever still makes it scroll.
+    view.requestAnimationFrame(() => {
+      const over = this.doc.documentElement.scrollHeight - view.innerHeight;
+      const now = this.fitHeight();
+      if (over > 0 && now !== null) this.fitHeight.set(now - over);
+    });
+  }
 
   ngOnInit() {
     this.reload();
