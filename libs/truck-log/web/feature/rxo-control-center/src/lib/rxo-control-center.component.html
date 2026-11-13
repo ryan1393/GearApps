@@ -1,0 +1,263 @@
+<tl-admin-access></tl-admin-access>
+<div class="tl-rxo" [class.is-focused]="!summaryOpen">
+  <header class="dana-page-header">
+    <div>
+      <h1>RXO Control Center</h1>
+      <p>Fort Wayne active freight for yesterday through tomorrow, exporter health and scan controls.</p>
+    </div>
+    <div class="dana-actions">
+      <span class="dana-muted" *ngIf="lastUpdated">Updated {{lastUpdated | plantDate:'shortTime'}}</span>
+      <button class="dana-btn" type="button" [disabled]="busy" (click)="refreshAll()">Refresh</button>
+      <button class="dana-btn dana-btn-primary" type="button" [disabled]="!adminAuth.canWrite() || busy || recoveryBusy || view.scanRunning || !control?.exporterRunning" [attr.aria-busy]="busy" (click)="runScanNow()">
+        {{view.scanRunning ? 'Scan running…' : 'Run Scan Now'}}
+      </button>
+    </div>
+  </header>
+
+  <tl-stale-data-notice [stale]="!!control && statusRefreshFailed" [lastUpdated]="lastUpdated" subject="RXO Control Center"></tl-stale-data-notice>
+
+  <!-- RXO integration live status -->
+  <section class="dana-alert tl-rxo-activity" [attr.data-state]="view.integrationState" role="status" aria-live="polite">
+    <span class="dana-status-badge" [attr.data-tone]="view.integrationTone">{{view.integrationStatus}}</span>
+    <span class="tl-rxo-activity-detail" [title]="view.integrationDetail">{{view.integrationDetail}}</span>
+    <!-- Not announced: the time changes on every 5 s poll; only real status changes are read out. -->
+    <span class="dana-muted dana-nowrap" aria-hidden="true">{{view.integrationUpdated}}</span>
+  </section>
+
+  <!-- Recovery notice: one compact strip, shown only while recovery can help (see showRecoveryPanel). -->
+  <section class="dana-alert dana-alert-warning tl-rxo-recovery" aria-labelledby="rxo-recovery-title" *ngIf="showRecoveryPanel">
+    <div class="tl-rxo-recovery-row">
+      <p><b id="rxo-recovery-title">{{recoveryBusy || recoveryMessage ? 'RXO connection recovery.' : 'RXO connection needs recovery.'}}</b> {{connectionRecoveryDetail}}</p>
+      <div class="dana-actions" *ngIf="adminAuth.canWrite(); else recoveryAdminSignIn">
+        <button class="dana-btn dana-btn-sm dana-btn-primary" type="button" [disabled]="recoveryBusy || busy || view.scanRunning || !recoveryAvailable" [attr.aria-busy]="recoveryBusy" (click)="recoverConnection()">{{recoveryBusy ? 'Requesting recovery…' : 'Recover connection'}}</button>
+        <button class="dana-btn dana-btn-sm" type="button" [disabled]="recoveryBusy" (click)="openRecoverySettings()">Settings &amp; Login</button>
+      </div>
+      <ng-template #recoveryAdminSignIn><a class="dana-btn dana-btn-sm dana-btn-primary" routerLink="/admin/login" [queryParams]="{ returnTo: '/rxo' }">Sign in to recover</a></ng-template>
+    </div>
+    <p class="tl-rxo-recovery-note" *ngIf="recoveryLoginRequired">Open Settings &amp; Login to check the saved RXO login. If RXO requests MFA, approval or an interactive sign-in, complete it with your administrator before recovering again.</p>
+    <p class="tl-rxo-recovery-note" *ngIf="recoveryWait as wait"><b>{{wait.title}}</b> {{wait.detail}} <time [attr.datetime]="wait.until">{{wait.resumeLabel}}</time> <span aria-live="off">({{wait.remaining}} remaining)</span>.</p>
+    <p class="tl-rxo-recovery-note dana-field-error" role="alert" *ngIf="recoveryError">{{recoveryError}}</p>
+    <p class="tl-rxo-recovery-note" role="status" *ngIf="recoveryMessage">{{recoveryMessage}}</p>
+  </section>
+
+  <div class="dana-alert dana-alert-danger" *ngIf="control && !control.controlAvailable">
+    <b>RXO controls unavailable.</b> {{control.message || 'Remote Docker is not available from this API host.'}}
+  </div>
+
+  <div class="dana-alert tl-rxo-run" *ngIf="control?.manualRun && control?.manualRun?.status !== 'IDLE'"
+       [class.dana-alert-success]="control?.manualRun?.status === 'COMPLETE'"
+       [class.dana-alert-danger]="control?.manualRun?.status === 'FAILED'"
+       [class.dana-alert-warning]="view.scanRecoveryActive || view.scanNeedsReview || control?.manualRun?.status === 'PARTIAL'">
+    <span><b>{{view.manualRunLabel}}</b> · {{control?.manualRun?.phase}}</span>
+    <span class="dana-muted" *ngIf="control?.manualRun?.sourceBatchId">Batch {{control?.manualRun?.sourceBatchId}}</span>
+  </div>
+
+  <!-- Alerts stay visible on every tab. -->
+  <section class="tl-stack tl-rxo-alerts" aria-label="RXO attention required" aria-live="polite" *ngIf="control && (view.timerStatusStale || view.scanRecoveryActive || view.scanNeedsReview)">
+    <div class="dana-alert dana-alert-warning" *ngIf="view.timerStatusStale">
+      <b>Status stale.</b> The countdown is paused until a fresh scheduler heartbeat and API response arrive.
+    </div>
+    <div class="dana-alert dana-alert-warning" *ngIf="view.scanRecoveryActive">
+      <b>RXO scan stalled.</b> Automatic recovery is in progress. Existing data stays available.
+    </div>
+    <div class="dana-alert dana-alert-danger" *ngIf="view.scanNeedsReview">
+      <b>RXO needs review.</b> The controlled retry did not complete. Existing data stays available. Use Recover connection for a controlled retry, or Settings &amp; Login when credentials or approval need attention.
+    </div>
+    <div class="dana-actions">
+      <button class="dana-btn dana-btn-sm" type="button" (click)="activeTab='health'; timerDiagnosticsOpen = true; healthTabButton.focus()">View timer diagnostics</button>
+    </div>
+  </section>
+
+  <section class="dana-alert dana-alert-warning tl-rxo-import-review" *ngIf="view.importNeedsReview" aria-label="RXO import needs review">
+    <div role="status" aria-live="polite">
+      <b>{{importStatus?.importHealth?.partial ? 'Partial RXO import' : 'RXO import completeness is unverified'}}</b>
+      <p>Some datasets were skipped or could not be verified. Available rows may come from an older batch.</p>
+      <ul><ng-container *ngFor="let item of importStatus?.importHealth?.datasets"><li *ngIf="item.reason">{{item.reason}}</li></ng-container></ul>
+    </div>
+    <details>
+      <summary>Import details · {{importStatus?.importHealth?.batchId || 'No batch recorded'}}</summary>
+      <div class="dana-table-shell" role="region" tabindex="0" aria-label="Import results by dataset and direction">
+        <table class="dana-table"><caption class="dana-muted">Source rows and import results for each direction</caption>
+          <thead><tr><th scope="col">Dataset</th><th scope="col">Direction</th><th scope="col">Source rows</th><th scope="col">Unique rows imported</th><th scope="col">Result</th></tr></thead>
+          <tbody><tr *ngFor="let item of importStatus?.importHealth?.datasets"><th scope="row">{{item.pageKey}}</th><td>{{item.direction}}</td><td>{{item.sourceRows === null ? 'Unknown' : item.sourceRows}}</td><td>{{item.uniqueRows === null ? 'Unknown' : item.uniqueRows}}</td><td>{{item.status === 'COMPLETE' ? 'Complete' : (item.reason || item.status)}}</td></tr></tbody>
+        </table>
+      </div>
+      <p>Export-limit protection is active. A capped dataset needs a smaller, verified export; repeating the same import will not restore it.</p>
+    </details>
+  </section>
+
+  <!-- RXO operator overview: read-only; saved values only. -->
+  <div class="tl-rxo-kpis" [class.is-compact]="!summaryOpen" id="rxo-summary">
+  <section class="dana-kpi-grid" aria-label="RXO scan and import summary">
+    <div class="dana-kpi-card" [attr.data-tone]="view.scanNeedsReview ? 'danger' : (view.scanRecoveryActive || view.timerStatusStale ? 'warning' : null)">
+      <button type="button" class="tl-kpi-jump" (click)="jumpTo('health', undefined, true)" [attr.aria-label]="'Timer status: open timer diagnostics'"></button>
+      <div class="dana-kpi-label">{{view.scanTimerTitle}}</div>
+      <div class="dana-kpi-value" aria-live="off">{{view.scanTimerLabel}}</div>
+      <div class="dana-kpi-note">{{view.schedulerPhaseLabel}} · {{view.schedulerTriggerLabel}}</div>
+    </div>
+    <div class="dana-kpi-card">
+      <button type="button" class="tl-kpi-jump" (click)="jumpTo('health')" [attr.aria-label]="'Last successful export: open Exporter Health'"></button>
+      <div class="dana-kpi-label">Last successful export</div>
+      <div class="dana-kpi-value tl-rxo-kpi-time">{{control?.exporterHealth?.lastSuccessAt ? (control?.exporterHealth?.lastSuccessAt | plantDate:'M/d h:mm a') : 'Not recorded'}}</div>
+      <div class="dana-kpi-note">Batch {{control?.exporterHealth?.lastBatchId || 'not reported'}}</div>
+    </div>
+    <div class="dana-kpi-card" [attr.data-tone]="view.importNeedsReview ? 'warning' : null">
+      <button type="button" class="tl-kpi-jump" (click)="jumpTo('health')" [attr.aria-label]="'Latest import: open Exporter Health'"></button>
+      <div class="dana-kpi-label">Latest import</div>
+      <div class="dana-kpi-value tl-rxo-kpi-time">{{view.lastImportDate ? (view.lastImportDate | plantDate:'M/d h:mm a') : 'Not recorded'}}</div>
+      <div class="dana-kpi-note">{{importStatus?.importHealth?.status || lastImportValue('status') || 'Status not reported'}} · {{lastImportValue('source_batch_id') || importStatus?.boundaryBatchId || 'no batch'}}</div>
+    </div>
+    <div class="dana-kpi-card">
+      <button type="button" class="tl-kpi-jump" (click)="jumpTo('settings')" [attr.aria-label]="'Automatic scan: open Settings and Login'"></button>
+      <div class="dana-kpi-label">Automatic scan</div>
+      <div class="dana-kpi-value tl-rxo-kpi-time" *ngIf="(view.scheduler?.syncIntervalMinutes ?? control?.settings?.syncIntervalMinutes) as interval; else noSavedSchedule">Every {{interval}} min</div>
+      <ng-template #noSavedSchedule><div class="dana-kpi-value tl-rxo-kpi-time">Not reported</div></ng-template>
+      <div class="dana-kpi-note">Change it under Settings &amp; Login</div>
+    </div>
+  </section>
+
+  <section class="dana-kpi-grid" aria-label="Active RXO counts">
+    <div class="dana-kpi-card"><button type="button" class="tl-kpi-jump" (click)="jumpTo('data', 'orders')" [attr.aria-label]="'RXO orders: show orders in the Data tab'"></button><div class="dana-kpi-label">RXO orders</div><div class="dana-kpi-value">{{view.siteCounts?.orders_visible ?? 0}}</div><div class="dana-kpi-note">Yesterday through tomorrow</div></div>
+    <div class="dana-kpi-card"><button type="button" class="tl-kpi-jump" (click)="jumpTo('data', 'shipments')" [attr.aria-label]="'RXO shipments: show shipments in the Data tab'"></button><div class="dana-kpi-label">RXO shipments</div><div class="dana-kpi-value">{{view.siteCounts?.shipments_visible ?? 0}}</div><div class="dana-kpi-note">Yesterday through tomorrow</div></div>
+    <div class="dana-kpi-card"><button type="button" class="tl-kpi-jump" (click)="jumpTo('data', 'freight')" [attr.aria-label]="'Freight on the move: show freight on the move in the Data tab'"></button><div class="dana-kpi-label">Freight on the move</div><div class="dana-kpi-value">{{view.siteCounts?.freight_visible ?? 0}}</div><div class="dana-kpi-note">Yesterday through tomorrow</div></div>
+    <div class="dana-kpi-card"><button type="button" class="tl-kpi-jump" (click)="jumpTo('data', 'shipments')" [attr.aria-label]="'Scheduled loads: show shipments in the Data tab'"></button><div class="dana-kpi-label">Scheduled loads</div><div class="dana-kpi-value">{{importStatus?.rxoScheduledLoads ?? 0}}</div><div class="dana-kpi-note">Active RXO loads, same window</div></div>
+  </section>
+  </div>
+
+  <div class="tl-rxo-tabbar">
+  <div class="dana-tabs tl-rxo-tabs" role="tablist" aria-label="RXO Control Center sections">
+    <button #dataTabButton id="rxo-tab-data" class="dana-tab" type="button" role="tab" aria-controls="rxo-panel-data"
+            [class.is-active]="activeTab === 'data'" [attr.aria-selected]="activeTab === 'data'" [attr.tabindex]="activeTab === 'data' ? 0 : -1"
+            (click)="activeTab='data'" (keydown.arrowright)="healthTabButton.focus(); $event.preventDefault()" (keydown.arrowleft)="settingsTabButton.focus(); $event.preventDefault()"
+            (keydown.home)="dataTabButton.focus(); $event.preventDefault()" (keydown.end)="settingsTabButton.focus(); $event.preventDefault()">Data</button>
+    <button #healthTabButton id="rxo-tab-health" class="dana-tab" type="button" role="tab" aria-controls="rxo-panel-health"
+            [class.is-active]="activeTab === 'health'" [attr.aria-selected]="activeTab === 'health'" [attr.tabindex]="activeTab === 'health' ? 0 : -1"
+            (click)="activeTab='health'" (keydown.arrowright)="settingsTabButton.focus(); $event.preventDefault()" (keydown.arrowleft)="dataTabButton.focus(); $event.preventDefault()"
+            (keydown.home)="dataTabButton.focus(); $event.preventDefault()" (keydown.end)="settingsTabButton.focus(); $event.preventDefault()">Exporter Health</button>
+    <button #settingsTabButton id="rxo-tab-settings" class="dana-tab" type="button" role="tab" aria-controls="rxo-panel-settings"
+            [class.is-active]="activeTab === 'settings'" [attr.aria-selected]="activeTab === 'settings'" [attr.tabindex]="activeTab === 'settings' ? 0 : -1"
+            (click)="activeTab='settings'" (keydown.arrowright)="dataTabButton.focus(); $event.preventDefault()" (keydown.arrowleft)="healthTabButton.focus(); $event.preventDefault()"
+            (keydown.home)="dataTabButton.focus(); $event.preventDefault()" (keydown.end)="settingsTabButton.focus(); $event.preventDefault()">Settings &amp; Login</button>
+  </div>
+  <button type="button" class="dana-btn dana-btn-ghost dana-btn-sm" aria-controls="rxo-summary" [attr.aria-expanded]="summaryOpen" (click)="toggleSummary()">{{summaryOpen ? 'Compact summary' : 'Full summary'}}</button>
+  </div>
+
+  <section tlRxoDataTable *ngIf="activeTab === 'data'" id="rxo-panel-data" role="tabpanel" aria-labelledby="rxo-tab-data" tabindex="0" class="dana-panel tl-fill">
+  </section>
+
+  <div *ngIf="activeTab === 'health'" id="rxo-panel-health" role="tabpanel" aria-labelledby="rxo-tab-health" tabindex="0" class="tl-stack tl-fill tl-scroll">
+    <section class="dana-panel" aria-label="RXO timer diagnostics">
+      <div class="dana-panel-header">
+        <div>
+          <h2>Timer diagnostics</h2>
+          <small>Scheduler heartbeat, phase, request consumption and clock alignment</small>
+        </div>
+        <div class="dana-actions">
+          <span class="dana-status-badge" [attr.data-tone]="view.timerStatusStale ? 'danger' : (view.scanRecoveryActive || view.scanNeedsReview || control?.manualRun?.status === 'PARTIAL' ? 'warning' : 'success')">{{view.timerDiagnosticsState}}</span>
+          <button id="rxo-diagnostics-toggle" class="dana-btn dana-btn-sm" type="button"
+                  [attr.aria-expanded]="timerDiagnosticsOpen" aria-controls="rxo-diagnostics-body"
+                  (click)="timerDiagnosticsOpen = !timerDiagnosticsOpen">{{timerDiagnosticsOpen ? 'Hide details' : 'Show details'}}</button>
+        </div>
+      </div>
+      <div id="rxo-diagnostics-body" class="dana-panel-body" role="region" aria-labelledby="rxo-diagnostics-toggle" [hidden]="!timerDiagnosticsOpen">
+        <div class="dana-detail-grid">
+          <div class="dana-detail"><span class="dana-detail-label">Scheduler heartbeat</span><span class="dana-detail-value">{{view.schedulerHeartbeatLabel}}</span><span class="dana-cell-sub">{{view.schedulerHeartbeatTimeLabel}}</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">API refresh age</span><span class="dana-detail-value">{{view.apiRefreshAgeLabel}}</span><span class="dana-cell-sub">{{view.statusGeneratedLabel}}</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Configured interval</span><span class="dana-detail-value">{{view.configuredIntervalLabel}}</span><span class="dana-cell-sub">Change it under Settings &amp; Login</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Current trigger / phase</span><span class="dana-detail-value">{{view.schedulerTriggerLabel}}</span><span class="dana-cell-sub">{{view.schedulerPhaseLabel}}</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Scan started</span><span class="dana-detail-value">{{view.scanStartedLabel}}</span><span class="dana-cell-sub">{{view.scanTimerRunning ? view.scanTimerLabel + ' elapsed' : 'No active scan'}}</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Next scheduled scan</span><span class="dana-detail-value">{{view.nextScheduledLabel}}</span><span class="dana-cell-sub">{{view.scanTimerRunning ? 'Recalculated after completion' : view.scanTimerLabel + ' remaining'}}</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Last completed duration</span><span class="dana-detail-value">{{view.lastCompletedDurationLabel}}</span><span class="dana-cell-sub">{{view.lastCompletedLabel}}</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Browser / server time</span><span class="dana-detail-value">{{view.browserTimeLabel}}</span><span class="dana-cell-sub">Server {{view.serverTimeLabel}}</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Detected clock offset</span><span class="dana-detail-value">{{view.clockOffsetLabel}}</span><span class="dana-cell-sub">Countdown uses server time</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Scheduler process</span><span class="dana-detail-value">{{view.schedulerProcessLabel}}</span><span class="dana-cell-sub">{{view.schedulerStartedLabel}}</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Exporter child process</span><span class="dana-detail-value">{{view.exporterChildProcessLabel}}</span><span class="dana-cell-sub">{{view.exporterAttemptLabel}}</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Last exporter output</span><span class="dana-detail-value">{{view.exporterProgressAgeLabel}}</span><span class="dana-cell-sub">{{view.exporterProgressLabel}}</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Stall limits</span><span class="dana-detail-value">{{view.stallLimitsLabel}}</span><span class="dana-cell-sub">Maximum duration / no-output timeout</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Recovery state</span><span class="dana-detail-value">{{view.recoveryStateLabel}}</span><span class="dana-cell-sub">{{view.recoveryReasonLabel}}</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Last recovery outcome</span><span class="dana-detail-value">{{view.lastRecoveryOutcomeLabel}}</span><span class="dana-cell-sub">{{view.lastRecoveryTimeLabel}}</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Manual request consumption</span><span class="dana-detail-value">{{view.manualRequestLabel}}</span><span class="dana-cell-sub">{{view.manualRequestConsumedLabel}}</span></div>
+          <div class="dana-detail"><span class="dana-detail-label">Last scheduler error</span><span class="dana-detail-value">{{view.schedulerErrorLabel}}</span><span class="dana-cell-sub">Exporter source unchanged</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div class="tl-rxo-columns">
+      <section class="dana-panel">
+        <div class="dana-panel-header">
+          <div><h2>RXO exporter</h2><small>Remote Docker / RXO Connect acquisition service</small></div>
+          <span class="dana-status-badge" [attr.data-tone]="view.exporterHealthy ? 'success' : 'warning'">{{view.exporterStatusLabel}}</span>
+        </div>
+        <div class="dana-panel-body tl-stack">
+          <div class="dana-detail-grid">
+            <div class="dana-detail"><span class="dana-detail-label">Exporter version</span><span class="dana-detail-value">{{control?.exporterHealth?.version || '-'}}</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Runtime integrity</span><span class="dana-detail-value">{{view.runtimeIntegrityLabel}}</span><span class="dana-cell-sub" *ngIf="control?.runtime?.checked">{{control?.runtime?.verified ? 'Expected runtime hash verified' : 'Running exporter hash does not match the expected runtime'}}</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Docker server</span><span class="dana-detail-value">{{control?.dockerVersion || 'Unavailable'}}</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Last successful scan</span><span class="dana-detail-value">{{control?.exporterHealth?.lastSuccessAt ? (control?.exporterHealth?.lastSuccessAt | plantDate:'M/d/yy h:mm:ss a') : 'Not recorded'}}</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Last duration</span><span class="dana-detail-value">{{view.durationLabel}}</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Next scan</span><span class="dana-detail-value">{{control?.exporterHealth?.nextRunAt ? (control?.exporterHealth?.nextRunAt | plantDate:'M/d/yy h:mm:ss a') : 'Waiting / manual'}}</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Last batch</span><span class="dana-detail-value">{{control?.exporterHealth?.lastBatchId || '-'}}</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Active load window</span><span class="dana-detail-value">Yesterday, today and tomorrow (Fort Wayne time)</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Scan interval</span><span class="dana-detail-value">Every {{control?.settings?.syncIntervalMinutes ?? 30}} minutes</span></div>
+          </div>
+          <div class="dana-table-shell" *ngIf="view.datasetHealthEntries.length">
+            <table class="dana-table">
+              <thead><tr><th scope="col">Dataset</th><th scope="col">Rows</th><th scope="col">Window</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let row of view.datasetHealthEntries" [attr.data-tone]="row.rows >= 10000 ? 'warning' : null">
+                  <th scope="row">{{row.label}}</th><td>{{row.rows | number}}</td>
+                  <td><span class="dana-status-badge" [attr.data-tone]="row.rows >= 10000 ? 'warning' : 'success'">{{row.rows >= 10000 ? '10K ceiling warning' : 'Complete window'}}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="dana-alert dana-alert-danger" *ngIf="control?.exporterHealth?.lastError"><b>Last exporter error.</b> {{control?.exporterHealth?.lastError}}</div>
+        </div>
+      </section>
+
+      <section class="dana-panel">
+        <div class="dana-panel-header">
+          <div><h2>Truck Log RXO import</h2><small>PostgreSQL / scheduled-load ingestion</small></div>
+          <span class="dana-status-badge" *ngIf="importStatus?.lastImport" [attr.data-tone]="view.importNeedsReview ? 'warning' : 'success'">{{view.importNeedsReview ? 'Needs review' : 'Connected'}}</span>
+        </div>
+        <div class="dana-panel-body tl-stack">
+          <div class="dana-detail-grid">
+            <div class="dana-detail"><span class="dana-detail-label">Last imported batch</span><span class="dana-detail-value">{{lastImportValue('source_batch_id') || importStatus?.boundaryBatchId || '-'}}</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Import status</span><span class="dana-detail-value">{{importStatus?.importHealth?.status || lastImportValue('status') || '-'}}</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Imported at</span><span class="dana-detail-value">{{view.lastImportDate ? (view.lastImportDate | plantDate:'M/d/yy h:mm:ss a') : '-'}}</span></div>
+            <div class="dana-detail"><span class="dana-detail-label">Linked orders</span><span class="dana-detail-value">{{lastImportValue('linked_order_rows') ?? 0}}</span></div>
+          </div>
+          <p class="dana-note">RXO provides planned transportation context. Truck Log stays authoritative for the physical guard and dock lifecycle.</p>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'settings' && !adminAuth.canWrite()" id="rxo-panel-settings" role="tabpanel" aria-labelledby="rxo-tab-settings" tabindex="0" class="tl-fill tl-scroll">
+    <section class="dana-panel">
+      <div class="dana-panel-header"><div><h2>RXO settings &amp; login</h2><small>Scan controls and credentials</small></div></div>
+      <div class="dana-panel-body tl-stack">
+        <p class="dana-note">Sign in as administrator to edit RXO scan settings, the RXO login and manual operations.</p>
+        <div class="dana-actions"><a class="dana-btn dana-btn-primary" routerLink="/admin/login" [queryParams]="{ returnTo: '/rxo' }">Sign in as administrator</a></div>
+      </div>
+    </section>
+  </div>
+
+  <div *ngIf="activeTab === 'settings' && adminAuth.canWrite()" id="rxo-panel-settings" role="tabpanel" aria-labelledby="rxo-tab-settings" tabindex="0" class="tl-stack tl-fill tl-scroll">
+    <div class="tl-rxo-columns" tlRxoSettingsPanel [form]="settingsForm" [control]="control" [busy]="busy" (busyChange)="setBusy($event)" (saved)="refreshControl(false)"></div>
+
+    <section class="dana-panel">
+      <div class="dana-panel-header"><div><h2>Manual operations</h2><small>One-click acquisition and import</small></div></div>
+      <div class="dana-action-list">
+        <div class="dana-action-row">
+          <div class="dana-action-main"><strong>Run scan now</strong><span>Runs RXO immediately, waits for completion, verifies the six files, syncs them locally and imports them into PostgreSQL.</span></div>
+          <button class="dana-btn dana-btn-primary" type="button" [disabled]="busy || view.scanRunning || !control?.exporterRunning" (click)="runScanNow()">Run Scan Now</button>
+        </div>
+        <div class="dana-action-row">
+          <div class="dana-action-main"><strong>Sync current export</strong><span>Does not open RXO. Copies the current verified remote snapshot into Truck Log and imports it.</span></div>
+          <button class="dana-btn" type="button" [disabled]="busy || view.scanRunning || !control?.dockerConnected" (click)="syncLatest()">Sync Current Export</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

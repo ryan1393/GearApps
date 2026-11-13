@@ -1,0 +1,202 @@
+<!-- RXO Data -->
+<div class="dana-panel-header tl-rxo-data-header">
+  <div>
+    <h2>{{data.dataKindLabel}} <span class="dana-count-badge">{{data.dataPage?.total ?? 0}}</span></h2>
+    <small>Active loads only — yesterday, today and tomorrow in Fort Wayne time</small>
+  </div>
+  <div class="dana-segmented tl-rxo-datasets" role="group" aria-label="RXO datasets">
+    <button type="button" [attr.aria-pressed]="data.dataKind==='shipments'" (click)="data.changeKind('shipments')">Shipments</button>
+    <button type="button" [attr.aria-pressed]="data.dataKind==='orders'" (click)="data.changeKind('orders')">Orders</button>
+    <button type="button" [attr.aria-pressed]="data.dataKind==='freight'" (click)="data.changeKind('freight')">Freight on the move</button>
+  </div>
+</div>
+<div class="dana-panel-body tl-stack tl-rxo-data-body">
+  <input #rxoDriverDocumentFile type="file" accept="application/pdf,.pdf" hidden (change)="data.uploadRxoDriverDocument($event)">
+  <form class="dana-filter-row tl-rxo-data-filters" (ngSubmit)="data.applyDataFilters()">
+    <label class="tl-rxo-search"><span class="tl-filter-label">Search</span><input name="rxoSearch" aria-label="Search RXO data" [(ngModel)]="data.dataSearch" placeholder="Shipment, order, carrier, PRO, trailer, status"></label>
+    <label><span class="tl-filter-label">Direction</span><select name="rxoDirection" aria-label="Direction" [(ngModel)]="data.dataDirection" (change)="data.applyDataFilters()"><option value="">All directions</option><option value="OUTBOUND">Outbound</option><option value="INBOUND">Inbound</option></select></label>
+    <div class="dana-actions tl-filter-actions">
+      <button class="dana-btn dana-btn-primary" type="submit" [disabled]="data.dataLoading">Search</button>
+      <button class="dana-btn dana-btn-ghost" type="button" [disabled]="data.dataLoading" (click)="data.clearDataFilters()">Clear</button>
+    </div>
+  </form>
+
+  <div class="dana-kpi-grid tl-rxo-status-summary" *ngIf="data.dataKind === 'shipments' || data.dataKind === 'orders'">
+    <div class="dana-kpi-card">
+      <div class="dana-kpi-label">Active {{data.dataKindLabel.toLowerCase()}}</div>
+      <div class="dana-kpi-value">{{data.dataPage?.total ?? 0}}</div>
+      <div class="dana-kpi-note">3-day Fort Wayne window</div>
+    </div>
+    <div class="dana-kpi-card" *ngFor="let item of data.dataPage?.statusSummary" [attr.data-tone]="statusTone(item.status) === 'warning' ? 'warning' : null">
+      <div class="dana-kpi-label">{{item.status}}</div>
+      <div class="dana-kpi-value">{{item.count}}</div>
+      <div class="dana-kpi-note">{{statusSummaryDetail(item.status)}}</div>
+    </div>
+  </div>
+
+
+  <!-- Shipments -->
+  <div class="dana-table-shell is-sticky-head" *ngIf="data.dataKind === 'shipments' && !data.dataLoading && !data.rxoDataError && data.dataPage?.kind === 'shipments'"
+    role="region" tabindex="0" aria-label="RXO shipments results">
+    <table class="dana-table tl-wide-table" data-rxo-dataset="shipments">
+      <caption class="dana-muted tl-rxo-caption">Open a row's details for addresses, documents, linked orders, mode, trailer and PRO.</caption>
+      <thead><tr><th>Shipment #</th><th>Status</th><th>Direction</th><th>Route</th><th>Carrier</th><th>Site time (ET)</th><th>Driver documents</th></tr></thead>
+      <tbody>
+        <ng-container *ngFor="let raw of data.dataPage?.rows; trackBy: data.trackRxoDataRow"><ng-container *ngIf="asShipment(raw) as row">
+        <tr>
+          <td>
+            <div class="tl-rxo-identity">
+              <b>{{row.shipment_id || '-'}}</b>
+              <button class="dana-btn dana-btn-ghost dana-btn-sm tl-rxo-details" type="button"
+                [id]="data.rxoDetailsId('shipments', row) + '-toggle'"
+                [attr.aria-expanded]="data.rxoDetailsOpen('shipments', row)"
+                [attr.aria-controls]="data.rxoDetailsId('shipments', row)"
+                [attr.aria-label]="(data.rxoDetailsOpen('shipments', row) ? 'Hide' : 'Show') + ' details for shipment ' + (row.shipment_id || 'without ID') + ', ' + row.direction"
+                (click)="data.toggleRxoDetails('shipments', row)">{{data.rxoDetailsOpen('shipments', row) ? 'Hide details' : 'Details'}}</button>
+            </div>
+          </td>
+          <td><span class="dana-status-badge" [attr.data-tone]="statusTone(row.current_status || row.shipment_status)">{{row.current_status || row.shipment_status || 'Unspecified'}}</span><span class="dana-cell-sub" *ngIf="row.eta_status">{{row.eta_status}}</span></td>
+          <td><span class="dana-status-badge is-plain" [attr.data-tone]="directionTone(row.direction)">{{row.direction}}</span></td>
+          <td><span class="dana-cell-sub">{{row.direction === 'INBOUND' ? 'From' : (row.direction === 'OUTBOUND' ? 'To' : 'Route')}}</span>{{data.rxoCanonicalShortRouteName(row)}}</td>
+          <td>{{row.carrier_name || '-'}}</td>
+          <td class="dana-nowrap"><span class="dana-cell-sub">{{rxoSiteTimeLabel(row.direction)}}</span>{{rxoSiteTime(row)}}</td>
+          <td>
+            <div class="tl-rxo-document" [attr.aria-busy]="data.documentUploadingKey === data.rxoShipmentKey(row)">
+              <span class="dana-status-badge" [attr.data-tone]="data.driverDocumentTone(row)">{{data.driverDocumentStatusLabel(row)}}</span>
+              <button class="dana-btn dana-btn-sm" type="button" [disabled]="!!data.documentUploadingKey"
+                [attr.aria-label]="(data.hasRxoDriverDocument(row) ? 'Replace PDF for shipment ' : 'Upload PDF for shipment ') + row.shipment_id + ', ' + row.direction"
+                (click)="data.beginRxoDocumentUpload(row, rxoDriverDocumentFile)">
+                {{data.documentUploadingKey === data.rxoShipmentKey(row) ? 'Uploading…' : (data.hasRxoDriverDocument(row) ? 'Replace PDF' : 'Upload PDF')}}
+              </button>
+            </div>
+            <span class="dana-cell-sub" *ngIf="row.driverDocument?.fileName" [attr.title]="row.driverDocument?.fileName">{{row.driverDocument?.fileName}}{{row.driverDocument?.version ? ' · v' + row.driverDocument?.version : ''}}</span>
+            <span class="dana-cell-sub" *ngIf="row.driverDocument?.status === 'PRINTED' && row.driverDocument?.printedAt">Printed {{row.driverDocument?.printedAt | plantDate:'short'}}</span>
+          </td>
+        </tr>
+        <tr [hidden]="!data.rxoDetailsOpen('shipments', row)" [id]="data.rxoDetailsId('shipments', row)">
+          <td colspan="7">
+            <section class="tl-stack" [attr.aria-label]="'Shipment details for ' + (row.shipment_id || 'without ID')" (keydown.escape)="data.closeRxoDetails('shipments', row, $event)">
+              <div class="dana-detail-grid">
+                <div class="dana-detail"><span class="dana-detail-label">Origin</span><span class="dana-detail-value">{{row.origin_name || '-'}}</span><span class="dana-cell-sub">{{row.origin_address || '-'}}</span></div>
+                <div class="dana-detail"><span class="dana-detail-label">Destination</span><span class="dana-detail-value">{{row.destination_name || '-'}}</span><span class="dana-cell-sub">{{row.destination_address || '-'}}</span></div>
+                <div class="dana-detail"><span class="dana-detail-label">Linked orders</span><span class="dana-detail-value">{{row.linked_order_count ?? 0}}</span><span class="dana-cell-sub" *ngIf="row.order_numbers?.length">{{row.order_numbers?.join(', ')}}</span></div>
+                <div class="dana-detail"><span class="dana-detail-label">Mode</span><span class="dana-detail-value">{{row.mode || '-'}}</span></div>
+                <div class="dana-detail"><span class="dana-detail-label">Trailer</span><span class="dana-detail-value">{{row.trailer_number || '-'}}</span></div>
+                <div class="dana-detail"><span class="dana-detail-label">PRO</span><span class="dana-detail-value">{{row.pro_number || '-'}}</span></div>
+              </div>
+              <div class="dana-actions"><button class="dana-btn dana-btn-ghost dana-btn-sm" type="button" (click)="data.closeRxoDetails('shipments', row, $event)" [attr.aria-label]="'Close details for shipment ' + (row.shipment_id || 'without ID')">Close details</button></div>
+            </section>
+          </td>
+        </tr>
+        </ng-container></ng-container>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Orders -->
+  <div class="dana-table-shell is-sticky-head" *ngIf="data.dataKind === 'orders' && !data.dataLoading && !data.rxoDataError && data.dataPage?.kind === 'orders'"
+    role="region" tabindex="0" aria-label="RXO orders results">
+    <table class="dana-table tl-wide-table" data-rxo-dataset="orders">
+      <caption class="dana-muted tl-rxo-caption">Open a row's details for addresses, customer order and tracking.</caption>
+      <thead><tr><th>Order #</th><th>Status</th><th>Shipment #</th><th>Direction</th><th>Route</th><th>Site time (ET)</th></tr></thead>
+      <tbody>
+        <ng-container *ngFor="let raw of data.dataPage?.rows; trackBy: data.trackRxoDataRow"><ng-container *ngIf="asOrder(raw) as row">
+        <tr>
+          <td>
+            <div class="tl-rxo-identity">
+              <b>{{row.order_number || '-'}}</b>
+              <button class="dana-btn dana-btn-ghost dana-btn-sm tl-rxo-details" type="button"
+                [id]="data.rxoDetailsId('orders', row) + '-toggle'"
+                [attr.aria-expanded]="data.rxoDetailsOpen('orders', row)"
+                [attr.aria-controls]="data.rxoDetailsId('orders', row)"
+                [attr.aria-label]="(data.rxoDetailsOpen('orders', row) ? 'Hide' : 'Show') + ' details for order ' + (row.order_number || 'without ID') + ', ' + row.direction"
+                (click)="data.toggleRxoDetails('orders', row)">{{data.rxoDetailsOpen('orders', row) ? 'Hide details' : 'Details'}}</button>
+            </div>
+          </td>
+          <td><span class="dana-status-badge" [attr.data-tone]="statusTone(row.status)">{{row.status || 'Unspecified'}}</span></td>
+          <td>{{row.shipment_id || '-'}}</td>
+          <td><span class="dana-status-badge is-plain" [attr.data-tone]="directionTone(row.direction)">{{row.direction}}</span></td>
+          <td><span class="dana-cell-sub">{{rxoDirectionalRouteLabel(row.direction)}}</span>{{rxoDirectionalRouteValue(row.direction, row.origin_name || '-', row.destination_name || '-')}}</td>
+          <td class="dana-nowrap"><span class="dana-cell-sub">{{rxoSiteTimeLabel(row.direction)}}</span>{{rxoSiteTime(row)}}</td>
+        </tr>
+        <tr [hidden]="!data.rxoDetailsOpen('orders', row)" [id]="data.rxoDetailsId('orders', row)">
+          <td colspan="6">
+            <section class="tl-stack" [attr.aria-label]="'Order details for ' + (row.order_number || 'without ID')" (keydown.escape)="data.closeRxoDetails('orders', row, $event)">
+              <div class="dana-detail-grid">
+                <div class="dana-detail"><span class="dana-detail-label">Origin</span><span class="dana-detail-value">{{row.origin_name || '-'}}</span><span class="dana-cell-sub">{{row.origin_address || '-'}}</span></div>
+                <div class="dana-detail"><span class="dana-detail-label">Destination</span><span class="dana-detail-value">{{row.destination_name || '-'}}</span><span class="dana-cell-sub">{{row.destination_address || '-'}}</span></div>
+                <div class="dana-detail"><span class="dana-detail-label">Customer order</span><span class="dana-detail-value">{{row.customer_order_number || '-'}}</span></div>
+                <div class="dana-detail"><span class="dana-detail-label">Tracking #</span><span class="dana-detail-value">{{row.tracking_number || '-'}}</span></div>
+              </div>
+              <div class="dana-actions"><button class="dana-btn dana-btn-ghost dana-btn-sm" type="button" (click)="data.closeRxoDetails('orders', row, $event)" [attr.aria-label]="'Close details for order ' + (row.order_number || 'without ID')">Close details</button></div>
+            </section>
+          </td>
+        </tr>
+        </ng-container></ng-container>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Freight on the move -->
+  <div class="dana-table-shell is-sticky-head" *ngIf="data.dataKind === 'freight' && !data.dataLoading && !data.rxoDataError && data.dataPage?.kind === 'freight'"
+    role="region" tabindex="0" aria-label="RXO freight results">
+    <table class="dana-table tl-wide-table" data-rxo-dataset="freight">
+      <caption class="dana-muted tl-rxo-caption">Open a row's details for stops, mode, trailer and PRO.</caption>
+      <thead><tr><th>Shipment #</th><th>Live status</th><th>Direction</th><th>Route</th><th>Carrier</th><th>Site time (ET)</th></tr></thead>
+      <tbody>
+        <ng-container *ngFor="let raw of data.dataPage?.rows; trackBy: data.trackRxoDataRow"><ng-container *ngIf="asFreight(raw) as row">
+        <tr>
+          <td>
+            <div class="tl-rxo-identity">
+              <b>{{row.shipment_id || '-'}}</b>
+              <button class="dana-btn dana-btn-ghost dana-btn-sm tl-rxo-details" type="button"
+                [id]="data.rxoDetailsId('freight', row) + '-toggle'"
+                [attr.aria-expanded]="data.rxoDetailsOpen('freight', row)"
+                [attr.aria-controls]="data.rxoDetailsId('freight', row)"
+                [attr.aria-label]="(data.rxoDetailsOpen('freight', row) ? 'Hide' : 'Show') + ' details for freight shipment ' + (row.shipment_id || 'without ID') + ', ' + row.direction"
+                (click)="data.toggleRxoDetails('freight', row)">{{data.rxoDetailsOpen('freight', row) ? 'Hide details' : 'Details'}}</button>
+            </div>
+          </td>
+          <td><span class="dana-status-badge" [attr.data-tone]="statusTone(row.status)">{{row.status || 'Unspecified'}}</span><span class="dana-cell-sub" *ngIf="row.eta_status">{{row.eta_status}}</span></td>
+          <td><span class="dana-status-badge is-plain" [attr.data-tone]="directionTone(row.direction)">{{row.direction}}</span></td>
+          <td><span class="dana-cell-sub">{{row.direction === 'INBOUND' ? 'From' : (row.direction === 'OUTBOUND' ? 'To' : 'Route')}}</span>{{data.rxoCanonicalShortRouteName(row)}}</td>
+          <td>{{row.carrier_name || '-'}}</td>
+          <td class="dana-nowrap"><span class="dana-cell-sub">{{rxoSiteTimeLabel(row.direction)}}</span>{{rxoSiteTime(row)}}</td>
+        </tr>
+        <tr [hidden]="!data.rxoDetailsOpen('freight', row)" [id]="data.rxoDetailsId('freight', row)">
+          <td colspan="6">
+            <section class="tl-stack" [attr.aria-label]="'Freight shipment details for ' + (row.shipment_id || 'without ID')" (keydown.escape)="data.closeRxoDetails('freight', row, $event)">
+              <div class="dana-detail-grid">
+                <div class="dana-detail"><span class="dana-detail-label">First stop</span><span class="dana-detail-value">{{row.first_stop_address || '-'}}</span></div>
+                <div class="dana-detail"><span class="dana-detail-label">Last stop</span><span class="dana-detail-value">{{row.last_stop_address || '-'}}</span></div>
+                <div class="dana-detail"><span class="dana-detail-label">Mode</span><span class="dana-detail-value">{{row.mode || '-'}}</span></div>
+                <div class="dana-detail"><span class="dana-detail-label">Trailer</span><span class="dana-detail-value">{{row.trailer_number || '-'}}</span></div>
+                <div class="dana-detail"><span class="dana-detail-label">PRO</span><span class="dana-detail-value">{{row.pro_number || '-'}}</span></div>
+              </div>
+              <div class="dana-actions"><button class="dana-btn dana-btn-ghost dana-btn-sm" type="button" (click)="data.closeRxoDetails('freight', row, $event)" [attr.aria-label]="'Close details for freight shipment ' + (row.shipment_id || 'without ID')">Close details</button></div>
+            </section>
+          </td>
+        </tr>
+        </ng-container></ng-container>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="dana-empty-state" *ngIf="!data.dataLoading && !data.rxoDataError && !(data.dataPage?.rows?.length)" role="status">No active RXO {{data.dataKindLabel.toLowerCase()}} match the yesterday-through-tomorrow window and current filter.</div>
+  <div class="dana-loading-state" *ngIf="data.dataLoading" role="status" aria-live="polite">Loading RXO {{data.dataKindLabel.toLowerCase()}}…</div>
+  <div class="dana-alert dana-alert-danger tl-rxo-error" *ngIf="data.rxoDataError" role="alert">
+    <span><b>RXO data could not be loaded.</b> {{data.rxoDataError}}</span>
+    <button class="dana-btn dana-btn-sm" type="button" [disabled]="data.dataLoading" (click)="data.retryRxoData()">Retry</button>
+  </div>
+
+  <div class="tl-rxo-data-footer">
+  <div class="tl-rxo-range" *ngIf="(data.dataPage?.total ?? 0) > 0">
+    <span class="dana-muted">{{data.dataSearch || data.dataDirection ? 'Filtered' : 'Current'}} active RXO data · {{data.dataRangeStart}}–{{data.dataRangeEnd}} of {{data.dataPage?.total ?? 0}}</span>
+  </div>
+  <nav class="dana-actions tl-pagination" aria-label="RXO data pages" *ngIf="(data.dataPage?.total ?? 0) > data.pageSize">
+    <button class="dana-btn" type="button" [disabled]="data.dataLoading || data.currentPage <= 1" (click)="data.goPage(data.currentPage-1)">Previous</button>
+    <span class="dana-muted">Page {{data.currentPage}} of {{data.totalPages}}</span>
+    <button class="dana-btn" type="button" [disabled]="data.dataLoading || data.currentPage >= data.totalPages" (click)="data.goPage(data.currentPage+1)">Next</button>
+  </nav>
+  </div>
+</div>

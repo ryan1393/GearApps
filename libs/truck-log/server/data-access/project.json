@@ -1,0 +1,19 @@
+{
+  "name": "truck-log-server-data-access",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/truck-log/server/data-access/src",
+  "projectType": "library",
+  "tags": [
+    "scope:truck-log",
+    "platform:server",
+    "type:data-access"
+  ],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/truck-log/server/data-access/tsconfig.json --noEmit"
+      }
+    }
+  }
+}

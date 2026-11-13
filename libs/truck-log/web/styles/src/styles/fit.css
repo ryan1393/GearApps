@@ -1,0 +1,167 @@
+/*
+ * Viewport fit — every operator screen fits the window on guard PCs, dock PCs and
+ * laptops. The shell is exactly one screen tall; each page is a flex column and the
+ * region that holds the long content (a table, the dock cards, a tab) scrolls inside
+ * its own card instead of the whole page.
+ *
+ *   .tl-fill    a region that takes the height left over (a panel, a grid, a tab)
+ *   .tl-scroll  the part inside a .tl-fill region that scrolls
+ *   .tl-cap     a secondary list that shrinks and scrolls before the main region does
+ *
+ * Phones, portrait tablets and very short windows keep normal page scrolling: forcing
+ * a form or a 9-column table into a 700px-tall phone screen would hide more than it shows.
+ * If the fixed parts of a page plus the smallest fill region cannot fit (for example
+ * several notices at once), the page area itself scrolls as a last resort.
+ */
+
+/* Density: tighter Dana spacing so working screens show more rows. Applies at every size.
+   Scoped to the Truck Log shell; Dana UI keeps owning the global tokens. */
+.dana-app-shell {
+  --dana-topbar-height: 58px;
+  --dana-content-pad: 20px;
+  --dana-content-max: 1720px;
+}
+.dana-topbar { padding: 0 22px; }
+.dana-sidebar { padding: 14px 12px; }
+.dana-brand-row { padding: 6px 10px 12px; }
+.dana-nav-group { margin: 6px 0; }
+.dana-nav-heading { padding: 6px 12px 4px; }
+.dana-side-link { margin: 2px 0; padding: 8px 12px; }
+.dana-page-header { align-items: center; margin-bottom: 14px; }
+.dana-page-header h1 { font-size: 24px; }
+.dana-page-header p { margin-top: 2px; font-size: 13px; }
+.dana-panel { margin-bottom: 14px; }
+.dana-panel-header { min-height: 52px; padding: 10px 16px; }
+.dana-panel-body { padding: 14px 16px; }
+.dana-kpi-grid { gap: 12px; margin-bottom: 14px; }
+.dana-kpi-card { padding: 12px 14px; }
+.dana-kpi-value { margin: 6px 0 2px; font-size: 26px; }
+.dana-action-row { gap: 14px; padding: 9px 16px; }
+table.dana-table th { padding: 9px 12px; }
+table.dana-table td { padding: 9px 12px; }
+.dana-tabs { flex: 0 0 auto; }
+
+@media screen and (min-width: 900px) and (min-height: 600px) {
+  .dana-app-shell { height: 100dvh; min-height: 0; overflow: hidden; }
+  .dana-sidebar { min-height: 0; }
+  .dana-main { display: flex; height: 100dvh; flex-direction: column; }
+  .dana-topbar { position: static; flex: 0 0 auto; }
+  .dana-page { display: flex; flex: 1 1 auto; min-height: 0; flex-direction: column; overflow: hidden; }
+
+  /* The routed screen (its host element) is the flex column; gaps replace margins. */
+  .dana-page > :not(router-outlet) {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  /* Zero specificity, so the fill rules below always win over this default. */
+  :where(.dana-page > :not(router-outlet)) > * { flex: 0 0 auto; }
+  /* Page wrappers pass their children straight to the screen column. */
+  .tl-rxo, .tl-admin { display: contents; }
+  /* Their children sit in the screen column too, so they need the same no-shrink default:
+     otherwise a panel with overflow:hidden (the RXO recovery card, admin tables) absorbs the
+     whole height shortfall and collapses to a sliver. Only .tl-fill takes the leftover height. */
+  .tl-rxo > :not(.tl-fill), .tl-admin > :not(.tl-fill) { flex: 0 0 auto; }
+  /* KPI rows stay one row of four on landscape tablets too (Dana drops to two below 1100px). */
+  .dana-page .dana-kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .dana-page .dana-kpi-grid,
+  .dana-page .dana-page-header,
+  .dana-page .dana-panel,
+  .dana-page .tl-notice { margin-bottom: 0; }
+
+  /* Fill regions. [hidden] tabs must stay hidden, so never display them. */
+  .tl-fill:not([hidden]) { display: flex; flex: 1 1 0; min-height: 170px; flex-direction: column; }
+  .tl-fill > * { flex: 0 0 auto; }
+  .tl-fill > .dana-panel { margin: 0; }
+  .tl-fill > .tl-fill { min-height: 0; }
+  .tl-fill > .tl-scroll,
+  .tl-fill > .dana-table-shell { flex: 1 1 auto; min-height: 0; max-height: none; overflow: auto; overscroll-behavior: contain; }
+  .tl-fill .dana-table-shell thead th { position: sticky; top: 0; z-index: 1; }
+  /* A tab whose whole content scrolls (settings, diagnostics). */
+  .tl-fill.tl-scroll { overflow: auto; overscroll-behavior: contain; }
+  .tl-cap { display: flex; flex: 0 1 auto; min-height: 120px; max-height: 38%; flex-direction: column; }
+  .tl-cap > .tl-scroll { min-height: 0; overflow: auto; overscroll-behavior: contain; }
+
+  /* Check In Truck: the form card and the action rail each scroll on their own. */
+  .tl-checkin-fields { display: flex; flex: 1 1 0; min-height: 300px; flex-direction: column; }
+  .tl-checkin-layout { flex: 1 1 auto; min-height: 0; grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr); grid-template-rows: minmax(0, 1fr); align-items: stretch; }
+  .tl-checkin-layout > .dana-panel { display: flex; min-height: 0; flex-direction: column; margin: 0; }
+  .tl-checkin-layout > .dana-panel > .dana-panel-body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+  .tl-checkin-rail { position: static; display: flex; min-height: 0; flex-direction: column; gap: 12px; overflow: auto; overscroll-behavior: contain; }
+  .tl-checkin-rail > .dana-panel { flex: 0 0 auto; margin: 0; }
+  .tl-checkin-print { max-height: 40%; overflow: auto; }
+
+  /* Dock Board: the dock cards scroll inside the board. */
+  .tl-dock-grid { flex: 1 1 0; min-height: 220px; align-content: start; overflow: auto; overscroll-behavior: contain; padding: 2px 4px 4px 2px; }
+
+  /* Records: the open record sits beside (wide screens) or under the result table. */
+  .tl-records-body { display: grid; flex: 1 1 0; min-height: 260px; grid-template-rows: minmax(0, 1fr); gap: 12px; }
+  .tl-records-body > .dana-panel { display: flex; min-height: 0; flex-direction: column; margin: 0; }
+  .tl-records-body > .dana-panel > .dana-table-shell,
+  .tl-records-body > .dana-panel > .tl-scroll { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+  .tl-records-body .dana-table-shell thead th { position: sticky; top: 0; z-index: 1; }
+  .tl-records-body.has-detail { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
+  .tl-records-body > .dana-panel > .tl-pagination { flex: 0 0 auto; padding: 8px 16px; border-top: 1px solid var(--dana-border); }
+
+  /* RXO Data tab: filters stay put, the results table scrolls. */
+  .tl-rxo-data-body { display: flex; flex: 1 1 auto; min-height: 0; flex-direction: column; overflow: auto; }
+  .tl-rxo-data-body > * { flex: 0 0 auto; }
+  .tl-rxo-data-body > .dana-table-shell { flex: 1 1 auto; min-height: 180px; max-height: none; overflow: auto; }
+  .tl-rxo-data-body > .tl-pagination { justify-content: center; }
+
+  /* RXO pages: the data tables never shrink below a usable height (several rows). When the
+     notices and summary above leave less room than that, the page scrolls instead of squeezing
+     the table down to one row. */
+  :is(#rxo-panel-data, #rxo-expedite-panel-data).tl-fill { min-height: min(460px, 70dvh); }
+  /* RXO pages: summaries stay short so the active tab gets the height. */
+  /* Data tab status counts: a slim strip of "label  count" tiles above the table. */
+  .dana-page .tl-rxo-status-summary { grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); gap: 8px; }
+  .tl-rxo-status-summary > .dana-kpi-card { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 6px 12px; }
+  .tl-rxo-status-summary .dana-kpi-value { margin: 0; font-size: 18px; }
+  .tl-rxo-status-summary .dana-kpi-note { display: none; }
+  .tl-rxo-activity { padding: 8px 12px; }
+
+  /* RXO data panels: filter labels and table captions stay for screen readers only. */
+  .tl-rxo-data-filters .tl-filter-label,
+  .tl-rxo-toolbar .tl-filter-label,
+  .tl-rxo-caption { position: absolute; width: 1px; height: 1px; overflow: hidden; margin: -1px; padding: 0; border: 0; clip: rect(0 0 0 0); white-space: nowrap; }
+  /* Anchor the screen-reader-only captions inside their scrolling table instead of the page. */
+  .dana-page .dana-table-shell { position: relative; }
+  .tl-rxo-datasets > button { min-height: 34px; padding-block: 4px; }
+  /* After a jump (compact summary) the table comes first: the page description, the data panel
+     subtitle and the per-status strip give way until "Full summary" brings them back. */
+  .tl-rxo.is-focused > .dana-page-header p,
+  .tl-rxo.is-focused .tl-rxo-data-header small,
+  .tl-rxo.is-focused .tl-rxo-status-summary { display: none; }
+  .tl-rxo.is-focused .tl-rxo-activity { flex-wrap: nowrap; }
+  .tl-rxo.is-focused .tl-rxo-activity-detail { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tl-rxo-data-body { gap: 10px; }
+  .tl-rxo.is-focused [role="tabpanel"] table.dana-table td { padding-block: 7px; }
+  /* RXO Expedite Data tab: the search row stays put and only the shipments table scrolls. */
+  .tl-fill > tl-rxo-expedite.tl-scroll { display: flex; flex-direction: column; overflow: hidden; }
+  tl-rxo-expedite > section,
+  tl-rxo-expedite > section > .dana-panel-body,
+  tl-rxo-expedite section[aria-labelledby="expedite-shipments-title"] { display: flex; flex: 1 1 auto; min-height: 0; flex-direction: column; }
+  tl-rxo-expedite > section > .dana-panel-body { overflow: auto; }
+  tl-rxo-expedite section[aria-labelledby="expedite-shipments-title"] > * { flex: 0 0 auto; }
+  tl-rxo-expedite section[aria-labelledby="expedite-shipments-title"] > .dana-table-shell { flex: 1 1 auto; min-height: 160px; max-height: none; overflow: auto; }
+
+  /* Sign-in strip above admin screens: one slim row. */
+  .tl-admin-access { margin-bottom: 0; padding: 6px 12px; }
+}
+
+/* From 1200px the open record sits beside the results table. The table drops the columns the
+   record already shows, so Open stays in reach without sideways scrolling. */
+@media screen and (min-width: 1200px) and (min-height: 600px) {
+  .tl-records-body.has-detail { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  .tl-records-body.has-detail .tl-wide-table { min-width: 0; }
+  .tl-records-body.has-detail .tl-wide-table :is(th, td):is(:nth-child(1), :nth-child(4), :nth-child(5), :nth-child(6), :nth-child(8)) { display: none; }
+}
+@media screen and (min-width: 1500px) and (min-height: 600px) {
+  .tl-records-body.has-detail { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); }
+  .tl-records-body.has-detail .tl-wide-table :is(th, td):is(:nth-child(1), :nth-child(4), :nth-child(6)) { display: table-cell; }
+}

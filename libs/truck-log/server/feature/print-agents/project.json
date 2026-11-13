@@ -1,0 +1,20 @@
+{
+  "name": "truck-log-server-feature-print-agents",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/truck-log/server/feature/print-agents/src",
+  "projectType": "library",
+  "tags": [
+    "scope:truck-log",
+    "platform:server",
+    "type:feature",
+    "domain:printing"
+  ],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/truck-log/server/feature/print-agents/tsconfig.json --noEmit"
+      }
+    }
+  }
+}

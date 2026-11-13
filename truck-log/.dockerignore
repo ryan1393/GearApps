@@ -1,0 +1,57 @@
+# Source-control / secrets
+.git
+.env
+.env.local
+.env.production
+.env.development
+.env.test
+.secrets
+
+# Local dependency/build/cache output
+node_modules
+node_modules/**
+dist
+dist/**
+.nx
+.nx/**
+.angular
+.angular/**
+.runtime-logs
+.runtime-logs/**
+coverage
+coverage/**
+tmp
+tmp/**
+temp
+temp/**
+
+# Historical backup/build artifacts are not runtime inputs
+.setup-backups
+.setup-backups/**
+_patch_backups
+_patch_backups/**
+patch_backups
+patch_backups/**
+backups
+backups/**
+*.bak
+*.bak-*
+*.zip
+*.7z
+*.rar
+*.gz
+*.tgz
+# The shared Dana UI package is a build input.
+!vendor/dana-ui/*.tgz
+*.tar
+*.log
+
+# Runtime data is mounted through Docker volumes and must never enter images
+data
+data/**
+.new-host-state
+.test-results
+test-results
+
+# Safe example is required by build-time setup tests
+!.env.example

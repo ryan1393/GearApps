@@ -1,0 +1,29 @@
+{
+  "name": "rxo-expedite",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/rxo-expedite/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/dist/apps/rxo-expedite"
+      ],
+      "options": {
+        "command": "node tools/truck-log/rxo/build-rxo-expedite.mjs"
+      }
+    },
+    "validate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "npm --prefix apps/rxo-expedite run check"
+      }
+    }
+  },
+  "tags": [
+    "scope:truck-log",
+    "platform:worker",
+    "type:app",
+    "domain:rxo"
+  ]
+}

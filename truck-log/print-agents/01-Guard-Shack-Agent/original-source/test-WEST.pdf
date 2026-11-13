@@ -1,0 +1,108 @@
+%PDF-1.3
+%“Œ‹ž ReportLab Generated PDF document (opensource)
+1 0 obj
+<<
+/F1 2 0 R /F2 3 0 R /F3 4 0 R
+>>
+endobj
+2 0 obj
+<<
+/BaseFont /Helvetica /Encoding /WinAnsiEncoding /Name /F1 /Subtype /Type1 /Type /Font
+>>
+endobj
+3 0 obj
+<<
+/BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding /Name /F2 /Subtype /Type1 /Type /Font
+>>
+endobj
+4 0 obj
+<<
+/BaseFont /Courier /Encoding /WinAnsiEncoding /Name /F3 /Subtype /Type1 /Type /Font
+>>
+endobj
+5 0 obj
+<<
+/Contents 9 0 R /MediaBox [ 0 0 612 792 ] /Parent 8 0 R /Resources <<
+/Font 1 0 R /ProcSet [ /PDF /Text /ImageB /ImageC /ImageI ]
+>> /Rotate 0 /Trans <<
+
+>> 
+  /Type /Page
+>>
+endobj
+6 0 obj
+<<
+/PageMode /UseNone /Pages 8 0 R /Type /Catalog
+>>
+endobj
+7 0 obj
+<<
+/Author (anonymous) /CreationDate (D:20000101000000+00'00') /Creator (anonymous) /Keywords () /ModDate (D:20000101000000+00'00') /Producer (ReportLab PDF Library - \(opensource\)) 
+  /Subject (unspecified) /Title (Truck Log - WEST gate service test V4R7) /Trapped /False
+>>
+endobj
+8 0 obj
+<<
+/Count 1 /Kids [ 5 0 R ] /Type /Pages
+>>
+endobj
+9 0 obj
+<<
+/Length 1333
+>>
+stream
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT /F2 17 Tf 20.4 TL ET
+BT 1 0 0 1 50 734 Tm (TRUCK LOG / WINDOWS SERVICE TEST) Tj T* ET
+2 w
+n 50 716 m 562 716 l S
+BT /F2 50 Tf 60 TL ET
+BT 1 0 0 1 50 620 Tm (WEST GATE) Tj T* ET
+BT /F1 16 Tf 19.2 TL ET
+BT 1 0 0 1 50 580 Tm (This sheet belongs at the West Gate printer only.) Tj T* ET
+BT /F2 13 Tf 15.6 TL ET
+BT 1 0 0 1 50 521 Tm (Expected destination:) Tj T* ET
+BT /F3 10 Tf 12 TL ET
+BT 1 0 0 1 50 497 Tm (\\\\USFTWPLVPS03\\USFTWP_W_Gate_Pass) Tj T* ET
+BT /F1 12 Tf 14.4 TL ET
+BT 1 0 0 1 50 445 Tm (Service: TruckLogPrintAgent) Tj T* ET
+BT 1 0 0 1 50 421 Tm (Windows host: USFTWLDAPP) Tj T* ET
+BT 1 0 0 1 50 397 Tm (Service account: LocalSystem / S-1-5-18) Tj T* ET
+BT 1 0 0 1 50 373 Tm (Release: V4R7 dual-printer service) Tj T* ET
+BT 1 0 0 1 50 349 Tm (This is a setup test, not a truck visit or a SAP document.) Tj T* ET
+n 50 210 512 80 re S
+BT /F2 13 Tf 15.6 TL ET
+BT 1 0 0 1 64 265 Tm (Confirm the physical location before enabling RXO jobs.) Tj T* ET
+BT /F1 11 Tf 13.2 TL ET
+BT 1 0 0 1 64 242 Tm (A successful program exit alone does not confirm paper came out.) Tj T* ET
+BT 1 0 0 1 64 225 Tm (Do not confirm a test delivered to the other gate.) Tj T* ET
+BT /F1 10 Tf 12 TL ET
+BT 1 0 0 1 50 80 Tm (One setup sheet per gate. No automatic reprint after an uncertain outcome.) Tj T* ET
+ 
+endstream
+endobj
+xref
+0 10
+0000000000 65535 f 
+0000000061 00000 n 
+0000000112 00000 n 
+0000000219 00000 n 
+0000000331 00000 n 
+0000000436 00000 n 
+0000000629 00000 n 
+0000000697 00000 n 
+0000000989 00000 n 
+0000001048 00000 n 
+trailer
+<<
+/ID 
+[<936ae1bf1ac702994aab5fd3bec192f6><936ae1bf1ac702994aab5fd3bec192f6>]
+% ReportLab generated PDF document -- digest (opensource)
+
+/Info 7 0 R
+/Root 6 0 R
+/Size 10
+>>
+startxref
+2432
+%%EOF

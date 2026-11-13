@@ -1,0 +1,79 @@
+{
+  "name": "truck-log",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/truck-log/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@angular-devkit/build-angular:application",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/apps/truck-log",
+        "index": "apps/truck-log/src/index.html",
+        "browser": "apps/truck-log/src/main.ts",
+        "polyfills": [
+          "zone.js"
+        ],
+        "tsConfig": "apps/truck-log/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/truck-log/public"
+          },
+          "apps/truck-log/src/favicon.ico",
+          "apps/truck-log/src/assets"
+        ],
+        "styles": [
+          "node_modules/@dana/ui/styles/dana-ui.css",
+          "apps/truck-log/src/styles.css"
+        ]
+      },
+      "configurations": {
+        "production": {
+          "outputHashing": "all",
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "1mb",
+              "maximumError": "2mb"
+            }
+          ]
+        },
+        "development": {
+          "optimization": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "executor": "@angular-devkit/build-angular:dev-server",
+      "configurations": {
+        "development": {
+          "buildTarget": "truck-log:build:development"
+        },
+        "production": {
+          "buildTarget": "truck-log:build:production"
+        }
+      },
+      "defaultConfiguration": "development",
+      "options": {
+        "port": 4300,
+        "proxyConfig": "apps/truck-log/proxy.conf.json"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p apps/truck-log/tsconfig.app.json --noEmit"
+      }
+    }
+  },
+  "tags": [
+    "scope:truck-log",
+    "platform:web",
+    "type:app"
+  ]
+}

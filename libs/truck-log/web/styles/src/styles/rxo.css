@@ -1,0 +1,71 @@
+/* RXO and RXO Expedite Control Centers — layout only. */
+.tl-rxo { display: grid; gap: 16px; min-width: 0; }
+.tl-rxo > *, .tl-rxo-columns > * { min-width: 0; }
+.tl-rxo > .dana-page-header,
+.tl-rxo > .dana-kpi-grid { margin-bottom: 0; }
+.tl-rxo-activity { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.tl-rxo-activity-detail { flex: 1 1 320px; min-width: 0; }
+.tl-rxo-run { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
+.tl-rxo-import-review details { margin-top: 8px; }
+.tl-rxo-import-review summary { cursor: pointer; padding: 6px 0; }
+.tl-rxo-kpi-time { font-size: 18px; }
+/* Scan/import summary and counts: stacked rows, one row of eight on wide screens. */
+.tl-rxo-kpis { display: grid; gap: 12px; }
+.tl-rxo-kpis > .dana-kpi-grid { margin: 0; }
+.tl-rxo-alerts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.tl-rxo-alerts > .dana-alert { flex: 1 1 420px; }
+.tl-rxo-datasets > button { white-space: nowrap; }
+/* Data panels: one toolbar row (filters + result count), and a footer with the count and paging. */
+.tl-rxo-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 8px 16px; }
+.tl-rxo-toolbar > .dana-filter-row { flex: 1 1 420px; margin: 0; }
+.tl-rxo-toolbar > .tl-rxo-range { margin-left: auto; padding-bottom: 10px; }
+.tl-rxo-data-footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.tl-rxo-data-footer > .tl-pagination { margin-left: auto; }
+.tl-rxo-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.tl-rxo-data-header { flex-wrap: wrap; gap: 12px 16px; }
+/* Equal-width segments, but never narrower than the longest label ("Freight on the move"). */
+.tl-rxo-datasets { flex: 0 0 auto; grid-auto-columns: minmax(max-content, 1fr); min-width: 0; }
+.tl-rxo-data-body { gap: 16px; }
+.tl-rxo-data-body > * { min-width: 0; }
+.tl-rxo-data-filters { margin: 0; gap: 12px; }
+.tl-rxo-search { flex: 1 1 360px; }
+/* The parent grid supplies the gap; Dana's standalone KPI margin would double it. */
+.tl-rxo-status-summary { grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr)); gap: 12px; margin: 0; }
+.tl-rxo-status-summary > .dana-kpi-card { min-width: 0; padding: 14px 16px; }
+.tl-rxo-range { justify-content: flex-end; }
+.tl-rxo-caption { caption-side: top; padding: 0 12px 12px; text-align: left; }
+.tl-rxo-identity { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 160px; }
+.tl-rxo-details { margin: 0; }
+.tl-rxo-document { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.tl-rxo-error { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.tl-rxo-kpis { gap: 8px; }
+.tl-rxo-kpis .dana-kpi-grid { gap: 8px; }
+.tl-rxo-kpis .dana-kpi-card { min-width: 0; padding: 9px 12px; }
+.tl-rxo-kpis .dana-kpi-value { margin: 4px 0 2px; font-size: 22px; }
+.tl-rxo-kpis .tl-rxo-kpi-time { font-size: 16px; line-height: 1.3; }
+@media (min-width: 1600px) { .tl-rxo-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Tabs with the summary toggle at the right end of the same row. */
+.tl-rxo-tabbar { display: flex; align-items: flex-end; gap: 12px; border-bottom: 1px solid var(--dana-border); }
+.tl-rxo-tabbar > .dana-tabs { flex: 1 1 auto; min-width: 0; border-bottom: 0; }
+.tl-rxo-tabbar > .dana-btn { flex: 0 0 auto; margin-bottom: 5px; }
+/* Compact summary: every tile shrinks to label + value in one row, so the open tab gets the height. */
+.tl-rxo-kpis.is-compact .dana-kpi-card { padding: 5px 10px; }
+.tl-rxo-kpis.is-compact .dana-kpi-note { display: none; }
+.tl-rxo-kpis.is-compact .dana-kpi-label { overflow: hidden; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.tl-rxo-kpis.is-compact .dana-kpi-value { overflow: hidden; margin: 1px 0 0; font-size: 15px; line-height: 1.25; text-overflow: ellipsis; white-space: nowrap; }
+@media (min-width: 900px) {
+  .tl-rxo-kpis.is-compact { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tl-rxo-kpis.is-compact .dana-kpi-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+}
+@media (max-width: 1100px) { .tl-rxo-columns { grid-template-columns: 1fr; } }
+@media (max-width: 560px) {
+  .tl-rxo-datasets { flex-basis: 100%; grid-auto-flow: row; }
+  .tl-rxo-data-filters > label { flex: 1 1 100%; }
+  .tl-rxo-data-filters > .tl-filter-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+}
+/* Connection recovery: a compact strip (text and buttons on one row), not a full card. */
+.tl-rxo-recovery { display: grid; gap: 4px; padding: 8px 12px; }
+.tl-rxo-recovery p { margin: 0; }
+.tl-rxo-recovery-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; }
+.tl-rxo-recovery-row > p { flex: 1 1 320px; min-width: 0; }
+.tl-rxo-recovery-note { font-size: 13px; }

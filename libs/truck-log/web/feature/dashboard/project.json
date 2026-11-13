@@ -1,0 +1,20 @@
+{
+  "name": "truck-log-web-feature-dashboard",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/truck-log/web/feature/dashboard/src",
+  "projectType": "library",
+  "tags": [
+    "scope:truck-log",
+    "platform:web",
+    "type:feature",
+    "domain:operations"
+  ],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/truck-log/web/feature/dashboard/tsconfig.json --noEmit"
+      }
+    }
+  }
+}

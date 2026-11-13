@@ -1,0 +1,59 @@
+{
+  "name": "rxo-integration",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/rxo-integration/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": [
+        "{workspaceRoot}/dist/apps/rxo-integration"
+      ],
+      "options": {
+        "command": "node tools/truck-log/rxo/build-rxo-integration.mjs"
+      }
+    },
+    "validate": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/truck-log/rxo/validate-rxo-integration.mjs"
+      }
+    },
+    "test-production": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File apps/rxo-integration/test-production-export.ps1"
+      }
+    },
+    "verify-latest": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File apps/rxo-integration/verify-latest-exports.ps1"
+      }
+    },
+    "start": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File apps/rxo-integration/start-integrated.ps1"
+      }
+    },
+    "status": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File apps/rxo-integration/status-integrated.ps1"
+      }
+    },
+    "sync-latest": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File apps/rxo-integration/sync-latest-to-truck-log.ps1"
+      }
+    }
+  },
+  "tags": [
+    "scope:truck-log",
+    "platform:worker",
+    "type:app",
+    "domain:rxo"
+  ]
+}

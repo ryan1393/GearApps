@@ -1,0 +1,15 @@
+/* Administration — layout only. */
+.tl-admin { display: grid; gap: 16px; min-width: 0; }
+.tl-admin > *, .tl-admin-columns > *, .tl-admin [role="tabpanel"] { min-width: 0; }
+.tl-admin > .dana-page-header { margin-bottom: 0; }
+.tl-admin-grow { flex: 1 1 320px; }
+.tl-admin-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+.tl-admin-retry { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+@media (max-width: 1100px) { .tl-admin-columns { grid-template-columns: 1fr; } }
+/* Locations edit table: room for names and street addresses; scrolls sideways on smaller screens. */
+.tl-ref-table { min-width: 1180px; }
+.tl-ref-wide { min-width: 220px; }
+/* Packing slip watcher routes: room for the UNC printer path and queue name. */
+.tl-watcher-table { min-width: 1180px; }
+.tl-watcher-wide { min-width: 200px; }
+.tl-watcher-printer { min-width: 360px; }

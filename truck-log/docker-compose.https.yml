@@ -1,0 +1,42 @@
+# Optional TLS overlay; Docker Compose 2.24.4+ is required for !override.
+# Always combine with docker-compose.yml. See docs/truck-log/HTTPS.md.
+services:
+  truck-log-server:
+    environment:
+      TRUCK_LOG_ADMIN_TRANSPORT: https
+      TRUCK_LOG_ADMIN_ORIGIN: "${TRUCK_LOG_PUBLIC_ORIGIN:?Set an https:// public origin in .env}"
+      TRUCK_LOG_ADMIN_PROXY_KEY: "${TRUCK_LOG_ADMIN_PROXY_KEY:?Generate the HTTPS proxy key first}"
+      # Exactly one trusted peer, matched to the web service's dedicated address.
+      TRUCK_LOG_ADMIN_PROXY_IPS: "${TRUCK_LOG_TLS_PROXY_IP:-172.30.43.10}"
+    networks:
+      truck-log: {}
+      truck-log-tls-proxy:
+        aliases: [truck-log-api-tls]
+
+  truck-log-web:
+    # Replace the base HTTP port rather than merging and leaving it public.
+    ports: !override
+      - "${TRUCK_LOG_TLS_PORT:-443}:443"
+    environment:
+      TRUCK_LOG_ADMIN_PROXY_KEY: "${TRUCK_LOG_ADMIN_PROXY_KEY:?Generate the HTTPS proxy key first}"
+    entrypoint: [/bin/sh, /opt/truck-log/start-https.sh]
+    volumes:
+      - type: bind
+        source: "${TRUCK_LOG_TLS_CERT_DIR:?Set the absolute TLS certificate directory on the Docker host}"
+        target: /etc/nginx/truck-log-tls
+        read_only: true
+        bind:
+          create_host_path: false
+    healthcheck:
+      test: [CMD-SHELL, "wget -Y off -q -O /dev/null http://127.0.0.1:8080/healthz || exit 1"]
+    networks:
+      truck-log: {}
+      truck-log-tls-proxy:
+        ipv4_address: "${TRUCK_LOG_TLS_PROXY_IP:-172.30.43.10}"
+
+networks:
+  truck-log-tls-proxy:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: "${TRUCK_LOG_TLS_PROXY_SUBNET:-172.30.43.0/24}"

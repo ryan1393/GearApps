@@ -1,0 +1,158 @@
+{
+  "release": "1.0.5",
+  "validationStatus": "SOURCE_VERIFIED",
+  "site": {
+    "name": "Dana Fort Wayne",
+    "requiredIdentifiers": [
+      "12808",
+      "DANA_USA_FORT_WAYNE_IN"
+    ],
+    "directionRule": {
+      "Origin": "OUTBOUND",
+      "Destination": "INBOUND"
+    }
+  },
+  "files": {
+    "apps/rxo-integration/src/lib/batch-retention.mjs": {
+      "sha256": "9604012328077518926e7d2072a5d4457fa3ddae866fb034c211a3ce4cff2a08",
+      "bytes": 326
+    },
+    "apps/rxo-integration/src/lib/process-lock.mjs": {
+      "sha256": "8bcf0a61cf6db3cdaeea85fee76c18e1539774caba8c80b44fc9a3127e1b20c9",
+      "bytes": 320
+    },
+    "apps/rxo-integration/src/lib/rxo-auth.mjs": {
+      "sha256": "a4b35e31b64c791d50181b6223ac26cd8d0671cc65a45343585bc5ed27b9306e",
+      "bytes": 312
+    },
+    "apps/rxo-integration/src/lib/rxo-export-batch.mjs": {
+      "sha256": "8551c042d20060d2ab833b22b3f2f7ae2797424fea2d0bad55a6765e8b192820",
+      "bytes": 12061
+    },
+    "apps/rxo-integration/src/lib/rxo-export-browser.mjs": {
+      "sha256": "7054e3fd2521bf17c811b7279b84f3060929243a7819404ed7669b417fa121ba",
+      "bytes": 2902
+    },
+    "apps/rxo-integration/src/lib/rxo-export-config.mjs": {
+      "sha256": "ccf21625e100604337bd92d58c42bd8a17d79d5336e8f88d1bca84d066e8201e",
+      "bytes": 3453
+    },
+    "apps/rxo-integration/src/lib/rxo-export-data.mjs": {
+      "sha256": "5fa9144e2b341ebbdd8e3c73085134d166f114a4daa9c3a452e35c41bd1330a7",
+      "bytes": 7604
+    },
+    "apps/rxo-integration/src/lib/rxo-export-dataset.mjs": {
+      "sha256": "88b0ffbe8acccfa9b17675ab721cc117f676d7679e9e6520254b0d462fe7ecd9",
+      "bytes": 12370
+    },
+    "apps/rxo-integration/src/lib/rxo-export-date-filter.mjs": {
+      "sha256": "e7308adac79389d2613a38c2772fa574100601e2838f61ca6821409edb984c14",
+      "bytes": 25963
+    },
+    "apps/rxo-integration/src/lib/rxo-export-download.mjs": {
+      "sha256": "3ac3f06e7521d55ecf91eb507892a39241009e6c778b043534c716f8308adfdb",
+      "bytes": 11676
+    },
+    "apps/rxo-integration/src/lib/rxo-export-login.mjs": {
+      "sha256": "fdd2a0b718968bcdacd94373d1dfb233754398678b731f9b95034c53ae344513",
+      "bytes": 3234
+    },
+    "apps/rxo-integration/src/lib/rxo-export-merge.mjs": {
+      "sha256": "849ff0678456bfefaa85002c8983326459d26161029aecc8544e9fb54313c6c4",
+      "bytes": 18427
+    },
+    "apps/rxo-integration/src/lib/rxo-export-publication.mjs": {
+      "sha256": "1f15fc3a4e1e7cff40bc14b1468e2b2f5611afca089a82cd4d5b848840b32eef",
+      "bytes": 8606
+    },
+    "apps/rxo-integration/src/lib/rxo-export-runtime.mjs": {
+      "sha256": "bd539f13cf85df5d2bafe8ae498376736a0962a13cbee3944d70b3d0ddaf10d5",
+      "bytes": 3309
+    },
+    "apps/rxo-integration/src/lib/rxo-export-window.mjs": {
+      "sha256": "ff2188282c6ef54a73f53ddc2e9cdd42708490a9fb78681b3a12d59a7141e54d",
+      "bytes": 1159
+    },
+    "apps/rxo-integration/src/lib/rxo-filter-common.mjs": {
+      "sha256": "34bfb5c5e66ee713fe76942be48ca5c7bbbbc5121de1a216206c4a27c728b458",
+      "bytes": 1947
+    },
+    "apps/rxo-integration/src/lib/rxo-filter-input.mjs": {
+      "sha256": "a51838e88d5b3c865ef2587e7669d922dc68ee0394a781741b30192b0eb3b7a9",
+      "bytes": 5251
+    },
+    "apps/rxo-integration/src/lib/rxo-filter-options.mjs": {
+      "sha256": "566434abbcf3282a877b8a4db546ff10259e77cc5e52db13c988a5c87353f80f",
+      "bytes": 5157
+    },
+    "apps/rxo-integration/src/lib/rxo-filter-panel.mjs": {
+      "sha256": "5cd491f9584c0fa62eab2e584d4d96d795d8f9449233c46f519cda4be7c5547f",
+      "bytes": 10461
+    },
+    "apps/rxo-integration/src/lib/rxo-filter-readiness.mjs": {
+      "sha256": "2cfa8e1ab15c6d31cff36e8d9ad808ee9245974add850c34ff4c1cdc4d37a3d5",
+      "bytes": 20121
+    },
+    "apps/rxo-integration/src/lib/rxo-filter-selection.mjs": {
+      "sha256": "10c77d6761b81300803a06ad39a0cd4c245f5f5e2e62c3fced77f53a7548a6b7",
+      "bytes": 6862
+    },
+    "apps/rxo-integration/src/lib/rxo-filter-ui.mjs": {
+      "sha256": "b84b77dba4855c759d92bb24a243aadc156611eb35cb1cbe6057f41f1feb9d53",
+      "bytes": 8168
+    },
+    "apps/rxo-integration/src/lib/rxo-overlay-ui.mjs": {
+      "sha256": "66d1e5049367b92b6150586cfe3d1b914be56004857aed1d94931ff4bd9e7ae6",
+      "bytes": 7981
+    },
+    "apps/rxo-integration/src/lib/rxo-scheduler-support.mjs": {
+      "sha256": "dcd4f9ff9f93a3d4c5e01c90794b34a315dbe97f34bb10285ff68f1475283add",
+      "bytes": 5888
+    },
+    "apps/rxo-integration/src/playwright-preflight.mjs": {
+      "sha256": "4c2c85cf57d921d981341dd44f1959ec3eaa335f28a1cb066c335787b0903428",
+      "bytes": 1044
+    },
+    "apps/rxo-integration/src/rxo-filter-test.mjs": {
+      "sha256": "5a0ece363825ca42b3967aad663d2122e925af0b4224f3db8f180f87ce198a1c",
+      "bytes": 6828
+    },
+    "apps/rxo-integration/src/rxo-fort-wayne-export.mjs": {
+      "sha256": "fd703486a35f7f7571c18f3aed2ec3357b0bdc6697e8b5227f99a630bfa0fa9c",
+      "bytes": 4924
+    },
+    "apps/rxo-integration/src/rxo-scheduler.mjs": {
+      "sha256": "415e02329bb1162137cd1b7321ff1fef95eacba7dd08032b05706646653a3178",
+      "bytes": 25678
+    },
+    "apps/rxo-integration/src/test-new-host-filter-readiness.mjs": {
+      "sha256": "c70cdf9d9c72ab8938e01714cc75daef23d4f2e65420fbafd465af24114baef4",
+      "bytes": 24977
+    },
+    "libs/truck-log/rxo-shared/batch-retention.mjs": {
+      "sha256": "b3a4b814e7d019d9c53fdeac117c6ff4d0815441335f10030a2c392b26deb492",
+      "bytes": 2028
+    },
+    "libs/truck-log/rxo-shared/process-lock.mjs": {
+      "sha256": "b62c19f3f224e694e453ca729c5933c85fb823f354f39e1fa9e134c66b81c5d0",
+      "bytes": 8468
+    },
+    "libs/truck-log/rxo-shared/rxo-auth.mjs": {
+      "sha256": "e2af9459676e0ae664b9e47e03ba145ee4de8de414e1a57361ef1fa22b9e135e",
+      "bytes": 47834
+    },
+    "apps/rxo-integration/Dockerfile": {
+      "sha256": "bef32984e30a5ca8455c01b61503f55f24f303b495626287ad8c144bfb38d41d",
+      "bytes": 1925
+    },
+    "apps/rxo-integration/Dockerfile.dockerignore": {
+      "sha256": "2a2b9040183bf1d57b57d998e7ae1a7c30e05013de23d48074385dff56702dc8",
+      "bytes": 349
+    },
+    "apps/rxo-integration/package.json": {
+      "sha256": "612e6a2c9ade6f26cf965bc99393284204816356fc50983bf7fd99ace2b08c3b",
+      "bytes": 644
+    }
+  },
+  "imageSourceDigest": "991976be51fe6472ffac0e85c633f6d5e1b969115682feea19a659993b620630"
+}

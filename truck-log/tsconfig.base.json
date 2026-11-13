@@ -1,0 +1,61 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "sourceMap": true,
+    "declaration": false,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "importHelpers": true,
+    "target": "ES2022",
+    "module": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM"
+    ],
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@truck-log/shared/contracts": [
+        "libs/truck-log/shared/contracts/src/index.ts"
+      ],
+      "@truck-log/web/data-access": [
+        "libs/truck-log/web/data-access/src/index.ts"
+      ],
+      "@truck-log/web/domain": [
+        "libs/truck-log/web/domain/src/index.ts"
+      ],
+      "@truck-log/web/ui": [
+        "libs/truck-log/web/ui/src/index.ts"
+      ],
+      "@truck-log/web/auth/*": [
+        "libs/truck-log/web/auth/*/src/index.ts"
+      ],
+      "@truck-log/web/feature/*": [
+        "libs/truck-log/web/feature/*/src/index.ts"
+      ],
+      "@truck-log/server/core": [
+        "libs/truck-log/server/core/src/index.ts"
+      ],
+      "@truck-log/server/data-access": [
+        "libs/truck-log/server/data-access/src/index.ts"
+      ],
+      "@truck-log/server/auth/*": [
+        "libs/truck-log/server/auth/*/src/index.ts"
+      ],
+      "@truck-log/server/domain/*": [
+        "libs/truck-log/server/domain/*/src/index.ts"
+      ],
+      "@truck-log/server/infrastructure/*": [
+        "libs/truck-log/server/infrastructure/*/src/index.ts"
+      ],
+      "@truck-log/server/feature/*": [
+        "libs/truck-log/server/feature/*/src/index.ts"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "tmp"
+  ]
+}

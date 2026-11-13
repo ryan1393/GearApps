@@ -1,0 +1,35 @@
+{
+  "name": "truck-log-server",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/truck-log-server/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nx/webpack:webpack",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "webpackConfig": "apps/truck-log-server/webpack.config.js",
+        "outputPath": "dist/apps/truck-log-server"
+      }
+    },
+    "serve": {
+      "executor": "@nx/js:node",
+      "options": {
+        "buildTarget": "truck-log-server:build"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p apps/truck-log-server/tsconfig.app.json --noEmit"
+      }
+    }
+  },
+  "tags": [
+    "scope:truck-log",
+    "platform:server",
+    "type:app"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "truck-log-web-auth-admin",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/truck-log/web/auth/admin/src",
+  "projectType": "library",
+  "tags": [
+    "scope:truck-log",
+    "platform:web",
+    "type:auth"
+  ],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/truck-log/web/auth/admin/tsconfig.json --noEmit"
+      }
+    }
+  }
+}

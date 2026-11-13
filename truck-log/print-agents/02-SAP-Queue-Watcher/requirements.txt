@@ -1,0 +1,2 @@
+# Python 3.10+ - audited, reproducible text-based PDF verification
+pypdf==6.21.4

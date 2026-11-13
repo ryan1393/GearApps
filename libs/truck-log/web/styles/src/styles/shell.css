@@ -1,0 +1,8 @@
+/* Truck Log shell — all looks come from the Dana UI shell. */
+
+/* The closed navigation drawer (below 1024px) is only moved off screen by Dana UI, so its links
+   would still take keyboard focus. Hide it once it has slid out; show it as it slides in. */
+@media (max-width:1024px) {
+  .dana-sidebar:not(.is-open) { visibility: hidden; transition: transform .18s ease, visibility 0s linear .18s; }
+  .dana-sidebar.is-open { visibility: visible; }
+}

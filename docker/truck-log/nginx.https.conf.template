@@ -1,0 +1,90 @@
+server {
+  listen 443 ssl;
+  ssl_certificate /etc/nginx/truck-log-tls/fullchain.pem;
+  ssl_certificate_key /etc/nginx/truck-log-tls/privkey.pem;
+  ssl_protocols TLSv1.2 TLSv1.3;
+  ssl_session_cache shared:TruckLogTLS:10m;
+  ssl_session_tickets off;
+  server_name _;
+  root /usr/share/nginx/html;
+  index index.html;
+
+  # Docker embedded DNS resolves Compose network names dynamically.
+  # Variable upstreams avoid fatal Nginx startup failure when the API
+  # hostname is temporarily unavailable during container recreation.
+  resolver 127.0.0.11 valid=10s ipv6=off;
+
+  location /api/ {
+    # The isolated deployment uses this exact API container name.
+    set $truck_log_api_backend truck-log-api-tls:3334;
+    proxy_pass http://$truck_log_api_backend;
+    proxy_http_version 1.1;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto https;
+    # Overwrite every caller-supplied assertion. The API also checks this
+    # proxy's dedicated source IP before trusting this key and client address.
+    proxy_set_header X-TruckLog-Admin-Proxy-Key "${TRUCK_LOG_ADMIN_PROXY_KEY}";
+    proxy_set_header X-TruckLog-Admin-Client-IP $remote_addr;
+    client_max_body_size 30m;
+  }
+
+  # Security headers for the web client. Declared per location because
+  # add_header is not inherited into a location that sets its own headers;
+  # API responses keep the headers the API itself sends.
+  # No Content-Security-Policy: Angular's production build inlines critical
+  # CSS with an onload handler and component <style> tags.
+
+  # The app shell: always revalidate so a redeploy is picked up immediately.
+  location = /index.html {
+    add_header Cache-Control "no-cache" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "same-origin" always;
+    add_header X-Frame-Options "DENY" always;
+  }
+
+  # Content-hashed build output (outputHashing: all) never changes in place.
+  location ~* "^/(?:main|polyfills|styles|chunk|runtime|scripts|worker)-[A-Za-z0-9]{8,}\.(?:js|css|mjs)$" {
+    try_files $uri =404;
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "same-origin" always;
+    add_header X-Frame-Options "DENY" always;
+  }
+
+  location /media/ {
+    try_files $uri =404;
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "same-origin" always;
+    add_header X-Frame-Options "DENY" always;
+  }
+
+  # Any other request for a file (it has an extension) must exist:
+  # a missing script, stylesheet or image is a 404, not the app shell.
+  # (/api/ is excluded: regex locations would otherwise win over its prefix.)
+  location ~* "^/(?!api/).*\.[A-Za-z0-9]{1,8}$" {
+    try_files $uri =404;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "same-origin" always;
+    add_header X-Frame-Options "DENY" always;
+  }
+
+  # Client-side routes fall back to the app shell.
+  location / {
+    try_files $uri $uri/ /index.html;
+    add_header Cache-Control "no-cache" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "same-origin" always;
+    add_header X-Frame-Options "DENY" always;
+  }
+}
+
+# Local process liveness only; no HTTP application or credential route is exposed.
+server {
+  listen 127.0.0.1:8080;
+  server_name localhost;
+  location = /healthz { access_log off; return 200 "healthy\n"; }
+  location / { return 404; }
+}

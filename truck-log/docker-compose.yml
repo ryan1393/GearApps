@@ -1,0 +1,340 @@
+name: truck-log
+
+services:
+  truck-log-postgres:
+    image: postgres:16-alpine
+    container_name: truck-log-postgres
+    labels:
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.5}"
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: "${TRUCK_LOG_DATABASE_USERNAME:?Run SETUP-TRUCK-LOG.cmd first}"
+      POSTGRES_PASSWORD: "${TRUCK_LOG_DATABASE_PASSWORD:?Database password required}"
+      POSTGRES_DB: "${TRUCK_LOG_DATABASE_NAME:-TruckLog}"
+    volumes:
+      - truck-log-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+    networks:
+      - truck-log
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  truck-log-server:
+    build:
+      context: .
+      dockerfile: docker/truck-log/server.Dockerfile
+      args:
+        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.5}"
+    image: truck-log-server:${TRUCK_LOG_RELEASE:-1.0.5}
+    container_name: truck-log-server
+    labels:
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.5}"
+    init: true
+    env_file:
+      - .env
+    environment:
+      TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.5}"
+      TRUCK_LOG_ADMIN_ENABLED: "true"
+      # Retain HTTP compatibility for existing .env files; HTTPS deployments use
+      # docker-compose.https.yml, which requires a trusted proxy and TLS origin.
+      TRUCK_LOG_ADMIN_TRANSPORT: "${TRUCK_LOG_ADMIN_TRANSPORT:-internal-http}"
+      TRUCK_LOG_ADMIN_ORIGIN: "${TRUCK_LOG_PUBLIC_ORIGIN:-http://localhost:4300}"
+      NODE_ENV: production
+      TRUCK_LOG_API_PORT: "3334"
+      TRUCK_LOG_DATABASE_HOST: truck-log-postgres
+      TRUCK_LOG_DATABASE_PORT: "5432"
+      TRUCK_LOG_DATABASE_SYNCHRONIZE: "false"
+      TRUCK_LOG_PRINT_AGENT_OFFLINE_SECONDS: "${TRUCK_LOG_PRINT_AGENT_OFFLINE_SECONDS:-90}"
+      TRUCK_LOG_DRIVER_PRINT_AGENT_ID: "${TRUCK_LOG_DRIVER_PRINT_AGENT_ID:-}"
+      TRUCK_LOG_DRIVER_PRINT_ROUTE: "${TRUCK_LOG_DRIVER_PRINT_ROUTE:-}"
+      TRUCK_LOG_DRIVER_PRINT_PRINTER: "${TRUCK_LOG_DRIVER_PRINT_PRINTER:-}"
+      TRUCK_LOG_DOCUMENT_STORAGE_ROOT: /data/truck-log-documents
+      TRUCK_LOG_RXO_LATEST_DIR: /data/truck-log-rxo/latest
+      TRUCK_LOG_RXO_DOCKER_DATA_VOLUME: truck-log-rxo-data
+      TRUCK_LOG_RXO_DOCKER_CREDENTIAL_VOLUME: truck-log-rxo-credentials
+      TRUCK_LOG_DOCKER_PROJECT: "truck-log"
+      TRUCK_LOG_RXO_EXPEDITE_CONTROL_ORIGIN: "${TRUCK_LOG_RXO_EXPEDITE_CONTROL_ORIGIN:-}"
+      TRUCK_LOG_RXO_EXPEDITE_ALLOW_HTTP: "${TRUCK_LOG_RXO_EXPEDITE_ALLOW_HTTP:-false}"
+      DOCKER_HOST: unix:///var/run/docker.sock
+    depends_on:
+      truck-log-postgres:
+        condition: service_healthy
+    ports:
+      # Remote browsers and Print Agents use the web server's /api/v1 route.
+      - "${TRUCK_LOG_API_BIND_ADDRESS:-127.0.0.1}:${TRUCK_LOG_API_PORT:-3334}:3334"
+    volumes:
+      - truck-log-documents:/data/truck-log-documents
+      - truck-log-rxo-import:/data/truck-log-rxo
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3334/api/v1/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      start_period: 180s
+      retries: 12
+    networks:
+      - truck-log
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  truck-log-web:
+    build:
+      context: .
+      dockerfile: docker/truck-log/web.Dockerfile
+      args:
+        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.5}"
+    image: truck-log-web:${TRUCK_LOG_RELEASE:-1.0.5}
+    container_name: truck-log-web
+    labels:
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.5}"
+    init: true
+    ports:
+      - "${TRUCK_LOG_WEB_PORT:-4300}:80"
+    depends_on:
+      truck-log-server:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "wget -Y off -q -O /dev/null http://127.0.0.1/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
+      retries: 12
+    networks:
+      - truck-log
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "5"
+
+  rxo-export:
+    build:
+      context: .
+      dockerfile: apps/rxo-integration/Dockerfile
+      args:
+        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.5}"
+      target: runtime
+    image: truck-log-rxo-export:${TRUCK_LOG_RELEASE:-1.0.5}
+    container_name: truck-log-rxo-export
+    labels:
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.5}"
+    init: true
+    restart: unless-stopped
+    # Chromium runs with --no-sandbox, so no capability is needed.
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    mem_limit: "2g"
+    pids_limit: 512
+    environment:
+      TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.5}"
+      TZ: "${TZ:-America/Indiana/Indianapolis}"
+      TRUCK_LOG_RXO_AUTH_EMAIL_ENABLED: "${TRUCK_LOG_RXO_AUTH_EMAIL_ENABLED:-false}"
+      SMTP_HOST: "${SMTP_HOST:-}"
+      SMTP_PORT: "${SMTP_PORT:-25}"
+      SMTP_FROM: "${SMTP_FROM:-}"
+      RXO_URL: https://customer.rxoconnect.rxo.com/control-tower/scorecard
+      RXO_SITE_KEY: fort-wayne
+      RXO_SITE_NAME: Dana Fort Wayne
+      RXO_SITE_CODE_PREFIXES: "12808"
+      RXO_SITE_TEXT_IDENTIFIERS: DANA_USA_FORT_WAYNE_IN
+      RXO_EXPORT_ALL_FALLBACK: "false"
+      RXO_SYNC_ON_START: "true"
+      RXO_SYNC_INTERVAL_MINUTES: "${RXO_SYNC_INTERVAL_MINUTES:-30}"
+      RXO_MAX_SCAN_DURATION_MINUTES: "${RXO_MAX_SCAN_DURATION_MINUTES:-30}"
+      RXO_NO_PROGRESS_TIMEOUT_MINUTES: "${RXO_NO_PROGRESS_TIMEOUT_MINUTES:-15}"
+      RXO_RECOVERY_COOLDOWN_SECONDS: "${RXO_RECOVERY_COOLDOWN_SECONDS:-30}"
+      RXO_MAX_AUTOMATIC_RECOVERY_ATTEMPTS: "1"
+      RXO_HEADLESS: "true"
+      RXO_LOGIN_TIMEOUT_MS: "120000"
+      RXO_DOWNLOAD_TIMEOUT_MS: "180000"
+      RXO_MAX_ATTEMPTS: "3"
+      RXO_RETRY_DELAY_SECONDS: "20"
+      RXO_FORCE_LOGIN_EACH_RUN: "false"
+      RXO_CAPTURE_FAILURE_SCREENSHOT: "${RXO_CAPTURE_FAILURE_SCREENSHOT:-false}"
+      RXO_FILTER_READY_TIMEOUT_MS: "${RXO_FILTER_READY_TIMEOUT_MS:-60000}"
+    volumes:
+      - truck-log-rxo-data:/app/data
+      - truck-log-rxo-state:/app/state
+      - truck-log-rxo-credentials:/run/secrets:ro
+    networks:
+      - truck-log
+    healthcheck:
+      # Healthy = the process is alive (heartbeat) AND the scheduler loop is still
+      # advancing: it publishes the latest time it must progress by (loop deadline).
+      test: ["CMD-SHELL", "node -e \"const fs=require('fs');const p='/app/data/scheduler-status.json';try{const j=JSON.parse(fs.readFileSync(p,'utf8'));const now=Date.now();process.exit(now-Date.parse(j.schedulerHeartbeatAt)<30000&&now<Date.parse(j.schedulerLoopDeadlineAt)?0:1)}catch(e){process.exit(1)}\""]
+      interval: 15s
+      timeout: 5s
+      start_period: 90s
+      retries: 12
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
+
+
+  rxo-browser:
+    profiles: ["rxo-browser"]
+    build:
+      context: .
+      dockerfile: apps/rxo-integration/Dockerfile
+      args:
+        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.5}"
+      target: interactive
+    image: truck-log-rxo-browser:${TRUCK_LOG_RELEASE:-1.0.5}
+    container_name: truck-log-rxo-browser
+    labels:
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.5}"
+    init: true
+    shm_size: "1gb"
+    # Xvfb, x11vnc, websockify and Chromium (--no-sandbox) need no capability.
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    mem_limit: "2g"
+    pids_limit: 512
+    environment:
+      TZ: "${TZ:-America/Indiana/Indianapolis}"
+      RXO_HEADLESS: "false"
+      RXO_BOOTSTRAP_SESSION: "${RXO_BOOTSTRAP_SESSION:-manual}"
+      RXO_CAPTURE_FAILURE_SCREENSHOT: "false"
+    ports:
+      - "127.0.0.1:${TRUCK_LOG_RXO_BROWSER_PORT:-6080}:6080"
+    volumes:
+      - truck-log-rxo-data:/app/data
+      - truck-log-rxo-state:/app/state
+      - truck-log-rxo-credentials:/run/secrets:ro
+    networks:
+      - truck-log
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:6080/vnc.html').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 15s
+    logging:
+      driver: json-file
+      options:
+        max-size: 5m
+        max-file: "2"
+
+  # RXO_EXPEDITE: independent automatic scheduler; standard RXO remains separate.
+  rxo-expedite-scheduler:
+    build:
+      context: .
+      dockerfile: apps/rxo-expedite/Dockerfile
+      args:
+        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.5}"
+    image: truck-log-rxo-expedite:${TRUCK_LOG_RELEASE:-1.0.5}
+    container_name: truck-log-rxo-expedite-scheduler
+    labels:
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.5}"
+    init: true
+    restart: unless-stopped
+    entrypoint: ["node", "/app/src/scheduler.mjs"]
+    environment:
+      TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.5}"
+      TZ: "${TZ:-America/Indiana/Indianapolis}"
+      TRUCK_LOG_RXO_AUTH_EMAIL_ENABLED: "${TRUCK_LOG_RXO_AUTH_EMAIL_ENABLED:-false}"
+      SMTP_HOST: "${SMTP_HOST:-}"
+      SMTP_PORT: "${SMTP_PORT:-25}"
+      SMTP_FROM: "${SMTP_FROM:-}"
+      RXO_EXPEDITE_SYNC_INTERVAL_MINUTES: "${RXO_EXPEDITE_SYNC_INTERVAL_MINUTES:-30}"
+      RXO_EXPEDITE_SYNC_ON_START: "${RXO_EXPEDITE_SYNC_ON_START:-true}"
+    shm_size: "512mb"
+    mem_limit: "1g"
+    cpus: 1.0
+    pids_limit: 256
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    volumes:
+      - truck-log-rxo-expedite-data:/app/data
+      - truck-log-rxo-expedite-state:/app/state
+      - truck-log-rxo-credentials:/run/secrets:ro
+    networks:
+      - truck-log
+    healthcheck:
+      # Healthy = heartbeat fresh AND the scheduler loop still advancing (loop deadline).
+      test: ["CMD-SHELL", "node -e \"const fs=require('fs');try{const j=JSON.parse(fs.readFileSync('/app/data/expedite-scheduler-status.json','utf8'));const now=Date.now();process.exit(now-Date.parse(j.schedulerHeartbeatAt)<30000&&now<Date.parse(j.schedulerLoopDeadlineAt)?0:1)}catch(e){process.exit(1)}\""]
+      interval: 15s
+      timeout: 5s
+      start_period: 90s
+      retries: 12
+    logging:
+      driver: json-file
+      options:
+        max-size: 5m
+        max-file: "2"
+
+  # RXO_EXPEDITE: manual one-shot remains available for controlled troubleshooting.
+  rxo-expedite:
+    profiles: ["rxo-expedite-manual"]
+    build:
+      context: .
+      dockerfile: apps/rxo-expedite/Dockerfile
+      args:
+        TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.5}"
+    image: truck-log-rxo-expedite:${TRUCK_LOG_RELEASE:-1.0.5}
+    init: true
+    restart: "no"
+    labels:
+      com.dana.truck-log.release: "${TRUCK_LOG_RELEASE:-1.0.5}"
+    entrypoint: ["node", "/app/src/cli.mjs"]
+    command: ["--help"]
+    environment:
+      TRUCK_LOG_RELEASE: "${TRUCK_LOG_RELEASE:-1.0.5}"
+      TZ: "${TZ:-America/Indiana/Indianapolis}"
+    shm_size: "512mb"
+    mem_limit: "1g"
+    cpus: 1.0
+    pids_limit: 256
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: ["ALL"]
+    volumes:
+      - truck-log-rxo-expedite-data:/app/data
+      - truck-log-rxo-expedite-state:/app/state
+      - truck-log-rxo-credentials:/run/secrets:ro
+    networks:
+      - truck-log
+    healthcheck:
+      disable: true
+    logging:
+      driver: json-file
+      options:
+        max-size: 5m
+        max-file: "2"
+
+volumes:
+  truck-log-rxo-expedite-data:
+    name: truck-log-rxo-expedite-data
+  truck-log-rxo-expedite-state:
+    name: truck-log-rxo-expedite-state
+  truck-log-postgres-data:
+    name: truck-log-postgres-data
+  truck-log-documents:
+    name: truck-log-documents
+  truck-log-rxo-import:
+    name: truck-log-rxo-import
+  truck-log-rxo-data:
+    name: truck-log-rxo-data
+  truck-log-rxo-state:
+    name: truck-log-rxo-state
+  truck-log-rxo-credentials:
+    name: truck-log-rxo-credentials
+
+networks:
+  truck-log:
+    name: truck-log
+    driver: bridge

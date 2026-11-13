@@ -1,0 +1,39 @@
+/* Shared Truck Log screens (dialogs, notices) — layout only. */
+.tl-notice { margin: 0 0 14px; }
+.tl-stack { display: grid; gap: 12px; }
+.tl-checkout-dialog { --dana-dialog-width: 620px; }
+.tl-panel-note { margin: 12px 18px 0; }
+/* Visit tables scroll sideways on tablets instead of squeezing every column. */
+.tl-wide-table { min-width: 940px; }
+/* Clickable summary tile: a full-size button inside the tile jumps to the section it summarizes.
+   The tile keeps its own markup and text; the button only adds the hit area, hover and focus ring. */
+.tl-rxo-kpis .dana-kpi-card,
+.tl-kpi-links .dana-kpi-card { position: relative; }
+.tl-kpi-jump { position: absolute; inset: 0; z-index: 1; width: 100%; padding: 0; border: 0; border-radius: inherit; background: transparent; cursor: pointer; }
+.tl-kpi-jump:hover { background: color-mix(in srgb, var(--dana-primary) 5%, transparent); }
+.tl-kpi-jump:focus-visible { outline: 2px solid var(--dana-primary); outline-offset: 2px; }
+/* Roles (data-role on the shell): hide what a role cannot use. The server enforces the same limits. */
+.dana-app-shell[data-role="MANAGEMENT"] .tl-write,
+.dana-app-shell[data-role="DOCK"] .tl-guard-only { display: none; }
+/* Dock handheld (CK65): its two screens as big tabs under the top bar on small screens. */
+.tl-role-tabs { display: none; }
+@media (max-width: 1024px) {
+  .tl-role-tabs { display: grid; flex: 0 0 auto; grid-template-columns: 1fr 1fr; gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--dana-border); background: var(--dana-surface); }
+  .tl-role-tabs > a { display: flex; min-height: 44px; align-items: center; justify-content: center; border-radius: var(--dana-radius-md); background: var(--dana-neutral-soft); color: var(--dana-muted); font-size: 14px; font-weight: 800; text-align: center; text-decoration: none; }
+  .tl-role-tabs > a.is-active { background: var(--dana-primary); color: var(--dana-surface); }
+}
+/* Phones and handhelds (CK65): page title and its buttons share one row. */
+@media (max-width: 560px) {
+  .dana-page-header { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-bottom: 10px; }
+  .dana-page-header > div:first-child { flex: 1 1 160px; min-width: 0; }
+  .dana-page-header > .dana-actions { flex-direction: row; }
+  .dana-page-header > .dana-actions > .dana-btn { width: auto; }
+  .dana-page-header h1 { font-size: 20px; }
+  .dana-page-header p { font-size: 12px; }
+}
+/* The narrowest handhelds (320px): a little more width for tables and cards. */
+@media (max-width: 400px) { .dana-page { padding: 10px; } }
+/* Aging/overdue rows say so in words too, not only with the row tint (Dashboard, Active Trucks). */
+.tl-age-text { font-weight: 700; }
+.tl-age-text[data-tone="danger"] { color: var(--dana-danger); }
+.tl-age-text[data-tone="warning"] { color: var(--dana-warning); }

@@ -1,0 +1,19 @@
+{
+  "name": "truck-log-web-domain",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/truck-log/web/domain/src",
+  "projectType": "library",
+  "tags": [
+    "scope:truck-log",
+    "platform:web",
+    "type:domain"
+  ],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/truck-log/web/domain/tsconfig.json --noEmit"
+      }
+    }
+  }
+}

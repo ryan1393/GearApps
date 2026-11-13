@@ -1,0 +1,20 @@
+{
+  "name": "truck-log-server-feature-settings",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/truck-log/server/feature/settings/src",
+  "projectType": "library",
+  "tags": [
+    "scope:truck-log",
+    "platform:server",
+    "type:feature",
+    "domain:admin"
+  ],
+  "targets": {
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "tsc -p libs/truck-log/server/feature/settings/tsconfig.json --noEmit"
+      }
+    }
+  }
+}

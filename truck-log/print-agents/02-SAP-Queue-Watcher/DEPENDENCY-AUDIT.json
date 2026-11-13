@@ -1,0 +1,38 @@
+{
+  "dependencies": [
+    {
+      "name": "pypdf",
+      "version": "6.21.4",
+      "vulns": []
+    },
+    {
+      "name": "pymupdf",
+      "version": "1.26.7",
+      "vulns": []
+    },
+    {
+      "name": "pytesseract",
+      "version": "0.3.13",
+      "vulns": []
+    },
+    {
+      "name": "pillow",
+      "version": "13.0.0",
+      "vulns": []
+    },
+    {
+      "name": "packaging",
+      "version": "26.3",
+      "vulns": []
+    }
+  ],
+  "fixes": [],
+  "audit": {
+    "date": "2026-10-29",
+    "tool": "pip-audit 2.10.1",
+    "environment": "Python 3.12.14/Linux isolated venv",
+    "scope": "All five exact-pinned Python runtime packages; Tesseract executable, Windows printer drivers, service host and guard Node/Sumatra binaries excluded",
+    "result": "No known vulnerabilities found",
+    "windows_wheels": "All five packages downloaded successfully for Windows x64/Python 3.11; not executed on Windows"
+  }
+}

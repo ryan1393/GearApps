@@ -1,0 +1,8 @@
+# Generated/runtime paths are never Nx project source.
+.setup-backups/
+_patch_backups/
+patch_backups/
+backups/
+.runtime-logs/
+.new-host-state/
+data/
